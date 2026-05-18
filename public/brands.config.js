@@ -864,66 +864,66 @@ const BRAND_TROMPO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?tacos,pastor,trompo&q=85',
+    hero: 'https://loremflickr.com/1200/1600/tacos,pastor,trompo',
     heroAlt: 'Trompo de pastor girando con piña encima',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tacos,pastor&q=80',
+        url: 'https://loremflickr.com/1200/900/tacos,pastor',
         tag: 'Tacos al pastor',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?trompo,carne&q=80',
+        url: 'https://loremflickr.com/900/1200/trompo,carne',
         tag: 'Trompo girando',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pina,asada&q=80',
+        url: 'https://loremflickr.com/900/1200/pina,asada',
         tag: 'Piña al trompo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?taquero,mexicano&q=80',
+        url: 'https://loremflickr.com/900/1200/taquero,mexicano',
         tag: 'Taquero al corte',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?salsa,verde,mexicana&q=80',
+        url: 'https://loremflickr.com/900/1200/salsa,verde,mexicana',
         tag: 'Salsa cruda',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cilantro,cebolla&q=80',
+        url: 'https://loremflickr.com/900/1200/cilantro,cebolla',
         tag: 'Cilantro y cebolla',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?taqueria,mexicana&q=80',
+        url: 'https://loremflickr.com/1200/900/taqueria,mexicana',
         tag: 'Plancha al rojo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tortilla,maiz&q=80',
+        url: 'https://loremflickr.com/900/1200/tortilla,maiz',
         tag: 'Tortilla recién hecha',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?puesto,tacos&q=80',
+        url: 'https://loremflickr.com/1200/900/puesto,tacos',
         tag: 'Local lleno',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?taquero,trabajo&q=80',
+        url: 'https://loremflickr.com/800/600/taquero,trabajo',
         caption: 'Taquero corta directo al plato'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?caja,registradora&q=80',
+        url: 'https://loremflickr.com/800/600/caja,registradora',
         caption: 'Cobro rápido por orden'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,taqueria&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,taqueria',
         caption: 'Cliente pide su orden completa'
       }
     ]
@@ -1055,66 +1055,66 @@ const BRAND_CANASTO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?tacos,canasta,mexicano&q=85',
+    hero: 'https://loremflickr.com/1200/1600/tacos,canasta,mexicano',
     heroAlt: 'Canasta de tacos sudados con tela',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tacos,sudados&q=80',
+        url: 'https://loremflickr.com/1200/900/tacos,sudados',
         tag: 'Tacos sudados',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bicicleta,tacos&q=80',
+        url: 'https://loremflickr.com/900/1200/bicicleta,tacos',
         tag: 'Bicicleta repartidora',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chicharron,prensado&q=80',
+        url: 'https://loremflickr.com/900/1200/chicharron,prensado',
         tag: 'Chicharrón prensado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?frijoles,refritos&q=80',
+        url: 'https://loremflickr.com/900/1200/frijoles,refritos',
         tag: 'Frijoles refritos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?papa,guisada&q=80',
+        url: 'https://loremflickr.com/900/1200/papa,guisada',
         tag: 'Papa con chorizo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?adobo,carne&q=80',
+        url: 'https://loremflickr.com/900/1200/adobo,carne',
         tag: 'Adobo casero',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cocina,mexicana,casera&q=80',
+        url: 'https://loremflickr.com/1200/900/cocina,mexicana,casera',
         tag: 'Cocina al alba',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tortilla,maiz&q=80',
+        url: 'https://loremflickr.com/900/1200/tortilla,maiz',
         tag: 'Tortilla blandita',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?calle,puesto&q=80',
+        url: 'https://loremflickr.com/1200/900/calle,puesto',
         tag: 'Esquina del barrio',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?bicicleta,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/bicicleta,delivery',
         caption: 'Bicicletero sale con su carga'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?canasta,mimbre&q=80',
+        url: 'https://loremflickr.com/800/600/canasta,mimbre',
         caption: 'Canasta de mimbre con tela'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,calle,mexicano&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,calle,mexicano',
         caption: 'Cliente fiel de la esquina'
       }
     ]
@@ -1252,66 +1252,66 @@ const BRAND_HORNITO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?barbacoa,borrego,mexicano&q=85',
+    hero: 'https://loremflickr.com/1200/1600/barbacoa,borrego,mexicano',
     heroAlt: 'Barbacoa de borrego envuelta en maguey',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?barbacoa,tacos&q=80',
+        url: 'https://loremflickr.com/1200/900/barbacoa,tacos',
         tag: 'Tacos de barbacoa',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?consome,borrego&q=80',
+        url: 'https://loremflickr.com/900/1200/consome,borrego',
         tag: 'Consomé caliente',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?maguey,pencas&q=80',
+        url: 'https://loremflickr.com/900/1200/maguey,pencas',
         tag: 'Pencas de maguey',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?horno,tierra&q=80',
+        url: 'https://loremflickr.com/900/1200/horno,tierra',
         tag: 'Horno de tierra',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?carne,cocida&q=80',
+        url: 'https://loremflickr.com/900/1200/carne,cocida',
         tag: 'Maciza tierna',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?salsa,borracha&q=80',
+        url: 'https://loremflickr.com/900/1200/salsa,borracha',
         tag: 'Salsa borracha',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?domingo,familia,mexicana&q=80',
+        url: 'https://loremflickr.com/1200/900/domingo,familia,mexicana',
         tag: 'Domingo de barbacoa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tortilla,maiz&q=80',
+        url: 'https://loremflickr.com/900/1200/tortilla,maiz',
         tag: 'Tortilla recién hecha',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?puesto,mercado&q=80',
+        url: 'https://loremflickr.com/1200/900/puesto,mercado',
         tag: 'Puesto del mercado',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?cocinero,barbacoa&q=80',
+        url: 'https://loremflickr.com/800/600/cocinero,barbacoa',
         caption: 'Barbacoyero deshebra la maciza'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?bascula,carne&q=80',
+        url: 'https://loremflickr.com/800/600/bascula,carne',
         caption: 'Báscula pesa cada pedido'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,domingo&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,domingo',
         caption: 'Cliente lleva kilo para la familia'
       }
     ]
@@ -1449,66 +1449,66 @@ const BRAND_CONSOME = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?birria,quesabirria,mexicano&q=85',
+    hero: 'https://loremflickr.com/1200/1600/birria,quesabirria,mexicano',
     heroAlt: 'Quesabirria con consomé al lado',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?quesabirria,queso&q=80',
+        url: 'https://loremflickr.com/1200/900/quesabirria,queso',
         tag: 'Quesabirria fundida',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?birria,res&q=80',
+        url: 'https://loremflickr.com/900/1200/birria,res',
         tag: 'Birria de res',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?consome,birria&q=80',
+        url: 'https://loremflickr.com/900/1200/consome,birria',
         tag: 'Consomé rojo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vampiro,taco&q=80',
+        url: 'https://loremflickr.com/900/1200/vampiro,taco',
         tag: 'Vampiro crujiente',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cebolla,cilantro&q=80',
+        url: 'https://loremflickr.com/900/1200/cebolla,cilantro',
         tag: 'Cebolla y cilantro',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?limones,salsa&q=80',
+        url: 'https://loremflickr.com/900/1200/limones,salsa',
         tag: 'Limón y salsa',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?birrieria,plancha&q=80',
+        url: 'https://loremflickr.com/1200/900/birrieria,plancha',
         tag: 'Plancha sumergida',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tortilla,maiz,roja&q=80',
+        url: 'https://loremflickr.com/900/1200/tortilla,maiz,roja',
         tag: 'Tortilla bañada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tijuana,birria&q=80',
+        url: 'https://loremflickr.com/1200/900/tijuana,birria',
         tag: 'Estilo tijuana',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?cocinero,birria&q=80',
+        url: 'https://loremflickr.com/800/600/cocinero,birria',
         caption: 'Cocinero bañar la tortilla en consomé'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,quesabirria&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,quesabirria',
         caption: 'Cliente moja su quesabirria'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?puesto,birria,mexico&q=80',
+        url: 'https://loremflickr.com/800/600/puesto,birria,mexico',
         caption: 'Puesto en mercado tradicional'
       }
     ]
@@ -1640,66 +1640,66 @@ const BRAND_VELADA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?pozole,mexicano,cenaduria&q=85',
+    hero: 'https://loremflickr.com/1200/1600/pozole,mexicano,cenaduria',
     heroAlt: 'Pozole rojo servido de noche',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pozole,rojo&q=80',
+        url: 'https://loremflickr.com/1200/900/pozole,rojo',
         tag: 'Pozole rojo',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pambazo,mexicano&q=80',
+        url: 'https://loremflickr.com/900/1200/pambazo,mexicano',
         tag: 'Pambazo bañado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tostada,tinga&q=80',
+        url: 'https://loremflickr.com/900/1200/tostada,tinga',
         tag: 'Tostada de tinga',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sope,frijol&q=80',
+        url: 'https://loremflickr.com/900/1200/sope,frijol',
         tag: 'Sopes con frijol',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?enchiladas,verdes&q=80',
+        url: 'https://loremflickr.com/900/1200/enchiladas,verdes',
         tag: 'Enchiladas verdes',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?atole,champurrado&q=80',
+        url: 'https://loremflickr.com/900/1200/atole,champurrado',
         tag: 'Atole y champurrado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cenaduria,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/cenaduria,interior',
         tag: 'Comedor familiar',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tamal,oaxaqueno&q=80',
+        url: 'https://loremflickr.com/900/1200/tamal,oaxaqueno',
         tag: 'Tamales calientes',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?antojitos,mexicanos&q=80',
+        url: 'https://loremflickr.com/1200/900/antojitos,mexicanos',
         tag: 'Antojitos surtidos',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?mesera,mexicana&q=80',
+        url: 'https://loremflickr.com/800/600/mesera,mexicana',
         caption: 'Mesera toma orden con tablet'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cocinera,antojos&q=80',
+        url: 'https://loremflickr.com/800/600/cocinera,antojos',
         caption: 'Cocinera bañando pambazos'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?familia,cenando&q=80',
+        url: 'https://loremflickr.com/800/600/familia,cenando',
         caption: 'Familia cenando tarde'
       }
     ]
@@ -1837,66 +1837,66 @@ const BRAND_COMEDOR = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?fonda,mexicana,comida&q=85',
+    hero: 'https://loremflickr.com/1200/1600/fonda,mexicana,comida',
     heroAlt: 'Comida corrida servida en plato hondo',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?comida,corrida,mexicana&q=80',
+        url: 'https://loremflickr.com/1200/900/comida,corrida,mexicana',
         tag: 'Comida corrida',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sopa,arroz&q=80',
+        url: 'https://loremflickr.com/900/1200/sopa,arroz',
         tag: 'Sopa de fideo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?guisado,mexicano&q=80',
+        url: 'https://loremflickr.com/900/1200/guisado,mexicano',
         tag: 'Guisado del día',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?agua,fresca&q=80',
+        url: 'https://loremflickr.com/900/1200/agua,fresca',
         tag: 'Aguas de sabor',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?frijoles,charros&q=80',
+        url: 'https://loremflickr.com/900/1200/frijoles,charros',
         tag: 'Frijoles charros',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?postre,gelatina&q=80',
+        url: 'https://loremflickr.com/900/1200/postre,gelatina',
         tag: 'Gelatina de postre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?comedor,fonda&q=80',
+        url: 'https://loremflickr.com/1200/900/comedor,fonda',
         tag: 'Comedor lleno',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tortillas,canasta&q=80',
+        url: 'https://loremflickr.com/900/1200/tortillas,canasta',
         tag: 'Canasta de tortillas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?fila,comida&q=80',
+        url: 'https://loremflickr.com/1200/900/fila,comida',
         tag: 'Fila al mediodía',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?mesera,fonda&q=80',
+        url: 'https://loremflickr.com/800/600/mesera,fonda',
         caption: 'Mesera anota la orden corrida'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cocinera,guisado&q=80',
+        url: 'https://loremflickr.com/800/600/cocinera,guisado',
         caption: 'Cocinera sirve el guisado del día'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,mexicano,comer&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,mexicano,comer',
         caption: 'Cliente disfruta comida hecha'
       }
     ]
@@ -2034,66 +2034,66 @@ const BRAND_BRASA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?pollo,asado,rosticero&q=85',
+    hero: 'https://loremflickr.com/1200/1600/pollo,asado,rosticero',
     heroAlt: 'Pollos rostizados girando en el horno',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pollo,rostizado&q=80',
+        url: 'https://loremflickr.com/1200/900/pollo,rostizado',
         tag: 'Pollo entero asado',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?papas,fritas&q=80',
+        url: 'https://loremflickr.com/900/1200/papas,fritas',
         tag: 'Papas a la francesa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?arroz,blanco&q=80',
+        url: 'https://loremflickr.com/900/1200/arroz,blanco',
         tag: 'Arroz blanco',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ensalada,col&q=80',
+        url: 'https://loremflickr.com/900/1200/ensalada,col',
         tag: 'Ensalada de col',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?salsa,verde,roja&q=80',
+        url: 'https://loremflickr.com/900/1200/salsa,verde,roja',
         tag: 'Salsas para pollo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tortilla,suave&q=80',
+        url: 'https://loremflickr.com/900/1200/tortilla,suave',
         tag: 'Tortillas calientes',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?rosticero,horno&q=80',
+        url: 'https://loremflickr.com/1200/900/rosticero,horno',
         tag: 'Rosticero al rojo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cliente,domingo&q=80',
+        url: 'https://loremflickr.com/900/1200/cliente,domingo',
         tag: 'Domingo familiar',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?polleria,mexicana&q=80',
+        url: 'https://loremflickr.com/1200/900/polleria,mexicana',
         tag: 'Despacho lleno',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?pollero,trabajo&q=80',
+        url: 'https://loremflickr.com/800/600/pollero,trabajo',
         caption: 'Pollero corta el cuarto recién hecho'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?fila,polleria&q=80',
+        url: 'https://loremflickr.com/800/600/fila,polleria',
         caption: 'Fila de domingo al mediodía'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?bolsa,papel,pollo&q=80',
+        url: 'https://loremflickr.com/800/600/bolsa,papel,pollo',
         caption: 'Pollo empacado para llevar'
       }
     ]
@@ -2231,66 +2231,66 @@ const BRAND_MAREA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?ceviche,mariscos,mexicano&q=85',
+    hero: 'https://loremflickr.com/1200/1600/ceviche,mariscos,mexicano',
     heroAlt: 'Aguachile rojo con camarones',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?aguachile,camaron&q=80',
+        url: 'https://loremflickr.com/1200/900/aguachile,camaron',
         tag: 'Aguachile verde',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ceviche,pescado&q=80',
+        url: 'https://loremflickr.com/900/1200/ceviche,pescado',
         tag: 'Ceviche de pescado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tostada,marlin&q=80',
+        url: 'https://loremflickr.com/900/1200/tostada,marlin',
         tag: 'Tostada de marlín',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?camaron,plancha&q=80',
+        url: 'https://loremflickr.com/900/1200/camaron,plancha',
         tag: 'Camarón a la plancha',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?caldo,siete,mares&q=80',
+        url: 'https://loremflickr.com/900/1200/caldo,siete,mares',
         tag: 'Caldo 7 mares',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cocteles,camaron&q=80',
+        url: 'https://loremflickr.com/900/1200/cocteles,camaron',
         tag: 'Coctel de camarón',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?marisqueria,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/marisqueria,interior',
         tag: 'Marisquería costera',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pulpo,mariscos&q=80',
+        url: 'https://loremflickr.com/900/1200/pulpo,mariscos',
         tag: 'Pulpo enamorado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mariscos,playa&q=80',
+        url: 'https://loremflickr.com/1200/900/mariscos,playa',
         tag: 'Mariscos frescos',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?bascula,mariscos&q=80',
+        url: 'https://loremflickr.com/800/600/bascula,mariscos',
         caption: 'Báscula pesa el camarón crudo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cocinero,mariscos&q=80',
+        url: 'https://loremflickr.com/800/600/cocinero,mariscos',
         caption: 'Cocinero prepara aguachile'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,mariscos&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,mariscos',
         caption: 'Familia comparte aguachile'
       }
     ]
@@ -2428,66 +2428,66 @@ const BRAND_LIMONERO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?ceviche,limon,mexicano&q=85',
+    hero: 'https://loremflickr.com/1200/1600/ceviche,limon,mexicano',
     heroAlt: 'Ceviche de sierra con limón y cebolla',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?ceviche,sierra&q=80',
+        url: 'https://loremflickr.com/1200/900/ceviche,sierra',
         tag: 'Ceviche de sierra',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?limon,verde&q=80',
+        url: 'https://loremflickr.com/900/1200/limon,verde',
         tag: 'Limón verde fresco',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cebolla,morada&q=80',
+        url: 'https://loremflickr.com/900/1200/cebolla,morada',
         tag: 'Cebolla morada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tostada,ceviche&q=80',
+        url: 'https://loremflickr.com/900/1200/tostada,ceviche',
         tag: 'Tostada premium',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?camaron,fresco&q=80',
+        url: 'https://loremflickr.com/900/1200/camaron,fresco',
         tag: 'Camarón crudo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?aguacate,maduro&q=80',
+        url: 'https://loremflickr.com/900/1200/aguacate,maduro',
         tag: 'Aguacate maduro',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cevicheria,fresca&q=80',
+        url: 'https://loremflickr.com/1200/900/cevicheria,fresca',
         tag: 'Mostrador fresco',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pescado,fresco&q=80',
+        url: 'https://loremflickr.com/900/1200/pescado,fresco',
         tag: 'Pescado del día',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?ceviche,coctel&q=80',
+        url: 'https://loremflickr.com/1200/900/ceviche,coctel',
         tag: 'Variedad de cebiches',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?cocinero,ceviche&q=80',
+        url: 'https://loremflickr.com/800/600/cocinero,ceviche',
         caption: 'Cocinero pica pescado al momento'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?bascula,cocina&q=80',
+        url: 'https://loremflickr.com/800/600/bascula,cocina',
         caption: 'Báscula pesa porciones exactas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,ceviche&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,ceviche',
         caption: 'Cliente disfruta tostada fresca'
       }
     ]
@@ -2625,66 +2625,66 @@ const BRAND_CONCHA_MAR = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?oysters,seafood,ostiones&q=85',
+    hero: 'https://loremflickr.com/1200/1600/oysters,seafood,ostiones',
     heroAlt: 'Docena de ostiones frescos en hielo',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?oysters,fresh&q=80',
+        url: 'https://loremflickr.com/1200/900/oysters,fresh',
         tag: 'Docena de ostiones',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?clams,almejas&q=80',
+        url: 'https://loremflickr.com/900/1200/clams,almejas',
         tag: 'Almejas chocolatas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?callo,hacha&q=80',
+        url: 'https://loremflickr.com/900/1200/callo,hacha',
         tag: 'Callo de hacha',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?limon,picado&q=80',
+        url: 'https://loremflickr.com/900/1200/limon,picado',
         tag: 'Limón picado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?salsa,verde&q=80',
+        url: 'https://loremflickr.com/900/1200/salsa,verde',
         tag: 'Salsa para ostión',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cerveza,michelada&q=80',
+        url: 'https://loremflickr.com/900/1200/cerveza,michelada',
         tag: 'Michelada al lado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?ostioneria,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/ostioneria,interior',
         tag: 'Barra de ostiones',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pulpo,enamorado&q=80',
+        url: 'https://loremflickr.com/900/1200/pulpo,enamorado',
         tag: 'Pulpo enamorado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?seafood,platter&q=80',
+        url: 'https://loremflickr.com/1200/900/seafood,platter',
         tag: 'Tabla de mariscos',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?ostionero,abriendo&q=80',
+        url: 'https://loremflickr.com/800/600/ostionero,abriendo',
         caption: 'Ostionero abre ostiones al momento'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?refri,mariscos&q=80',
+        url: 'https://loremflickr.com/800/600/refri,mariscos',
         caption: 'Refri con producto fresco'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,ostiones&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,ostiones',
         caption: 'Cliente disfruta docena'
       }
     ]
@@ -2822,66 +2822,66 @@ const BRAND_ASADO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?steak,argentino,parrilla&q=85',
+    hero: 'https://loremflickr.com/1200/1600/steak,argentino,parrilla',
     heroAlt: 'Bife de chorizo a la parrilla con malbec',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?asado,parrilla&q=80',
+        url: 'https://loremflickr.com/1200/900/asado,parrilla',
         tag: 'Asado argentino',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bife,chorizo&q=80',
+        url: 'https://loremflickr.com/900/1200/bife,chorizo',
         tag: 'Bife de chorizo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?provoleta,queso&q=80',
+        url: 'https://loremflickr.com/900/1200/provoleta,queso',
         tag: 'Provoleta a la plancha',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chimichurri,verde&q=80',
+        url: 'https://loremflickr.com/900/1200/chimichurri,verde',
         tag: 'Chimichurri casero',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?empanadas,argentinas&q=80',
+        url: 'https://loremflickr.com/900/1200/empanadas,argentinas',
         tag: 'Empanadas salteñas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?malbec,vino&q=80',
+        url: 'https://loremflickr.com/900/1200/malbec,vino',
         tag: 'Malbec mendocino',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?parrillada,carbon&q=80',
+        url: 'https://loremflickr.com/1200/900/parrillada,carbon',
         tag: 'Parrilla al carbón',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?morcilla,chorizo&q=80',
+        url: 'https://loremflickr.com/900/1200/morcilla,chorizo',
         tag: 'Achuras variadas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?restaurant,argentino&q=80',
+        url: 'https://loremflickr.com/1200/900/restaurant,argentino',
         tag: 'Salón íntimo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?parrillero,trabajo&q=80',
+        url: 'https://loremflickr.com/800/600/parrillero,trabajo',
         caption: 'Parrillero voltea bifes al punto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?sommelier,vino&q=80',
+        url: 'https://loremflickr.com/800/600/sommelier,vino',
         caption: 'Mozo descorcha malbec'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,steak&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,steak',
         caption: 'Comensal disfruta su corte'
       }
     ]
@@ -3019,66 +3019,66 @@ const BRAND_TRATTORIA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?pasta,italian,trattoria&q=85',
+    hero: 'https://loremflickr.com/1200/1600/pasta,italian,trattoria',
     heroAlt: 'Plato de pasta carbonara con queso rallado',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?carbonara,pasta&q=80',
+        url: 'https://loremflickr.com/1200/900/carbonara,pasta',
         tag: 'Carbonara clásica',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lasagna,bolognese&q=80',
+        url: 'https://loremflickr.com/900/1200/lasagna,bolognese',
         tag: 'Lasagna bolognese',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pizza,napolitana&q=80',
+        url: 'https://loremflickr.com/900/1200/pizza,napolitana',
         tag: 'Pizza napoletana',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tiramisu,postre&q=80',
+        url: 'https://loremflickr.com/900/1200/tiramisu,postre',
         tag: 'Tiramisú casero',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?risotto,milanese&q=80',
+        url: 'https://loremflickr.com/900/1200/risotto,milanese',
         tag: 'Risotto milanese',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chianti,vino&q=80',
+        url: 'https://loremflickr.com/900/1200/chianti,vino',
         tag: 'Chianti reserva',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?trattoria,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/trattoria,interior',
         tag: 'Salón rústico',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bruschetta,pan&q=80',
+        url: 'https://loremflickr.com/900/1200/bruschetta,pan',
         tag: 'Bruschetta clásica',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cocina,italiana&q=80',
+        url: 'https://loremflickr.com/1200/900/cocina,italiana',
         tag: 'Cocina abierta',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?chef,pasta&q=80',
+        url: 'https://loremflickr.com/800/600/chef,pasta',
         caption: 'Chef voltea la pasta al sartén'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?mozo,vino&q=80',
+        url: 'https://loremflickr.com/800/600/mozo,vino',
         caption: 'Mozo descorcha chianti'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,trattoria&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,trattoria',
         caption: 'Comensal disfruta carbonara'
       }
     ]
@@ -3216,66 +3216,66 @@ const BRAND_TASCA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?paella,spanish,tapas&q=85',
+    hero: 'https://loremflickr.com/1200/1600/paella,spanish,tapas',
     heroAlt: 'Paella valenciana con mariscos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?paella,valenciana&q=80',
+        url: 'https://loremflickr.com/1200/900/paella,valenciana',
         tag: 'Paella valenciana',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?jamon,iberico&q=80',
+        url: 'https://loremflickr.com/900/1200/jamon,iberico',
         tag: 'Jamón ibérico',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tortilla,patatas&q=80',
+        url: 'https://loremflickr.com/900/1200/tortilla,patatas',
         tag: 'Tortilla española',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tapas,variadas&q=80',
+        url: 'https://loremflickr.com/900/1200/tapas,variadas',
         tag: 'Tapas variadas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gambas,ajillo&q=80',
+        url: 'https://loremflickr.com/900/1200/gambas,ajillo',
         tag: 'Gambas al ajillo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sangria,rioja&q=80',
+        url: 'https://loremflickr.com/900/1200/sangria,rioja',
         tag: 'Sangría y rioja',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tasca,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/tasca,interior',
         tag: 'Tasca tradicional',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?queso,manchego&q=80',
+        url: 'https://loremflickr.com/900/1200/queso,manchego',
         tag: 'Queso manchego',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bar,espanol&q=80',
+        url: 'https://loremflickr.com/1200/900/bar,espanol',
         tag: 'Barra de tapas',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?jamonero,corte&q=80',
+        url: 'https://loremflickr.com/800/600/jamonero,corte',
         caption: 'Cortador rebana jamón a mano'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?paellero,fogon&q=80',
+        url: 'https://loremflickr.com/800/600/paellero,fogon',
         caption: 'Paellero remueve la sartén'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,tapas&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,tapas',
         caption: 'Mesa de amigos con tapas'
       }
     ]
@@ -3413,66 +3413,66 @@ const BRAND_KAPPA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?sushi,japanese,nigiri&q=85',
+    hero: 'https://loremflickr.com/1200/1600/sushi,japanese,nigiri',
     heroAlt: 'Tabla de nigiri y sashimi fresco',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sushi,plate&q=80',
+        url: 'https://loremflickr.com/1200/900/sushi,plate',
         tag: 'Tabla de sushi',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sashimi,tuna&q=80',
+        url: 'https://loremflickr.com/900/1200/sashimi,tuna',
         tag: 'Sashimi atún azul',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ramen,bowl&q=80',
+        url: 'https://loremflickr.com/900/1200/ramen,bowl',
         tag: 'Ramen tonkotsu',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tempura,fried&q=80',
+        url: 'https://loremflickr.com/900/1200/tempura,fried',
         tag: 'Tempura crujiente',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gyoza,dumplings&q=80',
+        url: 'https://loremflickr.com/900/1200/gyoza,dumplings',
         tag: 'Gyozas a la plancha',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sake,bottle&q=80',
+        url: 'https://loremflickr.com/900/1200/sake,bottle',
         tag: 'Sake premium',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sushi,bar&q=80',
+        url: 'https://loremflickr.com/1200/900/sushi,bar',
         tag: 'Barra de sushi',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wasabi,ginger&q=80',
+        url: 'https://loremflickr.com/900/1200/wasabi,ginger',
         tag: 'Wasabi y jengibre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?japanese,restaurant&q=80',
+        url: 'https://loremflickr.com/1200/900/japanese,restaurant',
         tag: 'Salón zen',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?sushi,chef&q=80',
+        url: 'https://loremflickr.com/800/600/sushi,chef',
         caption: 'Sushiman corta atún al momento'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?bascula,pescado&q=80',
+        url: 'https://loremflickr.com/800/600/bascula,pescado',
         caption: 'Báscula pesa porción exacta'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,sushi&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,sushi',
         caption: 'Cliente disfruta combo premium'
       }
     ]
@@ -3610,66 +3610,66 @@ const BRAND_BIBIM = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?korean,bbq,bibimbap&q=85',
+    hero: 'https://loremflickr.com/1200/1600/korean,bbq,bibimbap',
     heroAlt: 'Bibimbap en olla de piedra caliente',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bibimbap,korean&q=80',
+        url: 'https://loremflickr.com/1200/900/bibimbap,korean',
         tag: 'Bibimbap clásico',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bulgogi,bbq&q=80',
+        url: 'https://loremflickr.com/900/1200/bulgogi,bbq',
         tag: 'Bulgogi a la parrilla',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kimchi,fermented&q=80',
+        url: 'https://loremflickr.com/900/1200/kimchi,fermented',
         tag: 'Kimchi casero',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?banchan,sides&q=80',
+        url: 'https://loremflickr.com/900/1200/banchan,sides',
         tag: 'Banchan variados',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kbbq,grill&q=80',
+        url: 'https://loremflickr.com/900/1200/kbbq,grill',
         tag: 'Parrilla coreana',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?soju,bottle&q=80',
+        url: 'https://loremflickr.com/900/1200/soju,bottle',
         tag: 'Soju y cerveza',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?korean,restaurant&q=80',
+        url: 'https://loremflickr.com/1200/900/korean,restaurant',
         tag: 'Salón con parrillas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ramyun,spicy&q=80',
+        url: 'https://loremflickr.com/900/1200/ramyun,spicy',
         tag: 'Ramyun picante',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kpop,dining&q=80',
+        url: 'https://loremflickr.com/1200/900/kpop,dining',
         tag: 'Ambiente moderno',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?chef,korean&q=80',
+        url: 'https://loremflickr.com/800/600/chef,korean',
         caption: 'Chef cocina bulgogi'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?grill,table&q=80',
+        url: 'https://loremflickr.com/800/600/grill,table',
         caption: 'Parrilla integrada en la mesa'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?customer,kbbq&q=80',
+        url: 'https://loremflickr.com/800/600/customer,kbbq',
         caption: 'Familia disfruta parrillada'
       }
     ]
@@ -3807,62 +3807,62 @@ const BRAND_WOKITO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?chinese,wok,dimsum&q=85',
+    hero: 'https://loremflickr.com/1200/1600/chinese,wok,dimsum',
     heroAlt: 'Wok en llamas con arroz frito',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?chinese,food&q=80',
+        url: 'https://loremflickr.com/1200/900/chinese,food',
         tag: 'Cocina al wok',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dimsum,bamboo&q=80',
+        url: 'https://loremflickr.com/900/1200/dimsum,bamboo',
         tag: 'Dim sum al vapor',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fried,rice&q=80',
+        url: 'https://loremflickr.com/900/1200/fried,rice',
         tag: 'Arroz frito',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?peking,duck&q=80',
+        url: 'https://loremflickr.com/900/1200/peking,duck',
         tag: 'Pato pekinés',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?noodles,chow&q=80',
+        url: 'https://loremflickr.com/900/1200/noodles,chow',
         tag: 'Chow mein',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?spring,rolls&q=80',
+        url: 'https://loremflickr.com/900/1200/spring,rolls',
         tag: 'Rollos primavera',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?chinese,restaurant&q=80',
+        url: 'https://loremflickr.com/1200/900/chinese,restaurant',
         tag: 'Salón rojo',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?tea,chinese&q=80', tag: 'Té chino', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/tea,chinese', tag: 'Té chino', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?wok,fire&q=80',
+        url: 'https://loremflickr.com/1200/900/wok,fire',
         tag: 'Wok al rojo vivo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?chef,wok&q=80',
+        url: 'https://loremflickr.com/800/600/chef,wok',
         caption: 'Cocinero saltea al wok'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?dimsum,steamer&q=80',
+        url: 'https://loremflickr.com/800/600/dimsum,steamer',
         caption: 'Vaporeras de bambú'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?delivery,chinese&q=80',
+        url: 'https://loremflickr.com/800/600/delivery,chinese',
         caption: 'Pedido para llevar listo'
       }
     ]
@@ -4000,66 +4000,66 @@ const BRAND_TABULE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?lebanese,hummus,middle-eastern&q=85',
+    hero: 'https://loremflickr.com/1200/1600/lebanese,hummus,middle-eastern',
     heroAlt: 'Tabla libanesa con hummus, kibbeh y pita',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?taco,arabe&q=80',
+        url: 'https://loremflickr.com/1200/900/taco,arabe',
         tag: 'Tacos árabes',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?hummus,pita&q=80',
+        url: 'https://loremflickr.com/900/1200/hummus,pita',
         tag: 'Hummus con pita',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kibbeh,frito&q=80',
+        url: 'https://loremflickr.com/900/1200/kibbeh,frito',
         tag: 'Kibbeh frito',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tabbouleh,salad&q=80',
+        url: 'https://loremflickr.com/900/1200/tabbouleh,salad',
         tag: 'Tabulé fresco',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?shawarma,carne&q=80',
+        url: 'https://loremflickr.com/900/1200/shawarma,carne',
         tag: 'Shawarma de carne',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?falafel,plate&q=80',
+        url: 'https://loremflickr.com/900/1200/falafel,plate',
         tag: 'Falafel crujiente',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?lebanese,restaurant&q=80',
+        url: 'https://loremflickr.com/1200/900/lebanese,restaurant',
         tag: 'Salón con mosaicos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?baklava,sweet&q=80',
+        url: 'https://loremflickr.com/900/1200/baklava,sweet',
         tag: 'Baklava de postre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?middle,eastern,feast&q=80',
+        url: 'https://loremflickr.com/1200/900/middle,eastern,feast',
         tag: 'Mesa libanesa',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?cocinero,shawarma&q=80',
+        url: 'https://loremflickr.com/800/600/cocinero,shawarma',
         caption: 'Cocinero corta shawarma'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?pita,oven&q=80',
+        url: 'https://loremflickr.com/800/600/pita,oven',
         caption: 'Pita recién horneada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,libanes&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,libanes',
         caption: 'Familia poblana disfruta tacos'
       }
     ]
@@ -4197,66 +4197,66 @@ const BRAND_SEMILLA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?vegan,buddha,bowl&q=85',
+    hero: 'https://loremflickr.com/1200/1600/vegan,buddha,bowl',
     heroAlt: 'Buddha bowl con quinoa y vegetales',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?vegan,bowl&q=80',
+        url: 'https://loremflickr.com/1200/900/vegan,bowl',
         tag: 'Buddha bowl',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?quinoa,vegetables&q=80',
+        url: 'https://loremflickr.com/900/1200/quinoa,vegetables',
         tag: 'Quinoa con verduras',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vegan,burger&q=80',
+        url: 'https://loremflickr.com/900/1200/vegan,burger',
         tag: 'Hamburguesa vegana',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?smoothie,bowl&q=80',
+        url: 'https://loremflickr.com/900/1200/smoothie,bowl',
         tag: 'Smoothie bowl',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tofu,grilled&q=80',
+        url: 'https://loremflickr.com/900/1200/tofu,grilled',
         tag: 'Tofu marinado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kombucha,bottle&q=80',
+        url: 'https://loremflickr.com/900/1200/kombucha,bottle',
         tag: 'Kombucha artesanal',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?vegan,restaurant&q=80',
+        url: 'https://loremflickr.com/1200/900/vegan,restaurant',
         tag: 'Salón con plantas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vegan,dessert&q=80',
+        url: 'https://loremflickr.com/900/1200/vegan,dessert',
         tag: 'Postre vegano',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?fresh,greens&q=80',
+        url: 'https://loremflickr.com/1200/900/fresh,greens',
         tag: 'Verduras frescas',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?chef,vegan&q=80',
+        url: 'https://loremflickr.com/800/600/chef,vegan',
         caption: 'Chef emplata bowl saludable'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?ingredients,labeled&q=80',
+        url: 'https://loremflickr.com/800/600/ingredients,labeled',
         caption: 'Ingredientes etiquetados'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?customer,vegan&q=80',
+        url: 'https://loremflickr.com/800/600/customer,vegan',
         caption: 'Cliente con alergia confía'
       }
     ]
@@ -4394,66 +4394,66 @@ const BRAND_BALANCE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?healthy,fitness,bowl&q=85',
+    hero: 'https://loremflickr.com/1200/1600/healthy,fitness,bowl',
     heroAlt: 'Plato fitness con pollo y verduras',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?healthy,plate&q=80',
+        url: 'https://loremflickr.com/1200/900/healthy,plate',
         tag: 'Plato fitness',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?protein,bowl&q=80',
+        url: 'https://loremflickr.com/900/1200/protein,bowl',
         tag: 'Bowl de proteína',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?grilled,chicken&q=80',
+        url: 'https://loremflickr.com/900/1200/grilled,chicken',
         tag: 'Pollo a la plancha',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?salad,fresh&q=80',
+        url: 'https://loremflickr.com/900/1200/salad,fresh',
         tag: 'Ensalada power',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wrap,healthy&q=80',
+        url: 'https://loremflickr.com/900/1200/wrap,healthy',
         tag: 'Wrap integral',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?green,smoothie&q=80',
+        url: 'https://loremflickr.com/900/1200/green,smoothie',
         tag: 'Smoothie verde',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?healthy,restaurant&q=80',
+        url: 'https://loremflickr.com/1200/900/healthy,restaurant',
         tag: 'Espacio minimalista',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?meal,prep&q=80',
+        url: 'https://loremflickr.com/900/1200/meal,prep',
         tag: 'Meal prep semanal',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?fitness,food&q=80',
+        url: 'https://loremflickr.com/1200/900/fitness,food',
         tag: 'Comida atlética',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?chef,healthy&q=80',
+        url: 'https://loremflickr.com/800/600/chef,healthy',
         caption: 'Chef pesa porción exacta'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?nutrition,scale&q=80',
+        url: 'https://loremflickr.com/800/600/nutrition,scale',
         caption: 'Báscula con macros'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?gym,customer&q=80',
+        url: 'https://loremflickr.com/800/600/gym,customer',
         caption: 'Cliente fitness elige plato'
       }
     ]
@@ -4591,66 +4591,66 @@ const BRAND_PULPA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?juice,fresh,fruits&q=85',
+    hero: 'https://loremflickr.com/1200/1600/juice,fresh,fruits',
     heroAlt: 'Jugos de fruta natural recién hechos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?juice,orange&q=80',
+        url: 'https://loremflickr.com/1200/900/juice,orange',
         tag: 'Jugo de naranja',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?green,juice&q=80',
+        url: 'https://loremflickr.com/900/1200/green,juice',
         tag: 'Jugo verde',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?detox,drink&q=80',
+        url: 'https://loremflickr.com/900/1200/detox,drink',
         tag: 'Bebida detox',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fruits,bowl&q=80',
+        url: 'https://loremflickr.com/900/1200/fruits,bowl',
         tag: 'Plato de fruta',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tropical,smoothie&q=80',
+        url: 'https://loremflickr.com/900/1200/tropical,smoothie',
         tag: 'Smoothie tropical',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ginger,shot&q=80',
+        url: 'https://loremflickr.com/900/1200/ginger,shot',
         tag: 'Shot de jengibre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?juice,bar&q=80',
+        url: 'https://loremflickr.com/1200/900/juice,bar',
         tag: 'Barra de jugos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pineapple,cut&q=80',
+        url: 'https://loremflickr.com/900/1200/pineapple,cut',
         tag: 'Piña fresca',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?juicer,machine&q=80',
+        url: 'https://loremflickr.com/1200/900/juicer,machine',
         tag: 'Extractor en acción',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?juicer,fresh&q=80',
+        url: 'https://loremflickr.com/800/600/juicer,fresh',
         caption: 'Extractor exprime naranjas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?fresh,fruits&q=80',
+        url: 'https://loremflickr.com/800/600/fresh,fruits',
         caption: 'Fruta del día apilada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?customer,juice&q=80',
+        url: 'https://loremflickr.com/800/600/customer,juice',
         caption: 'Cliente lleva jugo de mañana'
       }
     ]
@@ -4788,66 +4788,66 @@ const BRAND_SAVIA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?juice,natural,vegetables&q=85',
+    hero: 'https://loremflickr.com/1200/1600/juice,natural,vegetables',
     heroAlt: 'Jugo verde recién extraído',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?green,juice&q=80',
+        url: 'https://loremflickr.com/1200/900/green,juice',
         tag: 'Jugo verde clásico',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?carrot,juice&q=80',
+        url: 'https://loremflickr.com/900/1200/carrot,juice',
         tag: 'Jugo de zanahoria',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?beet,juice&q=80',
+        url: 'https://loremflickr.com/900/1200/beet,juice',
         tag: 'Jugo de betabel',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?celery,fresh&q=80',
+        url: 'https://loremflickr.com/900/1200/celery,fresh',
         tag: 'Apio fresco',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?nopal,cactus&q=80',
+        url: 'https://loremflickr.com/900/1200/nopal,cactus',
         tag: 'Nopal con piña',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?spinach,green&q=80',
+        url: 'https://loremflickr.com/900/1200/spinach,green',
         tag: 'Espinaca y kale',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?juice,morning&q=80',
+        url: 'https://loremflickr.com/1200/900/juice,morning',
         tag: 'Puesto matutino',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lemon,ginger&q=80',
+        url: 'https://loremflickr.com/900/1200/lemon,ginger',
         tag: 'Limón y jengibre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?vegetables,fresh&q=80',
+        url: 'https://loremflickr.com/1200/900/vegetables,fresh',
         tag: 'Verduras del día',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?juicer,vegetables&q=80',
+        url: 'https://loremflickr.com/800/600/juicer,vegetables',
         caption: 'Extractor procesa apio'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?vendor,morning&q=80',
+        url: 'https://loremflickr.com/800/600/vendor,morning',
         caption: 'Don jugüero atiende al alba'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,trabajador&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,trabajador',
         caption: 'Trabajador toma jugo camino al trabajo'
       }
     ]
@@ -4985,62 +4985,62 @@ const BRAND_LICUADO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?smoothie,protein,fruit&q=85',
+    hero: 'https://loremflickr.com/1200/1600/smoothie,protein,fruit',
     heroAlt: 'Smoothie de frutos rojos con proteína',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?smoothie,berries&q=80',
+        url: 'https://loremflickr.com/1200/900/smoothie,berries',
         tag: 'Smoothie frutos rojos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?protein,scoop&q=80',
+        url: 'https://loremflickr.com/900/1200/protein,scoop',
         tag: 'Proteína en polvo',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?acai,bowl&q=80', tag: 'Açaí bowl', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/acai,bowl', tag: 'Açaí bowl', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?banana,frozen&q=80',
+        url: 'https://loremflickr.com/900/1200/banana,frozen',
         tag: 'Plátano congelado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mango,smoothie&q=80',
+        url: 'https://loremflickr.com/900/1200/mango,smoothie',
         tag: 'Smoothie mango',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?peanut,butter&q=80',
+        url: 'https://loremflickr.com/900/1200/peanut,butter',
         tag: 'Crema cacahuate',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?smoothie,bar&q=80',
+        url: 'https://loremflickr.com/1200/900/smoothie,bar',
         tag: 'Barra colorida',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chia,seeds&q=80',
+        url: 'https://loremflickr.com/900/1200/chia,seeds',
         tag: 'Chía y semillas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?blender,fruits&q=80',
+        url: 'https://loremflickr.com/1200/900/blender,fruits',
         tag: 'Licuadora pro',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?blender,smoothie&q=80',
+        url: 'https://loremflickr.com/800/600/blender,smoothie',
         caption: 'Licuadora pro mezcla todo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?protein,powder&q=80',
+        url: 'https://loremflickr.com/800/600/protein,powder',
         caption: 'Scoop preciso por tarro'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,gym&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,gym',
         caption: 'Cliente gym recoge smoothie'
       }
     ]
@@ -5178,66 +5178,66 @@ const BRAND_HELERA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?popsicle,paleta,colorful&q=85',
+    hero: 'https://loremflickr.com/1200/1600/popsicle,paleta,colorful',
     heroAlt: 'Paletas de hielo de colores',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?popsicles,fruit&q=80',
+        url: 'https://loremflickr.com/1200/900/popsicles,fruit',
         tag: 'Paletas de agua',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ice,cream,cone&q=80',
+        url: 'https://loremflickr.com/900/1200/ice,cream,cone',
         tag: 'Nieve de garrafa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chamoy,paleta&q=80',
+        url: 'https://loremflickr.com/900/1200/chamoy,paleta',
         tag: 'Paleta enchamoyada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lime,popsicle&q=80',
+        url: 'https://loremflickr.com/900/1200/lime,popsicle',
         tag: 'Paleta de limón',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?strawberry,ice&q=80',
+        url: 'https://loremflickr.com/900/1200/strawberry,ice',
         tag: 'Paleta de fresa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mango,popsicle&q=80',
+        url: 'https://loremflickr.com/900/1200/mango,popsicle',
         tag: 'Mango enchilado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?paleteria,michoacana&q=80',
+        url: 'https://loremflickr.com/1200/900/paleteria,michoacana',
         tag: 'Mostrador clásico',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?coconut,popsicle&q=80',
+        url: 'https://loremflickr.com/900/1200/coconut,popsicle',
         tag: 'Paleta de coco',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?ice,cream,kids&q=80',
+        url: 'https://loremflickr.com/1200/900/ice,cream,kids',
         tag: 'Tarde de niños',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?freezer,popsicles&q=80',
+        url: 'https://loremflickr.com/800/600/freezer,popsicles',
         caption: 'Freezer con sabores variados'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cart,paletas&q=80',
+        url: 'https://loremflickr.com/800/600/cart,paletas',
         caption: 'Carrito sale a repartir'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?kids,popsicle&q=80',
+        url: 'https://loremflickr.com/800/600/kids,popsicle',
         caption: 'Niños eligen sabor'
       }
     ]
@@ -5353,66 +5353,66 @@ const BRAND_NIEVE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?artisan,gelato,scoop&q=85',
+    hero: 'https://loremflickr.com/1200/1600/artisan,gelato,scoop',
     heroAlt: 'Bolas de helado artesanal en cono de waffle',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gelato,scoops&q=80',
+        url: 'https://loremflickr.com/1200/900/gelato,scoops',
         tag: 'Bolas artesanales',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pistachio,gelato&q=80',
+        url: 'https://loremflickr.com/900/1200/pistachio,gelato',
         tag: 'Pistache italiano',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mamey,ice&q=80',
+        url: 'https://loremflickr.com/900/1200/mamey,ice',
         tag: 'Mamey mexicano',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cookies,cream&q=80',
+        url: 'https://loremflickr.com/900/1200/cookies,cream',
         tag: 'Cookies & cream',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dark,chocolate&q=80',
+        url: 'https://loremflickr.com/900/1200/dark,chocolate',
         tag: 'Chocolate amargo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?queso,nieve&q=80',
+        url: 'https://loremflickr.com/900/1200/queso,nieve',
         tag: 'Nieve de queso',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gelateria,counter&q=80',
+        url: 'https://loremflickr.com/1200/900/gelateria,counter',
         tag: 'Mostrador refrigerado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?waffle,cone&q=80',
+        url: 'https://loremflickr.com/900/1200/waffle,cone',
         tag: 'Conos de waffle',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?ice,cream,artisan&q=80',
+        url: 'https://loremflickr.com/1200/900/ice,cream,artisan',
         tag: 'Sabores artesanales',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?scoop,ice&q=80',
+        url: 'https://loremflickr.com/800/600/scoop,ice',
         caption: 'Nievero saca bola perfecta'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?gelato,production&q=80',
+        url: 'https://loremflickr.com/800/600/gelato,production',
         caption: 'Producción al alba'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,gelato&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,gelato',
         caption: 'Cliente elige sabor del día'
       }
     ]
@@ -5544,66 +5544,66 @@ const BRAND_ESPOLVO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?churros,chocolate,mexican&q=85',
+    hero: 'https://loremflickr.com/1200/1600/churros,chocolate,mexican',
     heroAlt: 'Churros recién hechos con chocolate caliente',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?churros,sugar&q=80',
+        url: 'https://loremflickr.com/1200/900/churros,sugar',
         tag: 'Churros con azúcar',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chocolate,hot&q=80',
+        url: 'https://loremflickr.com/900/1200/chocolate,hot',
         tag: 'Chocolate caliente',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?churro,filled&q=80',
+        url: 'https://loremflickr.com/900/1200/churro,filled',
         tag: 'Churro relleno',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cajeta,sweet&q=80',
+        url: 'https://loremflickr.com/900/1200/cajeta,sweet',
         tag: 'Cajeta de Celaya',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?churro,frying&q=80',
+        url: 'https://loremflickr.com/900/1200/churro,frying',
         tag: 'Friéndose al rojo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cinnamon,sugar&q=80',
+        url: 'https://loremflickr.com/900/1200/cinnamon,sugar',
         tag: 'Canela y azúcar',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?churreria,traditional&q=80',
+        url: 'https://loremflickr.com/1200/900/churreria,traditional',
         tag: 'Churrería clásica',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?nutella,churro&q=80',
+        url: 'https://loremflickr.com/900/1200/nutella,churro',
         tag: 'Relleno de nutella',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?fair,churros&q=80',
+        url: 'https://loremflickr.com/1200/900/fair,churros',
         tag: 'Puesto en feria',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?churrero,frying&q=80',
+        url: 'https://loremflickr.com/800/600/churrero,frying',
         caption: 'Churrero saca churros calientes'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?chocolate,prepare&q=80',
+        url: 'https://loremflickr.com/800/600/chocolate,prepare',
         caption: 'Chocolate caliente espeso'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?kids,churros&q=80',
+        url: 'https://loremflickr.com/800/600/kids,churros',
         caption: 'Niños esperan churros'
       }
     ]
@@ -5741,66 +5741,66 @@ const BRAND_CUADRO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?waffle,toppings,sweet&q=85',
+    hero: 'https://loremflickr.com/1200/1600/waffle,toppings,sweet',
     heroAlt: 'Waffle con frutas y crema batida',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?waffle,nutella&q=80',
+        url: 'https://loremflickr.com/1200/900/waffle,nutella',
         tag: 'Waffle nutella',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?waffle,fruits&q=80',
+        url: 'https://loremflickr.com/900/1200/waffle,fruits',
         tag: 'Waffle frutos rojos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?belgian,waffle&q=80',
+        url: 'https://loremflickr.com/900/1200/belgian,waffle',
         tag: 'Belga clásico',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?whipped,cream&q=80',
+        url: 'https://loremflickr.com/900/1200/whipped,cream',
         tag: 'Crema batida',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?strawberries,sliced&q=80',
+        url: 'https://loremflickr.com/900/1200/strawberries,sliced',
         tag: 'Fresas frescas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?syrup,maple&q=80',
+        url: 'https://loremflickr.com/900/1200/syrup,maple',
         tag: 'Miel maple',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?waffle,bar&q=80',
+        url: 'https://loremflickr.com/1200/900/waffle,bar',
         tag: 'Barra de toppings',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ice,cream,scoop&q=80',
+        url: 'https://loremflickr.com/900/1200/ice,cream,scoop',
         tag: 'Bola de helado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?dessert,colorful&q=80',
+        url: 'https://loremflickr.com/1200/900/dessert,colorful',
         tag: 'Postre colorido',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?waffle,maker&q=80',
+        url: 'https://loremflickr.com/800/600/waffle,maker',
         caption: 'Plancha de waffle al rojo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?toppings,bar&q=80',
+        url: 'https://loremflickr.com/800/600/toppings,bar',
         caption: 'Barra de toppings'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?customer,waffle&q=80',
+        url: 'https://loremflickr.com/800/600/customer,waffle',
         caption: 'Cliente decora su waffle'
       }
     ]
@@ -5932,66 +5932,66 @@ const BRAND_DOBLEZ = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?crepe,nutella,french&q=85',
+    hero: 'https://loremflickr.com/1200/1600/crepe,nutella,french',
     heroAlt: 'Crepe doblada con nutella y plátano',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?crepe,sweet&q=80',
+        url: 'https://loremflickr.com/1200/900/crepe,sweet',
         tag: 'Crepe dulce',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?crepe,savory&q=80',
+        url: 'https://loremflickr.com/900/1200/crepe,savory',
         tag: 'Crepe salada',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?nutella,banana&q=80',
+        url: 'https://loremflickr.com/900/1200/nutella,banana',
         tag: 'Nutella y plátano',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ham,cheese&q=80',
+        url: 'https://loremflickr.com/900/1200/ham,cheese',
         tag: 'Jamón y queso',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?strawberry,crepe&q=80',
+        url: 'https://loremflickr.com/900/1200/strawberry,crepe',
         tag: 'Fresa y crema',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?spinach,mushroom&q=80',
+        url: 'https://loremflickr.com/900/1200/spinach,mushroom',
         tag: 'Espinaca y champi',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?creperie,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/creperie,interior',
         tag: 'Creperia francesa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?crepe,maker&q=80',
+        url: 'https://loremflickr.com/900/1200/crepe,maker',
         tag: 'Plancha redonda',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?dessert,coffee&q=80',
+        url: 'https://loremflickr.com/1200/900/dessert,coffee',
         tag: 'Postre con café',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?crepe,making&q=80',
+        url: 'https://loremflickr.com/800/600/crepe,making',
         caption: 'Crepero estira la masa'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?fillings,fresh&q=80',
+        url: 'https://loremflickr.com/800/600/fillings,fresh',
         caption: 'Rellenos listos al despacho'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?pareja,crepe&q=80',
+        url: 'https://loremflickr.com/800/600/pareja,crepe',
         caption: 'Pareja comparte crepe dulce'
       }
     ]
@@ -6129,66 +6129,66 @@ const BRAND_TORTA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?torta,mexicana,bolillo&q=85',
+    hero: 'https://loremflickr.com/1200/1600/torta,mexicana,bolillo',
     heroAlt: 'Torta cubana con aguacate y jamón',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?torta,cubana&q=80',
+        url: 'https://loremflickr.com/1200/900/torta,cubana',
         tag: 'Torta cubana',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bolillo,fresh&q=80',
+        url: 'https://loremflickr.com/900/1200/bolillo,fresh',
         tag: 'Bolillos del día',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?aguacate,palta&q=80',
+        url: 'https://loremflickr.com/900/1200/aguacate,palta',
         tag: 'Aguacate maduro',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?jamon,queso&q=80',
+        url: 'https://loremflickr.com/900/1200/jamon,queso',
         tag: 'Jamón y queso',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?milanesa,torta&q=80',
+        url: 'https://loremflickr.com/900/1200/milanesa,torta',
         tag: 'Torta milanesa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pierna,horneada&q=80',
+        url: 'https://loremflickr.com/900/1200/pierna,horneada',
         tag: 'Pierna horneada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?torteria,mostrador&q=80',
+        url: 'https://loremflickr.com/1200/900/torteria,mostrador',
         tag: 'Mostrador clásico',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?jalapenos,salsa&q=80',
+        url: 'https://loremflickr.com/900/1200/jalapenos,salsa',
         tag: 'Jalapeños y salsa',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?lunch,mexicano&q=80',
+        url: 'https://loremflickr.com/1200/900/lunch,mexicano',
         tag: 'Hora del lunch',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?tortero,armando&q=80',
+        url: 'https://loremflickr.com/800/600/tortero,armando',
         caption: 'Tortero arma la cubana'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?refri,ingredientes&q=80',
+        url: 'https://loremflickr.com/800/600/refri,ingredientes',
         caption: 'Refri con ingredientes listos'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,oficina&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,oficina',
         caption: 'Oficinistas piden lunch'
       }
     ]
@@ -6326,66 +6326,66 @@ const BRAND_GRILLA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?gourmet,burger,angus&q=85',
+    hero: 'https://loremflickr.com/1200/1600/gourmet,burger,angus',
     heroAlt: 'Hamburguesa gourmet con queso derretido',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?burger,gourmet&q=80',
+        url: 'https://loremflickr.com/1200/900/burger,gourmet',
         tag: 'Burger gourmet',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?angus,patty&q=80',
+        url: 'https://loremflickr.com/900/1200/angus,patty',
         tag: 'Patty Angus',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bacon,strips&q=80',
+        url: 'https://loremflickr.com/900/1200/bacon,strips',
         tag: 'Bacon crocante',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?truffle,fries&q=80',
+        url: 'https://loremflickr.com/900/1200/truffle,fries',
         tag: 'Papas trufa',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?onion,rings&q=80',
+        url: 'https://loremflickr.com/900/1200/onion,rings',
         tag: 'Aros de cebolla',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?craft,beer&q=80',
+        url: 'https://loremflickr.com/900/1200/craft,beer',
         tag: 'Cerveza artesanal',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?burger,joint&q=80',
+        url: 'https://loremflickr.com/1200/900/burger,joint',
         tag: 'Salón industrial',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cheese,melt&q=80',
+        url: 'https://loremflickr.com/900/1200/cheese,melt',
         tag: 'Queso derretido',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?grill,fire&q=80',
+        url: 'https://loremflickr.com/1200/900/grill,fire',
         tag: 'Plancha al fuego',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?cook,grill&q=80',
+        url: 'https://loremflickr.com/800/600/cook,grill',
         caption: 'Cocinero voltea patty al punto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?bascula,carne&q=80',
+        url: 'https://loremflickr.com/800/600/bascula,carne',
         caption: 'Báscula pesa cada patty'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?customer,burger&q=80',
+        url: 'https://loremflickr.com/800/600/customer,burger',
         caption: 'Cliente disfruta gourmet'
       }
     ]
@@ -6523,62 +6523,62 @@ const BRAND_JOCHO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?hotdog,toppings,sonoran&q=85',
+    hero: 'https://loremflickr.com/1200/1600/hotdog,toppings,sonoran',
     heroAlt: 'Hot dog sonorense con todos los toppings',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?hotdog,sonora&q=80',
+        url: 'https://loremflickr.com/1200/900/hotdog,sonora',
         tag: 'Sonorense clásico',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bacon,wrapped&q=80',
+        url: 'https://loremflickr.com/900/1200/bacon,wrapped',
         tag: 'Envuelto en tocino',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?chili,dog&q=80', tag: 'Chili dog', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/chili,dog', tag: 'Chili dog', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cheese,dog&q=80',
+        url: 'https://loremflickr.com/900/1200/cheese,dog',
         tag: 'Queso fundido',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mustard,ketchup&q=80',
+        url: 'https://loremflickr.com/900/1200/mustard,ketchup',
         tag: 'Mostaza y catsup',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?onions,grilled&q=80',
+        url: 'https://loremflickr.com/900/1200/onions,grilled',
         tag: 'Cebollas asadas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?hotdog,cart&q=80',
+        url: 'https://loremflickr.com/1200/900/hotdog,cart',
         tag: 'Carrito nocturno',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?avocado,sliced&q=80',
+        url: 'https://loremflickr.com/900/1200/avocado,sliced',
         tag: 'Aguacate fresco',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?fast,food,night&q=80',
+        url: 'https://loremflickr.com/1200/900/fast,food,night',
         tag: 'Noche con jochos',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?cook,grill,sausage&q=80',
+        url: 'https://loremflickr.com/800/600/cook,grill,sausage',
         caption: 'Cocinero pone salchichas a la plancha'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?toppings,variety&q=80',
+        url: 'https://loremflickr.com/800/600/toppings,variety',
         caption: 'Barra de toppings'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,noche&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,noche',
         caption: 'Cliente nocturno pide jocho'
       }
     ]
@@ -6710,66 +6710,66 @@ const BRAND_LENA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?pizza,oven,wood&q=85',
+    hero: 'https://loremflickr.com/1200/1600/pizza,oven,wood',
     heroAlt: 'Pizza al horno de leña recién sacada',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pizza,wood,fired&q=80',
+        url: 'https://loremflickr.com/1200/900/pizza,wood,fired',
         tag: 'Pizza al horno',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pepperoni,pizza&q=80',
+        url: 'https://loremflickr.com/900/1200/pepperoni,pizza',
         tag: 'Pepperoni clásica',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?hawaiian,pizza&q=80',
+        url: 'https://loremflickr.com/900/1200/hawaiian,pizza',
         tag: 'Hawaiana piña',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dough,fresh&q=80',
+        url: 'https://loremflickr.com/900/1200/dough,fresh',
         tag: 'Masa fresca',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mozzarella,cheese&q=80',
+        url: 'https://loremflickr.com/900/1200/mozzarella,cheese',
         tag: 'Mozzarella',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mushrooms,toppings&q=80',
+        url: 'https://loremflickr.com/900/1200/mushrooms,toppings',
         tag: 'Hongos frescos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pizzeria,oven&q=80',
+        url: 'https://loremflickr.com/1200/900/pizzeria,oven',
         tag: 'Horno de leña',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pizza,slice&q=80',
+        url: 'https://loremflickr.com/900/1200/pizza,slice',
         tag: 'Rebanada caliente',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?family,pizza&q=80',
+        url: 'https://loremflickr.com/1200/900/family,pizza',
         tag: 'Familia compartiendo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?pizzero,horno&q=80',
+        url: 'https://loremflickr.com/800/600/pizzero,horno',
         caption: 'Pizzero saca pizza al horno'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?toppings,prep&q=80',
+        url: 'https://loremflickr.com/800/600/toppings,prep',
         caption: 'Toppings listos para armar'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?delivery,box&q=80',
+        url: 'https://loremflickr.com/800/600/delivery,box',
         caption: 'Cajas listas para llevar'
       }
     ]
@@ -6907,66 +6907,66 @@ const BRAND_MASSA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?neapolitan,pizza,authentic&q=85',
+    hero: 'https://loremflickr.com/1200/1600/neapolitan,pizza,authentic',
     heroAlt: 'Pizza napolitana margherita auténtica',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?margherita,pizza&q=80',
+        url: 'https://loremflickr.com/1200/900/margherita,pizza',
         tag: 'Margherita D.O.P.',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bufala,mozzarella&q=80',
+        url: 'https://loremflickr.com/900/1200/bufala,mozzarella',
         tag: 'Bufala fresca',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?prosciutto,parma&q=80',
+        url: 'https://loremflickr.com/900/1200/prosciutto,parma',
         tag: 'Prosciutto Parma',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?basil,fresh&q=80',
+        url: 'https://loremflickr.com/900/1200/basil,fresh',
         tag: 'Albahaca fresca',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?san,marzano&q=80',
+        url: 'https://loremflickr.com/900/1200/san,marzano',
         tag: 'Tomate San Marzano',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wood,fired&q=80',
+        url: 'https://loremflickr.com/900/1200/wood,fired',
         tag: 'Horno 480°',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pizzeria,italiana&q=80',
+        url: 'https://loremflickr.com/1200/900/pizzeria,italiana',
         tag: 'Trattoria auténtica',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dough,sourdough&q=80',
+        url: 'https://loremflickr.com/900/1200/dough,sourdough',
         tag: 'Masa 72h fermentación',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?italian,family&q=80',
+        url: 'https://loremflickr.com/1200/900/italian,family',
         tag: 'Familia italiana',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?pizzaiolo,napoli&q=80',
+        url: 'https://loremflickr.com/800/600/pizzaiolo,napoli',
         caption: 'Pizzaiolo certificado AVPN'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?dough,starter&q=80',
+        url: 'https://loremflickr.com/800/600/dough,starter',
         caption: 'Masa madre activa'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?customer,authentic&q=80',
+        url: 'https://loremflickr.com/800/600/customer,authentic',
         caption: 'Cliente prueba auténtica'
       }
     ]
@@ -7104,66 +7104,66 @@ const BRAND_RODANTE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?food,truck,street&q=85',
+    hero: 'https://loremflickr.com/1200/1600/food,truck,street',
     heroAlt: 'Food truck colorido en evento nocturno',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?food,truck,colorful&q=80',
+        url: 'https://loremflickr.com/1200/900/food,truck,colorful',
         tag: 'Truck en evento',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gourmet,burger&q=80',
+        url: 'https://loremflickr.com/900/1200/gourmet,burger',
         tag: 'Burger gourmet móvil',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fish,tacos&q=80',
+        url: 'https://loremflickr.com/900/1200/fish,tacos',
         tag: 'Tacos de pescado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?asian,fusion&q=80',
+        url: 'https://loremflickr.com/900/1200/asian,fusion',
         tag: 'Fusión asiática',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?street,food&q=80',
+        url: 'https://loremflickr.com/900/1200/street,food',
         tag: 'Comida callejera',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?craft,fries&q=80',
+        url: 'https://loremflickr.com/900/1200/craft,fries',
         tag: 'Papas artesanales',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?festival,food&q=80',
+        url: 'https://loremflickr.com/1200/900/festival,food',
         tag: 'Festival nocturno',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cooking,truck&q=80',
+        url: 'https://loremflickr.com/900/1200/cooking,truck',
         tag: 'Cocinando dentro',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?queue,foodtruck&q=80',
+        url: 'https://loremflickr.com/1200/900/queue,foodtruck',
         tag: 'Fila del truck',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?cook,foodtruck&q=80',
+        url: 'https://loremflickr.com/800/600/cook,foodtruck',
         caption: 'Cocinero en truck móvil'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?customer,truck&q=80',
+        url: 'https://loremflickr.com/800/600/customer,truck',
         caption: 'Cliente paga con QR'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?event,private&q=80',
+        url: 'https://loremflickr.com/800/600/event,private',
         caption: 'Truck en evento privado'
       }
     ]
@@ -7301,54 +7301,54 @@ const BRAND_GRANO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?coffee,latte,barista&q=85',
+    hero: 'https://loremflickr.com/1200/1600/coffee,latte,barista',
     heroAlt: 'Barista pulling shot de espresso',
     showcase: [
-      {url: 'https://source.unsplash.com/random/1200x900/?latte,art&q=80', tag: 'Latte art', size: 'lg'},
+      {url: 'https://loremflickr.com/1200/900/latte,art', tag: 'Latte art', size: 'lg'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?espresso,shot&q=80',
+        url: 'https://loremflickr.com/900/1200/espresso,shot',
         tag: 'Espresso doble',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cappuccino,foam&q=80',
+        url: 'https://loremflickr.com/900/1200/cappuccino,foam',
         tag: 'Cappuccino',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?cold,brew&q=80', tag: 'Cold brew', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/900x1200/?pour,over&q=80', tag: 'Pour over', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/cold,brew', tag: 'Cold brew', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/pour,over', tag: 'Pour over', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?coffee,beans&q=80',
+        url: 'https://loremflickr.com/900/1200/coffee,beans',
         tag: 'Granos premium',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cafe,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/cafe,interior',
         tag: 'Salón acogedor',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pastry,cafe&q=80',
+        url: 'https://loremflickr.com/900/1200/pastry,cafe',
         tag: 'Pastel del día',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?coffee,morning&q=80',
+        url: 'https://loremflickr.com/1200/900/coffee,morning',
         tag: 'Mañana ocupada',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?barista,working&q=80',
+        url: 'https://loremflickr.com/800/600/barista,working',
         caption: 'Barista prepara latte art'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?coffee,scale&q=80',
+        url: 'https://loremflickr.com/800/600/coffee,scale',
         caption: 'Báscula para gramos exactos'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?regular,coffee&q=80',
+        url: 'https://loremflickr.com/800/600/regular,coffee',
         caption: 'Regular recibe su lo de siempre'
       }
     ]
@@ -7486,66 +7486,66 @@ const BRAND_TUESTE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?coffee,roastery,beans&q=85',
+    hero: 'https://loremflickr.com/1200/1600/coffee,roastery,beans',
     heroAlt: 'Tostador de café con granos verdes',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?coffee,roaster&q=80',
+        url: 'https://loremflickr.com/1200/900/coffee,roaster',
         tag: 'Tostador profesional',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?green,beans&q=80',
+        url: 'https://loremflickr.com/900/1200/green,beans',
         tag: 'Granos verdes',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ethiopian,coffee&q=80',
+        url: 'https://loremflickr.com/900/1200/ethiopian,coffee',
         tag: 'Etíope Yirgacheffe',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?colombian,coffee&q=80',
+        url: 'https://loremflickr.com/900/1200/colombian,coffee',
         tag: 'Colombia Huila',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chiapas,coffee&q=80',
+        url: 'https://loremflickr.com/900/1200/chiapas,coffee',
         tag: 'Chiapas alta',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cupping,session&q=80',
+        url: 'https://loremflickr.com/900/1200/cupping,session',
         tag: 'Cupping del lote',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?roasted,coffee&q=80',
+        url: 'https://loremflickr.com/1200/900/roasted,coffee',
         tag: 'Recién tostado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?coffee,bag&q=80',
+        url: 'https://loremflickr.com/900/1200/coffee,bag',
         tag: 'Bolsa con origen',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?roastery,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/roastery,interior',
         tag: 'Tostadero artesanal',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?roaster,profile&q=80',
+        url: 'https://loremflickr.com/800/600/roaster,profile',
         caption: 'Tostador anota curva de tueste'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?coffee,bagged&q=80',
+        url: 'https://loremflickr.com/800/600/coffee,bagged',
         caption: 'Bolsa con info de origen'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?subscriber,coffee&q=80',
+        url: 'https://loremflickr.com/800/600/subscriber,coffee',
         caption: 'Cliente recibe envío semanal'
       }
     ]
@@ -7662,66 +7662,66 @@ const BRAND_APUNTE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?cafeteria,students,university&q=85',
+    hero: 'https://loremflickr.com/1200/1600/cafeteria,students,university',
     heroAlt: 'Cafetería universitaria con estudiantes',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cafeteria,line&q=80',
+        url: 'https://loremflickr.com/1200/900/cafeteria,line',
         tag: 'Fila al mediodía',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?student,coffee&q=80',
+        url: 'https://loremflickr.com/900/1200/student,coffee',
         tag: 'Café para estudiar',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sandwich,combo&q=80',
+        url: 'https://loremflickr.com/900/1200/sandwich,combo',
         tag: 'Combo sandwich',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bagel,cream&q=80',
+        url: 'https://loremflickr.com/900/1200/bagel,cream',
         tag: 'Bagel con queso',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cookie,latte&q=80',
+        url: 'https://loremflickr.com/900/1200/cookie,latte',
         tag: 'Galleta y latte',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?yogurt,fruit&q=80',
+        url: 'https://loremflickr.com/900/1200/yogurt,fruit',
         tag: 'Yogurt con fruta',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?library,study&q=80',
+        url: 'https://loremflickr.com/1200/900/library,study',
         tag: 'Hora de estudiar',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?energy,drink&q=80',
+        url: 'https://loremflickr.com/900/1200/energy,drink',
         tag: 'Energética nocturna',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?students,group&q=80',
+        url: 'https://loremflickr.com/1200/900/students,group',
         tag: 'Grupo de amigos',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?barista,fast&q=80',
+        url: 'https://loremflickr.com/800/600/barista,fast',
         caption: 'Barista atiende rápido'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?credential,pay&q=80',
+        url: 'https://loremflickr.com/800/600/credential,pay',
         caption: 'Pago con credencial'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?students,exam&q=80',
+        url: 'https://loremflickr.com/800/600/students,exam',
         caption: 'Estudiantes en parciales'
       }
     ]
@@ -7859,66 +7859,66 @@ const BRAND_CONCHA_PAN = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?panaderia,concha,mexican&q=85',
+    hero: 'https://loremflickr.com/1200/1600/panaderia,concha,mexican',
     heroAlt: 'Conchas de pan dulce mexicanas en charola',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?conchas,bread&q=80',
+        url: 'https://loremflickr.com/1200/900/conchas,bread',
         tag: 'Conchas calientes',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bolillo,fresh&q=80',
+        url: 'https://loremflickr.com/900/1200/bolillo,fresh',
         tag: 'Bolillos del día',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cuernos,pan&q=80',
+        url: 'https://loremflickr.com/900/1200/cuernos,pan',
         tag: 'Cuernos azucarados',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?orejas,pan&q=80',
+        url: 'https://loremflickr.com/900/1200/orejas,pan',
         tag: 'Orejas crujientes',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pan,muerto&q=80',
+        url: 'https://loremflickr.com/900/1200/pan,muerto',
         tag: 'Pan de muerto',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?empanadas,dulces&q=80',
+        url: 'https://loremflickr.com/900/1200/empanadas,dulces',
         tag: 'Empanadas dulces',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?panaderia,horno&q=80',
+        url: 'https://loremflickr.com/1200/900/panaderia,horno',
         tag: 'Horno tradicional',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?donas,glaseadas&q=80',
+        url: 'https://loremflickr.com/900/1200/donas,glaseadas',
         tag: 'Donas glaseadas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?panaderia,mostrador&q=80',
+        url: 'https://loremflickr.com/1200/900/panaderia,mostrador',
         tag: 'Mostrador surtido',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?panadero,horno&q=80',
+        url: 'https://loremflickr.com/800/600/panadero,horno',
         caption: 'Panadero saca pan calientito'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?charola,pan&q=80',
+        url: 'https://loremflickr.com/800/600/charola,pan',
         caption: 'Charolas listas al mostrador'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,mañana&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,ma%C3%B1ana',
         caption: 'Cliente mañanero apartado'
       }
     ]
@@ -8035,66 +8035,66 @@ const BRAND_MASA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?sourdough,artisan,bread&q=85',
+    hero: 'https://loremflickr.com/1200/1600/sourdough,artisan,bread',
     heroAlt: 'Hogaza de masa madre con corteza',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sourdough,bread&q=80',
+        url: 'https://loremflickr.com/1200/900/sourdough,bread',
         tag: 'Masa madre clásica',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?baguette,french&q=80',
+        url: 'https://loremflickr.com/900/1200/baguette,french',
         tag: 'Baguette francesa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?focaccia,olive&q=80',
+        url: 'https://loremflickr.com/900/1200/focaccia,olive',
         tag: 'Focaccia con aceite',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?rye,bread&q=80',
+        url: 'https://loremflickr.com/900/1200/rye,bread',
         tag: 'Pan de centeno',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ciabatta,italian&q=80',
+        url: 'https://loremflickr.com/900/1200/ciabatta,italian',
         tag: 'Ciabatta italiana',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?seeds,bread&q=80',
+        url: 'https://loremflickr.com/900/1200/seeds,bread',
         tag: 'Multigrano',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bakery,artisan&q=80',
+        url: 'https://loremflickr.com/1200/900/bakery,artisan',
         tag: 'Panadería artesanal',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?starter,sourdough&q=80',
+        url: 'https://loremflickr.com/900/1200/starter,sourdough',
         tag: 'Masa madre activa',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bread,window&q=80',
+        url: 'https://loremflickr.com/1200/900/bread,window',
         tag: 'Aparador con pan',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?baker,kneading&q=80',
+        url: 'https://loremflickr.com/800/600/baker,kneading',
         caption: 'Panadero amasa al alba'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?dough,proofing&q=80',
+        url: 'https://loremflickr.com/800/600/dough,proofing',
         caption: 'Masa fermentando 72h'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?subscriber,bread&q=80',
+        url: 'https://loremflickr.com/800/600/subscriber,bread',
         caption: 'Cliente recoge lote semanal'
       }
     ]
@@ -8232,66 +8232,66 @@ const BRAND_MERENGUE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?pastry,fine,french&q=85',
+    hero: 'https://loremflickr.com/1200/1600/pastry,fine,french',
     heroAlt: 'Tarta de frutas con merengue suizo',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pastry,french&q=80',
+        url: 'https://loremflickr.com/1200/900/pastry,french',
         tag: 'Tartas finas',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?macarons,colorful&q=80',
+        url: 'https://loremflickr.com/900/1200/macarons,colorful',
         tag: 'Macarons franceses',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?eclair,chocolate&q=80',
+        url: 'https://loremflickr.com/900/1200/eclair,chocolate',
         tag: 'Éclairs chocolate',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tart,fruit&q=80',
+        url: 'https://loremflickr.com/900/1200/tart,fruit',
         tag: 'Tarta frutos rojos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cheesecake,artisan&q=80',
+        url: 'https://loremflickr.com/900/1200/cheesecake,artisan',
         tag: 'Cheesecake artesanal',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?petit,fours&q=80',
+        url: 'https://loremflickr.com/900/1200/petit,fours',
         tag: 'Petit fours',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?patisserie,vitrina&q=80',
+        url: 'https://loremflickr.com/1200/900/patisserie,vitrina',
         tag: 'Vitrina elegante',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?meringue,whipped&q=80',
+        url: 'https://loremflickr.com/900/1200/meringue,whipped',
         tag: 'Merengue suizo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?birthday,cake&q=80',
+        url: 'https://loremflickr.com/1200/900/birthday,cake',
         tag: 'Pastel cumpleaños',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?chef,pastry&q=80',
+        url: 'https://loremflickr.com/800/600/chef,pastry',
         caption: 'Chef monta tarta a mano'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?vitrina,vidrio&q=80',
+        url: 'https://loremflickr.com/800/600/vitrina,vidrio',
         caption: 'Vitrina refrigerada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,cumpleaños&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,cumplea%C3%B1os',
         caption: 'Cliente recoge pastel especial'
       }
     ]
@@ -8409,63 +8409,63 @@ const BRAND_TORTA_NOVIA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?wedding,cake,elegant&q=85',
+    hero: 'https://loremflickr.com/1200/1600/wedding,cake,elegant',
     heroAlt: 'Pastel de bodas de 4 pisos blanco',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?wedding,cake,tiered&q=80',
+        url: 'https://loremflickr.com/1200/900/wedding,cake,tiered',
         tag: 'Pastel 4 pisos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fondant,decoration&q=80',
+        url: 'https://loremflickr.com/900/1200/fondant,decoration',
         tag: 'Decoración fondant',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?flowers,sugar&q=80',
+        url: 'https://loremflickr.com/900/1200/flowers,sugar',
         tag: 'Flores de azúcar',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cake,topper&q=80',
+        url: 'https://loremflickr.com/900/1200/cake,topper',
         tag: 'Topper personalizado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wedding,setup&q=80',
+        url: 'https://loremflickr.com/900/1200/wedding,setup',
         tag: 'Montaje en salón',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cupcakes,wedding&q=80',
+        url: 'https://loremflickr.com/900/1200/cupcakes,wedding',
         tag: 'Cupcakes evento',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bridal,suite&q=80',
+        url: 'https://loremflickr.com/1200/900/bridal,suite',
         tag: 'Suite con pastel',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tasting,cake&q=80',
+        url: 'https://loremflickr.com/900/1200/tasting,cake',
         tag: 'Prueba de sabor',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?wedding,reception&q=80',
+        url: 'https://loremflickr.com/1200/900/wedding,reception',
         tag: 'Recepción elegante',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?chef,wedding&q=80',
+        url: 'https://loremflickr.com/800/600/chef,wedding',
         caption: 'Chef monta pastel monumental'
       },
-      {url: 'https://source.unsplash.com/random/800x600/?bride,cake&q=80', caption: 'Novia ve su pastel'},
+      {url: 'https://loremflickr.com/800/600/bride,cake', caption: 'Novia ve su pastel'},
       {
-        url: 'https://source.unsplash.com/random/800x600/?wedding,planner&q=80',
+        url: 'https://loremflickr.com/800/600/wedding,planner',
         caption: 'Coordinación con planner'
       }
     ]
@@ -8583,66 +8583,66 @@ const BRAND_TAMARINDO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?candy,mexican,pulparindos&q=85',
+    hero: 'https://loremflickr.com/1200/1600/candy,mexican,pulparindos',
     heroAlt: 'Dulces mexicanos surtidos en frascos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mexican,candy&q=80',
+        url: 'https://loremflickr.com/1200/900/mexican,candy',
         tag: 'Surtido mexicano',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tamarindo,dulce&q=80',
+        url: 'https://loremflickr.com/900/1200/tamarindo,dulce',
         tag: 'Tamarindos enchilados',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?paleta,coraza&q=80',
+        url: 'https://loremflickr.com/900/1200/paleta,coraza',
         tag: 'Paletas Corazón',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vero,mango&q=80',
+        url: 'https://loremflickr.com/900/1200/vero,mango',
         tag: 'Vero mango',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chamoy,bottle&q=80',
+        url: 'https://loremflickr.com/900/1200/chamoy,bottle',
         tag: 'Chamoy clásico',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?candies,bulk&q=80',
+        url: 'https://loremflickr.com/900/1200/candies,bulk',
         tag: 'Dulces a granel',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?candy,store&q=80',
+        url: 'https://loremflickr.com/1200/900/candy,store',
         tag: 'Mostrador colorido',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?piñata,fiesta&q=80',
+        url: 'https://loremflickr.com/900/1200/pi%C3%B1ata,fiesta',
         tag: 'Piñata mexicana',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kids,candy&q=80',
+        url: 'https://loremflickr.com/1200/900/kids,candy',
         tag: 'Niños eligen',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?candy,scale&q=80',
+        url: 'https://loremflickr.com/800/600/candy,scale',
         caption: 'Báscula pesa el surtido'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?bags,party&q=80',
+        url: 'https://loremflickr.com/800/600/bags,party',
         caption: 'Bolsas para piñatas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?kids,buying&q=80',
+        url: 'https://loremflickr.com/800/600/kids,buying',
         caption: 'Niños eligen dulces'
       }
     ]
@@ -8759,66 +8759,66 @@ const BRAND_CACAO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?chocolate,artisan,bonbon&q=85',
+    hero: 'https://loremflickr.com/1200/1600/chocolate,artisan,bonbon',
     heroAlt: 'Bombones artesanales en caja premium',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?chocolate,bonbons&q=80',
+        url: 'https://loremflickr.com/1200/900/chocolate,bonbons',
         tag: 'Caja de bombones',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dark,chocolate&q=80',
+        url: 'https://loremflickr.com/900/1200/dark,chocolate',
         tag: 'Chocolate 85%',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?truffles,filled&q=80',
+        url: 'https://loremflickr.com/900/1200/truffles,filled',
         tag: 'Trufas rellenas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cacao,beans&q=80',
+        url: 'https://loremflickr.com/900/1200/cacao,beans',
         tag: 'Cacao en grano',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chocolate,bar&q=80',
+        url: 'https://loremflickr.com/900/1200/chocolate,bar',
         tag: 'Barra single origin',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ganache,filling&q=80',
+        url: 'https://loremflickr.com/900/1200/ganache,filling',
         tag: 'Ganache filling',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?chocolatier,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/chocolatier,workshop',
         tag: 'Taller artesanal',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gift,chocolate&q=80',
+        url: 'https://loremflickr.com/900/1200/gift,chocolate',
         tag: 'Caja regalo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?valentine,chocolate&q=80',
+        url: 'https://loremflickr.com/1200/900/valentine,chocolate',
         tag: 'San Valentín',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?chocolatier,working&q=80',
+        url: 'https://loremflickr.com/800/600/chocolatier,working',
         caption: 'Chocolatero baña bombones'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cacao,origin&q=80',
+        url: 'https://loremflickr.com/800/600/cacao,origin',
         caption: 'Cacao Chiapas premium'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?valentine,gift&q=80',
+        url: 'https://loremflickr.com/800/600/valentine,gift',
         caption: 'Cliente compra regalo San Valentín'
       }
     ]
@@ -8935,66 +8935,66 @@ const BRAND_AGAVE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?tequila,bar,agave&q=85',
+    hero: 'https://loremflickr.com/1200/1600/tequila,bar,agave',
     heroAlt: 'Caballitos de tequila reposado con sal y limón',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tequila,shot&q=80',
+        url: 'https://loremflickr.com/1200/900/tequila,shot',
         tag: 'Caballito reposado',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?paloma,drink&q=80',
+        url: 'https://loremflickr.com/900/1200/paloma,drink',
         tag: 'Paloma clásica',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?margarita,salt&q=80',
+        url: 'https://loremflickr.com/900/1200/margarita,salt',
         tag: 'Margarita salada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?agave,plant&q=80',
+        url: 'https://loremflickr.com/900/1200/agave,plant',
         tag: 'Agave azul',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bartender,tequila&q=80',
+        url: 'https://loremflickr.com/900/1200/bartender,tequila',
         tag: 'Bartender experto',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?reposado,bottle&q=80',
+        url: 'https://loremflickr.com/900/1200/reposado,bottle',
         tag: 'Botella reposado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tequila,bar,dark&q=80',
+        url: 'https://loremflickr.com/1200/900/tequila,bar,dark',
         tag: 'Bar oscuro',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sangrita,drink&q=80',
+        url: 'https://loremflickr.com/900/1200/sangrita,drink',
         tag: 'Sangrita acompañante',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mexican,bar&q=80',
+        url: 'https://loremflickr.com/1200/900/mexican,bar',
         tag: 'Ambiente mexicano',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?bartender,pour&q=80',
+        url: 'https://loremflickr.com/800/600/bartender,pour',
         caption: 'Bartender sirve al jigger'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?bottles,backbar&q=80',
+        url: 'https://loremflickr.com/800/600/bottles,backbar',
         caption: 'Backbar con botellas premium'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,bar&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,bar',
         caption: 'Cliente prueba reposado'
       }
     ]
@@ -9132,66 +9132,66 @@ const BRAND_GUSANO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?mezcal,oaxaca,copita&q=85',
+    hero: 'https://loremflickr.com/1200/1600/mezcal,oaxaca,copita',
     heroAlt: 'Copita de mezcal con sal de gusano y naranja',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mezcal,bottle&q=80',
+        url: 'https://loremflickr.com/1200/900/mezcal,bottle',
         tag: 'Mezcal joven',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mezcal,glass&q=80',
+        url: 'https://loremflickr.com/900/1200/mezcal,glass',
         tag: 'Copita artesanal',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gusano,sal&q=80',
+        url: 'https://loremflickr.com/900/1200/gusano,sal',
         tag: 'Sal de gusano',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?orange,slice&q=80',
+        url: 'https://loremflickr.com/900/1200/orange,slice',
         tag: 'Naranja para acompañar',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?agave,wild&q=80',
+        url: 'https://loremflickr.com/900/1200/agave,wild',
         tag: 'Agave silvestre',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?palenque,oaxaca&q=80',
+        url: 'https://loremflickr.com/900/1200/palenque,oaxaca',
         tag: 'Palenque oaxaqueño',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mezcal,bar&q=80',
+        url: 'https://loremflickr.com/1200/900/mezcal,bar',
         tag: 'Mezcalería íntima',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tobala,wild&q=80',
+        url: 'https://loremflickr.com/900/1200/tobala,wild',
         tag: 'Tobalá silvestre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?oaxacan,culture&q=80',
+        url: 'https://loremflickr.com/1200/900/oaxacan,culture',
         tag: 'Cultura oaxaqueña',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?bartender,mezcal&q=80',
+        url: 'https://loremflickr.com/800/600/bartender,mezcal',
         caption: 'Bartender sirve copita'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?mezcal,collection&q=80',
+        url: 'https://loremflickr.com/800/600/mezcal,collection',
         caption: 'Colección de maestros'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,cata&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,cata',
         caption: 'Cliente cata mezcal joven'
       }
     ]
@@ -9329,66 +9329,66 @@ const BRAND_LUPULO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?craft,beer,brewery&q=85',
+    hero: 'https://loremflickr.com/1200/1600/craft,beer,brewery',
     heroAlt: 'Tarro de cerveza IPA recién servida',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?craft,beer&q=80',
+        url: 'https://loremflickr.com/1200/900/craft,beer',
         tag: 'Cerveza artesanal',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ipa,hops&q=80',
+        url: 'https://loremflickr.com/900/1200/ipa,hops',
         tag: 'IPA con lúpulo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?stout,dark&q=80',
+        url: 'https://loremflickr.com/900/1200/stout,dark',
         tag: 'Stout oscura',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wheat,beer&q=80',
+        url: 'https://loremflickr.com/900/1200/wheat,beer',
         tag: 'Trigo wheat',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?growler,bottle&q=80',
+        url: 'https://loremflickr.com/900/1200/growler,bottle',
         tag: 'Growler para llevar',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tap,beer&q=80',
+        url: 'https://loremflickr.com/900/1200/tap,beer',
         tag: 'Taps en barra',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?taproom,industrial&q=80',
+        url: 'https://loremflickr.com/1200/900/taproom,industrial',
         tag: 'Taproom industrial',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?brewery,fermenter&q=80',
+        url: 'https://loremflickr.com/900/1200/brewery,fermenter',
         tag: 'Fermentadores',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?beer,flight&q=80',
+        url: 'https://loremflickr.com/1200/900/beer,flight',
         tag: 'Flight de cata',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?bartender,tap&q=80',
+        url: 'https://loremflickr.com/800/600/bartender,tap',
         caption: 'Bartender llena tarro'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?growler,fill&q=80',
+        url: 'https://loremflickr.com/800/600/growler,fill',
         caption: 'Growler llenándose'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?customer,beer&q=80',
+        url: 'https://loremflickr.com/800/600/customer,beer',
         caption: 'Cliente prueba flight'
       }
     ]
@@ -9526,66 +9526,66 @@ const BRAND_BARRICA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?wine,bottles,cellar&q=85',
+    hero: 'https://loremflickr.com/1200/1600/wine,bottles,cellar',
     heroAlt: 'Bodega con botellas de vino reserva',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?wine,cellar&q=80',
+        url: 'https://loremflickr.com/1200/900/wine,cellar',
         tag: 'Cellar climatizado',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?red,wine&q=80',
+        url: 'https://loremflickr.com/900/1200/red,wine',
         tag: 'Tinto reserva',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?white,wine&q=80',
+        url: 'https://loremflickr.com/900/1200/white,wine',
         tag: 'Blanco fresco',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sommelier,tasting&q=80',
+        url: 'https://loremflickr.com/900/1200/sommelier,tasting',
         tag: 'Sommelier cata',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vineyard,guadalupe&q=80',
+        url: 'https://loremflickr.com/900/1200/vineyard,guadalupe',
         tag: 'Viñedo mexicano',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wine,glass&q=80',
+        url: 'https://loremflickr.com/900/1200/wine,glass',
         tag: 'Copa servida',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?wine,shop&q=80',
+        url: 'https://loremflickr.com/1200/900/wine,shop',
         tag: 'Tienda elegante',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cork,wine&q=80',
+        url: 'https://loremflickr.com/900/1200/cork,wine',
         tag: 'Descorche ritual',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?wine,dinner&q=80',
+        url: 'https://loremflickr.com/1200/900/wine,dinner',
         tag: 'Cena maridaje',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?sommelier,pour&q=80',
+        url: 'https://loremflickr.com/800/600/sommelier,pour',
         caption: 'Sommelier sirve reserva'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?wine,collection&q=80',
+        url: 'https://loremflickr.com/800/600/wine,collection',
         caption: 'Colección por región'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?customer,tasting&q=80',
+        url: 'https://loremflickr.com/800/600/customer,tasting',
         caption: 'Cliente cata Valle Guadalupe'
       }
     ]
@@ -9702,66 +9702,66 @@ const BRAND_CANTINITA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?cantina,mexican,bar&q=85',
+    hero: 'https://loremflickr.com/1200/1600/cantina,mexican,bar',
     heroAlt: 'Cantina tradicional con barra de madera',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cantina,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/cantina,interior',
         tag: 'Cantina clásica',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cuba,libre&q=80',
+        url: 'https://loremflickr.com/900/1200/cuba,libre',
         tag: 'Cuba libre',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?caguamas,beer&q=80',
+        url: 'https://loremflickr.com/900/1200/caguamas,beer',
         tag: 'Caguamas frías',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?botana,cacahuates&q=80',
+        url: 'https://loremflickr.com/900/1200/botana,cacahuates',
         tag: 'Cacahuates japoneses',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cantina,bar&q=80',
+        url: 'https://loremflickr.com/900/1200/cantina,bar',
         tag: 'Barra de madera',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?domino,table&q=80',
+        url: 'https://loremflickr.com/900/1200/domino,table',
         tag: 'Mesa de dominó',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mexican,bar&q=80',
+        url: 'https://loremflickr.com/1200/900/mexican,bar',
         tag: 'Ambiente mexicano',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cantinero,trabajo&q=80',
+        url: 'https://loremflickr.com/900/1200/cantinero,trabajo',
         tag: 'Cantinero al trabajo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cantina,regulars&q=80',
+        url: 'https://loremflickr.com/1200/900/cantina,regulars',
         tag: 'Mesa de regulares',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?cantinero,sirve&q=80',
+        url: 'https://loremflickr.com/800/600/cantinero,sirve',
         caption: 'Cantinero sirve cubas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?fiado,libreta&q=80',
+        url: 'https://loremflickr.com/800/600/fiado,libreta',
         caption: 'Libreta de fiados digital'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?amigos,cantina&q=80',
+        url: 'https://loremflickr.com/800/600/amigos,cantina',
         caption: 'Amigos juegan dominó'
       }
     ]
@@ -9895,66 +9895,66 @@ const BRAND_TRIBUNA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?sports,bar,beer&q=85',
+    hero: 'https://loremflickr.com/1200/1600/sports,bar,beer',
     heroAlt: 'Bar deportivo con TVs y cervezas',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sports,bar&q=80',
+        url: 'https://loremflickr.com/1200/900/sports,bar',
         tag: 'Bar deportivo',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?beer,bucket&q=80',
+        url: 'https://loremflickr.com/900/1200/beer,bucket',
         tag: 'Cubeta de cervezas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wings,buffalo&q=80',
+        url: 'https://loremflickr.com/900/1200/wings,buffalo',
         tag: 'Alitas búfalo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?nachos,cheese&q=80',
+        url: 'https://loremflickr.com/900/1200/nachos,cheese',
         tag: 'Nachos con queso',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?football,tv&q=80',
+        url: 'https://loremflickr.com/900/1200/football,tv',
         tag: 'Partido en TV',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?soccer,fans&q=80',
+        url: 'https://loremflickr.com/900/1200/soccer,fans',
         tag: 'Fans del América',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sports,bar,big&q=80',
+        url: 'https://loremflickr.com/1200/900/sports,bar,big',
         tag: 'Bar con tribuna',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?michelada,beer&q=80',
+        url: 'https://loremflickr.com/900/1200/michelada,beer',
         tag: 'Michelada cubana',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?stadium,view&q=80',
+        url: 'https://loremflickr.com/1200/900/stadium,view',
         tag: 'Pantallas gigantes',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?bartender,sports&q=80',
+        url: 'https://loremflickr.com/800/600/bartender,sports',
         caption: 'Bartender llena pedidos'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?big,screen,game&q=80',
+        url: 'https://loremflickr.com/800/600/big,screen,game',
         caption: 'Partido en pantalla gigante'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?fans,cheering&q=80',
+        url: 'https://loremflickr.com/800/600/fans,cheering',
         caption: 'Fans celebran gol'
       }
     ]
@@ -10092,65 +10092,65 @@ const BRAND_TERCIOPELO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?lounge,cocktail,bar&q=85',
+    hero: 'https://loremflickr.com/1200/1600/lounge,cocktail,bar',
     heroAlt: 'Cóctel premium en lounge con luces moradas',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cocktail,fancy&q=80',
+        url: 'https://loremflickr.com/1200/900/cocktail,fancy',
         tag: 'Cóctel signature',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?old,fashioned&q=80',
+        url: 'https://loremflickr.com/900/1200/old,fashioned',
         tag: 'Old fashioned',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mezcal,cocktail&q=80',
+        url: 'https://loremflickr.com/900/1200/mezcal,cocktail',
         tag: 'Coctel mezcal',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gin,tonic&q=80',
+        url: 'https://loremflickr.com/900/1200/gin,tonic',
         tag: 'Gin tonic premium',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lounge,vip&q=80',
+        url: 'https://loremflickr.com/900/1200/lounge,vip',
         tag: 'Reservado VIP',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bartender,mixing&q=80',
+        url: 'https://loremflickr.com/900/1200/bartender,mixing',
         tag: 'Mixólogo en acción',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?lounge,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/lounge,interior',
         tag: 'Lounge moderno',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ice,sphere&q=80',
+        url: 'https://loremflickr.com/900/1200/ice,sphere',
         tag: 'Esfera de hielo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?dj,booth&q=80',
+        url: 'https://loremflickr.com/1200/900/dj,booth',
         tag: 'Noche con DJ',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?bartender,fancy&q=80',
+        url: 'https://loremflickr.com/800/600/bartender,fancy',
         caption: 'Mixólogo prepara signature'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?vip,table&q=80',
+        url: 'https://loremflickr.com/800/600/vip,table',
         caption: 'Mesa VIP con botellas'
       },
-      {url: 'https://source.unsplash.com/random/800x600/?djset,night&q=80', caption: 'DJ set nocturno'}
+      {url: 'https://loremflickr.com/800/600/djset,night', caption: 'DJ set nocturno'}
     ]
   },
   liveDemo: {
@@ -10266,66 +10266,66 @@ const BRAND_MIXTO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?cocktail,bar,colorful&q=85',
+    hero: 'https://loremflickr.com/1200/1600/cocktail,bar,colorful',
     heroAlt: 'Cócteles coloridos en barra moderna',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cocktail,fancy&q=80',
+        url: 'https://loremflickr.com/1200/900/cocktail,fancy',
         tag: 'Cóctel signature',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?margarita,salt&q=80',
+        url: 'https://loremflickr.com/900/1200/margarita,salt',
         tag: 'Margarita escarchada',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mojito,mint&q=80',
+        url: 'https://loremflickr.com/900/1200/mojito,mint',
         tag: 'Mojito clásico',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pina,colada&q=80',
+        url: 'https://loremflickr.com/900/1200/pina,colada',
         tag: 'Piña colada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?manhattan,whiskey&q=80',
+        url: 'https://loremflickr.com/900/1200/manhattan,whiskey',
         tag: 'Manhattan',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bartender,shaker&q=80',
+        url: 'https://loremflickr.com/900/1200/bartender,shaker',
         tag: 'Coctelero pro',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cocktail,bar&q=80',
+        url: 'https://loremflickr.com/1200/900/cocktail,bar',
         tag: 'Barra moderna',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bloody,mary&q=80',
+        url: 'https://loremflickr.com/900/1200/bloody,mary',
         tag: 'Bloody Mary',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bottles,backbar&q=80',
+        url: 'https://loremflickr.com/1200/900/bottles,backbar',
         tag: 'Backbar premium',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?bartender,mixing&q=80',
+        url: 'https://loremflickr.com/800/600/bartender,mixing',
         caption: 'Coctelero shake un Manhattan'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?jigger,measure&q=80',
+        url: 'https://loremflickr.com/800/600/jigger,measure',
         caption: 'Jigger mide ml exacto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?customer,cocktail&q=80',
+        url: 'https://loremflickr.com/800/600/customer,cocktail',
         caption: 'Cliente prueba signature'
       }
     ]
@@ -10463,66 +10463,66 @@ const BRAND_HUMO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?cigar,humidor,cuban&q=85',
+    hero: 'https://loremflickr.com/1200/1600/cigar,humidor,cuban',
     heroAlt: 'Puro cubano premium en humidor de madera',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cuban,cigars&q=80',
+        url: 'https://loremflickr.com/1200/900/cuban,cigars',
         tag: 'Puros cubanos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cigar,box&q=80',
+        url: 'https://loremflickr.com/900/1200/cigar,box',
         tag: 'Caja Cohiba',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pipe,tobacco&q=80',
+        url: 'https://loremflickr.com/900/1200/pipe,tobacco',
         tag: 'Pipa premium',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?humidor,wood&q=80',
+        url: 'https://loremflickr.com/900/1200/humidor,wood',
         tag: 'Humidor de cedro',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cigar,smoke&q=80',
+        url: 'https://loremflickr.com/900/1200/cigar,smoke',
         tag: 'Puro encendido',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cigar,cutter&q=80',
+        url: 'https://loremflickr.com/900/1200/cigar,cutter',
         tag: 'Cortador premium',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cigar,lounge&q=80',
+        url: 'https://loremflickr.com/1200/900/cigar,lounge',
         tag: 'Lounge para fumar',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?whiskey,cigar&q=80',
+        url: 'https://loremflickr.com/900/1200/whiskey,cigar',
         tag: 'Whisky y puro',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cigar,shop&q=80',
+        url: 'https://loremflickr.com/1200/900/cigar,shop',
         tag: 'Tienda elegante',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?tabaquero,cliente&q=80',
+        url: 'https://loremflickr.com/800/600/tabaquero,cliente',
         caption: 'Tabaquero asesora al cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?humidor,inside&q=80',
+        url: 'https://loremflickr.com/800/600/humidor,inside',
         caption: 'Humidor con cajas premium'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?lounge,cigar,whiskey&q=80',
+        url: 'https://loremflickr.com/800/600/lounge,cigar,whiskey',
         caption: 'Cliente disfruta en lounge'
       }
     ]
@@ -10638,66 +10638,66 @@ const BRAND_BOTELLA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?liquor,store,bottles&q=85',
+    hero: 'https://loremflickr.com/1200/1600/liquor,store,bottles',
     heroAlt: 'Anaqueles de licorería con botellas variadas',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?liquor,shelves&q=80',
+        url: 'https://loremflickr.com/1200/900/liquor,shelves',
         tag: 'Anaqueles surtidos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?whisky,bottle&q=80',
+        url: 'https://loremflickr.com/900/1200/whisky,bottle',
         tag: 'Whisky premium',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tequila,bottle&q=80',
+        url: 'https://loremflickr.com/900/1200/tequila,bottle',
         tag: 'Tequila reposado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vodka,bottle&q=80',
+        url: 'https://loremflickr.com/900/1200/vodka,bottle',
         tag: 'Vodka importada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wine,bottles&q=80',
+        url: 'https://loremflickr.com/900/1200/wine,bottles',
         tag: 'Sección vinos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?beer,fridge&q=80',
+        url: 'https://loremflickr.com/900/1200/beer,fridge',
         tag: 'Refri cervezas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?liquor,counter&q=80',
+        url: 'https://loremflickr.com/1200/900/liquor,counter',
         tag: 'Mostrador con caja',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?party,liquor&q=80',
+        url: 'https://loremflickr.com/900/1200/party,liquor',
         tag: 'Para fiesta',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?delivery,liquor&q=80',
+        url: 'https://loremflickr.com/1200/900/delivery,liquor',
         tag: 'Pedido para llevar',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?customer,buying&q=80',
+        url: 'https://loremflickr.com/800/600/customer,buying',
         caption: 'Cliente compra para fiesta'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?bottles,boxed&q=80',
+        url: 'https://loremflickr.com/800/600/bottles,boxed',
         caption: 'Botellas en cajas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?delivery,prep&q=80',
+        url: 'https://loremflickr.com/800/600/delivery,prep',
         caption: 'Pedido para evento'
       }
     ]
@@ -10814,66 +10814,66 @@ const BRAND_DESPENSA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?gourmet,grocery,deli&q=85',
+    hero: 'https://loremflickr.com/1200/1600/gourmet,grocery,deli',
     heroAlt: 'Anaqueles de abarrotes premium',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gourmet,store&q=80',
+        url: 'https://loremflickr.com/1200/900/gourmet,store',
         tag: 'Tienda gourmet',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?olive,oil&q=80',
+        url: 'https://loremflickr.com/900/1200/olive,oil',
         tag: 'Aceites premium',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cheeses,artisan&q=80',
+        url: 'https://loremflickr.com/900/1200/cheeses,artisan',
         tag: 'Quesos artesanales',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wine,selection&q=80',
+        url: 'https://loremflickr.com/900/1200/wine,selection',
         tag: 'Sección vinos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?charcuterie,board&q=80',
+        url: 'https://loremflickr.com/900/1200/charcuterie,board',
         tag: 'Charcuterie',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chocolate,imported&q=80',
+        url: 'https://loremflickr.com/900/1200/chocolate,imported',
         tag: 'Chocolates importados',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?deli,counter&q=80',
+        url: 'https://loremflickr.com/1200/900/deli,counter',
         tag: 'Mostrador deli',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?canned,goods&q=80',
+        url: 'https://loremflickr.com/900/1200/canned,goods',
         tag: 'Enlatados gourmet',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?holiday,baskets&q=80',
+        url: 'https://loremflickr.com/1200/900/holiday,baskets',
         tag: 'Canastas navideñas',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?vendedor,abarrotes&q=80',
+        url: 'https://loremflickr.com/800/600/vendedor,abarrotes',
         caption: 'Vendedor asesora cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?canasta,navidena&q=80',
+        url: 'https://loremflickr.com/800/600/canasta,navidena',
         caption: 'Canasta navideña personalizada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,gourmet&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,gourmet',
         caption: 'Cliente VIP compra'
       }
     ]
@@ -11019,62 +11019,62 @@ const BRAND_ESQUINA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?corner,store,mexican&q=85',
+    hero: 'https://loremflickr.com/1200/1600/corner,store,mexican',
     heroAlt: 'Minisúper de barrio mexicano',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?corner,store&q=80',
+        url: 'https://loremflickr.com/1200/900/corner,store',
         tag: 'Minisúper familiar',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?soft,drinks&q=80',
+        url: 'https://loremflickr.com/900/1200/soft,drinks',
         tag: 'Refris con refrescos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?snacks,chips&q=80',
+        url: 'https://loremflickr.com/900/1200/snacks,chips',
         tag: 'Frituras Sabritas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?candy,corner&q=80',
+        url: 'https://loremflickr.com/900/1200/candy,corner',
         tag: 'Dulces a granel',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?leche,huevos&q=80',
+        url: 'https://loremflickr.com/900/1200/leche,huevos',
         tag: 'Lácteos básicos',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?pan,bimbo&q=80', tag: 'Pan blanco', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/pan,bimbo', tag: 'Pan blanco', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mini,super&q=80',
+        url: 'https://loremflickr.com/1200/900/mini,super',
         tag: 'Mostrador con caja',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?abarrotes,mexicanos&q=80',
+        url: 'https://loremflickr.com/900/1200/abarrotes,mexicanos',
         tag: 'Abarrotes básicos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?vecindad,tienda&q=80',
+        url: 'https://loremflickr.com/1200/900/vecindad,tienda',
         tag: 'Tienda del barrio',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?cajera,minisuper&q=80',
+        url: 'https://loremflickr.com/800/600/cajera,minisuper',
         caption: 'Cajera despacha rápido'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?fiado,libreta&q=80',
+        url: 'https://loremflickr.com/800/600/fiado,libreta',
         caption: 'Libreta de fiados digital'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?vecino,comprando&q=80',
+        url: 'https://loremflickr.com/800/600/vecino,comprando',
         caption: 'Vecino compra del diario'
       }
     ]
@@ -11220,58 +11220,58 @@ const BRAND_SIEMPRE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?convenience,store,oxxo&q=85',
+    hero: 'https://loremflickr.com/1200/1600/convenience,store,oxxo',
     heroAlt: 'Tienda de conveniencia 24 horas',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?7eleven,inside&q=80',
+        url: 'https://loremflickr.com/1200/900/7eleven,inside',
         tag: 'Tienda 24/7',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?slushie,drinks&q=80',
+        url: 'https://loremflickr.com/900/1200/slushie,drinks',
         tag: 'Bebidas frozen',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?coffee,gas&q=80', tag: 'Café 24h', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/coffee,gas', tag: 'Café 24h', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?hotdog,roller&q=80',
+        url: 'https://loremflickr.com/900/1200/hotdog,roller',
         tag: 'Hot dogs caliente',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chips,wall&q=80',
+        url: 'https://loremflickr.com/900/1200/chips,wall',
         tag: 'Botanas y dulces',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?night,clerk&q=80',
+        url: 'https://loremflickr.com/900/1200/night,clerk',
         tag: 'Empleado nocturno',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gas,station,store&q=80',
+        url: 'https://loremflickr.com/1200/900/gas,station,store',
         tag: 'Conveniencia rápida',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?atm,machine&q=80',
+        url: 'https://loremflickr.com/900/1200/atm,machine',
         tag: 'ATM en tienda',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?late,night,store&q=80',
+        url: 'https://loremflickr.com/1200/900/late,night,store',
         tag: 'Madrugada activa',
         size: 'md'
       }
     ],
     context: [
-      {url: 'https://source.unsplash.com/random/800x600/?cashier,night&q=80', caption: 'Cajera nocturna'},
+      {url: 'https://loremflickr.com/800/600/cashier,night', caption: 'Cajera nocturna'},
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,medianoche&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,medianoche',
         caption: 'Cliente medianoche'
       },
-      {url: 'https://source.unsplash.com/random/800x600/?delivery,fast&q=80', caption: 'Delivery rápido'}
+      {url: 'https://loremflickr.com/800/600/delivery,fast', caption: 'Delivery rápido'}
     ]
   },
   liveDemo: {
@@ -11407,66 +11407,66 @@ const BRAND_GALLINERO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?chicken,poultry,fresh&q=85',
+    hero: 'https://loremflickr.com/1200/1600/chicken,poultry,fresh',
     heroAlt: 'Pollo fresco en mostrador de pollería',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?chicken,raw&q=80',
+        url: 'https://loremflickr.com/1200/900/chicken,raw',
         tag: 'Pollo entero',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chicken,breast&q=80',
+        url: 'https://loremflickr.com/900/1200/chicken,breast',
         tag: 'Pechuga deshuesada',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chicken,thigh&q=80',
+        url: 'https://loremflickr.com/900/1200/chicken,thigh',
         tag: 'Muslo y pierna',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?eggs,carton&q=80',
+        url: 'https://loremflickr.com/900/1200/eggs,carton',
         tag: 'Huevo por kg',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?milanesa,pollo&q=80',
+        url: 'https://loremflickr.com/900/1200/milanesa,pollo',
         tag: 'Milanesa de pollo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wings,fresh&q=80',
+        url: 'https://loremflickr.com/900/1200/wings,fresh',
         tag: 'Alitas frescas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?butcher,chicken&q=80',
+        url: 'https://loremflickr.com/1200/900/butcher,chicken',
         tag: 'Carnicero al corte',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chicken,marinated&q=80',
+        url: 'https://loremflickr.com/900/1200/chicken,marinated',
         tag: 'Pollo marinado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?polleria,mostrador&q=80',
+        url: 'https://loremflickr.com/1200/900/polleria,mostrador',
         tag: 'Mostrador refri',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?pollero,corte&q=80',
+        url: 'https://loremflickr.com/800/600/pollero,corte',
         caption: 'Pollero corta el pollo al pedido'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?bascula,pollo&q=80',
+        url: 'https://loremflickr.com/800/600/bascula,pollo',
         caption: 'Báscula al kilo exacto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,polleria&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,polleria',
         caption: 'Cliente lleva semanal'
       }
     ]
@@ -11781,66 +11781,66 @@ const BRAND_ESCAMA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?fish,market,fresh&q=85',
+    hero: 'https://loremflickr.com/1200/1600/fish,market,fresh',
     heroAlt: 'Pescados frescos en hielo en mostrador',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?fish,market&q=80',
+        url: 'https://loremflickr.com/1200/900/fish,market',
         tag: 'Mostrador con hielo',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?huachinango,fresh&q=80',
+        url: 'https://loremflickr.com/900/1200/huachinango,fresh',
         tag: 'Huachinango',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?salmon,filet&q=80',
+        url: 'https://loremflickr.com/900/1200/salmon,filet',
         tag: 'Salmón filete',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?camarones,fresh&q=80',
+        url: 'https://loremflickr.com/900/1200/camarones,fresh',
         tag: 'Camarón crudo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pulpo,fresh&q=80',
+        url: 'https://loremflickr.com/900/1200/pulpo,fresh',
         tag: 'Pulpo entero',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mojarra,tilapia&q=80',
+        url: 'https://loremflickr.com/900/1200/mojarra,tilapia',
         tag: 'Mojarra',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?fishmonger,shop&q=80',
+        url: 'https://loremflickr.com/1200/900/fishmonger,shop',
         tag: 'Pescadería tradicional',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bacalao,salted&q=80',
+        url: 'https://loremflickr.com/900/1200/bacalao,salted',
         tag: 'Bacalao salado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?seafood,fresh&q=80',
+        url: 'https://loremflickr.com/1200/900/seafood,fresh',
         tag: 'Mariscos del día',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?fishmonger,scaling&q=80',
+        url: 'https://loremflickr.com/800/600/fishmonger,scaling',
         caption: 'Pescadero escama el pescado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?fish,ice&q=80',
+        url: 'https://loremflickr.com/800/600/fish,ice',
         caption: 'Pescado en hielo fresco'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?customer,fish&q=80',
+        url: 'https://loremflickr.com/800/600/customer,fish',
         caption: 'Cliente elige Cuaresma'
       }
     ]
@@ -11956,65 +11956,65 @@ const BRAND_MEZCLA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?bodega,aurrera,store&q=85',
+    hero: 'https://loremflickr.com/1200/1600/bodega,aurrera,store',
     heroAlt: 'Miscelánea mexicana surtida',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?store,mexican&q=80',
+        url: 'https://loremflickr.com/1200/900/store,mexican',
         tag: 'Miscelánea surtida',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?candy,bulk&q=80',
+        url: 'https://loremflickr.com/900/1200/candy,bulk',
         tag: 'Dulces a granel',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?recharge,phone&q=80',
+        url: 'https://loremflickr.com/900/1200/recharge,phone',
         tag: 'Recargas Telcel',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bills,pay&q=80',
+        url: 'https://loremflickr.com/900/1200/bills,pay',
         tag: 'Pago servicios CFE',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?abarrotes,basicos&q=80',
+        url: 'https://loremflickr.com/900/1200/abarrotes,basicos',
         tag: 'Abarrotes básicos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cervezas,refri&q=80',
+        url: 'https://loremflickr.com/900/1200/cervezas,refri',
         tag: 'Cervezas refri',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?miscelanea,mexican&q=80',
+        url: 'https://loremflickr.com/1200/900/miscelanea,mexican',
         tag: 'Tienda del barrio',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?papeleria,utiles&q=80',
+        url: 'https://loremflickr.com/900/1200/papeleria,utiles',
         tag: 'Papelería básica',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?neighborhood,store&q=80',
+        url: 'https://loremflickr.com/1200/900/neighborhood,store',
         tag: 'Esquina vecindad',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?vendedor,miscelanea&q=80',
+        url: 'https://loremflickr.com/800/600/vendedor,miscelanea',
         caption: 'Vendedora del diario'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?vecino,comprar&q=80',
+        url: 'https://loremflickr.com/800/600/vecino,comprar',
         caption: 'Vecino compra de todo'
       },
-      {url: 'https://source.unsplash.com/random/800x600/?caja,pagar&q=80', caption: 'Cobro mixto'}
+      {url: 'https://loremflickr.com/800/600/caja,pagar', caption: 'Cobro mixto'}
     ]
   },
   liveDemo: {
@@ -12152,66 +12152,66 @@ const BRAND_ATUNERO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?gourmet,deli,imported&q=85',
+    hero: 'https://loremflickr.com/1200/1600/gourmet,deli,imported',
     heroAlt: 'Ultramarinos con productos importados',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?deli,imported&q=80',
+        url: 'https://loremflickr.com/1200/900/deli,imported',
         tag: 'Conservas finas',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tuna,cans&q=80',
+        url: 'https://loremflickr.com/900/1200/tuna,cans',
         tag: 'Atún español Ortiz',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?olive,oil&q=80',
+        url: 'https://loremflickr.com/900/1200/olive,oil',
         tag: 'Aceite italiano',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cheese,wheel&q=80',
+        url: 'https://loremflickr.com/900/1200/cheese,wheel',
         tag: 'Quesos rueda',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?charcuterie&q=80',
+        url: 'https://loremflickr.com/900/1200/charcuterie',
         tag: 'Embutidos ibéricos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vinegar,balsamic&q=80',
+        url: 'https://loremflickr.com/900/1200/vinegar,balsamic',
         tag: 'Vinagre balsámico',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?deli,counter&q=80',
+        url: 'https://loremflickr.com/1200/900/deli,counter',
         tag: 'Mostrador deli',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?anchovies,jarred&q=80',
+        url: 'https://loremflickr.com/900/1200/anchovies,jarred',
         tag: 'Anchoas cantábrico',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gourmet,store&q=80',
+        url: 'https://loremflickr.com/1200/900/gourmet,store',
         tag: 'Tienda especializada',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?vendedor,asesorando&q=80',
+        url: 'https://loremflickr.com/800/600/vendedor,asesorando',
         caption: 'Vendedor asesora cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?caja,importada&q=80',
+        url: 'https://loremflickr.com/800/600/caja,importada',
         caption: 'Caja recién importada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cliente,deli&q=80',
+        url: 'https://loremflickr.com/800/600/cliente,deli',
         caption: 'Cliente VIP semanal'
       }
     ]
@@ -12328,66 +12328,66 @@ const BRAND_ARMARIO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?boutique,fashion,women,dress&q=85',
+    hero: 'https://loremflickr.com/1200/1600/boutique,fashion,women,dress',
     heroAlt: 'Vestidos colgados en boutique femenina',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?boutique,dress&q=80',
+        url: 'https://loremflickr.com/1200/900/boutique,dress',
         tag: 'Vestidos noche',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?blouse,women&q=80',
+        url: 'https://loremflickr.com/900/1200/blouse,women',
         tag: 'Blusas temporada',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?skirt,fashion&q=80',
+        url: 'https://loremflickr.com/900/1200/skirt,fashion',
         tag: 'Faldas plisadas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pants,women,fashion&q=80',
+        url: 'https://loremflickr.com/900/1200/pants,women,fashion',
         tag: 'Pantalones sastre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dress,floral&q=80',
+        url: 'https://loremflickr.com/900/1200/dress,floral',
         tag: 'Vestido floral',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?coat,women&q=80',
+        url: 'https://loremflickr.com/900/1200/coat,women',
         tag: 'Abrigo lana',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?boutique,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/boutique,interior',
         tag: 'Showroom',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fashion,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/fashion,detail',
         tag: 'Detalle bordado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?fitting,room&q=80',
+        url: 'https://loremflickr.com/1200/900/fitting,room',
         tag: 'Vestidor',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?clothing,rack&q=80',
+        url: 'https://loremflickr.com/800/600/clothing,rack',
         caption: 'Cada pieza con su talla disponible'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?shopping,woman&q=80',
+        url: 'https://loremflickr.com/800/600/shopping,woman',
         caption: 'Clienta prueba y vendedora marca en el sistema'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cash,register,fashion&q=80',
+        url: 'https://loremflickr.com/800/600/cash,register,fashion',
         caption: 'Ticket con QR para devolución'
       }
     ]
@@ -12503,62 +12503,62 @@ const BRAND_SOLAPA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?menswear,suit,shirt&q=85',
+    hero: 'https://loremflickr.com/1200/1600/menswear,suit,shirt',
     heroAlt: 'Camisas de vestir colgadas en tienda de caballero',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?men,shirt,fashion&q=80',
+        url: 'https://loremflickr.com/1200/900/men,shirt,fashion',
         tag: 'Camisas vestir',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?suit,men&q=80',
+        url: 'https://loremflickr.com/900/1200/suit,men',
         tag: 'Trajes sastre',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?polo,men&q=80',
+        url: 'https://loremflickr.com/900/1200/polo,men',
         tag: 'Polos clásicos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?menswear,pants&q=80',
+        url: 'https://loremflickr.com/900/1200/menswear,pants',
         tag: 'Pantalones',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?blazer,men&q=80',
+        url: 'https://loremflickr.com/900/1200/blazer,men',
         tag: 'Sacos sport',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tie,necktie&q=80',
+        url: 'https://loremflickr.com/900/1200/tie,necktie',
         tag: 'Corbatas seda',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/1200x900/?menswear,shop&q=80', tag: 'Tienda', size: 'md'},
+      {url: 'https://loremflickr.com/1200/900/menswear,shop', tag: 'Tienda', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cuff,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/cuff,detail',
         tag: 'Detalle puño',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tailor,measure&q=80',
+        url: 'https://loremflickr.com/1200/900/tailor,measure',
         tag: 'Sastrería',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?tailor,measuring&q=80',
+        url: 'https://loremflickr.com/800/600/tailor,measuring',
         caption: 'Toma de medidas registrada en su ficha'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?menswear,sale&q=80',
+        url: 'https://loremflickr.com/800/600/menswear,sale',
         caption: 'Vendedor consulta talla en sistema'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?suit,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/suit,fitting',
         caption: 'Entallado con timestamp y foto'
       }
     ]
@@ -12674,62 +12674,62 @@ const BRAND_MOCHILA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?kids,clothing,children&q=85',
+    hero: 'https://loremflickr.com/1200/1600/kids,clothing,children',
     heroAlt: 'Ropa colorida para niños colgada en tienda',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kids,fashion&q=80',
+        url: 'https://loremflickr.com/1200/900/kids,fashion',
         tag: 'Conjuntos coloridos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?girl,dress,kid&q=80',
+        url: 'https://loremflickr.com/900/1200/girl,dress,kid',
         tag: 'Vestidos niña',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?boy,shirt,kid&q=80',
+        url: 'https://loremflickr.com/900/1200/boy,shirt,kid',
         tag: 'Playeras niño',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,pants&q=80',
+        url: 'https://loremflickr.com/900/1200/children,pants',
         tag: 'Pantalones',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kids,uniform&q=80',
+        url: 'https://loremflickr.com/900/1200/kids,uniform',
         tag: 'Uniformes',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kids,jacket&q=80',
+        url: 'https://loremflickr.com/900/1200/kids,jacket',
         tag: 'Chamarras',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kids,store,colorful&q=80',
+        url: 'https://loremflickr.com/1200/900/kids,store,colorful',
         tag: 'Tienda',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?kids,shoes&q=80', tag: 'Calzado', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/kids,shoes', tag: 'Calzado', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kids,accessories&q=80',
+        url: 'https://loremflickr.com/1200/900/kids,accessories',
         tag: 'Accesorios',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?mother,kid,shopping&q=80',
+        url: 'https://loremflickr.com/800/600/mother,kid,shopping',
         caption: 'Mamá pregunta talla y vendedora consulta sistema'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?kid,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/kid,fitting',
         caption: 'Niño se prueba, sistema registra talla real'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?colorful,clothing,rack&q=80',
+        url: 'https://loremflickr.com/800/600/colorful,clothing,rack',
         caption: 'Rack por edad y temporada'
       }
     ]
@@ -12845,62 +12845,62 @@ const BRAND_BIBERON = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?baby,clothing,newborn&q=85',
+    hero: 'https://loremflickr.com/1200/1600/baby,clothing,newborn',
     heroAlt: 'Ropa de bebé tierna colgada en tienda',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?baby,clothes&q=80',
+        url: 'https://loremflickr.com/1200/900/baby,clothes',
         tag: 'Mamelucos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?baby,girl,outfit&q=80',
+        url: 'https://loremflickr.com/900/1200/baby,girl,outfit',
         tag: 'Vestidos bebé',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?baby,boy,outfit&q=80',
+        url: 'https://loremflickr.com/900/1200/baby,boy,outfit',
         tag: 'Conjuntos niño',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?baby,socks,shoes&q=80',
+        url: 'https://loremflickr.com/900/1200/baby,socks,shoes',
         tag: 'Calcetines y zapatitos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?baby,blanket&q=80',
+        url: 'https://loremflickr.com/900/1200/baby,blanket',
         tag: 'Cobertores',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?baby,hat,bonnet&q=80',
+        url: 'https://loremflickr.com/900/1200/baby,hat,bonnet',
         tag: 'Gorritos',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/1200x900/?baby,store&q=80', tag: 'Tienda', size: 'md'},
+      {url: 'https://loremflickr.com/1200/900/baby,store', tag: 'Tienda', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?baby,accessories&q=80',
+        url: 'https://loremflickr.com/900/1200/baby,accessories',
         tag: 'Accesorios',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?baby,nursery&q=80',
+        url: 'https://loremflickr.com/1200/900/baby,nursery',
         tag: 'Cuarto bebé',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?pregnant,woman,shopping&q=80',
+        url: 'https://loremflickr.com/800/600/pregnant,woman,shopping',
         caption: 'Mamá embarazada arma su lista'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?baby,shower&q=80',
+        url: 'https://loremflickr.com/800/600/baby,shower',
         caption: 'Baby shower con lista digital'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?baby,clothing,folded&q=80',
+        url: 'https://loremflickr.com/800/600/baby,clothing,folded',
         caption: 'Stock organizado por edad'
       }
     ]
@@ -13016,58 +13016,58 @@ const BRAND_SUDOR = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?sportswear,athletic,running&q=85',
+    hero: 'https://loremflickr.com/1200/1600/sportswear,athletic,running',
     heroAlt: 'Ropa deportiva en exhibidor',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sportswear,gym&q=80',
+        url: 'https://loremflickr.com/1200/900/sportswear,gym',
         tag: 'Ropa gym',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?running,shirt&q=80',
+        url: 'https://loremflickr.com/900/1200/running,shirt',
         tag: 'Playeras running',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?leggings,women&q=80',
+        url: 'https://loremflickr.com/900/1200/leggings,women',
         tag: 'Mallas mujer',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?shorts,men,sport&q=80',
+        url: 'https://loremflickr.com/900/1200/shorts,men,sport',
         tag: 'Shorts entrenamiento',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?hoodie,sport&q=80',
+        url: 'https://loremflickr.com/900/1200/hoodie,sport',
         tag: 'Sudaderas',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?yoga,clothing&q=80', tag: 'Yoga', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/1200x900/?sport,store&q=80', tag: 'Tienda', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/yoga,clothing', tag: 'Yoga', size: 'sm'},
+      {url: 'https://loremflickr.com/1200/900/sport,store', tag: 'Tienda', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sport,bra&q=80',
+        url: 'https://loremflickr.com/900/1200/sport,bra',
         tag: 'Tops deportivos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?marathon,runners&q=80',
+        url: 'https://loremflickr.com/1200/900/marathon,runners',
         tag: 'Maratón',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?gym,bag&q=80',
+        url: 'https://loremflickr.com/800/600/gym,bag',
         caption: 'Cliente arma su outfit completo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?fitness,sale&q=80',
+        url: 'https://loremflickr.com/800/600/fitness,sale',
         caption: 'Vendedor consulta stock al instante'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?running,shoes,store&q=80',
+        url: 'https://loremflickr.com/800/600/running,shoes,store',
         caption: 'Pruebas y devoluciones con foto'
       }
     ]
@@ -13183,62 +13183,62 @@ const BRAND_HILITO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?underwear,lingerie,intimate&q=85',
+    hero: 'https://loremflickr.com/1200/1600/underwear,lingerie,intimate',
     heroAlt: 'Ropa interior fina en exhibidor',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?underwear,women&q=80',
+        url: 'https://loremflickr.com/1200/900/underwear,women',
         tag: 'Brasieres',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?panties,women&q=80',
+        url: 'https://loremflickr.com/900/1200/panties,women',
         tag: 'Panties',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?underwear,men&q=80',
+        url: 'https://loremflickr.com/900/1200/underwear,men',
         tag: 'Boxers hombre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?shapewear&q=80',
+        url: 'https://loremflickr.com/900/1200/shapewear',
         tag: 'Fajas y modeladores',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?camisole&q=80',
+        url: 'https://loremflickr.com/900/1200/camisole',
         tag: 'Camisetas y tops',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?socks&q=80', tag: 'Calcetines', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/socks', tag: 'Calcetines', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?underwear,store&q=80',
+        url: 'https://loremflickr.com/1200/900/underwear,store',
         tag: 'Tienda',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?intimates,lace&q=80',
+        url: 'https://loremflickr.com/900/1200/intimates,lace',
         tag: 'Encaje',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?underwear,packaging&q=80',
+        url: 'https://loremflickr.com/1200/900/underwear,packaging',
         tag: 'Paquetes',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?bra,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/bra,fitting',
         caption: 'Toma de talla registrada en ficha'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?underwear,drawer&q=80',
+        url: 'https://loremflickr.com/800/600/underwear,drawer',
         caption: 'Stock organizado por talla y copa'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?lingerie,shop&q=80',
+        url: 'https://loremflickr.com/800/600/lingerie,shop',
         caption: 'Vendedora recomienda por historial'
       }
     ]
@@ -13354,62 +13354,62 @@ const BRAND_BIKINI = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?swimwear,bikini,beach&q=85',
+    hero: 'https://loremflickr.com/1200/1600/swimwear,bikini,beach',
     heroAlt: 'Trajes de baño coloridos en exhibidor de playa',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bikini,swimwear&q=80',
+        url: 'https://loremflickr.com/1200/900/bikini,swimwear',
         tag: 'Bikinis',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?onepiece,swimsuit&q=80',
+        url: 'https://loremflickr.com/900/1200/onepiece,swimsuit',
         tag: 'Enteros',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?swim,shorts,men&q=80',
+        url: 'https://loremflickr.com/900/1200/swim,shorts,men',
         tag: 'Shorts caballero',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cover,up,beach&q=80',
+        url: 'https://loremflickr.com/900/1200/cover,up,beach',
         tag: 'Pareos y caftanes',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sandals,beach&q=80',
+        url: 'https://loremflickr.com/900/1200/sandals,beach',
         tag: 'Sandalias playa',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?sunhat&q=80', tag: 'Sombreros', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/sunhat', tag: 'Sombreros', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?beach,store&q=80',
+        url: 'https://loremflickr.com/1200/900/beach,store',
         tag: 'Tienda playera',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bikini,tropical&q=80',
+        url: 'https://loremflickr.com/900/1200/bikini,tropical',
         tag: 'Estampados tropicales',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cancun,beach&q=80',
+        url: 'https://loremflickr.com/1200/900/cancun,beach',
         tag: 'Destino playa',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?bikini,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/bikini,fitting',
         caption: 'Clienta se prueba y vendedora consulta sistema'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?swimwear,rack&q=80',
+        url: 'https://loremflickr.com/800/600/swimwear,rack',
         caption: 'Stock organizado por talla y temporada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?beach,bag,sale&q=80',
+        url: 'https://loremflickr.com/800/600/beach,bag,sale',
         caption: 'Paquetes con pareo y sombrero'
       }
     ]
@@ -13525,58 +13525,58 @@ const BRAND_SEDA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?lingerie,silk,intimate&q=85',
+    hero: 'https://loremflickr.com/1200/1600/lingerie,silk,intimate',
     heroAlt: 'Lencería fina en exhibidor elegante',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?lingerie,lace&q=80',
+        url: 'https://loremflickr.com/1200/900/lingerie,lace',
         tag: 'Conjuntos encaje',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lingerie,satin&q=80',
+        url: 'https://loremflickr.com/900/1200/lingerie,satin',
         tag: 'Satín y seda',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?babydoll&q=80', tag: 'Babydolls', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/900x1200/?robe,silk&q=80', tag: 'Robes seda', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/babydoll', tag: 'Babydolls', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/robe,silk', tag: 'Robes seda', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bridal,lingerie&q=80',
+        url: 'https://loremflickr.com/900/1200/bridal,lingerie',
         tag: 'Lencería novia',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?stockings&q=80',
+        url: 'https://loremflickr.com/900/1200/stockings',
         tag: 'Medias y ligueros',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?boudoir,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/boudoir,interior',
         tag: 'Boutique íntima',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?intimate,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/intimate,detail',
         tag: 'Detalle bordado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?lingerie,packaging&q=80',
+        url: 'https://loremflickr.com/1200/900/lingerie,packaging',
         tag: 'Empaque discreto',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?intimate,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/intimate,fitting',
         caption: 'Vestidor privado con asesoría'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?gift,wrap,black&q=80',
+        url: 'https://loremflickr.com/800/600/gift,wrap,black',
         caption: 'Empaque discreto para regalo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?lingerie,drawer&q=80',
+        url: 'https://loremflickr.com/800/600/lingerie,drawer',
         caption: 'Stock por copa y banda'
       }
     ]
@@ -13692,62 +13692,62 @@ const BRAND_CORBATA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?suit,formal,menswear&q=85',
+    hero: 'https://loremflickr.com/1200/1600/suit,formal,menswear',
     heroAlt: 'Trajes formales colgados en tienda elegante',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?suit,formal&q=80',
+        url: 'https://loremflickr.com/1200/900/suit,formal',
         tag: 'Trajes 2 piezas',
         size: 'lg'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?tuxedo&q=80', tag: 'Smokings', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/tuxedo', tag: 'Smokings', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dress,shirt,formal&q=80',
+        url: 'https://loremflickr.com/900/1200/dress,shirt,formal',
         tag: 'Camisas vestir',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?necktie&q=80',
+        url: 'https://loremflickr.com/900/1200/necktie',
         tag: 'Corbatas seda',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cufflinks&q=80',
+        url: 'https://loremflickr.com/900/1200/cufflinks',
         tag: 'Mancuernillas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?belt,leather&q=80',
+        url: 'https://loremflickr.com/900/1200/belt,leather',
         tag: 'Cinturones piel',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?formal,store&q=80',
+        url: 'https://loremflickr.com/1200/900/formal,store',
         tag: 'Tienda formal',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pocket,square&q=80',
+        url: 'https://loremflickr.com/900/1200/pocket,square',
         tag: 'Pañuelos bolsillo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tailor,measure&q=80',
+        url: 'https://loremflickr.com/1200/900/tailor,measure',
         tag: 'Sastrería integrada',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?suit,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/suit,fitting',
         caption: 'Toma de medidas en ficha de cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?formal,sale&q=80',
+        url: 'https://loremflickr.com/800/600/formal,sale',
         caption: 'Vendedor arma paquete completo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?tailor,chalk&q=80',
+        url: 'https://loremflickr.com/800/600/tailor,chalk',
         caption: 'Entallado con cita agendada'
       }
     ]
@@ -13863,66 +13863,66 @@ const BRAND_VELO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?bride,wedding,dress&q=85',
+    hero: 'https://loremflickr.com/1200/1600/bride,wedding,dress',
     heroAlt: 'Vestidos de novia colgados en boutique de novia',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?wedding,dress&q=80',
+        url: 'https://loremflickr.com/1200/900/wedding,dress',
         tag: 'Vestidos novia',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bridal,veil&q=80',
+        url: 'https://loremflickr.com/900/1200/bridal,veil',
         tag: 'Velos catedral',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bridesmaid,dress&q=80',
+        url: 'https://loremflickr.com/900/1200/bridesmaid,dress',
         tag: 'Vestidos dama',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wedding,shoes,white&q=80',
+        url: 'https://loremflickr.com/900/1200/wedding,shoes,white',
         tag: 'Zapatos novia',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wedding,accessories&q=80',
+        url: 'https://loremflickr.com/900/1200/wedding,accessories',
         tag: 'Accesorios',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lace,detail,white&q=80',
+        url: 'https://loremflickr.com/900/1200/lace,detail,white',
         tag: 'Detalle encaje',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bridal,boutique&q=80',
+        url: 'https://loremflickr.com/1200/900/bridal,boutique',
         tag: 'Boutique novia',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bouquet,flowers&q=80',
+        url: 'https://loremflickr.com/900/1200/bouquet,flowers',
         tag: 'Ramos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?wedding,tiara&q=80',
+        url: 'https://loremflickr.com/1200/900/wedding,tiara',
         tag: 'Tiaras y peinetas',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?bride,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/bride,fitting',
         caption: 'Prueba con asesora y fotos en ficha'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?wedding,planning&q=80',
+        url: 'https://loremflickr.com/800/600/wedding,planning',
         caption: 'Agenda de citas con anticipo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?bridal,alteration&q=80',
+        url: 'https://loremflickr.com/800/600/bridal,alteration',
         caption: 'Sastre con cita agendada'
       }
     ]
@@ -14038,58 +14038,58 @@ const BRAND_SMOKING = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?tuxedo,formal,black,tie&q=85',
+    hero: 'https://loremflickr.com/1200/1600/tuxedo,formal,black,tie',
     heroAlt: 'Smokings colgados en tienda de renta',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tuxedo&q=80',
+        url: 'https://loremflickr.com/1200/900/tuxedo',
         tag: 'Smokings clásicos',
         size: 'lg'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?bowtie&q=80', tag: 'Corbatines', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/bowtie', tag: 'Corbatines', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cummerbund&q=80',
+        url: 'https://loremflickr.com/900/1200/cummerbund',
         tag: 'Fajines seda',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?formal,shoes,patent&q=80',
+        url: 'https://loremflickr.com/900/1200/formal,shoes,patent',
         tag: 'Zapatos charol',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dress,shirt,wing&q=80',
+        url: 'https://loremflickr.com/900/1200/dress,shirt,wing',
         tag: 'Camisas pechera',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?suspenders&q=80', tag: 'Tirantes', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/suspenders', tag: 'Tirantes', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?formal,event&q=80',
+        url: 'https://loremflickr.com/1200/900/formal,event',
         tag: 'Evento gala',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?white,tuxedo&q=80',
+        url: 'https://loremflickr.com/900/1200/white,tuxedo',
         tag: 'Smoking blanco',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?groom,formal&q=80',
+        url: 'https://loremflickr.com/1200/900/groom,formal',
         tag: 'Novio etiqueta',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?tuxedo,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/tuxedo,fitting',
         caption: 'Toma de medidas para renta'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?formal,event,gala&q=80',
+        url: 'https://loremflickr.com/800/600/formal,event,gala',
         caption: 'Cliente en evento con renta confirmada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?tuxedo,return&q=80',
+        url: 'https://loremflickr.com/800/600/tuxedo,return',
         caption: 'Devolución con foto y fianza'
       }
     ]
@@ -14210,58 +14210,58 @@ const BRAND_SUELA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?sneakers,athletic,shoes&q=85',
+    hero: 'https://loremflickr.com/1200/1600/sneakers,athletic,shoes',
     heroAlt: 'Tenis modernos en exhibidor urbano',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sneakers,nike&q=80',
+        url: 'https://loremflickr.com/1200/900/sneakers,nike',
         tag: 'Tenis lifestyle',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?running,shoes&q=80',
+        url: 'https://loremflickr.com/900/1200/running,shoes',
         tag: 'Tenis running',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?basketball,shoes&q=80',
+        url: 'https://loremflickr.com/900/1200/basketball,shoes',
         tag: 'Basket',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?retro,sneakers&q=80', tag: 'Retro', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/retro,sneakers', tag: 'Retro', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?white,sneakers&q=80',
+        url: 'https://loremflickr.com/900/1200/white,sneakers',
         tag: 'Blancos clásicos',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?sneakers,box&q=80', tag: 'En caja', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/sneakers,box', tag: 'En caja', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sneaker,store&q=80',
+        url: 'https://loremflickr.com/1200/900/sneaker,store',
         tag: 'Tienda sneaker',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?limited,edition,sneaker&q=80',
+        url: 'https://loremflickr.com/900/1200/limited,edition,sneaker',
         tag: 'Edición limitada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sneaker,wall&q=80',
+        url: 'https://loremflickr.com/1200/900/sneaker,wall',
         tag: 'Muro display',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?sneaker,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/sneaker,fitting',
         caption: 'Cliente prueba número exacto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?sneaker,launch&q=80',
+        url: 'https://loremflickr.com/800/600/sneaker,launch',
         caption: 'Lanzamiento con reserva online'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?sneakers,collection&q=80',
+        url: 'https://loremflickr.com/800/600/sneakers,collection',
         caption: 'Ficha de sneakerhead con historial'
       }
     ]
@@ -14377,62 +14377,62 @@ const BRAND_JOGGER = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?sweatpants,jogger,streetwear&q=85',
+    hero: 'https://loremflickr.com/1200/1600/sweatpants,jogger,streetwear',
     heroAlt: 'Pants y joggers colgados en exhibidor urbano',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?joggers,streetwear&q=80',
+        url: 'https://loremflickr.com/1200/900/joggers,streetwear',
         tag: 'Joggers slim',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sweatpants&q=80',
+        url: 'https://loremflickr.com/900/1200/sweatpants',
         tag: 'Pants clásicos',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?cargo,pants&q=80', tag: 'Cargo', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/cargo,pants', tag: 'Cargo', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?hoodie,streetwear&q=80',
+        url: 'https://loremflickr.com/900/1200/hoodie,streetwear',
         tag: 'Sudaderas combo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?track,pants&q=80',
+        url: 'https://loremflickr.com/900/1200/track,pants',
         tag: 'Track pants',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?leggings,sport&q=80',
+        url: 'https://loremflickr.com/900/1200/leggings,sport',
         tag: 'Leggings dama',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?streetwear,store&q=80',
+        url: 'https://loremflickr.com/1200/900/streetwear,store',
         tag: 'Tienda urbana',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fleece,pants&q=80',
+        url: 'https://loremflickr.com/900/1200/fleece,pants',
         tag: 'Polar invierno',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?athleisure&q=80',
+        url: 'https://loremflickr.com/1200/900/athleisure',
         tag: 'Athleisure',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?jogger,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/jogger,fitting',
         caption: 'Cliente prueba corte y talla'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?streetwear,rack&q=80',
+        url: 'https://loremflickr.com/800/600/streetwear,rack',
         caption: 'Stock por corte y temporada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?streetwear,combo&q=80',
+        url: 'https://loremflickr.com/800/600/streetwear,combo',
         caption: 'Combo pants + sudadera con descuento'
       }
     ]
@@ -14548,66 +14548,66 @@ const BRAND_CALLE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?streetwear,urban,hiphop&q=85',
+    hero: 'https://loremflickr.com/1200/1600/streetwear,urban,hiphop',
     heroAlt: 'Ropa urbana en tienda de streetwear',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?streetwear,hoodie&q=80',
+        url: 'https://loremflickr.com/1200/900/streetwear,hoodie',
         tag: 'Hoodies oversize',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tshirt,graphic&q=80',
+        url: 'https://loremflickr.com/900/1200/tshirt,graphic',
         tag: 'Tees gráficos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cap,snapback&q=80',
+        url: 'https://loremflickr.com/900/1200/cap,snapback',
         tag: 'Snapbacks',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?baggy,jeans&q=80',
+        url: 'https://loremflickr.com/900/1200/baggy,jeans',
         tag: 'Baggy jeans',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?varsity,jacket&q=80',
+        url: 'https://loremflickr.com/900/1200/varsity,jacket',
         tag: 'Varsity jackets',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?streetwear,chain&q=80',
+        url: 'https://loremflickr.com/900/1200/streetwear,chain',
         tag: 'Cadenas y accesorios',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?streetwear,store&q=80',
+        url: 'https://loremflickr.com/1200/900/streetwear,store',
         tag: 'Tienda urbana',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?limited,edition,clothing&q=80',
+        url: 'https://loremflickr.com/900/1200/limited,edition,clothing',
         tag: 'Edición limitada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?urban,fashion,shoot&q=80',
+        url: 'https://loremflickr.com/1200/900/urban,fashion,shoot',
         tag: 'Lookbook drop',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?streetwear,drop&q=80',
+        url: 'https://loremflickr.com/800/600/streetwear,drop',
         caption: 'Drop con reserva por SMS'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?urban,fashion,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/urban,fashion,fitting',
         caption: 'Cliente prueba con asesor'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?streetwear,packaging&q=80',
+        url: 'https://loremflickr.com/800/600/streetwear,packaging',
         caption: 'Empaque numerado para coleccionista'
       }
     ]
@@ -14723,66 +14723,66 @@ const BRAND_TRIBU = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?gothic,fashion,dark&q=85',
+    hero: 'https://loremflickr.com/1200/1600/gothic,fashion,dark',
     heroAlt: 'Ropa alternativa oscura en tienda gótica',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gothic,clothing&q=80',
+        url: 'https://loremflickr.com/1200/900/gothic,clothing',
         tag: 'Gótico clásico',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?punk,jacket&q=80',
+        url: 'https://loremflickr.com/900/1200/punk,jacket',
         tag: 'Punk leather',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?rock,band,shirt&q=80',
+        url: 'https://loremflickr.com/900/1200/rock,band,shirt',
         tag: 'Band tees',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dark,boots&q=80',
+        url: 'https://loremflickr.com/900/1200/dark,boots',
         tag: 'Botas plataforma',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?corset,gothic&q=80',
+        url: 'https://loremflickr.com/900/1200/corset,gothic',
         tag: 'Corsetería',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chains,alternative&q=80',
+        url: 'https://loremflickr.com/900/1200/chains,alternative',
         tag: 'Accesorios cadenas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?alternative,store&q=80',
+        url: 'https://loremflickr.com/1200/900/alternative,store',
         tag: 'Tienda alternativa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?spike,dark&q=80',
+        url: 'https://loremflickr.com/900/1200/spike,dark',
         tag: 'Detalle spikes',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?goth,event&q=80',
+        url: 'https://loremflickr.com/1200/900/goth,event',
         tag: 'Evento dark',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?gothic,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/gothic,fitting',
         caption: 'Cliente prueba con asesor'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?alternative,rack&q=80',
+        url: 'https://loremflickr.com/800/600/alternative,rack',
         caption: 'Stock por estilo y tribu'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?dark,event,party&q=80',
+        url: 'https://loremflickr.com/800/600/dark,event,party',
         caption: 'Evento privado con clientes VIP'
       }
     ]
@@ -14898,66 +14898,66 @@ const BRAND_ANEJO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?vintage,clothing,retro&q=85',
+    hero: 'https://loremflickr.com/1200/1600/vintage,clothing,retro',
     heroAlt: 'Ropa vintage colgada en tienda con pátina',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?vintage,dress&q=80',
+        url: 'https://loremflickr.com/1200/900/vintage,dress',
         tag: 'Vestidos 70s',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?retro,jacket&q=80',
+        url: 'https://loremflickr.com/900/1200/retro,jacket',
         tag: 'Chaquetas 80s',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vintage,denim&q=80',
+        url: 'https://loremflickr.com/900/1200/vintage,denim',
         tag: 'Denim años 90',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?retro,blouse&q=80',
+        url: 'https://loremflickr.com/900/1200/retro,blouse',
         tag: 'Blusas 60s',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vintage,coat&q=80',
+        url: 'https://loremflickr.com/900/1200/vintage,coat',
         tag: 'Abrigos clásicos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?retro,scarf&q=80',
+        url: 'https://loremflickr.com/900/1200/retro,scarf',
         tag: 'Pañuelos seda',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?vintage,store&q=80',
+        url: 'https://loremflickr.com/1200/900/vintage,store',
         tag: 'Tienda vintage',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vintage,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/vintage,detail',
         tag: 'Detalle bordado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?antique,clothes&q=80',
+        url: 'https://loremflickr.com/1200/900/antique,clothes',
         tag: 'Pieza de archivo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?vintage,label&q=80',
+        url: 'https://loremflickr.com/800/600/vintage,label',
         caption: 'Cada pieza con etiqueta de década'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?vintage,collector&q=80',
+        url: 'https://loremflickr.com/800/600/vintage,collector',
         caption: 'Coleccionista revisa procedencia'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?vintage,authentication&q=80',
+        url: 'https://loremflickr.com/800/600/vintage,authentication',
         caption: 'Autenticación de marcas premium'
       }
     ]
@@ -15073,62 +15073,62 @@ const BRAND_ROTACION = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?thrift,store,secondhand&q=85',
+    hero: 'https://loremflickr.com/1200/1600/thrift,store,secondhand',
     heroAlt: 'Tienda de segunda mano con prendas colgadas',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?thrift,clothing&q=80',
+        url: 'https://loremflickr.com/1200/900/thrift,clothing',
         tag: 'Prendas surtidas',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?secondhand,dress&q=80',
+        url: 'https://loremflickr.com/900/1200/secondhand,dress',
         tag: 'Vestidos usados',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vintage,jeans&q=80',
+        url: 'https://loremflickr.com/900/1200/vintage,jeans',
         tag: 'Denim segunda mano',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?used,jacket&q=80',
+        url: 'https://loremflickr.com/900/1200/used,jacket',
         tag: 'Chaquetas',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?thrift,shoes&q=80', tag: 'Calzado', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/thrift,shoes', tag: 'Calzado', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bag,used&q=80',
+        url: 'https://loremflickr.com/900/1200/bag,used',
         tag: 'Bolsas usadas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?thrift,shop,interior&q=80',
+        url: 'https://loremflickr.com/1200/900/thrift,shop,interior',
         tag: 'Local thrift',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?clothing,donation&q=80',
+        url: 'https://loremflickr.com/900/1200/clothing,donation',
         tag: 'Ingreso por kilo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?retro,fashion,rack&q=80',
+        url: 'https://loremflickr.com/1200/900/retro,fashion,rack',
         tag: 'Rack rotativo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?clothes,sorting&q=80',
+        url: 'https://loremflickr.com/800/600/clothes,sorting',
         caption: 'Clasificación y etiquetado rápido'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?thrift,shopper&q=80',
+        url: 'https://loremflickr.com/800/600/thrift,shopper',
         caption: 'Cliente busca por categoría y precio'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?clothes,pile,sale&q=80',
+        url: 'https://loremflickr.com/800/600/clothes,pile,sale',
         caption: 'Rotación con descuento por días'
       }
     ]
@@ -15244,66 +15244,66 @@ const BRAND_PERCHA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?consignment,boutique,fashion&q=85',
+    hero: 'https://loremflickr.com/1200/1600/consignment,boutique,fashion',
     heroAlt: 'Tienda consignataria con prendas curadas',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?consignment,store&q=80',
+        url: 'https://loremflickr.com/1200/900/consignment,store',
         tag: 'Curaduría premium',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?designer,dress&q=80',
+        url: 'https://loremflickr.com/900/1200/designer,dress',
         tag: 'Diseñador consignado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?luxury,bag&q=80',
+        url: 'https://loremflickr.com/900/1200/luxury,bag',
         tag: 'Bolsas premium',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?designer,shoes&q=80',
+        url: 'https://loremflickr.com/900/1200/designer,shoes',
         tag: 'Calzado diseñador',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vintage,couture&q=80',
+        url: 'https://loremflickr.com/900/1200/vintage,couture',
         tag: 'Couture vintage',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?luxury,accessory&q=80',
+        url: 'https://loremflickr.com/900/1200/luxury,accessory',
         tag: 'Accesorios lujo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?boutique,interior,curated&q=80',
+        url: 'https://loremflickr.com/1200/900/boutique,interior,curated',
         tag: 'Boutique curada',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fashion,tag,price&q=80',
+        url: 'https://loremflickr.com/900/1200/fashion,tag,price',
         tag: 'Etiqueta con dueño',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?consignment,counter&q=80',
+        url: 'https://loremflickr.com/1200/900/consignment,counter',
         tag: 'Recepción consigna',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?consignment,receive&q=80',
+        url: 'https://loremflickr.com/800/600/consignment,receive',
         caption: 'Recepción con foto y precio acordado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?fashion,purchase&q=80',
+        url: 'https://loremflickr.com/800/600/fashion,purchase',
         caption: 'Venta y reparto de comisión'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?payment,fashion&q=80',
+        url: 'https://loremflickr.com/800/600/payment,fashion',
         caption: 'Pago quincenal a consignante'
       }
     ]
@@ -15419,66 +15419,66 @@ const BRAND_QUILATE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?jewelry,gold,diamond&q=85',
+    hero: 'https://loremflickr.com/1200/1600/jewelry,gold,diamond',
     heroAlt: 'Anillos de oro y diamantes en vitrina',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?engagement,ring&q=80',
+        url: 'https://loremflickr.com/1200/900/engagement,ring',
         tag: 'Anillos compromiso',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?diamond,earrings&q=80',
+        url: 'https://loremflickr.com/900/1200/diamond,earrings',
         tag: 'Aretes diamante',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gold,bracelet&q=80',
+        url: 'https://loremflickr.com/900/1200/gold,bracelet',
         tag: 'Pulseras oro',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gold,chain&q=80',
+        url: 'https://loremflickr.com/900/1200/gold,chain',
         tag: 'Cadenas hombre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pearl,necklace&q=80',
+        url: 'https://loremflickr.com/900/1200/pearl,necklace',
         tag: 'Collares perla',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?luxury,watch&q=80',
+        url: 'https://loremflickr.com/900/1200/luxury,watch',
         tag: 'Relojes suizos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?jeweler,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/jeweler,workshop',
         tag: 'Taller orfebre',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?jewelry,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/jewelry,detail',
         tag: 'Engaste diamante',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?jewelry,display&q=80',
+        url: 'https://loremflickr.com/1200/900/jewelry,display',
         tag: 'Vitrina exhibición',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?gold,scale&q=80',
+        url: 'https://loremflickr.com/800/600/gold,scale',
         caption: 'Báscula calibrada al gramo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?jewelry,certificate&q=80',
+        url: 'https://loremflickr.com/800/600/jewelry,certificate',
         caption: 'Certificado digital con foto y peso'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?vip,client,jewelry&q=80',
+        url: 'https://loremflickr.com/800/600/vip,client,jewelry',
         caption: 'Cliente VIP con asesora'
       }
     ]
@@ -15594,66 +15594,66 @@ const BRAND_TICTAC = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?luxury,watch,timepiece&q=85',
+    hero: 'https://loremflickr.com/1200/1600/luxury,watch,timepiece',
     heroAlt: 'Relojes premium en vitrina iluminada',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?watch,swiss&q=80',
+        url: 'https://loremflickr.com/1200/900/watch,swiss',
         tag: 'Relojes suizos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?watch,gold&q=80',
+        url: 'https://loremflickr.com/900/1200/watch,gold',
         tag: 'Relojes oro',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?watch,sport&q=80',
+        url: 'https://loremflickr.com/900/1200/watch,sport',
         tag: 'Relojes deportivos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?watch,women&q=80',
+        url: 'https://loremflickr.com/900/1200/watch,women',
         tag: 'Relojes dama',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?watch,dial,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/watch,dial,detail',
         tag: 'Detalle esfera',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?watch,strap,leather&q=80',
+        url: 'https://loremflickr.com/900/1200/watch,strap,leather',
         tag: 'Pieles y mallas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?watchmaker,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/watchmaker,workshop',
         tag: 'Taller relojero',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?watch,movement&q=80',
+        url: 'https://loremflickr.com/900/1200/watch,movement',
         tag: 'Movimiento mecánico',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?watch,display,boutique&q=80',
+        url: 'https://loremflickr.com/1200/900/watch,display,boutique',
         tag: 'Vitrina premium',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?watch,serial,number&q=80',
+        url: 'https://loremflickr.com/800/600/watch,serial,number',
         caption: 'Cada reloj con serial registrado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?watch,repair&q=80',
+        url: 'https://loremflickr.com/800/600/watch,repair',
         caption: 'Reparación con cita y diagnóstico'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?watch,certificate&q=80',
+        url: 'https://loremflickr.com/800/600/watch,certificate',
         caption: 'Certificado y garantía digital'
       }
     ]
@@ -15769,66 +15769,66 @@ const BRAND_DIJE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?costume,jewelry,colorful&q=85',
+    hero: 'https://loremflickr.com/1200/1600/costume,jewelry,colorful',
     heroAlt: 'Bisutería colorida en exhibidor',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?fashion,jewelry&q=80',
+        url: 'https://loremflickr.com/1200/900/fashion,jewelry',
         tag: 'Collares',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?earrings,fashion&q=80',
+        url: 'https://loremflickr.com/900/1200/earrings,fashion',
         tag: 'Aretes diseño',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bracelet,colorful&q=80',
+        url: 'https://loremflickr.com/900/1200/bracelet,colorful',
         tag: 'Pulseras tejidas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?charm,necklace&q=80',
+        url: 'https://loremflickr.com/900/1200/charm,necklace',
         tag: 'Dijes y charms',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ring,fashion&q=80',
+        url: 'https://loremflickr.com/900/1200/ring,fashion',
         tag: 'Anillos moda',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?hair,clip&q=80',
+        url: 'https://loremflickr.com/900/1200/hair,clip',
         tag: 'Accesorios pelo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?jewelry,store&q=80',
+        url: 'https://loremflickr.com/1200/900/jewelry,store',
         tag: 'Tienda colorida',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fashion,accessories&q=80',
+        url: 'https://loremflickr.com/900/1200/fashion,accessories',
         tag: 'Accesorios moda',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?market,stall,jewelry&q=80',
+        url: 'https://loremflickr.com/1200/900/market,stall,jewelry',
         tag: 'Tianguis',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?fashion,jewelry,close&q=80',
+        url: 'https://loremflickr.com/800/600/fashion,jewelry,close',
         caption: 'Clienta arma combo personalizado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?jewelry,display,colorful&q=80',
+        url: 'https://loremflickr.com/800/600/jewelry,display,colorful',
         caption: 'Stock por color y temporada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?jewelry,gift,wrap&q=80',
+        url: 'https://loremflickr.com/800/600/jewelry,gift,wrap',
         caption: 'Empaque para regalo'
       }
     ]
@@ -15944,58 +15944,58 @@ const BRAND_ACCESORIO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?accessories,women,scarf&q=85',
+    hero: 'https://loremflickr.com/1200/1600/accessories,women,scarf',
     heroAlt: 'Accesorios femeninos en exhibidor curado',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?scarf,silk&q=80',
+        url: 'https://loremflickr.com/1200/900/scarf,silk',
         tag: 'Pañuelos seda',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?belt,women,fashion&q=80',
+        url: 'https://loremflickr.com/900/1200/belt,women,fashion',
         tag: 'Cinturones',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sunglasses,women&q=80',
+        url: 'https://loremflickr.com/900/1200/sunglasses,women',
         tag: 'Lentes sol',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?hat,women&q=80', tag: 'Sombreros', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/900x1200/?gloves,women&q=80', tag: 'Guantes', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/hat,women', tag: 'Sombreros', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/gloves,women', tag: 'Guantes', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?headband,women&q=80',
+        url: 'https://loremflickr.com/900/1200/headband,women',
         tag: 'Diademas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?accessories,boutique&q=80',
+        url: 'https://loremflickr.com/1200/900/accessories,boutique',
         tag: 'Boutique',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?accessories,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/accessories,detail',
         tag: 'Detalle',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?accessories,gift&q=80',
+        url: 'https://loremflickr.com/1200/900/accessories,gift',
         tag: 'Regalo personalizado',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?accessories,style&q=80',
+        url: 'https://loremflickr.com/800/600/accessories,style',
         caption: 'Asesoría de outfit completo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?accessories,wrap&q=80',
+        url: 'https://loremflickr.com/800/600/accessories,wrap',
         caption: 'Empaque regalo personalizado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?fashion,accessories,layered&q=80',
+        url: 'https://loremflickr.com/800/600/fashion,accessories,layered',
         caption: 'Combo capas y temporada'
       }
     ]
@@ -16111,66 +16111,66 @@ const BRAND_ASA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?handbag,leather,luxury&q=85',
+    hero: 'https://loremflickr.com/1200/1600/handbag,leather,luxury',
     heroAlt: 'Bolsos de piel premium en exhibidor',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?handbag,designer&q=80',
+        url: 'https://loremflickr.com/1200/900/handbag,designer',
         tag: 'Bolsos diseñador',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?clutch,women&q=80',
+        url: 'https://loremflickr.com/900/1200/clutch,women',
         tag: 'Clutches noche',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tote,bag&q=80',
+        url: 'https://loremflickr.com/900/1200/tote,bag',
         tag: 'Totes diarios',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wallet,leather&q=80',
+        url: 'https://loremflickr.com/900/1200/wallet,leather',
         tag: 'Carteras piel',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?crossbody,bag&q=80',
+        url: 'https://loremflickr.com/900/1200/crossbody,bag',
         tag: 'Cruzados',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?backpack,women&q=80',
+        url: 'https://loremflickr.com/900/1200/backpack,women',
         tag: 'Mochilas mujer',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?leather,store&q=80',
+        url: 'https://loremflickr.com/1200/900/leather,store',
         tag: 'Tienda piel',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?handbag,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/handbag,detail',
         tag: 'Detalle herrajes',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bag,boutique&q=80',
+        url: 'https://loremflickr.com/1200/900/bag,boutique',
         tag: 'Boutique',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?leather,bag,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/leather,bag,fitting',
         caption: 'Clienta prueba color en piel real'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?handbag,packaging&q=80',
+        url: 'https://loremflickr.com/800/600/handbag,packaging',
         caption: 'Empaque premium para regalo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?leather,care&q=80',
+        url: 'https://loremflickr.com/800/600/leather,care',
         caption: 'Mantenimiento y limpieza'
       }
     ]
@@ -16286,66 +16286,66 @@ const BRAND_TACON = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?heels,women,shoes&q=85',
+    hero: 'https://loremflickr.com/1200/1600/heels,women,shoes',
     heroAlt: 'Tacones de dama en exhibidor elegante',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?high,heels&q=80',
+        url: 'https://loremflickr.com/1200/900/high,heels',
         tag: 'Tacones noche',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pumps,women&q=80',
+        url: 'https://loremflickr.com/900/1200/pumps,women',
         tag: 'Pumps oficina',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?flats,women&q=80',
+        url: 'https://loremflickr.com/900/1200/flats,women',
         tag: 'Flats casuales',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sandals,women&q=80',
+        url: 'https://loremflickr.com/900/1200/sandals,women',
         tag: 'Sandalias',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?boots,women&q=80',
+        url: 'https://loremflickr.com/900/1200/boots,women',
         tag: 'Botas dama',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?slingback,heels&q=80',
+        url: 'https://loremflickr.com/900/1200/slingback,heels',
         tag: 'Slingbacks',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?shoe,store,women&q=80',
+        url: 'https://loremflickr.com/1200/900/shoe,store,women',
         tag: 'Zapatería dama',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wedding,shoes&q=80',
+        url: 'https://loremflickr.com/900/1200/wedding,shoes',
         tag: 'Zapatos novia',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?shoes,display&q=80',
+        url: 'https://loremflickr.com/1200/900/shoes,display',
         tag: 'Exhibidor',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?shoe,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/shoe,fitting',
         caption: 'Clienta prueba número exacto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?heels,boxes&q=80',
+        url: 'https://loremflickr.com/800/600/heels,boxes',
         caption: 'Stock por número y modelo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?shoes,sale&q=80',
+        url: 'https://loremflickr.com/800/600/shoes,sale',
         caption: 'Combo con bolsa de la temporada'
       }
     ]
@@ -16461,62 +16461,62 @@ const BRAND_OXFORD = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?oxford,shoes,men,leather&q=85',
+    hero: 'https://loremflickr.com/1200/1600/oxford,shoes,men,leather',
     heroAlt: 'Zapatos oxford de caballero en exhibidor',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?oxford,leather&q=80',
+        url: 'https://loremflickr.com/1200/900/oxford,leather',
         tag: 'Oxford clásicos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?derby,shoes&q=80',
+        url: 'https://loremflickr.com/900/1200/derby,shoes',
         tag: 'Derby vestir',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?loafers,men&q=80',
+        url: 'https://loremflickr.com/900/1200/loafers,men',
         tag: 'Mocasines',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?brogue,shoes&q=80', tag: 'Brogues', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/brogue,shoes', tag: 'Brogues', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?monk,strap&q=80',
+        url: 'https://loremflickr.com/900/1200/monk,strap',
         tag: 'Monk strap',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?leather,boots,men&q=80',
+        url: 'https://loremflickr.com/900/1200/leather,boots,men',
         tag: 'Botas piel',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?menswear,shoes,store&q=80',
+        url: 'https://loremflickr.com/1200/900/menswear,shoes,store',
         tag: 'Zapatería caballero',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?shoe,polish&q=80',
+        url: 'https://loremflickr.com/900/1200/shoe,polish',
         tag: 'Bola y abrillantado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?shoe,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/shoe,workshop',
         tag: 'Taller reparación',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?shoe,fitting,men&q=80',
+        url: 'https://loremflickr.com/800/600/shoe,fitting,men',
         caption: 'Cliente prueba con horma exacta'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?leather,shoes,care&q=80',
+        url: 'https://loremflickr.com/800/600/leather,shoes,care',
         caption: 'Mantenimiento y reparación con cita'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?menswear,shoes,box&q=80',
+        url: 'https://loremflickr.com/800/600/menswear,shoes,box',
         caption: 'Caja con etiqueta y certificado'
       }
     ]
@@ -16632,66 +16632,66 @@ const BRAND_PASITO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?kids,shoes,children&q=85',
+    hero: 'https://loremflickr.com/1200/1600/kids,shoes,children',
     heroAlt: 'Zapatos infantiles coloridos en exhibidor',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kids,shoes&q=80',
+        url: 'https://loremflickr.com/1200/900/kids,shoes',
         tag: 'Tenis infantiles',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?school,shoes,kids&q=80',
+        url: 'https://loremflickr.com/900/1200/school,shoes,kids',
         tag: 'Escolares',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?baby,shoes,first&q=80',
+        url: 'https://loremflickr.com/900/1200/baby,shoes,first',
         tag: 'Primeros pasos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kids,sandals&q=80',
+        url: 'https://loremflickr.com/900/1200/kids,sandals',
         tag: 'Sandalias',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kids,boots&q=80',
+        url: 'https://loremflickr.com/900/1200/kids,boots',
         tag: 'Botas niño',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?girl,party,shoes&q=80',
+        url: 'https://loremflickr.com/900/1200/girl,party,shoes',
         tag: 'Vestir niña',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?children,shoe,store&q=80',
+        url: 'https://loremflickr.com/1200/900/children,shoe,store',
         tag: 'Zapatería infantil',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?colorful,sneakers,kids&q=80',
+        url: 'https://loremflickr.com/900/1200/colorful,sneakers,kids',
         tag: 'Tenis coloridos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kids,foot,measure&q=80',
+        url: 'https://loremflickr.com/1200/900/kids,foot,measure',
         tag: 'Medición pie',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?kid,shoe,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/kid,shoe,fitting',
         caption: 'Medición de pie del niño en tienda'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?mother,kid,shoes&q=80',
+        url: 'https://loremflickr.com/800/600/mother,kid,shoes',
         caption: 'Mamá consulta talla en sistema'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?school,uniform,shoes&q=80',
+        url: 'https://loremflickr.com/800/600/school,uniform,shoes',
         caption: 'Combo escolar para regreso a clases'
       }
     ]
@@ -16807,54 +16807,54 @@ const BRAND_ESPUELA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?cowboy,boots,leather,western&q=85',
+    hero: 'https://loremflickr.com/1200/1600/cowboy,boots,leather,western',
     heroAlt: 'Botas vaqueras de piel en exhibidor',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cowboy,boots&q=80',
+        url: 'https://loremflickr.com/1200/900/cowboy,boots',
         tag: 'Botas clásicas',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ostrich,boots&q=80',
+        url: 'https://loremflickr.com/900/1200/ostrich,boots',
         tag: 'Avestruz premium',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?snake,boots&q=80', tag: 'Víbora', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/snake,boots', tag: 'Víbora', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?western,boots,women&q=80',
+        url: 'https://loremflickr.com/900/1200/western,boots,women',
         tag: 'Botas dama',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?leather,detail,boots&q=80',
+        url: 'https://loremflickr.com/900/1200/leather,detail,boots',
         tag: 'Detalle piel',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?cowboy,hat&q=80', tag: 'Sombreros', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/cowboy,hat', tag: 'Sombreros', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?western,store&q=80',
+        url: 'https://loremflickr.com/1200/900/western,store',
         tag: 'Tienda vaquera',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?boot,maker,craft&q=80',
+        url: 'https://loremflickr.com/900/1200/boot,maker,craft',
         tag: 'Taller bota',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/1200x900/?ranch,rodeo&q=80', tag: 'Rodeo', size: 'md'}
+      {url: 'https://loremflickr.com/1200/900/ranch,rodeo', tag: 'Rodeo', size: 'md'}
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?boot,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/boot,fitting',
         caption: 'Toma de talla y horma vaquera'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?leather,boot,care&q=80',
+        url: 'https://loremflickr.com/800/600/leather,boot,care',
         caption: 'Mantenimiento y cambio de tacón'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?western,certificate&q=80',
+        url: 'https://loremflickr.com/800/600/western,certificate',
         caption: 'Certificado de origen de piel'
       }
     ]
@@ -16970,62 +16970,62 @@ const BRAND_REBOTE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?running,shoes,athletic&q=85',
+    hero: 'https://loremflickr.com/1200/1600/running,shoes,athletic',
     heroAlt: 'Tenis deportivos en exhibidor energético',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?running,sneakers&q=80',
+        url: 'https://loremflickr.com/1200/900/running,sneakers',
         tag: 'Running pro',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?basketball,sneakers&q=80',
+        url: 'https://loremflickr.com/900/1200/basketball,sneakers',
         tag: 'Basket',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?futsal,shoes&q=80', tag: 'Futsal', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/futsal,shoes', tag: 'Futsal', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gym,shoes&q=80',
+        url: 'https://loremflickr.com/900/1200/gym,shoes',
         tag: 'Gym training',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?trail,running&q=80',
+        url: 'https://loremflickr.com/900/1200/trail,running',
         tag: 'Trail running',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tennis,sneakers&q=80',
+        url: 'https://loremflickr.com/900/1200/tennis,sneakers',
         tag: 'Tenis cancha',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sneakers,wall,store&q=80',
+        url: 'https://loremflickr.com/1200/900/sneakers,wall,store',
         tag: 'Tienda deportiva',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?running,sole&q=80',
+        url: 'https://loremflickr.com/900/1200/running,sole',
         tag: 'Detalle suela',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?marathon,runner&q=80',
+        url: 'https://loremflickr.com/1200/900/marathon,runner',
         tag: 'Maratón',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?foot,analysis&q=80',
+        url: 'https://loremflickr.com/800/600/foot,analysis',
         caption: 'Análisis de pisada con cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?sneaker,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/sneaker,fitting',
         caption: 'Prueba con número exacto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?runner,training&q=80',
+        url: 'https://loremflickr.com/800/600/runner,training',
         caption: 'Recomendación por disciplina'
       }
     ]
@@ -17141,58 +17141,58 @@ const BRAND_BORLA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?loafers,men,leather&q=85',
+    hero: 'https://loremflickr.com/1200/1600/loafers,men,leather',
     heroAlt: 'Mocasines de piel en exhibidor elegante',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?loafers,leather&q=80',
+        url: 'https://loremflickr.com/1200/900/loafers,leather',
         tag: 'Mocasines clásicos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?penny,loafer&q=80',
+        url: 'https://loremflickr.com/900/1200/penny,loafer',
         tag: 'Penny loafers',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tassel,loafer&q=80',
+        url: 'https://loremflickr.com/900/1200/tassel,loafer',
         tag: 'Tassel borla',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?driving,shoes&q=80', tag: 'Driver', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/900x1200/?suede,loafers&q=80', tag: 'Ante', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/driving,shoes', tag: 'Driver', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/suede,loafers', tag: 'Ante', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?horsebit,loafer&q=80',
+        url: 'https://loremflickr.com/900/1200/horsebit,loafer',
         tag: 'Horsebit',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?menswear,casual,shoes&q=80',
+        url: 'https://loremflickr.com/1200/900/menswear,casual,shoes',
         tag: 'Tienda casual',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?leather,polish&q=80',
+        url: 'https://loremflickr.com/900/1200/leather,polish',
         tag: 'Bola y cuidado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?leather,store&q=80',
+        url: 'https://loremflickr.com/1200/900/leather,store',
         tag: 'Vitrina piel',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?loafer,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/loafer,fitting',
         caption: 'Prueba con horma exacta'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?leather,care&q=80',
+        url: 'https://loremflickr.com/800/600/leather,care',
         caption: 'Servicio bola con cita'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?menswear,detail&q=80',
+        url: 'https://loremflickr.com/800/600/menswear,detail',
         caption: 'Detalle borla y herrajes'
       }
     ]
@@ -17308,62 +17308,62 @@ const BRAND_ARMAZON = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?eyeglasses,frames,optical&q=85',
+    hero: 'https://loremflickr.com/1200/1600/eyeglasses,frames,optical',
     heroAlt: 'Armazones de lentes en exhibidor minimalista',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?eyeglasses,frames&q=80',
+        url: 'https://loremflickr.com/1200/900/eyeglasses,frames',
         tag: 'Armazones clásicos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sunglasses,fashion&q=80',
+        url: 'https://loremflickr.com/900/1200/sunglasses,fashion',
         tag: 'Lentes sol',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?reading,glasses&q=80',
+        url: 'https://loremflickr.com/900/1200/reading,glasses',
         tag: 'Lectura',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kids,glasses&q=80',
+        url: 'https://loremflickr.com/900/1200/kids,glasses',
         tag: 'Infantil',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?titanium,glasses&q=80',
+        url: 'https://loremflickr.com/900/1200/titanium,glasses',
         tag: 'Titanio',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?acetate,frames&q=80',
+        url: 'https://loremflickr.com/900/1200/acetate,frames',
         tag: 'Acetato',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/1200x900/?optical,store&q=80', tag: 'Óptica', size: 'md'},
+      {url: 'https://loremflickr.com/1200/900/optical,store', tag: 'Óptica', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?eye,exam&q=80',
+        url: 'https://loremflickr.com/900/1200/eye,exam',
         tag: 'Examen vista',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?lens,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/lens,workshop',
         tag: 'Taller corte',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?glasses,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/glasses,fitting',
         caption: 'Prueba con cara del cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?eye,prescription&q=80',
+        url: 'https://loremflickr.com/800/600/eye,prescription',
         caption: 'Receta capturada en ficha'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?glasses,packaging&q=80',
+        url: 'https://loremflickr.com/800/600/glasses,packaging',
         caption: 'Entrega con estuche y garantía'
       }
     ]
@@ -17479,66 +17479,66 @@ const BRAND_DIOPTRIA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?optometry,eye,exam&q=85',
+    hero: 'https://loremflickr.com/1200/1600/optometry,eye,exam',
     heroAlt: 'Óptica con phoropter y armazones',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?phoropter&q=80',
+        url: 'https://loremflickr.com/1200/900/phoropter',
         tag: 'Examen completo',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?glasses,reading&q=80',
+        url: 'https://loremflickr.com/900/1200/glasses,reading',
         tag: 'Lectura graduados',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?progressive,lenses&q=80',
+        url: 'https://loremflickr.com/900/1200/progressive,lenses',
         tag: 'Progresivos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bifocal,glasses&q=80',
+        url: 'https://loremflickr.com/900/1200/bifocal,glasses',
         tag: 'Bifocales',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?antiglare,lens&q=80',
+        url: 'https://loremflickr.com/900/1200/antiglare,lens',
         tag: 'Antirreflejo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?blue,light,glasses&q=80',
+        url: 'https://loremflickr.com/900/1200/blue,light,glasses',
         tag: 'Filtro azul',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?optometrist,office&q=80',
+        url: 'https://loremflickr.com/1200/900/optometrist,office',
         tag: 'Consultorio',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lens,cutting&q=80',
+        url: 'https://loremflickr.com/900/1200/lens,cutting',
         tag: 'Corte de lente',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?optical,laboratory&q=80',
+        url: 'https://loremflickr.com/1200/900/optical,laboratory',
         tag: 'Laboratorio',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?eye,test&q=80',
+        url: 'https://loremflickr.com/800/600/eye,test',
         caption: 'Examen con optometrista certificado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?lens,measure&q=80',
+        url: 'https://loremflickr.com/800/600/lens,measure',
         caption: 'DIP y altura medidos en sistema'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?glasses,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/glasses,delivery',
         caption: 'Entrega con revisión final'
       }
     ]
@@ -17654,62 +17654,62 @@ const BRAND_PUPILA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?contact,lens,blue,eye&q=85',
+    hero: 'https://loremflickr.com/1200/1600/contact,lens,blue,eye',
     heroAlt: 'Cajas de lentes de contacto en exhibidor médico',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?contact,lens&q=80',
+        url: 'https://loremflickr.com/1200/900/contact,lens',
         tag: 'Lentes blandos',
         size: 'lg'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?toric,lens&q=80', tag: 'Tóricos', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/toric,lens', tag: 'Tóricos', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?colored,contacts&q=80',
+        url: 'https://loremflickr.com/900/1200/colored,contacts',
         tag: 'De color',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?daily,disposable&q=80',
+        url: 'https://loremflickr.com/900/1200/daily,disposable',
         tag: 'Diarios',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?monthly,contacts&q=80',
+        url: 'https://loremflickr.com/900/1200/monthly,contacts',
         tag: 'Mensuales',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lens,solution&q=80',
+        url: 'https://loremflickr.com/900/1200/lens,solution',
         tag: 'Soluciones',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?optometry,office&q=80',
+        url: 'https://loremflickr.com/1200/900/optometry,office',
         tag: 'Consultorio',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?eye,care&q=80',
+        url: 'https://loremflickr.com/900/1200/eye,care',
         tag: 'Cuidado ocular',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?lens,fitting&q=80',
+        url: 'https://loremflickr.com/1200/900/lens,fitting',
         tag: 'Adaptación',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?contact,lens,case&q=80',
+        url: 'https://loremflickr.com/800/600/contact,lens,case',
         caption: 'Cliente recibe caja con su receta'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?eye,doctor&q=80',
+        url: 'https://loremflickr.com/800/600/eye,doctor',
         caption: 'Adaptación con optometrista'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?subscription,box&q=80',
+        url: 'https://loremflickr.com/800/600/subscription,box',
         caption: 'Suscripción mensual a domicilio'
       }
     ]
@@ -17825,58 +17825,58 @@ const BRAND_MUEBLE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?furniture,sofa,home&q=85',
+    hero: 'https://loremflickr.com/1200/1600/furniture,sofa,home',
     heroAlt: 'Mueblería con salas y comedores en exhibición',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?living,room,sofa&q=80',
+        url: 'https://loremflickr.com/1200/900/living,room,sofa',
         tag: 'Salas',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dining,table&q=80',
+        url: 'https://loremflickr.com/900/1200/dining,table',
         tag: 'Comedores',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bedroom,furniture&q=80',
+        url: 'https://loremflickr.com/900/1200/bedroom,furniture',
         tag: 'Recámaras',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?bookshelf&q=80', tag: 'Libreros', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/900x1200/?armchair&q=80', tag: 'Sillones', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/bookshelf', tag: 'Libreros', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/armchair', tag: 'Sillones', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?coffee,table&q=80',
+        url: 'https://loremflickr.com/900/1200/coffee,table',
         tag: 'Mesas centro',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?furniture,store&q=80',
+        url: 'https://loremflickr.com/1200/900/furniture,store',
         tag: 'Showroom',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wood,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/wood,detail',
         tag: 'Detalle madera',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?delivery,furniture&q=80',
+        url: 'https://loremflickr.com/1200/900/delivery,furniture',
         tag: 'Entrega',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?furniture,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/furniture,fitting',
         caption: 'Cliente prueba sala en showroom'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?furniture,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/furniture,delivery',
         caption: 'Entrega a domicilio con foto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?furniture,assembly&q=80',
+        url: 'https://loremflickr.com/800/600/furniture,assembly',
         caption: 'Instalación con técnico'
       }
     ]
@@ -17992,66 +17992,66 @@ const BRAND_ESCRITORIO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?office,furniture,desk&q=85',
+    hero: 'https://loremflickr.com/1200/1600/office,furniture,desk',
     heroAlt: 'Mueblería de oficina con estaciones de trabajo',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?office,desk&q=80',
+        url: 'https://loremflickr.com/1200/900/office,desk',
         tag: 'Escritorios',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?office,chair&q=80',
+        url: 'https://loremflickr.com/900/1200/office,chair',
         tag: 'Sillas ergonómicas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?conference,table&q=80',
+        url: 'https://loremflickr.com/900/1200/conference,table',
         tag: 'Mesas junta',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?filing,cabinet&q=80',
+        url: 'https://loremflickr.com/900/1200/filing,cabinet',
         tag: 'Archiveros',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cubicle,workstation&q=80',
+        url: 'https://loremflickr.com/900/1200/cubicle,workstation',
         tag: 'Estaciones',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?reception,desk&q=80',
+        url: 'https://loremflickr.com/900/1200/reception,desk',
         tag: 'Recepción',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?modern,office&q=80',
+        url: 'https://loremflickr.com/1200/900/modern,office',
         tag: 'Oficina moderna',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ergonomic,chair&q=80',
+        url: 'https://loremflickr.com/900/1200/ergonomic,chair',
         tag: 'Ergonomía',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?corporate,space&q=80',
+        url: 'https://loremflickr.com/1200/900/corporate,space',
         tag: 'Espacio corporativo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?office,quote&q=80',
+        url: 'https://loremflickr.com/800/600/office,quote',
         caption: 'Cotización por proyecto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?office,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/office,delivery',
         caption: 'Entrega e instalación corporativa'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?office,setup&q=80',
+        url: 'https://loremflickr.com/800/600/office,setup',
         caption: 'Setup completo con técnicos'
       }
     ]
@@ -18167,62 +18167,62 @@ const BRAND_ALMOHADA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?mattress,bed,bedroom&q=85',
+    hero: 'https://loremflickr.com/1200/1600/mattress,bed,bedroom',
     heroAlt: 'Colchones en showroom de colchonería',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mattress,showroom&q=80',
+        url: 'https://loremflickr.com/1200/900/mattress,showroom',
         tag: 'Showroom',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pillow,sleep&q=80',
+        url: 'https://loremflickr.com/900/1200/pillow,sleep',
         tag: 'Almohadas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?memory,foam&q=80',
+        url: 'https://loremflickr.com/900/1200/memory,foam',
         tag: 'Memory foam',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?box,spring&q=80',
+        url: 'https://loremflickr.com/900/1200/box,spring',
         tag: 'Box springs',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bed,sheets&q=80',
+        url: 'https://loremflickr.com/900/1200/bed,sheets',
         tag: 'Sábanas premium',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?duvet,comforter&q=80',
+        url: 'https://loremflickr.com/900/1200/duvet,comforter',
         tag: 'Edredones',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mattress,store&q=80',
+        url: 'https://loremflickr.com/1200/900/mattress,store',
         tag: 'Tienda colchones',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?bed,frame&q=80', tag: 'Bases', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/bed,frame', tag: 'Bases', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sleep,test&q=80',
+        url: 'https://loremflickr.com/1200/900/sleep,test',
         tag: 'Prueba acostado',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?mattress,test&q=80',
+        url: 'https://loremflickr.com/800/600/mattress,test',
         caption: 'Cliente prueba 10 min antes de comprar'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?mattress,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/mattress,delivery',
         caption: 'Entrega con cambio de viejo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?sleep,bedroom&q=80',
+        url: 'https://loremflickr.com/800/600/sleep,bedroom',
         caption: 'Garantía 100 noches'
       }
     ]
@@ -18338,66 +18338,66 @@ const BRAND_ALACENA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?kitchen,cabinet,modern&q=85',
+    hero: 'https://loremflickr.com/1200/1600/kitchen,cabinet,modern',
     heroAlt: 'Cocinas integrales en showroom',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?modern,kitchen&q=80',
+        url: 'https://loremflickr.com/1200/900/modern,kitchen',
         tag: 'Cocinas modernas',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kitchen,island&q=80',
+        url: 'https://loremflickr.com/900/1200/kitchen,island',
         tag: 'Islas centrales',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kitchen,cabinet&q=80',
+        url: 'https://loremflickr.com/900/1200/kitchen,cabinet',
         tag: 'Alacenas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?countertop,quartz&q=80',
+        url: 'https://loremflickr.com/900/1200/countertop,quartz',
         tag: 'Cubiertas cuarzo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kitchen,faucet&q=80',
+        url: 'https://loremflickr.com/900/1200/kitchen,faucet',
         tag: 'Grifería',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kitchen,storage&q=80',
+        url: 'https://loremflickr.com/900/1200/kitchen,storage',
         tag: 'Organizadores',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?showroom,kitchen&q=80',
+        url: 'https://loremflickr.com/1200/900/showroom,kitchen',
         tag: 'Showroom',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kitchen,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/kitchen,detail',
         tag: 'Detalle herrajes',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kitchen,install&q=80',
+        url: 'https://loremflickr.com/1200/900/kitchen,install',
         tag: 'Instalación',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?kitchen,design&q=80',
+        url: 'https://loremflickr.com/800/600/kitchen,design',
         caption: 'Diseño 3D con cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?kitchen,measure&q=80',
+        url: 'https://loremflickr.com/800/600/kitchen,measure',
         caption: 'Toma de medidas en sitio'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?kitchen,workshop&q=80',
+        url: 'https://loremflickr.com/800/600/kitchen,workshop',
         caption: 'Producción a medida'
       }
     ]
@@ -18513,62 +18513,62 @@ const BRAND_COLGADOR = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?closet,wardrobe,custom&q=85',
+    hero: 'https://loremflickr.com/1200/1600/closet,wardrobe,custom',
     heroAlt: 'Closets a medida en showroom moderno',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?walk,in,closet&q=80',
+        url: 'https://loremflickr.com/1200/900/walk,in,closet',
         tag: 'Vestidores',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?closet,system&q=80',
+        url: 'https://loremflickr.com/900/1200/closet,system',
         tag: 'Sistemas modulares',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wardrobe,drawer&q=80',
+        url: 'https://loremflickr.com/900/1200/wardrobe,drawer',
         tag: 'Cajoneras',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?shoe,rack&q=80', tag: 'Zapateras', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/shoe,rack', tag: 'Zapateras', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?closet,hanging&q=80',
+        url: 'https://loremflickr.com/900/1200/closet,hanging',
         tag: 'Barras colgar',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?closet,light&q=80',
+        url: 'https://loremflickr.com/900/1200/closet,light',
         tag: 'Iluminación LED',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?modern,wardrobe&q=80',
+        url: 'https://loremflickr.com/1200/900/modern,wardrobe',
         tag: 'Showroom',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cabinet,handle&q=80',
+        url: 'https://loremflickr.com/900/1200/cabinet,handle',
         tag: 'Herrajes',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?closet,install&q=80',
+        url: 'https://loremflickr.com/1200/900/closet,install',
         tag: 'Instalación',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?closet,measure&q=80',
+        url: 'https://loremflickr.com/800/600/closet,measure',
         caption: 'Medición precisa en sitio'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?wardrobe,design&q=80',
+        url: 'https://loremflickr.com/800/600/wardrobe,design',
         caption: 'Render 3D con cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?closet,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/closet,delivery',
         caption: 'Instalación con foto del progreso'
       }
     ]
@@ -18684,62 +18684,62 @@ const BRAND_LINEA_B = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?appliance,store,home&q=85',
+    hero: 'https://loremflickr.com/1200/1600/appliance,store,home',
     heroAlt: 'Tienda de electrodomésticos con línea blanca',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?refrigerator&q=80',
+        url: 'https://loremflickr.com/1200/900/refrigerator',
         tag: 'Refrigeradores',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?washer,laundry&q=80',
+        url: 'https://loremflickr.com/900/1200/washer,laundry',
         tag: 'Lavadoras',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?microwave&q=80', tag: 'Microondas', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/microwave', tag: 'Microondas', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dishwasher&q=80',
+        url: 'https://loremflickr.com/900/1200/dishwasher',
         tag: 'Lavavajillas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?oven,stove&q=80',
+        url: 'https://loremflickr.com/900/1200/oven,stove',
         tag: 'Estufas y hornos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?blender,appliance&q=80',
+        url: 'https://loremflickr.com/900/1200/blender,appliance',
         tag: 'Pequeños electrod.',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?appliance,showroom&q=80',
+        url: 'https://loremflickr.com/1200/900/appliance,showroom',
         tag: 'Showroom',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?air,conditioner&q=80',
+        url: 'https://loremflickr.com/900/1200/air,conditioner',
         tag: 'Aire acondicionado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?delivery,appliance&q=80',
+        url: 'https://loremflickr.com/1200/900/delivery,appliance',
         tag: 'Entrega domicilio',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?appliance,sale&q=80',
+        url: 'https://loremflickr.com/800/600/appliance,sale',
         caption: 'Cliente compra con financiamiento'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?appliance,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/appliance,delivery',
         caption: 'Entrega con instalación'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,document&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,document',
         caption: 'Garantía registrada en sistema'
       }
     ]
@@ -18851,62 +18851,62 @@ const BRAND_NEVERA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?refrigerator,whitegoods&q=85',
+    hero: 'https://loremflickr.com/1200/1600/refrigerator,whitegoods',
     heroAlt: 'Línea blanca en tienda con neveras y lavadoras',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?refrigerator,french&q=80',
+        url: 'https://loremflickr.com/1200/900/refrigerator,french',
         tag: 'French Door',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?washer,front,load&q=80',
+        url: 'https://loremflickr.com/900/1200/washer,front,load',
         tag: 'Lavadora carga frontal',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?dryer&q=80', tag: 'Secadoras', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/dryer', tag: 'Secadoras', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?freezer,deep&q=80',
+        url: 'https://loremflickr.com/900/1200/freezer,deep',
         tag: 'Congeladores',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dishwasher,modern&q=80',
+        url: 'https://loremflickr.com/900/1200/dishwasher,modern',
         tag: 'Lavavajillas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?water,heater&q=80',
+        url: 'https://loremflickr.com/900/1200/water,heater',
         tag: 'Calentadores',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?whitegoods,showroom&q=80',
+        url: 'https://loremflickr.com/1200/900/whitegoods,showroom',
         tag: 'Showroom',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fridge,interior&q=80',
+        url: 'https://loremflickr.com/900/1200/fridge,interior',
         tag: 'Detalle interior',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?appliance,delivery,truck&q=80',
+        url: 'https://loremflickr.com/1200/900/appliance,delivery,truck',
         tag: 'Entrega',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?fridge,measure&q=80',
+        url: 'https://loremflickr.com/800/600/fridge,measure',
         caption: 'Medición de espacio en sitio'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?appliance,install&q=80',
+        url: 'https://loremflickr.com/800/600/appliance,install',
         caption: 'Instalación con técnico certificado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?appliance,warranty&q=80',
+        url: 'https://loremflickr.com/800/600/appliance,warranty',
         caption: 'Garantía 5 años registrada'
       }
     ]
@@ -19022,54 +19022,54 @@ const BRAND_SINTONIA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?television,oled,electronics&q=85',
+    hero: 'https://loremflickr.com/1200/1600/television,oled,electronics',
     heroAlt: 'Pantallas y línea café en exhibidor',
     showcase: [
-      {url: 'https://source.unsplash.com/random/1200x900/?smart,tv&q=80', tag: 'Smart TVs', size: 'lg'},
-      {url: 'https://source.unsplash.com/random/900x1200/?oled,tv&q=80', tag: 'OLED premium', size: 'md'},
-      {url: 'https://source.unsplash.com/random/900x1200/?soundbar&q=80', tag: 'Soundbars', size: 'sm'},
+      {url: 'https://loremflickr.com/1200/900/smart,tv', tag: 'Smart TVs', size: 'lg'},
+      {url: 'https://loremflickr.com/900/1200/oled,tv', tag: 'OLED premium', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/soundbar', tag: 'Soundbars', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?home,theater&q=80',
+        url: 'https://loremflickr.com/900/1200/home,theater',
         tag: 'Home theaters',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?projector,4k&q=80',
+        url: 'https://loremflickr.com/900/1200/projector,4k',
         tag: 'Proyectores 4K',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?stereo,system&q=80',
+        url: 'https://loremflickr.com/900/1200/stereo,system',
         tag: 'Estéreos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?electronics,showroom&q=80',
+        url: 'https://loremflickr.com/1200/900/electronics,showroom',
         tag: 'Showroom',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tv,wall,mount&q=80',
+        url: 'https://loremflickr.com/900/1200/tv,wall,mount',
         tag: 'Instalación pared',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?home,entertainment&q=80',
+        url: 'https://loremflickr.com/1200/900/home,entertainment',
         tag: 'Entretenimiento',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?tv,setup&q=80',
+        url: 'https://loremflickr.com/800/600/tv,setup',
         caption: 'Instalación con técnico'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?electronics,sale&q=80',
+        url: 'https://loremflickr.com/800/600/electronics,sale',
         caption: 'Cliente compra con financiamiento'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,tv&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,tv',
         caption: 'Garantía registrada al ticket'
       }
     ]
@@ -19185,62 +19185,62 @@ const BRAND_GADGET = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?electronics,gadgets,tech&q=85',
+    hero: 'https://loremflickr.com/1200/1600/electronics,gadgets,tech',
     heroAlt: 'Tienda de electrónica con gadgets variados',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?headphones,wireless&q=80',
+        url: 'https://loremflickr.com/1200/900/headphones,wireless',
         tag: 'Audífonos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?smartwatch&q=80',
+        url: 'https://loremflickr.com/900/1200/smartwatch',
         tag: 'Smartwatches',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?camera,digital&q=80',
+        url: 'https://loremflickr.com/900/1200/camera,digital',
         tag: 'Cámaras',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?drone&q=80', tag: 'Drones', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/drone', tag: 'Drones', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gaming,controller&q=80',
+        url: 'https://loremflickr.com/900/1200/gaming,controller',
         tag: 'Gaming',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bluetooth,speaker&q=80',
+        url: 'https://loremflickr.com/900/1200/bluetooth,speaker',
         tag: 'Bocinas BT',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?electronics,store&q=80',
+        url: 'https://loremflickr.com/1200/900/electronics,store',
         tag: 'Tienda tech',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tablet,gadget&q=80',
+        url: 'https://loremflickr.com/900/1200/tablet,gadget',
         tag: 'Tablets',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tech,accessories&q=80',
+        url: 'https://loremflickr.com/1200/900/tech,accessories',
         tag: 'Accesorios',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?gadget,unbox&q=80',
+        url: 'https://loremflickr.com/800/600/gadget,unbox',
         caption: 'Cliente revisa serial al recibir'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?tech,repair&q=80',
+        url: 'https://loremflickr.com/800/600/tech,repair',
         caption: 'Servicio técnico con diagnóstico'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,electronics&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,electronics',
         caption: 'Garantía registrada por serial'
       }
     ]
@@ -19356,58 +19356,58 @@ const BRAND_TORRE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?computer,gaming,pc&q=85',
+    hero: 'https://loremflickr.com/1200/1600/computer,gaming,pc',
     heroAlt: 'Tienda de computadoras con torres gaming',
     showcase: [
-      {url: 'https://source.unsplash.com/random/1200x900/?gaming,pc&q=80', tag: 'Gaming PCs', size: 'lg'},
+      {url: 'https://loremflickr.com/1200/900/gaming,pc', tag: 'Gaming PCs', size: 'lg'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cpu,processor&q=80',
+        url: 'https://loremflickr.com/900/1200/cpu,processor',
         tag: 'Procesadores',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gpu,graphics&q=80',
+        url: 'https://loremflickr.com/900/1200/gpu,graphics',
         tag: 'Tarjetas video',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ram,memory&q=80',
+        url: 'https://loremflickr.com/900/1200/ram,memory',
         tag: 'Memoria RAM',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ssd,storage&q=80',
+        url: 'https://loremflickr.com/900/1200/ssd,storage',
         tag: 'SSD y discos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?motherboard&q=80',
+        url: 'https://loremflickr.com/900/1200/motherboard',
         tag: 'Tarjetas madre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pc,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/pc,workshop',
         tag: 'Taller armado',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?pc,case&q=80', tag: 'Gabinetes', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/pc,case', tag: 'Gabinetes', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gaming,setup&q=80',
+        url: 'https://loremflickr.com/1200/900/gaming,setup',
         tag: 'Setup completo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?pc,build&q=80',
+        url: 'https://loremflickr.com/800/600/pc,build',
         caption: 'Armado en taller con técnico'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?pc,benchmark&q=80',
+        url: 'https://loremflickr.com/800/600/pc,benchmark',
         caption: 'Pruebas antes de entregar'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?pc,setup,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/pc,setup,delivery',
         caption: 'Instalación en casa del cliente'
       }
     ]
@@ -19523,54 +19523,54 @@ const BRAND_PORTATIL = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?laptop,macbook,workspace&q=85',
+    hero: 'https://loremflickr.com/1200/1600/laptop,macbook,workspace',
     heroAlt: 'Laptops en exhibidor minimalista',
     showcase: [
-      {url: 'https://source.unsplash.com/random/1200x900/?macbook,pro&q=80', tag: 'MacBooks', size: 'lg'},
+      {url: 'https://loremflickr.com/1200/900/macbook,pro', tag: 'MacBooks', size: 'lg'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dell,laptop&q=80',
+        url: 'https://loremflickr.com/900/1200/dell,laptop',
         tag: 'Dell empresarial',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gaming,laptop&q=80',
+        url: 'https://loremflickr.com/900/1200/gaming,laptop',
         tag: 'Gaming laptops',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?ultrabook&q=80', tag: 'Ultrabooks', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/ultrabook', tag: 'Ultrabooks', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?laptop,backpack&q=80',
+        url: 'https://loremflickr.com/900/1200/laptop,backpack',
         tag: 'Mochilas tech',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mouse,wireless&q=80',
+        url: 'https://loremflickr.com/900/1200/mouse,wireless',
         tag: 'Mouse y teclados',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?laptop,store&q=80',
+        url: 'https://loremflickr.com/1200/900/laptop,store',
         tag: 'Showroom',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?usb,hub&q=80', tag: 'Hubs y dock', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/usb,hub', tag: 'Hubs y dock', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?coworking,laptop&q=80',
+        url: 'https://loremflickr.com/1200/900/coworking,laptop',
         tag: 'Movilidad pro',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?laptop,unbox&q=80',
+        url: 'https://loremflickr.com/800/600/laptop,unbox',
         caption: 'Cliente revisa serial al recibir'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?laptop,repair&q=80',
+        url: 'https://loremflickr.com/800/600/laptop,repair',
         caption: 'Servicio técnico con diagnóstico'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?laptop,setup&q=80',
+        url: 'https://loremflickr.com/800/600/laptop,setup',
         caption: 'Configuración inicial incluida'
       }
     ]
@@ -19686,46 +19686,46 @@ const BRAND_MOVIL = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?smartphone,iphone,mobile&q=85',
+    hero: 'https://loremflickr.com/1200/1600/smartphone,iphone,mobile',
     heroAlt: 'Celulares en exhibidor de tienda tech',
     showcase: [
-      {url: 'https://source.unsplash.com/random/1200x900/?iphone,latest&q=80', tag: 'iPhone', size: 'lg'},
+      {url: 'https://loremflickr.com/1200/900/iphone,latest', tag: 'iPhone', size: 'lg'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?samsung,galaxy&q=80',
+        url: 'https://loremflickr.com/900/1200/samsung,galaxy',
         tag: 'Samsung',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?xiaomi,phone&q=80', tag: 'Xiaomi', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/900x1200/?google,pixel&q=80', tag: 'Pixel', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/xiaomi,phone', tag: 'Xiaomi', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/google,pixel', tag: 'Pixel', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?phone,box&q=80',
+        url: 'https://loremflickr.com/900/1200/phone,box',
         tag: 'Cajas selladas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?phone,gold&q=80',
+        url: 'https://loremflickr.com/900/1200/phone,gold',
         tag: 'Edición premium',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/1200x900/?phone,store&q=80', tag: 'Tienda', size: 'md'},
-      {url: 'https://source.unsplash.com/random/900x1200/?phone,unbox&q=80', tag: 'Unboxing', size: 'sm'},
+      {url: 'https://loremflickr.com/1200/900/phone,store', tag: 'Tienda', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/phone,unbox', tag: 'Unboxing', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?phone,repair&q=80',
+        url: 'https://loremflickr.com/1200/900/phone,repair',
         tag: 'Reparación',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?imei,phone&q=80',
+        url: 'https://loremflickr.com/800/600/imei,phone',
         caption: 'IMEI registrado al vender'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?phone,plan&q=80',
+        url: 'https://loremflickr.com/800/600/phone,plan',
         caption: 'Plan de telco activado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?phone,setup&q=80',
+        url: 'https://loremflickr.com/800/600/phone,setup',
         caption: 'Configuración inicial con cliente'
       }
     ]
@@ -19841,58 +19841,58 @@ const BRAND_FUNDA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?phone,case,accessories&q=85',
+    hero: 'https://loremflickr.com/1200/1600/phone,case,accessories',
     heroAlt: 'Fundas y accesorios celulares en exhibidor colorido',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?phone,case&q=80',
+        url: 'https://loremflickr.com/1200/900/phone,case',
         tag: 'Fundas variedad',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?screen,protector&q=80',
+        url: 'https://loremflickr.com/900/1200/screen,protector',
         tag: 'Vidrios templados',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?cable,usb&q=80', tag: 'Cables', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/cable,usb', tag: 'Cables', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?charger,wireless&q=80',
+        url: 'https://loremflickr.com/900/1200/charger,wireless',
         tag: 'Cargadores',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?earbuds&q=80', tag: 'Audífonos BT', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/earbuds', tag: 'Audífonos BT', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?powerbank&q=80',
+        url: 'https://loremflickr.com/900/1200/powerbank',
         tag: 'Power banks',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?accessory,store,phone&q=80',
+        url: 'https://loremflickr.com/1200/900/accessory,store,phone',
         tag: 'Tienda',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?phone,grip&q=80',
+        url: 'https://loremflickr.com/900/1200/phone,grip',
         tag: 'Pop sockets',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?phone,mount,car&q=80',
+        url: 'https://loremflickr.com/1200/900/phone,mount,car',
         tag: 'Soportes auto',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?phone,install,screen&q=80',
+        url: 'https://loremflickr.com/800/600/phone,install,screen',
         caption: 'Instalación de mica inmediata'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?phone,case,fitting&q=80',
+        url: 'https://loremflickr.com/800/600/phone,case,fitting',
         caption: 'Cliente prueba funda en modelo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?phone,accessory,display&q=80',
+        url: 'https://loremflickr.com/800/600/phone,accessory,display',
         caption: 'Combo funda + vidrio templado'
       }
     ]
@@ -20008,62 +20008,62 @@ const BRAND_NIVEL = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?videogames,gaming,console&q=85',
+    hero: 'https://loremflickr.com/1200/1600/videogames,gaming,console',
     heroAlt: 'Tienda de videojuegos con consolas y títulos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?playstation&q=80',
+        url: 'https://loremflickr.com/1200/900/playstation',
         tag: 'PlayStation',
         size: 'lg'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?xbox,console&q=80', tag: 'Xbox', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/xbox,console', tag: 'Xbox', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?nintendo,switch&q=80',
+        url: 'https://loremflickr.com/900/1200/nintendo,switch',
         tag: 'Nintendo Switch',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?game,controller&q=80',
+        url: 'https://loremflickr.com/900/1200/game,controller',
         tag: 'Controles',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gaming,headset&q=80',
+        url: 'https://loremflickr.com/900/1200/gaming,headset',
         tag: 'Headsets gamer',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?game,disc&q=80',
+        url: 'https://loremflickr.com/900/1200/game,disc',
         tag: 'Juegos físicos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gaming,store&q=80',
+        url: 'https://loremflickr.com/1200/900/gaming,store',
         tag: 'Tienda gamer',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?collectible,figure&q=80',
+        url: 'https://loremflickr.com/900/1200/collectible,figure',
         tag: 'Figuras coleccionables',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gaming,event&q=80',
+        url: 'https://loremflickr.com/1200/900/gaming,event',
         tag: 'Eventos gaming',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?game,launch&q=80',
+        url: 'https://loremflickr.com/800/600/game,launch',
         caption: 'Lanzamientos con preventa'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?console,test&q=80',
+        url: 'https://loremflickr.com/800/600/console,test',
         caption: 'Prueba de consolas usadas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?gaming,tournament&q=80',
+        url: 'https://loremflickr.com/800/600/gaming,tournament',
         caption: 'Torneos en tienda'
       }
     ]
@@ -20179,55 +20179,55 @@ const BRAND_TROMPITO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?toys,kids,playful&q=85',
+    hero: 'https://loremflickr.com/1200/1600/toys,kids,playful',
     heroAlt: 'Juguetería colorida con muñecas y juegos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?toys,wooden&q=80',
+        url: 'https://loremflickr.com/1200/900/toys,wooden',
         tag: 'Juguetes madera',
         size: 'lg'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?dolls&q=80', tag: 'Muñecas', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/dolls', tag: 'Muñecas', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?puzzle,kids&q=80',
+        url: 'https://loremflickr.com/900/1200/puzzle,kids',
         tag: 'Rompecabezas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?board,game&q=80',
+        url: 'https://loremflickr.com/900/1200/board,game',
         tag: 'Juegos mesa',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lego,blocks&q=80',
+        url: 'https://loremflickr.com/900/1200/lego,blocks',
         tag: 'Bloques construcción',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?stuffed,animal&q=80',
+        url: 'https://loremflickr.com/900/1200/stuffed,animal',
         tag: 'Peluches',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/1200x900/?toy,store&q=80', tag: 'Juguetería', size: 'md'},
+      {url: 'https://loremflickr.com/1200/900/toy,store', tag: 'Juguetería', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?action,figure&q=80',
+        url: 'https://loremflickr.com/900/1200/action,figure',
         tag: 'Figuras de acción',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?birthday,toys&q=80',
+        url: 'https://loremflickr.com/1200/900/birthday,toys',
         tag: 'Cumpleaños',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?kids,birthday,gift&q=80',
+        url: 'https://loremflickr.com/800/600/kids,birthday,gift',
         caption: 'Lista de regalo para cumpleaños'
       },
-      {url: 'https://source.unsplash.com/random/800x600/?gift,wrap&q=80', caption: 'Envoltura especial'},
+      {url: 'https://loremflickr.com/800/600/gift,wrap', caption: 'Envoltura especial'},
       {
-        url: 'https://source.unsplash.com/random/800x600/?mom,kid,toy&q=80',
+        url: 'https://loremflickr.com/800/600/mom,kid,toy',
         caption: 'Mamá elige según edad'
       }
     ]
@@ -20343,54 +20343,54 @@ const BRAND_MAQUETA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?model,kit,hobby&q=85',
+    hero: 'https://loremflickr.com/1200/1600/model,kit,hobby',
     heroAlt: 'Tienda de hobby con maquetas y pinturas',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?model,kit&q=80',
+        url: 'https://loremflickr.com/1200/900/model,kit',
         tag: 'Maquetas plástico',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?paint,acrylic&q=80',
+        url: 'https://loremflickr.com/900/1200/paint,acrylic',
         tag: 'Pinturas acrílicas',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?brush,hobby&q=80', tag: 'Pinceles', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/900x1200/?airbrush&q=80', tag: 'Aerógrafos', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/900x1200/?diorama&q=80', tag: 'Dioramas', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/brush,hobby', tag: 'Pinceles', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/airbrush', tag: 'Aerógrafos', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/diorama', tag: 'Dioramas', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?hobby,tools&q=80',
+        url: 'https://loremflickr.com/900/1200/hobby,tools',
         tag: 'Herramientas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?hobby,store&q=80',
+        url: 'https://loremflickr.com/1200/900/hobby,store',
         tag: 'Tienda hobby',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?model,painting&q=80',
+        url: 'https://loremflickr.com/900/1200/model,painting',
         tag: 'Modelo terminado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?warhammer,figures&q=80',
+        url: 'https://loremflickr.com/1200/900/warhammer,figures',
         tag: 'Wargaming',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?hobby,workbench&q=80',
+        url: 'https://loremflickr.com/800/600/hobby,workbench',
         caption: 'Cliente arma proyecto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?hobby,club&q=80',
+        url: 'https://loremflickr.com/800/600/hobby,club',
         caption: 'Comunidad y eventos'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?paint,palette&q=80',
+        url: 'https://loremflickr.com/800/600/paint,palette',
         caption: 'Asesoría de pintura'
       }
     ]
@@ -20506,62 +20506,62 @@ const BRAND_ESCALA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?scale,model,kit&q=85',
+    hero: 'https://loremflickr.com/1200/1600/scale,model,kit',
     heroAlt: 'Maquetas a escala en exhibidor',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tank,model&q=80',
+        url: 'https://loremflickr.com/1200/900/tank,model',
         tag: 'Tanques 1:35',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?airplane,model&q=80',
+        url: 'https://loremflickr.com/900/1200/airplane,model',
         tag: 'Aviones 1:48',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?car,model&q=80', tag: 'Autos 1:24', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/car,model', tag: 'Autos 1:24', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ship,model&q=80',
+        url: 'https://loremflickr.com/900/1200/ship,model',
         tag: 'Barcos 1:350',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?railroad,model&q=80',
+        url: 'https://loremflickr.com/900/1200/railroad,model',
         tag: 'Trenes H0',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?figures,scale&q=80',
+        url: 'https://loremflickr.com/900/1200/figures,scale',
         tag: 'Figuras escala',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?model,shop&q=80',
+        url: 'https://loremflickr.com/1200/900/model,shop',
         tag: 'Tienda modelismo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?diorama,base&q=80',
+        url: 'https://loremflickr.com/900/1200/diorama,base',
         tag: 'Bases dioramas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?scale,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/scale,workshop',
         tag: 'Taller',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?model,assembly&q=80',
+        url: 'https://loremflickr.com/800/600/model,assembly',
         caption: 'Cliente arma maqueta en casa'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?model,detail&q=80',
+        url: 'https://loremflickr.com/800/600/model,detail',
         caption: 'Detalle de pintado avanzado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?model,exhibition&q=80',
+        url: 'https://loremflickr.com/800/600/model,exhibition',
         caption: 'Exposición de coleccionistas'
       }
     ]
@@ -20677,66 +20677,66 @@ const BRAND_TARJETA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?trading,cards,collection&q=85',
+    hero: 'https://loremflickr.com/1200/1600/trading,cards,collection',
     heroAlt: 'Cartas coleccionables en vitrina',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pokemon,cards&q=80',
+        url: 'https://loremflickr.com/1200/900/pokemon,cards',
         tag: 'Pokémon TCG',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?magic,gathering&q=80',
+        url: 'https://loremflickr.com/900/1200/magic,gathering',
         tag: 'Magic',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?yugioh,cards&q=80',
+        url: 'https://loremflickr.com/900/1200/yugioh,cards',
         tag: 'Yu-Gi-Oh!',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sports,cards&q=80',
+        url: 'https://loremflickr.com/900/1200/sports,cards',
         tag: 'Cartas deportivas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?card,binder&q=80',
+        url: 'https://loremflickr.com/900/1200/card,binder',
         tag: 'Folders premium',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?graded,card&q=80',
+        url: 'https://loremflickr.com/900/1200/graded,card',
         tag: 'Cartas calificadas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?card,shop&q=80',
+        url: 'https://loremflickr.com/1200/900/card,shop',
         tag: 'Tienda cartas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?rare,card&q=80',
+        url: 'https://loremflickr.com/900/1200/rare,card',
         tag: 'Edición rara',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?card,tournament&q=80',
+        url: 'https://loremflickr.com/1200/900/card,tournament',
         tag: 'Torneo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?card,authentication&q=80',
+        url: 'https://loremflickr.com/800/600/card,authentication',
         caption: 'Autenticación de carta rara'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?card,trade&q=80',
+        url: 'https://loremflickr.com/800/600/card,trade',
         caption: 'Compraventa entre coleccionistas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?tournament,gaming&q=80',
+        url: 'https://loremflickr.com/800/600/tournament,gaming',
         caption: 'Torneo en tienda'
       }
     ]
@@ -20852,54 +20852,54 @@ const BRAND_VINETA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?comic,book,marvel&q=85',
+    hero: 'https://loremflickr.com/1200/1600/comic,book,marvel',
     heroAlt: 'Comiquería con cómics y figuras',
     showcase: [
-      {url: 'https://source.unsplash.com/random/1200x900/?comic,marvel&q=80', tag: 'Marvel', size: 'lg'},
-      {url: 'https://source.unsplash.com/random/900x1200/?dc,comics&q=80', tag: 'DC', size: 'md'},
-      {url: 'https://source.unsplash.com/random/900x1200/?indie,comic&q=80', tag: 'Indie', size: 'sm'},
+      {url: 'https://loremflickr.com/1200/900/comic,marvel', tag: 'Marvel', size: 'lg'},
+      {url: 'https://loremflickr.com/900/1200/dc,comics', tag: 'DC', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/indie,comic', tag: 'Indie', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?graphic,novel&q=80',
+        url: 'https://loremflickr.com/900/1200/graphic,novel',
         tag: 'Novelas gráficas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?comic,variant&q=80',
+        url: 'https://loremflickr.com/900/1200/comic,variant',
         tag: 'Variantes',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vintage,comic&q=80',
+        url: 'https://loremflickr.com/900/1200/vintage,comic',
         tag: 'Vintage',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?comic,store&q=80',
+        url: 'https://loremflickr.com/1200/900/comic,store',
         tag: 'Comiquería',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?comic,bag&q=80',
+        url: 'https://loremflickr.com/900/1200/comic,bag',
         tag: 'Bag & Board',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?comic,event,signing&q=80',
+        url: 'https://loremflickr.com/1200/900/comic,event,signing',
         tag: 'Firmas y eventos',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?comic,reading&q=80',
+        url: 'https://loremflickr.com/800/600/comic,reading',
         caption: 'Cliente revisa pull list'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?comic,grading&q=80',
+        url: 'https://loremflickr.com/800/600/comic,grading',
         caption: 'Cómic calificado CGC'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?comic,convention&q=80',
+        url: 'https://loremflickr.com/800/600/comic,convention',
         caption: 'Convenciones y eventos'
       }
     ]
@@ -21015,50 +21015,50 @@ const BRAND_TOMO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?manga,anime,japan&q=85',
+    hero: 'https://loremflickr.com/1200/1600/manga,anime,japan',
     heroAlt: 'Mangería con tomos en estantería',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?manga,shelves&q=80',
+        url: 'https://loremflickr.com/1200/900/manga,shelves',
         tag: 'Series completas',
         size: 'lg'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?shonen,manga&q=80', tag: 'Shonen', size: 'md'},
-      {url: 'https://source.unsplash.com/random/900x1200/?shojo,manga&q=80', tag: 'Shojo', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/900x1200/?seinen,manga&q=80', tag: 'Seinen', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/shonen,manga', tag: 'Shonen', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/shojo,manga', tag: 'Shojo', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/seinen,manga', tag: 'Seinen', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?anime,merchandise&q=80',
+        url: 'https://loremflickr.com/900/1200/anime,merchandise',
         tag: 'Merch anime',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?manga,artbook&q=80',
+        url: 'https://loremflickr.com/900/1200/manga,artbook',
         tag: 'Artbooks',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/1200x900/?anime,store&q=80', tag: 'Mangería', size: 'md'},
+      {url: 'https://loremflickr.com/1200/900/anime,store', tag: 'Mangería', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?manga,limited&q=80',
+        url: 'https://loremflickr.com/900/1200/manga,limited',
         tag: 'Ediciones limitadas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cosplay,event&q=80',
+        url: 'https://loremflickr.com/1200/900/cosplay,event',
         tag: 'Cosplay',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?manga,reading&q=80',
+        url: 'https://loremflickr.com/800/600/manga,reading',
         caption: 'Lector revisa serie'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?manga,collection&q=80',
+        url: 'https://loremflickr.com/800/600/manga,collection',
         caption: 'Colección completa'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?anime,convention&q=80',
+        url: 'https://loremflickr.com/800/600/anime,convention',
         caption: 'Convenciones y eventos'
       }
     ]
@@ -21174,58 +21174,58 @@ const BRAND_AURA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?crystal,esoteric,tarot&q=85',
+    hero: 'https://loremflickr.com/1200/1600/crystal,esoteric,tarot',
     heroAlt: 'Tienda esotérica con cristales y velas',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?crystals,gemstones&q=80',
+        url: 'https://loremflickr.com/1200/900/crystals,gemstones',
         tag: 'Cristales',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tarot,cards&q=80',
+        url: 'https://loremflickr.com/900/1200/tarot,cards',
         tag: 'Cartas tarot',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?candles,ritual&q=80',
+        url: 'https://loremflickr.com/900/1200/candles,ritual',
         tag: 'Velas rituales',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?incense&q=80', tag: 'Incienso', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/incense', tag: 'Incienso', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?herbs,dried&q=80',
+        url: 'https://loremflickr.com/900/1200/herbs,dried',
         tag: 'Hierbas secas',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?pendulum&q=80', tag: 'Péndulos', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/pendulum', tag: 'Péndulos', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?esoteric,shop&q=80',
+        url: 'https://loremflickr.com/1200/900/esoteric,shop',
         tag: 'Tienda esotérica',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?amulet,protection&q=80',
+        url: 'https://loremflickr.com/900/1200/amulet,protection',
         tag: 'Amuletos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tarot,reading&q=80',
+        url: 'https://loremflickr.com/1200/900/tarot,reading',
         tag: 'Lectura tarot',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?tarot,session&q=80',
+        url: 'https://loremflickr.com/800/600/tarot,session',
         caption: 'Consulta de tarot agendada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?crystal,energy&q=80',
+        url: 'https://loremflickr.com/800/600/crystal,energy',
         caption: 'Limpieza energética'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?moon,ritual&q=80',
+        url: 'https://loremflickr.com/800/600/moon,ritual',
         caption: 'Rituales por fase lunar'
       }
     ]
@@ -21341,54 +21341,54 @@ const BRAND_TALLO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?flowers,bouquet,florist&q=85',
+    hero: 'https://loremflickr.com/1200/1600/flowers,bouquet,florist',
     heroAlt: 'Floristería con ramos coloridos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?roses,bouquet&q=80',
+        url: 'https://loremflickr.com/1200/900/roses,bouquet',
         tag: 'Ramos rosas',
         size: 'lg'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?tulips&q=80', tag: 'Tulipanes', size: 'md'},
-      {url: 'https://source.unsplash.com/random/900x1200/?sunflower&q=80', tag: 'Girasoles', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/900x1200/?orchid&q=80', tag: 'Orquídeas', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/tulips', tag: 'Tulipanes', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/sunflower', tag: 'Girasoles', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/orchid', tag: 'Orquídeas', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wedding,flowers&q=80',
+        url: 'https://loremflickr.com/900/1200/wedding,flowers',
         tag: 'Ramos novia',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?funeral,arrangement&q=80',
+        url: 'https://loremflickr.com/900/1200/funeral,arrangement',
         tag: 'Coronas fúnebres',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?flower,shop&q=80',
+        url: 'https://loremflickr.com/1200/900/flower,shop',
         tag: 'Floristería',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?florist,working&q=80',
+        url: 'https://loremflickr.com/900/1200/florist,working',
         tag: 'Taller',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?flower,delivery&q=80',
+        url: 'https://loremflickr.com/1200/900/flower,delivery',
         tag: 'Entrega',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?florist,cutting&q=80',
+        url: 'https://loremflickr.com/800/600/florist,cutting',
         caption: 'Florista arma ramo en taller'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?flower,fresh&q=80',
+        url: 'https://loremflickr.com/800/600/flower,fresh',
         caption: 'Stock con fecha de llegada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?delivery,florist&q=80',
+        url: 'https://loremflickr.com/800/600/delivery,florist',
         caption: 'Entrega a domicilio'
       }
     ]
@@ -21508,66 +21508,66 @@ const BRAND_RAMILLETE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?floral,arrangement,premium&q=85',
+    hero: 'https://loremflickr.com/1200/1600/floral,arrangement,premium',
     heroAlt: 'Arreglos florales premium en exhibidor',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?wedding,arrangement&q=80',
+        url: 'https://loremflickr.com/1200/900/wedding,arrangement',
         tag: 'Bodas',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?birthday,flowers&q=80',
+        url: 'https://loremflickr.com/900/1200/birthday,flowers',
         tag: 'Cumpleaños',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?condolence,arrangement&q=80',
+        url: 'https://loremflickr.com/900/1200/condolence,arrangement',
         tag: 'Condolencias',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?centerpiece,floral&q=80',
+        url: 'https://loremflickr.com/900/1200/centerpiece,floral',
         tag: 'Centros mesa',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?baby,shower,flowers&q=80',
+        url: 'https://loremflickr.com/900/1200/baby,shower,flowers',
         tag: 'Baby showers',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?corporate,flowers&q=80',
+        url: 'https://loremflickr.com/900/1200/corporate,flowers',
         tag: 'Corporativo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?floral,studio&q=80',
+        url: 'https://loremflickr.com/1200/900/floral,studio',
         tag: 'Estudio floral',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bouquet,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/bouquet,detail',
         tag: 'Detalle ramo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?wedding,decoration&q=80',
+        url: 'https://loremflickr.com/1200/900/wedding,decoration',
         tag: 'Decoración boda',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?florist,arranging&q=80',
+        url: 'https://loremflickr.com/800/600/florist,arranging',
         caption: 'Diseño del arreglo en taller'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?event,floral&q=80',
+        url: 'https://loremflickr.com/800/600/event,floral',
         caption: 'Montaje en evento'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?flowers,delivery,truck&q=80',
+        url: 'https://loremflickr.com/800/600/flowers,delivery,truck',
         caption: 'Entrega con hora exacta'
       }
     ]
@@ -21687,66 +21687,66 @@ const BRAND_HELIO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?balloons,party,decoration&q=85',
+    hero: 'https://loremflickr.com/1200/1600/balloons,party,decoration',
     heroAlt: 'Tienda de globos con decoración colorida',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?balloon,arch&q=80',
+        url: 'https://loremflickr.com/1200/900/balloon,arch',
         tag: 'Arcos globos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?helium,balloons&q=80',
+        url: 'https://loremflickr.com/900/1200/helium,balloons',
         tag: 'Helio bouquet',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?birthday,decoration&q=80',
+        url: 'https://loremflickr.com/900/1200/birthday,decoration',
         tag: 'Cumpleaños',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?baby,shower,decor&q=80',
+        url: 'https://loremflickr.com/900/1200/baby,shower,decor',
         tag: 'Baby showers',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wedding,balloons&q=80',
+        url: 'https://loremflickr.com/900/1200/wedding,balloons',
         tag: 'Bodas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?party,supplies&q=80',
+        url: 'https://loremflickr.com/900/1200/party,supplies',
         tag: 'Accesorios fiesta',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?balloon,shop&q=80',
+        url: 'https://loremflickr.com/1200/900/balloon,shop',
         tag: 'Tienda globos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?metallic,balloon&q=80',
+        url: 'https://loremflickr.com/900/1200/metallic,balloon',
         tag: 'Globos metálicos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?party,setup&q=80',
+        url: 'https://loremflickr.com/1200/900/party,setup',
         tag: 'Montaje evento',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?balloon,inflating&q=80',
+        url: 'https://loremflickr.com/800/600/balloon,inflating',
         caption: 'Taller inflando con helio'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?party,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/party,delivery',
         caption: 'Entrega y montaje en evento'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?party,decoration,setup&q=80',
+        url: 'https://loremflickr.com/800/600/party,decoration,setup',
         caption: 'Montaje completo de fiesta'
       }
     ]
@@ -21866,58 +21866,58 @@ const BRAND_PINATA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?candy,pinata,mexican&q=85',
+    hero: 'https://loremflickr.com/1200/1600/candy,pinata,mexican',
     heroAlt: 'Dulcería con piñatas y dulces variados',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pinata,mexican&q=80',
+        url: 'https://loremflickr.com/1200/900/pinata,mexican',
         tag: 'Piñatas tradicionales',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?character,pinata&q=80',
+        url: 'https://loremflickr.com/900/1200/character,pinata',
         tag: 'Personajes',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?candy,bulk&q=80',
+        url: 'https://loremflickr.com/900/1200/candy,bulk',
         tag: 'Dulces a granel',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chocolate,kids&q=80',
+        url: 'https://loremflickr.com/900/1200/chocolate,kids',
         tag: 'Chocolates',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?candy,paquete&q=80',
+        url: 'https://loremflickr.com/900/1200/candy,paquete',
         tag: 'Paquetes piñata',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?lollipop&q=80', tag: 'Paletas', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/1200x900/?candy,store&q=80', tag: 'Dulcería', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/lollipop', tag: 'Paletas', size: 'sm'},
+      {url: 'https://loremflickr.com/1200/900/candy,store', tag: 'Dulcería', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?birthday,party,mexican&q=80',
+        url: 'https://loremflickr.com/900/1200/birthday,party,mexican',
         tag: 'Fiesta tradicional',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pinata,break&q=80',
+        url: 'https://loremflickr.com/1200/900/pinata,break',
         tag: 'Quiebre piñata',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?candy,bags&q=80',
+        url: 'https://loremflickr.com/800/600/candy,bags',
         caption: 'Bolsitas pre-armadas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?pinata,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/pinata,delivery',
         caption: 'Entrega de piñata grande'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?kids,birthday,mexican&q=80',
+        url: 'https://loremflickr.com/800/600/kids,birthday,mexican',
         caption: 'Cliente arma fiesta'
       }
     ]
@@ -22033,62 +22033,62 @@ const BRAND_MONO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?gift,wrap,present&q=85',
+    hero: 'https://loremflickr.com/1200/1600/gift,wrap,present',
     heroAlt: 'Tienda de regalos con cajas envueltas',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gift,box&q=80',
+        url: 'https://loremflickr.com/1200/900/gift,box',
         tag: 'Cajas regalo',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?perfume,gift&q=80',
+        url: 'https://loremflickr.com/900/1200/perfume,gift',
         tag: 'Perfumes',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chocolate,box&q=80',
+        url: 'https://loremflickr.com/900/1200/chocolate,box',
         tag: 'Chocolates',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?candle,scent&q=80',
+        url: 'https://loremflickr.com/900/1200/candle,scent',
         tag: 'Velas aromáticas',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?gift,basket&q=80', tag: 'Canastas', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/gift,basket', tag: 'Canastas', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?personalized,gift&q=80',
+        url: 'https://loremflickr.com/900/1200/personalized,gift',
         tag: 'Personalizados',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gift,shop&q=80',
+        url: 'https://loremflickr.com/1200/900/gift,shop',
         tag: 'Tienda regalos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ribbon,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/ribbon,detail',
         tag: 'Detalle moño',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gift,delivery&q=80',
+        url: 'https://loremflickr.com/1200/900/gift,delivery',
         tag: 'Entrega sorpresa',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?gift,wrap,paper&q=80',
+        url: 'https://loremflickr.com/800/600/gift,wrap,paper',
         caption: 'Envoltura especial con tarjeta'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?gift,delivery,surprise&q=80',
+        url: 'https://loremflickr.com/800/600/gift,delivery,surprise',
         caption: 'Entrega sorpresa con video'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?gift,personalize&q=80',
+        url: 'https://loremflickr.com/800/600/gift,personalize',
         caption: 'Regalo personalizado'
       }
     ]
@@ -22204,58 +22204,58 @@ const BRAND_RECUERDO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?souvenir,mexican,tourist&q=85',
+    hero: 'https://loremflickr.com/1200/1600/souvenir,mexican,tourist',
     heroAlt: 'Tienda de souvenirs mexicanos coloridos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mexican,souvenir&q=80',
+        url: 'https://loremflickr.com/1200/900/mexican,souvenir',
         tag: 'Souvenirs MX',
         size: 'lg'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?keychain&q=80', tag: 'Llaveros', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/keychain', tag: 'Llaveros', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?magnets,fridge&q=80',
+        url: 'https://loremflickr.com/900/1200/magnets,fridge',
         tag: 'Imanes',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tshirt,tourist&q=80',
+        url: 'https://loremflickr.com/900/1200/tshirt,tourist',
         tag: 'Playeras turísticas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mexican,sombrero&q=80',
+        url: 'https://loremflickr.com/900/1200/mexican,sombrero',
         tag: 'Sombreros',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tequila,bottle&q=80',
+        url: 'https://loremflickr.com/900/1200/tequila,bottle',
         tag: 'Tequila premium',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?souvenir,store&q=80',
+        url: 'https://loremflickr.com/1200/900/souvenir,store',
         tag: 'Tienda turística',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?postcard&q=80', tag: 'Postales', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/postcard', tag: 'Postales', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cancun,beach&q=80',
+        url: 'https://loremflickr.com/1200/900/cancun,beach',
         tag: 'Destino playa',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?tourist,shopping&q=80',
+        url: 'https://loremflickr.com/800/600/tourist,shopping',
         caption: 'Turista compra en pesos o dólares'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?tour,group&q=80',
+        url: 'https://loremflickr.com/800/600/tour,group',
         caption: 'Grupo de turistas con paquetes'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?craft,souvenir&q=80',
+        url: 'https://loremflickr.com/800/600/craft,souvenir',
         caption: 'Artesanías locales'
       }
     ]
@@ -22371,66 +22371,66 @@ const BRAND_BARRO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?mexican,craft,artisan&q=85',
+    hero: 'https://loremflickr.com/1200/1600/mexican,craft,artisan',
     heroAlt: 'Tienda de artesanías mexicanas con barro y textiles',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?talavera,pottery&q=80',
+        url: 'https://loremflickr.com/1200/900/talavera,pottery',
         tag: 'Talavera Puebla',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?alebrije&q=80',
+        url: 'https://loremflickr.com/900/1200/alebrije',
         tag: 'Alebrijes Oaxaca',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?textile,mexican&q=80',
+        url: 'https://loremflickr.com/900/1200/textile,mexican',
         tag: 'Textiles Chiapas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?silver,mexican&q=80',
+        url: 'https://loremflickr.com/900/1200/silver,mexican',
         tag: 'Plata Taxco',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?barro,negro&q=80',
+        url: 'https://loremflickr.com/900/1200/barro,negro',
         tag: 'Barro negro',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?huichol,art&q=80',
+        url: 'https://loremflickr.com/900/1200/huichol,art',
         tag: 'Arte Huichol',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?artisan,shop&q=80',
+        url: 'https://loremflickr.com/1200/900/artisan,shop',
         tag: 'Tienda artesanal',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?craft,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/craft,detail',
         tag: 'Detalle pieza',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?artisan,working&q=80',
+        url: 'https://loremflickr.com/1200/900/artisan,working',
         tag: 'Artesano en taller',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?craft,certificate&q=80',
+        url: 'https://loremflickr.com/800/600/craft,certificate',
         caption: 'Certificado de origen del artesano'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?mexican,market&q=80',
+        url: 'https://loremflickr.com/800/600/mexican,market',
         caption: 'Visita de turistas a tienda'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?artisan,pottery&q=80',
+        url: 'https://loremflickr.com/800/600/artisan,pottery',
         caption: 'Artesano firma cada pieza'
       }
     ]
@@ -22546,58 +22546,58 @@ const BRAND_BUJIA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?mechanic,garage,wrench&q=80',
+    hero: 'https://loremflickr.com/1200/1600/mechanic,garage,wrench',
     heroAlt: 'Mecánico afinando motor en taller',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mechanic,engine&q=80',
+        url: 'https://loremflickr.com/1200/900/mechanic,engine',
         tag: 'Afinación motor',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wrench,tools&q=80',
+        url: 'https://loremflickr.com/900/1200/wrench,tools',
         tag: 'Herramientas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sparkplug,bujia&q=80',
+        url: 'https://loremflickr.com/900/1200/sparkplug,bujia',
         tag: 'Bujías',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-repair,oil&q=80',
+        url: 'https://loremflickr.com/900/1200/car-repair,oil',
         tag: 'Cambio aceite',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?garage,mechanic&q=80',
+        url: 'https://loremflickr.com/900/1200/garage,mechanic',
         tag: 'Diagnóstico',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?brake,disc&q=80', tag: 'Frenos', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/brake,disc', tag: 'Frenos', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?workshop,car&q=80',
+        url: 'https://loremflickr.com/1200/900/workshop,car',
         tag: 'Taller industrial',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?tire,llanta&q=80', tag: 'Llantas', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/tire,llanta', tag: 'Llantas', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?engine,piston&q=80',
+        url: 'https://loremflickr.com/1200/900/engine,piston',
         tag: 'Motor abierto',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?mechanic,tablet&q=80',
+        url: 'https://loremflickr.com/800/600/mechanic,tablet',
         caption: 'Orden firmada en tablet por el cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?garage,parts&q=80',
+        url: 'https://loremflickr.com/800/600/garage,parts',
         caption: 'Refacciones escaneadas al instalarse'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?whatsapp,phone&q=80',
+        url: 'https://loremflickr.com/800/600/whatsapp,phone',
         caption: 'Presupuesto enviado por WhatsApp'
       }
     ]
@@ -22715,66 +22715,66 @@ const BRAND_LATONERO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?bodyshop,car-paint,dent&q=80',
+    hero: 'https://loremflickr.com/1200/1600/bodyshop,car-paint,dent',
     heroAlt: 'Hojalatero reparando defensa abollada',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?car-paint,bodyshop&q=80',
+        url: 'https://loremflickr.com/1200/900/car-paint,bodyshop',
         tag: 'Pintura horneada',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dent,repair&q=80',
+        url: 'https://loremflickr.com/900/1200/dent,repair',
         tag: 'Enderezado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sanding,car&q=80',
+        url: 'https://loremflickr.com/900/1200/sanding,car',
         tag: 'Lijado fino',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-paint,spray&q=80',
+        url: 'https://loremflickr.com/900/1200/car-paint,spray',
         tag: 'Cabina pintura',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bodyshop,fender&q=80',
+        url: 'https://loremflickr.com/900/1200/bodyshop,fender',
         tag: 'Salpicadera',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?polish,car&q=80',
+        url: 'https://loremflickr.com/900/1200/polish,car',
         tag: 'Pulido final',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?garage,car-repair&q=80',
+        url: 'https://loremflickr.com/1200/900/garage,car-repair',
         tag: 'Nave de trabajo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bumper,replace&q=80',
+        url: 'https://loremflickr.com/900/1200/bumper,replace',
         tag: 'Defensa nueva',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?car-paint,gloss&q=80',
+        url: 'https://loremflickr.com/1200/900/car-paint,gloss',
         tag: 'Color igualado',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?inspection,car&q=80',
+        url: 'https://loremflickr.com/800/600/inspection,car',
         caption: 'Fotos del estado al recibir el auto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?insurance,document&q=80',
+        url: 'https://loremflickr.com/800/600/insurance,document',
         caption: 'Orden vinculada a aseguradora'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?delivery,car&q=80',
+        url: 'https://loremflickr.com/800/600/delivery,car',
         caption: 'Entrega con foto final firmada'
       }
     ]
@@ -22892,66 +22892,66 @@ const BRAND_EMBRAGUE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?transmission,gearbox,mechanic&q=80',
+    hero: 'https://loremflickr.com/1200/1600/transmission,gearbox,mechanic',
     heroAlt: 'Mecánico armando caja de transmisión',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?gearbox,transmission&q=80',
+        url: 'https://loremflickr.com/1200/900/gearbox,transmission',
         tag: 'Caja automática',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?clutch,wrench&q=80',
+        url: 'https://loremflickr.com/900/1200/clutch,wrench',
         tag: 'Embrague',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gear,steel&q=80',
+        url: 'https://loremflickr.com/900/1200/gear,steel',
         tag: 'Engranajes',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mechanic,oil&q=80',
+        url: 'https://loremflickr.com/900/1200/mechanic,oil',
         tag: 'Aceite ATF',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gearbox,manual&q=80',
+        url: 'https://loremflickr.com/900/1200/gearbox,manual',
         tag: 'Caja manual',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?garage,tools&q=80',
+        url: 'https://loremflickr.com/900/1200/garage,tools',
         tag: 'Bahía elevada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?car,lift&q=80',
+        url: 'https://loremflickr.com/1200/900/car,lift',
         tag: 'Auto elevado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bearing,steel&q=80',
+        url: 'https://loremflickr.com/900/1200/bearing,steel',
         tag: 'Baleros',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?workshop,gearbox&q=80',
+        url: 'https://loremflickr.com/1200/900/workshop,gearbox',
         tag: 'Taller especializado',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?logbook,mechanic&q=80',
+        url: 'https://loremflickr.com/800/600/logbook,mechanic',
         caption: 'Bitácora de cada caja con foto de cada pieza'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,paper&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,paper',
         caption: 'Garantía digital de 12 meses'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?phone,whatsapp&q=80',
+        url: 'https://loremflickr.com/800/600/phone,whatsapp',
         caption: 'Cliente recibe video del antes-después'
       }
     ]
@@ -23069,58 +23069,58 @@ const BRAND_ALTERNADOR = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?car-electric,wiring,mechanic&q=80',
+    hero: 'https://loremflickr.com/1200/1600/car-electric,wiring,mechanic',
     heroAlt: 'Electricista automotriz revisando arnés',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?wiring,car&q=80',
+        url: 'https://loremflickr.com/1200/900/wiring,car',
         tag: 'Arnés completo',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?alternator,car&q=80',
+        url: 'https://loremflickr.com/900/1200/alternator,car',
         tag: 'Alternador',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?multimeter,test&q=80',
+        url: 'https://loremflickr.com/900/1200/multimeter,test',
         tag: 'Multímetro',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?battery,car&q=80', tag: 'Batería', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/battery,car', tag: 'Batería', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fuse,box&q=80',
+        url: 'https://loremflickr.com/900/1200/fuse,box',
         tag: 'Caja fusibles',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?scanner,obd&q=80',
+        url: 'https://loremflickr.com/900/1200/scanner,obd',
         tag: 'Scanner OBD',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?garage,electric&q=80',
+        url: 'https://loremflickr.com/1200/900/garage,electric',
         tag: 'Mesa diagnóstico',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?starter,car&q=80', tag: 'Marcha', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/starter,car', tag: 'Marcha', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?wires,colored&q=80',
+        url: 'https://loremflickr.com/1200/900/wires,colored',
         tag: 'Cableado nuevo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?scanner,car&q=80',
+        url: 'https://loremflickr.com/800/600/scanner,car',
         caption: 'Códigos de falla guardados con scan'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?wiring,diagram&q=80',
+        url: 'https://loremflickr.com/800/600/wiring,diagram',
         caption: 'Diagrama eléctrico del auto en sistema'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?invoice,paper&q=80',
+        url: 'https://loremflickr.com/800/600/invoice,paper',
         caption: 'Factura con códigos y horas reales'
       }
     ]
@@ -23238,66 +23238,66 @@ const BRAND_DIESEL_SHOP = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?diesel,truck,mechanic&q=80',
+    hero: 'https://loremflickr.com/1200/1600/diesel,truck,mechanic',
     heroAlt: 'Mecánico diésel trabajando en motor de tractocamión',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?diesel,truck-engine&q=80',
+        url: 'https://loremflickr.com/1200/900/diesel,truck-engine',
         tag: 'Motor Cummins',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?injector,diesel&q=80',
+        url: 'https://loremflickr.com/900/1200/injector,diesel',
         tag: 'Inyectores',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?turbo,engine&q=80',
+        url: 'https://loremflickr.com/900/1200/turbo,engine',
         tag: 'Turbo Holset',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fuel-pump,diesel&q=80',
+        url: 'https://loremflickr.com/900/1200/fuel-pump,diesel',
         tag: 'Bomba inyección',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tractor,truck&q=80',
+        url: 'https://loremflickr.com/900/1200/tractor,truck',
         tag: 'Tractocamión',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mechanic,wrench&q=80',
+        url: 'https://loremflickr.com/900/1200/mechanic,wrench',
         tag: 'Calibración',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?diesel,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/diesel,workshop',
         tag: 'Nave especializada',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?engine,piston&q=80',
+        url: 'https://loremflickr.com/900/1200/engine,piston',
         tag: 'Pistón pesado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?truck,fleet&q=80',
+        url: 'https://loremflickr.com/1200/900/truck,fleet',
         tag: 'Flota cliente',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?diesel,test&q=80',
+        url: 'https://loremflickr.com/800/600/diesel,test',
         caption: 'Pruebas de bomba en banco'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?fleet,truck&q=80',
+        url: 'https://loremflickr.com/800/600/fleet,truck',
         caption: 'Historial completo por unidad de flota'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?invoice,fleet&q=80',
+        url: 'https://loremflickr.com/800/600/invoice,fleet',
         caption: 'Factura para empresa transportista'
       }
     ]
@@ -23415,66 +23415,66 @@ const BRAND_ESCAPE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?motorcycle,mechanic,garage&q=80',
+    hero: 'https://loremflickr.com/1200/1600/motorcycle,mechanic,garage',
     heroAlt: 'Mecánico afinando moto en taller',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?motorcycle,repair&q=80',
+        url: 'https://loremflickr.com/1200/900/motorcycle,repair',
         tag: 'Servicio motor',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?motorcycle,chain&q=80',
+        url: 'https://loremflickr.com/900/1200/motorcycle,chain',
         tag: 'Cadena',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?motorcycle,tire&q=80',
+        url: 'https://loremflickr.com/900/1200/motorcycle,tire',
         tag: 'Llantas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?motorcycle,brake&q=80',
+        url: 'https://loremflickr.com/900/1200/motorcycle,brake',
         tag: 'Frenos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?scooter,workshop&q=80',
+        url: 'https://loremflickr.com/900/1200/scooter,workshop',
         tag: 'Scooter Italika',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?motorcycle,exhaust&q=80',
+        url: 'https://loremflickr.com/900/1200/motorcycle,exhaust',
         tag: 'Escape',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?motorcycle,garage&q=80',
+        url: 'https://loremflickr.com/1200/900/motorcycle,garage',
         tag: 'Bahía moto',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?motorcycle,oil&q=80',
+        url: 'https://loremflickr.com/900/1200/motorcycle,oil',
         tag: 'Cambio aceite',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bike,detail&q=80',
+        url: 'https://loremflickr.com/1200/900/bike,detail',
         tag: 'Mecánica fina',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?delivery,bike&q=80',
+        url: 'https://loremflickr.com/800/600/delivery,bike',
         caption: 'Mantenimiento de repartidores'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?motorcycle,helmet&q=80',
+        url: 'https://loremflickr.com/800/600/motorcycle,helmet',
         caption: 'Servicio express en 30 minutos'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?motorcycle,phone&q=80',
+        url: 'https://loremflickr.com/800/600/motorcycle,phone',
         caption: 'Cliente recibe video del servicio'
       }
     ]
@@ -23592,58 +23592,58 @@ const BRAND_BALATA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?auto-parts,shelves,store&q=80',
+    hero: 'https://loremflickr.com/1200/1600/auto-parts,shelves,store',
     heroAlt: 'Tienda de refacciones automotrices con estantería organizada',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?auto-parts,store&q=80',
+        url: 'https://loremflickr.com/1200/900/auto-parts,store',
         tag: 'Tienda principal',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?brake-pads,boxes&q=80',
+        url: 'https://loremflickr.com/900/1200/brake-pads,boxes',
         tag: 'Balatas en caja',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?spark-plug,boxes&q=80',
+        url: 'https://loremflickr.com/900/1200/spark-plug,boxes',
         tag: 'Bujías',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?oil-filter,car&q=80',
+        url: 'https://loremflickr.com/900/1200/oil-filter,car',
         tag: 'Filtros aceite',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?warehouse,parts&q=80',
+        url: 'https://loremflickr.com/900/1200/warehouse,parts',
         tag: 'Almacén',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?battery,car&q=80', tag: 'Baterías', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/battery,car', tag: 'Baterías', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?retail,auto&q=80',
+        url: 'https://loremflickr.com/1200/900/retail,auto',
         tag: 'Mostrador',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?belt,car&q=80', tag: 'Bandas', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/belt,car', tag: 'Bandas', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?inventory,counter&q=80',
+        url: 'https://loremflickr.com/1200/900/inventory,counter',
         tag: 'Inventario',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?barcode,scan&q=80',
+        url: 'https://loremflickr.com/800/600/barcode,scan',
         caption: 'Cada caja con código de barras escaneable'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?catalog,book&q=80',
+        url: 'https://loremflickr.com/800/600/catalog,book',
         caption: 'Catálogo digital por VIN o placas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?mechanic,parts&q=80',
+        url: 'https://loremflickr.com/800/600/mechanic,parts',
         caption: 'Talleres compran en línea con cuenta'
       }
     ]
@@ -23768,58 +23768,58 @@ const BRAND_REFACCION = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?auto-parts,store,counter&q=80',
+    hero: 'https://loremflickr.com/1200/1600/auto-parts,store,counter',
     heroAlt: 'Mostrador de refaccionaria con cliente y vendedor',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?auto-parts,warehouse&q=80',
+        url: 'https://loremflickr.com/1200/900/auto-parts,warehouse',
         tag: 'Almacén central',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?spark-plug,box&q=80',
+        url: 'https://loremflickr.com/900/1200/spark-plug,box',
         tag: 'Bujías NGK',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?shock,suspension&q=80',
+        url: 'https://loremflickr.com/900/1200/shock,suspension',
         tag: 'Amortiguadores',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?clutch,parts&q=80',
+        url: 'https://loremflickr.com/900/1200/clutch,parts',
         tag: 'Embragues',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?oil,quart&q=80', tag: 'Aceites', size: 'md'},
-      {url: 'https://source.unsplash.com/random/900x1200/?headlight,car&q=80', tag: 'Faros', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/oil,quart', tag: 'Aceites', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/headlight,car', tag: 'Faros', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?counter,parts&q=80',
+        url: 'https://loremflickr.com/1200/900/counter,parts',
         tag: 'Mostrador',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?radiator,car&q=80',
+        url: 'https://loremflickr.com/900/1200/radiator,car',
         tag: 'Radiadores',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?inventory,parts&q=80',
+        url: 'https://loremflickr.com/1200/900/inventory,parts',
         tag: 'Estantería',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?vin,scan&q=80',
+        url: 'https://loremflickr.com/800/600/vin,scan',
         caption: 'Búsqueda por VIN en segundos'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?wholesale,credit&q=80',
+        url: 'https://loremflickr.com/800/600/wholesale,credit',
         caption: 'Crédito a talleres con control'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?delivery,parts&q=80',
+        url: 'https://loremflickr.com/800/600/delivery,parts',
         caption: 'Reparto a talleres con ruta'
       }
     ]
@@ -23944,62 +23944,62 @@ const BRAND_SERVICIO_AUTO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?car-service,garage,mechanic&q=80',
+    hero: 'https://loremflickr.com/1200/1600/car-service,garage,mechanic',
     heroAlt: 'Centro de servicio automotriz con varios autos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?car-repair,bay&q=80',
+        url: 'https://loremflickr.com/1200/900/car-repair,bay',
         tag: 'Bahía servicio',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car,lift&q=80',
+        url: 'https://loremflickr.com/900/1200/car,lift',
         tag: 'Auto en rampa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mechanic,tools&q=80',
+        url: 'https://loremflickr.com/900/1200/mechanic,tools',
         tag: 'Técnico',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?oil-change,car&q=80',
+        url: 'https://loremflickr.com/900/1200/oil-change,car',
         tag: 'Cambio aceite',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?brakes,disc&q=80', tag: 'Frenos', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/brakes,disc', tag: 'Frenos', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tires,balance&q=80',
+        url: 'https://loremflickr.com/900/1200/tires,balance',
         tag: 'Balanceo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?garage,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/garage,workshop',
         tag: 'Nave completa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?alignment,car&q=80',
+        url: 'https://loremflickr.com/900/1200/alignment,car',
         tag: 'Alineación',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?reception,car&q=80',
+        url: 'https://loremflickr.com/1200/900/reception,car',
         tag: 'Recepción',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?reception,client&q=80',
+        url: 'https://loremflickr.com/800/600/reception,client',
         caption: 'Asesor entrega orden firmada al cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?mechanic,tablet&q=80',
+        url: 'https://loremflickr.com/800/600/mechanic,tablet',
         caption: 'Técnico actualiza estado en tablet'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?phone,car&q=80',
+        url: 'https://loremflickr.com/800/600/phone,car',
         caption: 'Cliente ve avance en su celular'
       }
     ]
@@ -24117,66 +24117,66 @@ const BRAND_ESPUMA_AUTO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?car-wash,foam,steam&q=80',
+    hero: 'https://loremflickr.com/1200/1600/car-wash,foam,steam',
     heroAlt: 'Auto en lavado a vapor con espuma activa',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?car-wash,foam&q=80',
+        url: 'https://loremflickr.com/1200/900/car-wash,foam',
         tag: 'Espuma activa',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-detail,steam&q=80',
+        url: 'https://loremflickr.com/900/1200/car-detail,steam',
         tag: 'Vapor interior',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-wax,polish&q=80',
+        url: 'https://loremflickr.com/900/1200/car-wax,polish',
         tag: 'Encerado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-vacuum,interior&q=80',
+        url: 'https://loremflickr.com/900/1200/car-vacuum,interior',
         tag: 'Aspirado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?carwash,worker&q=80',
+        url: 'https://loremflickr.com/900/1200/carwash,worker',
         tag: 'Lavador pro',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tire-shine,car&q=80',
+        url: 'https://loremflickr.com/900/1200/tire-shine,car',
         tag: 'Brillo llantas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?clean-car,detail&q=80',
+        url: 'https://loremflickr.com/1200/900/clean-car,detail',
         tag: 'Auto pulcro',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?carwash,bay&q=80',
+        url: 'https://loremflickr.com/900/1200/carwash,bay',
         tag: 'Bahía vapor',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?carwash,reception&q=80',
+        url: 'https://loremflickr.com/1200/900/carwash,reception',
         tag: 'Recepción',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?carwash,phone&q=80',
+        url: 'https://loremflickr.com/800/600/carwash,phone',
         caption: 'Cliente reserva por app'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?carwash,team&q=80',
+        url: 'https://loremflickr.com/800/600/carwash,team',
         caption: 'Equipo con uniforme y tablet'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?carwash,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/carwash,delivery',
         caption: 'Auto entregado con checklist'
       }
     ]
@@ -24294,62 +24294,62 @@ const BRAND_PULIDO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?car-detailing,polish,wax&q=80',
+    hero: 'https://loremflickr.com/1200/1600/car-detailing,polish,wax',
     heroAlt: 'Detailer puliendo carrocería con maquina rotativa',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?car-polish,buffer&q=80',
+        url: 'https://loremflickr.com/1200/900/car-polish,buffer',
         tag: 'Pulido correctivo',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-ceramic,coat&q=80',
+        url: 'https://loremflickr.com/900/1200/car-ceramic,coat',
         tag: 'Ceramic coating',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-clay,bar&q=80',
+        url: 'https://loremflickr.com/900/1200/car-clay,bar',
         tag: 'Descontaminación',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-leather,clean&q=80',
+        url: 'https://loremflickr.com/900/1200/car-leather,clean',
         tag: 'Piel hidratada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-detail,gloss&q=80',
+        url: 'https://loremflickr.com/900/1200/car-detail,gloss',
         tag: 'Brillo profundo',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?ppf,car&q=80', tag: 'PPF', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/ppf,car', tag: 'PPF', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?garage,luxury-car&q=80',
+        url: 'https://loremflickr.com/1200/900/garage,luxury-car',
         tag: 'Estudio detailing',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-shine,paint&q=80',
+        url: 'https://loremflickr.com/900/1200/car-shine,paint',
         tag: 'Pintura espejo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?car-detail,team&q=80',
+        url: 'https://loremflickr.com/1200/900/car-detail,team',
         tag: 'Equipo certificado',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?paint,measure&q=80',
+        url: 'https://loremflickr.com/800/600/paint,measure',
         caption: 'Medición de pintura antes-después'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?ceramic,product&q=80',
+        url: 'https://loremflickr.com/800/600/ceramic,product',
         caption: 'Cada cerámico con certificado de garantía'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?car-delivery,wash&q=80',
+        url: 'https://loremflickr.com/800/600/car-delivery,wash',
         caption: 'Cliente recibe auto con explicación'
       }
     ]
@@ -24467,66 +24467,66 @@ const BRAND_PELICULA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?window-tint,car,film&q=80',
+    hero: 'https://loremflickr.com/1200/1600/window-tint,car,film',
     heroAlt: 'Polarizador colocando película en ventana de auto',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?car-tint,window&q=80',
+        url: 'https://loremflickr.com/1200/900/car-tint,window',
         tag: 'Polarizado lateral',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?film,roll&q=80',
+        url: 'https://loremflickr.com/900/1200/film,roll',
         tag: 'Rollo 3M Ceramic',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-window,cut&q=80',
+        url: 'https://loremflickr.com/900/1200/car-window,cut',
         tag: 'Corte de plantilla',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?windshield,film&q=80',
+        url: 'https://loremflickr.com/900/1200/windshield,film',
         tag: 'Parabrisas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tint,heat-gun&q=80',
+        url: 'https://loremflickr.com/900/1200/tint,heat-gun',
         tag: 'Aplicación con calor',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-detail,glass&q=80',
+        url: 'https://loremflickr.com/900/1200/car-detail,glass',
         tag: 'Cristales claros',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?car-shop,bay&q=80',
+        url: 'https://loremflickr.com/1200/900/car-shop,bay',
         tag: 'Bahía limpia',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?meter,tint&q=80',
+        url: 'https://loremflickr.com/900/1200/meter,tint',
         tag: 'Medidor de %',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?suv,dark-tint&q=80',
+        url: 'https://loremflickr.com/1200/900/suv,dark-tint',
         tag: 'SUV terminado',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?certificate,paper&q=80',
+        url: 'https://loremflickr.com/800/600/certificate,paper',
         caption: 'Certificado oficial 3M con lote'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?tint-meter,car&q=80',
+        url: 'https://loremflickr.com/800/600/tint-meter,car',
         caption: 'Medición VLT post-instalación'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,phone&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,phone',
         caption: 'Garantía 5 años en WhatsApp'
       }
     ]
@@ -24644,66 +24644,66 @@ const BRAND_RUEDA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?roadside,mechanic,van&q=80',
+    hero: 'https://loremflickr.com/1200/1600/roadside,mechanic,van',
     heroAlt: 'Mecánico a domicilio atendiendo auto en calle',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mechanic,roadside&q=80',
+        url: 'https://loremflickr.com/1200/900/mechanic,roadside',
         tag: 'Servicio en calle',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?van,mechanic&q=80',
+        url: 'https://loremflickr.com/900/1200/van,mechanic',
         tag: 'Van con herramientas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?jumper,cables&q=80',
+        url: 'https://loremflickr.com/900/1200/jumper,cables',
         tag: 'Pasacorriente',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tire,flat&q=80',
+        url: 'https://loremflickr.com/900/1200/tire,flat',
         tag: 'Llanta ponchada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?battery,replace&q=80',
+        url: 'https://loremflickr.com/900/1200/battery,replace',
         tag: 'Cambio batería',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wrench,car&q=80',
+        url: 'https://loremflickr.com/900/1200/wrench,car',
         tag: 'Diagnóstico in situ',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?mechanic,phone&q=80',
+        url: 'https://loremflickr.com/1200/900/mechanic,phone',
         tag: 'Llegada con app',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?engine,help&q=80',
+        url: 'https://loremflickr.com/900/1200/engine,help',
         tag: 'Auxilio motor',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?roadside,service&q=80',
+        url: 'https://loremflickr.com/1200/900/roadside,service',
         tag: 'Asistencia 24h',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?gps,map&q=80',
+        url: 'https://loremflickr.com/800/600/gps,map',
         caption: 'Ubicación del cliente con GPS'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?mechanic,sign&q=80',
+        url: 'https://loremflickr.com/800/600/mechanic,sign',
         caption: 'Cliente firma servicio en celular'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?payment,phone&q=80',
+        url: 'https://loremflickr.com/800/600/payment,phone',
         caption: 'Cobro con terminal y QR'
       }
     ]
@@ -24821,66 +24821,66 @@ const BRAND_GRUA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?tow-truck,roadside&q=80',
+    hero: 'https://loremflickr.com/1200/1600/tow-truck,roadside',
     heroAlt: 'Grúa con plataforma cargando auto en calle',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tow-truck,car&q=80',
+        url: 'https://loremflickr.com/1200/900/tow-truck,car',
         tag: 'Grúa plataforma',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wrecker,roadside&q=80',
+        url: 'https://loremflickr.com/900/1200/wrecker,roadside',
         tag: 'Grúa arrastre',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?accident,car&q=80',
+        url: 'https://loremflickr.com/900/1200/accident,car',
         tag: 'Salvamento',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?highway,emergency&q=80',
+        url: 'https://loremflickr.com/900/1200/highway,emergency',
         tag: 'Carretera',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tow,winch&q=80',
+        url: 'https://loremflickr.com/900/1200/tow,winch',
         tag: 'Winch de cable',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?delivery,car&q=80',
+        url: 'https://loremflickr.com/900/1200/delivery,car',
         tag: 'Entrega taller',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tow-fleet,trucks&q=80',
+        url: 'https://loremflickr.com/1200/900/tow-fleet,trucks',
         tag: 'Flota grúas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?safety,driver&q=80',
+        url: 'https://loremflickr.com/900/1200/safety,driver',
         tag: 'Operador certificado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tow,depot&q=80',
+        url: 'https://loremflickr.com/1200/900/tow,depot',
         tag: 'Patio resguardo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?map,gps&q=80',
+        url: 'https://loremflickr.com/800/600/map,gps',
         caption: 'Ruta con GPS y kilómetros reales'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?insurance,client&q=80',
+        url: 'https://loremflickr.com/800/600/insurance,client',
         caption: 'Aseguradora ve servicio en vivo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?phone,sign&q=80',
+        url: 'https://loremflickr.com/800/600/phone,sign',
         caption: 'Cliente firma estado del auto al subir'
       }
     ]
@@ -24998,66 +24998,66 @@ const BRAND_LLAVE_AUTO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?car-key,locksmith,programming&q=80',
+    hero: 'https://loremflickr.com/1200/1600/car-key,locksmith,programming',
     heroAlt: 'Cerrajero programando llave con chip',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?car-key,programming&q=80',
+        url: 'https://loremflickr.com/1200/900/car-key,programming',
         tag: 'Programación chip',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?key,blank&q=80',
+        url: 'https://loremflickr.com/900/1200/key,blank',
         tag: 'Llaves vírgenes',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cut,key&q=80',
+        url: 'https://loremflickr.com/900/1200/cut,key',
         tag: 'Corte de llave',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lock,car&q=80',
+        url: 'https://loremflickr.com/900/1200/lock,car',
         tag: 'Apertura puerta',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?transponder,chip&q=80',
+        url: 'https://loremflickr.com/900/1200/transponder,chip',
         tag: 'Transponder',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?keyless,fob&q=80',
+        url: 'https://loremflickr.com/900/1200/keyless,fob',
         tag: 'Smart Key',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?locksmith,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/locksmith,workshop',
         tag: 'Taller cerrajero',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tools,locksmith&q=80',
+        url: 'https://loremflickr.com/900/1200/tools,locksmith',
         tag: 'Herramientas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?car-service,key&q=80',
+        url: 'https://loremflickr.com/1200/900/car-service,key',
         tag: 'Servicio mobile',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?id,document&q=80',
+        url: 'https://loremflickr.com/800/600/id,document',
         caption: 'Verificación de identidad y factura del auto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,phone&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,phone',
         caption: 'Garantía 6 meses por chip'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?delivery,key&q=80',
+        url: 'https://loremflickr.com/800/600/delivery,key',
         caption: 'Entrega con prueba de funcionamiento'
       }
     ]
@@ -25180,66 +25180,66 @@ const BRAND_CONCESIONARIO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?car-dealership,showroom&q=80',
+    hero: 'https://loremflickr.com/1200/1600/car-dealership,showroom',
     heroAlt: 'Piso de exhibición de agencia de autos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?car-showroom,luxury&q=80',
+        url: 'https://loremflickr.com/1200/900/car-showroom,luxury',
         tag: 'Piso showroom',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-keys,delivery&q=80',
+        url: 'https://loremflickr.com/900/1200/car-keys,delivery',
         tag: 'Entrega de llaves',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?financing,signing&q=80',
+        url: 'https://loremflickr.com/900/1200/financing,signing',
         tag: 'Firma contrato',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?used-car,inspection&q=80',
+        url: 'https://loremflickr.com/900/1200/used-car,inspection',
         tag: 'Seminuevo inspección',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?car-display,interior&q=80',
+        url: 'https://loremflickr.com/900/1200/car-display,interior',
         tag: 'Interior exhibición',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?salesman,client&q=80',
+        url: 'https://loremflickr.com/900/1200/salesman,client',
         tag: 'Asesor con cliente',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?dealership,lot&q=80',
+        url: 'https://loremflickr.com/1200/900/dealership,lot',
         tag: 'Patio de unidades',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?premium-car,suv&q=80',
+        url: 'https://loremflickr.com/900/1200/premium-car,suv',
         tag: 'SUV premium',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?dealership,reception&q=80',
+        url: 'https://loremflickr.com/1200/900/dealership,reception',
         tag: 'Recepción',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?car-key,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/car-key,delivery',
         caption: 'Entrega ceremoniosa con foto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?contract,signature&q=80',
+        url: 'https://loremflickr.com/800/600/contract,signature',
         caption: 'Contrato firmado digital'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?vin,inspection&q=80',
+        url: 'https://loremflickr.com/800/600/vin,inspection',
         caption: 'VIN y kilometraje registrados'
       }
     ]
@@ -25355,66 +25355,66 @@ const BRAND_TRACTO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?used-cars,dealership-lot&q=80',
+    hero: 'https://loremflickr.com/1200/1600/used-cars,dealership-lot',
     heroAlt: 'Lote de autos seminuevos en exhibición',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?used-car,lot&q=80',
+        url: 'https://loremflickr.com/1200/900/used-car,lot',
         tag: 'Lote completo',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sedan,used&q=80',
+        url: 'https://loremflickr.com/900/1200/sedan,used',
         tag: 'Sedán seminuevo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?suv,used&q=80',
+        url: 'https://loremflickr.com/900/1200/suv,used',
         tag: 'SUV seminueva',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?inspection,car&q=80',
+        url: 'https://loremflickr.com/900/1200/inspection,car',
         tag: 'Inspección 150 puntos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?carfax,history&q=80',
+        url: 'https://loremflickr.com/900/1200/carfax,history',
         tag: 'Historial reportes',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?signing,contract&q=80',
+        url: 'https://loremflickr.com/900/1200/signing,contract',
         tag: 'Firma de factura',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?dealer,used&q=80',
+        url: 'https://loremflickr.com/1200/900/dealer,used',
         tag: 'Sala de ventas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vin,plate&q=80',
+        url: 'https://loremflickr.com/900/1200/vin,plate',
         tag: 'VIN verificado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?test-drive,car&q=80',
+        url: 'https://loremflickr.com/1200/900/test-drive,car',
         tag: 'Test drive',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?paper,car&q=80',
+        url: 'https://loremflickr.com/800/600/paper,car',
         caption: 'Expediente legal: factura, tarjetón, refrendos'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?repuve,plate&q=80',
+        url: 'https://loremflickr.com/800/600/repuve,plate',
         caption: 'REPUVE consultado por VIN'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?notary,sign&q=80',
+        url: 'https://loremflickr.com/800/600/notary,sign',
         caption: 'Notario o gestor para trámite'
       }
     ]
@@ -25530,58 +25530,58 @@ const BRAND_RENTA_AUTO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?rental-cars,fleet&q=80',
+    hero: 'https://loremflickr.com/1200/1600/rental-cars,fleet',
     heroAlt: 'Flota de autos de renta en patio',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?rental-fleet,parking&q=80',
+        url: 'https://loremflickr.com/1200/900/rental-fleet,parking',
         tag: 'Flota completa',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sedan,white&q=80',
+        url: 'https://loremflickr.com/900/1200/sedan,white',
         tag: 'Sedán económico',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?suv,silver&q=80',
+        url: 'https://loremflickr.com/900/1200/suv,silver',
         tag: 'SUV familiar',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?compact,car&q=80', tag: 'Compacto', size: 'sm'},
-      {url: 'https://source.unsplash.com/random/900x1200/?pickup,truck&q=80', tag: 'Pickup', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/compact,car', tag: 'Compacto', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/pickup,truck', tag: 'Pickup', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?premium-car,bmw&q=80',
+        url: 'https://loremflickr.com/900/1200/premium-car,bmw',
         tag: 'Premium',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?counter,rental&q=80',
+        url: 'https://loremflickr.com/1200/900/counter,rental',
         tag: 'Mostrador',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?key-handover,car&q=80',
+        url: 'https://loremflickr.com/900/1200/key-handover,car',
         tag: 'Entrega de llaves',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?airport,rental&q=80',
+        url: 'https://loremflickr.com/1200/900/airport,rental',
         tag: 'Mostrador aeropuerto',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?inspection,car&q=80',
+        url: 'https://loremflickr.com/800/600/inspection,car',
         caption: 'Inspección con 18 fotos firmadas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?credit-card,deposit&q=80',
+        url: 'https://loremflickr.com/800/600/credit-card,deposit',
         caption: 'Depósito en garantía con tarjeta'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?gps,car&q=80',
+        url: 'https://loremflickr.com/800/600/gps,car',
         caption: 'GPS en cada unidad para tracking'
       }
     ]
@@ -25697,62 +25697,62 @@ const BRAND_RENTA_MOTO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?motorcycle-rental,beach&q=80',
+    hero: 'https://loremflickr.com/1200/1600/motorcycle-rental,beach',
     heroAlt: 'Flota de motos de renta en zona turística',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?motorcycle-fleet,parking&q=80',
+        url: 'https://loremflickr.com/1200/900/motorcycle-fleet,parking',
         tag: 'Flota',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?scooter,beach&q=80',
+        url: 'https://loremflickr.com/900/1200/scooter,beach',
         tag: 'Scooter playa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?motorcycle,touring&q=80',
+        url: 'https://loremflickr.com/900/1200/motorcycle,touring',
         tag: 'Touring',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?moped,city&q=80', tag: 'Urbana', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/moped,city', tag: 'Urbana', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?helmet,gear&q=80',
+        url: 'https://loremflickr.com/900/1200/helmet,gear',
         tag: 'Casco incluido',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?motorcycle,gps&q=80',
+        url: 'https://loremflickr.com/900/1200/motorcycle,gps',
         tag: 'GPS activo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?rental,counter&q=80',
+        url: 'https://loremflickr.com/1200/900/rental,counter',
         tag: 'Mostrador',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?adventure,motorcycle&q=80',
+        url: 'https://loremflickr.com/900/1200/adventure,motorcycle',
         tag: 'Adventure',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tourist,motorcycle&q=80',
+        url: 'https://loremflickr.com/1200/900/tourist,motorcycle',
         tag: 'Turistas felices',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?inspection,motorcycle&q=80',
+        url: 'https://loremflickr.com/800/600/inspection,motorcycle',
         caption: 'Inspección con foto firmada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?license,driver&q=80',
+        url: 'https://loremflickr.com/800/600/license,driver',
         caption: 'Licencia y INE verificadas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?gps,phone&q=80',
+        url: 'https://loremflickr.com/800/600/gps,phone',
         caption: 'Tracking en vivo de cada moto'
       }
     ]
@@ -25868,59 +25868,59 @@ const BRAND_CAMIONETA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?pickup-truck,rental,fleet&q=80',
+    hero: 'https://loremflickr.com/1200/1600/pickup-truck,rental,fleet',
     heroAlt: 'Flota de camionetas y pickups para renta',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pickup,truck&q=80',
+        url: 'https://loremflickr.com/1200/900/pickup,truck',
         tag: 'Pickup doble cabina',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?box-truck,delivery&q=80',
+        url: 'https://loremflickr.com/900/1200/box-truck,delivery',
         tag: 'Caja seca 3.5T',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?moving-truck,box&q=80',
+        url: 'https://loremflickr.com/900/1200/moving-truck,box',
         tag: 'Mudanza',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?refrigerated,truck&q=80',
+        url: 'https://loremflickr.com/900/1200/refrigerated,truck',
         tag: 'Refrigerada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?stake-truck,redila&q=80',
+        url: 'https://loremflickr.com/900/1200/stake-truck,redila',
         tag: 'Redila',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?cargo,van&q=80', tag: 'Van carga', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/cargo,van', tag: 'Van carga', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?truck-fleet,depot&q=80',
+        url: 'https://loremflickr.com/1200/900/truck-fleet,depot',
         tag: 'Depot completo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?driver,truck&q=80',
+        url: 'https://loremflickr.com/900/1200/driver,truck',
         tag: 'Con chofer opcional',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?loading,boxes&q=80',
+        url: 'https://loremflickr.com/1200/900/loading,boxes',
         tag: 'Carga lista',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?inspection,truck&q=80',
+        url: 'https://loremflickr.com/800/600/inspection,truck',
         caption: 'Inspección con foto firmada'
       },
-      {url: 'https://source.unsplash.com/random/800x600/?gps,fleet&q=80', caption: 'GPS en cada unidad'},
+      {url: 'https://loremflickr.com/800/600/gps,fleet', caption: 'GPS en cada unidad'},
       {
-        url: 'https://source.unsplash.com/random/800x600/?weight,truck&q=80',
+        url: 'https://loremflickr.com/800/600/weight,truck',
         caption: 'Peso registrado a la salida'
       }
     ]
@@ -26045,62 +26045,62 @@ const BRAND_REMOLQUE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?trailer,rental,hitch&q=80',
+    hero: 'https://loremflickr.com/1200/1600/trailer,rental,hitch',
     heroAlt: 'Remolques de renta alineados en patio',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?trailer,utility&q=80',
+        url: 'https://loremflickr.com/1200/900/trailer,utility',
         tag: 'Utilitario',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?flatbed,trailer&q=80',
+        url: 'https://loremflickr.com/900/1200/flatbed,trailer',
         tag: 'Cama baja',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cargo,trailer&q=80',
+        url: 'https://loremflickr.com/900/1200/cargo,trailer',
         tag: 'Caja cargo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?motorcycle,trailer&q=80',
+        url: 'https://loremflickr.com/900/1200/motorcycle,trailer',
         tag: 'Motocicletero',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?boat,trailer&q=80', tag: 'Lancha', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/boat,trailer', tag: 'Lancha', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?camper,trailer&q=80',
+        url: 'https://loremflickr.com/900/1200/camper,trailer',
         tag: 'Camper',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?trailer-yard,depot&q=80',
+        url: 'https://loremflickr.com/1200/900/trailer-yard,depot',
         tag: 'Patio remolques',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?hitch,coupler&q=80',
+        url: 'https://loremflickr.com/900/1200/hitch,coupler',
         tag: 'Enganche',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?travel,trailer&q=80',
+        url: 'https://loremflickr.com/1200/900/travel,trailer',
         tag: 'Travel trailer',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?inspection,trailer&q=80',
+        url: 'https://loremflickr.com/800/600/inspection,trailer',
         caption: 'Inspección con foto firmada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?tire,trailer&q=80',
+        url: 'https://loremflickr.com/800/600/tire,trailer',
         caption: 'Estado de llantas registrado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?signature,deposit&q=80',
+        url: 'https://loremflickr.com/800/600/signature,deposit',
         caption: 'Depósito retenido en tarjeta'
       }
     ]
@@ -26225,62 +26225,62 @@ const BRAND_VIRUTA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?carpentry,wood,workshop&q=80',
+    hero: 'https://loremflickr.com/1200/1600/carpentry,wood,workshop',
     heroAlt: 'Carpintero trabajando con madera en taller',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?carpentry,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/carpentry,workshop',
         tag: 'Taller carpintería',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wood,sawdust&q=80',
+        url: 'https://loremflickr.com/900/1200/wood,sawdust',
         tag: 'Madera fresca',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?closet,wood&q=80',
+        url: 'https://loremflickr.com/900/1200/closet,wood',
         tag: 'Closet a medida',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kitchen,cabinets&q=80',
+        url: 'https://loremflickr.com/900/1200/kitchen,cabinets',
         tag: 'Cocina integral',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?carpenter,plans&q=80',
+        url: 'https://loremflickr.com/900/1200/carpenter,plans',
         tag: 'Planos a mano',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?saw,wood&q=80',
+        url: 'https://loremflickr.com/900/1200/saw,wood',
         tag: 'Corte preciso',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?carpentry,details&q=80',
+        url: 'https://loremflickr.com/1200/900/carpentry,details',
         tag: 'Detalle artesanal',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?wood,glue&q=80', tag: 'Ensamble', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/wood,glue', tag: 'Ensamble', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?furniture,custom&q=80',
+        url: 'https://loremflickr.com/1200/900/furniture,custom',
         tag: 'Mueble entregado',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?blueprint,drawing&q=80',
+        url: 'https://loremflickr.com/800/600/blueprint,drawing',
         caption: 'Planos y croquis firmados'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?carpenter,measurement&q=80',
+        url: 'https://loremflickr.com/800/600/carpenter,measurement',
         caption: 'Medición en sitio del cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?delivery,furniture&q=80',
+        url: 'https://loremflickr.com/800/600/delivery,furniture',
         caption: 'Instalación con fotos'
       }
     ]
@@ -26398,66 +26398,66 @@ const BRAND_BARNIZ = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?ebanisteria,fine-furniture,wood&q=80',
+    hero: 'https://loremflickr.com/1200/1600/ebanisteria,fine-furniture,wood',
     heroAlt: 'Ebanista trabajando con maderas finas',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?fine-wood,furniture&q=80',
+        url: 'https://loremflickr.com/1200/900/fine-wood,furniture',
         tag: 'Mesa parota',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mahogany,wood&q=80',
+        url: 'https://loremflickr.com/900/1200/mahogany,wood',
         tag: 'Caoba pulida',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wood-carving,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/wood-carving,detail',
         tag: 'Tallado fino',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?varnish,brush&q=80',
+        url: 'https://loremflickr.com/900/1200/varnish,brush',
         tag: 'Barniz al aceite',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wood-joinery,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/wood-joinery,detail',
         tag: 'Ensamble caja',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fine-furniture,living&q=80',
+        url: 'https://loremflickr.com/900/1200/fine-furniture,living',
         tag: 'Mueble entregado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?ebanista,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/ebanista,workshop',
         tag: 'Taller fino',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wood-pattern,grain&q=80',
+        url: 'https://loremflickr.com/900/1200/wood-pattern,grain',
         tag: 'Veta natural',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?dining-table,wood&q=80',
+        url: 'https://loremflickr.com/1200/900/dining-table,wood',
         tag: 'Mesa comedor',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?sketch,furniture&q=80',
+        url: 'https://loremflickr.com/800/600/sketch,furniture',
         caption: 'Boceto firmado por cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?wood-sample,colors&q=80',
+        url: 'https://loremflickr.com/800/600/wood-sample,colors',
         caption: 'Muestras de madera y acabado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?signature,artist&q=80',
+        url: 'https://loremflickr.com/800/600/signature,artist',
         caption: 'Firma del ebanista en cada pieza'
       }
     ]
@@ -26580,66 +26580,66 @@ const BRAND_YUNQUE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?blacksmith,welding,iron-work&q=80',
+    hero: 'https://loremflickr.com/1200/1600/blacksmith,welding,iron-work',
     heroAlt: 'Herrero soldando portón en taller',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?welding,sparks&q=80',
+        url: 'https://loremflickr.com/1200/900/welding,sparks',
         tag: 'Soldadura MIG',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wrought-iron,gate&q=80',
+        url: 'https://loremflickr.com/900/1200/wrought-iron,gate',
         tag: 'Portón forjado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?railing,iron&q=80',
+        url: 'https://loremflickr.com/900/1200/railing,iron',
         tag: 'Barandal',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?window-bars,iron&q=80',
+        url: 'https://loremflickr.com/900/1200/window-bars,iron',
         tag: 'Protección',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?metal-stairs,spiral&q=80',
+        url: 'https://loremflickr.com/900/1200/metal-stairs,spiral',
         tag: 'Escalera caracol',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?iron-gate,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/iron-gate,detail',
         tag: 'Detalle forja',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?workshop,welding&q=80',
+        url: 'https://loremflickr.com/1200/900/workshop,welding',
         tag: 'Taller herrería',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?paint,metal&q=80',
+        url: 'https://loremflickr.com/900/1200/paint,metal',
         tag: 'Pintura epoxi',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?iron-balcony,house&q=80',
+        url: 'https://loremflickr.com/1200/900/iron-balcony,house',
         tag: 'Balcón instalado',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?measurement,iron&q=80',
+        url: 'https://loremflickr.com/800/600/measurement,iron',
         caption: 'Medición en obra del cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?welding,helmet&q=80',
+        url: 'https://loremflickr.com/800/600/welding,helmet',
         caption: 'Soldadura con certificado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?install,gate&q=80',
+        url: 'https://loremflickr.com/800/600/install,gate',
         caption: 'Instalación con anclas medidas'
       }
     ]
@@ -26757,66 +26757,66 @@ const BRAND_CHISPA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?welding,arc,sparks&q=80',
+    hero: 'https://loremflickr.com/1200/1600/welding,arc,sparks',
     heroAlt: 'Soldador especializado con careta y arco eléctrico',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?welding,tig&q=80',
+        url: 'https://loremflickr.com/1200/900/welding,tig',
         tag: 'Soldadura TIG',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?welding,mig&q=80',
+        url: 'https://loremflickr.com/900/1200/welding,mig',
         tag: 'Soldadura MIG',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?stainless,weld&q=80',
+        url: 'https://loremflickr.com/900/1200/stainless,weld',
         tag: 'Inox sanitario',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?aluminum,weld&q=80',
+        url: 'https://loremflickr.com/900/1200/aluminum,weld',
         tag: 'Aluminio',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pipe,weld&q=80',
+        url: 'https://loremflickr.com/900/1200/pipe,weld',
         tag: 'Tubería presión',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?structural,welder&q=80',
+        url: 'https://loremflickr.com/900/1200/structural,welder',
         tag: 'Estructural',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?welding-shop,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/welding-shop,workshop',
         tag: 'Taller',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?welder,certified&q=80',
+        url: 'https://loremflickr.com/900/1200/welder,certified',
         tag: 'Soldador certificado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?industrial,welding&q=80',
+        url: 'https://loremflickr.com/1200/900/industrial,welding',
         tag: 'Trabajo industrial',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?certificate,weld&q=80',
+        url: 'https://loremflickr.com/800/600/certificate,weld',
         caption: 'Certificación AWS de cada soldador'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?xray,weld&q=80',
+        url: 'https://loremflickr.com/800/600/xray,weld',
         caption: 'Inspección no destructiva'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,weld&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,weld',
         caption: 'Garantía por cordón'
       }
     ]
@@ -26934,62 +26934,62 @@ const BRAND_TUERIA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?plumber,pipe,wrench&q=80',
+    hero: 'https://loremflickr.com/1200/1600/plumber,pipe,wrench',
     heroAlt: 'Plomero reparando tubería de cobre bajo lavabo',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?plumber,bathroom&q=80',
+        url: 'https://loremflickr.com/1200/900/plumber,bathroom',
         tag: 'Servicio baño',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pipe,wrench&q=80',
+        url: 'https://loremflickr.com/900/1200/pipe,wrench',
         tag: 'Tubería cobre',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?faucet,leak&q=80',
+        url: 'https://loremflickr.com/900/1200/faucet,leak',
         tag: 'Fuga llave',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?water-heater,boiler&q=80',
+        url: 'https://loremflickr.com/900/1200/water-heater,boiler',
         tag: 'Boiler',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bathroom,renovation&q=80',
+        url: 'https://loremflickr.com/900/1200/bathroom,renovation',
         tag: 'Baño nuevo',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?drain,clean&q=80', tag: 'Destape', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/drain,clean', tag: 'Destape', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?plumber,van&q=80',
+        url: 'https://loremflickr.com/1200/900/plumber,van',
         tag: 'Van con material',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?valve,water&q=80',
+        url: 'https://loremflickr.com/900/1200/valve,water',
         tag: 'Llave de paso',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bathroom,clean&q=80',
+        url: 'https://loremflickr.com/1200/900/bathroom,clean',
         tag: 'Trabajo limpio',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?plumber,phone&q=80',
+        url: 'https://loremflickr.com/800/600/plumber,phone',
         caption: 'Cotización por WhatsApp con foto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?materials,box&q=80',
+        url: 'https://loremflickr.com/800/600/materials,box',
         caption: 'Material registrado en van'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?signature,tablet&q=80',
+        url: 'https://loremflickr.com/800/600/signature,tablet',
         caption: 'Cliente firma servicio en celular'
       }
     ]
@@ -27107,66 +27107,66 @@ const BRAND_WATT = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?electrician,wiring,panel&q=80',
+    hero: 'https://loremflickr.com/1200/1600/electrician,wiring,panel',
     heroAlt: 'Electricista instalando centro de carga en muro',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?electrician,panel&q=80',
+        url: 'https://loremflickr.com/1200/900/electrician,panel',
         tag: 'Centro de carga',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wiring,conduit&q=80',
+        url: 'https://loremflickr.com/900/1200/wiring,conduit',
         tag: 'Cableado en tubo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?outlet,install&q=80',
+        url: 'https://loremflickr.com/900/1200/outlet,install',
         tag: 'Contactos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?breaker,electrical&q=80',
+        url: 'https://loremflickr.com/900/1200/breaker,electrical',
         tag: 'Pastillas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lighting,led&q=80',
+        url: 'https://loremflickr.com/900/1200/lighting,led',
         tag: 'Iluminación LED',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?multimeter,test&q=80',
+        url: 'https://loremflickr.com/900/1200/multimeter,test',
         tag: 'Medición',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?electrician,tools&q=80',
+        url: 'https://loremflickr.com/1200/900/electrician,tools',
         tag: 'Herramientas pro',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ground,wire&q=80',
+        url: 'https://loremflickr.com/900/1200/ground,wire',
         tag: 'Tierra física',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?smart-home,electric&q=80',
+        url: 'https://loremflickr.com/1200/900/smart-home,electric',
         tag: 'Automatización',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?certificate,electrician&q=80',
+        url: 'https://loremflickr.com/800/600/certificate,electrician',
         caption: 'Certificación CFE y NOM-001'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?diagram,electric&q=80',
+        url: 'https://loremflickr.com/800/600/diagram,electric',
         caption: 'Diagrama unifilar firmado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,electrician&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,electrician',
         caption: 'Garantía 12 meses por instalación'
       }
     ]
@@ -27289,66 +27289,66 @@ const BRAND_CLIMATIZADO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?air-conditioner,install,technician&q=80',
+    hero: 'https://loremflickr.com/1200/1600/air-conditioner,install,technician',
     heroAlt: 'Técnico instalando minisplit en pared',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?minisplit,wall&q=80',
+        url: 'https://loremflickr.com/1200/900/minisplit,wall',
         tag: 'Minisplit inverter',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ductwork,install&q=80',
+        url: 'https://loremflickr.com/900/1200/ductwork,install',
         tag: 'Ducto central',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?condenser,outside&q=80',
+        url: 'https://loremflickr.com/900/1200/condenser,outside',
         tag: 'Condensadora',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?copper,refrigerant&q=80',
+        url: 'https://loremflickr.com/900/1200/copper,refrigerant',
         tag: 'Tubería cobre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vacuum,gauges&q=80',
+        url: 'https://loremflickr.com/900/1200/vacuum,gauges',
         tag: 'Vacío y carga',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?thermostat,smart&q=80',
+        url: 'https://loremflickr.com/900/1200/thermostat,smart',
         tag: 'Termostato',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?ac-room,clean&q=80',
+        url: 'https://loremflickr.com/1200/900/ac-room,clean',
         tag: 'Cuarto fresco',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ac-tools,gauge&q=80',
+        url: 'https://loremflickr.com/900/1200/ac-tools,gauge',
         tag: 'Manómetros',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?commercial,ac&q=80',
+        url: 'https://loremflickr.com/1200/900/commercial,ac',
         tag: 'Comercial',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?calculation,paper&q=80',
+        url: 'https://loremflickr.com/800/600/calculation,paper',
         caption: 'Cálculo de carga térmica por habitación'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,paper&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,paper',
         caption: 'Garantía 24 meses por instalación'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?maintenance,ac&q=80',
+        url: 'https://loremflickr.com/800/600/maintenance,ac',
         caption: 'Mantenimiento semestral programado'
       }
     ]
@@ -27466,66 +27466,66 @@ const BRAND_FRIGORIFICO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?ac-service,maintenance,technician&q=80',
+    hero: 'https://loremflickr.com/1200/1600/ac-service,maintenance,technician',
     heroAlt: 'Técnico limpiando evaporador de minisplit',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?ac-cleaning,evaporator&q=80',
+        url: 'https://loremflickr.com/1200/900/ac-cleaning,evaporator',
         tag: 'Limpieza evaporador',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ac-gas,refrigerant&q=80',
+        url: 'https://loremflickr.com/900/1200/ac-gas,refrigerant',
         tag: 'Recarga gas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ac-filter,clean&q=80',
+        url: 'https://loremflickr.com/900/1200/ac-filter,clean',
         tag: 'Filtros nuevos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ac-coil,wash&q=80',
+        url: 'https://loremflickr.com/900/1200/ac-coil,wash',
         tag: 'Lavado serpentín',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ac-condenser,outside&q=80',
+        url: 'https://loremflickr.com/900/1200/ac-condenser,outside',
         tag: 'Condensador limpio',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ac-pressure,gauge&q=80',
+        url: 'https://loremflickr.com/900/1200/ac-pressure,gauge',
         tag: 'Medición presión',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?ac-service,team&q=80',
+        url: 'https://loremflickr.com/1200/900/ac-service,team',
         tag: 'Equipo certificado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ac-thermometer,cold&q=80',
+        url: 'https://loremflickr.com/900/1200/ac-thermometer,cold',
         tag: '12°C salida',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?commercial,ac-service&q=80',
+        url: 'https://loremflickr.com/1200/900/commercial,ac-service',
         tag: 'Servicio comercial',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?clipboard,checklist&q=80',
+        url: 'https://loremflickr.com/800/600/clipboard,checklist',
         caption: 'Checklist 18 puntos firmado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,phone&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,phone',
         caption: 'Garantía 90 días en WhatsApp'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?schedule,calendar&q=80',
+        url: 'https://loremflickr.com/800/600/schedule,calendar',
         caption: 'Próximo mantenimiento programado'
       }
     ]
@@ -27643,66 +27643,66 @@ const BRAND_CALDERA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?heating,boiler,technician&q=80',
+    hero: 'https://loremflickr.com/1200/1600/heating,boiler,technician',
     heroAlt: 'Técnico instalando caldera de gas en casa',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?boiler,heating&q=80',
+        url: 'https://loremflickr.com/1200/900/boiler,heating',
         tag: 'Caldera de gas',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?radiator,heating&q=80',
+        url: 'https://loremflickr.com/900/1200/radiator,heating',
         tag: 'Radiador',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?underfloor,heating&q=80',
+        url: 'https://loremflickr.com/900/1200/underfloor,heating',
         tag: 'Piso radiante',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?heating-pipe,install&q=80',
+        url: 'https://loremflickr.com/900/1200/heating-pipe,install',
         tag: 'Tubería cobre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gas-meter,connect&q=80',
+        url: 'https://loremflickr.com/900/1200/gas-meter,connect',
         tag: 'Conexión gas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?thermostat,room&q=80',
+        url: 'https://loremflickr.com/900/1200/thermostat,room',
         tag: 'Termostato',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?heating-tech,install&q=80',
+        url: 'https://loremflickr.com/1200/900/heating-tech,install',
         tag: 'Instalación pro',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?heating-tools&q=80',
+        url: 'https://loremflickr.com/900/1200/heating-tools',
         tag: 'Herramientas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?warm-home,winter&q=80',
+        url: 'https://loremflickr.com/1200/900/warm-home,winter',
         tag: 'Casa cálida',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?gas-test,leak&q=80',
+        url: 'https://loremflickr.com/800/600/gas-test,leak',
         caption: 'Prueba de fuga obligatoria'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?calculation,heat&q=80',
+        url: 'https://loremflickr.com/800/600/calculation,heat',
         caption: 'Cálculo de carga térmica por habitación'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,heating&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,heating',
         caption: 'Garantía 24 meses con mantenimiento'
       }
     ]
@@ -27820,66 +27820,66 @@ const BRAND_TECHAR = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?waterproofing,roof,worker&q=80',
+    hero: 'https://loremflickr.com/1200/1600/waterproofing,roof,worker',
     heroAlt: 'Impermeabilizador aplicando membrana en azotea',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?waterproofing,membrane&q=80',
+        url: 'https://loremflickr.com/1200/900/waterproofing,membrane',
         tag: 'Membrana asfáltica',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?acrylic,paint&q=80',
+        url: 'https://loremflickr.com/900/1200/acrylic,paint',
         tag: 'Acrílico elastomérico',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?roof,torch&q=80',
+        url: 'https://loremflickr.com/900/1200/roof,torch',
         tag: 'Soplete y manto',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?primer,roof&q=80',
+        url: 'https://loremflickr.com/900/1200/primer,roof',
         tag: 'Primer asfáltico',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mesh,fiber&q=80',
+        url: 'https://loremflickr.com/900/1200/mesh,fiber',
         tag: 'Malla de refuerzo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?drain,roof&q=80',
+        url: 'https://loremflickr.com/900/1200/drain,roof',
         tag: 'Bajadas selladas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?rooftop,clean&q=80',
+        url: 'https://loremflickr.com/1200/900/rooftop,clean',
         tag: 'Azotea preparada',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?white-roof,reflective&q=80',
+        url: 'https://loremflickr.com/900/1200/white-roof,reflective',
         tag: 'Acabado blanco',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?rain-test,water&q=80',
+        url: 'https://loremflickr.com/1200/900/rain-test,water',
         tag: 'Prueba de inundación',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?measure,roof&q=80',
+        url: 'https://loremflickr.com/800/600/measure,roof',
         caption: 'Medición del área a impermeabilizar'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?product,can&q=80',
+        url: 'https://loremflickr.com/800/600/product,can',
         caption: 'Producto con código y lote registrado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?certificate,warranty&q=80',
+        url: 'https://loremflickr.com/800/600/certificate,warranty',
         caption: 'Garantía 10 años firmada'
       }
     ]
@@ -27997,62 +27997,62 @@ const BRAND_TABIQUE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?bricklayer,construction,bricks&q=80',
+    hero: 'https://loremflickr.com/1200/1600/bricklayer,construction,bricks',
     heroAlt: 'Albañil colocando tabique en muro nuevo',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bricklayer,wall&q=80',
+        url: 'https://loremflickr.com/1200/900/bricklayer,wall',
         tag: 'Muro nuevo',
         size: 'lg'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?cement,bags&q=80', tag: 'Cemento', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/cement,bags', tag: 'Cemento', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?plaster,trowel&q=80',
+        url: 'https://loremflickr.com/900/1200/plaster,trowel',
         tag: 'Aplanado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?concrete,floor&q=80',
+        url: 'https://loremflickr.com/900/1200/concrete,floor',
         tag: 'Piso de concreto',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?steel,rebar&q=80',
+        url: 'https://loremflickr.com/900/1200/steel,rebar',
         tag: 'Castillos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?roof,construction&q=80',
+        url: 'https://loremflickr.com/900/1200/roof,construction',
         tag: 'Loza colada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?construction-site,workers&q=80',
+        url: 'https://loremflickr.com/1200/900/construction-site,workers',
         tag: 'Obra',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?level,measure&q=80',
+        url: 'https://loremflickr.com/900/1200/level,measure',
         tag: 'Nivel y plomada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?house,construction&q=80',
+        url: 'https://loremflickr.com/1200/900/house,construction',
         tag: 'Cuarto terminado',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?blueprint,construction&q=80',
+        url: 'https://loremflickr.com/800/600/blueprint,construction',
         caption: 'Croquis con medidas firmado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cement,delivery&q=80',
+        url: 'https://loremflickr.com/800/600/cement,delivery',
         caption: 'Material entregado en obra'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?worker,progress&q=80',
+        url: 'https://loremflickr.com/800/600/worker,progress',
         caption: 'Avance fotografiado por etapa'
       }
     ]
@@ -28170,66 +28170,66 @@ const BRAND_OBRA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?house,construction,site&q=80',
+    hero: 'https://loremflickr.com/1200/1600/house,construction,site',
     heroAlt: 'Casa en construcción con estructura y muros nuevos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?construction,house&q=80',
+        url: 'https://loremflickr.com/1200/900/construction,house',
         tag: 'Casa en obra negra',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?foundation,concrete&q=80',
+        url: 'https://loremflickr.com/900/1200/foundation,concrete',
         tag: 'Cimentación',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?roof,beams&q=80',
+        url: 'https://loremflickr.com/900/1200/roof,beams',
         tag: 'Estructura techo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?install,window&q=80',
+        url: 'https://loremflickr.com/900/1200/install,window',
         tag: 'Cancelería',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?finish,paint&q=80',
+        url: 'https://loremflickr.com/900/1200/finish,paint',
         tag: 'Acabados',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?modern-home,exterior&q=80',
+        url: 'https://loremflickr.com/900/1200/modern-home,exterior',
         tag: 'Fachada lista',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?blueprint,architect&q=80',
+        url: 'https://loremflickr.com/1200/900/blueprint,architect',
         tag: 'Planos ejecutivos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?inspector,site&q=80',
+        url: 'https://loremflickr.com/900/1200/inspector,site',
         tag: 'Inspección',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?house,delivery&q=80',
+        url: 'https://loremflickr.com/1200/900/house,delivery',
         tag: 'Entrega llaves',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?contract,signing&q=80',
+        url: 'https://loremflickr.com/800/600/contract,signing',
         caption: 'Contrato y planos firmados'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?logbook,construction&q=80',
+        url: 'https://loremflickr.com/800/600/logbook,construction',
         caption: 'Bitácora digital con fotos diarias'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,document&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,document',
         caption: 'Garantía estructural 5 años'
       }
     ]
@@ -28347,66 +28347,66 @@ const BRAND_RENOVAR = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?renovation,kitchen,modern&q=80',
+    hero: 'https://loremflickr.com/1200/1600/renovation,kitchen,modern',
     heroAlt: 'Cocina remodelada con isla central y acabados modernos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kitchen,remodel&q=80',
+        url: 'https://loremflickr.com/1200/900/kitchen,remodel',
         tag: 'Cocina integral',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bathroom,renovation&q=80',
+        url: 'https://loremflickr.com/900/1200/bathroom,renovation',
         tag: 'Baño remodelado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?living-room,modern&q=80',
+        url: 'https://loremflickr.com/900/1200/living-room,modern',
         tag: 'Sala nueva',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?office,remodel&q=80',
+        url: 'https://loremflickr.com/900/1200/office,remodel',
         tag: 'Oficina moderna',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tile,bathroom&q=80',
+        url: 'https://loremflickr.com/900/1200/tile,bathroom',
         tag: 'Azulejos finos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?counter,quartz&q=80',
+        url: 'https://loremflickr.com/900/1200/counter,quartz',
         tag: 'Cuarzo encimera',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?renovation,team&q=80',
+        url: 'https://loremflickr.com/1200/900/renovation,team',
         tag: 'Equipo trabajando',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?demolition,wall&q=80',
+        url: 'https://loremflickr.com/900/1200/demolition,wall',
         tag: 'Demolición',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?modern-home,finish&q=80',
+        url: 'https://loremflickr.com/1200/900/modern-home,finish',
         tag: 'Acabado final',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?3d-render,design&q=80',
+        url: 'https://loremflickr.com/800/600/3d-render,design',
         caption: 'Render 3D del proyecto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?material,sample&q=80',
+        url: 'https://loremflickr.com/800/600/material,sample',
         caption: 'Selección de materiales firmada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?budget,paper&q=80',
+        url: 'https://loremflickr.com/800/600/budget,paper',
         caption: 'Presupuesto cerrado por partidas'
       }
     ]
@@ -28524,62 +28524,62 @@ const BRAND_AMBIENTE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?interior-design,living-room,luxury&q=80',
+    hero: 'https://loremflickr.com/1200/1600/interior-design,living-room,luxury',
     heroAlt: 'Sala diseñada por interiorista con mobiliario curado',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?interior,modern&q=80',
+        url: 'https://loremflickr.com/1200/900/interior,modern',
         tag: 'Sala diseñada',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dining,interior&q=80',
+        url: 'https://loremflickr.com/900/1200/dining,interior',
         tag: 'Comedor',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bedroom,luxury&q=80',
+        url: 'https://loremflickr.com/900/1200/bedroom,luxury',
         tag: 'Recámara principal',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?moodboard,fabrics&q=80',
+        url: 'https://loremflickr.com/900/1200/moodboard,fabrics',
         tag: 'Mood board',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lighting,decor&q=80',
+        url: 'https://loremflickr.com/900/1200/lighting,decor',
         tag: 'Iluminación',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?art,wall&q=80', tag: 'Arte curado', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/art,wall', tag: 'Arte curado', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?showroom,furniture&q=80',
+        url: 'https://loremflickr.com/1200/900/showroom,furniture',
         tag: 'Selección piezas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?textile,sample&q=80',
+        url: 'https://loremflickr.com/900/1200/textile,sample',
         tag: 'Telas y texturas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?office,corporate&q=80',
+        url: 'https://loremflickr.com/1200/900/office,corporate',
         tag: 'Oficina corporativa',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?3d,render&q=80',
+        url: 'https://loremflickr.com/800/600/3d,render',
         caption: 'Render fotorealista del proyecto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?contract,client&q=80',
+        url: 'https://loremflickr.com/800/600/contract,client',
         caption: 'Honorarios por etapas firmados'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?installation,furniture&q=80',
+        url: 'https://loremflickr.com/800/600/installation,furniture',
         caption: 'Instalación con equipo especializado'
       }
     ]
@@ -28712,66 +28712,66 @@ const BRAND_PLANO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?architecture,blueprint,office&q=80',
+    hero: 'https://loremflickr.com/1200/1600/architecture,blueprint,office',
     heroAlt: 'Arquitecto revisando planos en mesa de despacho',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?blueprint,architecture&q=80',
+        url: 'https://loremflickr.com/1200/900/blueprint,architecture',
         tag: 'Planos ejecutivos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?architect,sketch&q=80',
+        url: 'https://loremflickr.com/900/1200/architect,sketch',
         tag: 'Bocetos iniciales',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?3d-render,building&q=80',
+        url: 'https://loremflickr.com/900/1200/3d-render,building',
         tag: 'Render fotorealista',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?modern-building,design&q=80',
+        url: 'https://loremflickr.com/900/1200/modern-building,design',
         tag: 'Diseño moderno',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?architect,table&q=80',
+        url: 'https://loremflickr.com/900/1200/architect,table',
         tag: 'Mesa de trabajo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?permit,document&q=80',
+        url: 'https://loremflickr.com/900/1200/permit,document',
         tag: 'Trámite permisos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?office,architecture&q=80',
+        url: 'https://loremflickr.com/1200/900/office,architecture',
         tag: 'Despacho',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?meeting,plans&q=80',
+        url: 'https://loremflickr.com/900/1200/meeting,plans',
         tag: 'Junta con cliente',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?finished-house,modern&q=80',
+        url: 'https://loremflickr.com/1200/900/finished-house,modern',
         tag: 'Obra terminada',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?stamp,sign&q=80',
+        url: 'https://loremflickr.com/800/600/stamp,sign',
         caption: 'DRO firmando con cédula'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?contract,architect&q=80',
+        url: 'https://loremflickr.com/800/600/contract,architect',
         caption: 'Contrato con CAM-SAM por etapas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?supervision,site&q=80',
+        url: 'https://loremflickr.com/800/600/supervision,site',
         caption: 'Supervisión semanal en obra'
       }
     ]
@@ -28894,66 +28894,66 @@ const BRAND_COLUMNA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?engineering,structural,calculation&q=80',
+    hero: 'https://loremflickr.com/1200/1600/engineering,structural,calculation',
     heroAlt: 'Ingeniero civil calculando estructura en computadora',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?engineering,blueprint&q=80',
+        url: 'https://loremflickr.com/1200/900/engineering,blueprint',
         tag: 'Plano estructural',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?rebar,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/rebar,detail',
         tag: 'Acero refuerzo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?concrete,test&q=80',
+        url: 'https://loremflickr.com/900/1200/concrete,test',
         tag: 'Cilindro concreto',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bridge,beam&q=80',
+        url: 'https://loremflickr.com/900/1200/bridge,beam',
         tag: 'Trabe puente',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?engineer,site&q=80',
+        url: 'https://loremflickr.com/900/1200/engineer,site',
         tag: 'Supervisión obra',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?soil,test&q=80',
+        url: 'https://loremflickr.com/900/1200/soil,test',
         tag: 'Estudio suelo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?engineering,office&q=80',
+        url: 'https://loremflickr.com/1200/900/engineering,office',
         tag: 'Despacho ingeniería',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?seismic,analysis&q=80',
+        url: 'https://loremflickr.com/900/1200/seismic,analysis',
         tag: 'Análisis sísmico',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?infrastructure,civil&q=80',
+        url: 'https://loremflickr.com/1200/900/infrastructure,civil',
         tag: 'Infraestructura',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?stamp,certified&q=80',
+        url: 'https://loremflickr.com/800/600/stamp,certified',
         caption: 'DRO con cédula y firma electrónica'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?laboratory,concrete&q=80',
+        url: 'https://loremflickr.com/800/600/laboratory,concrete',
         caption: 'Pruebas de laboratorio certificadas'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?report,binder&q=80',
+        url: 'https://loremflickr.com/800/600/report,binder',
         caption: 'Memoria de cálculo entregada'
       }
     ]
@@ -29081,66 +29081,66 @@ const BRAND_REPELENTE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?pest-control,fumigation,technician&q=80',
+    hero: 'https://loremflickr.com/1200/1600/pest-control,fumigation,technician',
     heroAlt: 'Fumigador certificado aplicando producto en casa',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?fumigation,spray&q=80',
+        url: 'https://loremflickr.com/1200/900/fumigation,spray',
         tag: 'Aspersión',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pest-control,gear&q=80',
+        url: 'https://loremflickr.com/900/1200/pest-control,gear',
         tag: 'Equipo protección',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?rat,bait&q=80',
+        url: 'https://loremflickr.com/900/1200/rat,bait',
         tag: 'Cebo roedores',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?termite,wood&q=80',
+        url: 'https://loremflickr.com/900/1200/termite,wood',
         tag: 'Termitas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?spray,cockroach&q=80',
+        url: 'https://loremflickr.com/900/1200/spray,cockroach',
         tag: 'Cucarachas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mosquito,fog&q=80',
+        url: 'https://loremflickr.com/900/1200/mosquito,fog',
         tag: 'Mosquitos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?warehouse,fumigation&q=80',
+        url: 'https://loremflickr.com/1200/900/warehouse,fumigation',
         tag: 'Industrial',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?safety,uniform&q=80',
+        url: 'https://loremflickr.com/900/1200/safety,uniform',
         tag: 'Técnico certificado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?restaurant,clean&q=80',
+        url: 'https://loremflickr.com/1200/900/restaurant,clean',
         tag: 'Comercial',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?certificate,cofepris&q=80',
+        url: 'https://loremflickr.com/800/600/certificate,cofepris',
         caption: 'Licencia COFEPRIS vigente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?label,chemical&q=80',
+        url: 'https://loremflickr.com/800/600/label,chemical',
         caption: 'Hoja de seguridad de cada producto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,paper&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,paper',
         caption: 'Garantía 60-90 días según plaga'
       }
     ]
@@ -29258,66 +29258,66 @@ const BRAND_TRAMPA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?pest-control,bait-station,industrial&q=80',
+    hero: 'https://loremflickr.com/1200/1600/pest-control,bait-station,industrial',
     heroAlt: 'Técnico inspeccionando estación cebadera en planta',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bait-station,outdoor&q=80',
+        url: 'https://loremflickr.com/1200/900/bait-station,outdoor',
         tag: 'Estación cebadera',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?glue-trap,monitor&q=80',
+        url: 'https://loremflickr.com/900/1200/glue-trap,monitor',
         tag: 'Trampa pegajosa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?light-trap,fly&q=80',
+        url: 'https://loremflickr.com/900/1200/light-trap,fly',
         tag: 'Trampa luz',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?inspection,plant&q=80',
+        url: 'https://loremflickr.com/900/1200/inspection,plant',
         tag: 'Inspección planta',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?warehouse,monitoring&q=80',
+        url: 'https://loremflickr.com/900/1200/warehouse,monitoring',
         tag: 'Bodega monitoreada',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?qr-code,station&q=80',
+        url: 'https://loremflickr.com/900/1200/qr-code,station',
         tag: 'QR por estación',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?food-plant,pest&q=80',
+        url: 'https://loremflickr.com/1200/900/food-plant,pest',
         tag: 'Planta alimentos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?report,audit&q=80',
+        url: 'https://loremflickr.com/900/1200/report,audit',
         tag: 'Reporte HACCP',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tracking,map&q=80',
+        url: 'https://loremflickr.com/1200/900/tracking,map',
         tag: 'Mapa estaciones',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?qr-scan,inspect&q=80',
+        url: 'https://loremflickr.com/800/600/qr-scan,inspect',
         caption: 'QR en cada estación escaneado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?dashboard,pest&q=80',
+        url: 'https://loremflickr.com/800/600/dashboard,pest',
         caption: 'Dashboard con tendencias'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?certificate,iso&q=80',
+        url: 'https://loremflickr.com/800/600/certificate,iso',
         caption: 'Certificación HACCP/BPM/ISO'
       }
     ]
@@ -29435,66 +29435,66 @@ const BRAND_JABON = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?cleaning,housekeeping,home&q=80',
+    hero: 'https://loremflickr.com/1200/1600/cleaning,housekeeping,home',
     heroAlt: 'Equipo de limpieza con uniforme trabajando en casa',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cleaning,kitchen&q=80',
+        url: 'https://loremflickr.com/1200/900/cleaning,kitchen',
         tag: 'Cocina impecable',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cleaning,bathroom&q=80',
+        url: 'https://loremflickr.com/900/1200/cleaning,bathroom',
         tag: 'Baño limpio',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mop,floor&q=80',
+        url: 'https://loremflickr.com/900/1200/mop,floor',
         tag: 'Pisos brillantes',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vacuum,carpet&q=80',
+        url: 'https://loremflickr.com/900/1200/vacuum,carpet',
         tag: 'Alfombras',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cleaning,team&q=80',
+        url: 'https://loremflickr.com/900/1200/cleaning,team',
         tag: 'Equipo uniforme',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cleaning,products&q=80',
+        url: 'https://loremflickr.com/900/1200/cleaning,products',
         tag: 'Productos pro',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?clean-home,modern&q=80',
+        url: 'https://loremflickr.com/1200/900/clean-home,modern',
         tag: 'Casa terminada',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?window,clean&q=80',
+        url: 'https://loremflickr.com/900/1200/window,clean',
         tag: 'Ventanas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cleaning,bedroom&q=80',
+        url: 'https://loremflickr.com/1200/900/cleaning,bedroom',
         tag: 'Recámara fresca',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?checklist,cleaning&q=80',
+        url: 'https://loremflickr.com/800/600/checklist,cleaning',
         caption: 'Checklist 32 puntos por casa'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?uniform,cleaner&q=80',
+        url: 'https://loremflickr.com/800/600/uniform,cleaner',
         caption: 'Equipo con uniforme y gafete'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?before-after,home&q=80',
+        url: 'https://loremflickr.com/800/600/before-after,home',
         caption: 'Foto antes-después en cada casa'
       }
     ]
@@ -29612,66 +29612,66 @@ const BRAND_TRAPEADOR = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?office-cleaning,janitor,corporate&q=80',
+    hero: 'https://loremflickr.com/1200/1600/office-cleaning,janitor,corporate',
     heroAlt: 'Personal de limpieza con uniforme en pasillo de oficina',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?office-cleaning,floor&q=80',
+        url: 'https://loremflickr.com/1200/900/office-cleaning,floor',
         tag: 'Pisos comerciales',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bathroom,commercial&q=80',
+        url: 'https://loremflickr.com/900/1200/bathroom,commercial',
         tag: 'Baños públicos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?janitor,uniform&q=80',
+        url: 'https://loremflickr.com/900/1200/janitor,uniform',
         tag: 'Personal con uniforme',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cleaning,mall&q=80',
+        url: 'https://loremflickr.com/900/1200/cleaning,mall',
         tag: 'Plaza comercial',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?clinic,cleaning&q=80',
+        url: 'https://loremflickr.com/900/1200/clinic,cleaning',
         tag: 'Clínica esterilizada',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?school,cleaning&q=80',
+        url: 'https://loremflickr.com/900/1200/school,cleaning',
         tag: 'Escuela limpia',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?night-shift,cleaning&q=80',
+        url: 'https://loremflickr.com/1200/900/night-shift,cleaning',
         tag: 'Turno nocturno',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?industrial,cleaning&q=80',
+        url: 'https://loremflickr.com/900/1200/industrial,cleaning',
         tag: 'Industrial',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?clean-office,morning&q=80',
+        url: 'https://loremflickr.com/1200/900/clean-office,morning',
         tag: 'Listo para abrir',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?qr-code,wall&q=80',
+        url: 'https://loremflickr.com/800/600/qr-code,wall',
         caption: 'QR en cada área inspeccionable'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?supervisor,tablet&q=80',
+        url: 'https://loremflickr.com/800/600/supervisor,tablet',
         caption: 'Supervisión digital en tiempo real'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?clock,time&q=80',
+        url: 'https://loremflickr.com/800/600/clock,time',
         caption: 'Checador con foto y geo'
       }
     ]
@@ -29794,66 +29794,66 @@ const BRAND_TAPIZADO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?sofa-cleaning,upholstery,technician&q=80',
+    hero: 'https://loremflickr.com/1200/1600/sofa-cleaning,upholstery,technician',
     heroAlt: 'Técnico lavando sofá con extractor',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sofa-clean,extract&q=80',
+        url: 'https://loremflickr.com/1200/900/sofa-clean,extract',
         tag: 'Sala lavada',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mattress,clean&q=80',
+        url: 'https://loremflickr.com/900/1200/mattress,clean',
         tag: 'Colchón',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?carpet,steam&q=80',
+        url: 'https://loremflickr.com/900/1200/carpet,steam',
         tag: 'Alfombra vapor',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chair,upholstery&q=80',
+        url: 'https://loremflickr.com/900/1200/chair,upholstery',
         tag: 'Sillón',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?extractor,foam&q=80',
+        url: 'https://loremflickr.com/900/1200/extractor,foam',
         tag: 'Extractor profesional',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?stain,remove&q=80',
+        url: 'https://loremflickr.com/900/1200/stain,remove',
         tag: 'Manchas eliminadas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?living-room,clean&q=80',
+        url: 'https://loremflickr.com/1200/900/living-room,clean',
         tag: 'Sala como nueva',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fabric,sample&q=80',
+        url: 'https://loremflickr.com/900/1200/fabric,sample',
         tag: 'Test de tela',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bedroom,fresh&q=80',
+        url: 'https://loremflickr.com/1200/900/bedroom,fresh',
         tag: 'Recámara fresca',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?ph-test,fabric&q=80',
+        url: 'https://loremflickr.com/800/600/ph-test,fabric',
         caption: 'Test de pH y color en zona oculta'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?certificate,products&q=80',
+        url: 'https://loremflickr.com/800/600/certificate,products',
         caption: 'Productos certificados hipoalergénicos'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?before-after,sofa&q=80',
+        url: 'https://loremflickr.com/800/600/before-after,sofa',
         caption: 'Foto comparativa antes-después'
       }
     ]
@@ -29971,62 +29971,62 @@ const BRAND_PODA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?landscaping,garden,gardener&q=80',
+    hero: 'https://loremflickr.com/1200/1600/landscaping,garden,gardener',
     heroAlt: 'Jardinero podando arbusto con tijera profesional',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?garden,mowing&q=80',
+        url: 'https://loremflickr.com/1200/900/garden,mowing',
         tag: 'Corte césped',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pruning,tree&q=80',
+        url: 'https://loremflickr.com/900/1200/pruning,tree',
         tag: 'Poda árbol',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fertilizer,garden&q=80',
+        url: 'https://loremflickr.com/900/1200/fertilizer,garden',
         tag: 'Fertilización',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?garden-design,landscape&q=80',
+        url: 'https://loremflickr.com/900/1200/garden-design,landscape',
         tag: 'Paisajismo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?irrigation,sprinkler&q=80',
+        url: 'https://loremflickr.com/900/1200/irrigation,sprinkler',
         tag: 'Riego automático',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?hedge,trimmer&q=80', tag: 'Setos', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/hedge,trimmer', tag: 'Setos', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?backyard,green&q=80',
+        url: 'https://loremflickr.com/1200/900/backyard,green',
         tag: 'Jardín terminado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gardener,tools&q=80',
+        url: 'https://loremflickr.com/900/1200/gardener,tools',
         tag: 'Herramientas pro',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?flower-bed,garden&q=80',
+        url: 'https://loremflickr.com/1200/900/flower-bed,garden',
         tag: 'Macizos florales',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?gardener,truck&q=80',
+        url: 'https://loremflickr.com/800/600/gardener,truck',
         caption: 'Equipo móvil completo en camioneta'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?plant,disease&q=80',
+        url: 'https://loremflickr.com/800/600/plant,disease',
         caption: 'Diagnóstico de plagas y enfermedades'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?garden-app,phone&q=80',
+        url: 'https://loremflickr.com/800/600/garden-app,phone',
         caption: 'Cliente ve plan de jardín en app'
       }
     ]
@@ -30144,66 +30144,66 @@ const BRAND_ALBERCA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?pool-cleaning,maintenance,technician&q=80',
+    hero: 'https://loremflickr.com/1200/1600/pool-cleaning,maintenance,technician',
     heroAlt: 'Técnico midiendo cloro en alberca residencial',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?swimming-pool,clean&q=80',
+        url: 'https://loremflickr.com/1200/900/swimming-pool,clean',
         tag: 'Alberca cristalina',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pool,chlorine&q=80',
+        url: 'https://loremflickr.com/900/1200/pool,chlorine',
         tag: 'Cloración',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pool,filter&q=80',
+        url: 'https://loremflickr.com/900/1200/pool,filter',
         tag: 'Filtro arena',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pool-test,kit&q=80',
+        url: 'https://loremflickr.com/900/1200/pool-test,kit',
         tag: 'Test químico',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pool-net,leaves&q=80',
+        url: 'https://loremflickr.com/900/1200/pool-net,leaves',
         tag: 'Limpieza superficie',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pool-vacuum,bottom&q=80',
+        url: 'https://loremflickr.com/900/1200/pool-vacuum,bottom',
         tag: 'Aspirado fondo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pool-resort,clean&q=80',
+        url: 'https://loremflickr.com/1200/900/pool-resort,clean',
         tag: 'Comercial',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pool-tile,clean&q=80',
+        url: 'https://loremflickr.com/900/1200/pool-tile,clean',
         tag: 'Azulejos limpios',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?pool-pump,equipment&q=80',
+        url: 'https://loremflickr.com/1200/900/pool-pump,equipment',
         tag: 'Bomba y filtro',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?ph-test,water&q=80',
+        url: 'https://loremflickr.com/800/600/ph-test,water',
         caption: 'Test de pH y cloro registrado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?chemicals,labeled&q=80',
+        url: 'https://loremflickr.com/800/600/chemicals,labeled',
         caption: 'Químicos certificados'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cleaning,record&q=80',
+        url: 'https://loremflickr.com/800/600/cleaning,record',
         caption: 'Bitácora diaria firmada'
       }
     ]
@@ -30321,66 +30321,66 @@ const BRAND_CANDADO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?locksmith,key,night&q=80',
+    hero: 'https://loremflickr.com/1200/1600/locksmith,key,night',
     heroAlt: 'Cerrajero abriendo cerradura de puerta de casa',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?locksmith,door&q=80',
+        url: 'https://loremflickr.com/1200/900/locksmith,door',
         tag: 'Apertura puerta',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lock,install&q=80',
+        url: 'https://loremflickr.com/900/1200/lock,install',
         tag: 'Chapa nueva',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?key,cut&q=80',
+        url: 'https://loremflickr.com/900/1200/key,cut',
         tag: 'Corte de llave',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?smart-lock,door&q=80',
+        url: 'https://loremflickr.com/900/1200/smart-lock,door',
         tag: 'Cerradura inteligente',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?security,system&q=80',
+        url: 'https://loremflickr.com/900/1200/security,system',
         tag: 'Sistema seguridad',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?vault,safe&q=80',
+        url: 'https://loremflickr.com/900/1200/vault,safe',
         tag: 'Caja fuerte',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?locksmith,van&q=80',
+        url: 'https://loremflickr.com/1200/900/locksmith,van',
         tag: 'Van 24/7',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?biometric,lock&q=80',
+        url: 'https://loremflickr.com/900/1200/biometric,lock',
         tag: 'Biométrico',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?door,reinforce&q=80',
+        url: 'https://loremflickr.com/1200/900/door,reinforce',
         tag: 'Puerta blindada',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?id,verify&q=80',
+        url: 'https://loremflickr.com/800/600/id,verify',
         caption: 'Verificación de identidad obligatoria'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,locksmith&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,locksmith',
         caption: 'Garantía 12 meses'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?phone,location&q=80',
+        url: 'https://loremflickr.com/800/600/phone,location',
         caption: 'Llegada con GPS en vivo'
       }
     ]
@@ -30498,66 +30498,66 @@ const BRAND_REPARA_CEL = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?phone-repair,technician,screen&q=80',
+    hero: 'https://loremflickr.com/1200/1600/phone-repair,technician,screen',
     heroAlt: 'Técnico reparando pantalla de smartphone',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?screen-repair,phone&q=80',
+        url: 'https://loremflickr.com/1200/900/screen-repair,phone',
         tag: 'Pantalla nueva',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?battery,phone&q=80',
+        url: 'https://loremflickr.com/900/1200/battery,phone',
         tag: 'Batería original',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?soldering,microscope&q=80',
+        url: 'https://loremflickr.com/900/1200/soldering,microscope',
         tag: 'Microsoldadura',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?camera,phone-repair&q=80',
+        url: 'https://loremflickr.com/900/1200/camera,phone-repair',
         tag: 'Lente cámara',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?phone-tools,kit&q=80',
+        url: 'https://loremflickr.com/900/1200/phone-tools,kit',
         tag: 'Herramientas pro',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?diagnostic,phone&q=80',
+        url: 'https://loremflickr.com/900/1200/diagnostic,phone',
         tag: 'Diagnóstico',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?repair-shop,clean&q=80',
+        url: 'https://loremflickr.com/1200/900/repair-shop,clean',
         tag: 'Taller limpio',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?charging-port,fix&q=80',
+        url: 'https://loremflickr.com/900/1200/charging-port,fix',
         tag: 'Puerto carga',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?customer,phone&q=80',
+        url: 'https://loremflickr.com/1200/900/customer,phone',
         tag: 'Cliente recibe',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?imei,sticker&q=80',
+        url: 'https://loremflickr.com/800/600/imei,sticker',
         caption: 'IMEI registrado al recibir'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?backup,data&q=80',
+        url: 'https://loremflickr.com/800/600/backup,data',
         caption: 'Respaldo de datos antes de abrir'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,phone&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,phone',
         caption: 'Garantía 90 días'
       }
     ]
@@ -30675,66 +30675,66 @@ const BRAND_REPARA_PC = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?computer-repair,laptop,technician&q=80',
+    hero: 'https://loremflickr.com/1200/1600/computer-repair,laptop,technician',
     heroAlt: 'Técnico reparando laptop con destornillador',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?laptop-repair,open&q=80',
+        url: 'https://loremflickr.com/1200/900/laptop-repair,open',
         tag: 'Reparación laptop',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ssd,upgrade&q=80',
+        url: 'https://loremflickr.com/900/1200/ssd,upgrade',
         tag: 'Upgrade SSD',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?virus,scan&q=80',
+        url: 'https://loremflickr.com/900/1200/virus,scan',
         tag: 'Limpieza virus',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?keyboard,replace&q=80',
+        url: 'https://loremflickr.com/900/1200/keyboard,replace',
         tag: 'Teclado nuevo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?desktop,custom&q=80',
+        url: 'https://loremflickr.com/900/1200/desktop,custom',
         tag: 'PC armada',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ram,install&q=80',
+        url: 'https://loremflickr.com/900/1200/ram,install',
         tag: 'RAM expandida',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?repair-shop,computer&q=80',
+        url: 'https://loremflickr.com/1200/900/repair-shop,computer',
         tag: 'Taller pro',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?data-recovery,hard-drive&q=80',
+        url: 'https://loremflickr.com/900/1200/data-recovery,hard-drive',
         tag: 'Recuperación datos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?customer,laptop&q=80',
+        url: 'https://loremflickr.com/1200/900/customer,laptop',
         tag: 'Cliente recibe',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?backup,external&q=80',
+        url: 'https://loremflickr.com/800/600/backup,external',
         caption: 'Respaldo en disco externo entregado al cliente'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?serial,sticker&q=80',
+        url: 'https://loremflickr.com/800/600/serial,sticker',
         caption: 'Serial registrado al recibir'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,document&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,document',
         caption: 'Garantía 90 días en software, 6 meses en hardware'
       }
     ]
@@ -30852,62 +30852,62 @@ const BRAND_REPARELEC = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?appliance-repair,refrigerator,technician&q=80',
+    hero: 'https://loremflickr.com/1200/1600/appliance-repair,refrigerator,technician',
     heroAlt: 'Técnico reparando refrigerador con multímetro',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?refrigerator,repair&q=80',
+        url: 'https://loremflickr.com/1200/900/refrigerator,repair',
         tag: 'Refrigerador',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?washing-machine,fix&q=80',
+        url: 'https://loremflickr.com/900/1200/washing-machine,fix',
         tag: 'Lavadora',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dryer,service&q=80',
+        url: 'https://loremflickr.com/900/1200/dryer,service',
         tag: 'Secadora',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dishwasher,repair&q=80',
+        url: 'https://loremflickr.com/900/1200/dishwasher,repair',
         tag: 'Lavavajillas',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?oven,service&q=80', tag: 'Horno', size: 'md'},
+      {url: 'https://loremflickr.com/900/1200/oven,service', tag: 'Horno', size: 'md'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?microwave,repair&q=80',
+        url: 'https://loremflickr.com/900/1200/microwave,repair',
         tag: 'Microondas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?appliance-shop,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/appliance-shop,workshop',
         tag: 'Taller',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?technician,tools&q=80',
+        url: 'https://loremflickr.com/900/1200/technician,tools',
         tag: 'Herramientas pro',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?home-delivery,appliance&q=80',
+        url: 'https://loremflickr.com/1200/900/home-delivery,appliance',
         tag: 'Servicio a casa',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?serial-number,appliance&q=80',
+        url: 'https://loremflickr.com/800/600/serial-number,appliance',
         caption: 'Número de serie y modelo registrados'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?part,box&q=80',
+        url: 'https://loremflickr.com/800/600/part,box',
         caption: 'Refacciones originales con empaque'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,document&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,document',
         caption: 'Garantía 90 días en refacción'
       }
     ]
@@ -31030,66 +31030,66 @@ const BRAND_REPARA_TV = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?tv-repair,technician,electronics&q=80',
+    hero: 'https://loremflickr.com/1200/1600/tv-repair,technician,electronics',
     heroAlt: 'Técnico reparando tarjeta de televisor LED',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tv-board,repair&q=80',
+        url: 'https://loremflickr.com/1200/900/tv-board,repair',
         tag: 'Tarjeta lógica',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?led-strip,tv&q=80',
+        url: 'https://loremflickr.com/900/1200/led-strip,tv',
         tag: 'Tiras LED',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?capacitor,solder&q=80',
+        url: 'https://loremflickr.com/900/1200/capacitor,solder',
         tag: 'Capacitores',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?tv-screen,repair&q=80',
+        url: 'https://loremflickr.com/900/1200/tv-screen,repair',
         tag: 'Pantalla',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?power-supply,tv&q=80',
+        url: 'https://loremflickr.com/900/1200/power-supply,tv',
         tag: 'Fuente poder',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?multimeter,electronics&q=80',
+        url: 'https://loremflickr.com/900/1200/multimeter,electronics',
         tag: 'Diagnóstico',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tv-shop,electronics&q=80',
+        url: 'https://loremflickr.com/1200/900/tv-shop,electronics',
         tag: 'Taller',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?soldering,iron&q=80',
+        url: 'https://loremflickr.com/900/1200/soldering,iron',
         tag: 'Microsoldadura',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?large-tv,delivery&q=80',
+        url: 'https://loremflickr.com/1200/900/large-tv,delivery',
         tag: 'Entrega TV',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?serial,tv&q=80',
+        url: 'https://loremflickr.com/800/600/serial,tv',
         caption: 'Serial y modelo registrados'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?part-box,original&q=80',
+        url: 'https://loremflickr.com/800/600/part-box,original',
         caption: 'Refacciones originales por marca'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,paper&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,paper',
         caption: 'Garantía 90 días por refacción'
       }
     ]
@@ -31207,66 +31207,66 @@ const BRAND_BOCINA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?audio-repair,speaker,electronics&q=80',
+    hero: 'https://loremflickr.com/1200/1600/audio-repair,speaker,electronics',
     heroAlt: 'Técnico reparando bobina de bocina profesional',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?speaker,reconing&q=80',
+        url: 'https://loremflickr.com/1200/900/speaker,reconing',
         tag: 'Reconado bobina',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?amplifier,repair&q=80',
+        url: 'https://loremflickr.com/900/1200/amplifier,repair',
         tag: 'Amplificador',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mixer,console&q=80',
+        url: 'https://loremflickr.com/900/1200/mixer,console',
         tag: 'Mezcladora',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?subwoofer,large&q=80',
+        url: 'https://loremflickr.com/900/1200/subwoofer,large',
         tag: 'Subwoofer',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?oscilloscope,audio&q=80',
+        url: 'https://loremflickr.com/900/1200/oscilloscope,audio',
         tag: 'Osciloscopio',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?microphone,studio&q=80',
+        url: 'https://loremflickr.com/900/1200/microphone,studio',
         tag: 'Micrófonos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?audio-shop,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/audio-shop,workshop',
         tag: 'Taller pro',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?voice-coil,detail&q=80',
+        url: 'https://loremflickr.com/900/1200/voice-coil,detail',
         tag: 'Bobina nueva',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?dj-equipment,club&q=80',
+        url: 'https://loremflickr.com/1200/900/dj-equipment,club',
         tag: 'Equipo DJ',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?serial,audio&q=80',
+        url: 'https://loremflickr.com/800/600/serial,audio',
         caption: 'Serial del equipo registrado'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?test,frequency&q=80',
+        url: 'https://loremflickr.com/800/600/test,frequency',
         caption: 'Pruebas con generador de tonos'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?warranty,audio&q=80',
+        url: 'https://loremflickr.com/800/600/warranty,audio',
         caption: 'Garantía 6 meses en bobinado'
       }
     ]
@@ -31384,66 +31384,66 @@ const BRAND_GATEO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?kindergarten,children,blocks,playroom&q=85',
+    hero: 'https://loremflickr.com/1200/1600/kindergarten,children,blocks,playroom',
     heroAlt: 'Niños jugando con bloques en kinder',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kindergarten,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/kindergarten,classroom',
         tag: 'Salón de juegos',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,blocks&q=80',
+        url: 'https://loremflickr.com/900/1200/children,blocks',
         tag: 'Bloques de madera',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kids,painting&q=80',
+        url: 'https://loremflickr.com/900/1200/kids,painting',
         tag: 'Hora de pintar',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?preschool,snack&q=80',
+        url: 'https://loremflickr.com/900/1200/preschool,snack',
         tag: 'Lunch saludable',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kindergarten,story&q=80',
+        url: 'https://loremflickr.com/900/1200/kindergarten,story',
         tag: 'Cuento del día',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,playground&q=80',
+        url: 'https://loremflickr.com/900/1200/children,playground',
         tag: 'Recreo afuera',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kids,music,class&q=80',
+        url: 'https://loremflickr.com/1200/900/kids,music,class',
         tag: 'Clase de música',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,nap&q=80',
+        url: 'https://loremflickr.com/900/1200/children,nap',
         tag: 'Siesta vespertina',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kindergarten,teacher&q=80',
+        url: 'https://loremflickr.com/1200/900/kindergarten,teacher',
         tag: 'Miss con grupo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?preschool,entrance&q=80',
+        url: 'https://loremflickr.com/800/600/preschool,entrance',
         caption: 'Entrada con código QR del papá'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?kids,lunch,table&q=80',
+        url: 'https://loremflickr.com/800/600/kids,lunch,table',
         caption: 'Lunch fotografiado y compartido'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?kindergarten,parent&q=80',
+        url: 'https://loremflickr.com/800/600/kindergarten,parent',
         caption: 'Mamá recoge con autorización'
       }
     ]
@@ -31561,66 +31561,66 @@ const BRAND_BLOQUE = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?preschool,children,learning&q=85',
+    hero: 'https://loremflickr.com/1200/1600/preschool,children,learning',
     heroAlt: 'Preescolar con peques aprendiendo',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?preschool,classroom,colors&q=80',
+        url: 'https://loremflickr.com/1200/900/preschool,classroom,colors',
         tag: 'Salón colorido',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kids,alphabet&q=80',
+        url: 'https://loremflickr.com/900/1200/kids,alphabet',
         tag: 'Abecedario',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,numbers&q=80',
+        url: 'https://loremflickr.com/900/1200/children,numbers',
         tag: 'Hora de números',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?preschool,art&q=80',
+        url: 'https://loremflickr.com/900/1200/preschool,art',
         tag: 'Manualidad',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kids,reading,story&q=80',
+        url: 'https://loremflickr.com/900/1200/kids,reading,story',
         tag: 'Hora del cuento',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?preschool,outdoor&q=80',
+        url: 'https://loremflickr.com/900/1200/preschool,outdoor',
         tag: 'Patio de juegos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?kids,puzzle&q=80',
+        url: 'https://loremflickr.com/1200/900/kids,puzzle',
         tag: 'Rompecabezas',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,singing&q=80',
+        url: 'https://loremflickr.com/900/1200/children,singing',
         tag: 'Hora de cantar',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?preschool,group&q=80',
+        url: 'https://loremflickr.com/1200/900/preschool,group',
         tag: 'Grupo completo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?preschool,teacher,note&q=80',
+        url: 'https://loremflickr.com/800/600/preschool,teacher,note',
         caption: 'Miss registra logros del día'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?kids,activity&q=80',
+        url: 'https://loremflickr.com/800/600/kids,activity',
         caption: 'Actividad sensorial fotografiada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?preschool,parent,phone&q=80',
+        url: 'https://loremflickr.com/800/600/preschool,parent,phone',
         caption: 'Papá ve avances por app'
       }
     ]
@@ -31738,66 +31738,66 @@ const BRAND_PIZARRA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?primary,school,classroom,kids&q=85',
+    hero: 'https://loremflickr.com/1200/1600/primary,school,classroom,kids',
     heroAlt: 'Aula de primaria con pizarra',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?elementary,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/elementary,classroom',
         tag: 'Salón de primaria',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?school,uniform,kids&q=80',
+        url: 'https://loremflickr.com/900/1200/school,uniform,kids',
         tag: 'Uniforme escolar',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?math,blackboard&q=80',
+        url: 'https://loremflickr.com/900/1200/math,blackboard',
         tag: 'Matemáticas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?school,books,desk&q=80',
+        url: 'https://loremflickr.com/900/1200/school,books,desk',
         tag: 'Libros de texto',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?school,recess,playground&q=80',
+        url: 'https://loremflickr.com/900/1200/school,recess,playground',
         tag: 'Recreo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?science,kids,experiment&q=80',
+        url: 'https://loremflickr.com/900/1200/science,kids,experiment',
         tag: 'Laboratorio',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?school,assembly&q=80',
+        url: 'https://loremflickr.com/1200/900/school,assembly',
         tag: 'Honores',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?library,kids&q=80',
+        url: 'https://loremflickr.com/900/1200/library,kids',
         tag: 'Biblioteca',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?school,teacher,students&q=80',
+        url: 'https://loremflickr.com/1200/900/school,teacher,students',
         tag: 'Clase con maestra',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?school,entrance,gate&q=80',
+        url: 'https://loremflickr.com/800/600/school,entrance,gate',
         caption: 'Entrada con credencial QR'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,grading&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,grading',
         caption: 'Maestro captura calificaciones'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?parent,phone,school&q=80',
+        url: 'https://loremflickr.com/800/600/parent,phone,school',
         caption: 'Papá consulta boleta digital'
       }
     ]
@@ -31911,66 +31911,66 @@ const BRAND_MOCHILA_SEC = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?middle,school,students,teen&q=85',
+    hero: 'https://loremflickr.com/1200/1600/middle,school,students,teen',
     heroAlt: 'Alumnos de secundaria en aula',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?secondary,school,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/secondary,school,classroom',
         tag: 'Aula de secundaria',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?teen,uniform&q=80',
+        url: 'https://loremflickr.com/900/1200/teen,uniform',
         tag: 'Uniforme',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?science,lab,teens&q=80',
+        url: 'https://loremflickr.com/900/1200/science,lab,teens',
         tag: 'Laboratorio',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?math,classroom&q=80',
+        url: 'https://loremflickr.com/900/1200/math,classroom',
         tag: 'Matemáticas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?school,library&q=80',
+        url: 'https://loremflickr.com/900/1200/school,library',
         tag: 'Biblioteca',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?teens,sports,school&q=80',
+        url: 'https://loremflickr.com/900/1200/teens,sports,school',
         tag: 'Deportes',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?school,group,students&q=80',
+        url: 'https://loremflickr.com/1200/900/school,group,students',
         tag: 'Grupo escolar',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?teacher,lesson&q=80',
+        url: 'https://loremflickr.com/900/1200/teacher,lesson',
         tag: 'Maestro en clase',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?school,computer,lab&q=80',
+        url: 'https://loremflickr.com/1200/900/school,computer,lab',
         tag: 'Centro de cómputo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?school,id,card&q=80',
+        url: 'https://loremflickr.com/800/600/school,id,card',
         caption: 'Credencial con QR de acceso'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,tablet,grading&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,tablet,grading',
         caption: 'Maestro captura desde tablet'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?parent,grades,phone&q=80',
+        url: 'https://loremflickr.com/800/600/parent,grades,phone',
         caption: 'Padre revisa calificaciones online'
       }
     ]
@@ -32088,66 +32088,66 @@ const BRAND_APUNTE_PREPA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?highschool,students,classroom&q=85',
+    hero: 'https://loremflickr.com/1200/1600/highschool,students,classroom',
     heroAlt: 'Estudiantes de prepa en aula',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?highschool,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/highschool,classroom',
         tag: 'Aula de prepa',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?student,notes&q=80',
+        url: 'https://loremflickr.com/900/1200/student,notes',
         tag: 'Apuntes de clase',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chemistry,lab&q=80',
+        url: 'https://loremflickr.com/900/1200/chemistry,lab',
         tag: 'Laboratorio química',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?physics,classroom&q=80',
+        url: 'https://loremflickr.com/900/1200/physics,classroom',
         tag: 'Física',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?library,study&q=80',
+        url: 'https://loremflickr.com/900/1200/library,study',
         tag: 'Biblioteca',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?campus,students&q=80',
+        url: 'https://loremflickr.com/900/1200/campus,students',
         tag: 'Patio escolar',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?highschool,group&q=80',
+        url: 'https://loremflickr.com/1200/900/highschool,group',
         tag: 'Generación',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?teacher,lecture&q=80',
+        url: 'https://loremflickr.com/900/1200/teacher,lecture',
         tag: 'Cátedra',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?computer,lab,school&q=80',
+        url: 'https://loremflickr.com/1200/900/computer,lab,school',
         tag: 'Centro de cómputo',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,id,access&q=80',
+        url: 'https://loremflickr.com/800/600/student,id,access',
         caption: 'Acceso con credencial digital'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,grades,tablet&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,grades,tablet',
         caption: 'Maestro captura desde tablet'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,grades,laptop&q=80',
+        url: 'https://loremflickr.com/800/600/student,grades,laptop',
         caption: 'Alumno consulta calificaciones'
       }
     ]
@@ -32265,66 +32265,66 @@ const BRAND_TECNICO_BAC = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?vocational,school,workshop,students&q=85',
+    hero: 'https://loremflickr.com/1200/1600/vocational,school,workshop,students',
     heroAlt: 'Taller de bachillerato técnico',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?workshop,students,tools&q=80',
+        url: 'https://loremflickr.com/1200/900/workshop,students,tools',
         tag: 'Taller técnico',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?electronics,lab&q=80',
+        url: 'https://loremflickr.com/900/1200/electronics,lab',
         tag: 'Electrónica',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mechanic,school&q=80',
+        url: 'https://loremflickr.com/900/1200/mechanic,school',
         tag: 'Mecánica',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?welding,student&q=80',
+        url: 'https://loremflickr.com/900/1200/welding,student',
         tag: 'Soldadura',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?industrial,training&q=80',
+        url: 'https://loremflickr.com/900/1200/industrial,training',
         tag: 'Capacitación industrial',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?student,uniform,blue&q=80',
+        url: 'https://loremflickr.com/900/1200/student,uniform,blue',
         tag: 'Uniforme de taller',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?vocational,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/vocational,classroom',
         tag: 'Aula teórica',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cnc,machine,student&q=80',
+        url: 'https://loremflickr.com/900/1200/cnc,machine,student',
         tag: 'CNC',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?graduation,technical&q=80',
+        url: 'https://loremflickr.com/1200/900/graduation,technical',
         tag: 'Graduación',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,id,scanner&q=80',
+        url: 'https://loremflickr.com/800/600/student,id,scanner',
         caption: 'Entrada al taller con QR'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,workshop,tablet&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,workshop,tablet',
         caption: 'Maestro registra horas práctica'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?certificate,technical&q=80',
+        url: 'https://loremflickr.com/800/600/certificate,technical',
         caption: 'Certificado al completar módulo'
       }
     ]
@@ -32442,66 +32442,66 @@ const BRAND_TOGA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?university,campus,students,library&q=85',
+    hero: 'https://loremflickr.com/1200/1600/university,campus,students,library',
     heroAlt: 'Campus universitario con alumnos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?university,campus&q=80',
+        url: 'https://loremflickr.com/1200/900/university,campus',
         tag: 'Campus principal',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?library,university&q=80',
+        url: 'https://loremflickr.com/900/1200/library,university',
         tag: 'Biblioteca',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?lecture,hall&q=80',
+        url: 'https://loremflickr.com/900/1200/lecture,hall',
         tag: 'Aula magna',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?graduation,gown&q=80',
+        url: 'https://loremflickr.com/900/1200/graduation,gown',
         tag: 'Graduación',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?student,laptop,study&q=80',
+        url: 'https://loremflickr.com/900/1200/student,laptop,study',
         tag: 'Estudio',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?university,group,students&q=80',
+        url: 'https://loremflickr.com/900/1200/university,group,students',
         tag: 'Grupo de estudio',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?professor,lecture&q=80',
+        url: 'https://loremflickr.com/1200/900/professor,lecture',
         tag: 'Cátedra magistral',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?research,lab,university&q=80',
+        url: 'https://loremflickr.com/900/1200/research,lab,university',
         tag: 'Laboratorio',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?university,building&q=80',
+        url: 'https://loremflickr.com/1200/900/university,building',
         tag: 'Edificio rectoría',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,id,university&q=80',
+        url: 'https://loremflickr.com/800/600/student,id,university',
         caption: 'Credencial universitaria digital'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?professor,grades,laptop&q=80',
+        url: 'https://loremflickr.com/800/600/professor,grades,laptop',
         caption: 'Catedrático captura calificaciones'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?graduation,diploma&q=80',
+        url: 'https://loremflickr.com/800/600/graduation,diploma',
         caption: 'Constancia de titulación'
       }
     ]
@@ -32619,66 +32619,66 @@ const BRAND_BILINGUAL = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?bilingual,school,students,english&q=85',
+    hero: 'https://loremflickr.com/1200/1600/bilingual,school,students,english',
     heroAlt: 'Colegio bilingüe con alumnos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bilingual,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/bilingual,classroom',
         tag: 'Aula bilingüe',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?english,books&q=80',
+        url: 'https://loremflickr.com/900/1200/english,books',
         tag: 'Material en inglés',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,reading,english&q=80',
+        url: 'https://loremflickr.com/900/1200/children,reading,english',
         tag: 'Reading time',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?students,flag,uk&q=80',
+        url: 'https://loremflickr.com/900/1200/students,flag,uk',
         tag: 'Día Reino Unido',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?school,debate&q=80',
+        url: 'https://loremflickr.com/900/1200/school,debate',
         tag: 'Debate en inglés',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,art,school&q=80',
+        url: 'https://loremflickr.com/900/1200/children,art,school',
         tag: 'Arts class',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?school,multicultural&q=80',
+        url: 'https://loremflickr.com/1200/900/school,multicultural',
         tag: 'Diversidad cultural',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?teacher,english&q=80',
+        url: 'https://loremflickr.com/900/1200/teacher,english',
         tag: 'Native teacher',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?certificate,english&q=80',
+        url: 'https://loremflickr.com/1200/900/certificate,english',
         tag: 'Cambridge cert',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?school,id,kids&q=80',
+        url: 'https://loremflickr.com/800/600/school,id,kids',
         caption: 'Credencial con código de nivel'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,laptop,grading&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,laptop,grading',
         caption: 'Native captura evaluación'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?english,certificate,parent&q=80',
+        url: 'https://loremflickr.com/800/600/english,certificate,parent',
         caption: 'Papá descarga certificado'
       }
     ]
@@ -32796,66 +32796,66 @@ const BRAND_MONTESSORI = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?montessori,wood,materials,kids&q=85',
+    hero: 'https://loremflickr.com/1200/1600/montessori,wood,materials,kids',
     heroAlt: 'Ambiente Montessori con materiales de madera',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?montessori,classroom,wood&q=80',
+        url: 'https://loremflickr.com/1200/900/montessori,classroom,wood',
         tag: 'Ambiente preparado',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?montessori,materials&q=80',
+        url: 'https://loremflickr.com/900/1200/montessori,materials',
         tag: 'Materiales sensoriales',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,wooden,blocks&q=80',
+        url: 'https://loremflickr.com/900/1200/children,wooden,blocks',
         tag: 'Bloques de madera',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kids,garden,school&q=80',
+        url: 'https://loremflickr.com/900/1200/kids,garden,school',
         tag: 'Huerto escolar',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?montessori,practical,life&q=80',
+        url: 'https://loremflickr.com/900/1200/montessori,practical,life',
         tag: 'Vida práctica',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,reading,quiet&q=80',
+        url: 'https://loremflickr.com/900/1200/children,reading,quiet',
         tag: 'Lectura libre',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?montessori,guide,child&q=80',
+        url: 'https://loremflickr.com/1200/900/montessori,guide,child',
         tag: 'Guía y niño',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,nature,school&q=80',
+        url: 'https://loremflickr.com/900/1200/children,nature,school',
         tag: 'Conexión naturaleza',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?montessori,community&q=80',
+        url: 'https://loremflickr.com/1200/900/montessori,community',
         tag: 'Comunidad escolar',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?montessori,entrance&q=80',
+        url: 'https://loremflickr.com/800/600/montessori,entrance',
         caption: 'Entrada en calma con guía'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,observation,kids&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,observation,kids',
         caption: 'Guía registra observaciones'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?parent,report,school&q=80',
+        url: 'https://loremflickr.com/800/600/parent,report,school',
         caption: 'Padre lee reporte trimestral'
       }
     ]
@@ -32973,66 +32973,66 @@ const BRAND_WALDORF = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?waldorf,steiner,school,wood&q=85',
+    hero: 'https://loremflickr.com/1200/1600/waldorf,steiner,school,wood',
     heroAlt: 'Escuela Waldorf con ambiente natural',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?waldorf,classroom,wood&q=80',
+        url: 'https://loremflickr.com/1200/900/waldorf,classroom,wood',
         tag: 'Aula Waldorf',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,crafts,wool&q=80',
+        url: 'https://loremflickr.com/900/1200/children,crafts,wool',
         tag: 'Telar y lana',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kids,painting,watercolor&q=80',
+        url: 'https://loremflickr.com/900/1200/kids,painting,watercolor',
         tag: 'Acuarela húmedo-en-húmedo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?eurythmy,movement&q=80',
+        url: 'https://loremflickr.com/900/1200/eurythmy,movement',
         tag: 'Euritmia',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?garden,school,nature&q=80',
+        url: 'https://loremflickr.com/900/1200/garden,school,nature',
         tag: 'Huerto biodinámico',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bread,baking,children&q=80',
+        url: 'https://loremflickr.com/900/1200/bread,baking,children',
         tag: 'Hornear pan',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?waldorf,festival&q=80',
+        url: 'https://loremflickr.com/1200/900/waldorf,festival',
         tag: 'Fiesta de san juan',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wood,carving,kids&q=80',
+        url: 'https://loremflickr.com/900/1200/wood,carving,kids',
         tag: 'Carpintería',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?waldorf,community&q=80',
+        url: 'https://loremflickr.com/1200/900/waldorf,community',
         tag: 'Comunidad escolar',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?waldorf,entrance,wood&q=80',
+        url: 'https://loremflickr.com/800/600/waldorf,entrance,wood',
         caption: 'Entrada cálida con cirio'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,observation,waldorf&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,observation,waldorf',
         caption: 'Maestra registra desarrollo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?parent,letter,waldorf&q=80',
+        url: 'https://loremflickr.com/800/600/parent,letter,waldorf',
         caption: 'Padre recibe carta trimestral'
       }
     ]
@@ -33150,66 +33150,66 @@ const BRAND_TORNILLO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?technical,institute,workshop&q=85',
+    hero: 'https://loremflickr.com/1200/1600/technical,institute,workshop',
     heroAlt: 'Instituto técnico con alumnos adultos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?technical,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/technical,workshop',
         tag: 'Taller industrial',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?welding,training&q=80',
+        url: 'https://loremflickr.com/900/1200/welding,training',
         tag: 'Soldadura',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?electrician,training&q=80',
+        url: 'https://loremflickr.com/900/1200/electrician,training',
         tag: 'Electricidad',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mechanic,school&q=80',
+        url: 'https://loremflickr.com/900/1200/mechanic,school',
         tag: 'Mecánica auto',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?refrigeration,training&q=80',
+        url: 'https://loremflickr.com/900/1200/refrigeration,training',
         tag: 'Refrigeración',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?plumber,training&q=80',
+        url: 'https://loremflickr.com/900/1200/plumber,training',
         tag: 'Plomería',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?adults,classroom,vocational&q=80',
+        url: 'https://loremflickr.com/1200/900/adults,classroom,vocational',
         tag: 'Adultos en clase',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?certification,technical&q=80',
+        url: 'https://loremflickr.com/900/1200/certification,technical',
         tag: 'Certificado emitido',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?industrial,training,center&q=80',
+        url: 'https://loremflickr.com/1200/900/industrial,training,center',
         tag: 'Centro de capacitación',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?adult,id,scanner&q=80',
+        url: 'https://loremflickr.com/800/600/adult,id,scanner',
         caption: 'Entrada con credencial QR'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?instructor,tablet,log&q=80',
+        url: 'https://loremflickr.com/800/600/instructor,tablet,log',
         caption: 'Instructor registra horas reales'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?certificate,worker&q=80',
+        url: 'https://loremflickr.com/800/600/certificate,worker',
         caption: 'Certificación entregada'
       }
     ]
@@ -33327,66 +33327,66 @@ const BRAND_IDIOMA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?language,books,classroom,study&q=85',
+    hero: 'https://loremflickr.com/1200/1600/language,books,classroom,study',
     heroAlt: 'Academia de idiomas con grupos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?language,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/language,classroom',
         tag: 'Salón multinivel',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?books,language,study&q=80',
+        url: 'https://loremflickr.com/900/1200/books,language,study',
         tag: 'Materiales CEFR',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?conversation,group&q=80',
+        url: 'https://loremflickr.com/900/1200/conversation,group',
         tag: 'Conversación grupal',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?flags,world&q=80',
+        url: 'https://loremflickr.com/900/1200/flags,world',
         tag: 'Múltiples idiomas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?teacher,language,native&q=80',
+        url: 'https://loremflickr.com/900/1200/teacher,language,native',
         tag: 'Maestro nativo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?online,language,class&q=80',
+        url: 'https://loremflickr.com/900/1200/online,language,class',
         tag: 'Clase virtual',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?adults,studying,language&q=80',
+        url: 'https://loremflickr.com/1200/900/adults,studying,language',
         tag: 'Adultos en clase',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?certificate,language&q=80',
+        url: 'https://loremflickr.com/900/1200/certificate,language',
         tag: 'Certificación nivel',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?language,immersion&q=80',
+        url: 'https://loremflickr.com/1200/900/language,immersion',
         tag: 'Inmersión cultural',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,login,language&q=80',
+        url: 'https://loremflickr.com/800/600/student,login,language',
         caption: 'Alumno reserva clase desde app'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,native,tablet&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,native,tablet',
         caption: 'Maestro nativo registra avance'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?language,certificate,digital&q=80',
+        url: 'https://loremflickr.com/800/600/language,certificate,digital',
         caption: 'Certificado de nivel emitido'
       }
     ]
@@ -33504,66 +33504,66 @@ const BRAND_INGLES = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?english,classroom,students,books&q=85',
+    hero: 'https://loremflickr.com/1200/1600/english,classroom,students,books',
     heroAlt: 'Academia de inglés con grupo',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?english,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/english,classroom',
         tag: 'English classroom',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cambridge,books&q=80',
+        url: 'https://loremflickr.com/900/1200/cambridge,books',
         tag: 'Cambridge materials',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kids,english,games&q=80',
+        url: 'https://loremflickr.com/900/1200/kids,english,games',
         tag: 'Kids fun class',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?adults,english,coffee&q=80',
+        url: 'https://loremflickr.com/900/1200/adults,english,coffee',
         tag: 'Adult conversation',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?teacher,english,native&q=80',
+        url: 'https://loremflickr.com/900/1200/teacher,english,native',
         tag: 'Native speaker',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?teen,english,study&q=80',
+        url: 'https://loremflickr.com/900/1200/teen,english,study',
         tag: 'Teen group',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?english,conversation,group&q=80',
+        url: 'https://loremflickr.com/1200/900/english,conversation,group',
         tag: 'Speaking practice',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?certificate,cambridge&q=80',
+        url: 'https://loremflickr.com/900/1200/certificate,cambridge',
         tag: 'Cambridge cert',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?english,exam,students&q=80',
+        url: 'https://loremflickr.com/1200/900/english,exam,students',
         tag: 'Exam day',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,id,reception&q=80',
+        url: 'https://loremflickr.com/800/600/student,id,reception',
         caption: 'Alumno reserva clase desde app'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,laptop,grading&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,laptop,grading',
         caption: 'Teacher logs progress'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?cambridge,certificate,parent&q=80',
+        url: 'https://loremflickr.com/800/600/cambridge,certificate,parent',
         caption: 'Papá descarga certificado'
       }
     ]
@@ -33681,66 +33681,66 @@ const BRAND_MANDARIN = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?chinese,characters,students,calligraphy&q=85',
+    hero: 'https://loremflickr.com/1200/1600/chinese,characters,students,calligraphy',
     heroAlt: 'Academia de chino mandarín',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?chinese,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/chinese,classroom',
         tag: 'Salón de chino',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chinese,calligraphy&q=80',
+        url: 'https://loremflickr.com/900/1200/chinese,calligraphy',
         tag: 'Caligrafía',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chinese,characters,study&q=80',
+        url: 'https://loremflickr.com/900/1200/chinese,characters,study',
         tag: 'Caracteres hanzi',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?asian,teacher,class&q=80',
+        url: 'https://loremflickr.com/900/1200/asian,teacher,class',
         tag: 'Maestro nativo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?china,culture,school&q=80',
+        url: 'https://loremflickr.com/900/1200/china,culture,school',
         tag: 'Cultura china',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chinese,tea,ceremony&q=80',
+        url: 'https://loremflickr.com/900/1200/chinese,tea,ceremony',
         tag: 'Ceremonia del té',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?adults,chinese,study&q=80',
+        url: 'https://loremflickr.com/1200/900/adults,chinese,study',
         tag: 'Adultos en clase',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?hsk,certificate&q=80',
+        url: 'https://loremflickr.com/900/1200/hsk,certificate',
         tag: 'Certificado HSK',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?chinese,new,year,school&q=80',
+        url: 'https://loremflickr.com/1200/900/chinese,new,year,school',
         tag: 'Año nuevo chino',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,asian,scanner&q=80',
+        url: 'https://loremflickr.com/800/600/student,asian,scanner',
         caption: 'Alumno entra con QR'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,chinese,tablet&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,chinese,tablet',
         caption: 'Laoshi registra avance'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?hsk,exam,prep&q=80',
+        url: 'https://loremflickr.com/800/600/hsk,exam,prep',
         caption: 'Preparación examen HSK'
       }
     ]
@@ -33854,66 +33854,66 @@ const BRAND_TUTORIA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?tutoring,student,books,study&q=85',
+    hero: 'https://loremflickr.com/1200/1600/tutoring,student,books,study',
     heroAlt: 'Sesión de tutoría',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tutoring,table,kid&q=80',
+        url: 'https://loremflickr.com/1200/900/tutoring,table,kid',
         tag: 'Tutoría 1-a-1',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?math,homework&q=80',
+        url: 'https://loremflickr.com/900/1200/math,homework',
         tag: 'Tareas de mate',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?spanish,study&q=80',
+        url: 'https://loremflickr.com/900/1200/spanish,study',
         tag: 'Español',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?science,kid,study&q=80',
+        url: 'https://loremflickr.com/900/1200/science,kid,study',
         tag: 'Ciencias',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?history,books,study&q=80',
+        url: 'https://loremflickr.com/900/1200/history,books,study',
         tag: 'Historia',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?english,tutoring&q=80',
+        url: 'https://loremflickr.com/900/1200/english,tutoring',
         tag: 'Inglés',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tutor,explaining&q=80',
+        url: 'https://loremflickr.com/1200/900/tutor,explaining',
         tag: 'Tutor explica',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?student,success&q=80',
+        url: 'https://loremflickr.com/900/1200/student,success',
         tag: 'Aprobado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?study,group,kids&q=80',
+        url: 'https://loremflickr.com/1200/900/study,group,kids',
         tag: 'Grupo de estudio',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?parent,booking,phone&q=80',
+        url: 'https://loremflickr.com/800/600/parent,booking,phone',
         caption: 'Papá reserva tutoría'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?tutor,laptop,notes&q=80',
+        url: 'https://loremflickr.com/800/600/tutor,laptop,notes',
         caption: 'Tutor registra tema visto'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,grades,improved&q=80',
+        url: 'https://loremflickr.com/800/600/student,grades,improved',
         caption: 'Calificación subió'
       }
     ]
@@ -34031,66 +34031,66 @@ const BRAND_PARTICULAR = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?tutor,home,student,books&q=85',
+    hero: 'https://loremflickr.com/1200/1600/tutor,home,student,books',
     heroAlt: 'Maestro particular en casa',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?tutor,home,kid&q=80',
+        url: 'https://loremflickr.com/1200/900/tutor,home,kid',
         tag: 'Clase en casa',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?private,lesson,math&q=80',
+        url: 'https://loremflickr.com/900/1200/private,lesson,math',
         tag: 'Mate uno-a-uno',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?reading,private,lesson&q=80',
+        url: 'https://loremflickr.com/900/1200/reading,private,lesson',
         tag: 'Lectura guiada',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?writing,kid,tutor&q=80',
+        url: 'https://loremflickr.com/900/1200/writing,kid,tutor',
         tag: 'Caligrafía',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?english,private&q=80',
+        url: 'https://loremflickr.com/900/1200/english,private',
         tag: 'Inglés a domicilio',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?student,confident&q=80',
+        url: 'https://loremflickr.com/900/1200/student,confident',
         tag: 'Alumno confiado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?teacher,car,driving&q=80',
+        url: 'https://loremflickr.com/1200/900/teacher,car,driving',
         tag: 'Maestro en ruta',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?parent,review&q=80',
+        url: 'https://loremflickr.com/900/1200/parent,review',
         tag: 'Papá revisa',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?study,desk,private&q=80',
+        url: 'https://loremflickr.com/1200/900/study,desk,private',
         tag: 'Espacio estudio',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?parent,scheduling&q=80',
+        url: 'https://loremflickr.com/800/600/parent,scheduling',
         caption: 'Papá agenda en celular'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?tutor,arriving,home&q=80',
+        url: 'https://loremflickr.com/800/600/tutor,arriving,home',
         caption: 'Maestro confirma llegada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,smiling,desk&q=80',
+        url: 'https://loremflickr.com/800/600/student,smiling,desk',
         caption: 'Alumno termina sesión'
       }
     ]
@@ -34208,58 +34208,58 @@ const BRAND_PARTITURA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?music,piano,school,instruments&q=85',
+    hero: 'https://loremflickr.com/1200/1600/music,piano,school,instruments',
     heroAlt: 'Academia musical con instrumentos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?piano,student&q=80',
+        url: 'https://loremflickr.com/1200/900/piano,student',
         tag: 'Salón de piano',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?guitar,lesson&q=80',
+        url: 'https://loremflickr.com/900/1200/guitar,lesson',
         tag: 'Guitarra',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?violin,student&q=80',
+        url: 'https://loremflickr.com/900/1200/violin,student',
         tag: 'Violín',
         size: 'sm'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?drums,kid&q=80', tag: 'Batería', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/drums,kid', tag: 'Batería', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?saxophone,music&q=80',
+        url: 'https://loremflickr.com/900/1200/saxophone,music',
         tag: 'Saxofón',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?flute,lesson&q=80', tag: 'Flauta', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/flute,lesson', tag: 'Flauta', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/1200x900/?ensemble,kids,music&q=80',
+        url: 'https://loremflickr.com/1200/900/ensemble,kids,music',
         tag: 'Ensamble',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?recital,kid,piano&q=80',
+        url: 'https://loremflickr.com/900/1200/recital,kid,piano',
         tag: 'Recital',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?music,school,group&q=80',
+        url: 'https://loremflickr.com/1200/900/music,school,group',
         tag: 'Grupo de cámara',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,music,scanner&q=80',
+        url: 'https://loremflickr.com/800/600/student,music,scanner',
         caption: 'Alumno entra al salón'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,music,laptop&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,music,laptop',
         caption: 'Maestro registra avance'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?parent,recital,phone&q=80',
+        url: 'https://loremflickr.com/800/600/parent,recital,phone',
         caption: 'Papá ve video del recital'
       }
     ]
@@ -34377,66 +34377,66 @@ const BRAND_COMPAS = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?dance,studio,ballet,students&q=85',
+    hero: 'https://loremflickr.com/1200/1600/dance,studio,ballet,students',
     heroAlt: 'Estudio de baile con grupo',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?ballet,studio&q=80',
+        url: 'https://loremflickr.com/1200/900/ballet,studio',
         tag: 'Estudio ballet',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?jazz,dance,class&q=80',
+        url: 'https://loremflickr.com/900/1200/jazz,dance,class',
         tag: 'Jazz',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?hip,hop,dance&q=80',
+        url: 'https://loremflickr.com/900/1200/hip,hop,dance',
         tag: 'Hip-hop',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?salsa,couple,dance&q=80',
+        url: 'https://loremflickr.com/900/1200/salsa,couple,dance',
         tag: 'Salsa',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?contemporary,dance&q=80',
+        url: 'https://loremflickr.com/900/1200/contemporary,dance',
         tag: 'Contemporáneo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ballet,kids&q=80',
+        url: 'https://loremflickr.com/900/1200/ballet,kids',
         tag: 'Ballet infantil',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?dance,performance,stage&q=80',
+        url: 'https://loremflickr.com/1200/900/dance,performance,stage',
         tag: 'Presentación',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dance,shoes&q=80',
+        url: 'https://loremflickr.com/900/1200/dance,shoes',
         tag: 'Zapatillas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?dance,studio,mirror&q=80',
+        url: 'https://loremflickr.com/1200/900/dance,studio,mirror',
         tag: 'Espejos y barra',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,dance,arriving&q=80',
+        url: 'https://loremflickr.com/800/600/student,dance,arriving',
         caption: 'Alumno entra con QR'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?dance,teacher,tablet&q=80',
+        url: 'https://loremflickr.com/800/600/dance,teacher,tablet',
         caption: 'Maestro registra asistencia'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?dance,recital,parent&q=80',
+        url: 'https://loremflickr.com/800/600/dance,recital,parent',
         caption: 'Padre reserva recital'
       }
     ]
@@ -34554,66 +34554,66 @@ const BRAND_MANTRA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?yoga,studio,meditation,mat&q=85',
+    hero: 'https://loremflickr.com/1200/1600/yoga,studio,meditation,mat',
     heroAlt: 'Estudio de yoga con tapetes',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?yoga,class,studio&q=80',
+        url: 'https://loremflickr.com/1200/900/yoga,class,studio',
         tag: 'Clase grupal',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?yoga,pose,asana&q=80',
+        url: 'https://loremflickr.com/900/1200/yoga,pose,asana',
         tag: 'Asana',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?meditation,group&q=80',
+        url: 'https://loremflickr.com/900/1200/meditation,group',
         tag: 'Meditación',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?prenatal,yoga&q=80',
+        url: 'https://loremflickr.com/900/1200/prenatal,yoga',
         tag: 'Prenatal yoga',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?hot,yoga,class&q=80',
+        url: 'https://loremflickr.com/900/1200/hot,yoga,class',
         tag: 'Hot yoga',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?ashtanga,yoga&q=80',
+        url: 'https://loremflickr.com/900/1200/ashtanga,yoga',
         tag: 'Ashtanga',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?yoga,sunrise&q=80',
+        url: 'https://loremflickr.com/1200/900/yoga,sunrise',
         tag: 'Clase amanecer',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?yoga,props,blocks&q=80',
+        url: 'https://loremflickr.com/900/1200/yoga,props,blocks',
         tag: 'Bloques y straps',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?yoga,studio,peaceful&q=80',
+        url: 'https://loremflickr.com/1200/900/yoga,studio,peaceful',
         tag: 'Salón en paz',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?yoga,app,booking&q=80',
+        url: 'https://loremflickr.com/800/600/yoga,app,booking',
         caption: 'Socia reserva clase'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?yoga,teacher,tablet&q=80',
+        url: 'https://loremflickr.com/800/600/yoga,teacher,tablet',
         caption: 'Instructora ve asistencia'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?yoga,membership&q=80',
+        url: 'https://loremflickr.com/800/600/yoga,membership',
         caption: 'Membresía mensual activa'
       }
     ]
@@ -34727,62 +34727,62 @@ const BRAND_CINTA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?karate,dojo,students,training&q=85',
+    hero: 'https://loremflickr.com/1200/1600/karate,dojo,students,training',
     heroAlt: 'Dojo de artes marciales',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?karate,dojo&q=80',
+        url: 'https://loremflickr.com/1200/900/karate,dojo',
         tag: 'Dojo principal',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?taekwondo,kick&q=80',
+        url: 'https://loremflickr.com/900/1200/taekwondo,kick',
         tag: 'Taekwondo',
         size: 'md'
       },
-      {url: 'https://source.unsplash.com/random/900x1200/?judo,training&q=80', tag: 'Judo', size: 'sm'},
+      {url: 'https://loremflickr.com/900/1200/judo,training', tag: 'Judo', size: 'sm'},
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bjj,brazilian,jiu&q=80',
+        url: 'https://loremflickr.com/900/1200/bjj,brazilian,jiu',
         tag: 'BJJ',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?belt,karate,exam&q=80',
+        url: 'https://loremflickr.com/900/1200/belt,karate,exam',
         tag: 'Examen de cinta',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?karate,kids&q=80',
+        url: 'https://loremflickr.com/900/1200/karate,kids',
         tag: 'Karate infantil',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?martial,arts,tournament&q=80',
+        url: 'https://loremflickr.com/1200/900/martial,arts,tournament',
         tag: 'Torneo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?gi,uniform,martial&q=80',
+        url: 'https://loremflickr.com/900/1200/gi,uniform,martial',
         tag: 'Uniforme gi',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sensei,students,martial&q=80',
+        url: 'https://loremflickr.com/1200/900/sensei,students,martial',
         tag: 'Sensei y alumnos',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,dojo,entry&q=80',
+        url: 'https://loremflickr.com/800/600/student,dojo,entry',
         caption: 'Alumno entra con QR'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?sensei,tablet,grade&q=80',
+        url: 'https://loremflickr.com/800/600/sensei,tablet,grade',
         caption: 'Sensei evalúa técnica'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?belt,ceremony,parents&q=80',
+        url: 'https://loremflickr.com/800/600/belt,ceremony,parents',
         caption: 'Ceremonia de cinta'
       }
     ]
@@ -34900,66 +34900,66 @@ const BRAND_BRAZADA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?swimming,pool,kids,lesson&q=85',
+    hero: 'https://loremflickr.com/1200/1600/swimming,pool,kids,lesson',
     heroAlt: 'Alberca con clase de natación',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?swimming,pool,school&q=80',
+        url: 'https://loremflickr.com/1200/900/swimming,pool,school',
         tag: 'Alberca olímpica',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?kids,swimming,float&q=80',
+        url: 'https://loremflickr.com/900/1200/kids,swimming,float',
         tag: 'Bebés acuáticos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?children,swimming,goggles&q=80',
+        url: 'https://loremflickr.com/900/1200/children,swimming,goggles',
         tag: 'Niños nadando',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?swimming,instructor&q=80',
+        url: 'https://loremflickr.com/900/1200/swimming,instructor',
         tag: 'Instructor en agua',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?swim,style,crawl&q=80',
+        url: 'https://loremflickr.com/900/1200/swim,style,crawl',
         tag: 'Estilo crawl',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?backstroke,training&q=80',
+        url: 'https://loremflickr.com/900/1200/backstroke,training',
         tag: 'Dorso',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?competitive,swimming&q=80',
+        url: 'https://loremflickr.com/1200/900/competitive,swimming',
         tag: 'Competitivo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?swimming,medal,kid&q=80',
+        url: 'https://loremflickr.com/900/1200/swimming,medal,kid',
         tag: 'Medalla nivel',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?swimming,pool,lanes&q=80',
+        url: 'https://loremflickr.com/1200/900/swimming,pool,lanes',
         tag: 'Carriles',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?swim,id,checkin&q=80',
+        url: 'https://loremflickr.com/800/600/swim,id,checkin',
         caption: 'Padre registra entrada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?instructor,tablet,pool&q=80',
+        url: 'https://loremflickr.com/800/600/instructor,tablet,pool',
         caption: 'Instructor evalúa nivel'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?kid,swim,certificate&q=80',
+        url: 'https://loremflickr.com/800/600/kid,swim,certificate',
         caption: 'Certificado de nivel'
       }
     ]
@@ -35077,66 +35077,66 @@ const BRAND_MELODIA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?singing,microphone,vocal,coach&q=85',
+    hero: 'https://loremflickr.com/1200/1600/singing,microphone,vocal,coach',
     heroAlt: 'Academia de canto con micrófono',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?singer,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/singer,classroom',
         tag: 'Salón de canto',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?microphone,studio&q=80',
+        url: 'https://loremflickr.com/900/1200/microphone,studio',
         tag: 'Micrófono',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?piano,vocal,teacher&q=80',
+        url: 'https://loremflickr.com/900/1200/piano,vocal,teacher',
         tag: 'Vocalización piano',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?choir,kids&q=80',
+        url: 'https://loremflickr.com/900/1200/choir,kids',
         tag: 'Coro infantil',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?opera,singer&q=80',
+        url: 'https://loremflickr.com/900/1200/opera,singer',
         tag: 'Canto lírico',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pop,singer,training&q=80',
+        url: 'https://loremflickr.com/900/1200/pop,singer,training',
         tag: 'Canto pop',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?stage,performance,singer&q=80',
+        url: 'https://loremflickr.com/1200/900/stage,performance,singer',
         tag: 'Recital',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?recording,studio&q=80',
+        url: 'https://loremflickr.com/900/1200/recording,studio',
         tag: 'Grabación',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?vocal,group,practice&q=80',
+        url: 'https://loremflickr.com/1200/900/vocal,group,practice',
         tag: 'Práctica grupal',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,singing,check&q=80',
+        url: 'https://loremflickr.com/800/600/student,singing,check',
         caption: 'Alumna entra a su clase'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?coach,vocal,tablet&q=80',
+        url: 'https://loremflickr.com/800/600/coach,vocal,tablet',
         caption: 'Coach registra tesitura'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?parent,phone,recital&q=80',
+        url: 'https://loremflickr.com/800/600/parent,phone,recital',
         caption: 'Padre ve video recital'
       }
     ]
@@ -35254,66 +35254,66 @@ const BRAND_SARTEN = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?cooking,school,chef,students&q=85',
+    hero: 'https://loremflickr.com/1200/1600/cooking,school,chef,students',
     heroAlt: 'Escuela de cocina con alumnos',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?cooking,class&q=80',
+        url: 'https://loremflickr.com/1200/900/cooking,class',
         tag: 'Aula-cocina',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?chef,knife,skills&q=80',
+        url: 'https://loremflickr.com/900/1200/chef,knife,skills',
         tag: 'Cortes básicos',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pastry,baking&q=80',
+        url: 'https://loremflickr.com/900/1200/pastry,baking',
         tag: 'Repostería',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mexican,food,class&q=80',
+        url: 'https://loremflickr.com/900/1200/mexican,food,class',
         tag: 'Cocina mexicana',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?italian,cooking&q=80',
+        url: 'https://loremflickr.com/900/1200/italian,cooking',
         tag: 'Cocina italiana',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?asian,cooking&q=80',
+        url: 'https://loremflickr.com/900/1200/asian,cooking',
         tag: 'Cocina asiática',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?plated,dish&q=80',
+        url: 'https://loremflickr.com/1200/900/plated,dish',
         tag: 'Emplatado',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?wine,pairing&q=80',
+        url: 'https://loremflickr.com/900/1200/wine,pairing',
         tag: 'Maridaje',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?chef,certification&q=80',
+        url: 'https://loremflickr.com/1200/900/chef,certification',
         tag: 'Certificación',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,apron,arriving&q=80',
+        url: 'https://loremflickr.com/800/600/student,apron,arriving',
         caption: 'Alumno entra con mandil'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?chef,evaluating,plate&q=80',
+        url: 'https://loremflickr.com/800/600/chef,evaluating,plate',
         caption: 'Chef evalúa plato'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?ingredients,kitchen&q=80',
+        url: 'https://loremflickr.com/800/600/ingredients,kitchen',
         caption: 'Insumos del día'
       }
     ]
@@ -35431,66 +35431,66 @@ const BRAND_HILO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?sewing,school,machines,fabric&q=85',
+    hero: 'https://loremflickr.com/1200/1600/sewing,school,machines,fabric',
     heroAlt: 'Academia de costura con máquinas',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?sewing,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/sewing,classroom',
         tag: 'Aula de costura',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sewing,machine&q=80',
+        url: 'https://loremflickr.com/900/1200/sewing,machine',
         tag: 'Máquina de coser',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pattern,fabric&q=80',
+        url: 'https://loremflickr.com/900/1200/pattern,fabric',
         tag: 'Patrón y tela',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?embroidery,hand&q=80',
+        url: 'https://loremflickr.com/900/1200/embroidery,hand',
         tag: 'Bordado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?fashion,sketch&q=80',
+        url: 'https://loremflickr.com/900/1200/fashion,sketch',
         tag: 'Diseño boceto',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?dressmaker,seamstress&q=80',
+        url: 'https://loremflickr.com/900/1200/dressmaker,seamstress',
         tag: 'Modista trabajando',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?fashion,show,school&q=80',
+        url: 'https://loremflickr.com/1200/900/fashion,show,school',
         tag: 'Pasarela final',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?thread,colors&q=80',
+        url: 'https://loremflickr.com/900/1200/thread,colors',
         tag: 'Hilos surtidos',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?textiles,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/textiles,workshop',
         tag: 'Taller textil',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,sewing,entrance&q=80',
+        url: 'https://loremflickr.com/800/600/student,sewing,entrance',
         caption: 'Alumna entra al taller'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,fabric,evaluate&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,fabric,evaluate',
         caption: 'Maestra evalúa puntada'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?dress,finished,model&q=80',
+        url: 'https://loremflickr.com/800/600/dress,finished,model',
         caption: 'Prenda terminada'
       }
     ]
@@ -35608,66 +35608,66 @@ const BRAND_TIJERA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?craft,workshop,kids,glue&q=85',
+    hero: 'https://loremflickr.com/1200/1600/craft,workshop,kids,glue',
     heroAlt: 'Taller de manualidades con niños',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?craft,workshop,kids&q=80',
+        url: 'https://loremflickr.com/1200/900/craft,workshop,kids',
         tag: 'Taller infantil',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?scrapbook,paper&q=80',
+        url: 'https://loremflickr.com/900/1200/scrapbook,paper',
         tag: 'Scrapbook',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?clay,modeling&q=80',
+        url: 'https://loremflickr.com/900/1200/clay,modeling',
         tag: 'Plastilina y arcilla',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?paint,kids,canvas&q=80',
+        url: 'https://loremflickr.com/900/1200/paint,kids,canvas',
         tag: 'Pintura canvas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?origami,paper&q=80',
+        url: 'https://loremflickr.com/900/1200/origami,paper',
         tag: 'Origami',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?beads,jewelry,kids&q=80',
+        url: 'https://loremflickr.com/900/1200/beads,jewelry,kids',
         tag: 'Bisutería',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?craft,materials,colorful&q=80',
+        url: 'https://loremflickr.com/1200/900/craft,materials,colorful',
         tag: 'Mesa de materiales',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?diy,wood,kids&q=80',
+        url: 'https://loremflickr.com/900/1200/diy,wood,kids',
         tag: 'DIY madera',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?craft,group,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/craft,group,workshop',
         tag: 'Grupo creando',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?kid,workshop,checkin&q=80',
+        url: 'https://loremflickr.com/800/600/kid,workshop,checkin',
         caption: 'Niño llega al taller'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?craft,kit,materials&q=80',
+        url: 'https://loremflickr.com/800/600/craft,kit,materials',
         caption: 'Kit del día listo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?finished,craft,proud&q=80',
+        url: 'https://loremflickr.com/800/600/finished,craft,proud',
         caption: 'Proyecto terminado'
       }
     ]
@@ -35785,66 +35785,66 @@ const BRAND_OFICIO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?trades,training,workshop,tools&q=85',
+    hero: 'https://loremflickr.com/1200/1600/trades,training,workshop,tools',
     heroAlt: 'Instituto de oficios con taller',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?electrician,training&q=80',
+        url: 'https://loremflickr.com/1200/900/electrician,training',
         tag: 'Electricidad',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?plumber,school&q=80',
+        url: 'https://loremflickr.com/900/1200/plumber,school',
         tag: 'Plomería',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?carpenter,workshop&q=80',
+        url: 'https://loremflickr.com/900/1200/carpenter,workshop',
         tag: 'Carpintería',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?welder,training&q=80',
+        url: 'https://loremflickr.com/900/1200/welder,training',
         tag: 'Soldadura',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?bricklayer,construction&q=80',
+        url: 'https://loremflickr.com/900/1200/bricklayer,construction',
         tag: 'Albañilería',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mechanic,auto,school&q=80',
+        url: 'https://loremflickr.com/900/1200/mechanic,auto,school',
         tag: 'Mecánica auto',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?trades,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/trades,classroom',
         tag: 'Aula teórica',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?safety,equipment,worker&q=80',
+        url: 'https://loremflickr.com/900/1200/safety,equipment,worker',
         tag: 'Equipo de seguridad',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?conocer,certificate&q=80',
+        url: 'https://loremflickr.com/1200/900/conocer,certificate',
         tag: 'Cert. CONOCER',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?worker,id,workshop&q=80',
+        url: 'https://loremflickr.com/800/600/worker,id,workshop',
         caption: 'Alumno entra con casco'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?instructor,tablet,trade&q=80',
+        url: 'https://loremflickr.com/800/600/instructor,tablet,trade',
         caption: 'Instructor registra avance'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?certified,worker&q=80',
+        url: 'https://loremflickr.com/800/600/certified,worker',
         caption: 'Trabajador certificado'
       }
     ]
@@ -35962,66 +35962,66 @@ const BRAND_WEBINAR = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?online,course,laptop,student&q=85',
+    hero: 'https://loremflickr.com/1200/1600/online,course,laptop,student',
     heroAlt: 'Estudiante tomando curso en línea',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?online,learning&q=80',
+        url: 'https://loremflickr.com/1200/900/online,learning',
         tag: 'Aprendizaje remoto',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?webinar,zoom&q=80',
+        url: 'https://loremflickr.com/900/1200/webinar,zoom',
         tag: 'Webinar en vivo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?video,course,recording&q=80',
+        url: 'https://loremflickr.com/900/1200/video,course,recording',
         tag: 'Curso grabado',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?digital,certificate&q=80',
+        url: 'https://loremflickr.com/900/1200/digital,certificate',
         tag: 'Cert. digital',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?laptop,study,home&q=80',
+        url: 'https://loremflickr.com/900/1200/laptop,study,home',
         tag: 'Estudio en casa',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?elearning,platform&q=80',
+        url: 'https://loremflickr.com/900/1200/elearning,platform',
         tag: 'Plataforma LMS',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?community,online,students&q=80',
+        url: 'https://loremflickr.com/1200/900/community,online,students',
         tag: 'Comunidad online',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?subscription,access&q=80',
+        url: 'https://loremflickr.com/900/1200/subscription,access',
         tag: 'Acceso anual',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?virtual,classroom&q=80',
+        url: 'https://loremflickr.com/1200/900/virtual,classroom',
         tag: 'Aula virtual',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?student,login,laptop&q=80',
+        url: 'https://loremflickr.com/800/600/student,login,laptop',
         caption: 'Alumno entra a plataforma'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?teacher,webinar,live&q=80',
+        url: 'https://loremflickr.com/800/600/teacher,webinar,live',
         caption: 'Webinar en directo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?certificate,digital,linkedin&q=80',
+        url: 'https://loremflickr.com/800/600/certificate,digital,linkedin',
         caption: 'Certificado emitido'
       }
     ]
@@ -36139,66 +36139,66 @@ const BRAND_CORPORATIVO = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?corporate,training,executive,classroom&q=85',
+    hero: 'https://loremflickr.com/1200/1600/corporate,training,executive,classroom',
     heroAlt: 'Capacitación corporativa ejecutiva',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?corporate,training&q=80',
+        url: 'https://loremflickr.com/1200/900/corporate,training',
         tag: 'Aula corporativa',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?executive,workshop&q=80',
+        url: 'https://loremflickr.com/900/1200/executive,workshop',
         tag: 'Workshop ejecutivo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?leadership,training&q=80',
+        url: 'https://loremflickr.com/900/1200/leadership,training',
         tag: 'Liderazgo',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?finance,training&q=80',
+        url: 'https://loremflickr.com/900/1200/finance,training',
         tag: 'Finanzas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?team,training,office&q=80',
+        url: 'https://loremflickr.com/900/1200/team,training,office',
         tag: 'Trabajo en equipo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?mentor,executive&q=80',
+        url: 'https://loremflickr.com/900/1200/mentor,executive',
         tag: 'Mentoring',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?conference,corporate&q=80',
+        url: 'https://loremflickr.com/1200/900/conference,corporate',
         tag: 'Convención anual',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?certificate,executive&q=80',
+        url: 'https://loremflickr.com/900/1200/certificate,executive',
         tag: 'Certificación',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?boardroom,training&q=80',
+        url: 'https://loremflickr.com/1200/900/boardroom,training',
         tag: 'Sala de juntas',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?employee,id,corporate&q=80',
+        url: 'https://loremflickr.com/800/600/employee,id,corporate',
         caption: 'Colaborador ingresa con SSO'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?facilitator,laptop&q=80',
+        url: 'https://loremflickr.com/800/600/facilitator,laptop',
         caption: 'Facilitador registra avance'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?ceo,dashboard,roi&q=80',
+        url: 'https://loremflickr.com/800/600/ceo,dashboard,roi',
         caption: 'CEO ve ROI del programa'
       }
     ]
@@ -36316,66 +36316,66 @@ const BRAND_CAPACITA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?business,training,corporate,workshop&q=85',
+    hero: 'https://loremflickr.com/1200/1600/business,training,corporate,workshop',
     heroAlt: 'Workshop empresarial in-company',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?business,workshop&q=80',
+        url: 'https://loremflickr.com/1200/900/business,workshop',
         tag: 'Workshop in-company',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?team,building&q=80',
+        url: 'https://loremflickr.com/900/1200/team,building',
         tag: 'Team building',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?sales,training&q=80',
+        url: 'https://loremflickr.com/900/1200/sales,training',
         tag: 'Capacitación ventas',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?soft,skills,training&q=80',
+        url: 'https://loremflickr.com/900/1200/soft,skills,training',
         tag: 'Soft skills',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?coaching,executive&q=80',
+        url: 'https://loremflickr.com/900/1200/coaching,executive',
         tag: 'Coaching ejecutivo',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?presentation,business&q=80',
+        url: 'https://loremflickr.com/900/1200/presentation,business',
         tag: 'Presentación cliente',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?conference,hotel,training&q=80',
+        url: 'https://loremflickr.com/1200/900/conference,hotel,training',
         tag: 'Hotel sede',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?certificate,corporate&q=80',
+        url: 'https://loremflickr.com/900/1200/certificate,corporate',
         tag: 'Certificación',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?facilitator,group&q=80',
+        url: 'https://loremflickr.com/1200/900/facilitator,group',
         tag: 'Facilitador en acción',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?attendee,id,workshop&q=80',
+        url: 'https://loremflickr.com/800/600/attendee,id,workshop',
         caption: 'Asistente firma lista digital'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?facilitator,evaluating&q=80',
+        url: 'https://loremflickr.com/800/600/facilitator,evaluating',
         caption: 'Facilitador evalúa grupo'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?report,executive,client&q=80',
+        url: 'https://loremflickr.com/800/600/report,executive,client',
         caption: 'Reporte al cliente'
       }
     ]
@@ -36493,66 +36493,66 @@ const BRAND_CERTIFICA = {
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?certification,exam,professional,tech&q=85',
+    hero: 'https://loremflickr.com/1200/1600/certification,exam,professional,tech',
     heroAlt: 'Centro de certificación técnica',
     showcase: [
       {
-        url: 'https://source.unsplash.com/random/1200x900/?exam,room,certification&q=80',
+        url: 'https://loremflickr.com/1200/900/exam,room,certification',
         tag: 'Sala de examen',
         size: 'lg'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?aws,certification&q=80',
+        url: 'https://loremflickr.com/900/1200/aws,certification',
         tag: 'AWS Solutions',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?microsoft,azure&q=80',
+        url: 'https://loremflickr.com/900/1200/microsoft,azure',
         tag: 'Microsoft Azure',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?cisco,networking&q=80',
+        url: 'https://loremflickr.com/900/1200/cisco,networking',
         tag: 'Cisco CCNA',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?scrum,master&q=80',
+        url: 'https://loremflickr.com/900/1200/scrum,master',
         tag: 'Scrum Master',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?pmp,project,manager&q=80',
+        url: 'https://loremflickr.com/900/1200/pmp,project,manager',
         tag: 'PMP',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?bootcamp,intensive&q=80',
+        url: 'https://loremflickr.com/1200/900/bootcamp,intensive',
         tag: 'Bootcamp',
         size: 'md'
       },
       {
-        url: 'https://source.unsplash.com/random/900x1200/?digital,badge&q=80',
+        url: 'https://loremflickr.com/900/1200/digital,badge',
         tag: 'Digital badge',
         size: 'sm'
       },
       {
-        url: 'https://source.unsplash.com/random/1200x900/?professional,certified&q=80',
+        url: 'https://loremflickr.com/1200/900/professional,certified',
         tag: 'Profesional certificado',
         size: 'md'
       }
     ],
     context: [
       {
-        url: 'https://source.unsplash.com/random/800x600/?candidate,id,exam&q=80',
+        url: 'https://loremflickr.com/800/600/candidate,id,exam',
         caption: 'Candidato presenta ID'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?proctor,exam,laptop&q=80',
+        url: 'https://loremflickr.com/800/600/proctor,exam,laptop',
         caption: 'Evaluador acreditado supervisa'
       },
       {
-        url: 'https://source.unsplash.com/random/800x600/?credly,badge,linkedin&q=80',
+        url: 'https://loremflickr.com/800/600/credly,badge,linkedin',
         caption: 'Badge en LinkedIn'
       }
     ]

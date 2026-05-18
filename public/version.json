@@ -1,13 +1,14 @@
 {
-  "version": "1.0.384",
+  "version": "1.0.385",
   "major": 1,
   "minor": 0,
-  "patch": 384,
+  "patch": 385,
   "commit": "pending",
   "branch": "main",
   "date": "2026-05-18T16:00:00.000Z",
   "built_at": "2026-05-18T16:00:00.000Z",
   "changelog": [
+    "V9.9.1 CRÍTICO: 2587 URLs source.unsplash.com (DEPRECADO/404) → loremflickr.com (200 OK, sí filtra por keywords). Resuelve imágenes rotas en TODOS los ~217 landings premium. + 5 HARD_EXCEPTIONS routing: motos/bicis→folio (rentas), inflables/brincolines→folio, estancia infantil/guardería→gateo (no bloque construcción), vapeadores→discreto, esotérica/velas/santería→discreto, purificadora agua→tendito.",
     "V9.9: motor schema-driven activado en paneldecontrol.html + salvadorex-pos.html con opt-in via ?giro=slug. Demo URL: /paneldecontrol.html?giro=navaja oculta módulos no-barbería y reemplaza textos. Sin ?giro=, motor inerte (0 riesgo). RLS habilitado en 17 tablas nuevas (giros_terminologias + audio modules).",
     "V9.8.1: HARD_EXCEPTIONS antojitos mexicanos (mole/tamales/elotes/esquites/chilaquiles/gorditas/sopes/huaraches → comandero) + cabello chino/rizado/permanente → brillo (no wokito asiático).",
     "V9.8: merge selectivo feature/ampliacion-modulos — motor schema-driven (applyGiroConfig.js + vlxPanelDrawer.js) + giros-terminologias.json + test-schema-ui.html como assets. NO incluidos en HTMLs de producción (opt-in via data-vlx-auto-giro o llamada explícita).",
