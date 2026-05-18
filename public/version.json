@@ -1,13 +1,14 @@
 {
-  "version": "1.0.383",
+  "version": "1.0.384",
   "major": 1,
   "minor": 0,
-  "patch": 383,
+  "patch": 384,
   "commit": "pending",
   "branch": "main",
   "date": "2026-05-18T16:00:00.000Z",
   "built_at": "2026-05-18T16:00:00.000Z",
   "changelog": [
+    "V9.9: motor schema-driven activado en paneldecontrol.html + salvadorex-pos.html con opt-in via ?giro=slug. Demo URL: /paneldecontrol.html?giro=navaja oculta módulos no-barbería y reemplaza textos. Sin ?giro=, motor inerte (0 riesgo). RLS habilitado en 17 tablas nuevas (giros_terminologias + audio modules).",
     "V9.8.1: HARD_EXCEPTIONS antojitos mexicanos (mole/tamales/elotes/esquites/chilaquiles/gorditas/sopes/huaraches → comandero) + cabello chino/rizado/permanente → brillo (no wokito asiático).",
     "V9.8: merge selectivo feature/ampliacion-modulos — motor schema-driven (applyGiroConfig.js + vlxPanelDrawer.js) + giros-terminologias.json + test-schema-ui.html como assets. NO incluidos en HTMLs de producción (opt-in via data-vlx-auto-giro o llamada explícita).",
     "V9.7: NEW endpoint GET /api/giros/config?giro=<slug> — devuelve config schema-driven (terminologias, modulos_activos, campos_visibles) leyendo de la tabla nueva giros_terminologias. Fallback chain: tenant override → global template → default.",

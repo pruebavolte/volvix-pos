@@ -9309,5 +9309,21 @@
 })();
 </script>
 
+<!-- V9.9: Motor schema-driven multi-giro. Opt-in vía ?giro=slug en URL. -->
+<script src="/js/applyGiroConfig.js" defer></script>
+<script>
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    try {
+      var u = new URL(window.location.href);
+      var giro = u.searchParams.get('giro');
+      if (giro && typeof window.applyGiroConfig === 'function') {
+        setTimeout(function(){ window.applyGiroConfig(giro); }, 300);
+      }
+    } catch(_) {}
+  });
+})();
+</script>
+
 </body>
 </html>

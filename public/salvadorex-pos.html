@@ -23862,5 +23862,24 @@ window.addEventListener('volvix:version-loaded', function(e){
 })();
 </script>
 
+<!-- V9.9: Motor schema-driven multi-giro (opt-in via ?giro=slug en URL o window.applyGiroConfig en consola).
+     Cargado en silencio. NO se auto-activa sin trigger explícito. -->
+<script src="/js/applyGiroConfig.js" defer></script>
+<script>
+(function(){
+  // Bootstrap motor: si URL tiene ?giro=<slug>, aplicar al cargar.
+  // Permite demos: /salvadorex-pos.html?giro=navaja → POS adaptado a barbería.
+  document.addEventListener('DOMContentLoaded', function(){
+    try {
+      var u = new URL(window.location.href);
+      var giro = u.searchParams.get('giro');
+      if (giro && typeof window.applyGiroConfig === 'function') {
+        setTimeout(function(){ window.applyGiroConfig(giro); }, 300);
+      }
+    } catch(_) {}
+  });
+})();
+</script>
+
 </body>
 </html>
