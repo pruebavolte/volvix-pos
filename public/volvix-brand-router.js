@@ -1015,6 +1015,27 @@
     'colchones'                                  : 'almohada',
     'bases de cama'                              : 'almohada',
     'almohadas premium'                          : 'almohada',
+    // V8.5: textil hogar / blanqueria / sabanas → almohada (textil de cama)
+    'sabanas'                                    : 'almohada',
+    'sábanas'                                    : 'almohada',
+    'blanqueria'                                 : 'almohada',
+    'blanquería'                                 : 'almohada',
+    'tienda de sabanas'                          : 'almohada',
+    'tienda de sábanas'                          : 'almohada',
+    'edredones'                                  : 'almohada',
+    'cobijas'                                    : 'almohada',
+    'colchas'                                    : 'almohada',
+    'fundas para almohada'                       : 'almohada',
+    'textil hogar'                               : 'almohada',
+    'textiles hogar'                             : 'almohada',
+    'textiles para el hogar'                     : 'almohada',
+    'lenceria de cama'                           : 'almohada',
+    'lencería de cama'                           : 'almohada',
+    'toallas'                                    : 'almohada',
+    'cortinas'                                   : 'almohada',
+    'tienda de cortinas'                         : 'almohada',
+    'manteleria'                                 : 'almohada',
+    'mantelería'                                 : 'almohada',
     'cocinas integrales'                         : 'alacena',
     'cocinas a medida'                           : 'alacena',
     'muebles de cocina'                          : 'alacena',
@@ -2205,6 +2226,58 @@
     // ABARROTES Y BARRIO → tendito (también default genérico decente)
     if (/abarrot|tiendit|minisuper|mini super|miscelan|mercer|papeler|lavanderi|tintorer|carwash|lava de auto|ferreter|vidrieri/.test(q))
       return '/tendito.html';
+
+    // V8.5: HOGAR / TEXTIL / DECORACIÓN / CAMA → almohada (textil hogar)
+    if (/sabana|blanquer|edredon|cobij|colch|almohad|toall|cortin|mantel|funda de cama|funda para cama|lenceria de cama|textil hogar|hogar textil/.test(q))
+      return '/almohada.html';
+
+    // V8.5: MUEBLES Y HOGAR (estructura) → mueble
+    if (/mueble|sala|comedor|sofa|sillon|recamara|recamaras|mueblero|carpinter/.test(q))
+      return '/mueble.html';
+
+    // V8.5: DECORACIÓN / REGALOS / FLORES → ramillete (floristería existente)
+    if (/flore|floreria|ramo|ramillete|arreglo floral|decoracion|decora|regalo|art deco/.test(q))
+      return '/ramillete.html';
+
+    // V8.5: JUGUETERÍA → trompito
+    if (/juguet|trompito|tienda de juguetes|pelichi/.test(q))
+      return '/trompito.html';
+
+    // V8.5: ELECTRÓNICA / CELULARES → movil
+    if (/celular|telefono|tablet|electronic|gadget|smartphone/.test(q))
+      return '/movil.html';
+
+    // V8.5: REPARACIONES (celular/pc/tv) → repara-cel
+    if (/repara|service de|servicio tecnico|reparacion/.test(q))
+      return '/repara-cel.html';
+
+    // V8.5: ÓPTICAS → armazon
+    if (/optic|lentes|armazon|graduados|monturas/.test(q))
+      return '/armazon.html';
+
+    // V8.5: RELOJERÍA → tictac
+    if (/reloj|tictac|hora|relojer/.test(q))
+      return '/tictac.html';
+
+    // V8.5: PESCADERÍA / MARISCOS → escama
+    if (/pesca|maris|huachinango|salmon|fish|atun|tilapia/.test(q))
+      return '/escama.html';
+
+    // V8.5: AUTO / TALLER MECÁNICO → refacciona
+    if (/auto|carro|vehiculo|taller|mecanic|llanta|refaccion|aceite|afinacion/.test(q))
+      return '/refacciona.html';
+
+    // V8.5: EDUCACIÓN / ESCUELA → bloque
+    if (/escuel|colegio|kinder|preescolar|primaria|secundaria|prepa|universidad|academi|curso|capacit|guarder/.test(q))
+      return '/bloque.html';
+
+    // V8.5: LIBRERÍA / LIBROS → bloque (educación, cercano)
+    if (/libr|libreria|book|biblio|editor/.test(q))
+      return '/bloque.html';
+
+    // V8.5: VETERINARIA / MASCOTAS → pata
+    if (/veterinari|vet|mascot|perro|gato|petshop|pet shop|animales|estetica canina|peluqueria canina/.test(q))
+      return '/pata.html';
 
     // DEFAULT: marca con identidad más "general / warm local" = tendito
     return '/tendito.html';

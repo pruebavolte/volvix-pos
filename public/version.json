@@ -1,19 +1,20 @@
 {
-  "version": "1.0.351",
+  "version": "1.0.352",
   "major": 1,
   "minor": 0,
-  "patch": 351,
+  "patch": 352,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-17T23:15:00.000Z",
-  "built_at": "2026-05-17T23:15:00.000Z",
+  "date": "2026-05-17T23:45:00.000Z",
+  "built_at": "2026-05-17T23:45:00.000Z",
   "changelog": [
+    "V8.5 PATCH: fallback ampliado masivamente. Antes 'sabanas/blanqueria/edredones/cortinas/toallas' caía a /tendito.html (tiendita de abarrotes, MAL match). Ahora va a /almohada.html (textil de cama). Agregadas 12 nuevas categorías al fallback regex: textil hogar, muebles, decoración/flores, jugueterías, electrónica/celulares, reparaciones, ópticas, relojerías, pescaderías, talleres mecánicos, escuelas/libros, mascotas/veterinarias. También +20 aliases específicos en VLX_ALIASES para sábanas/blanqueria/edredones/cortinas/etc → almohada. Cualquier giro raro ahora aterriza en una marca premium relevante semánticamente.",
     "V8.4.1 PATCH: regex de fallback ampliado para servicios profesionales. Ahora captura 'juridico', 'gestor', 'tramites', 'impuestos', 'firma'. Test 'estudio juridico' ahora va correctamente a /folio.html en vez de default /tendito.html.",
     "V8.4 HOTFIX: fallback router para giros no mapeados. Cuando un usuario busca un giro raro (vulcanizadora exótica, dentista holístico, barbacoa, estudio jurídico), el sistema YA NO sirve landing-{slug}.html con template plano feo. Ahora intercepta en quickSearch/searchGiro/rewriteLinks y redirige a la marca hero más cercana semánticamente (pulso, brillo, folio, forja, tarima, comandero, pareo, tendito, receta). Escape: queries <3 chars no se redirigen. Cubre 100% de giros raros sin AI ni APIs nuevas.",
-    "V8.3 NUEVA MARCA: Discreto - Sexshop/Boutique íntima premium #217. Paleta dark (#0F0D14) + soft pink (#D67BA8), fonts Cormorant Garamond + Italianno. 6 features (códigos discretos, empaque neutral, club VIP sin lista pública, pago contactless con factura neutral, catálogo QR, entrega domicilio). Aliases: sexshop, sex shop, tienda erotica, adultos, lenceria, boutique intima. Reemplaza landing genérica que mostraba 'Sistema POS para Sexshop' básico.",
-    "V8.2 FIX motor reload-loop: los 5 HTMLs del ZIP V8 (pulso/brillo/folio/forja/tarima) tenían el Bug #1 historico (window.location.search = ...) que causa body vacío. Sintoma confirmado físicamente con Chrome MCP: title carga correctamente pero document.body es null. Fix aplicado idéntico al V6 motor fix.",
-    "V8.1 FIX router: aliases V6 corregidos - dental/dentista/clinica → Pulso, estetica/salon/spa → Brillo",
-    "V8 motor-v3 ZIP integrado: 5 marcas hero nuevas",
+    "V8.3 NUEVA MARCA: Discreto - Sexshop/Boutique íntima premium #217.",
+    "V8.2 FIX motor reload-loop",
+    "V8.1 FIX router aliases V6",
+    "V8 motor-v3 ZIP integrado",
     "V7 motor: 200 marcas premium auto-generadas",
     "V6 motor v3: 6 marcas premium nuevas"
   ]
