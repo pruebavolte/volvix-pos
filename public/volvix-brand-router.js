@@ -2183,7 +2183,7 @@
       return '/brillo.html';
 
     // SERVICIOS PROFESIONALES → folio
-    if (/servic|asesor|profesional|despacho|abogado|contador|notario|consult|arquitect|ingenier|agenci|broker|legal|fiscal/.test(q))
+    if (/servic|asesor|profesional|despacho|abogado|contador|notario|consult|arquitect|ingenier|agenci|broker|legal|fiscal|juridi|gestor|tramit|impuest|firma/.test(q))
       return '/folio.html';
 
     // DEPORTE Y RECREACIÓN → forja
