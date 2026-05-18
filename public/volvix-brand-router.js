@@ -3130,6 +3130,15 @@
     // V9.9.4 — Estudio fotográfico / fotografía profesional → brillo (estética/imagen) si no hay marca foto
     if (/estudio (fotogr[aá]fico|de fotograf[ií]a)|fotograf[ií]a (profesional|de )?(bebe|boda|evento|familia)|sesi[oó]n (de )?fotos?/.test(n))
       return VLX_BRANDS.brillo || { brand:'Brillo', url:'brillo.html' };
+    // V9.9.5 — Pasteles/repostería específica → merengue (repostería)
+    if (/pasteles? (de |tres leches|chocolate|fresa|fondant|para )|pastel(eria|er[ií]a)|pay (de |al)|brownies?|cupcakes?|tartas?|cheesecakes?|tiramis[uú]/.test(n))
+      return VLX_BRANDS.merengue || { brand:'Merengue', url:'merengue.html' };
+    // V9.9.5 — Muebles (jardín, sala, comedor, etc.) → almohada (mueblería)
+    if (/muebles? (de |para )?(jard[ií]n|sala|comedor|recamara|reci[aá]mara|oficina|cocina)|muebleria|muebler[ií]a|tienda (de )?muebles/.test(n))
+      return VLX_BRANDS.almohada || { brand:'Almohada', url:'almohada.html' };
+    // V9.9.5 — Cocinas regionales mexicanas específicas → comandero (cocina mexicana general)
+    if (/cocina (yucateca|oaxaque[nñ]a|poblana|veracruzana|chilanga|jarocha|sinaloense|sonorense|regiomontana|jaroch|tlaxcalteca|hidalguense|chiapaneca|guerrerense)|comida (regional|t[ií]pica) (mexicana|de m[eé]xico)?/.test(n))
+      return VLX_BRANDS.comandero || { brand:'Comandero', url:'comandero.html' };
 
     if (/^(renta|alquil)/.test(n) || / (renta|alquila|alquiler) /.test(' '+n+' '))
       return VLX_BRANDS.tarima || { brand:'Tarima', url:'tarima.html' };
