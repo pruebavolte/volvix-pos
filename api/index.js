@@ -1156,6 +1156,8 @@ function resolveOwnerPosUserId(tenantId) {
   const KNOWN_TENANT_OWNERS = {
     'TNT001': 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',
     'TNT002': 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1',
+    // V10.1 — Fruteria bartola (grupovolvix@gmail.com)
+    'TNT-P5E74': 'fd4c05db-cde2-45bb-a7b0-b1a3391921bd',
   };
   if (tenantId && KNOWN_TENANT_OWNERS[tenantId]) {
     return KNOWN_TENANT_OWNERS[tenantId];
@@ -2313,9 +2315,16 @@ const handlers = {
       }
 
       let mapped = (products || []).map(p => ({
-        id: p.id, code: p.code, name: p.name, category: p.category,
+        id: p.id, code: p.code, barcode: p.barcode, name: p.name, category: p.category,
         price: parseFloat(p.price), cost: parseFloat(p.cost),
-        stock: p.stock, icon: p.icon, tenant_id: tenantId || 'TNT001',
+        stock: p.stock, min_stock: p.min_stock, icon: p.icon,
+        // V10.1 — multimedia + info extendida para Quick-pick visual + sidebar
+        image_url: p.image_url || null,
+        images: Array.isArray(p.images) ? p.images : (p.images || []),
+        videos: Array.isArray(p.videos) ? p.videos : (p.videos || []),
+        description_long: p.description_long || null,
+        tech_info: p.tech_info || {},
+        tenant_id: tenantId || 'TNT001',
       }));
 
       // R8f: branch-aware stock — overlay pos_inventory.quantity for the requested branch.

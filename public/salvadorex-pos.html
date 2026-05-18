@@ -825,6 +825,17 @@
     font-size: 20px;
     margin-bottom: 6px;
   }
+  /* V10.1 — imagen real del producto en quick-pick (G2) */
+  .qp-img {
+    width: 56px; height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-bottom: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    display: block;
+  }
+  .qp-card { min-height: 110px; }
   .qp-name {
     font-size: 11.5px;
     font-weight: 500;
@@ -7715,13 +7726,7 @@
       });
       CATEGORIES = Array.from(catMap.values());
       QUICKPICK = products.map(p => ({
-        // 2026-05-14 BUG CRITICO FIX: ANTES no incluiamos `id` -> cuando el
-        // cajero clickaba un quick-pick, CART recibia el producto SIN id ->
-        // al cobrar, backend filter `isUuid(it.id)` lo excluia -> stock NO
-        // decrementaba. Usuario reporto "se vende algo no se rebaja de
-        // inventario". MISMO bug aplicaba a CATALOG (que se llena desde
-        // QUICKPICK). Ahora cargamos id REAL para que decrement_stock_atomic
-        // funcione.
+        // 2026-05-14 BUG CRITICO FIX: incluir id UUID real para decrement_stock_atomic.
         id: p.id,
         cat: __slugifyCat(p.category || p.department || 'General'),
         icon: p.icon || __iconForCategory(p.category || ''),
@@ -7729,6 +7734,12 @@
         price: Number(p.price || p.unit_price || p.precio_venta || 0),
         code: String(p.code || p.sku || p.barcode || p.id || ''),
         stock: Number(p.stock || p.qty || p.cantidad || 0),
+        // V10.1 — multimedia + info extendida (G2/G3)
+        image_url: p.image_url || (Array.isArray(p.images) && p.images[0] && p.images[0].url) || null,
+        images: Array.isArray(p.images) ? p.images : [],
+        videos: Array.isArray(p.videos) ? p.videos : [],
+        description_long: p.description_long || null,
+        tech_info: p.tech_info || {}
       }));
       if (CATEGORIES.length && !selectedCategory) selectedCategory = CATEGORIES[0].key;
       // 2026-05-14 FIX STALE DATA: SIEMPRE refrescar CATALOG entero, no solo si esta vacio.
@@ -12901,25 +12912,67 @@
     const items = selectedCategory ? QUICKPICK.filter(p => p.cat === selectedCategory) : QUICKPICK;
     grid.innerHTML = items.length === 0
       ? '<div style="grid-column: span 2; padding: 20px; text-align: center; color: var(--text-3); font-size: 11.5px;">Sin productos en esta categoría</div>'
-      : items.map(p => `
-        <button class="qp-card" onclick="addQuickPick('${p.code}')" aria-label="${p.name} - ${fmt(p.price)}" title="${p.name} - ${fmt(p.price)}">
-          <div class="qp-icon">${p.icon}</div>
+      : items.map(p => {
+          // V10.1: si hay image_url usar <img>, sino fallback al emoji
+          const safeCode = String(p.code).replace(/'/g, "\\'");
+          const safeName = String(p.name || '').replace(/"/g, '&quot;');
+          const imgHtml = p.image_url
+            ? `<img class="qp-img" src="${p.image_url}" alt="${safeName}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><div class="qp-icon" style="display:none">${p.icon}</div>`
+            : `<div class="qp-icon">${p.icon}</div>`;
+          return `
+        <button class="qp-card" onclick="addQuickPick('${safeCode}'); showProductSidebar('${safeCode}')" oncontextmenu="event.preventDefault(); showProductSidebar('${safeCode}'); return false;" aria-label="${safeName} - ${fmt(p.price)}" title="${safeName} - ${fmt(p.price)} — click derecho para ver detalle">
+          ${imgHtml}
           <div class="qp-name">${p.name}</div>
           <div class="qp-price">${fmt(p.price)}</div>
         </button>
-      `).join('');
+      `;
+        }).join('');
   }
+
+  // V10.1 — Sidebar de producto seleccionado con galería + info extendida (G3)
+  function showProductSidebar(code) {
+    const p = QUICKPICK.find(x => x.code === code);
+    if (!p) return;
+    let sidebar = document.getElementById('vlx-product-sidebar');
+    if (!sidebar) {
+      sidebar = document.createElement('aside');
+      sidebar.id = 'vlx-product-sidebar';
+      sidebar.style.cssText = 'position:fixed;right:0;top:0;bottom:0;width:380px;background:#fff;border-left:2px solid #2D5F8F;box-shadow:-4px 0 16px rgba(0,0,0,.15);z-index:9999;overflow-y:auto;padding:0;font-family:inherit;display:flex;flex-direction:column;';
+      document.body.appendChild(sidebar);
+    }
+    const images = (p.images && p.images.length) ? p.images : (p.image_url ? [{url: p.image_url, alt: p.name}] : []);
+    const videos = p.videos || [];
+    const tech = p.tech_info || {};
+    const techRows = Object.entries(tech).map(([k,v]) => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #eee;font-size:12px"><span style="color:#666;text-transform:capitalize">${String(k).replace(/_/g,' ')}</span><strong style="color:#222">${v}</strong></div>`).join('');
+    sidebar.innerHTML = `
+      <div style="background:#2D5F8F;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0;font-size:15px;font-weight:600">${p.name}</h3>
+        <button onclick="document.getElementById('vlx-product-sidebar').remove()" style="background:transparent;border:0;color:#fff;font-size:20px;cursor:pointer;padding:0;line-height:1">×</button>
+      </div>
+      <div style="padding:16px;flex:1;overflow-y:auto">
+        ${images[0] ? `<img src="${images[0].url}" alt="${images[0].alt || p.name}" style="width:100%;height:240px;object-fit:cover;border-radius:8px;margin-bottom:8px" onerror="this.style.display='none'">` : ''}
+        ${images.length > 1 ? `<div style="display:grid;grid-template-columns:repeat(${Math.min(images.length-1, 4)}, 1fr);gap:6px;margin-bottom:14px">${images.slice(1, 5).map(img => `<img src="${img.url}" alt="${img.alt||''}" style="width:100%;height:64px;object-fit:cover;border-radius:4px;cursor:pointer" onclick="document.querySelector('#vlx-product-sidebar img').src=this.src" onerror="this.style.opacity=0.3">`).join('')}</div>` : ''}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px">
+          <span style="font-size:22px;font-weight:700;color:#2D5F8F">${fmt(p.price)}</span>
+          <span style="font-size:12px;color:#888">Stock: <strong style="color:${p.stock>5?'#0a0':'#c00'}">${p.stock}</strong></span>
+        </div>
+        ${p.description_long ? `<div style="background:#f7f9fb;padding:10px 12px;border-radius:6px;font-size:12.5px;line-height:1.5;color:#444;margin-bottom:14px">${p.description_long}</div>` : ''}
+        ${techRows ? `<div style="margin-bottom:14px"><h4 style="margin:0 0 6px;font-size:13px;color:#2D5F8F">📋 Ficha técnica</h4>${techRows}</div>` : ''}
+        ${videos.length ? `<div style="margin-bottom:14px"><h4 style="margin:0 0 6px;font-size:13px;color:#2D5F8F">🎬 Videos</h4>${videos.map(v => `<a href="${v.url}" target="_blank" rel="noopener" style="display:block;padding:8px;background:#f0f4f8;border-radius:4px;margin-bottom:4px;text-decoration:none;color:#2D5F8F;font-size:12px">▶ ${v.title || 'Ver video'}</a>`).join('')}</div>` : ''}
+        <button onclick="addQuickPick('${String(p.code).replace(/'/g, "\\'")}'); " style="width:100%;padding:12px;background:#2D5F8F;color:#fff;border:0;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer">+ Agregar al ticket</button>
+      </div>`;
+  }
+  window.showProductSidebar = showProductSidebar;
   function addQuickPick(code) {
     const p = QUICKPICK.find(x => x.code === code);
     if (!p) return;
     const existing = CART.find(c => c.code === code);
     if (existing) existing.qty++;
-    // 2026-05-14 BUG FIX: incluir id:p.id (UUID del producto). Sin esto, el
-    // backend (api/index.js:2638 decrement_stock_atomic) filtra el item por
-    // !isUuid(it.id) y NUNCA decrementa stock. Bug que causaba "vendo pero
-    // no se rebaja inventario".
-    else CART.push({id: p.id, code:p.code, name:p.name, price:p.price, qty:1, stock:p.stock});
+    // 2026-05-14 BUG FIX: incluir id:p.id (UUID del producto). V10.1: + image_url para mostrar miniatura en CART.
+    else CART.push({id: p.id, code:p.code, name:p.name, price:p.price, qty:1, stock:p.stock, image_url: p.image_url, images: p.images});
     renderCart();
+    // V10.1 — auto-mostrar sidebar de producto al agregar (G3)
+    try { if (window.innerWidth >= 1100) showProductSidebar(code); } catch(_){}
     // Cerrar panel en móvil después de agregar
     if (window.innerWidth < 880) {
       $('#pos-sidebar-right').classList.remove('open');
