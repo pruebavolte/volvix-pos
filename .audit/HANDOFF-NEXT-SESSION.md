@@ -1,7 +1,85 @@
 # 🚀 HANDOFF — Próxima sesión empieza AQUÍ
 
 > **Para Claude/IA que retoma este proyecto**: lee este documento PRIMERO. Tiene todo el contexto comprimido.
-> **ÚLTIMA ACTUALIZACIÓN**: 2026-05-17 V7 motor (211 marcas premium ya activas)
+> **ÚLTIMA ACTUALIZACIÓN**: 2026-05-17 V8.4.1 (217 marcas premium · fallback router para giros raros · NUNCA más template plano)
+
+---
+
+## 🆕 V8.4 + V8.4.1 (últimos cambios — 2026-05-17 23:15)
+
+**HOTFIX: Fallback router para giros NO mapeados** — el bug del template plano resuelto.
+
+**Por qué se agregó:** El usuario reportó que buscar giros raros (vulcanizadora exótica, dentista holístico, barbacoa, estudio jurídico, etc.) que NO existen en las 217 marcas premium ni en los aliases del router, el sistema servía `landing-{slug}.html` con un template plano horrible: "Sistema POS para X" + CTA aburrido + banner amarillo "¿No es lo que buscabas?". Cero diseño, cero personalización, cero robos del oficio.
+
+**Solución (rápida, sin AI, sin APIs nuevas):** En `public/volvix-brand-router.js`, agregar `fallbackToClosestHero(query)` que con regex amplios mapea CUALQUIER giro raro a la marca hero más cercana semánticamente. Wired en 3 puntos: `quickSearch` (chips), `searchGiro` (input submit), `rewriteLinks` (links dinámicos JS).
+
+**Mapeos del fallback:**
+
+| Categoría | Regex (parcial) | Hero destino |
+|---|---|---|
+| Salud y bienestar | `salud\|medic\|clinic\|dental\|optic\|fisio...` | `/pulso.html` |
+| Farmacia | `farmac\|botica\|drogueria` | `/receta.html` |
+| Belleza y estética | `belleza\|salon\|spa\|estetic\|unas\|manicur...` | `/brillo.html` |
+| Servicios profesionales | `servic\|asesor\|despacho\|abogado\|juridi\|gestor...` | `/folio.html` |
+| Deporte y recreación | `deport\|gym\|fitness\|yoga\|crossfit...` | `/forja.html` |
+| Eventos y nocturnos | `event\|bar\|antro\|club\|cateri\|karaok...` | `/tarima.html` |
+| Alimentos | `comida\|restau\|taqu\|barbacoa\|panad\|cafeteria...` | `/comandero.html` |
+| Retail (ropa/calzado) | `ropa\|calzado\|moda\|boutique\|zapat\|joyer...` | `/pareo.html` |
+| Abarrotes y barrio | `abarrot\|tiendit\|miscelan\|ferreter\|papeler...` | `/tendito.html` |
+| Default | (cualquier otro >3 chars) | `/tendito.html` |
+
+**Escape condition:** queries <3 chars NO redirigen (deja el flujo original del marketplace).
+
+**Verificación con Chrome MCP (10 casos):**
+- ✅ `sexshop` → `/discreto.html` (alias V8.3, ni siquiera llega al fallback)
+- ✅ `vulcanizadora rara` → `/tendito.html` (default)
+- ✅ `dentista holistico` → `/pulso.html`
+- ✅ `barbacoa` → `/hornito.html` (alias premium específico, MEJOR que comandero)
+- ✅ `estudio juridico` → `/folio.html` (V8.4.1 patch agregó `juridi`)
+- ✅ `(empty)` → no redirect (escape)
+- ✅ `ab` → no redirect (escape, <3 chars)
+- ✅ `aaa` → `/tendito.html` (default)
+- ✅ `spa de gatos` → `/brillo.html`
+- ✅ `panaderia artesanal` → `/masa.html` (alias premium específico)
+
+**Resultado:** 100% de giros raros ahora aterrizan en una landing premium. **0 casos** caen al template plano.
+
+**Costo:** 0 USD. **No** requiere generador AI on-demand. **No** requiere Anthropic API key. **No** requiere Unsplash key. **No** requiere servidor adicional.
+
+**Commits:** `a494533` (V8.4) + `06e9ed6` (V8.4.1 patch). **Versión:** 1.0.351.
+
+**Decisión del usuario sobre el generador AI:** RECHAZADO por ahora. Activar solo cuando haya 5+ clientes pagando Y se vean patrones de búsqueda raros recurrentes en analytics. Hasta entonces, el fallback router cubre el 100% de los giros con landings ya hechas (mejor calidad, costo cero, mantenimiento mínimo).
+
+---
+
+## 🆕 V8.3 (cambio previo — 2026-05-17 22:30)
+
+---
+
+## 🆕 V8.3 (último cambio — 2026-05-17 22:30)
+
+**Nueva marca: Discreto** (para sexshop/boutique íntima) — la #217.
+
+**Por qué se agregó:** El usuario reportó (screenshot) que buscar "sexshop" en marketplace mostraba landing GENÉRICA ("Sistema POS para Sexshop · Sistema POS especializado para tu negocio") generada por el fallback handler del servidor, en lugar de una landing premium personalizada como las otras 216 marcas.
+
+**Identidad:**
+- Paleta dark `#0F0D14` + soft pink accent `#D67BA8` (lujo discreto, no rosa pop)
+- Fonts: Cormorant Garamond (display) + Inter (body) + Italianno (script)
+- Vibe: minimalist, intimate, respectful
+
+**Features clave** (todas enfocadas en discreción del cliente):
+1. Códigos discretos en etiquetas (DX-204, nunca el nombre del producto)
+2. Empaque neutral para envíos (sin logo de tienda)
+3. Club VIP sin lista pública (descuentos por código de cliente)
+4. Pago contactless con factura neutral (concepto "Boutique")
+5. Catálogo digital con QR (cliente ve en su celular, empleado no lee preferencias)
+6. Entrega domicilio con horarios pactados (sin tocar timbre, paquete neutro)
+
+**Aliases en router** (14 nuevos): sexshop, sex shop, sex-shop, tienda erotica, tienda para adultos, tienda de adultos, productos para adultos, juguetes para adultos, lenceria, lenceria fina, boutique intima, boutique discreta, discreto, adultos
+
+**Commit**: `e82fc86` · **Versión**: 1.0.349 · **URL**: https://systeminternational.app/discreto.html
+
+**Lección para próximas sesiones**: cuando el usuario muestre un giro con landing genérica, **crear marca premium manual** en lugar de activar generador AI (más controlado, mejor calidad, menos tokens consumidos).
 
 ---
 
