@@ -13009,20 +13009,49 @@
     target.style.textAlign = 'left';
     target.style.fontStyle = 'normal';
     target.style.color = '#222';
+    // V10.4 — Layout: imagen principal MÁS GRANDE arriba (aspect-ratio 4:3),
+    // thumbs+videos en fila HORIZONTAL scrollable abajo. Click imagen → modal lightbox.
+    const allMedia = images.map(img => ({ type: 'img', url: img.url, alt: img.alt || p.name }))
+      .concat(videos.map(v => ({ type: 'video', url: v.url, title: v.title || 'Video' })));
+    const mainImg = images[0] || null;
     target.innerHTML = `
       <div style="font-weight:700;font-size:14px;color:#2D5F8F;margin-bottom:8px;line-height:1.2">${p.name}</div>
-      ${images[0] ? `<img id="vlx-pane-main-img" src="${images[0].url}" alt="${images[0].alt || p.name}" style="width:100%;height:180px;object-fit:cover;border-radius:6px;margin-bottom:6px;border:1px solid #e0e6ec" onerror="this.style.display='none'">` : ''}
-      ${images.length > 1 ? `<div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:4px;margin-bottom:10px">${images.slice(1, 5).map(img => `<img src="${img.url}" alt="${img.alt||''}" style="width:100%;height:48px;object-fit:cover;border-radius:3px;cursor:pointer;border:1px solid #e0e6ec" onclick="var m=document.getElementById('vlx-pane-main-img');if(m)m.src=this.src" onerror="this.style.opacity=0.3">`).join('')}</div>` : ''}
+      ${mainImg ? `<img id="vlx-pane-main-img" src="${mainImg.url}" alt="${mainImg.alt || p.name}" data-title="${(mainImg.alt || p.name).replace(/"/g,'')}" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;margin-bottom:8px;border:1px solid #e0e6ec;cursor:zoom-in;display:block" onclick="window.vlxOpenMediaLightbox(this.src,this.getAttribute('data-title'))" onerror="this.style.display='none'">` : ''}
+      ${allMedia.length > 1 ? `<div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin">${allMedia.slice(0,12).map(m => m.type === 'img' ? `<img src="${m.url}" alt="${m.alt||''}" style="width:62px;height:62px;flex:0 0 62px;object-fit:cover;border-radius:5px;cursor:pointer;border:2px solid transparent" onclick="(function(s){var mn=document.getElementById('vlx-pane-main-img');if(mn){mn.src=s;}window.vlxOpenMediaLightbox(s);})(this.src);this.style.borderColor='#2D5F8F'" onerror="this.style.opacity=0.3" title="${(m.alt||'').replace(/"/g,'')}">` : `<a href="${m.url}" target="_blank" rel="noopener" style="display:flex;width:62px;height:62px;flex:0 0 62px;background:#0a0a0a;color:#fff;border-radius:5px;align-items:center;justify-content:center;text-decoration:none;font-size:11px;border:2px solid transparent" title="${(m.title||'Video').replace(/"/g,'')}">▶</a>`).join('')}</div>` : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 8px;padding:6px 8px;background:#f7f9fb;border-radius:4px">
         <span style="font-size:18px;font-weight:700;color:#2D5F8F">${fmt(p.price)}</span>
         <span style="font-size:11px;color:#888">Stock: <strong style="color:${p.stock>5?'#0a0':'#c00'}">${p.stock}</strong></span>
       </div>
       ${p.description_long ? `<div style="background:#f7f9fb;padding:8px 10px;border-radius:4px;font-size:11.5px;line-height:1.45;color:#444;margin-bottom:10px">${p.description_long}</div>` : ''}
       ${techRows ? `<div style="margin-bottom:10px"><div style="font-weight:600;font-size:11.5px;color:#2D5F8F;margin-bottom:3px">📋 Ficha técnica</div>${techRows}</div>` : ''}
-      ${videos.length ? `<div style="margin-bottom:10px"><div style="font-weight:600;font-size:11.5px;color:#2D5F8F;margin-bottom:3px">🎬 Videos</div>${videos.map(v => `<a href="${v.url}" target="_blank" rel="noopener" style="display:block;padding:5px 8px;background:#f0f4f8;border-radius:3px;margin-bottom:3px;text-decoration:none;color:#2D5F8F;font-size:11px">▶ ${v.title || 'Ver video'}</a>`).join('')}</div>` : ''}
       <button onclick="addQuickPick('${safeCode}')" style="width:100%;padding:10px;background:#2D5F8F;color:#fff;border:0;border-radius:5px;font-size:12.5px;font-weight:600;cursor:pointer">+ Agregar al ticket</button>`;
   }
   window.showProductSidebar = showProductSidebar;
+
+  // V10.4 — Modal lightbox para imagen fullscreen
+  window.vlxOpenMediaLightbox = function(src, title) {
+    if (!src) return;
+    let lb = document.getElementById('vlx-media-lightbox');
+    if (!lb) {
+      lb = document.createElement('div');
+      lb.id = 'vlx-media-lightbox';
+      document.body.appendChild(lb);
+    }
+    const setP = (k, v) => lb.style.setProperty(k, v, 'important');
+    setP('position','fixed'); setP('inset','0'); setP('z-index','100000');
+    setP('background','rgba(0,0,0,0.92)'); setP('display','flex');
+    setP('align-items','center'); setP('justify-content','center');
+    setP('cursor','zoom-out'); setP('padding','30px');
+    lb.innerHTML = `
+      <button onclick="document.getElementById('vlx-media-lightbox').remove()" style="position:absolute;top:18px;right:24px;background:transparent;border:0;color:#fff;font-size:36px;cursor:pointer;line-height:1;font-family:inherit" aria-label="Cerrar">×</button>
+      ${title ? `<div style="position:absolute;top:24px;left:24px;color:#fff;font-size:15px;font-weight:600;font-family:inherit">${title}</div>` : ''}
+      <img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.5);cursor:default" onclick="event.stopPropagation()">
+      <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);color:#fff;opacity:.6;font-size:12px;font-family:inherit">Click fuera de la imagen o Esc para cerrar</div>
+    `;
+    lb.onclick = (e) => { if (e.target === lb) lb.remove(); };
+    const escHandler = (e) => { if (e.key === 'Escape') { lb.remove(); document.removeEventListener('keydown', escHandler); } };
+    document.addEventListener('keydown', escHandler);
+  };
   function addQuickPick(code) {
     const p = QUICKPICK.find(x => x.code === code);
     if (!p) return;
