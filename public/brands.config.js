@@ -191,6 +191,15 @@ const BRAND_COMANDERO = {
     {title:'Cortesías sin autorización',
      rob:'"Eran amigos de mi prima", "se quejó del platillo y le regalé el postre". Empleados regalan comida para hacer amigos.',
      fix:'Cortesías exigen <strong>PIN del gerente + motivo + foto del cliente</strong>. Reporte mensual por mesero.'},
+    {title:'Cocina dice "ya casi sale" y nunca sale',
+     rob:'Cliente lleva 20 min esperando, mesera dice "ya viene", cocina dice "ya casi". Cliente se enoja, se va sin pagar el postre, no vuelve. Pierdes el ticket completo + un cliente.',
+     fix:'KDS con <strong>cronómetro por platillo</strong>. Si pasa de 12 min, alerta visual. Mesera ve el tiempo real, no la mentira de la cocina.'},
+    {title:'Propinas chuecas — el de la barra siempre se queda más',
+     rob:'Pool de propinas que "se reparte equitativo" pero el que recibe el efectivo se queda con su tajada antes de partir. Meseros nuevos terminan ganando menos que el de la barra que cobra.',
+     fix:'Pool digital con <strong>reglas que tú defines</strong>: 60% meseros / 20% cocina / 20% barra (o lo que decidas). Reparto automático al cierre, sin discusión.'},
+    {title:'Reservaciones por WhatsApp que se traslapan',
+     rob:'Reservan mesa 8pm el sábado por WhatsApp. Llega el cliente, está ocupada porque otro reservó antes. Pierdes al cliente nuevo + al que regresaba.',
+     fix:'Mesas en sistema en <strong>tiempo real</strong>. Reservación por WhatsApp asigna mesa automáticamente. Si está ocupada, ofrece próxima disponible.'},
   ],
 };
 
@@ -284,6 +293,15 @@ const BRAND_NAVAJA = {
     {title:'Citas que sí se atendieron, "no llegaron"',
      rob:'El cliente llegó, le cortaron, pero el barbero dice "no llegó" porque ya cobró en efectivo. La cita aparece como ausente.',
      fix:'Cita confirmada se marca <strong>al iniciar el servicio con foto del cliente en el sillón</strong>. Si se inició, se cobró.'},
+    {title:'Comisiones que nunca cuadran al cierre',
+     rob:'Al final del día siempre hay discusión: "yo atendí 12", "no, fueron 8". Sin sistema, queda en la palabra del barbero contra la tuya. Y siempre pierdes tú.',
+     fix:'Cierre diario con <strong>desglose automático por barbero</strong>. Cada quien ve sus cortes, sus propinas, su comisión. Sin discusiones, sin pizarrón con gises.'},
+    {title:'WhatsApps de citas que se pierden',
+     rob:'Cliente manda "¿hay cita el sábado a las 11?" entre los mensajes del grupo familiar y los de la chamba. Para cuando lo ves, ya pasó. Pierdes 3-5 citas por semana así.',
+     fix:'WhatsApp Business <strong>integrado al POS</strong>. Cada solicitud entra al sistema, se asigna a barbero, se confirma automáticamente. Recordatorio 1 hora antes.'},
+    {title:'El que llega tarde y deja esperando',
+     rob:'Pancho llegó 40 min tarde, 3 clientes se fueron sin cortarse. Pierdes $600 en ese rato. Pero al fin de semana le pagas igual porque no tienes evidencia.',
+     fix:'Check-in obligatorio <strong>con QR al entrar</strong>. Si llega tarde, queda registrado. Reporte de puntualidad por barbero al cierre de quincena.'},
   ],
 };
 
@@ -378,6 +396,15 @@ const BRAND_RECETA = {
     {title:'Venta "por fuera" de mostrador',
      rob:'Despachador cobra en efectivo, no registra la venta, se queda con el dinero. El stock baja "por arte de magia".',
      fix:'Inventario auditado <strong>al cierre de cada turno</strong>. Diferencia stock físico vs sistema dispara alerta.'},
+    {title:'COFEPRIS llega y no tengo el libro al día',
+     rob:'Te avisan visita en 48 horas. Pasas la noche cuadrando entradas/salidas a mano. Si te falta un movimiento, multa de $15,000+ y suspensión temporal.',
+     fix:'Libro de control <strong>se genera automático</strong>. Cada venta de medicamento controlado queda asentada al instante. Lista para COFEPRIS con 1 click.'},
+    {title:'Tarifas IMSS/INFONAVIT desactualizadas',
+     rob:'El descuento de INFONAVIT cambió de 30% a 25% pero tú sigues aplicando el viejo. Cliente paga menos, tú pierdes el diferencial. Al mes son $3,000-8,000 perdidos.',
+     fix:'Tarifas oficiales <strong>actualizadas automáticamente</strong> en el sistema. IMSS, INFONAVIT, ISSSTE. Sistema aplica el descuento vigente, sin error humano.'},
+    {title:'Cliente regular y no sé su tratamiento',
+     rob:'Don Pedro pide su pastilla de presión cada mes. ¿Cuándo fue la última vez? ¿Cuál era la dosis exacta? No recuerdas, le preguntas, queda mal contigo.',
+     fix:'Expediente del cliente <strong>con histórico completo</strong>. Buscas "Don Pedro" y ves: enalapril 10mg, última compra 18 oct, alergia a penicilina. Atención premium sin esfuerzo.'},
   ],
 };
 
@@ -475,6 +502,15 @@ const BRAND_TENDITO = {
     {title:'Recargas vendidas afuera del sistema',
      rob:'Empleado vende tiempo aire con su propio crédito y se queda la comisión. La tienda no se entera.',
      fix:'Recargas se hacen <strong>desde el sistema con tu saldo</strong>. Sin sistema, no hay recarga.'},
+    {title:'Doña Lola me debe $400 desde hace 2 semanas',
+     rob:'Vendes fiado para no perder al cliente. Pasa el tiempo, se acumulan deudas, no te animas a cobrar porque "vas a perder al cliente". Al final pierdes la lana Y al cliente.',
+     fix:'Lista de fiados con <strong>foto + WhatsApp automático</strong>. "Hola Doña Lola, su saldo es $400 al 15 de noviembre". Sin que tú tengas que llamar, sin pena.'},
+    {title:'Sobrino que "ayuda" y se lleva del cajón',
+     rob:'El sobrino, primo, hijo del compa, "ayuda en la tarde" pero se lleva $20, $50 del cajón. Sin contar mercancía. Al mes son $1,500 que no encuentras.',
+     fix:'Cada movimiento del cajón <strong>asociado a una venta</strong>. Sin venta, no se abre. Diferencia entre cobrado y mercancía vendida = alerta inmediata.'},
+    {title:'Stock que se acaba sin avisar',
+     rob:'El refresco grande se acabó hace 3 días. El cliente entra, no encuentra, se va a la competencia. No sabes cuánto pierdes en clientes que no regresan.',
+     fix:'Stock mínimo con <strong>alerta WhatsApp el día antes</strong>. Sistema dice "Coca-Cola 600ml: quedan 3 unidades, pide ya". Cero ventas perdidas por desabasto.'},
   ],
 };
 
@@ -11706,6 +11742,21 @@ const BRAND_CORTE = {
       title: 'Dry aged \'fingido\' sin tiempo real',
       rob: 'Carnicero vende ribeye normal como dry aged 45 días. Cliente paga premium ($1,200 vs $700/kg). Cero rastreo real.',
       fix: 'Dry aged con <strong>foto y fecha entrada al refri obligatorio</strong>. Sistema cuenta días. Cliente ve certificado al comprar. Cero fraude.'
+    },
+    {
+      title: 'El sirloin del lunes se me echó a perder',
+      rob: 'Llega viernes y el sirloin del lunes sigue ahí. Ya tiene mal color. Lo tiras o vendes en $80 lo que costaba $400. Una carnicería chica pierde $5,000-12,000 al mes así.',
+      fix: 'Caducidad por corte <strong>con alerta 24h antes</strong>. Sistema te dice: "Sirloin lote LB-2840, vendelo HOY al -30% antes que se vaya a basura". Sin pérdida silenciosa.'
+    },
+    {
+      title: 'Empleado nuevo dice precios "al tanteo"',
+      rob: 'El nuevo no se acuerda del precio del filete, le calcula "más o menos". Al cierre la caja queda $400 abajo. Tú pierdes, él no se da cuenta.',
+      fix: 'Precios por corte <strong>fijos en sistema</strong>. El empleado solo pesa la pieza, sistema calcula el precio exacto. Cero "tanteos", cero descuadres.'
+    },
+    {
+      title: 'Fiados que no recuerdas a quién les diste',
+      rob: 'Doña María te pide "le llevo dos kilos, mañana le pago". Mañana no llega. ¿Quién era Doña María? ¿Tenía bolsa azul o roja? El fiado se evapora.',
+      fix: 'Fiado <strong>con foto del cliente + WhatsApp</strong>. Sistema recuerda por ti: "Doña María, fiado $480, fecha 15 nov, foto adjunta". Cobranza dignificada.'
     }
   ]
 };
