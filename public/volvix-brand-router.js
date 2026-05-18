@@ -3120,6 +3120,41 @@
     if (/\bveterinari[ao]?s?\b|\bclinica veterinaria\b|\bcentro veterinario\b/.test(n))
       return VLX_BRANDS.pata || { brand:'Pata', url:'pata.html' };
 
+    // ═══════════════════════════════════════════════════════════════
+    // V9.4 FERRETERÍA/CONSTRUCCIÓN — 36 giros que iban a tendito (frutería)
+    // Erick reportó: "puerta" → tendito muestra frutas, no tiene sentido.
+    // Fix: routing específico por tipo de ferretería/construcción.
+    // ═══════════════════════════════════════════════════════════════
+
+    // CARPINTERÍA — puertas de madera, muebles a medida, closets, recámaras → VIRUTA
+    if (/\bpuerta(s)? (de madera|madera)\b|^puerta(s)?$|puerta carpinter|mueble a medida|muebles a medida|closet a medida|closets a medida|recamar(a|as) a medida|cocina integral|carpinter(i|í)a|ebaniste|tallado en madera/.test(n))
+      return VLX_BRANDS.viruta || { brand:'Viruta', url:'viruta.html' };
+
+    // HERRERÍA / METALURGIA — puertas metálicas, portones, ventanas, soldadura → YUNQUE
+    if (/\bport(o|ó)n(es)?\b|puerta met(a|á)lica|ventana met(a|á)lica|herrer(i|í)a|soldadura|cerca(s)? met(a|á)licas?|reja(s)?|barda met|hierro forjado/.test(n))
+      return VLX_BRANDS.yunque || { brand:'Yunque', url:'yunque.html' };
+
+    // FERRETERÍA GENÉRICA — tornillos, clavos, herramientas, candados, llaves
+    // (van a yunque que es el más cercano a "ferretería" en el catálogo)
+    if (/\bferreter(i|í)a(s)?\b|tlapaler(i|í)a|tornillo(s)?|clavo(s)?|herramientas?|cerradur(a|as)|candado(s)?|cerrajer(i|í)a|copia(s)? de llave(s)?|silic(o|ó)n|pegamento|cinta de aislar/.test(n))
+      return VLX_BRANDS.yunque || { brand:'Yunque', url:'yunque.html' };
+
+    // VIDRIERÍA → YUNQUE (más cercano)
+    if (/\bvidrio(s)?\b|vidrier(i|í)a|cristal(es)? para|aluminio|cancel(es)?/.test(n))
+      return VLX_BRANDS.yunque || { brand:'Yunque', url:'yunque.html' };
+
+    // CONSTRUCCIÓN / MATERIALES — cemento, arena, varilla, grava → OBRA o TABIQUE
+    if (/^cemento$|venta de cemento|arena (volc|de)|grava|varilla|materiales? de construcc|block(es)? de|tabique(s)?|albanil|alban(i|í)l|construcc(i|i|ó)n residencial/.test(n))
+      return VLX_BRANDS.obra || VLX_BRANDS.tabique || { brand:'Obra', url:'obra.html' };
+
+    // PINTURAS / ACABADOS → BARNIZ
+    if (/^pintura(s)?$|\bpintura(s)? (para|de|para hogar)\b|venta de pintura|barniz|esmalte|laca(s)?|impermeabilizante/.test(n))
+      return VLX_BRANDS.barniz || { brand:'Barniz', url:'barniz.html' };
+
+    // EQUIPO DE SEGURIDAD INDUSTRIAL — EPP → FOLIO (servicios profesionales B2B)
+    if (/mascarilla(s)?|guante(s)? industrial|equipo de seguridad|epp\b|botas? industrial|casco industrial/.test(n))
+      return VLX_BRANDS.folio || { brand:'Folio', url:'folio.html' };
+
     // 1. Exact match en alias
     if (VLX_ALIASES[n] && VLX_BRANDS[VLX_ALIASES[n]]) {
       return VLX_BRANDS[VLX_ALIASES[n]];
