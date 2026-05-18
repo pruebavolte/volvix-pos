@@ -1,0 +1,7345 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "generated": "2026-05-18",
+    "description": "Catálogo único de campos dinámicos por modal. Filtrados por giro vía applyGiroConfig.js.",
+    "philosophy": "Un solo sistema configurable, no múltiples sistemas. Activar/ocultar campos por giro + cambiar terminologías.",
+    "integration": "render dinámico en <div data-vlx-dynamic-fields=\"MODAL_NAME\"></div>",
+    "total_fields": 677,
+    "total_modals": 6,
+    "total_modules": 50
+  },
+  "modules": {
+    "base": {
+      "label": "Base",
+      "always_active": true,
+      "giros": [
+        "*"
+      ]
+    },
+    "fiscal": {
+      "label": "Fiscal / SAT",
+      "giros": [
+        "*"
+      ]
+    },
+    "precios": {
+      "label": "Precios extendidos",
+      "giros": [
+        "*"
+      ]
+    },
+    "comisiones": {
+      "label": "Comisiones",
+      "giros": [
+        "barberia",
+        "estetica",
+        "gym",
+        "retail",
+        "restaurante"
+      ]
+    },
+    "lealtad": {
+      "label": "Lealtad y cashback",
+      "giros": [
+        "*"
+      ]
+    },
+    "inventario": {
+      "label": "Inventario avanzado",
+      "giros": [
+        "*"
+      ]
+    },
+    "serializacion": {
+      "label": "Series/IMEI",
+      "giros": [
+        "celulares",
+        "electronica"
+      ]
+    },
+    "lotes": {
+      "label": "Lotes",
+      "giros": [
+        "farmacia",
+        "abarrotes",
+        "carniceria"
+      ]
+    },
+    "caducidad": {
+      "label": "Caducidad",
+      "giros": [
+        "farmacia",
+        "abarrotes",
+        "carniceria",
+        "restaurante"
+      ]
+    },
+    "trazabilidad": {
+      "label": "Trazabilidad",
+      "giros": [
+        "farmacia",
+        "industrial",
+        "carniceria",
+        "export"
+      ]
+    },
+    "compliance": {
+      "label": "Compliance",
+      "giros": [
+        "farmacia",
+        "industrial",
+        "alimentos",
+        "export"
+      ]
+    },
+    "variantes": {
+      "label": "Variantes",
+      "giros": [
+        "ropa",
+        "zapateria",
+        "boutique",
+        "pintura",
+        "muebleria",
+        "abarrotes",
+        "farmacia"
+      ]
+    },
+    "recetas": {
+      "label": "Recetas/Componentes",
+      "giros": [
+        "restaurante",
+        "panaderia",
+        "bar",
+        "taqueria",
+        "cafeteria"
+      ]
+    },
+    "combos": {
+      "label": "Kits/Combos",
+      "giros": [
+        "restaurante",
+        "papeleria",
+        "retail"
+      ]
+    },
+    "servicios": {
+      "label": "Servicios",
+      "giros": [
+        "barberia",
+        "medico",
+        "taller",
+        "spa",
+        "estetica",
+        "veterinaria"
+      ]
+    },
+    "agenda": {
+      "label": "Agenda/Citas",
+      "giros": [
+        "barberia",
+        "estetica",
+        "medico",
+        "veterinaria",
+        "spa"
+      ]
+    },
+    "suscripciones": {
+      "label": "Suscripciones",
+      "giros": [
+        "gym",
+        "saas",
+        "membresia"
+      ]
+    },
+    "rentas": {
+      "label": "Rentas/Alquileres",
+      "giros": [
+        "rentas",
+        "hotel",
+        "coworking",
+        "salones",
+        "trajes",
+        "parking",
+        "airbnb"
+      ]
+    },
+    "cocina": {
+      "label": "Cocina/KDS",
+      "giros": [
+        "restaurante",
+        "taqueria",
+        "cafeteria",
+        "parrilla",
+        "bar"
+      ]
+    },
+    "delivery": {
+      "label": "Delivery",
+      "giros": [
+        "restaurante",
+        "farmacia",
+        "abarrotes"
+      ]
+    },
+    "medico": {
+      "label": "Médico",
+      "giros": [
+        "medico",
+        "dental",
+        "veterinaria",
+        "farmacia"
+      ]
+    },
+    "veterinaria": {
+      "label": "Veterinaria",
+      "giros": [
+        "veterinaria"
+      ]
+    },
+    "educacion": {
+      "label": "Educación",
+      "giros": [
+        "escuela",
+        "academia",
+        "kinder"
+      ]
+    },
+    "hotel": {
+      "label": "Hotelería",
+      "giros": [
+        "hotel",
+        "airbnb"
+      ]
+    },
+    "gym": {
+      "label": "Gimnasio",
+      "giros": [
+        "gym",
+        "club"
+      ]
+    },
+    "eventos": {
+      "label": "Eventos",
+      "giros": [
+        "salones",
+        "concierto",
+        "teatro",
+        "bar"
+      ]
+    },
+    "automotriz": {
+      "label": "Automotriz",
+      "giros": [
+        "taller",
+        "refaccionaria"
+      ]
+    },
+    "marketplace": {
+      "label": "Marketplace",
+      "giros": [
+        "ecommerce"
+      ]
+    },
+    "ecommerce": {
+      "label": "E-commerce",
+      "giros": [
+        "ecommerce"
+      ]
+    },
+    "multimoneda": {
+      "label": "Multi-moneda",
+      "giros": [
+        "hotel",
+        "turismo",
+        "export"
+      ]
+    },
+    "multisucursal": {
+      "label": "Multi-sucursal",
+      "giros": [
+        "*"
+      ]
+    },
+    "multilang": {
+      "label": "Multi-idioma",
+      "giros": [
+        "hotel",
+        "turismo"
+      ]
+    },
+    "promociones": {
+      "label": "Promociones",
+      "giros": [
+        "*"
+      ]
+    },
+    "fiados": {
+      "label": "Fiados",
+      "giros": [
+        "abarrotes",
+        "carniceria",
+        "papeleria",
+        "tortilleria"
+      ]
+    },
+    "documentos": {
+      "label": "Documentos adjuntos",
+      "giros": [
+        "*"
+      ]
+    },
+    "permisos": {
+      "label": "Permisos granulares",
+      "giros": [
+        "*"
+      ]
+    },
+    "biometria": {
+      "label": "Biometría",
+      "giros": [
+        "gym",
+        "medico",
+        "retail"
+      ]
+    },
+    "auth": {
+      "label": "Acceso/Auth",
+      "giros": [
+        "*"
+      ]
+    },
+    "crm": {
+      "label": "CRM",
+      "giros": [
+        "*"
+      ]
+    },
+    "rh": {
+      "label": "RRHH",
+      "giros": [
+        "*"
+      ]
+    },
+    "pagos": {
+      "label": "Métodos de pago",
+      "giros": [
+        "*"
+      ]
+    },
+    "integracion": {
+      "label": "Integraciones",
+      "giros": [
+        "*"
+      ]
+    },
+    "hardware": {
+      "label": "Hardware",
+      "giros": [
+        "*"
+      ]
+    },
+    "ia": {
+      "label": "IA / Auto",
+      "giros": [
+        "*"
+      ]
+    },
+    "garantias": {
+      "label": "Garantías",
+      "giros": [
+        "electrodom",
+        "celulares",
+        "muebleria"
+      ]
+    },
+    "devoluciones": {
+      "label": "Devoluciones",
+      "giros": [
+        "*"
+      ]
+    },
+    "balanza": {
+      "label": "Báscula",
+      "giros": [
+        "carniceria",
+        "abarrotes",
+        "tortilleria",
+        "frutas"
+      ]
+    },
+    "dimensiones": {
+      "label": "Dimensiones físicas",
+      "giros": [
+        "ferreteria",
+        "muebleria"
+      ]
+    },
+    "proveedores": {
+      "label": "Proveedores avanz.",
+      "giros": [
+        "*"
+      ]
+    },
+    "logistica": {
+      "label": "Logística",
+      "giros": [
+        "*"
+      ]
+    }
+  },
+  "modals": {
+    "productos": {
+      "label": "Producto / Servicio",
+      "current_fields_keep": [
+        "nombre",
+        "precio_venta",
+        "costo",
+        "stock",
+        "stock_minimo",
+        "categoria"
+      ],
+      "sections": {
+        "1.1 Identidad completa": [
+          {
+            "name": "sku",
+            "label": "SKU",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "sku_corto",
+            "label": "SKU corto",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "codigo_barras",
+            "label": "Código de barras",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "codigo_barras_secundario",
+            "label": "Código de barras secundario",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "retail"
+            ]
+          },
+          {
+            "name": "codigo_alterno_proveedor",
+            "label": "Código del proveedor",
+            "type": "text",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "qr_propio",
+            "label": "QR propio",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "restaurante",
+              "delivery"
+            ]
+          },
+          {
+            "name": "descripcion_corta",
+            "label": "Descripción corta",
+            "type": "textarea",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "descripcion_larga",
+            "label": "Descripción larga (web)",
+            "type": "textarea",
+            "module": "ecommerce",
+            "giros": [
+              "retail",
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "nombre_corto_ticket",
+            "label": "Nombre corto en ticket",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "nombre_para_cocina",
+            "label": "Nombre para cocina",
+            "type": "text",
+            "module": "cocina",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "marca",
+            "label": "Marca",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "retail"
+            ]
+          },
+          {
+            "name": "sub_marca",
+            "label": "Sub-marca",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "retail"
+            ]
+          },
+          {
+            "name": "fabricante",
+            "label": "Fabricante",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "retail",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "pais_origen",
+            "label": "País de origen",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "retail"
+            ]
+          },
+          {
+            "name": "denominacion_comercial",
+            "label": "Denominación comercial",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "farmacia",
+              "abarrotes"
+            ]
+          },
+          {
+            "name": "sub_categoria",
+            "label": "Sub-categoría",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "familia_producto",
+            "label": "Familia de producto",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "retail"
+            ]
+          },
+          {
+            "name": "etiquetas_libres",
+            "label": "Etiquetas (separadas por coma)",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "clave_interna",
+            "label": "Clave interna",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "codigo_producto_servicio_sat",
+            "label": "Clave producto/servicio SAT",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "clave_unidad_medida_sat",
+            "label": "Clave unidad de medida SAT",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "1.2 Multimedia": [
+          {
+            "name": "imagen_principal",
+            "label": "Imagen principal",
+            "type": "file",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "imagenes_galeria",
+            "label": "Galería de imágenes (max 10)",
+            "type": "file_multi",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "video_demo_url",
+            "label": "URL video demo",
+            "type": "url",
+            "module": "ecommerce",
+            "giros": [
+              "retail",
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "modelo_3d_url",
+            "label": "URL modelo 3D",
+            "type": "url",
+            "module": "ecommerce",
+            "giros": [
+              "muebleria",
+              "electrodom"
+            ]
+          },
+          {
+            "name": "archivo_pdf_ficha_tecnica",
+            "label": "PDF ficha técnica",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "farmacia",
+              "ferreteria",
+              "refacciones"
+            ]
+          },
+          {
+            "name": "archivo_pdf_certificado",
+            "label": "PDF certificado",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "farmacia",
+              "industrial"
+            ]
+          },
+          {
+            "name": "archivo_pdf_garantia",
+            "label": "PDF garantía",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "electrodom",
+              "celulares"
+            ]
+          }
+        ],
+        "1.3 Precios completo": [
+          {
+            "name": "precio_mayoreo_1",
+            "label": "Precio mayoreo 1 (desde N und)",
+            "type": "number",
+            "module": "precios",
+            "giros": [
+              "abarrotes",
+              "ferreteria",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "precio_mayoreo_2",
+            "label": "Precio mayoreo 2",
+            "type": "number",
+            "module": "precios",
+            "giros": [
+              "abarrotes",
+              "ferreteria"
+            ]
+          },
+          {
+            "name": "precio_mayoreo_3",
+            "label": "Precio mayoreo 3",
+            "type": "number",
+            "module": "precios",
+            "giros": [
+              "abarrotes",
+              "ferreteria"
+            ]
+          },
+          {
+            "name": "precio_menudeo",
+            "label": "Precio menudeo",
+            "type": "number",
+            "module": "precios",
+            "giros": [
+              "abarrotes",
+              "ferreteria"
+            ]
+          },
+          {
+            "name": "precio_vip",
+            "label": "Precio VIP",
+            "type": "number",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "precio_empleado",
+            "label": "Precio empleado",
+            "type": "number",
+            "module": "precios",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "precio_promocion",
+            "label": "Precio promoción",
+            "type": "number",
+            "module": "promociones",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "precio_anterior_tachado",
+            "label": "Precio anterior (tachado)",
+            "type": "number",
+            "module": "promociones",
+            "giros": [
+              "retail",
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "descuento_porcentaje",
+            "label": "Descuento %",
+            "type": "number",
+            "module": "promociones",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "descuento_monto_fijo",
+            "label": "Descuento monto fijo",
+            "type": "number",
+            "module": "promociones",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "descuento_valido_desde",
+            "label": "Desde",
+            "type": "date",
+            "module": "promociones",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "descuento_valido_hasta",
+            "label": "Hasta",
+            "type": "date",
+            "module": "promociones",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "margen_porcentaje",
+            "label": "Margen % (auto)",
+            "type": "number",
+            "module": "precios",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "margen_pesos",
+            "label": "Margen $ (auto)",
+            "type": "number",
+            "module": "precios",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "moneda_principal",
+            "label": "Moneda",
+            "type": "select",
+            "module": "multimoneda",
+            "giros": [
+              "hotel",
+              "turismo"
+            ],
+            "options": [
+              "MXN",
+              "USD",
+              "EUR",
+              "CAD"
+            ]
+          },
+          {
+            "name": "precio_en_dolares",
+            "label": "Precio en USD",
+            "type": "number",
+            "module": "multimoneda",
+            "giros": [
+              "hotel",
+              "turismo"
+            ]
+          },
+          {
+            "name": "precio_en_euros",
+            "label": "Precio en EUR",
+            "type": "number",
+            "module": "multimoneda",
+            "giros": [
+              "hotel",
+              "turismo"
+            ]
+          },
+          {
+            "name": "precio_dinamico_horario",
+            "label": "Precio dinámico por horario",
+            "type": "switch",
+            "module": "precios",
+            "giros": [
+              "restaurante",
+              "bar",
+              "parking"
+            ]
+          },
+          {
+            "name": "precio_dinamico_demanda",
+            "label": "Precio dinámico por demanda",
+            "type": "switch",
+            "module": "precios",
+            "giros": [
+              "hotel",
+              "salones"
+            ]
+          }
+        ],
+        "1.4 Comisiones": [
+          {
+            "name": "comision_vendedor_porcentaje",
+            "label": "Comisión vendedor %",
+            "type": "number",
+            "module": "comisiones",
+            "giros": [
+              "barberia",
+              "estetica",
+              "gym",
+              "retail"
+            ]
+          },
+          {
+            "name": "comision_vendedor_monto_fijo",
+            "label": "Comisión vendedor $",
+            "type": "number",
+            "module": "comisiones",
+            "giros": [
+              "barberia",
+              "estetica",
+              "gym",
+              "retail"
+            ]
+          },
+          {
+            "name": "comision_solo_efectivo",
+            "label": "Comisión sólo en efectivo",
+            "type": "switch",
+            "module": "comisiones",
+            "giros": [
+              "barberia",
+              "estetica"
+            ]
+          },
+          {
+            "name": "comision_solo_si_full_price",
+            "label": "Comisión sólo a precio completo",
+            "type": "switch",
+            "module": "comisiones",
+            "giros": [
+              "retail"
+            ]
+          },
+          {
+            "name": "cashback_cliente_porcentaje",
+            "label": "Cashback cliente %",
+            "type": "number",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puntos_lealtad_otorgados",
+            "label": "Puntos lealtad",
+            "type": "number",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "multiplicador_puntos",
+            "label": "Multiplicador puntos",
+            "type": "number",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "1.5 Inventario": [
+          {
+            "name": "stock_maximo",
+            "label": "Stock máximo",
+            "type": "number",
+            "module": "inventario",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "stock_reservado",
+            "label": "Stock reservado",
+            "type": "number",
+            "module": "inventario",
+            "giros": [
+              "retail",
+              "ecommerce"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "unidad_base",
+            "label": "Unidad base",
+            "type": "text",
+            "module": "inventario",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "unidad_compra",
+            "label": "Unidad de compra",
+            "type": "text",
+            "module": "inventario",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "unidad_venta",
+            "label": "Unidad de venta",
+            "type": "text",
+            "module": "inventario",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "factor_conversion",
+            "label": "Factor caja → pieza",
+            "type": "number",
+            "module": "inventario",
+            "giros": [
+              "abarrotes",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "caja_contiene_unidades",
+            "label": "Caja contiene N unidades",
+            "type": "number",
+            "module": "inventario",
+            "giros": [
+              "abarrotes",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "rotacion_promedio_dias",
+            "label": "Rotación días (auto)",
+            "type": "number",
+            "module": "inventario",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "abc_clasificacion",
+            "label": "Clasificación ABC",
+            "type": "select",
+            "module": "inventario",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "A",
+              "B",
+              "C"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ubicacion_fisica_almacen",
+            "label": "Ubicación almacén",
+            "type": "text",
+            "module": "inventario",
+            "giros": [
+              "retail",
+              "abarrotes"
+            ]
+          },
+          {
+            "name": "pasillo",
+            "label": "Pasillo",
+            "type": "text",
+            "module": "inventario",
+            "giros": [
+              "abarrotes",
+              "super"
+            ]
+          },
+          {
+            "name": "anaquel",
+            "label": "Anaquel",
+            "type": "text",
+            "module": "inventario",
+            "giros": [
+              "abarrotes",
+              "super"
+            ]
+          },
+          {
+            "name": "peso_kg",
+            "label": "Peso (kg)",
+            "type": "number",
+            "module": "balanza",
+            "giros": [
+              "carniceria",
+              "abarrotes",
+              "tortilleria"
+            ]
+          },
+          {
+            "name": "dim_alto_cm",
+            "label": "Alto (cm)",
+            "type": "number",
+            "module": "dimensiones",
+            "giros": [
+              "ferreteria",
+              "muebleria"
+            ]
+          },
+          {
+            "name": "dim_ancho_cm",
+            "label": "Ancho (cm)",
+            "type": "number",
+            "module": "dimensiones",
+            "giros": [
+              "ferreteria",
+              "muebleria"
+            ]
+          },
+          {
+            "name": "dim_largo_cm",
+            "label": "Largo (cm)",
+            "type": "number",
+            "module": "dimensiones",
+            "giros": [
+              "ferreteria",
+              "muebleria"
+            ]
+          }
+        ],
+        "1.6 Serialización": [
+          {
+            "name": "requiere_numero_serie",
+            "label": "Requiere n° serie",
+            "type": "switch",
+            "module": "serializacion",
+            "giros": [
+              "celulares",
+              "electronica"
+            ]
+          },
+          {
+            "name": "generacion_serial_auto",
+            "label": "Generar serial auto",
+            "type": "switch",
+            "module": "serializacion",
+            "giros": [
+              "celulares"
+            ]
+          },
+          {
+            "name": "imei_obligatorio",
+            "label": "IMEI obligatorio",
+            "type": "switch",
+            "module": "serializacion",
+            "giros": [
+              "celulares"
+            ]
+          },
+          {
+            "name": "estado_serial",
+            "label": "Estado",
+            "type": "select",
+            "module": "serializacion",
+            "giros": [
+              "celulares"
+            ],
+            "options": [
+              "nuevo",
+              "usado",
+              "reparado",
+              "reacondicionado"
+            ]
+          }
+        ],
+        "1.7 Lotes y caducidad": [
+          {
+            "name": "maneja_lotes",
+            "label": "Maneja lotes",
+            "type": "switch",
+            "module": "lotes",
+            "giros": [
+              "farmacia",
+              "abarrotes",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "numero_lote",
+            "label": "Número de lote",
+            "type": "text",
+            "module": "lotes",
+            "giros": [
+              "farmacia",
+              "abarrotes",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "fecha_fabricacion",
+            "label": "Fecha de fabricación",
+            "type": "date",
+            "module": "lotes",
+            "giros": [
+              "farmacia",
+              "abarrotes"
+            ]
+          },
+          {
+            "name": "fecha_caducidad",
+            "label": "Fecha de caducidad",
+            "type": "date",
+            "module": "caducidad",
+            "giros": [
+              "farmacia",
+              "abarrotes",
+              "carniceria",
+              "restaurante"
+            ]
+          },
+          {
+            "name": "alerta_30_dias",
+            "label": "Alertar 30 días antes",
+            "type": "switch",
+            "module": "caducidad",
+            "giros": [
+              "farmacia",
+              "abarrotes"
+            ]
+          },
+          {
+            "name": "alerta_60_dias",
+            "label": "Alertar 60 días antes",
+            "type": "switch",
+            "module": "caducidad",
+            "giros": [
+              "farmacia",
+              "abarrotes"
+            ]
+          },
+          {
+            "name": "politica_fefo",
+            "label": "FEFO (first-expire-first-out)",
+            "type": "switch",
+            "module": "caducidad",
+            "giros": [
+              "farmacia",
+              "abarrotes"
+            ]
+          },
+          {
+            "name": "descuento_auto_proximo_vencer",
+            "label": "Descuento auto al vencer",
+            "type": "switch",
+            "module": "caducidad",
+            "giros": [
+              "farmacia",
+              "abarrotes"
+            ]
+          }
+        ],
+        "1.8 Trazabilidad": [
+          {
+            "name": "origen_lote",
+            "label": "Origen del lote",
+            "type": "text",
+            "module": "trazabilidad",
+            "giros": [
+              "farmacia",
+              "industrial",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "proveedor_lote",
+            "label": "Proveedor del lote",
+            "type": "text",
+            "module": "trazabilidad",
+            "giros": [
+              "farmacia",
+              "industrial",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "fecha_recepcion_lote",
+            "label": "Fecha recepción",
+            "type": "date",
+            "module": "trazabilidad",
+            "giros": [
+              "farmacia",
+              "industrial"
+            ]
+          },
+          {
+            "name": "ruta_logistica",
+            "label": "Ruta logística",
+            "type": "text",
+            "module": "trazabilidad",
+            "giros": [
+              "industrial",
+              "export"
+            ]
+          },
+          {
+            "name": "certificados_adjuntos",
+            "label": "Certificados adjuntos",
+            "type": "file_multi",
+            "module": "trazabilidad",
+            "giros": [
+              "farmacia",
+              "industrial"
+            ]
+          }
+        ],
+        "1.9 Compliance / Certificaciones": [
+          {
+            "name": "norma_oficial_mexicana",
+            "label": "NOM aplicable",
+            "type": "text",
+            "module": "compliance",
+            "giros": [
+              "farmacia",
+              "industrial",
+              "alimentos"
+            ]
+          },
+          {
+            "name": "iso_certificacion",
+            "label": "ISO certificación",
+            "type": "text",
+            "module": "compliance",
+            "giros": [
+              "industrial",
+              "export"
+            ]
+          },
+          {
+            "name": "fda_certificado",
+            "label": "FDA certificado",
+            "type": "text",
+            "module": "compliance",
+            "giros": [
+              "export"
+            ]
+          },
+          {
+            "name": "cofepris_registro",
+            "label": "COFEPRIS registro",
+            "type": "text",
+            "module": "compliance",
+            "giros": [
+              "farmacia"
+            ]
+          },
+          {
+            "name": "clave_cofepris",
+            "label": "Clave COFEPRIS",
+            "type": "text",
+            "module": "compliance",
+            "giros": [
+              "farmacia"
+            ]
+          },
+          {
+            "name": "controlado_grupo",
+            "label": "Grupo controlado",
+            "type": "select",
+            "module": "compliance",
+            "giros": [
+              "farmacia"
+            ],
+            "options": [
+              "I",
+              "II",
+              "III",
+              "IV",
+              "V",
+              "no_controlado"
+            ]
+          },
+          {
+            "name": "requiere_receta_medica",
+            "label": "Requiere receta",
+            "type": "switch",
+            "module": "compliance",
+            "giros": [
+              "farmacia"
+            ]
+          },
+          {
+            "name": "receta_retenida",
+            "label": "Receta retenida",
+            "type": "switch",
+            "module": "compliance",
+            "giros": [
+              "farmacia"
+            ]
+          },
+          {
+            "name": "receta_resurtible",
+            "label": "Receta resurtible",
+            "type": "switch",
+            "module": "compliance",
+            "giros": [
+              "farmacia"
+            ]
+          },
+          {
+            "name": "edad_minima_compra",
+            "label": "Edad mínima compra",
+            "type": "number",
+            "module": "compliance",
+            "giros": [
+              "farmacia",
+              "bar",
+              "tabaqueria"
+            ]
+          },
+          {
+            "name": "verificacion_id_obligatoria",
+            "label": "Verificar ID obligatorio",
+            "type": "switch",
+            "module": "compliance",
+            "giros": [
+              "farmacia",
+              "bar"
+            ]
+          }
+        ],
+        "1.10 Variantes": [
+          {
+            "name": "tiene_variantes",
+            "label": "Tiene variantes",
+            "type": "switch",
+            "module": "variantes",
+            "giros": [
+              "ropa",
+              "zapateria",
+              "abarrotes"
+            ]
+          },
+          {
+            "name": "tipo_variante",
+            "label": "Tipo de variante",
+            "type": "select",
+            "module": "variantes",
+            "giros": [
+              "ropa",
+              "zapateria",
+              "abarrotes"
+            ],
+            "options": [
+              "talla",
+              "color",
+              "sabor",
+              "material",
+              "presentacion"
+            ]
+          },
+          {
+            "name": "tallas_disponibles",
+            "label": "Tallas disponibles (CSV)",
+            "type": "text",
+            "module": "variantes",
+            "giros": [
+              "ropa",
+              "zapateria"
+            ]
+          },
+          {
+            "name": "colores_disponibles",
+            "label": "Colores disponibles (CSV)",
+            "type": "text",
+            "module": "variantes",
+            "giros": [
+              "ropa",
+              "zapateria",
+              "pintura"
+            ]
+          },
+          {
+            "name": "materiales_disponibles",
+            "label": "Materiales (CSV)",
+            "type": "text",
+            "module": "variantes",
+            "giros": [
+              "ropa",
+              "muebleria"
+            ]
+          },
+          {
+            "name": "sabores_disponibles",
+            "label": "Sabores (CSV)",
+            "type": "text",
+            "module": "variantes",
+            "giros": [
+              "restaurante",
+              "helado"
+            ]
+          },
+          {
+            "name": "presentaciones",
+            "label": "Presentaciones (250ml,500ml,1L)",
+            "type": "text",
+            "module": "variantes",
+            "giros": [
+              "abarrotes",
+              "farmacia"
+            ]
+          }
+        ],
+        "1.11 Recetas y componentes": [
+          {
+            "name": "es_producto_con_receta",
+            "label": "Tiene receta",
+            "type": "switch",
+            "module": "recetas",
+            "giros": [
+              "restaurante",
+              "panaderia",
+              "bar"
+            ]
+          },
+          {
+            "name": "ingredientes",
+            "label": "Ingredientes (sub-tabla)",
+            "type": "subtable",
+            "module": "recetas",
+            "giros": [
+              "restaurante",
+              "panaderia"
+            ]
+          },
+          {
+            "name": "merma_porcentaje",
+            "label": "Merma %",
+            "type": "number",
+            "module": "recetas",
+            "giros": [
+              "restaurante",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "factor_rendimiento",
+            "label": "Factor rendimiento",
+            "type": "number",
+            "module": "recetas",
+            "giros": [
+              "restaurante",
+              "panaderia"
+            ]
+          },
+          {
+            "name": "permite_modificadores",
+            "label": "Permite modificadores",
+            "type": "switch",
+            "module": "recetas",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "modificadores_disponibles",
+            "label": "Modificadores disponibles",
+            "type": "text",
+            "module": "recetas",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "ingredientes_removibles_permitidos",
+            "label": "Ingredientes removibles",
+            "type": "text",
+            "module": "recetas",
+            "giros": [
+              "restaurante",
+              "taqueria"
+            ]
+          },
+          {
+            "name": "extras_con_costo",
+            "label": "Extras con costo",
+            "type": "text",
+            "module": "recetas",
+            "giros": [
+              "restaurante",
+              "taqueria"
+            ]
+          }
+        ],
+        "1.12 Kits y combos": [
+          {
+            "name": "es_kit_o_combo",
+            "label": "Es kit/combo",
+            "type": "switch",
+            "module": "combos",
+            "giros": [
+              "restaurante",
+              "papeleria",
+              "retail"
+            ]
+          },
+          {
+            "name": "productos_incluidos",
+            "label": "Productos incluidos",
+            "type": "subtable",
+            "module": "combos",
+            "giros": [
+              "restaurante",
+              "papeleria"
+            ]
+          },
+          {
+            "name": "combo_obligatorio_todos",
+            "label": "Combo: todos obligatorios",
+            "type": "switch",
+            "module": "combos",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "combo_opcional_elegir_n",
+            "label": "Combo: elegir N opcionales",
+            "type": "number",
+            "module": "combos",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "descuento_kit_calculado",
+            "label": "Descuento kit %",
+            "type": "number",
+            "module": "combos",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          }
+        ],
+        "1.13 Servicios": [
+          {
+            "name": "es_servicio",
+            "label": "Es servicio",
+            "type": "switch",
+            "module": "servicios",
+            "giros": [
+              "barberia",
+              "medico",
+              "taller",
+              "spa"
+            ]
+          },
+          {
+            "name": "duracion_minutos",
+            "label": "Duración (min)",
+            "type": "number",
+            "module": "servicios",
+            "giros": [
+              "barberia",
+              "medico",
+              "taller",
+              "spa"
+            ]
+          },
+          {
+            "name": "requiere_cita",
+            "label": "Requiere cita",
+            "type": "switch",
+            "module": "agenda",
+            "giros": [
+              "barberia",
+              "medico",
+              "spa"
+            ]
+          },
+          {
+            "name": "empleado_asignable",
+            "label": "Empleado asignable",
+            "type": "switch",
+            "module": "servicios",
+            "giros": [
+              "barberia",
+              "estetica",
+              "spa"
+            ]
+          },
+          {
+            "name": "recursos_requeridos",
+            "label": "Recursos requeridos",
+            "type": "text",
+            "module": "servicios",
+            "giros": [
+              "spa",
+              "medico",
+              "salones"
+            ]
+          },
+          {
+            "name": "tiempo_descanso_entre_servicios",
+            "label": "Descanso entre servicios (min)",
+            "type": "number",
+            "module": "servicios",
+            "giros": [
+              "spa",
+              "medico"
+            ]
+          }
+        ],
+        "1.14 Suscripciones": [
+          {
+            "name": "es_suscripcion",
+            "label": "Es suscripción",
+            "type": "switch",
+            "module": "suscripciones",
+            "giros": [
+              "gym",
+              "saas",
+              "membresia"
+            ]
+          },
+          {
+            "name": "periodicidad",
+            "label": "Periodicidad",
+            "type": "select",
+            "module": "suscripciones",
+            "giros": [
+              "gym",
+              "saas"
+            ],
+            "options": [
+              "mensual",
+              "trimestral",
+              "semestral",
+              "anual"
+            ]
+          },
+          {
+            "name": "periodo_dias_prueba_gratis",
+            "label": "Días de prueba gratis",
+            "type": "number",
+            "module": "suscripciones",
+            "giros": [
+              "gym",
+              "saas"
+            ]
+          },
+          {
+            "name": "renovacion_automatica",
+            "label": "Renovación automática",
+            "type": "switch",
+            "module": "suscripciones",
+            "giros": [
+              "gym",
+              "saas"
+            ]
+          },
+          {
+            "name": "penalizacion_cancelacion",
+            "label": "Penalización por cancelar",
+            "type": "number",
+            "module": "suscripciones",
+            "giros": [
+              "gym"
+            ]
+          },
+          {
+            "name": "beneficios_incluidos",
+            "label": "Beneficios incluidos",
+            "type": "textarea",
+            "module": "suscripciones",
+            "giros": [
+              "gym",
+              "club"
+            ]
+          }
+        ],
+        "1.15 Rentas": [
+          {
+            "name": "es_rentable",
+            "label": "Es rentable",
+            "type": "switch",
+            "module": "rentas",
+            "giros": [
+              "rentas",
+              "hotel",
+              "coworking",
+              "salones"
+            ]
+          },
+          {
+            "name": "precio_por_hora",
+            "label": "Precio/hora",
+            "type": "number",
+            "module": "rentas",
+            "giros": [
+              "rentas",
+              "parking",
+              "coworking"
+            ]
+          },
+          {
+            "name": "precio_por_dia",
+            "label": "Precio/día",
+            "type": "number",
+            "module": "rentas",
+            "giros": [
+              "rentas",
+              "hotel",
+              "trajes"
+            ]
+          },
+          {
+            "name": "precio_por_semana",
+            "label": "Precio/semana",
+            "type": "number",
+            "module": "rentas",
+            "giros": [
+              "rentas"
+            ]
+          },
+          {
+            "name": "precio_por_mes",
+            "label": "Precio/mes",
+            "type": "number",
+            "module": "rentas",
+            "giros": [
+              "rentas"
+            ]
+          },
+          {
+            "name": "deposito_garantia",
+            "label": "Depósito garantía",
+            "type": "number",
+            "module": "rentas",
+            "giros": [
+              "rentas"
+            ]
+          },
+          {
+            "name": "check_in_hora",
+            "label": "Hora check-in",
+            "type": "time",
+            "module": "rentas",
+            "giros": [
+              "hotel",
+              "airbnb",
+              "rentas"
+            ]
+          },
+          {
+            "name": "check_out_hora",
+            "label": "Hora check-out",
+            "type": "time",
+            "module": "rentas",
+            "giros": [
+              "hotel",
+              "airbnb",
+              "rentas"
+            ]
+          }
+        ],
+        "1.16 Restaurante / Cocina": [
+          {
+            "name": "se_manda_a_cocina",
+            "label": "Se manda a cocina",
+            "type": "switch",
+            "module": "cocina",
+            "giros": [
+              "restaurante",
+              "taqueria"
+            ]
+          },
+          {
+            "name": "area_preparacion",
+            "label": "Área preparación",
+            "type": "select",
+            "module": "cocina",
+            "giros": [
+              "restaurante"
+            ],
+            "options": [
+              "bar",
+              "cocina",
+              "postres",
+              "parrilla",
+              "fríos"
+            ]
+          },
+          {
+            "name": "impresora_cocina_destino",
+            "label": "Impresora cocina",
+            "type": "select",
+            "module": "cocina",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "tiempo_coccion_estimado_minutos",
+            "label": "Tiempo cocción (min)",
+            "type": "number",
+            "module": "cocina",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "nivel_picante",
+            "label": "Nivel picante",
+            "type": "select",
+            "module": "cocina",
+            "giros": [
+              "restaurante",
+              "taqueria"
+            ],
+            "options": [
+              "sin",
+              "poco",
+              "medio",
+              "muy_picante"
+            ]
+          },
+          {
+            "name": "termino_carne_default",
+            "label": "Término carne",
+            "type": "select",
+            "module": "cocina",
+            "giros": [
+              "restaurante",
+              "parrilla"
+            ],
+            "options": [
+              "rojo",
+              "medio",
+              "tres_cuartos",
+              "bien_cocido"
+            ]
+          },
+          {
+            "name": "incluye_guarnicion",
+            "label": "Incluye guarnición",
+            "type": "switch",
+            "module": "cocina",
+            "giros": [
+              "restaurante"
+            ]
+          }
+        ],
+        "1.17 Delivery": [
+          {
+            "name": "disponible_delivery",
+            "label": "Disponible delivery",
+            "type": "switch",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia",
+              "abarrotes"
+            ]
+          },
+          {
+            "name": "tiempo_preparacion_delivery",
+            "label": "Tiempo prep delivery (min)",
+            "type": "number",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "tiempo_entrega_promedio",
+            "label": "Tiempo entrega prom (min)",
+            "type": "number",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "costo_envio_zona",
+            "label": "Costo envío base",
+            "type": "number",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "comision_repartidor",
+            "label": "Comisión repartidor",
+            "type": "number",
+            "module": "delivery",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "requiere_temperatura_controlada",
+            "label": "Temperatura controlada",
+            "type": "switch",
+            "module": "delivery",
+            "giros": [
+              "farmacia",
+              "helados"
+            ]
+          },
+          {
+            "name": "disponible_uber_eats",
+            "label": "Uber Eats",
+            "type": "switch",
+            "module": "delivery",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "disponible_didi_food",
+            "label": "DiDi Food",
+            "type": "switch",
+            "module": "delivery",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "disponible_rappi",
+            "label": "Rappi",
+            "type": "switch",
+            "module": "delivery",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "sku_uber_eats",
+            "label": "SKU Uber Eats",
+            "type": "text",
+            "module": "delivery",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "sku_didi_food",
+            "label": "SKU DiDi Food",
+            "type": "text",
+            "module": "delivery",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "sku_rappi",
+            "label": "SKU Rappi",
+            "type": "text",
+            "module": "delivery",
+            "giros": [
+              "restaurante"
+            ]
+          }
+        ],
+        "1.18 Médico / Farmacéutico": [
+          {
+            "name": "requiere_expediente_paciente",
+            "label": "Requiere expediente",
+            "type": "switch",
+            "module": "medico",
+            "giros": [
+              "medico",
+              "dental",
+              "veterinaria"
+            ]
+          },
+          {
+            "name": "dosis_default",
+            "label": "Dosis default",
+            "type": "text",
+            "module": "medico",
+            "giros": [
+              "farmacia",
+              "medico"
+            ]
+          },
+          {
+            "name": "unidad_dosis",
+            "label": "Unidad dosis",
+            "type": "select",
+            "module": "medico",
+            "giros": [
+              "farmacia",
+              "medico"
+            ],
+            "options": [
+              "mg",
+              "ml",
+              "UI",
+              "gotas",
+              "tabletas"
+            ]
+          },
+          {
+            "name": "frecuencia_default",
+            "label": "Frecuencia",
+            "type": "text",
+            "module": "medico",
+            "giros": [
+              "farmacia",
+              "medico"
+            ]
+          },
+          {
+            "name": "duracion_tratamiento_dias",
+            "label": "Duración (días)",
+            "type": "number",
+            "module": "medico",
+            "giros": [
+              "farmacia",
+              "medico"
+            ]
+          },
+          {
+            "name": "via_administracion",
+            "label": "Vía administración",
+            "type": "select",
+            "module": "medico",
+            "giros": [
+              "farmacia",
+              "medico"
+            ],
+            "options": [
+              "oral",
+              "IV",
+              "IM",
+              "tópica",
+              "rectal",
+              "sublingual",
+              "inhalada"
+            ]
+          },
+          {
+            "name": "contraindicaciones_texto",
+            "label": "Contraindicaciones",
+            "type": "textarea",
+            "module": "medico",
+            "giros": [
+              "farmacia"
+            ]
+          },
+          {
+            "name": "efectos_secundarios_texto",
+            "label": "Efectos secundarios",
+            "type": "textarea",
+            "module": "medico",
+            "giros": [
+              "farmacia"
+            ]
+          },
+          {
+            "name": "embarazo_categoria",
+            "label": "Categoría embarazo",
+            "type": "select",
+            "module": "medico",
+            "giros": [
+              "farmacia"
+            ],
+            "options": [
+              "A",
+              "B",
+              "C",
+              "D",
+              "X",
+              "N/A"
+            ]
+          }
+        ],
+        "1.19 Automotriz": [
+          {
+            "name": "es_refaccion",
+            "label": "Es refacción",
+            "type": "switch",
+            "module": "automotriz",
+            "giros": [
+              "taller",
+              "refaccionaria"
+            ]
+          },
+          {
+            "name": "vin_obligatorio",
+            "label": "VIN obligatorio",
+            "type": "switch",
+            "module": "automotriz",
+            "giros": [
+              "taller",
+              "refaccionaria"
+            ]
+          },
+          {
+            "name": "marca_vehiculo_compatible",
+            "label": "Marca compatible",
+            "type": "text",
+            "module": "automotriz",
+            "giros": [
+              "refaccionaria"
+            ]
+          },
+          {
+            "name": "modelo_vehiculo_compatible",
+            "label": "Modelo compatible",
+            "type": "text",
+            "module": "automotriz",
+            "giros": [
+              "refaccionaria"
+            ]
+          },
+          {
+            "name": "ano_desde",
+            "label": "Año desde",
+            "type": "number",
+            "module": "automotriz",
+            "giros": [
+              "refaccionaria"
+            ]
+          },
+          {
+            "name": "ano_hasta",
+            "label": "Año hasta",
+            "type": "number",
+            "module": "automotriz",
+            "giros": [
+              "refaccionaria"
+            ]
+          },
+          {
+            "name": "motor_compatible",
+            "label": "Motor compatible",
+            "type": "text",
+            "module": "automotriz",
+            "giros": [
+              "refaccionaria"
+            ]
+          },
+          {
+            "name": "posicion",
+            "label": "Posición",
+            "type": "select",
+            "module": "automotriz",
+            "giros": [
+              "refaccionaria"
+            ],
+            "options": [
+              "delantera",
+              "trasera",
+              "izquierda",
+              "derecha",
+              "N/A"
+            ]
+          },
+          {
+            "name": "es_mano_obra",
+            "label": "Es mano de obra",
+            "type": "switch",
+            "module": "automotriz",
+            "giros": [
+              "taller"
+            ]
+          },
+          {
+            "name": "horas_estimadas_servicio",
+            "label": "Horas estimadas",
+            "type": "number",
+            "module": "automotriz",
+            "giros": [
+              "taller"
+            ]
+          },
+          {
+            "name": "oem_original",
+            "label": "OEM original",
+            "type": "switch",
+            "module": "automotriz",
+            "giros": [
+              "refaccionaria"
+            ]
+          }
+        ],
+        "1.20 Hotelería": [
+          {
+            "name": "tipo_habitacion",
+            "label": "Tipo habitación",
+            "type": "select",
+            "module": "hotel",
+            "giros": [
+              "hotel",
+              "airbnb"
+            ],
+            "options": [
+              "single",
+              "doble",
+              "triple",
+              "suite",
+              "presidencial"
+            ]
+          },
+          {
+            "name": "ocupacion_maxima",
+            "label": "Ocupación máxima",
+            "type": "number",
+            "module": "hotel",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "camas_cantidad",
+            "label": "N° camas",
+            "type": "number",
+            "module": "hotel",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "desayuno_incluido",
+            "label": "Desayuno incluido",
+            "type": "switch",
+            "module": "hotel",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "wifi_incluido",
+            "label": "WiFi incluido",
+            "type": "switch",
+            "module": "hotel",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "estacionamiento_incluido",
+            "label": "Estacionamiento incluido",
+            "type": "switch",
+            "module": "hotel",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "precio_temporada_alta",
+            "label": "Precio temporada alta",
+            "type": "number",
+            "module": "hotel",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "precio_temporada_baja",
+            "label": "Precio temporada baja",
+            "type": "number",
+            "module": "hotel",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "politica_cancelacion",
+            "label": "Política cancelación",
+            "type": "textarea",
+            "module": "hotel",
+            "giros": [
+              "hotel"
+            ]
+          }
+        ],
+        "1.21 Educación": [
+          {
+            "name": "es_curso",
+            "label": "Es curso",
+            "type": "switch",
+            "module": "educacion",
+            "giros": [
+              "escuela",
+              "academia"
+            ]
+          },
+          {
+            "name": "duracion_total_horas",
+            "label": "Duración (horas)",
+            "type": "number",
+            "module": "educacion",
+            "giros": [
+              "academia"
+            ]
+          },
+          {
+            "name": "duracion_semanas",
+            "label": "Duración (semanas)",
+            "type": "number",
+            "module": "educacion",
+            "giros": [
+              "academia",
+              "escuela"
+            ]
+          },
+          {
+            "name": "cupos_maximos",
+            "label": "Cupos máximos",
+            "type": "number",
+            "module": "educacion",
+            "giros": [
+              "academia"
+            ]
+          },
+          {
+            "name": "nivel_dificultad",
+            "label": "Nivel",
+            "type": "select",
+            "module": "educacion",
+            "giros": [
+              "academia"
+            ],
+            "options": [
+              "principiante",
+              "intermedio",
+              "avanzado"
+            ]
+          },
+          {
+            "name": "certificado_emite",
+            "label": "Emite certificado",
+            "type": "switch",
+            "module": "educacion",
+            "giros": [
+              "academia"
+            ]
+          },
+          {
+            "name": "calificacion_minima_aprobacion",
+            "label": "Calificación mínima",
+            "type": "number",
+            "module": "educacion",
+            "giros": [
+              "academia",
+              "escuela"
+            ]
+          }
+        ],
+        "1.22 Gimnasio": [
+          {
+            "name": "es_membresia",
+            "label": "Es membresía",
+            "type": "switch",
+            "module": "gym",
+            "giros": [
+              "gym",
+              "club"
+            ]
+          },
+          {
+            "name": "acceso_qr",
+            "label": "Acceso por QR",
+            "type": "switch",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ]
+          },
+          {
+            "name": "acceso_biometrico",
+            "label": "Acceso biométrico",
+            "type": "switch",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ]
+          },
+          {
+            "name": "clases_incluidas",
+            "label": "Clases incluidas",
+            "type": "text",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ]
+          },
+          {
+            "name": "limite_accesos_por_mes",
+            "label": "Límite accesos/mes",
+            "type": "number",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ]
+          },
+          {
+            "name": "horario_acceso",
+            "label": "Horario acceso",
+            "type": "text",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ]
+          },
+          {
+            "name": "incluye_invitado",
+            "label": "Incluye invitado",
+            "type": "switch",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ]
+          },
+          {
+            "name": "nivel_membresia",
+            "label": "Nivel membresía",
+            "type": "select",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ],
+            "options": [
+              "básico",
+              "plus",
+              "premium",
+              "VIP"
+            ]
+          }
+        ],
+        "1.23 Eventos": [
+          {
+            "name": "es_evento",
+            "label": "Es evento",
+            "type": "switch",
+            "module": "eventos",
+            "giros": [
+              "salones",
+              "concierto"
+            ]
+          },
+          {
+            "name": "fecha_evento",
+            "label": "Fecha evento",
+            "type": "datetime",
+            "module": "eventos",
+            "giros": [
+              "concierto",
+              "salones"
+            ]
+          },
+          {
+            "name": "capacidad_maxima",
+            "label": "Capacidad",
+            "type": "number",
+            "module": "eventos",
+            "giros": [
+              "concierto",
+              "salones"
+            ]
+          },
+          {
+            "name": "asientos_numerados",
+            "label": "Asientos numerados",
+            "type": "switch",
+            "module": "eventos",
+            "giros": [
+              "concierto",
+              "teatro"
+            ]
+          },
+          {
+            "name": "qr_ticket_emite",
+            "label": "Emite QR ticket",
+            "type": "switch",
+            "module": "eventos",
+            "giros": [
+              "concierto"
+            ]
+          },
+          {
+            "name": "tickets_disponibles",
+            "label": "Tickets disponibles",
+            "type": "number",
+            "module": "eventos",
+            "giros": [
+              "concierto"
+            ]
+          }
+        ],
+        "1.24 Impuestos / SAT": [
+          {
+            "name": "iva_porcentaje",
+            "label": "IVA %",
+            "type": "select",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "0",
+              "8",
+              "16",
+              "exento"
+            ]
+          },
+          {
+            "name": "iva_retencion",
+            "label": "Retención IVA %",
+            "type": "number",
+            "module": "fiscal",
+            "giros": [
+              "profesionales"
+            ]
+          },
+          {
+            "name": "ieps_porcentaje",
+            "label": "IEPS %",
+            "type": "number",
+            "module": "fiscal",
+            "giros": [
+              "abarrotes",
+              "bar",
+              "tabaqueria"
+            ]
+          },
+          {
+            "name": "ish_porcentaje",
+            "label": "ISH %",
+            "type": "number",
+            "module": "fiscal",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "clave_cfdi_uso",
+            "label": "Uso CFDI",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "exento_impuestos",
+            "label": "Exento impuestos",
+            "type": "switch",
+            "module": "fiscal",
+            "giros": [
+              "medicamentos",
+              "libros"
+            ]
+          },
+          {
+            "name": "factura_obligatoria",
+            "label": "Factura obligatoria",
+            "type": "switch",
+            "module": "fiscal",
+            "giros": [
+              "corporativo"
+            ]
+          },
+          {
+            "name": "incluye_iva_en_precio",
+            "label": "IVA incluido en precio",
+            "type": "switch",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "1.25 Marketplace / E-commerce": [
+          {
+            "name": "publicado_en_amazon",
+            "label": "Publicado Amazon",
+            "type": "switch",
+            "module": "marketplace",
+            "giros": [
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "sku_amazon",
+            "label": "SKU Amazon",
+            "type": "text",
+            "module": "marketplace",
+            "giros": [
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "asin_amazon",
+            "label": "ASIN",
+            "type": "text",
+            "module": "marketplace",
+            "giros": [
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "publicado_mercadolibre",
+            "label": "Publicado ML",
+            "type": "switch",
+            "module": "marketplace",
+            "giros": [
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "sku_mercadolibre",
+            "label": "SKU MercadoLibre",
+            "type": "text",
+            "module": "marketplace",
+            "giros": [
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "publicado_shopify",
+            "label": "Publicado Shopify",
+            "type": "switch",
+            "module": "marketplace",
+            "giros": [
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "sku_shopify",
+            "label": "SKU Shopify",
+            "type": "text",
+            "module": "marketplace",
+            "giros": [
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "sincronizar_stock_auto",
+            "label": "Sync stock auto",
+            "type": "switch",
+            "module": "marketplace",
+            "giros": [
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "sincronizar_precio_auto",
+            "label": "Sync precio auto",
+            "type": "switch",
+            "module": "marketplace",
+            "giros": [
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "seo_titulo",
+            "label": "SEO título",
+            "type": "text",
+            "module": "ecommerce",
+            "giros": [
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "seo_descripcion",
+            "label": "SEO descripción",
+            "type": "textarea",
+            "module": "ecommerce",
+            "giros": [
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "seo_keywords",
+            "label": "SEO keywords",
+            "type": "text",
+            "module": "ecommerce",
+            "giros": [
+              "ecommerce"
+            ]
+          },
+          {
+            "name": "slug_url_amigable",
+            "label": "Slug URL",
+            "type": "text",
+            "module": "ecommerce",
+            "giros": [
+              "ecommerce"
+            ]
+          }
+        ],
+        "1.26 IA / Automatización": [
+          {
+            "name": "ia_descripcion_generada",
+            "label": "IA: descripción generada",
+            "type": "textarea",
+            "module": "ia",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ia_categoria_auto",
+            "label": "IA: categoría auto",
+            "type": "text",
+            "module": "ia",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ia_codigo_sat_sugerido",
+            "label": "IA: SAT sugerido",
+            "type": "text",
+            "module": "ia",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ia_precio_competencia",
+            "label": "IA: precio competencia",
+            "type": "number",
+            "module": "ia",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ia_precio_sugerido",
+            "label": "IA: precio sugerido",
+            "type": "number",
+            "module": "ia",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ia_prediccion_demanda",
+            "label": "IA: predicción demanda",
+            "type": "text",
+            "module": "ia",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ia_reorden_automatico",
+            "label": "IA: reorden auto",
+            "type": "switch",
+            "module": "ia",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "1.27 Permisos": [
+          {
+            "name": "permitir_descuento",
+            "label": "Permitir descuento",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "descuento_maximo_porcentaje",
+            "label": "Descuento máx %",
+            "type": "number",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "requiere_pin_descuento",
+            "label": "PIN para descuento",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "permitir_cancelar_venta",
+            "label": "Permitir cancelar venta",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "quien_puede_editar_precio",
+            "label": "Quién puede editar precio",
+            "type": "select",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "cualquiera",
+              "vendedor",
+              "gerente",
+              "admin"
+            ]
+          },
+          {
+            "name": "quien_puede_ver_costo",
+            "label": "Quién ve el costo",
+            "type": "select",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "cualquiera",
+              "vendedor",
+              "gerente",
+              "admin"
+            ]
+          },
+          {
+            "name": "requiere_doble_autorizacion",
+            "label": "Doble autorización",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "farmacia",
+              "bar"
+            ]
+          }
+        ],
+        "1.28 Garantías": [
+          {
+            "name": "tiene_garantia",
+            "label": "Tiene garantía",
+            "type": "switch",
+            "module": "garantias",
+            "giros": [
+              "electrodom",
+              "celulares",
+              "muebleria"
+            ]
+          },
+          {
+            "name": "duracion_garantia_meses",
+            "label": "Duración garantía (meses)",
+            "type": "number",
+            "module": "garantias",
+            "giros": [
+              "electrodom",
+              "celulares"
+            ]
+          },
+          {
+            "name": "tipo_garantia",
+            "label": "Tipo garantía",
+            "type": "select",
+            "module": "garantias",
+            "giros": [
+              "electrodom",
+              "celulares"
+            ],
+            "options": [
+              "fabricante",
+              "tienda",
+              "mixta"
+            ]
+          },
+          {
+            "name": "garantia_extendida_disponible",
+            "label": "Garantía extendida disponible",
+            "type": "switch",
+            "module": "garantias",
+            "giros": [
+              "electrodom",
+              "celulares"
+            ]
+          },
+          {
+            "name": "costo_garantia_extendida",
+            "label": "Costo garantía extendida",
+            "type": "number",
+            "module": "garantias",
+            "giros": [
+              "electrodom",
+              "celulares"
+            ]
+          }
+        ],
+        "1.29 Devoluciones": [
+          {
+            "name": "permite_devolucion",
+            "label": "Permite devolución",
+            "type": "switch",
+            "module": "devoluciones",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "dias_para_devolver",
+            "label": "Días para devolver",
+            "type": "number",
+            "module": "devoluciones",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "politica_devolucion_texto",
+            "label": "Política devolución",
+            "type": "textarea",
+            "module": "devoluciones",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "reingreso_inventario_auto",
+            "label": "Reingreso inventario auto",
+            "type": "switch",
+            "module": "devoluciones",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "evidencia_foto_obligatoria",
+            "label": "Evidencia foto obligatoria",
+            "type": "switch",
+            "module": "devoluciones",
+            "giros": [
+              "*"
+            ]
+          }
+        ]
+      }
+    },
+    "proveedores": {
+      "label": "Proveedor",
+      "current_fields_keep": [
+        "nombre",
+        "telefono",
+        "direccion"
+      ],
+      "sections": {
+        "2.1 Identidad ampliada": [
+          {
+            "name": "nombre_comercial",
+            "label": "Nombre comercial",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "razon_social_fiscal",
+            "label": "Razón social",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "rfc",
+            "label": "RFC",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "contacto_principal_nombre",
+            "label": "Contacto principal",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "contacto_principal_puesto",
+            "label": "Puesto contacto",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "contacto_telefono_directo",
+            "label": "Tel directo contacto",
+            "type": "tel",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "contacto_whatsapp",
+            "label": "WhatsApp",
+            "type": "tel",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "contacto_email",
+            "label": "Email",
+            "type": "email",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "contacto_secundario_nombre",
+            "label": "Contacto secundario",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "contacto_secundario_telefono",
+            "label": "Tel contacto secundario",
+            "type": "tel",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "sitio_web",
+            "label": "Sitio web",
+            "type": "url",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "direccion_fiscal",
+            "label": "Dirección fiscal",
+            "type": "textarea",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "direccion_almacen",
+            "label": "Dirección almacén",
+            "type": "textarea",
+            "module": "logistica",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "ciudad",
+            "label": "Ciudad",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "estado",
+            "label": "Estado",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "codigo_postal",
+            "label": "CP",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "pais_origen",
+            "label": "País",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "export"
+            ]
+          },
+          {
+            "name": "giro_proveedor",
+            "label": "Giro del proveedor",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "nivel_proveedor",
+            "label": "Nivel",
+            "type": "select",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "preferente",
+              "normal",
+              "backup",
+              "en_revision"
+            ]
+          }
+        ],
+        "2.2 Comercial y crédito": [
+          {
+            "name": "categoria_principal_proveedor",
+            "label": "Categoría principal",
+            "type": "text",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "sub_categorias_proveedor",
+            "label": "Sub-categorías",
+            "type": "text",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "productos_que_vende",
+            "label": "Productos que vende",
+            "type": "subtable",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "volumen_minimo_compra",
+            "label": "Volumen mínimo compra",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "volumen_minimo_descuento",
+            "label": "Volumen para descuento",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "descuento_por_volumen_escalado",
+            "label": "Descuento por volumen escalado",
+            "type": "textarea",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "descuento_pronto_pago_porcentaje",
+            "label": "Descuento pronto pago %",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "dias_para_pronto_pago",
+            "label": "Días para pronto pago",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "tipo_terminos_pago",
+            "label": "Términos pago",
+            "type": "select",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "contado",
+              "7_dias",
+              "15_dias",
+              "30_dias",
+              "60_dias",
+              "90_dias",
+              "consignacion"
+            ]
+          },
+          {
+            "name": "dias_credito_autorizados",
+            "label": "Días crédito autorizados",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "limite_credito_pesos",
+            "label": "Límite crédito $",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "credito_usado_actual",
+            "label": "Crédito usado actual",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "credito_disponible",
+            "label": "Crédito disponible",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "tiene_consignacion",
+            "label": "Tiene consignación",
+            "type": "switch",
+            "module": "proveedores",
+            "giros": [
+              "retail"
+            ]
+          },
+          {
+            "name": "permite_devolucion_caducados",
+            "label": "Acepta devolución caducados",
+            "type": "switch",
+            "module": "proveedores",
+            "giros": [
+              "farmacia",
+              "abarrotes"
+            ]
+          },
+          {
+            "name": "permite_canjes",
+            "label": "Acepta canjes",
+            "type": "switch",
+            "module": "proveedores",
+            "giros": [
+              "retail"
+            ]
+          },
+          {
+            "name": "metodo_pago_preferido",
+            "label": "Método pago preferido",
+            "type": "select",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "efectivo",
+              "transferencia_spei",
+              "cheque",
+              "tarjeta_credito",
+              "tarjeta_debito",
+              "oxxo"
+            ]
+          },
+          {
+            "name": "cuenta_bancaria",
+            "label": "Cuenta bancaria",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "banco",
+            "label": "Banco",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "clabe_interbancaria",
+            "label": "CLABE",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "codigo_swift",
+            "label": "SWIFT (internacional)",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "export"
+            ]
+          }
+        ],
+        "2.3 Logística y surtido": [
+          {
+            "name": "frecuencia_surtido",
+            "label": "Frecuencia surtido",
+            "type": "select",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "diario",
+              "2_veces_semana",
+              "semanal",
+              "quincenal",
+              "mensual",
+              "a_pedido",
+              "bajo_demanda"
+            ]
+          },
+          {
+            "name": "dia_semana_surtido_preferido",
+            "label": "Día semana surtido",
+            "type": "select",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "lunes",
+              "martes",
+              "miercoles",
+              "jueves",
+              "viernes",
+              "sabado",
+              "domingo"
+            ]
+          },
+          {
+            "name": "horario_recepcion_pedidos",
+            "label": "Horario recepción pedidos",
+            "type": "text",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "hora_cierre_pedido",
+            "label": "Hora cierre pedido",
+            "type": "time",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "tiempo_entrega_horas_pedido",
+            "label": "Tiempo entrega (horas)",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "tiempo_entrega_dias_pedido",
+            "label": "Tiempo entrega (días)",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "flete_incluido_desde_monto",
+            "label": "Flete gratis desde",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "costo_flete_estandar",
+            "label": "Costo flete estándar",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "zona_cobertura_envio",
+            "label": "Zona cobertura",
+            "type": "text",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "recoge_mercancia_propio",
+            "label": "Recoge mercancía propia",
+            "type": "switch",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "recolectar_devoluciones",
+            "label": "Recolecta devoluciones",
+            "type": "switch",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "requiere_orden_compra_formal",
+            "label": "Requiere OC formal",
+            "type": "switch",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "plataforma_pedidos_url",
+            "label": "URL plataforma pedidos",
+            "type": "url",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "api_integracion_disponible",
+            "label": "API integración",
+            "type": "switch",
+            "module": "proveedores",
+            "giros": [
+              "retail"
+            ]
+          }
+        ],
+        "2.4 Historial y evaluación": [
+          {
+            "name": "fecha_alta_proveedor",
+            "label": "Fecha alta",
+            "type": "date",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "fecha_primer_compra",
+            "label": "Primera compra",
+            "type": "date",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "fecha_ultima_compra",
+            "label": "Última compra",
+            "type": "date",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ultima_compra_monto",
+            "label": "Última compra $",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "total_comprado_30_dias",
+            "label": "Total 30d",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "total_comprado_90_dias",
+            "label": "Total 90d",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "total_comprado_anual",
+            "label": "Total anual",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "total_comprado_historico",
+            "label": "Total histórico",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ticket_promedio_compra",
+            "label": "Ticket promedio",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "numero_pedidos_historico",
+            "label": "N° pedidos",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "porcentaje_pedidos_completos",
+            "label": "% pedidos completos",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "porcentaje_pedidos_a_tiempo",
+            "label": "% a tiempo",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "porcentaje_devoluciones",
+            "label": "% devoluciones",
+            "type": "number",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "evaluacion_calidad_estrellas",
+            "label": "Calidad (1-5)",
+            "type": "rating",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "evaluacion_precio_estrellas",
+            "label": "Precio (1-5)",
+            "type": "rating",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "evaluacion_servicio_estrellas",
+            "label": "Servicio (1-5)",
+            "type": "rating",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "evaluacion_global_estrellas",
+            "label": "Global",
+            "type": "rating",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          }
+        ],
+        "2.5 Documentos": [
+          {
+            "name": "constancia_situacion_fiscal_pdf",
+            "label": "Constancia situación fiscal",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "cedula_rfc_pdf",
+            "label": "Cédula RFC",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acta_constitutiva_pdf",
+            "label": "Acta constitutiva",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "identificacion_oficial_pdf",
+            "label": "ID oficial",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "comprobante_domicilio_pdf",
+            "label": "Comprobante domicilio",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "contrato_marco_pdf",
+            "label": "Contrato marco",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "nda_firmado_pdf",
+            "label": "NDA firmado",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "licencia_sanitaria_pdf",
+            "label": "Licencia sanitaria",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "farmacia",
+              "alimentos"
+            ]
+          },
+          {
+            "name": "certificado_iso_pdf",
+            "label": "Certificado ISO",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "industrial",
+              "export"
+            ]
+          },
+          {
+            "name": "licencia_alcohol_pdf",
+            "label": "Licencia alcohol",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "bar",
+              "abarrotes"
+            ]
+          },
+          {
+            "name": "cofepris_pdf",
+            "label": "COFEPRIS",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "farmacia"
+            ]
+          },
+          {
+            "name": "facturas_pendientes_lista",
+            "label": "Facturas pendientes",
+            "type": "subtable",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          }
+        ],
+        "2.6 Notas y alertas": [
+          {
+            "name": "notas_internas",
+            "label": "Notas internas",
+            "type": "textarea",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "alertas_visibles_al_comprar",
+            "label": "Alertas al comprar",
+            "type": "textarea",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "nivel_riesgo",
+            "label": "Nivel riesgo",
+            "type": "select",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "bajo",
+              "medio",
+              "alto"
+            ]
+          },
+          {
+            "name": "proveedor_alternativo",
+            "label": "Proveedor backup",
+            "type": "text",
+            "module": "proveedores",
+            "giros": [
+              "*"
+            ]
+          }
+        ]
+      }
+    },
+    "clientes": {
+      "label": "Cliente",
+      "current_fields_keep": [
+        "nombre",
+        "telefono"
+      ],
+      "sections": {
+        "3.1 Identidad": [
+          {
+            "name": "apellido_paterno",
+            "label": "Apellido paterno",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "apellido_materno",
+            "label": "Apellido materno",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "nombre_corto_ticket",
+            "label": "Nombre corto ticket",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "fecha_nacimiento",
+            "label": "Fecha nacimiento",
+            "type": "date",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "edad",
+            "label": "Edad",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "genero",
+            "label": "Género",
+            "type": "select",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "masculino",
+              "femenino",
+              "no_binario",
+              "prefiere_no_decir"
+            ]
+          },
+          {
+            "name": "ocupacion",
+            "label": "Ocupación",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "medico",
+              "banca"
+            ]
+          },
+          {
+            "name": "estado_civil",
+            "label": "Estado civil",
+            "type": "select",
+            "module": "base",
+            "giros": [
+              "medico",
+              "banca"
+            ],
+            "options": [
+              "soltero",
+              "casado",
+              "divorciado",
+              "viudo",
+              "union_libre"
+            ]
+          },
+          {
+            "name": "foto_cliente",
+            "label": "Foto",
+            "type": "file",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "huella_registrada",
+            "label": "Huella registrada",
+            "type": "switch",
+            "module": "biometria",
+            "giros": [
+              "gym",
+              "medico"
+            ]
+          }
+        ],
+        "3.2 Contacto": [
+          {
+            "name": "telefono_whatsapp",
+            "label": "WhatsApp",
+            "type": "tel",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "telefono_casa",
+            "label": "Tel casa",
+            "type": "tel",
+            "module": "base",
+            "giros": [
+              "medico"
+            ]
+          },
+          {
+            "name": "telefono_trabajo",
+            "label": "Tel trabajo",
+            "type": "tel",
+            "module": "base",
+            "giros": [
+              "medico"
+            ]
+          },
+          {
+            "name": "email_principal",
+            "label": "Email",
+            "type": "email",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "email_facturacion",
+            "label": "Email facturación",
+            "type": "email",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "direccion_completa",
+            "label": "Dirección",
+            "type": "textarea",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "calle_numero",
+            "label": "Calle y número",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "colonia",
+            "label": "Colonia",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "ciudad",
+            "label": "Ciudad",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "estado_republica",
+            "label": "Estado",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "codigo_postal",
+            "label": "CP",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "referencias_ubicacion",
+            "label": "Referencias ubicación",
+            "type": "textarea",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "gps_coordenadas",
+            "label": "GPS",
+            "type": "text",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "zona_reparto_asignada",
+            "label": "Zona reparto",
+            "type": "text",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ]
+          }
+        ],
+        "3.3 Comercial": [
+          {
+            "name": "tipo_cliente",
+            "label": "Tipo cliente",
+            "type": "select",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "regular",
+              "VIP",
+              "mayorista",
+              "frecuente",
+              "corporativo",
+              "empleado"
+            ]
+          },
+          {
+            "name": "descuento_aplicable_porcentaje",
+            "label": "Descuento aplicable %",
+            "type": "number",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "descuento_aplicable_monto",
+            "label": "Descuento aplicable $",
+            "type": "number",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_publicidad",
+            "label": "Acepta publicidad",
+            "type": "switch",
+            "module": "crm",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "fuente_origen",
+            "label": "Fuente origen",
+            "type": "select",
+            "module": "crm",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "referido",
+              "facebook_ads",
+              "instagram",
+              "google",
+              "walk_in",
+              "whatsapp",
+              "flyer"
+            ]
+          },
+          {
+            "name": "referido_por_cliente",
+            "label": "Referido por",
+            "type": "text",
+            "module": "crm",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "asesor_ventas_asignado",
+            "label": "Asesor asignado",
+            "type": "text",
+            "module": "crm",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "canal_preferido_contacto",
+            "label": "Canal preferido",
+            "type": "select",
+            "module": "crm",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "whatsapp",
+              "email",
+              "sms",
+              "llamada",
+              "presencial"
+            ]
+          }
+        ],
+        "3.4 Crédito y fiados": [
+          {
+            "name": "tiene_fiado_autorizado",
+            "label": "Tiene fiado autorizado",
+            "type": "switch",
+            "module": "fiados",
+            "giros": [
+              "abarrotes",
+              "carniceria",
+              "papeleria",
+              "tortilleria"
+            ]
+          },
+          {
+            "name": "limite_credito_pesos",
+            "label": "Límite crédito $",
+            "type": "number",
+            "module": "fiados",
+            "giros": [
+              "abarrotes",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "credito_usado_actual",
+            "label": "Crédito usado",
+            "type": "number",
+            "module": "fiados",
+            "giros": [
+              "abarrotes",
+              "carniceria"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "credito_disponible",
+            "label": "Disponible",
+            "type": "number",
+            "module": "fiados",
+            "giros": [
+              "abarrotes",
+              "carniceria"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "dias_credito",
+            "label": "Días crédito",
+            "type": "number",
+            "module": "fiados",
+            "giros": [
+              "abarrotes",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "fecha_corte_fiado",
+            "label": "Fecha corte fiado",
+            "type": "text",
+            "module": "fiados",
+            "giros": [
+              "abarrotes",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "dia_pago_acordado",
+            "label": "Día pago acordado",
+            "type": "text",
+            "module": "fiados",
+            "giros": [
+              "abarrotes",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "penalizacion_atraso",
+            "label": "Penalización atraso",
+            "type": "number",
+            "module": "fiados",
+            "giros": [
+              "abarrotes",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "recordatorio_whatsapp_auto",
+            "label": "Recordatorio WA auto",
+            "type": "switch",
+            "module": "fiados",
+            "giros": [
+              "abarrotes",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "saldo_deudor_total",
+            "label": "Saldo deudor total",
+            "type": "number",
+            "module": "fiados",
+            "giros": [
+              "abarrotes",
+              "carniceria"
+            ],
+            "readonly": true
+          }
+        ],
+        "3.5 Historial": [
+          {
+            "name": "fecha_alta",
+            "label": "Fecha alta",
+            "type": "date",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "fecha_primer_compra",
+            "label": "Primera compra",
+            "type": "date",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "fecha_ultima_compra",
+            "label": "Última compra",
+            "type": "date",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "dias_desde_ultima_compra",
+            "label": "Días sin comprar",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "frecuencia_visitas_dias",
+            "label": "Frecuencia visitas (días)",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "total_compras_acumulado_pesos",
+            "label": "Total compras $",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "numero_compras_total",
+            "label": "N° compras",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ticket_promedio_pesos",
+            "label": "Ticket promedio",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ticket_mas_alto",
+            "label": "Ticket más alto",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "producto_mas_comprado",
+            "label": "Producto fav",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "categoria_favorita",
+            "label": "Categoría fav",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "estado_cliente",
+            "label": "Estado cliente",
+            "type": "select",
+            "module": "crm",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "activo",
+              "inactivo_30d",
+              "inactivo_60d",
+              "inactivo_90d",
+              "en_riesgo_churn"
+            ],
+            "readonly": true
+          }
+        ],
+        "3.6 Fiscal": [
+          {
+            "name": "rfc_personal_o_moral",
+            "label": "RFC",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "razon_social_fiscal",
+            "label": "Razón social",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "direccion_fiscal",
+            "label": "Dirección fiscal",
+            "type": "textarea",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "uso_cfdi_preferido",
+            "label": "Uso CFDI",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "regimen_fiscal",
+            "label": "Régimen fiscal",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "correo_recepcion_factura",
+            "label": "Email factura",
+            "type": "email",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "requiere_factura_siempre",
+            "label": "Requiere factura siempre",
+            "type": "switch",
+            "module": "fiscal",
+            "giros": [
+              "corporativo"
+            ]
+          }
+        ],
+        "3.7 Lealtad": [
+          {
+            "name": "puntos_acumulados_total",
+            "label": "Puntos acumulados",
+            "type": "number",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "puntos_disponibles_redimir",
+            "label": "Puntos disponibles",
+            "type": "number",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "nivel_lealtad",
+            "label": "Nivel lealtad",
+            "type": "select",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "bronce",
+              "plata",
+              "oro",
+              "platino",
+              "diamante"
+            ]
+          },
+          {
+            "name": "multiplicador_puntos",
+            "label": "Multiplicador",
+            "type": "number",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "cashback_acumulado_pesos",
+            "label": "Cashback acumulado $",
+            "type": "number",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "cashback_disponible",
+            "label": "Cashback disponible",
+            "type": "number",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "codigo_referido_personal",
+            "label": "Código referido",
+            "type": "text",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "referidos_traidos_count",
+            "label": "Referidos traídos",
+            "type": "number",
+            "module": "lealtad",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          }
+        ],
+        "3.8 Comunicación": [
+          {
+            "name": "prefiere_whatsapp",
+            "label": "Prefiere WhatsApp",
+            "type": "switch",
+            "module": "crm",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "prefiere_email",
+            "label": "Prefiere email",
+            "type": "switch",
+            "module": "crm",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "prefiere_sms",
+            "label": "Prefiere SMS",
+            "type": "switch",
+            "module": "crm",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_promociones_email",
+            "label": "Acepta promos email",
+            "type": "switch",
+            "module": "crm",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_promociones_whatsapp",
+            "label": "Acepta promos WA",
+            "type": "switch",
+            "module": "crm",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_recordatorios_citas",
+            "label": "Acepta recordatorios citas",
+            "type": "switch",
+            "module": "crm",
+            "giros": [
+              "barberia",
+              "medico",
+              "spa"
+            ]
+          },
+          {
+            "name": "ultimo_contacto_fecha",
+            "label": "Último contacto",
+            "type": "date",
+            "module": "crm",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "satisfaccion_ultima_nps",
+            "label": "NPS última",
+            "type": "number",
+            "module": "crm",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          }
+        ],
+        "3.9 Médico/Dental": [
+          {
+            "name": "expediente_medico_id",
+            "label": "Expediente ID",
+            "type": "text",
+            "module": "medico",
+            "giros": [
+              "medico",
+              "dental"
+            ]
+          },
+          {
+            "name": "historial_clinico",
+            "label": "Historial clínico",
+            "type": "textarea",
+            "module": "medico",
+            "giros": [
+              "medico",
+              "dental"
+            ]
+          },
+          {
+            "name": "alergias_conocidas",
+            "label": "Alergias",
+            "type": "textarea",
+            "module": "medico",
+            "giros": [
+              "medico",
+              "dental",
+              "veterinaria"
+            ]
+          },
+          {
+            "name": "padecimientos_cronicos",
+            "label": "Padecimientos crónicos",
+            "type": "textarea",
+            "module": "medico",
+            "giros": [
+              "medico"
+            ]
+          },
+          {
+            "name": "medicamentos_actuales",
+            "label": "Medicamentos actuales",
+            "type": "textarea",
+            "module": "medico",
+            "giros": [
+              "medico",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "tipo_sangre",
+            "label": "Tipo sangre",
+            "type": "select",
+            "module": "medico",
+            "giros": [
+              "medico",
+              "dental"
+            ],
+            "options": [
+              "A+",
+              "A-",
+              "B+",
+              "B-",
+              "AB+",
+              "AB-",
+              "O+",
+              "O-",
+              "desconocido"
+            ]
+          },
+          {
+            "name": "contacto_emergencia_nombre",
+            "label": "Contacto emergencia",
+            "type": "text",
+            "module": "medico",
+            "giros": [
+              "medico",
+              "dental",
+              "gym"
+            ]
+          },
+          {
+            "name": "contacto_emergencia_telefono",
+            "label": "Tel emergencia",
+            "type": "tel",
+            "module": "medico",
+            "giros": [
+              "medico",
+              "dental",
+              "gym"
+            ]
+          },
+          {
+            "name": "seguro_medico",
+            "label": "Seguro médico",
+            "type": "text",
+            "module": "medico",
+            "giros": [
+              "medico",
+              "dental"
+            ]
+          },
+          {
+            "name": "poliza_seguro",
+            "label": "Póliza",
+            "type": "text",
+            "module": "medico",
+            "giros": [
+              "medico",
+              "dental"
+            ]
+          }
+        ],
+        "3.10 Veterinaria": [
+          {
+            "name": "mascotas_sub_tabla",
+            "label": "Mascotas (sub-tabla)",
+            "type": "subtable",
+            "module": "veterinaria",
+            "giros": [
+              "veterinaria"
+            ]
+          }
+        ],
+        "3.11 Hotel": [
+          {
+            "name": "pasaporte_numero",
+            "label": "Pasaporte",
+            "type": "text",
+            "module": "hotel",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "ine_numero",
+            "label": "INE",
+            "type": "text",
+            "module": "hotel",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "nacionalidad",
+            "label": "Nacionalidad",
+            "type": "text",
+            "module": "hotel",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "preferencia_habitacion",
+            "label": "Preferencia habitación",
+            "type": "text",
+            "module": "hotel",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "restricciones_alimentarias",
+            "label": "Restricciones alimentarias",
+            "type": "text",
+            "module": "hotel",
+            "giros": [
+              "hotel",
+              "restaurante"
+            ]
+          }
+        ],
+        "3.12 Educación": [
+          {
+            "name": "nivel_escolar_actual",
+            "label": "Nivel escolar",
+            "type": "text",
+            "module": "educacion",
+            "giros": [
+              "escuela",
+              "academia"
+            ]
+          },
+          {
+            "name": "padre_tutor_nombre",
+            "label": "Padre/Tutor",
+            "type": "text",
+            "module": "educacion",
+            "giros": [
+              "escuela",
+              "kinder"
+            ]
+          },
+          {
+            "name": "padre_tutor_telefono",
+            "label": "Tel padre/tutor",
+            "type": "tel",
+            "module": "educacion",
+            "giros": [
+              "escuela",
+              "kinder"
+            ]
+          },
+          {
+            "name": "calificaciones_promedio",
+            "label": "Promedio",
+            "type": "number",
+            "module": "educacion",
+            "giros": [
+              "escuela"
+            ]
+          },
+          {
+            "name": "materias_inscritas",
+            "label": "Materias inscritas",
+            "type": "text",
+            "module": "educacion",
+            "giros": [
+              "academia"
+            ]
+          }
+        ],
+        "3.13 Gym": [
+          {
+            "name": "peso_actual_kg",
+            "label": "Peso (kg)",
+            "type": "number",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ]
+          },
+          {
+            "name": "estatura_cm",
+            "label": "Estatura (cm)",
+            "type": "number",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ]
+          },
+          {
+            "name": "objetivo_fitness",
+            "label": "Objetivo",
+            "type": "text",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ]
+          },
+          {
+            "name": "entrenador_asignado",
+            "label": "Entrenador",
+            "type": "text",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ]
+          },
+          {
+            "name": "clases_inscritas",
+            "label": "Clases inscritas",
+            "type": "text",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ]
+          },
+          {
+            "name": "horario_preferido_gym",
+            "label": "Horario preferido",
+            "type": "text",
+            "module": "gym",
+            "giros": [
+              "gym"
+            ]
+          }
+        ]
+      }
+    },
+    "empleados": {
+      "label": "Empleado",
+      "current_fields_keep": [
+        "nombre",
+        "telefono",
+        "email",
+        "rol"
+      ],
+      "sections": {
+        "4.1 Identidad": [
+          {
+            "name": "apellido_paterno",
+            "label": "Apellido paterno",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "apellido_materno",
+            "label": "Apellido materno",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "nombre_corto_ticket",
+            "label": "Nombre corto ticket",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "nick_o_apodo",
+            "label": "Nick/apodo",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "foto_perfil",
+            "label": "Foto",
+            "type": "file",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "fecha_nacimiento",
+            "label": "Fecha nacimiento",
+            "type": "date",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "genero",
+            "label": "Género",
+            "type": "select",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "masculino",
+              "femenino",
+              "no_binario"
+            ]
+          },
+          {
+            "name": "estado_civil",
+            "label": "Estado civil",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "nacionalidad",
+            "label": "Nacionalidad",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "curp",
+            "label": "CURP",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "rfc",
+            "label": "RFC",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "nss_imss",
+            "label": "NSS",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "4.2 Contacto": [
+          {
+            "name": "whatsapp",
+            "label": "WhatsApp",
+            "type": "tel",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "email_personal",
+            "label": "Email personal",
+            "type": "email",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "direccion_completa",
+            "label": "Dirección",
+            "type": "textarea",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "codigo_postal",
+            "label": "CP",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "ciudad",
+            "label": "Ciudad",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "contacto_emergencia_nombre",
+            "label": "Contacto emergencia",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "contacto_emergencia_parentesco",
+            "label": "Parentesco",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "contacto_emergencia_telefono",
+            "label": "Tel emergencia",
+            "type": "tel",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "4.3 Laboral": [
+          {
+            "name": "puesto",
+            "label": "Puesto",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "departamento",
+            "label": "Departamento",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "sucursal_asignada",
+            "label": "Sucursal asignada",
+            "type": "text",
+            "module": "multisucursal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "fecha_ingreso",
+            "label": "Fecha ingreso",
+            "type": "date",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "fecha_alta_imss",
+            "label": "Fecha alta IMSS",
+            "type": "date",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "antigüedad_meses",
+            "label": "Antigüedad (meses)",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "tipo_contrato",
+            "label": "Tipo contrato",
+            "type": "select",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "tiempo_indefinido",
+              "tiempo_determinado",
+              "obra_o_servicio",
+              "prueba",
+              "capacitacion",
+              "honorarios"
+            ]
+          },
+          {
+            "name": "fecha_termino_contrato",
+            "label": "Fecha término",
+            "type": "date",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "hora_entrada",
+            "label": "Hora entrada",
+            "type": "time",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "hora_salida",
+            "label": "Hora salida",
+            "type": "time",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "dias_laborales",
+            "label": "Días laborales",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "turnos_rotativos",
+            "label": "Turnos rotativos",
+            "type": "switch",
+            "module": "rh",
+            "giros": [
+              "restaurante",
+              "gas"
+            ]
+          }
+        ],
+        "4.4 Compensación": [
+          {
+            "name": "salario_base_mensual",
+            "label": "Salario base mensual",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "salario_base_diario",
+            "label": "Salario base diario",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "periodicidad_pago",
+            "label": "Periodicidad pago",
+            "type": "select",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "semanal",
+              "quincenal",
+              "mensual"
+            ]
+          },
+          {
+            "name": "metodo_pago_nomina",
+            "label": "Método pago nómina",
+            "type": "select",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "transferencia",
+              "efectivo",
+              "cheque"
+            ]
+          },
+          {
+            "name": "banco_nomina",
+            "label": "Banco nómina",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "clabe_nomina",
+            "label": "CLABE nómina",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "tiene_comisiones",
+            "label": "Tiene comisiones",
+            "type": "switch",
+            "module": "comisiones",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "esquema_comision_tipo",
+            "label": "Esquema comisión",
+            "type": "select",
+            "module": "comisiones",
+            "giros": [
+              "barberia",
+              "estetica",
+              "retail"
+            ],
+            "options": [
+              "porcentaje_sobre_venta",
+              "monto_fijo_por_venta",
+              "mixto_escalonado",
+              "por_objetivo_cumplido"
+            ]
+          },
+          {
+            "name": "porcentaje_comision",
+            "label": "Comisión %",
+            "type": "number",
+            "module": "comisiones",
+            "giros": [
+              "barberia",
+              "estetica",
+              "retail"
+            ]
+          },
+          {
+            "name": "monto_fijo_comision",
+            "label": "Comisión $",
+            "type": "number",
+            "module": "comisiones",
+            "giros": [
+              "barberia",
+              "estetica",
+              "retail"
+            ]
+          },
+          {
+            "name": "comision_solo_efectivo",
+            "label": "Comisión sólo efectivo",
+            "type": "switch",
+            "module": "comisiones",
+            "giros": [
+              "barberia",
+              "estetica"
+            ]
+          },
+          {
+            "name": "bono_cumpleaños",
+            "label": "Bono cumpleaños",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "bono_antigüedad",
+            "label": "Bono antigüedad",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "bono_productividad",
+            "label": "Bono productividad",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "dias_vacaciones_disponibles",
+            "label": "Vacaciones disponibles",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "dias_vacaciones_tomados_año",
+            "label": "Vacaciones tomadas",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          }
+        ],
+        "4.5 Permisos del sistema": [
+          {
+            "name": "rol_principal",
+            "label": "Rol principal",
+            "type": "select",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "administrador",
+              "gerente_sucursal",
+              "cajero",
+              "mesero",
+              "cocinero",
+              "barbero",
+              "estilista",
+              "despachador",
+              "vendedor",
+              "repartidor",
+              "bodeguero"
+            ]
+          },
+          {
+            "name": "puede_dar_descuento",
+            "label": "Puede dar descuento",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "descuento_maximo_permitido_porcentaje",
+            "label": "Descuento máx %",
+            "type": "number",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puede_cancelar_venta",
+            "label": "Puede cancelar venta",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puede_ver_costos",
+            "label": "Ve costos",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puede_ver_margenes",
+            "label": "Ve márgenes",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puede_modificar_inventario",
+            "label": "Modifica inventario",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puede_dar_alta_productos",
+            "label": "Alta productos",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puede_dar_alta_clientes",
+            "label": "Alta clientes",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puede_facturar",
+            "label": "Puede facturar",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puede_corte_caja",
+            "label": "Corte de caja",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puede_apertura_caja",
+            "label": "Apertura caja",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puede_ver_reportes",
+            "label": "Ve reportes",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puede_exportar_datos",
+            "label": "Exporta datos",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "puede_administrar_empleados",
+            "label": "Administra empleados",
+            "type": "switch",
+            "module": "permisos",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "4.6 Acceso": [
+          {
+            "name": "usuario_login",
+            "label": "Usuario login",
+            "type": "text",
+            "module": "auth",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "pin_personal",
+            "label": "PIN personal",
+            "type": "password",
+            "module": "auth",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "debe_cambiar_password",
+            "label": "Debe cambiar password",
+            "type": "switch",
+            "module": "auth",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "2fa_habilitado",
+            "label": "2FA habilitado",
+            "type": "switch",
+            "module": "auth",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "huella_dactilar_registrada",
+            "label": "Huella registrada",
+            "type": "switch",
+            "module": "biometria",
+            "giros": [
+              "gym",
+              "medico"
+            ]
+          },
+          {
+            "name": "horarios_acceso_permitidos",
+            "label": "Horarios acceso",
+            "type": "text",
+            "module": "auth",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "ultimo_login_fecha",
+            "label": "Último login",
+            "type": "datetime",
+            "module": "auth",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ultimo_login_ip",
+            "label": "IP último login",
+            "type": "text",
+            "module": "auth",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "bloqueado",
+            "label": "Bloqueado",
+            "type": "switch",
+            "module": "auth",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "4.7 Desempeño": [
+          {
+            "name": "ventas_dia_actual",
+            "label": "Ventas hoy",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ventas_semana_actual",
+            "label": "Ventas semana",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ventas_mes_actual",
+            "label": "Ventas mes",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "meta_ventas_mes",
+            "label": "Meta mes",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "porcentaje_cumplimiento_meta",
+            "label": "% cumplimiento meta",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "comisiones_acumuladas_periodo",
+            "label": "Comisiones periodo",
+            "type": "number",
+            "module": "comisiones",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ticket_promedio_vendedor",
+            "label": "Ticket promedio",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "clientes_atendidos_dia",
+            "label": "Clientes hoy",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "tiempo_promedio_servicio_minutos",
+            "label": "Tiempo prom servicio",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "barberia",
+              "medico",
+              "spa"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "asistencia_porcentaje",
+            "label": "Asistencia %",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "puntualidad_porcentaje",
+            "label": "Puntualidad %",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "faltas_injustificadas",
+            "label": "Faltas",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "retardos_count",
+            "label": "Retardos",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "horas_extra_mes",
+            "label": "Horas extra",
+            "type": "number",
+            "module": "rh",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          }
+        ],
+        "4.8 Documentos": [
+          {
+            "name": "ine_foto_frontal",
+            "label": "INE frontal",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "ine_foto_reverso",
+            "label": "INE reverso",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "comprobante_domicilio",
+            "label": "Comprobante domicilio",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acta_nacimiento",
+            "label": "Acta nacimiento",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "curp_oficial",
+            "label": "CURP oficial",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "contrato_laboral_firmado",
+            "label": "Contrato firmado",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "nda_firmado",
+            "label": "NDA",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "reglamento_interno_firmado",
+            "label": "Reglamento interno",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "examen_medico",
+            "label": "Examen médico",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "licencia_manejo",
+            "label": "Licencia manejo",
+            "type": "file",
+            "module": "documentos",
+            "giros": [
+              "repartidor",
+              "chofer"
+            ]
+          }
+        ]
+      }
+    },
+    "ventas": {
+      "label": "Venta / Carrito",
+      "current_fields_keep": [
+        "cliente",
+        "productos",
+        "total",
+        "metodo_pago"
+      ],
+      "sections": {
+        "5.1 Identificación venta": [
+          {
+            "name": "folio_venta_consecutivo",
+            "label": "Folio",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "serie_venta",
+            "label": "Serie",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "hora_venta",
+            "label": "Hora",
+            "type": "time",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "sucursal_id",
+            "label": "Sucursal",
+            "type": "select",
+            "module": "multisucursal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "caja_id",
+            "label": "Caja",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "turno_id",
+            "label": "Turno",
+            "type": "text",
+            "module": "rh",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "vendedor_asignado",
+            "label": "Vendedor",
+            "type": "text",
+            "module": "comisiones",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "mesero_asignado",
+            "label": "Mesero",
+            "type": "text",
+            "module": "cocina",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "mesa_numero",
+            "label": "Mesa N°",
+            "type": "text",
+            "module": "cocina",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "comanda_numero",
+            "label": "Comanda N°",
+            "type": "text",
+            "module": "cocina",
+            "giros": [
+              "restaurante"
+            ]
+          }
+        ],
+        "5.2 Cliente": [
+          {
+            "name": "cliente_es_anonimo",
+            "label": "Cliente anónimo",
+            "type": "switch",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "cliente_telefono_capturado",
+            "label": "Teléfono",
+            "type": "tel",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "cliente_email_capturado",
+            "label": "Email",
+            "type": "email",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "cliente_rfc_capturado",
+            "label": "RFC",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "es_nuevo_cliente",
+            "label": "Cliente nuevo",
+            "type": "switch",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "canal_origen_venta",
+            "label": "Canal",
+            "type": "select",
+            "module": "crm",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "presencial",
+              "whatsapp",
+              "llamada",
+              "delivery_propio",
+              "uber_eats",
+              "didi_food",
+              "rappi",
+              "ecommerce_propio"
+            ]
+          }
+        ],
+        "5.4 Totales y pagos": [
+          {
+            "name": "subtotal_sin_impuestos",
+            "label": "Subtotal",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "iva_total",
+            "label": "IVA",
+            "type": "number",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ieps_total",
+            "label": "IEPS",
+            "type": "number",
+            "module": "fiscal",
+            "giros": [
+              "abarrotes",
+              "bar"
+            ]
+          },
+          {
+            "name": "ish_total",
+            "label": "ISH",
+            "type": "number",
+            "module": "fiscal",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "descuento_general",
+            "label": "Descuento general",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "descuento_general_motivo",
+            "label": "Motivo descuento",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "propina_sugerida",
+            "label": "Propina sugerida",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "propina_efectiva",
+            "label": "Propina recibida",
+            "type": "number",
+            "module": "comisiones",
+            "giros": [
+              "restaurante",
+              "barberia"
+            ]
+          },
+          {
+            "name": "total_a_pagar",
+            "label": "Total a pagar",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "metodo_pago_principal",
+            "label": "Método pago",
+            "type": "select",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "efectivo",
+              "tarjeta_credito",
+              "tarjeta_debito",
+              "transferencia_spei",
+              "cheque",
+              "vales_despensa",
+              "oxxo",
+              "codi",
+              "mercado_pago",
+              "paypal",
+              "clip"
+            ]
+          },
+          {
+            "name": "es_pago_mixto",
+            "label": "Pago mixto",
+            "type": "switch",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "monto_recibido_efectivo",
+            "label": "Recibido efectivo",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "cambio_entregado",
+            "label": "Cambio",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "referencia_terminal",
+            "label": "Referencia terminal",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "autorizacion_bancaria",
+            "label": "Autorización",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "ultimos_4_tarjeta",
+            "label": "Últimos 4 tarjeta",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "5.5 Facturación": [
+          {
+            "name": "requiere_factura",
+            "label": "Requiere factura",
+            "type": "switch",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "uuid_factura",
+            "label": "UUID",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "folio_fiscal",
+            "label": "Folio fiscal",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "estado_factura",
+            "label": "Estado factura",
+            "type": "select",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "pendiente",
+              "emitida",
+              "cancelada",
+              "rechazada"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "xml_url",
+            "label": "XML",
+            "type": "url",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "pdf_url",
+            "label": "PDF",
+            "type": "url",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "metodo_pago_factura",
+            "label": "MP factura",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "forma_pago_factura",
+            "label": "FP factura",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "uso_cfdi",
+            "label": "Uso CFDI",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "5.6 Estado": [
+          {
+            "name": "estado_venta",
+            "label": "Estado",
+            "type": "select",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "cotizacion",
+              "reservada",
+              "pendiente_pago",
+              "parcialmente_pagada",
+              "pagada",
+              "facturada",
+              "entregada",
+              "cancelada",
+              "devuelta_parcial",
+              "devuelta_total"
+            ]
+          },
+          {
+            "name": "es_fiado",
+            "label": "Es fiado",
+            "type": "switch",
+            "module": "fiados",
+            "giros": [
+              "abarrotes",
+              "carniceria",
+              "papeleria"
+            ]
+          },
+          {
+            "name": "fecha_promesa_pago_fiado",
+            "label": "Promesa pago fiado",
+            "type": "date",
+            "module": "fiados",
+            "giros": [
+              "abarrotes",
+              "carniceria"
+            ]
+          },
+          {
+            "name": "es_cotizacion",
+            "label": "Es cotización",
+            "type": "switch",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "vigencia_cotizacion_dias",
+            "label": "Vigencia cotización (días)",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "es_pedido_anticipo",
+            "label": "Pedido con anticipo",
+            "type": "switch",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "porcentaje_anticipo_pagado",
+            "label": "% anticipo pagado",
+            "type": "number",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "notas_internas_venta",
+            "label": "Notas internas",
+            "type": "textarea",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "firma_cliente_recibida",
+            "label": "Firma cliente recibida",
+            "type": "switch",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "ticket_impreso",
+            "label": "Ticket impreso",
+            "type": "switch",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ticket_enviado_email",
+            "label": "Ticket enviado email",
+            "type": "switch",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "ticket_enviado_whatsapp",
+            "label": "Ticket enviado WA",
+            "type": "switch",
+            "module": "base",
+            "giros": [
+              "*"
+            ],
+            "readonly": true
+          }
+        ],
+        "5.7 Delivery": [
+          {
+            "name": "es_para_delivery",
+            "label": "Es delivery",
+            "type": "switch",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia",
+              "abarrotes"
+            ]
+          },
+          {
+            "name": "direccion_entrega",
+            "label": "Dirección entrega",
+            "type": "textarea",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "zona_reparto",
+            "label": "Zona reparto",
+            "type": "text",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "costo_envio",
+            "label": "Costo envío",
+            "type": "number",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "repartidor_asignado",
+            "label": "Repartidor",
+            "type": "text",
+            "module": "delivery",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "hora_promesa_entrega",
+            "label": "Hora promesa",
+            "type": "datetime",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "hora_real_entrega",
+            "label": "Hora real entrega",
+            "type": "datetime",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "tracking_url",
+            "label": "Tracking URL",
+            "type": "url",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ],
+            "readonly": true
+          },
+          {
+            "name": "firma_recibido",
+            "label": "Firma recibido",
+            "type": "switch",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "foto_evidencia_entrega",
+            "label": "Foto evidencia",
+            "type": "file",
+            "module": "delivery",
+            "giros": [
+              "restaurante",
+              "farmacia"
+            ]
+          }
+        ]
+      }
+    },
+    "configuracion": {
+      "label": "Configuración del negocio",
+      "current_fields_keep": [
+        "nombre_negocio",
+        "giro",
+        "rfc"
+      ],
+      "sections": {
+        "6.1 Datos negocio": [
+          {
+            "name": "nombre_comercial",
+            "label": "Nombre comercial",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "razon_social",
+            "label": "Razón social",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "rfc_negocio",
+            "label": "RFC",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "regimen_fiscal",
+            "label": "Régimen fiscal",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "giros_secundarios",
+            "label": "Giros secundarios",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "logo_principal",
+            "label": "Logo principal",
+            "type": "file",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "logo_ticket",
+            "label": "Logo ticket",
+            "type": "file",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "favicon",
+            "label": "Favicon",
+            "type": "file",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "colores_marca_primario",
+            "label": "Color primario",
+            "type": "color",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "colores_marca_secundario",
+            "label": "Color secundario",
+            "type": "color",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "descripcion_negocio",
+            "label": "Descripción",
+            "type": "textarea",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "horario_apertura",
+            "label": "Apertura",
+            "type": "time",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "horario_cierre",
+            "label": "Cierre",
+            "type": "time",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "dias_laborales",
+            "label": "Días laborales",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "zona_horaria",
+            "label": "Zona horaria",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "moneda_principal",
+            "label": "Moneda",
+            "type": "select",
+            "module": "multimoneda",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "MXN",
+              "USD",
+              "EUR"
+            ]
+          },
+          {
+            "name": "idioma_principal",
+            "label": "Idioma",
+            "type": "select",
+            "module": "multilang",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "es-MX",
+              "en-US",
+              "fr-FR"
+            ]
+          }
+        ],
+        "6.2 Ubicación y contacto": [
+          {
+            "name": "direccion_principal",
+            "label": "Dirección",
+            "type": "textarea",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "gps_coordenadas",
+            "label": "GPS",
+            "type": "text",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "telefono_negocio",
+            "label": "Tel negocio",
+            "type": "tel",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "whatsapp_business",
+            "label": "WhatsApp Business",
+            "type": "tel",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "email_negocio",
+            "label": "Email",
+            "type": "email",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "sitio_web",
+            "label": "Sitio web",
+            "type": "url",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "facebook_url",
+            "label": "Facebook",
+            "type": "url",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "instagram_url",
+            "label": "Instagram",
+            "type": "url",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "tiktok_url",
+            "label": "TikTok",
+            "type": "url",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "google_my_business_url",
+            "label": "Google My Business",
+            "type": "url",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "6.3 Sucursales": [
+          {
+            "name": "es_multi_sucursal",
+            "label": "Multi-sucursal",
+            "type": "switch",
+            "module": "multisucursal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "sucursal_matriz_id",
+            "label": "Sucursal matriz",
+            "type": "text",
+            "module": "multisucursal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "sucursales_sub_tabla",
+            "label": "Sucursales",
+            "type": "subtable",
+            "module": "multisucursal",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "6.4 Módulos activos": [
+          {
+            "name": "modulos_activos_lista",
+            "label": "Módulos activos",
+            "type": "multi_module_switches",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "modulos_inactivos_lista",
+            "label": "Módulos inactivos",
+            "type": "multi_module_switches",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "6.5 Terminologías por giro": [
+          {
+            "name": "terminologias_overrides",
+            "label": "Terminologías custom",
+            "type": "terminology_grid",
+            "module": "base",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "6.6 Fiscal e impuestos": [
+          {
+            "name": "iva_default_porcentaje",
+            "label": "IVA default %",
+            "type": "select",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "0",
+              "8",
+              "16",
+              "exento"
+            ]
+          },
+          {
+            "name": "ieps_aplica",
+            "label": "IEPS aplica",
+            "type": "switch",
+            "module": "fiscal",
+            "giros": [
+              "abarrotes",
+              "bar"
+            ]
+          },
+          {
+            "name": "ieps_porcentaje_default",
+            "label": "IEPS %",
+            "type": "number",
+            "module": "fiscal",
+            "giros": [
+              "abarrotes",
+              "bar"
+            ]
+          },
+          {
+            "name": "ish_aplica",
+            "label": "ISH aplica",
+            "type": "switch",
+            "module": "fiscal",
+            "giros": [
+              "hotel"
+            ]
+          },
+          {
+            "name": "es_responsable_factura_electronica",
+            "label": "Factura electrónica",
+            "type": "switch",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "proveedor_pac",
+            "label": "Proveedor PAC",
+            "type": "select",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ],
+            "options": [
+              "Facturama",
+              "SW",
+              "Solución Factible",
+              "Otro"
+            ]
+          },
+          {
+            "name": "serie_facturas",
+            "label": "Serie facturas",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "folio_inicial",
+            "label": "Folio inicial",
+            "type": "number",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "clave_uso_cfdi_default",
+            "label": "Uso CFDI default",
+            "type": "text",
+            "module": "fiscal",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "6.7 Métodos pago": [
+          {
+            "name": "acepta_efectivo",
+            "label": "Efectivo",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_tarjeta_credito",
+            "label": "Tarjeta crédito",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_tarjeta_debito",
+            "label": "Tarjeta débito",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_transferencia",
+            "label": "Transferencia",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_codi",
+            "label": "CoDi",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_mercado_pago",
+            "label": "Mercado Pago",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_clip",
+            "label": "Clip",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_oxxo",
+            "label": "OXXO",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_vales_despensa",
+            "label": "Vales despensa",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "acepta_vales_gasolina",
+            "label": "Vales gasolina",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "gas"
+            ]
+          },
+          {
+            "name": "acepta_cheque",
+            "label": "Cheque",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "corporativo"
+            ]
+          },
+          {
+            "name": "acepta_dolares",
+            "label": "Dólares",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "hotel",
+              "turismo"
+            ]
+          },
+          {
+            "name": "acepta_paypal",
+            "label": "PayPal",
+            "type": "switch",
+            "module": "pagos",
+            "giros": [
+              "ecommerce"
+            ]
+          }
+        ],
+        "6.8 Integraciones": [
+          {
+            "name": "whatsapp_business_api",
+            "label": "WhatsApp Business API",
+            "type": "text",
+            "module": "integracion",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "facebook_pixel_id",
+            "label": "Facebook Pixel ID",
+            "type": "text",
+            "module": "integracion",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "google_analytics_id",
+            "label": "Google Analytics ID",
+            "type": "text",
+            "module": "integracion",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "stripe_publishable_key",
+            "label": "Stripe public key",
+            "type": "text",
+            "module": "integracion",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "mercado_pago_access_token",
+            "label": "Mercado Pago token",
+            "type": "password",
+            "module": "integracion",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "uber_eats_merchant_id",
+            "label": "Uber Eats merchant",
+            "type": "text",
+            "module": "integracion",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "didi_food_merchant_id",
+            "label": "DiDi Food merchant",
+            "type": "text",
+            "module": "integracion",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "rappi_merchant_id",
+            "label": "Rappi merchant",
+            "type": "text",
+            "module": "integracion",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "zapier_webhook",
+            "label": "Zapier webhook",
+            "type": "url",
+            "module": "integracion",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "make_webhook",
+            "label": "Make webhook",
+            "type": "url",
+            "module": "integracion",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "telegram_bot_token",
+            "label": "Telegram bot",
+            "type": "password",
+            "module": "integracion",
+            "giros": [
+              "*"
+            ]
+          }
+        ],
+        "6.9 Hardware": [
+          {
+            "name": "impresora_ticket_principal",
+            "label": "Impresora ticket principal",
+            "type": "text",
+            "module": "hardware",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "impresora_cocina_1",
+            "label": "Impresora cocina 1",
+            "type": "text",
+            "module": "hardware",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "impresora_cocina_2",
+            "label": "Impresora cocina 2",
+            "type": "text",
+            "module": "hardware",
+            "giros": [
+              "restaurante"
+            ]
+          },
+          {
+            "name": "impresora_etiquetas",
+            "label": "Impresora etiquetas",
+            "type": "text",
+            "module": "hardware",
+            "giros": [
+              "abarrotes",
+              "farmacia"
+            ]
+          },
+          {
+            "name": "caja_dinero_modelo",
+            "label": "Caja dinero modelo",
+            "type": "text",
+            "module": "hardware",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "basculas_conectadas",
+            "label": "Básculas",
+            "type": "text",
+            "module": "hardware",
+            "giros": [
+              "carniceria",
+              "abarrotes"
+            ]
+          },
+          {
+            "name": "lectores_codigo_barras",
+            "label": "Lectores código barras",
+            "type": "text",
+            "module": "hardware",
+            "giros": [
+              "*"
+            ]
+          },
+          {
+            "name": "lectores_huella",
+            "label": "Lectores huella",
+            "type": "text",
+            "module": "hardware",
+            "giros": [
+              "gym",
+              "medico"
+            ]
+          },
+          {
+            "name": "pantallas_cocina_kds",
+            "label": "Pantallas KDS",
+            "type": "text",
+            "module": "hardware",
+            "giros": [
+              "restaurante"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

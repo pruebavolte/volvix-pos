@@ -212,19 +212,199 @@
     console.log('[applyGiroConfig] Reset completo');
   }
 
+  // ════════════════════════════════════════════════════════════
+  // V1.1 — Render dinámico de campos desde modal-fields-catalog.json
+  // Inyecta en <div data-vlx-dynamic-fields="MODAL_NAME"></div>
+  // los campos cuyo data-module está activo Y cuyo data-giros incluye el giro actual.
+  // ════════════════════════════════════════════════════════════
+
+  let _catalogCache = null;
+
+  async function loadFieldsCatalog() {
+    if (_catalogCache) return _catalogCache;
+    try {
+      const resp = await fetch('/data/modal-fields-catalog.json?v=' + Date.now(), { cache: 'no-cache' });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      _catalogCache = await resp.json();
+      return _catalogCache;
+    } catch (err) {
+      console.warn('[applyGiroConfig] No se pudo cargar catalog:', err.message);
+      return null;
+    }
+  }
+
+  function fieldVisibleForGiro(field, giroSlug, activeModules, inactiveModules) {
+    // Filtro 1: módulo activo
+    const mod = field.module || 'base';
+    if (mod !== 'base' && inactiveModules.has(mod)) return false;
+    if (mod !== 'base' && activeModules.size > 0 && !activeModules.has(mod)) return false;
+    // Filtro 2: giros incluye este giro O wildcard
+    const giros = field.giros || ['*'];
+    if (giros.indexOf('*') >= 0) return true;
+    if (giros.indexOf(giroSlug) >= 0) return true;
+    return false;
+  }
+
+  function escapeAttr(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  }
+
+  function renderField(field) {
+    const id = 'vlx-fld-' + field.name;
+    const label = escapeAttr(field.label || field.name);
+    const giros = (field.giros || ['*']).join(',');
+    const readonly = field.readonly ? ' readonly' : '';
+    let input;
+
+    switch (field.type) {
+      case 'switch':
+        input = `<input type="checkbox" id="${id}" name="${field.name}" class="vlx-switch"${readonly} />`;
+        break;
+      case 'textarea':
+        input = `<textarea id="${id}" name="${field.name}"${readonly} placeholder="${label}"></textarea>`;
+        break;
+      case 'select': {
+        const opts = (field.options || []).map(o => `<option value="${escapeAttr(o)}">${escapeAttr(o)}</option>`).join('');
+        input = `<select id="${id}" name="${field.name}"${readonly}><option value="">— elegir —</option>${opts}</select>`;
+        break;
+      }
+      case 'number':
+        input = `<input type="number" id="${id}" name="${field.name}" step="any"${readonly} />`;
+        break;
+      case 'date':
+        input = `<input type="date" id="${id}" name="${field.name}"${readonly} />`;
+        break;
+      case 'time':
+        input = `<input type="time" id="${id}" name="${field.name}"${readonly} />`;
+        break;
+      case 'datetime':
+        input = `<input type="datetime-local" id="${id}" name="${field.name}"${readonly} />`;
+        break;
+      case 'email':
+        input = `<input type="email" id="${id}" name="${field.name}"${readonly} />`;
+        break;
+      case 'tel':
+        input = `<input type="tel" id="${id}" name="${field.name}"${readonly} />`;
+        break;
+      case 'url':
+        input = `<input type="url" id="${id}" name="${field.name}"${readonly} />`;
+        break;
+      case 'color':
+        input = `<input type="color" id="${id}" name="${field.name}"${readonly} />`;
+        break;
+      case 'password':
+        input = `<input type="password" id="${id}" name="${field.name}"${readonly} />`;
+        break;
+      case 'file':
+        input = `<input type="file" id="${id}" name="${field.name}"${readonly} />`;
+        break;
+      case 'file_multi':
+        input = `<input type="file" id="${id}" name="${field.name}" multiple${readonly} />`;
+        break;
+      case 'rating':
+        input = `<input type="number" id="${id}" name="${field.name}" min="1" max="5" step="1"${readonly} />`;
+        break;
+      case 'subtable':
+        input = `<div class="vlx-subtable" id="${id}" data-name="${field.name}" data-readonly="${readonly ? '1' : '0'}"><em>(sub-tabla)</em></div>`;
+        break;
+      case 'multi_module_switches':
+        input = `<div class="vlx-multi-module-switches" id="${id}" data-name="${field.name}"></div>`;
+        break;
+      case 'terminology_grid':
+        input = `<div class="vlx-terminology-grid" id="${id}" data-name="${field.name}"></div>`;
+        break;
+      default:
+        input = `<input type="text" id="${id}" name="${field.name}"${readonly} />`;
+    }
+
+    return `<div class="vlx-field" data-module="${escapeAttr(field.module || 'base')}" data-giros="${escapeAttr(giros)}">` +
+           `<label for="${id}">${label}${field.readonly ? ' <em>(auto)</em>' : ''}</label>` +
+           input + `</div>`;
+  }
+
+  async function renderDynamicFieldsForModal(container, modalName, giroSlug) {
+    if (!container || !modalName || !giroSlug) return { rendered: 0 };
+    const catalog = await loadFieldsCatalog();
+    if (!catalog || !catalog.modals || !catalog.modals[modalName]) {
+      console.warn('[applyGiroConfig] Modal no en catalog:', modalName);
+      return { rendered: 0 };
+    }
+    const terminologias = await loadTerminologias();
+    const giroCfg = resolveGiroConfig(terminologias, giroSlug);
+    const activeModules = new Set((giroCfg && giroCfg.modulos_activos) || []);
+    const inactiveModules = new Set((giroCfg && giroCfg.modulos_inactivos) || []);
+    activeModules.add('base'); // base siempre activo
+
+    const modal = catalog.modals[modalName];
+    const sections = modal.sections || {};
+    let html = '';
+    let total = 0;
+    let visible = 0;
+
+    for (const sectionTitle of Object.keys(sections)) {
+      const fields = sections[sectionTitle];
+      const visibleFields = fields.filter(f => fieldVisibleForGiro(f, giroSlug, activeModules, inactiveModules));
+      total += fields.length;
+      visible += visibleFields.length;
+      if (visibleFields.length === 0) continue;
+      html += `<fieldset class="vlx-section" data-section="${escapeAttr(sectionTitle)}">` +
+              `<legend>${escapeAttr(sectionTitle)}</legend>` +
+              visibleFields.map(renderField).join('') +
+              `</fieldset>`;
+    }
+
+    container.innerHTML = html;
+    container.setAttribute('data-vlx-rendered-modal', modalName);
+    container.setAttribute('data-vlx-rendered-giro', giroSlug);
+    container.setAttribute('data-vlx-rendered-fields', String(visible));
+    container.setAttribute('data-vlx-total-fields', String(total));
+
+    console.log(`[applyGiroConfig] renderModal=${modalName} giro=${giroSlug} visible=${visible}/${total}`);
+    return { rendered: visible, total: total };
+  }
+
+  // Auto-render: cada <div data-vlx-dynamic-fields="MODAL_NAME"> visible.
+  async function renderAllDynamicContainers(giroSlug) {
+    if (!giroSlug) return;
+    const containers = document.querySelectorAll('[data-vlx-dynamic-fields]');
+    const results = [];
+    for (const c of containers) {
+      const modal = c.getAttribute('data-vlx-dynamic-fields');
+      if (!modal) continue;
+      const r = await renderDynamicFieldsForModal(c, modal, giroSlug);
+      results.push({ modal, ...r });
+    }
+    return results;
+  }
+
   // Exponer públicamente
   window.applyGiroConfig = applyGiroConfig;
   window.listGirosDisponibles = listGirosDisponibles;
   window.getGiroConfig = getGiroConfig;
   window.resetGiroConfig = resetGiroConfig;
+  window.vlxRenderDynamicFields = renderDynamicFieldsForModal;
+  window.vlxRenderAllDynamicContainers = renderAllDynamicContainers;
+  window.vlxLoadFieldsCatalog = loadFieldsCatalog;
   window.vlxSchemaDrivenUI = {
     apply: applyGiroConfig,
     list: listGirosDisponibles,
     get: getGiroConfig,
     reset: resetGiroConfig,
+    renderModal: renderDynamicFieldsForModal,
+    renderAll: renderAllDynamicContainers,
+    catalog: loadFieldsCatalog,
     activeGiro: () => _activeGiroSlug,
-    version: '1.0'
+    version: '1.1'
   };
+
+  // Cuando applyGiroConfig se ejecute, auto-renderizar containers dinámicos
+  window.addEventListener('vlx:giro-applied', function(e) {
+    if (e && e.detail && e.detail.giroSlug) {
+      renderAllDynamicContainers(e.detail.giroSlug).catch(err => {
+        console.warn('[applyGiroConfig] renderAllDynamicContainers fail:', err.message);
+      });
+    }
+  });
 
   // Auto-apply si hay data-vlx-auto-giro en body
   document.addEventListener('DOMContentLoaded', function() {

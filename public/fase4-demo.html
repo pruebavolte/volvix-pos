@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fase 4 Demo · Motor schema-driven multi-giro · Volvix</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0f1419; color: #e8eef5; }
+  header { background: #1a2030; padding: 14px 24px; border-bottom: 1px solid #2a3245; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: 18px; color: #6cb6ff; }
+  h1 small { color: #8aa0bb; font-weight: 400; margin-left: 8px; font-size: 13px; }
+  .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .toolbar label { font-size: 12px; color: #8aa0bb; }
+  select, button { background: #232a3a; border: 1px solid #3a4458; color: #e8eef5; padding: 6px 12px; border-radius: 6px; font-size: 13px; }
+  select:focus, button:hover { border-color: #6cb6ff; outline: none; }
+  button { cursor: pointer; }
+  .tabs { display: flex; gap: 0; background: #1a2030; padding: 0 24px; border-bottom: 1px solid #2a3245; overflow-x: auto; }
+  .tab { padding: 12px 18px; cursor: pointer; border: none; background: transparent; color: #8aa0bb; font-size: 13px; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tab.active { color: #6cb6ff; border-bottom-color: #6cb6ff; }
+  .tab:hover { color: #b6cce5; }
+  main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+  .modal-info { background: #1a2030; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; border-left: 3px solid #6cb6ff; font-size: 13px; }
+  .modal-info b { color: #8fd0a0; }
+  .modal-info .stats { color: #fdb45c; font-weight: 600; margin-left: 8px; }
+  .modal-info .terms { margin-top: 6px; color: #c8b5ff; font-size: 12px; font-style: italic; }
+  .modal-panel { background: #131a26; border: 1px solid #2a3245; border-radius: 10px; padding: 16px; }
+  .modal-panel[hidden] { display: none; }
+  fieldset.vlx-section { border: 1px solid #2a3245; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; background: #0f1419; }
+  fieldset.vlx-section legend { color: #6cb6ff; font-size: 13px; font-weight: 600; padding: 0 8px; }
+  .vlx-field { display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px; align-items: center; padding: 4px 0; min-height: 32px; }
+  .vlx-field label { font-size: 12px; color: #a5b3c7; }
+  .vlx-field label em { color: #fdb45c; font-style: normal; font-size: 10px; }
+  .vlx-field input, .vlx-field select, .vlx-field textarea { background: #232a3a; border: 1px solid #3a4458; color: #e8eef5; padding: 6px 10px; border-radius: 4px; font-size: 12px; width: 100%; }
+  .vlx-field input[type=checkbox] { width: auto; }
+  .vlx-field input[type=color] { width: 40px; height: 30px; padding: 0; }
+  .vlx-field textarea { min-height: 50px; resize: vertical; }
+  .vlx-field input[readonly], .vlx-field select[readonly], .vlx-field textarea[readonly] { opacity: 0.7; background: #1a2030; }
+  .vlx-subtable, .vlx-multi-module-switches, .vlx-terminology-grid { background: #1a2030; border: 1px dashed #3a4458; padding: 8px; border-radius: 4px; color: #8aa0bb; font-size: 11px; font-style: italic; }
+  .vlx-dynamic-container { min-height: 100px; }
+  .empty-hint { text-align: center; color: #5a6478; font-style: italic; padding: 30px; }
+  .footer { padding: 16px 24px; color: #5a6478; font-size: 11px; border-top: 1px solid #2a3245; margin-top: 30px; }
+  code { background: #232a3a; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #fdb45c; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🧬 Fase 4 Demo <small>motor schema-driven · 677 campos · 6 modales · 30+ giros</small></h1>
+  <div class="toolbar">
+    <label>Giro activo:</label>
+    <select id="giroSelector">
+      <option value="default">— Genérico —</option>
+    </select>
+    <button onclick="aplicarGiro()">Aplicar</button>
+    <button onclick="resetAll()" style="background:#3a2a2a;border-color:#5a3a3a">Reset</button>
+  </div>
+</header>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" data-modal="productos">Productos / Servicios</button>
+  <button class="tab" data-modal="proveedores">Proveedores</button>
+  <button class="tab" data-modal="clientes">Clientes</button>
+  <button class="tab" data-modal="empleados">Empleados</button>
+  <button class="tab" data-modal="ventas">Ventas / Carrito</button>
+  <button class="tab" data-modal="configuracion">Configuración negocio</button>
+</div>
+
+<main>
+  <div class="modal-info" id="modalInfo">
+    Selecciona un giro arriba y presiona <b>Aplicar</b> para ver los campos relevantes a ese giro.
+  </div>
+
+  <div class="modal-panel" id="panel-productos">
+    <div data-vlx-dynamic-fields="productos" class="vlx-dynamic-container">
+      <div class="empty-hint">Aplica un giro para ver los campos del modal <code>productos</code>.</div>
+    </div>
+  </div>
+  <div class="modal-panel" id="panel-proveedores" hidden>
+    <div data-vlx-dynamic-fields="proveedores" class="vlx-dynamic-container">
+      <div class="empty-hint">Aplica un giro para ver los campos del modal <code>proveedores</code>.</div>
+    </div>
+  </div>
+  <div class="modal-panel" id="panel-clientes" hidden>
+    <div data-vlx-dynamic-fields="clientes" class="vlx-dynamic-container">
+      <div class="empty-hint">Aplica un giro para ver los campos del modal <code>clientes</code>.</div>
+    </div>
+  </div>
+  <div class="modal-panel" id="panel-empleados" hidden>
+    <div data-vlx-dynamic-fields="empleados" class="vlx-dynamic-container">
+      <div class="empty-hint">Aplica un giro para ver los campos del modal <code>empleados</code>.</div>
+    </div>
+  </div>
+  <div class="modal-panel" id="panel-ventas" hidden>
+    <div data-vlx-dynamic-fields="ventas" class="vlx-dynamic-container">
+      <div class="empty-hint">Aplica un giro para ver los campos del modal <code>ventas</code>.</div>
+    </div>
+  </div>
+  <div class="modal-panel" id="panel-configuracion" hidden>
+    <div data-vlx-dynamic-fields="configuracion" class="vlx-dynamic-container">
+      <div class="empty-hint">Aplica un giro para ver los campos del modal <code>configuracion</code>.</div>
+    </div>
+  </div>
+</main>
+
+<div class="footer">
+  <b>Filosofía:</b> Un solo sistema operativo que se configura — no se programa — para cada giro.
+  Activamos lo que el dueño ocupa, ocultamos lo que le estorba, y le hablamos en su idioma.
+  &nbsp;|&nbsp; Fuente única: <code>/data/modal-fields-catalog.json</code> + <code>/data/giros-terminologias.json</code>
+  &nbsp;|&nbsp; Motor: <code>/js/applyGiroConfig.js v1.1</code>
+</div>
+
+<script src="/js/applyGiroConfig.js"></script>
+<script>
+(function(){
+  // Tabs
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.modal-panel');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const modal = t.getAttribute('data-modal');
+    panels.forEach(p => p.hidden = p.id !== 'panel-' + modal);
+  }));
+
+  // Populate giro selector
+  document.addEventListener('DOMContentLoaded', async function(){
+    try {
+      const list = await window.listGirosDisponibles();
+      const sel = document.getElementById('giroSelector');
+      const labels = {
+        navaja:'navaja (Barbería)', comandero:'comandero (Restaurante)', tendito:'tendito (Abarrotes)',
+        receta:'receta (Farmacia)', pulso:'pulso (Clínica/Dental)', pata:'pata (Veterinaria)',
+        folio:'folio (Hotel)', forja:'forja (Taller)', tarima:'tarima (Bar/Vinatería)',
+        brillo:'brillo (Estética)', gateo:'gateo (Guardería)', burbuja:'burbuja (Lavandería)',
+        pareo:'pareo (Boutique)', almohada:'almohada (Mueblería)', tictac:'tictac (Relojería)',
+        armazon:'armazon (Óptica)', mochila:'mochila (Bebés)', discreto:'discreto (Sexshop)',
+        comedor:'comedor (Fonda)', consome:'consome (Sopas)', nieve:'nieve (Helados)',
+        merengue:'merengue (Repostería)', restaurante:'restaurante', cafeteria:'cafeteria', taqueria:'taqueria'
+      };
+      list.forEach(slug => {
+        const opt = document.createElement('option');
+        opt.value = slug;
+        opt.textContent = labels[slug] || slug;
+        sel.appendChild(opt);
+      });
+
+      // URL ?giro=
+      const u = new URL(window.location.href);
+      const initialGiro = u.searchParams.get('giro');
+      if (initialGiro) { sel.value = initialGiro; aplicarGiro(); }
+    } catch (e) {
+      console.error('Error populating selector:', e);
+    }
+  });
+
+  window.aplicarGiro = async function(){
+    const slug = document.getElementById('giroSelector').value;
+    if (!slug) return;
+    await window.applyGiroConfig(slug);
+    // El event vlx:giro-applied dispara renderAllDynamicContainers automáticamente.
+    // Esperamos un tick para que termine y actualizamos info.
+    setTimeout(updateInfo, 200);
+  };
+
+  function updateInfo(){
+    const slug = document.body.getAttribute('data-vlx-active-giro');
+    const info = document.getElementById('modalInfo');
+    if (!slug) { info.textContent = 'Sin giro activo.'; return; }
+    const containers = document.querySelectorAll('[data-vlx-dynamic-fields]');
+    let totalVisible = 0;
+    let totalAll = 0;
+    const byModal = [];
+    containers.forEach(c => {
+      const modal = c.getAttribute('data-vlx-dynamic-fields');
+      const visible = parseInt(c.getAttribute('data-vlx-rendered-fields') || '0', 10);
+      const total = parseInt(c.getAttribute('data-vlx-total-fields') || '0', 10);
+      totalVisible += visible;
+      totalAll += total;
+      byModal.push({ modal, visible, total });
+    });
+    window.getGiroConfig(slug).then(cfg => {
+      const terms = cfg && cfg.terminologias ? cfg.terminologias : {};
+      const termsList = Object.entries(terms).map(([k,v]) => `${k}→${v}`).join(', ');
+      info.innerHTML =
+        `Giro activo: <b>${slug}</b> · Total campos visibles: <span class="stats">${totalVisible}/${totalAll}</span> · ` +
+        byModal.map(b => `<code>${b.modal}: ${b.visible}/${b.total}</code>`).join(' ') +
+        `<div class="terms"><b>Terminologías:</b> ${termsList || '(default)'}</div>`;
+    });
+  }
+
+  window.resetAll = function(){
+    window.resetGiroConfig();
+    document.getElementById('giroSelector').value = 'default';
+    document.querySelectorAll('[data-vlx-dynamic-fields]').forEach(c => {
+      c.innerHTML = '<div class="empty-hint">Aplica un giro para ver los campos.</div>';
+    });
+    document.getElementById('modalInfo').textContent = 'Sin giro activo.';
+  };
+})();
+</script>
+</body>
+</html>
