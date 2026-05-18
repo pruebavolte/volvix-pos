@@ -1,17 +1,19 @@
 {
-  "version": "1.0.365",
+  "version": "1.0.366",
   "major": 1,
   "minor": 0,
-  "patch": 365,
+  "patch": 366,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-18T10:30:00.000Z",
-  "built_at": "2026-05-18T10:30:00.000Z",
+  "date": "2026-05-18T10:50:00.000Z",
+  "built_at": "2026-05-18T10:50:00.000Z",
   "changelog": [
-    "V9.0.4+V9.0.5 PRE-PITCH FIX MASIVO: (1) Widget booking ahora soporta estructura ALT (slots con name/available, sin barberos) — arregla render de merengue/burbuja/y similares. Aplicado a 206 HTMLs. (2) PLAIN_TO_PREMIUM extendido con 50 mappings nuevos para que el backend NO sirva templates planos: taquería→comandero, dental→pulso, veterinaria→pata, abarrotes→tendito, lavandería→burbuja, vapeshop→discreto, lencería→discreto, y muchos más.",
-    "V9.0.3: parche surgical 10 HTMLs faltantes del widget booking",
-    "V9.0.2: widget booking + 8 HARD_EXCEPTIONS",
-    "V9.0.1: HARD_EXCEPTIONS al inicio de resolve()",
-    "V8.9 BUG CRITICAL: backend api/giros.js servía templates planos"
+    "V9.0.6 RESILIENT WIDGETS: wrap try/catch en renderLiveDemo en 206 HTMLs. Si un widget (stock/kds/booking/expiry/fiado) crashea por estructura de data no esperada, el render NO se rompe — solo el widget muestra mensaje fallback. Arregla mezcla.html, burbuja.html (175 chars→completo), y cualquier marca futura con liveDemo incompatible.",
+    "V9.0.5: widget booking ALT + 50 PLAIN_TO_PREMIUM mappings",
+    "V9.0.4: widget booking defensive (b.taken/d.taken)",
+    "V9.0.3: surgical patch 10 HTMLs",
+    "V9.0.2: HARD_EXCEPTIONS extendidos",
+    "V9.0.1: HARD_EXCEPTIONS al inicio resolve()",
+    "V9.0: pre-pitch fix"
   ]
 }
