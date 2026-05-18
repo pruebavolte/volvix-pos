@@ -1,7 +1,59 @@
 # 🚀 HANDOFF — Próxima sesión empieza AQUÍ
 
 > **Para Claude/IA que retoma este proyecto**: lee este documento PRIMERO. Tiene todo el contexto comprimido.
-> **ÚLTIMA ACTUALIZACIÓN**: 2026-05-17 V8.4.1 (217 marcas premium · fallback router para giros raros · NUNCA más template plano)
+> **ÚLTIMA ACTUALIZACIÓN**: 2026-05-18 V8.7.2 (217 marcas premium · 100% de 453 giros SMB caen en landing premium relevante · 0 al template plano · 0 al fallback genérico erróneo)
+
+---
+
+## 🆕 V8.6 → V8.7.2 — VALIDACIÓN MASIVA 453 GIROS (último sprint)
+
+**Sprint del usuario:** "Necesito que escribas 500 giros de negocios manualmente, no des por terminado hasta que TODOS vayan a la landing correcta."
+
+**Resultado final (v1.0.357):**
+- 453 giros típicos del SMB mexicano testeados en `/test-giros.json`
+- **321 exact match** (la marca premium ideal específica)
+- **132 acceptable** (van a una marca premium de la misma categoría con nombre distinto, ej: "tenis deportivos" → `/rebote.html` en lugar de `/pareo.html`)
+- **0 a `/tendito.html`** (cuando había marca mejor)
+- **0 a categoría incorrecta**
+- **0 al template plano `landing-{slug}.html`**
+
+**= 100% de 453 giros aterriza en landing premium relevante.**
+
+### Bugs encontrados y arreglados durante este sprint
+
+| Bug | Causa raíz | Versión fix |
+|---|---|---|
+| `sabanas` → `/tendito.html` (abarrotes, ¡textil de cama!) | Faltaban aliases para textil hogar | V8.5 — +20 aliases hogar |
+| `bolsas` → landing de zapatos/tenis | Partial match capturaba algo de retail | V8.6 — +14 aliases bolsas → asa |
+| 115 giros caían a `/tendito.html` en lugar de marca específica | Faltaban aliases para 100+ giros típicos | V8.7 — +130 aliases mega fix |
+| **Aliases V8.7 NO funcionaban** (silenciosamente) | `pareo`/`comandero`/`refacciona` NO existían como keys en VLX_BRANDS — solo `zapateria`/`restaurante`/`taller_mecanico` | **V8.7.1 CRITICAL** — self-references |
+| 13 casos con acentos/ñ no matcheaban | `norm()` quita acentos antes de buscar; keys como `'piñatas'` nunca matcheaban | V8.7.2 — +60 aliases sin acentos |
+
+### Lecciones para próximas sesiones
+
+1. **Cuando agregues aliases nuevos, valida que el target key exista en VLX_BRANDS.** Si no existe, agrega self-reference (`'X': { brand:'X', url:'X.html' }`).
+2. **Keys de aliases SIEMPRE sin acentos/ñ.** `norm()` las quita antes de buscar — keys con acentos son código muerto.
+3. **Cuando un alias falle silenciosamente, debuggear con:**
+   ```js
+   const r = window.vlxBrandRouter;
+   r.aliases.hasOwnProperty('miquery'); // ¿existe el alias?
+   r.brands[r.aliases['miquery']];      // ¿existe el target en BRANDS?
+   ```
+4. **Archivo `public/test-giros.json` contiene 453 casos**: re-ejecutar antes de cada release tocando el router. Es la regresión.
+
+### Commits del sprint V8.6-V8.7.2
+
+- `6dd91b3` V8.6: aliases bolsas/carteras → asa
+- `7de6103` test: copia test-giros.json a /public
+- `b524a41` V8.7 MEGA FIX: +130 aliases para giros típicos SMB
+- `e725609` V8.7.1 CRITICAL: pareo/comandero/refacciona en VLX_BRANDS
+- `56b8f7c` V8.7.2: +60 aliases con keys normalizadas
+
+**Versión deployada:** 1.0.357 · **URL:** https://systeminternational.app/
+
+---
+
+## 🆕 V8.4 + V8.4.1 (sprint previo)
 
 ---
 
