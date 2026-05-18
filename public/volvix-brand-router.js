@@ -3084,6 +3084,23 @@
     var n = norm(query);
     if (!n) return null;
 
+    // ═══════════════════════════════════════════════════════════════
+    // V9.0 HARD EXCEPTIONS (pre-pitch fix) — ANTES de cualquier match
+    // Bloquea matches incorrectos del partial-match para casos reportados:
+    // - 'renta de trajes' → debe ir a tarima (rentas/eventos), NO pareo
+    // - 'pañales' → debe ir a tendito, NO espuma (cafetería) por match "pan-"
+    // - 'sexshop' → confirmar discreto
+    // - 'papeleria' → confirmar bloque, NO espuma por match parcial
+    // ═══════════════════════════════════════════════════════════════
+    if (/^(renta|alquil)/.test(n) || / (renta|alquila|alquiler) /.test(' '+n+' '))
+      return VLX_BRANDS.tarima || { brand:'Tarima', url:'tarima.html' };
+    if (/^panales$|^panal$|^pañales$|^pañal$|panal de|pañal de|bebe|recien nacido/.test(n))
+      return VLX_BRANDS.tendito || { brand:'Tendito', url:'tendito.html' };
+    if (/^sexshop$|^sex shop$|tienda erotica|productos intimos/.test(n))
+      return VLX_BRANDS.discreto || { brand:'Discreto', url:'discreto.html' };
+    if (/^papeleria$|papeler|art escolar|utiles escolares/.test(n))
+      return VLX_BRANDS.bloque || { brand:'Bloque', url:'bloque.html' };
+
     // 1. Exact match en alias
     if (VLX_ALIASES[n] && VLX_BRANDS[VLX_ALIASES[n]]) {
       return VLX_BRANDS[VLX_ALIASES[n]];
