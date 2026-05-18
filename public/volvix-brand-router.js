@@ -3065,6 +3065,8 @@
     'nutricion deportiva tienda': 'tendito',
     'suplementos para gym': 'tendito',
     'preworkout': 'tendito',
+    // V8.8.1 - último caso detectado en round 2
+    'neveria': 'nieve',
   };
 
   // ---- Normalizador ------------------------------------------
