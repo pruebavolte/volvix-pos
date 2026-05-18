@@ -3135,16 +3135,18 @@
       return VLX_BRANDS.yunque || { brand:'Yunque', url:'yunque.html' };
 
     // FERRETERÍA GENÉRICA — tornillos, clavos, herramientas, candados, llaves
-    // (van a yunque que es el más cercano a "ferretería" en el catálogo)
-    if (/\bferreter(i|í)a(s)?\b|tlapaler(i|í)a|tornillo(s)?|clavo(s)?|herramientas?|cerradur(a|as)|candado(s)?|cerrajer(i|í)a|copia(s)? de llave(s)?|silic(o|ó)n|pegamento|cinta de aislar/.test(n))
+    // V9.4.1: agregados sierra, taladro, martillo, ventanas, acero, llaves genérico
+    if (/\bferreter(i|í)a(s)?\b|tlapaler(i|í)a|tornillo(s)?|clavo(s)?|\bherramient(a|as)?\b|cerradur(a|as)|candado(s)?|cerrajer(i|í)a|copia(s)? de llave(s)?|silic(o|ó)n|pegamento|cinta de aislar|^llaves?$|venta de llaves|^sierra(s)?$|^taladro(s)?$|^martillo(s)?$|venta de herramientas|^acero$|venta de acero/.test(n))
       return VLX_BRANDS.yunque || { brand:'Yunque', url:'yunque.html' };
 
-    // VIDRIERÍA → YUNQUE (más cercano)
-    if (/\bvidrio(s)?\b|vidrier(i|í)a|cristal(es)? para|aluminio|cancel(es)?/.test(n))
+    // VIDRIERÍA / VENTANAS → YUNQUE (más cercano)
+    // V9.4.1: ventanas + aluminio van aquí
+    if (/\bvidrio(s)?\b|vidrier(i|í)a|cristal(es)? para|aluminio|cancel(es)?|^ventana(s)?$|venta de ventanas/.test(n))
       return VLX_BRANDS.yunque || { brand:'Yunque', url:'yunque.html' };
 
     // CONSTRUCCIÓN / MATERIALES — cemento, arena, varilla, grava → OBRA o TABIQUE
-    if (/^cemento$|venta de cemento|arena (volc|de)|grava|varilla|materiales? de construcc|block(es)? de|tabique(s)?|albanil|alban(i|í)l|construcc(i|i|ó)n residencial/.test(n))
+    // V9.4.1: arena (cualquier tipo) ahora también
+    if (/^cemento$|venta de cemento|^arena$|arena (volc|de)|venta de arena|grava|varilla|materiales? de construcc|block(es)? de|tabique(s)?|albanil|alban(i|í)l|construcc(i|i|ó)n residencial/.test(n))
       return VLX_BRANDS.obra || VLX_BRANDS.tabique || { brand:'Obra', url:'obra.html' };
 
     // PINTURAS / ACABADOS → BARNIZ
