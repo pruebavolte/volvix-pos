@@ -1,19 +1,18 @@
 {
-  "version": "1.0.357",
+  "version": "1.0.358",
   "major": 1,
   "minor": 0,
-  "patch": 357,
+  "patch": 358,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-18T01:10:00.000Z",
-  "built_at": "2026-05-18T01:10:00.000Z",
+  "date": "2026-05-18T02:00:00.000Z",
+  "built_at": "2026-05-18T02:00:00.000Z",
   "changelog": [
-    "V8.7.2: +60 aliases adicionales con keys normalizadas (sin acentos/ñ). Bug: norm() quita los acentos antes de buscar, así que keys como 'piñatas' nunca matcheaban. Fix: agregadas versiones 'pinatas', 'birreria', 'casa de empeno', 'cementerio', 'galeria', 'cine/cines', 'teatro/teatros', etc. Más: renta de mesas y sillas, mariachi, fabrica de hielo, casas de cambio, instrumentos musicales, estudio de arte/grabacion. Total aliases V8.7+V8.7.2: ~190 nuevos.",
-    "V8.7.1 CRITICAL FIX: BUG raíz pareo/comandero/refacciona faltaban en VLX_BRANDS.",
-    "V8.7 MEGA FIX: +130 aliases para giros típicos SMB mexicano.",
-    "V8.6: aliases bolsas/carteras → asa.",
-    "V8.5.1 PATCH: 3 mini-bugs.",
-    "V8.5 PATCH: fallback ampliado para sabanas + 12 categorías.",
-    "V8.4.1, V8.4, V8.3, V8.2, V8.1, V8, V7, V6: fases anteriores."
+    "V8.8 ROUND 1: validación masiva 1081 giros. Fix bug crítico: papeleria/colegio/escuela en VLX_BRANDS apuntaban a landing-papeleria.html / landing-colegio.html (TEMPLATE PLANO viejo) - corregidos a bloque.html. +280 aliases nuevos para giros mexicanos SMB cubriendo: comida regional (cabrito/machaca/discada/arrachera/mole/cochinita), postres (marquesitas/cupcakes/cheesecakes/donas/crepas), bebidas (boba/bubble tea/micheladas/pulqueria/tequileria), belleza completa (microblading/lash bar/spray tan/waxing), salud especializada (acupuntor/cardiologo/oncologo/hospital privado), eventos completos (wedding planner/banda musical/violinista/saxofonista/renta vajillas/mariachi premium), hospedaje (hostal/motel/glamping/airbnb), tech avanzada (gaming pc/smartwatch/wearables/cctv/fibra optica), industria (maquila/empacadora/fundidora/tornos cnc), construcción (acabados/marmol/canteria/tablaroca/aislamiento), auto (concesionarias/transporte/grúas/baterías). +5 self-references (espuma/navaja/receta/pata/tendito/burbuja). Marcas inexistentes (horno/impermo) redirigidas a merengue/folio.",
+    "V8.7.2: +60 aliases con keys normalizadas",
+    "V8.7.1 CRITICAL FIX: BUG pareo/comandero/refacciona en VLX_BRANDS",
+    "V8.7 MEGA FIX: +130 aliases",
+    "V8.6: aliases bolsas/carteras → asa",
+    "V8.5.1, V8.5, V8.4.1, V8.4, V8.3, V8.2, V8.1, V8, V7, V6: fases anteriores"
   ]
 }
