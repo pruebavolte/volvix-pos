@@ -9875,18 +9875,28 @@
     // V10.3.1 — Fallback robusto: VolvixTax.computeTotals a veces no está cargado.
     // Sin esto, searchProduct/addToCart fallaba con "computeTotals is not a function"
     // y aunque el item ya estaba en CART, el ticket no renderizaba y mostraba "Sin resultados".
+    // V10.3.2 — fallback completo con TODOS los campos que usa el render
+    function _vlxBuildFallbackTotals() {
+      const sub = CART.reduce((s,i) => s + (Number(i.price)||0) * (Number(i.qty)||0), 0);
+      const disc = Number(window.__volvixCartDiscount || 0);
+      const taxable = Math.max(0, sub - disc);
+      return {
+        subtotal: sub, taxable_base: taxable, iva_rate: 0, iva_amount: 0,
+        ieps_amount: 0, tax: 0, discount: disc, total: taxable
+      };
+    }
     var totals;
     try {
       if (window.VolvixTax && typeof window.VolvixTax.computeTotals === 'function') {
         totals = window.VolvixTax.computeTotals(CART, Number(window.__volvixCartDiscount || 0));
+        // Asegurar campos esperados aunque computeTotals devuelva parcial
+        const def = _vlxBuildFallbackTotals();
+        Object.keys(def).forEach(k => { if (totals[k] == null || isNaN(totals[k])) totals[k] = def[k]; });
       } else {
-        const sub = CART.reduce((s,i) => s + (Number(i.price)||0) * (Number(i.qty)||0), 0);
-        const disc = Number(window.__volvixCartDiscount || 0);
-        totals = { subtotal: sub, tax: 0, discount: disc, total: Math.max(0, sub - disc) };
+        totals = _vlxBuildFallbackTotals();
       }
     } catch(e) {
-      const sub = CART.reduce((s,i) => s + (Number(i.price)||0) * (Number(i.qty)||0), 0);
-      totals = { subtotal: sub, tax: 0, discount: 0, total: sub };
+      totals = _vlxBuildFallbackTotals();
     }
     const count = CART.reduce((s,i) => s + i.qty, 0);
     $('#item-count').textContent = count;
