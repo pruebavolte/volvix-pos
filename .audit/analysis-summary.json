@@ -1,23 +1,30 @@
 {
-  "timestamp": "2026-05-18T06:29:31.770Z",
+  "timestamp": "2026-05-18T06:56:03.393Z",
   "stats": {
-    "total": 95,
-    "pass_all": 82,
+    "total": 966,
+    "pass_all": 841,
     "fail_check1": 0,
     "fail_check2": 2,
-    "fail_check3": 11,
+    "fail_check3": 123,
     "error": 1,
-    "has_screenshot": 6
+    "has_screenshot": 87
   },
-  "pct_pass": 86.3,
+  "pct_pass": 87.1,
   "pct_check1": 100,
-  "pct_check2": 97.9,
-  "pct_check3": 88.4,
+  "pct_check2": 99.8,
+  "pct_check3": 87.3,
   "fails_by_category": {
-    "alimentos": 1,
-    "retail": 4,
-    "entretenimiento": 1,
-    "servicios": 5
+    "alimentos": 9,
+    "retail": 9,
+    "entretenimiento": 14,
+    "servicios": 9,
+    "educacion": 3,
+    "profesionales": 20,
+    "auto": 1,
+    "salud": 14,
+    "belleza": 19,
+    "mascotas": 2,
+    "deporte": 23
   },
   "fails_by_dest_count": {
     "cantinita": 1,
@@ -25,14 +32,351 @@
     "landing-disco": 1,
     "mezcla": 1,
     "solapa": 1,
-    "marketplace": 1,
+    "marketplace": 4,
     "oficio": 1,
     "repelente": 1,
-    "poda": 1,
+    "poda": 2,
     "yunque": 1,
-    "forja": 1
+    "forja": 3,
+    "pizarra": 1,
+    "toga": 1,
+    "apunte-prepa": 1,
+    "columna": 1,
+    "plano": 2,
+    "pelicula": 2,
+    "tendito": 53,
+    "obra": 1,
+    "discreto": 2,
+    "torta": 3,
+    "pareo": 4,
+    "tarima": 6,
+    "brillo": 1,
+    "licuado": 1,
+    "pulpa": 1,
+    "reparelec": 1,
+    "folio": 3,
+    "nevera": 1,
+    "corte": 2,
+    "pulso": 1,
+    "techar": 1,
+    "trampa": 1,
+    "pulido": 1,
+    "pata": 1,
+    "mantra": 4,
+    "compas": 1,
+    "bloque": 5,
+    "brazada": 1,
+    "cinta": 1,
+    "movil": 1,
+    "terciopelo": 1
   },
   "top_failed_dests": [
+    {
+      "dest": "tendito",
+      "count": 53,
+      "samples": [
+        {
+          "q": "diseñador gráfico",
+          "exp_cat": "profesionales",
+          "exp_brand": "folio",
+          "reason": "categoría destino (retail) != esperada (profesionales)"
+        },
+        {
+          "q": "desarrollador web",
+          "exp_cat": "profesionales",
+          "exp_brand": "folio",
+          "reason": "categoría destino (retail) != esperada (profesionales)"
+        },
+        {
+          "q": "administrador de condominios",
+          "exp_cat": "profesionales",
+          "exp_brand": "folio",
+          "reason": "categoría destino (retail) != esperada (profesionales)"
+        }
+      ]
+    },
+    {
+      "dest": "tarima",
+      "count": 6,
+      "samples": [
+        {
+          "q": "juice bar",
+          "exp_cat": "alimentos",
+          "exp_brand": "limonero",
+          "reason": "categoría destino (entretenimiento) != esperada (alimentos)"
+        },
+        {
+          "q": "venta de discos vinilo",
+          "exp_cat": "retail",
+          "exp_brand": "tendito",
+          "reason": "categoría destino (entretenimiento) != esperada (retail)"
+        },
+        {
+          "q": "arreglo de barba",
+          "exp_cat": "belleza",
+          "exp_brand": "navaja",
+          "reason": "categoría destino (entretenimiento) != esperada (belleza)"
+        }
+      ]
+    },
+    {
+      "dest": "bloque",
+      "count": 5,
+      "samples": [
+        {
+          "q": "lucha libre",
+          "exp_cat": "deporte",
+          "exp_brand": "forja",
+          "reason": "categoría destino (educacion) != esperada (deporte)"
+        },
+        {
+          "q": "escuela de voleibol",
+          "exp_cat": "deporte",
+          "exp_brand": "forja",
+          "reason": "categoría destino (educacion) != esperada (deporte)"
+        },
+        {
+          "q": "escuela de béisbol",
+          "exp_cat": "deporte",
+          "exp_brand": "forja",
+          "reason": "categoría destino (educacion) != esperada (deporte)"
+        }
+      ]
+    },
+    {
+      "dest": "marketplace",
+      "count": 4,
+      "samples": [
+        {
+          "q": "tienda de ropa",
+          "exp_cat": "retail",
+          "exp_brand": "pareo",
+          "reason": "categoría destino (desconocida) != esperada (retail)"
+        },
+        {
+          "q": "coach ejecutivo",
+          "exp_cat": "profesionales",
+          "exp_brand": "folio",
+          "reason": "categoría destino (desconocida) != esperada (profesionales)"
+        },
+        {
+          "q": "ballet clásico",
+          "exp_cat": "deporte",
+          "exp_brand": "forja",
+          "reason": "categoría destino (desconocida) != esperada (deporte)"
+        }
+      ]
+    },
+    {
+      "dest": "pareo",
+      "count": 4,
+      "samples": [
+        {
+          "q": "huaraches",
+          "exp_cat": "alimentos",
+          "exp_brand": "comandero",
+          "reason": "categoría destino (retail) != esperada (alimentos)"
+        },
+        {
+          "q": "naturopatía",
+          "exp_cat": "salud",
+          "exp_brand": "pulso",
+          "reason": "categoría destino (retail) != esperada (salud)"
+        },
+        {
+          "q": "cycling boutique",
+          "exp_cat": "deporte",
+          "exp_brand": "forja",
+          "reason": "categoría destino (retail) != esperada (deporte)"
+        }
+      ]
+    },
+    {
+      "dest": "mantra",
+      "count": 4,
+      "samples": [
+        {
+          "q": "yoga vinyasa",
+          "exp_cat": "deporte",
+          "exp_brand": "forja",
+          "reason": "categoría destino (desconocida) != esperada (deporte)"
+        },
+        {
+          "q": "hot yoga",
+          "exp_cat": "deporte",
+          "exp_brand": "forja",
+          "reason": "categoría destino (desconocida) != esperada (deporte)"
+        },
+        {
+          "q": "yoga prenatal",
+          "exp_cat": "deporte",
+          "exp_brand": "forja",
+          "reason": "categoría destino (desconocida) != esperada (deporte)"
+        }
+      ]
+    },
+    {
+      "dest": "forja",
+      "count": 3,
+      "samples": [
+        {
+          "q": "mudanzas",
+          "exp_cat": "servicios",
+          "exp_brand": "folio",
+          "reason": "categoría destino (deporte) != esperada (servicios)"
+        },
+        {
+          "q": "hammam",
+          "exp_cat": "belleza",
+          "exp_brand": "brillo",
+          "reason": "categoría destino (deporte) != esperada (belleza)"
+        },
+        {
+          "q": "pista de baile",
+          "exp_cat": "entretenimiento",
+          "exp_brand": "tarima",
+          "reason": "categoría destino (deporte) != esperada (entretenimiento)"
+        }
+      ]
+    },
+    {
+      "dest": "torta",
+      "count": 3,
+      "samples": [
+        {
+          "q": "tortas cubanas",
+          "exp_cat": "alimentos",
+          "exp_brand": "comandero",
+          "reason": "categoría destino (desconocida) != esperada (alimentos)"
+        },
+        {
+          "q": "tortas",
+          "exp_cat": "alimentos",
+          "exp_brand": "comandero",
+          "reason": "categoría destino (desconocida) != esperada (alimentos)"
+        },
+        {
+          "q": "tortas ahogadas",
+          "exp_cat": "alimentos",
+          "exp_brand": "comandero",
+          "reason": "categoría destino (desconocida) != esperada (alimentos)"
+        }
+      ]
+    },
+    {
+      "dest": "folio",
+      "count": 3,
+      "samples": [
+        {
+          "q": "equipo de camping",
+          "exp_cat": "retail",
+          "exp_brand": "tendito",
+          "reason": "categoría destino (profesionales) != esperada (retail)"
+        },
+        {
+          "q": "fitness coach online",
+          "exp_cat": "deporte",
+          "exp_brand": "forja",
+          "reason": "categoría destino (profesionales) != esperada (deporte)"
+        },
+        {
+          "q": "pagos de servicios",
+          "exp_cat": "servicios",
+          "exp_brand": "tendito",
+          "reason": "categoría destino (profesionales) != esperada (servicios)"
+        }
+      ]
+    },
+    {
+      "dest": "poda",
+      "count": 2,
+      "samples": [
+        {
+          "q": "jardinería",
+          "exp_cat": "servicios",
+          "exp_brand": "folio",
+          "reason": "categoría destino (desconocida) != esperada (servicios)"
+        },
+        {
+          "q": "paisajismo",
+          "exp_cat": "profesionales",
+          "exp_brand": "folio",
+          "reason": "categoría destino (desconocida) != esperada (profesionales)"
+        }
+      ]
+    },
+    {
+      "dest": "plano",
+      "count": 2,
+      "samples": [
+        {
+          "q": "arquitectos",
+          "exp_cat": "profesionales",
+          "exp_brand": "folio",
+          "reason": "categoría destino (desconocida) != esperada (profesionales)"
+        },
+        {
+          "q": "arquitecto residencial",
+          "exp_cat": "profesionales",
+          "exp_brand": "folio",
+          "reason": "categoría destino (desconocida) != esperada (profesionales)"
+        }
+      ]
+    },
+    {
+      "dest": "pelicula",
+      "count": 2,
+      "samples": [
+        {
+          "q": "polarizado",
+          "exp_cat": "auto",
+          "exp_brand": "pulido",
+          "reason": "categoría destino (desconocida) != esperada (auto)"
+        },
+        {
+          "q": "tintes premium",
+          "exp_cat": "belleza",
+          "exp_brand": "brillo",
+          "reason": "categoría destino (desconocida) != esperada (belleza)"
+        }
+      ]
+    },
+    {
+      "dest": "discreto",
+      "count": 2,
+      "samples": [
+        {
+          "q": "cuidador de adultos",
+          "exp_cat": "salud",
+          "exp_brand": "pulso",
+          "reason": "categoría destino (retail) != esperada (salud)"
+        },
+        {
+          "q": "cuidado de adultos mayores",
+          "exp_cat": "salud",
+          "exp_brand": "pulso",
+          "reason": "categoría destino (retail) != esperada (salud)"
+        }
+      ]
+    },
+    {
+      "dest": "corte",
+      "count": 2,
+      "samples": [
+        {
+          "q": "baño y corte felino",
+          "exp_cat": "mascotas",
+          "exp_brand": "pata",
+          "reason": "categoría destino (alimentos) != esperada (mascotas)"
+        },
+        {
+          "q": "baño y corte canino",
+          "exp_cat": "mascotas",
+          "exp_brand": "pata",
+          "reason": "categoría destino (alimentos) != esperada (mascotas)"
+        }
+      ]
+    },
     {
       "dest": "cantinita",
       "count": 1,
@@ -44,140 +388,52 @@
           "reason": "categoría destino (desconocida) != esperada (alimentos)"
         }
       ]
-    },
-    {
-      "dest": "armario",
-      "count": 1,
-      "samples": [
-        {
-          "q": "ropa de mujer",
-          "exp_cat": "retail",
-          "exp_brand": "pareo",
-          "reason": "categoría destino (desconocida) != esperada (retail)"
-        }
-      ]
-    },
-    {
-      "dest": "landing-disco",
-      "count": 1,
-      "samples": [
-        {
-          "q": "antro",
-          "exp_cat": "entretenimiento",
-          "exp_brand": "tarima",
-          "reason": "categoría destino (desconocida) != esperada (entretenimiento)"
-        }
-      ]
-    },
-    {
-      "dest": "mezcla",
-      "count": 1,
-      "samples": [
-        {
-          "q": "miscelánea",
-          "exp_cat": "retail",
-          "exp_brand": "tendito",
-          "reason": "categoría destino (desconocida) != esperada (retail)"
-        }
-      ]
-    },
-    {
-      "dest": "solapa",
-      "count": 1,
-      "samples": [
-        {
-          "q": "ropa de hombre",
-          "exp_cat": "retail",
-          "exp_brand": "pareo",
-          "reason": "categoría destino (desconocida) != esperada (retail)"
-        }
-      ]
-    },
-    {
-      "dest": "marketplace",
-      "count": 1,
-      "samples": [
-        {
-          "q": "tienda de ropa",
-          "exp_cat": "retail",
-          "exp_brand": "pareo",
-          "reason": "categoría destino (desconocida) != esperada (retail)"
-        }
-      ]
-    },
-    {
-      "dest": "oficio",
-      "count": 1,
-      "samples": [
-        {
-          "q": "electricidad",
-          "exp_cat": "servicios",
-          "exp_brand": "watt",
-          "reason": "categoría destino (desconocida) != esperada (servicios)"
-        }
-      ]
-    },
-    {
-      "dest": "repelente",
-      "count": 1,
-      "samples": [
-        {
-          "q": "fumigación",
-          "exp_cat": "servicios",
-          "exp_brand": "pulgon",
-          "reason": "categoría destino (desconocida) != esperada (servicios)"
-        }
-      ]
-    },
-    {
-      "dest": "poda",
-      "count": 1,
-      "samples": [
-        {
-          "q": "jardinería",
-          "exp_cat": "servicios",
-          "exp_brand": "folio",
-          "reason": "categoría destino (desconocida) != esperada (servicios)"
-        }
-      ]
-    },
-    {
-      "dest": "yunque",
-      "count": 1,
-      "samples": [
-        {
-          "q": "herrería",
-          "exp_cat": "servicios",
-          "exp_brand": "chispa",
-          "reason": "categoría destino (desconocida) != esperada (servicios)"
-        }
-      ]
-    },
-    {
-      "dest": "forja",
-      "count": 1,
-      "samples": [
-        {
-          "q": "mudanzas",
-          "exp_cat": "servicios",
-          "exp_brand": "folio",
-          "reason": "categoría destino (deporte) != esperada (servicios)"
-        }
-      ]
     }
   ],
   "samples_per_brand_for_visual_check": {
-    "comandero": [],
-    "espuma": [],
+    "comandero": [
+      {
+        "query": "mole oaxaqueño",
+        "screenshotPath": "screenshots\\0340-comandero.jpg"
+      },
+      {
+        "query": "comida poblana",
+        "screenshotPath": "screenshots\\0360-comandero.jpg"
+      }
+    ],
+    "espuma": [
+      {
+        "query": "café gourmet",
+        "screenshotPath": "screenshots\\0410-espuma.jpg"
+      }
+    ],
     "brasa": [],
-    "tendito": [],
+    "tendito": [
+      {
+        "query": "guardias de seguridad",
+        "screenshotPath": "screenshots\\0200-tendito.jpg"
+      },
+      {
+        "query": "renta de departamentos",
+        "screenshotPath": "screenshots\\0260-tendito.jpg"
+      },
+      {
+        "query": "venta de patinetas",
+        "screenshotPath": "screenshots\\0540-tendito.jpg"
+      }
+    ],
     "marea": [
       {
         "query": "marisqueria",
         "screenshotPath": "screenshots\\0010-marea.jpg"
       }
     ],
-    "corte": [],
+    "corte": [
+      {
+        "query": "salchichonería",
+        "screenshotPath": "screenshots\\0400-corte.jpg"
+      }
+    ],
     "escama": [],
     "merengue": [],
     "helera": [],
@@ -187,13 +443,30 @@
         "screenshotPath": "screenshots\\0020-nieve.jpg"
       }
     ],
-    "tarima": [],
+    "tarima": [
+      {
+        "query": "pulquería",
+        "screenshotPath": "screenshots\\0420-tarima.jpg"
+      },
+      {
+        "query": "speakeasy",
+        "screenshotPath": "screenshots\\0430-tarima.jpg"
+      },
+      {
+        "query": "nail bar",
+        "screenshotPath": "screenshots\\0650-tarima.jpg"
+      }
+    ],
     "cantinita": [],
     "hornito": [],
     "comedor": [
       {
         "query": "lonchería",
         "screenshotPath": "screenshots\\0030-comedor.jpg"
+      },
+      {
+        "query": "comida vegetariana",
+        "screenshotPath": "screenshots\\0370-comedor.jpg"
       }
     ],
     "velada": [],
@@ -204,14 +477,51 @@
       }
     ],
     "landing-disco": [],
-    "pareo": [],
+    "pareo": [
+      {
+        "query": "huaraches",
+        "screenshotPath": "screenshots\\0330-pareo.jpg"
+      },
+      {
+        "query": "cancha de tenis",
+        "screenshotPath": "screenshots\\0800-pareo.jpg"
+      }
+    ],
     "mezcla": [],
-    "mueble": [],
+    "mueble": [
+      {
+        "query": "muebles modernos",
+        "screenshotPath": "screenshots\\0530-mueble.jpg"
+      }
+    ],
     "solapa": [],
-    "tictac": [],
+    "tictac": [
+      {
+        "query": "relojería suiza",
+        "screenshotPath": "screenshots\\0480-tictac.jpg"
+      }
+    ],
     "quilate": [],
-    "brillo": [],
-    "armazon": [],
+    "brillo": [
+      {
+        "query": "venta de tintes",
+        "screenshotPath": "screenshots\\0490-brillo.jpg"
+      },
+      {
+        "query": "manicure",
+        "screenshotPath": "screenshots\\0560-brillo.jpg"
+      },
+      {
+        "query": "maquillaje para novias",
+        "screenshotPath": "screenshots\\0590-brillo.jpg"
+      }
+    ],
+    "armazon": [
+      {
+        "query": "venta de lentes",
+        "screenshotPath": "screenshots\\0670-armazon.jpg"
+      }
+    ],
     "movil": [],
     "marketplace": [],
     "discreto": [],
