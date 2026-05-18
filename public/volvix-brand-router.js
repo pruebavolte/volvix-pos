@@ -3092,6 +3092,26 @@
     // rotas (bloque/pata/gateo) reciban tráfico hasta que se confirme
     // que renderizan tras el fix del widget booking.
     // ═══════════════════════════════════════════════════════════════
+    // V9.9.2 — RENTAS específicas DEBEN ir antes del catch-all general
+    // motos/bicis/autos → folio (gestión hospedaje/rentas), no tarima (bar)
+    if (/(renta|alquil(er|o)?) (de )?(motos?|motocicletas?|bicis?|bicicletas?|autos?|carros?|veh[ií]culos?|patines?|scooters?)/.test(n))
+      return VLX_BRANDS.folio || { brand:'Folio', url:'folio.html' };
+    // inflables/brincolines/sillas/mesas para fiesta → folio (rentas para eventos)
+    if (/(renta|alquil(er|o)?) (de )?(inflables?|brincolines?|carpas|sillas para fiesta|mesas para fiesta|tablones?|toldos?|salones? (para )?fiesta)/.test(n))
+      return VLX_BRANDS.folio || { brand:'Folio', url:'folio.html' };
+    // Estancia infantil / guardería / kinder NUNCA bloque (construcción)
+    if (/estancia (infantil|para ni[nñ]os?|para beb[eé]s?)|guarder[ií]a|\bkinder\b|preescolar|estimulaci[oó]n (temprana )?infantil|maternal(es)?/.test(n))
+      return VLX_BRANDS.gateo || { brand:'Gateo', url:'gateo.html' };
+    // Vapeadores/cigarros electrónicos → discreto (productos adultos especializados)
+    if (/vapeador(es)?|\bvape\b|cigarro(s)? electr[oó]nicos?|e-cig|hookah|narguile|tabaco(s)? premium/.test(n))
+      return VLX_BRANDS.discreto || { brand:'Discreto', url:'discreto.html' };
+    // Esotérica / velas rituales → discreto (productos especializados)
+    if (/esot[eé]rica|espirituales?|velas? rituales?|santeria|hierbas? medicinales?|incienso|amuletos?|cristales? energ/.test(n))
+      return VLX_BRANDS.discreto || { brand:'Discreto', url:'discreto.html' };
+    // Purificadora de agua → tendito (productos a domicilio)
+    if (/purificadora (de )?agua|garrafones? (de )?agua|reparto (de )?agua|distribuidora (de )?agua/.test(n))
+      return VLX_BRANDS.tendito || { brand:'Tendito', url:'tendito.html' };
+
     if (/^(renta|alquil)/.test(n) || / (renta|alquila|alquiler) /.test(' '+n+' '))
       return VLX_BRANDS.tarima || { brand:'Tarima', url:'tarima.html' };
     // V9.8.1 — antojitos mexicanos / comida de mole → comandero (cocina mexicana)
@@ -3100,27 +3120,7 @@
     // V9.8.1 — "cabello chino"/"cabello rizado"/permanente etc NO son cocina asiática → brillo/estética
     if (/cabello chino|cabello rizado|permanente|rizos|alaciado|tratamiento (de )?cabello|tinte (de |para )?cabello|coloraci[oó]n (de )?cabello|peinado|salon de belleza|sal[oó]n de belleza|estilismo/.test(n))
       return VLX_BRANDS.brillo || { brand:'Brillo', url:'brillo.html' };
-    // V9.9 — Renta motos/bicis/autos → tarima es bar; rentas debe ir a una marca de rentas.
-    // De momento usamos tarima como catch-all rentas (tiene sección de renta de salones).
-    // Mejor: forja para motos (taller relacionado), o folio (alquiler/hospedaje).
-    if (/renta (de )?(motos?|motocicletas?|bicis?|bicicletas?|autos?|carros?|veh[ií]culos?)|alquil(er|o) (de )?(motos?|bicis?|autos?)/.test(n))
-      return VLX_BRANDS.folio || { brand:'Folio', url:'folio.html' };
-    // V9.9 — Inflables/brincolines → folio (eventos/rentas) en vez de tarima (bar)
-    if (/(renta|alquil) (de )?(inflables?|brincolines?|carpas|sillas|mesas para fiesta)|tablones para evento/.test(n))
-      return VLX_BRANDS.folio || { brand:'Folio', url:'folio.html' };
-    // V9.9 — Estancia infantil/guardería NUNCA debe ir a bloque (construcción)
-    if (/estancia (infantil|para )?ni[nñ]os?|guarder[ií]a|kinder|preescolar|estimulaci[oó]n (temprana )?infantil|estancia para beb[eé]s?/.test(n))
-      return VLX_BRANDS.gateo || { brand:'Gateo', url:'gateo.html' };
-    // V9.9 — Vapeadores/cigarros electrónicos NO son abarrotes — son tienda especializada
-    // Mapeo a tendito pero con sección vapes (NO existe marca dedicada; mejor que vaya a discreto que es para productos adultos)
-    if (/vapeador(es)?|vape|cigarro(s)? electr[oó]nicos?|e-cig|hookah|narguile|tabacos? premium/.test(n))
-      return VLX_BRANDS.discreto || { brand:'Discreto', url:'discreto.html' };
-    // V9.9 — Esotérica / espirituales / velas rituales NO son abarrotes
-    if (/esot[eé]rica|espirituales?|velas? rituales?|santeria|hierbas? medicinales?|incienso|amuletos?|cristales?/.test(n))
-      return VLX_BRANDS.discreto || { brand:'Discreto', url:'discreto.html' };
-    // V9.9 — Purificadora de agua: NO existía mapping. Mapeo a tendito (productos a domicilio)
-    if (/purificadora (de )?agua|garrafones? (de )?agua|reparto (de )?agua|agua para garraf[oó]n|distribuidora (de )?agua/.test(n))
-      return VLX_BRANDS.tendito || { brand:'Tendito', url:'tendito.html' };
+    // (Excepciones V9.9 ya movidas ARRIBA antes del catch-all rentas — ver bloque V9.9.2)
     // V9.6.2: regex más restrictivo para no capturar "ropa de bebe" → tendito
     // Solo captura: pañales literal | productos de bebé genéricos (alimento, leche, biberones, etc.)
     if (/^panales?$|^pañales?$|panal de|pañal de|alimento(s)? (de |para )?bebe|leche para bebe|biberon|chupone(s)?|carrito(s)? para bebe|cuna(s)? para bebe/.test(n))
