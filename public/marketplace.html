@@ -1693,26 +1693,40 @@ document.addEventListener('DOMContentLoaded', function () {
       return showNewGiroGeneration(q, /* force */ true);
     }
 
+    // V10.6 — Lógica simplificada:
+    //   1. Si search devuelve exists EXACTO con landing → redirige.
+    //   2. Si findGiro local encuentra match exacto (mismo name/key) → showFoundGiro.
+    //   3. CUALQUIER otra cosa → showNewGiroGeneration (NO classifyWithAI).
+    // ANTES classifyWithAI clasificaba "toallas" → "abarrotes" → redirige a tendito/almohada,
+    // dándole al usuario la sensación de "no me crea, me redirige a algo parecido".
+    // AHORA: si no es match EXACTO, siempre creamos landing nueva con el query exacto.
+    const isExactMatch = (hit, query) => {
+      if (!hit) return false;
+      const qNorm = String(query).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+      const nNorm = String(hit.name || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+      const kNorm = String(hit.key || '').toLowerCase().trim();
+      return qNorm === nNorm || qNorm === kNorm;
+    };
     fetch('/api/giros/search?q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
       .then((r) => r.ok ? r.json() : Promise.reject(new Error('search failed')))
       .then((data) => {
-        if (data && data.exists && data.landing) {
+        // 1) Match exacto del backend (q === slug/synonyms) → redirigir
+        if (data && data.exists && data.landing &&
+            (String(data.slug || '').toLowerCase() === String(q).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim()
+             || String(data.name || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim() === String(q).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim())) {
           window.location.assign(data.landing);
           return;
         }
-        // 2026-05 BUG-FIX: para queries multi-word brand (ej. "Café Lizingh"), saltar
-        // findGiro y classifyWithAI — pueden redirigir a giro genérico. Generar NUEVO.
-        if (isMultiWordBrandQuery(q)) {
-          return showNewGiroGeneration(q);
-        }
+        // 2) Match exacto local
         const localHit = findGiro(q);
-        if (localHit) { showFoundGiro(localHit); return; }
-        return classifyWithAI(q);
+        if (isExactMatch(localHit, q)) { showFoundGiro(localHit); return; }
+        // 3) Cualquier otra cosa → crear landing nueva con el query EXACTO del usuario
+        return showNewGiroGeneration(q);
       })
       .catch(() => {
-        if (isMultiWordBrandQuery(q)) { showNewGiroGeneration(q); return; }
+        // Sin red → mismo fallback: crear nueva
         const localHit = findGiro(q);
-        if (localHit) showFoundGiro(localHit);
+        if (isExactMatch(localHit, q)) showFoundGiro(localHit);
         else showNewGiroGeneration(q);
       });
   }
