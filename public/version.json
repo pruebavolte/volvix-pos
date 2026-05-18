@@ -1,24 +1,19 @@
 {
-  "version": "1.0.356",
+  "version": "1.0.357",
   "major": 1,
   "minor": 0,
-  "patch": 356,
+  "patch": 357,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-18T00:55:00.000Z",
-  "built_at": "2026-05-18T00:55:00.000Z",
+  "date": "2026-05-18T01:10:00.000Z",
+  "built_at": "2026-05-18T01:10:00.000Z",
   "changelog": [
-    "V8.7.1 CRITICAL FIX: BUG raíz encontrado — pareo/comandero/refacciona NO existían como keys en VLX_BRANDS (solo zapateria/restaurante/taller_mecanico). Por eso TODOS los aliases que apuntaban a 'pareo'/'comandero'/'refacciona' caían en partial match y terminaban en /tendito.html. Fix: agregar self-references pareo→pareo.html, comandero→comandero.html, refacciona→refacciona.html. Esto desbloquea ~30 aliases V8.7 que estaban fallando: sandalias, huaraches, botas, sombreros, gorras, corbatas, cinturones, tortilleria, dulceria, hot dogs, carnitas, tamales, llanteria, etc.",
-    "V8.7 MEGA FIX: +130 aliases nuevos para giros típicos SMB mexicano.",
+    "V8.7.2: +60 aliases adicionales con keys normalizadas (sin acentos/ñ). Bug: norm() quita los acentos antes de buscar, así que keys como 'piñatas' nunca matcheaban. Fix: agregadas versiones 'pinatas', 'birreria', 'casa de empeno', 'cementerio', 'galeria', 'cine/cines', 'teatro/teatros', etc. Más: renta de mesas y sillas, mariachi, fabrica de hielo, casas de cambio, instrumentos musicales, estudio de arte/grabacion. Total aliases V8.7+V8.7.2: ~190 nuevos.",
+    "V8.7.1 CRITICAL FIX: BUG raíz pareo/comandero/refacciona faltaban en VLX_BRANDS.",
+    "V8.7 MEGA FIX: +130 aliases para giros típicos SMB mexicano.",
     "V8.6: aliases bolsas/carteras → asa.",
-    "V8.5.1 PATCH: 3 mini-bugs (optica/peluqueria canina/vulcanizadora).",
+    "V8.5.1 PATCH: 3 mini-bugs.",
     "V8.5 PATCH: fallback ampliado para sabanas + 12 categorías.",
-    "V8.4.1 PATCH: regex juridico/gestor/tramites.",
-    "V8.4 HOTFIX: fallback router contra template plano.",
-    "V8.3: nueva marca Discreto #217.",
-    "V8.2 FIX motor reload-loop",
-    "V8.1 FIX router aliases V6",
-    "V8 motor-v3 ZIP integrado",
-    "V7 motor: 200 marcas premium auto-generadas"
+    "V8.4.1, V8.4, V8.3, V8.2, V8.1, V8, V7, V6: fases anteriores."
   ]
 }
