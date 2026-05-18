@@ -2162,12 +2162,61 @@
     return bestMatch;
   }
 
+  // ---- HOTFIX V8.4: fallback a hero más cercano ---------------
+  // Cuando resolve() falla, en vez de servir landing-{slug}.html (template plano),
+  // redirigimos al hero más cercano semánticamente. Esto convierte el 100% de
+  // los giros raros en una landing decente sin necesidad de AI ni nuevas APIs.
+  function fallbackToClosestHero(query) {
+    var q = norm(query);
+    if (!q || q.length < 3) return null; // escape: query muy corta → no redirigir
+
+    // SALUD Y BIENESTAR → pulso
+    if (/salud|medic|clinic|dental|dentist|optic|fisio|nutri|psico|pediatr|gineco|dermato|audi|podo|consulto/.test(q))
+      return '/pulso.html';
+
+    // FARMACIA (mantener separado, no es Pulso)
+    if (/farmac|botica|drogueria/.test(q))
+      return '/receta.html';
+
+    // BELLEZA Y ESTÉTICA → brillo (sexshop ya tiene alias a discreto, no llega aquí)
+    if (/belleza|salon|spa|estetic|unas|manicur|pedicur|depilac|maquill|peluqu|ceja|pestana/.test(q))
+      return '/brillo.html';
+
+    // SERVICIOS PROFESIONALES → folio
+    if (/servic|asesor|profesional|despacho|abogado|contador|notario|consult|arquitect|ingenier|agenci|broker|legal|fiscal/.test(q))
+      return '/folio.html';
+
+    // DEPORTE Y RECREACIÓN → forja
+    if (/deport|gym|fitness|yoga|pilates|crossfit|danza|baile|karate|box|spinning|zumba|atletic|entrenam/.test(q))
+      return '/forja.html';
+
+    // ENTRETENIMIENTO Y EVENTOS → tarima
+    if (/event|bar|antro|cantina|club|salon de event|banquet|cateri|karaok|terraz|loung|fiesta|disco/.test(q))
+      return '/tarima.html';
+
+    // ALIMENTOS → comandero
+    if (/comida|alimento|cocina|restau|taqu|pizz|hambur|marisco|cafe|cafeteria|panad|past|tortill|carnice|polleria|fonda|fruteri|jugo|nieve|helad|paleter|barbacoa|birrieria|antoji|mariscos|sushi|asad/.test(q))
+      return '/comandero.html';
+
+    // RETAIL (ropa/calzado) → pareo
+    if (/ropa|calzado|moda|boutique|zapat|tenis|tienda de ropa|joyer|bolsa|accesori/.test(q))
+      return '/pareo.html';
+
+    // ABARROTES Y BARRIO → tendito (también default genérico decente)
+    if (/abarrot|tiendit|minisuper|mini super|miscelan|mercer|papeler|lavanderi|tintorer|carwash|lava de auto|ferreter|vidrieri/.test(q))
+      return '/tendito.html';
+
+    // DEFAULT: marca con identidad más "general / warm local" = tendito
+    return '/tendito.html';
+  }
+
   // Expose globally so otros scripts pueden usarlo
   window.vlxBrandRouter = {
     brands: VLX_BRANDS,
     aliases: VLX_ALIASES,
     resolve: resolve,
     norm: norm,
+    fallbackToClosestHero: fallbackToClosestHero,
   };
 
   // ---- Save search context for downstream pages --------------
@@ -2194,9 +2243,15 @@
         window.location.href = brand.url;
         return;
       }
-      // Fallback: comportamiento original
+      // HOTFIX V8.4: antes de caer al template plano, intentar fallback a hero más cercano
+      var fbUrl = fallbackToClosestHero(text);
+      if (fbUrl) {
+        saveContext(text, { brand: 'Fallback (closest hero)', url: fbUrl });
+        window.location.href = fbUrl;
+        return;
+      }
+      // Fallback final: comportamiento original (sólo si query muy corta)
       if (typeof prevQuick === 'function') return prevQuick(text);
-      // Si no había, al menos copiar al input
       var inp = document.getElementById('giro-input');
       if (inp) { inp.value = text; if (typeof window.searchGiro === 'function') window.searchGiro(); }
     };
@@ -2210,6 +2265,13 @@
         if (brand && brand.url) {
           saveContext(q, brand);
           window.location.href = brand.url;
+          return;
+        }
+        // HOTFIX V8.4: fallback a hero más cercano antes de template plano
+        var fbUrl = fallbackToClosestHero(q);
+        if (fbUrl) {
+          saveContext(q, { brand: 'Fallback (closest hero)', url: fbUrl });
+          window.location.href = fbUrl;
           return;
         }
       }
@@ -2239,6 +2301,15 @@
         a.dataset.vlxRouted = '1';
         a.dataset.vlxOriginal = href;
         a.setAttribute('href', brand.url);
+        return;
+      }
+      // HOTFIX V8.4: si no hay match, también redirigir al hero más cercano
+      var fbUrl = fallbackToClosestHero(key);
+      if (fbUrl) {
+        a.dataset.vlxRouted = '1';
+        a.dataset.vlxOriginal = href;
+        a.dataset.vlxFallback = '1';
+        a.setAttribute('href', fbUrl);
       }
     });
   }
