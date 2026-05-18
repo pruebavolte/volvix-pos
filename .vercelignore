@@ -10,6 +10,9 @@ files (3).zip
 .gitignore
 README.md
 *.md
+# excepción: el mapa público generado por scripts/system-map/ sí debe deployarse
+!public/system-map/POS-PANEL-MAP.md
+!public/system-map/*.md
 capacitor.config.json
 tauri.conf.json
 

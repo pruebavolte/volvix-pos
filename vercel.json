@@ -39,6 +39,8 @@
     { "src": "/tendero\\.html", "status": 301, "headers": { "Location": "/marketplace.html" } },
     { "src": "/app", "status": 308, "headers": { "Location": "/app/index.html" } },
     { "src": "/app/", "status": 308, "headers": { "Location": "/app/index.html" } },
+    { "src": "/system-map", "status": 308, "headers": { "Location": "/system-map/" } },
+    { "src": "/system-map/", "dest": "/system-map/index.html" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/api/index.js" }
   ],
