@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mapa del sistema · salvadorex-pos ↔ paneldecontrol</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+  :root { --bg:#0f1115; --panel:#161a22; --text:#e6e8eb; --muted:#9aa3b2; --accent:#5cc8ff; --ok:#34d399; --warn:#fbbf24; --line:#262b36; }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 'JetBrains Mono','Fira Mono',Consolas,monospace}
+  header{padding:24px 28px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+  header h1{font-size:18px;margin:0 0 4px;font-family:Inter,system-ui,sans-serif}
+  header .meta{color:var(--muted);font-size:12px}
+  header .links{margin-top:10px;display:flex;gap:10px;flex-wrap:wrap}
+  header .links a{color:var(--accent);text-decoration:none;border:1px solid var(--line);padding:5px 10px;border-radius:6px;font-size:12px}
+  header .links a:hover{border-color:var(--accent)}
+  main{padding:24px 28px;max-width:1200px;margin:0 auto}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:18px}
+  section h2{margin:0 0 12px;font-family:Inter,system-ui,sans-serif;font-size:15px;color:var(--accent)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .kpi{background:#0f131b;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+  .kpi .v{font-size:22px;font-family:Inter,sans-serif;font-weight:600}
+  .kpi .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{color:var(--muted);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+  td code{background:#0f131b;padding:1px 5px;border-radius:4px;color:var(--ok)}
+  .pill{display:inline-block;padding:2px 7px;border-radius:99px;font-size:11px;background:#0f131b;border:1px solid var(--line);color:var(--muted)}
+  .pill.ok{color:var(--ok);border-color:rgba(52,211,153,.3)}
+  .pill.warn{color:var(--warn);border-color:rgba(251,191,36,.3)}
+  pre{background:#0a0d12;border:1px solid var(--line);border-radius:6px;padding:10px;overflow:auto;font-size:11px}
+  .loading{color:var(--muted);padding:40px;text-align:center}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:700px){.cols2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🗺️ Mapa del sistema — salvadorex-pos.html ↔ paneldecontrol.html</h1>
+  <div class="meta" id="meta">cargando…</div>
+  <div class="links">
+    <a href="/system-map/pos-panel-map.json" target="_blank">📄 JSON crudo</a>
+    <a href="/system-map/POS-PANEL-MAP.md" target="_blank">📝 Markdown</a>
+    <a href="/" >← Volver al inicio</a>
+  </div>
+</header>
+<main>
+  <div id="root" class="loading">Cargando mapa…</div>
+</main>
+
+<script>
+(async function(){
+  const root = document.getElementById('root');
+  const metaEl = document.getElementById('meta');
+  let data;
+  try {
+    const r = await fetch('/system-map/pos-panel-map.json', { cache:'no-store' });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    data = await r.json();
+  } catch(e) {
+    root.innerHTML = '<div style="color:#f87171">No se pudo cargar el JSON: '+e.message+'</div>';
+    return;
+  }
+
+  const m   = data._meta || {};
+  const rel = data.relationship || {};
+  const pos = data.pos_html || {};
+  const pan = data.panel_html || {};
+
+  metaEl.textContent = 'Generado '+m.generated_at+' · POS sha1 '+m.hashes.pos_sha1+' · Panel sha1 '+m.hashes.panel_sha1;
+
+  function kpi(label, value){
+    return '<div class="kpi"><div class="v">'+value+'</div><div class="l">'+label+'</div></div>';
+  }
+  function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]);}
+  function tbl(headers, rows){
+    return '<table><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+
+      rows.map(r=>'<tr>'+r.map(c=>'<td>'+(c==null?'':c)+'</td>').join('')+'</tr>').join('')+
+      '</tbody></table>';
+  }
+
+  const html = [];
+
+  // 1. KPIs
+  html.push('<section><h2>1 · Métricas</h2><div class="grid">'+
+    kpi('Modales POS', m.counts.pos_modals) +
+    kpi('Modales Panel', m.counts.panel_modals) +
+    kpi('Funciones POS', m.counts.pos_functions) +
+    kpi('Funciones Panel', m.counts.panel_functions) +
+    kpi('Botones POS', m.counts.pos_buttons) +
+    kpi('Botones Panel', m.counts.panel_buttons) +
+    kpi('APIs consumidas POS', m.counts.pos_api_endpoints) +
+    kpi('APIs consumidas Panel', m.counts.panel_api_endpoints) +
+    kpi('Rutas backend', m.counts.api_routes_declared) +
+    kpi('Tablas Supabase', m.counts.supabase_tables) +
+    '</div></section>');
+
+  // 2. Relación
+  html.push('<section><h2>2 · Relación POS ↔ Panel</h2>'+
+    '<p><strong>Endpoints compartidos:</strong> '+rel.summary.shared_api_endpoints+' → '+
+      (rel.shared_api_endpoints||[]).map(e=>'<code>'+esc(e)+'</code>').join(', ')+'</p>'+
+    '<p><strong>Patrón de handoff:</strong> '+esc(rel.flow.handoff_pattern)+'</p>'+
+    '<div class="cols2"><div><strong>Solo POS ('+rel.summary.pos_only_endpoints+')</strong><pre>'+
+      esc((rel.pos_only_endpoints||[]).join('\n'))+'</pre></div>'+
+    '<div><strong>Solo Panel ('+rel.summary.panel_only_endpoints+')</strong><pre>'+
+      esc((rel.panel_only_endpoints||[]).join('\n'))+'</pre></div></div>'+
+    '</section>');
+
+  // 3. Nav Panel
+  html.push('<section><h2>3 · Navegación Panel (v14)</h2>'+
+    tbl(['nav','pane existe'],
+      (pan.panelNav.navs||[]).map(n => [n, pan.panelNav.panes.includes(n)
+        ? '<span class="pill ok">✓</span>'
+        : '<span class="pill warn">⚠ dinámico</span>' ])
+    )+
+    (pan.panelNav.panes.some(p=>!pan.panelNav.navs.includes(p))
+      ? '<p style="margin-top:10px;color:var(--muted)">Panes sin nav: '+
+        pan.panelNav.panes.filter(p=>!pan.panelNav.navs.includes(p))
+          .map(p=>'<code>'+esc(p)+'</code>').join(', ')+'</p>'
+      : '')+
+    '</section>');
+
+  // 4. Modales POS
+  html.push('<section><h2>4 · Modales del POS</h2>'+
+    tbl(['ID','Label'],
+      (pos.modals||[]).map(x => ['<code>'+esc(x.id)+'</code>', esc(x.label||'∅')])
+    )+
+    '</section>');
+
+  // 5. Tablas
+  html.push('<section><h2>5 · Tablas Supabase ('+(data.supabase.tables_detected||[]).length+')</h2>'+
+    '<div style="margin-bottom:10px">'+
+      Object.entries(data.supabase.counts_by_prefix||{})
+        .map(([k,v])=>'<span class="pill">'+esc(k)+'* → '+v+'</span>').join(' ')+
+    '</div><pre>'+esc((data.supabase.tables_detected||[]).join('\n'))+'</pre>'+
+    '</section>');
+
+  // 6. Hints tabla → endpoints
+  const hints = Object.entries(rel.table_endpoint_hints||{})
+    .filter(([t,eps])=>eps && eps.length)
+    .sort((a,b)=>b[1].length-a[1].length);
+  html.push('<section><h2>6 · Tabla → endpoints (heurística)</h2>'+
+    tbl(['Tabla','#','Ejemplos'],
+      hints.map(([t,eps])=>['<code>'+esc(t)+'</code>', eps.length,
+        eps.slice(0,3).map(e=>'<code>'+esc(e)+'</code>').join('<br>')])
+    )+'</section>');
+
+  // 7. Scripts
+  html.push('<section><h2>7 · Scripts cargados</h2>'+
+    '<div class="cols2"><div><strong>POS</strong><pre>'+esc((pos.scripts||[]).join('\n'))+'</pre></div>'+
+    '<div><strong>Panel</strong><pre>'+esc((pan.scripts||[]).join('\n'))+'</pre></div></div>'+
+    '</section>');
+
+  // 8. Regenerar
+  html.push('<section><h2>8 · Cómo regenerar este mapa</h2>'+
+    '<pre>node scripts/system-map/scan-pos-panel.js --pretty\nnode scripts/system-map/render-markdown.js</pre>'+
+    '<p style="color:var(--muted);font-size:12px">Re-correr después de cualquier edición a <code>public/salvadorex-pos.html</code>, <code>public/paneldecontrol.html</code> o <code>api/index.js</code>. El campo <code>_meta.hashes</code> permite detectar drift.</p>'+
+    '</section>');
+
+  root.innerHTML = html.join('');
+})();
+</script>
+</body>
+</html>

@@ -1,13 +1,14 @@
 {
-  "version": "1.0.405",
+  "version": "1.0.406",
   "major": 1,
   "minor": 0,
-  "patch": 405,
+  "patch": 406,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-18T16:00:00.000Z",
-  "built_at": "2026-05-18T16:00:00.000Z",
+  "date": "2026-05-18T23:00:00.000Z",
+  "built_at": "2026-05-18T23:00:00.000Z",
   "changelog": [
+    "V10.9 SYSTEM-MAP: nuevo mapa vivo POS↔Panel disponible en /system-map/ — scripts/system-map/scan-pos-panel.js extrae con regex modales (13 POS / 0 Panel), funciones (321 / 67), botones (577 / 64), endpoints /api/ consumidos (45 / 64), 899 rutas backend declaradas y 79 tablas Supabase. Viewer HTML + JSON crudo + Markdown sirven en public/system-map/. _meta.sha1 detecta drift automáticamente.",
     "V10.0 CRÍTICO: 870 botones 'Empezar gratis' en 218 landings premium → ANTES href='#cta' (anchor que no redirigía) → AHORA href='/registro.html?giro=<slug>'. El usuario reportó que botones Ver Demo / Empezar gratis / Acceder no funcionaban — el Acceder y Ver Demo sí iban (login.html y #galeria respectivamente), pero Empezar gratis estaba completamente roto.",
     "V9.9.5: pasteles/tres leches/brownies/cheesecake → merengue, muebles jardín/sala/comedor/recámara/oficina → almohada, cocinas regionales mexicanas (yucateca/oaxaqueña/poblana/etc) → comandero.",
     "V9.9.4: HARD_EXCEPTIONS pollo (guisar/asar/rostizar) → brasa, productos naturistas/diabéticos/suplementos/herbolaria → receta, estudio fotográfico → brillo.",
