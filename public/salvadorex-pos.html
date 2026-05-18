@@ -12935,13 +12935,17 @@
     if (!p) return;
     let sidebar = document.getElementById('vlx-product-sidebar');
     if (!sidebar) {
-      sidebar = document.createElement('div');  // V10.1.1: div en vez de aside (aside global tiene display:none)
+      sidebar = document.createElement('div');
       sidebar.id = 'vlx-product-sidebar';
-      sidebar.setAttribute('style', 'position:fixed !important;right:0 !important;top:0 !important;bottom:0 !important;width:380px !important;background:#fff !important;border-left:2px solid #2D5F8F !important;box-shadow:-4px 0 16px rgba(0,0,0,.15) !important;z-index:99999 !important;overflow-y:auto !important;padding:0 !important;font-family:inherit !important;display:flex !important;flex-direction:column !important;visibility:visible !important;opacity:1 !important;');
       document.body.appendChild(sidebar);
-    } else {
-      sidebar.setAttribute('style', sidebar.getAttribute('style'));  // re-aplicar para casos donde algún script borró display
     }
+    // V10.1.2: setProperty con priority='important' es la única forma que funciona en todos los browsers
+    const setStyle = (prop, val) => sidebar.style.setProperty(prop, val, 'important');
+    setStyle('position','fixed'); setStyle('right','0'); setStyle('top','0'); setStyle('bottom','0');
+    setStyle('width','380px'); setStyle('background','#fff'); setStyle('border-left','2px solid #2D5F8F');
+    setStyle('box-shadow','-4px 0 16px rgba(0,0,0,.15)'); setStyle('z-index','99999');
+    setStyle('overflow-y','auto'); setStyle('padding','0'); setStyle('font-family','inherit');
+    setStyle('display','flex'); setStyle('flex-direction','column'); setStyle('visibility','visible'); setStyle('opacity','1');
     const images = (p.images && p.images.length) ? p.images : (p.image_url ? [{url: p.image_url, alt: p.name}] : []);
     const videos = p.videos || [];
     const tech = p.tech_info || {};
