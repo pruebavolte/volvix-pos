@@ -1,16 +1,17 @@
 {
-  "version": "1.0.359",
+  "version": "1.0.360",
   "major": 1,
   "minor": 0,
-  "patch": 359,
+  "patch": 360,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-18T02:10:00.000Z",
-  "built_at": "2026-05-18T02:10:00.000Z",
+  "date": "2026-05-18T06:35:00.000Z",
+  "built_at": "2026-05-18T06:35:00.000Z",
   "changelog": [
-    "V8.8.1 ROUND 2 final fix: 'neveria' (sin acento) → /nieve.html. Cierra el ciclo de validación masiva. 1081/1081 giros aterrizan en landing premium relevante. 0 al template plano. 0 al genérico tendito cuando hay marca específica.",
-    "V8.8 ROUND 1: validación masiva 1081 giros, +280 aliases SMB MX, fix bug papeleria/colegio landing planos.",
-    "V8.7.x: aliases con keys normalizadas + BUG critical pareo/comandero/refacciona en VLX_BRANDS.",
+    "V8.9 BUG CRITICAL: detectado vía Puppeteer real que backend api/giros.js mapeaba 'antro'→/landing-disco.html y 'librería'→/landing-libreria.html (templates planos viejos). El frontend vlxBrandRouter NO podía interceptar porque searchGiro() llama PRIMERO al backend. Fix: agregada tabla PLAIN_TO_PREMIUM en searchGiros() que remap 30 landings planas a sus marcas premium correspondientes (disco→tarima, libreria→bloque, cantina→tarima, hotel→folio, joyeria→quilate, zapateria→pareo, etc.). Ahora ningún flujo del marketplace puede caer al template plano viejo.",
+    "V8.8.1 ROUND 2: 'neveria' → /nieve.html",
+    "V8.8 ROUND 1: validación masiva 1081 giros, +280 aliases SMB MX, fix papeleria/colegio landing planos",
+    "V8.7.x: aliases con keys normalizadas + BUG critical pareo/comandero/refacciona en VLX_BRANDS",
     "V8.6, V8.5.1, V8.5, V8.4.1, V8.4, V8.3, V8.2, V8.1, V8, V7, V6: fases anteriores"
   ]
 }

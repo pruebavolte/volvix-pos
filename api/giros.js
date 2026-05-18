@@ -180,6 +180,44 @@ async function searchGiros(ctx, req, res, parsedUrl) {
   }
 
   if (hit) {
+    // V8.9 FIX: si el landing apunta a /landing-X.html (template plano viejo),
+    // remap al PREMIUM brand correspondiente. El frontend vlxBrandRouter tiene
+    // 217 marcas premium activas; esta función backend NO debe servir template plano.
+    const PLAIN_TO_PREMIUM = {
+      '/landing-disco.html': '/tarima.html',
+      '/landing-libreria.html': '/bloque.html',
+      '/landing-cantina.html': '/tarima.html',
+      '/landing-hotel.html': '/folio.html',
+      '/landing-funeraria.html': '/folio.html',
+      '/landing-gasolinera.html': '/folio.html',
+      '/landing-renta-autos.html': '/folio.html',
+      '/landing-renta-salones.html': '/tarima.html',
+      '/landing-foto-estudio.html': '/folio.html',
+      '/landing-escuela-idiomas.html': '/bloque.html',
+      '/landing-purificadora.html': '/tendito.html',
+      '/landing-joyeria.html': '/quilate.html',
+      '/landing-zapateria.html': '/pareo.html',
+      '/landing-ropa.html': '/pareo.html',
+      '/landing-muebleria.html': '/mueble.html',
+      '/landing-ferreteria.html': '/tendito.html',
+      '/landing-papeleria.html': '/bloque.html',
+      '/landing-colegio.html': '/bloque.html',
+      '/landing-minisuper.html': '/tendito.html',
+      '/landing-fruteria.html': '/tendito.html',
+      '/landing-carniceria.html': '/corte.html',
+      '/landing-polleria.html': '/tendito.html',
+      '/landing-tortilleria.html': '/comandero.html',
+      '/landing-pasteleria.html': '/merengue.html',
+      '/landing-heladeria.html': '/nieve.html',
+      '/landing-nails.html': '/brillo.html',
+      '/landing-tatuajes.html': '/brillo.html',
+      '/landing-lavado-autos.html': '/burbuja.html',
+      '/landing-servicio-celulares.html': '/repara-cel.html',
+      '/landing-floreria.html': '/petalo.html',
+    };
+    if (PLAIN_TO_PREMIUM[hit.landing]) {
+      hit.landing = PLAIN_TO_PREMIUM[hit.landing];
+    }
     return send(ctx, res, 200, {
       exists: true,
       slug: hit.slug,
