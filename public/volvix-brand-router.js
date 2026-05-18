@@ -3517,23 +3517,35 @@
     };
 
     var prevSearch = window.searchGiro;
+    // V10.7 BUG FIX: este override redirigía SIEMPRE a la marca más cercana
+    // (partial-match) sin preguntar. "toallas" → /almohada.html (colchonerías) sin
+    // pasar por /api/giros/generate. El usuario esperaba que se creara una landing
+    // nueva ("ToallasPro") en lugar de redirigir a algo parecido.
+    //
+    // Fix: solo redirigir si el match es EXACTO (la query normalizada coincide con
+    // el slug de la marca). Si es partial/fallback, dejar correr la searchGiro
+    // ORIGINAL del marketplace que llama /api/giros/generate (crea landing nueva).
     window.searchGiro = function(){
       var inp = document.getElementById('giro-input');
       var q = inp ? (inp.value || '').trim() : '';
       if (q) {
+        var qNorm = norm(q);
         var brand = resolve(q);
         if (brand && brand.url) {
-          saveContext(q, brand);
-          window.location.href = brand.url;
-          return;
+          // Extraer slug de brand.url (ej "/navaja.html" → "navaja")
+          var slugMatch = String(brand.url || '').match(/\/?([^/.?#]+)\.html/);
+          var slug = slugMatch ? slugMatch[1].toLowerCase() : '';
+          // Match exacto: query normalizada == slug del archivo
+          if (slug && (slug === qNorm || slug === qNorm.replace(/s$/,'') || (slug+'s') === qNorm)) {
+            saveContext(q, brand);
+            window.location.href = brand.url;
+            return;
+          }
+          // Match NO-exacto: dejar pasar al prevSearch (que llamará /api/giros/generate)
+          console.log('[vlx-router] partial-match para "' + q + '" → ' + slug + ', pero NO redirigiendo. prevSearch tomará control para crear landing nueva.');
         }
-        // HOTFIX V8.4: fallback a hero más cercano antes de template plano
-        var fbUrl = fallbackToClosestHero(q);
-        if (fbUrl) {
-          saveContext(q, { brand: 'Fallback (closest hero)', url: fbUrl });
-          window.location.href = fbUrl;
-          return;
-        }
+        // No hacer fallback a closest hero — eso causa el bug.
+        // Dejar que el marketplace.searchGiro original genere landing nueva via /api/giros/generate.
       }
       if (typeof prevSearch === 'function') return prevSearch();
     };
