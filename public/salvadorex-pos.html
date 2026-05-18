@@ -12935,10 +12935,12 @@
     if (!p) return;
     let sidebar = document.getElementById('vlx-product-sidebar');
     if (!sidebar) {
-      sidebar = document.createElement('aside');
+      sidebar = document.createElement('div');  // V10.1.1: div en vez de aside (aside global tiene display:none)
       sidebar.id = 'vlx-product-sidebar';
-      sidebar.style.cssText = 'position:fixed;right:0;top:0;bottom:0;width:380px;background:#fff;border-left:2px solid #2D5F8F;box-shadow:-4px 0 16px rgba(0,0,0,.15);z-index:9999;overflow-y:auto;padding:0;font-family:inherit;display:flex;flex-direction:column;';
+      sidebar.setAttribute('style', 'position:fixed !important;right:0 !important;top:0 !important;bottom:0 !important;width:380px !important;background:#fff !important;border-left:2px solid #2D5F8F !important;box-shadow:-4px 0 16px rgba(0,0,0,.15) !important;z-index:99999 !important;overflow-y:auto !important;padding:0 !important;font-family:inherit !important;display:flex !important;flex-direction:column !important;visibility:visible !important;opacity:1 !important;');
       document.body.appendChild(sidebar);
+    } else {
+      sidebar.setAttribute('style', sidebar.getAttribute('style'));  // re-aplicar para casos donde algún script borró display
     }
     const images = (p.images && p.images.length) ? p.images : (p.image_url ? [{url: p.image_url, alt: p.name}] : []);
     const videos = p.videos || [];
