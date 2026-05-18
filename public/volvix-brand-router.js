@@ -277,6 +277,7 @@
     'folio'             : { brand: 'Folio', url: 'folio.html' },
     'forja'             : { brand: 'Forja', url: 'forja.html' },
     'tarima'            : { brand: 'Tarima', url: 'tarima.html' },
+    'discreto'          : { brand: 'Discreto', url: 'discreto.html' },
   };
 
   // ---- Aliases (lo que el usuario escribe) → key -------------
@@ -2108,6 +2109,21 @@
     'antro'                             : 'tarima',
     'discoteca'                         : 'tarima',
     'pub'                               : 'tarima',
+    // --- Discreto (sexshop / boutique íntima) ---
+    'sexshop'                           : 'discreto',
+    'sex shop'                          : 'discreto',
+    'sex-shop'                          : 'discreto',
+    'tienda erotica'                    : 'discreto',
+    'tienda para adultos'               : 'discreto',
+    'tienda de adultos'                 : 'discreto',
+    'productos para adultos'            : 'discreto',
+    'juguetes para adultos'             : 'discreto',
+    'lenceria'                          : 'discreto',
+    'lenceria fina'                     : 'discreto',
+    'boutique intima'                   : 'discreto',
+    'boutique discreta'                 : 'discreto',
+    'discreto'                          : 'discreto',
+    'adultos'                           : 'discreto',
   };
 
   // ---- Normalizador ------------------------------------------

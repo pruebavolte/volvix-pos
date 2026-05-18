@@ -37126,6 +37126,67 @@ const BRAND_TARIMA = {
 
 
 // =============================================================
+// BRAND_DISCRETO — Sexshop / tienda para adultos (minimalist vibe)
+// =============================================================
+const BRAND_DISCRETO = {
+  slug:'discreto', brand:'Discreto', tagline:'El sistema para tiendas de adultos que cuidan la privacidad de cada cliente',
+  giro:'sexshop', giroPlural:'sexshops', vibe:'minimalist',
+  palette:{bg:'#0F0D14', surface:'#1A1722', paper:'#221E2D', ink:'#F5F0F8', ink2:'#D6CCDF', muted:'#8A7E9A', line:'#2E2837', accent:'#D67BA8', accent2:'#E89DC0'},
+  fonts:{display:'Cormorant Garamond', body:'Inter', script:'Italianno', mono:'JetBrains Mono'},
+  hero:{eyebrow:'El sistema para sexshops mexicanos · 2026', h1:'Cada <em>cliente</em>,<br>cada <em>compra</em>,<br>en su intimidad.', deck:'El POS hecho para que la discreción sea el estándar: códigos neutrales en etiquetas, empaque sin marca visible, recibos genéricos, y club VIP que reconoce al cliente regular sin nombrarlo.', ctaPrimary:'Empezar gratis', ctaSecondary:'Ver inventario en vivo', metaLine:'$0 inicial · sin tarjeta · 100% discreto'},
+  images:{
+    hero:'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1200&h=1600&fit=crop&q=85', heroAlt:'Boutique elegante con iluminación cálida',
+    showcase:[
+      {url:'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1200&h=900&fit=crop&q=80',tag:'Interior boutique',size:'lg'},
+      {url:'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=900&h=1200&fit=crop&q=80',tag:'Empaque neutral',size:'md'},
+      {url:'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=900&h=1200&fit=crop&q=80',tag:'Producto en vitrina',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=900&h=1200&fit=crop&q=80',tag:'Iluminación cálida',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=900&h=1200&fit=crop&q=80',tag:'Ambiente íntimo',size:'md'},
+      {url:'https://images.unsplash.com/photo-1612965607446-25e1332775ae?w=900&h=1200&fit=crop&q=80',tag:'Catálogo discreto',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1200&h=900&fit=crop&q=80',tag:'Display elegante',size:'md'},
+      {url:'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=900&h=1200&fit=crop&q=80',tag:'Atención privada',size:'sm'},
+      {url:'https://images.unsplash.com/photo-1607082349566-187342175e2f?w=1200&h=900&fit=crop&q=80',tag:'Boutique moderna',size:'md'},
+    ],
+    context:[
+      {url:'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&h=600&fit=crop&q=80',caption:'Recibo discreto sin nombre del producto'},
+      {url:'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=800&h=600&fit=crop&q=80',caption:'Empaque opaco para envío a domicilio'},
+      {url:'https://images.unsplash.com/photo-1612965607446-25e1332775ae?w=800&h=600&fit=crop&q=80',caption:'Stock en vivo con códigos internos'},
+    ],
+  },
+  liveDemo:{
+    type:'stock', eyebrow:'Inventario en vivo',
+    title:'Tu stock, <em>por código discreto</em>',
+    deck:'Cada producto identificado con código interno tipo "DX-204" en etiquetas, recibos y reportes. El cliente solo ve productos en pantalla, nunca nombres en sus papeles.',
+    secondary:'En las sexshops, la privacidad del cliente es el activo. Discreto convierte cada interacción en una experiencia respetuosa.',
+    data:{
+      product:'Línea Premium', tallas:['DX-100','DX-200','DX-300','DX-400','DX-500','DX-600','DX-700','DX-800'],
+      stock:[
+        {color:'Estándar', vals:[8, 5, 12, 3, 7, 0, 4, 2]},
+        {color:'Premium', vals:[3, 4, 6, 2, 5, 1, 0, 0]},
+        {color:'Edición ltda', vals:[2, 1, 3, 0, 2, 0, 0, 0]},
+      ],
+      lowThreshold:2,
+    },
+  },
+  features:[
+    {ico:'archive', h:'Códigos discretos en etiquetas', d:'Cada producto identificado con código interno (DX-204). En etiquetas, recibos y reportes, jamás aparece el nombre del producto.'},
+    {ico:'bookmark', h:'Empaque neutral para envíos', d:'Pedidos a domicilio salen en empaque opaco sin logo de tienda. Cliente firma factura genérica de "Boutique Premium".'},
+    {ico:'percent', h:'Club VIP sin lista pública', d:'Cliente regular recibe descuentos por su código de cliente. Nunca aparece su nombre en pantallas visibles, solo internamente.'},
+    {ico:'camera', h:'Pago contactless con factura neutral', d:'Cobro por tarjeta sin que el ticket diga "sexshop". Concepto en estado de cuenta: "Boutique" o nombre comercial neutral.'},
+    {ico:'barcode', h:'Catálogo digital con QR para cliente', d:'Cliente escanea QR en mesa, ve catálogo en su celular sin que el empleado lea sus preferencias. Compra desde el carrito.'},
+    {ico:'truck', h:'Entrega domicilio con horarios pactados', d:'Cliente pide entrega en ventana de horario específica. Repartidor entrega sin tocar timbre, deja paquete neutro, manda WhatsApp con foto.'},
+  ],
+  stats:[{v:'1,247', l:'Productos en inventario'},{v:'34', l:'Ventas hoy'},{v:'5', l:'Min de setup', suffix:'min'},{v:'0', l:'Costo inicial', prefix:'$'}],
+  quote:{text:'Antes mis clientes <span class="hl">se iban sin comprar por miedo a que el ticket dijera el producto</span>. Con Discreto, todo está codificado. Mis ventas subieron 45% en 3 meses.', sig:'Karla M.', role:'Boutique Discreto, Polanco, CDMX'},
+  thefts:[
+    {title:'Productos "regalo" a empleados', rob:'Empleado se lleva lubricantes, juguetes o accesorios diciendo "se rompió" o "es muestra". En una sexshop son 15-30 productos al mes — $5-15k perdidos.', fix:'Cada producto con <strong>número de serie único</strong>. Salidas requieren autorización del dueño por WhatsApp. Auditoría diaria automática.'},
+    {title:'Devoluciones "no usadas" que sí lo están', rob:'Cliente devuelve producto íntimo diciendo "no me sirvió" y el empleado lo revende como nuevo. Por higiene y por imagen, es ilegal y peligroso.', fix:'Política <strong>cero devoluciones de productos íntimos</strong> enforced en el sistema. Si el empleado intenta revender, el sistema bloquea (sin override sin tu autorización).'},
+    {title:'Venta "por fuera" sin pasar por caja', rob:'Cliente quiere máxima discreción y paga en efectivo. Empleado le dice "te lo dejo más barato sin ticket" y se queda con todo. Tú nunca te enteras.', fix:'Acceso al producto requiere <strong>escaneo previo del código en sistema</strong>. Sin escaneo, no se puede sacar del aparador. Stock se descuadra y te alerta.'},
+  ],
+};
+
+
+// =============================================================
 // SOCIAL PROOF — toasts que rotan en todas las landings
 // =============================================================
 const SOCIAL_PROOF = [
@@ -37348,6 +37409,7 @@ const SOCIAL_PROOF = [
   {brand:'Folio',  biz:'Despacho Hernández',    city:'Monterrey, NL',     when:'hace 18 min'},
   {brand:'Forja',  biz:'CrossFit Vallarta',     city:'Vallarta, JAL',     when:'hace 26 min'},
   {brand:'Tarima', biz:'Salón La Hacienda',     city:'San Pedro, NL',     when:'hace 34 min'},
+  {brand:'Discreto', biz:'Boutique Discreto',    city:'Polanco, CDMX',     when:'hace 18 min'},
 ];
 
 
@@ -37571,6 +37633,7 @@ const BRANDS = {
   folio: BRAND_FOLIO,
   forja: BRAND_FORJA,
   tarima: BRAND_TARIMA,
+  discreto: BRAND_DISCRETO,
 };
 
 if (typeof module !== 'undefined' && module.exports) {
