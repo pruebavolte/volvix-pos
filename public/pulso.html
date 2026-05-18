@@ -997,11 +997,13 @@
         <div class="role">${b.role}</div>
       </button>`).join('');
     const renderSlots = (idx) => {
-      const b = d.barberos[idx];
+      const b = d.barberos[idx] || {};
+      const _taken = (b.taken && Array.isArray(b.taken)) ? b.taken : (Array.isArray(d.taken) ? d.taken : []);
+      const _active = (b.active !== undefined) ? b.active : d.active;
       return d.slots.map((h, i) => {
         let cls = 'v-w-book-slot';
-        if (b.taken.indexOf(i) !== -1) cls += ' taken';
-        if (b.active === i) cls += ' active';
+        if (_taken.indexOf(i) !== -1) cls += ' taken';
+        if (_active === i) cls += ' active';
         return `<button class="${cls}">${h}</button>`;
       }).join('');
     };
