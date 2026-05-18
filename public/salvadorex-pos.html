@@ -2750,11 +2750,54 @@
       window.VolvixProductSearch.mountAutocomplete(inp, {
         debounce: 200, limit: 8,
         onSelect: function(p) {
-          // searchProduct ya valida precio re-fetch
-          if (typeof searchProduct === 'function') {
-            searchProduct(p.code || p.id);
-          } else {
-            inp.value = p.code || '';
+          // V10.5 BUG FIX: NO usar searchProduct(p.id) porque p.id es UUID y
+          // CATALOG indexa por code/barcode, no por id → searchProduct fallaba
+          // y abría modal "Editar producto" con UUID en el nombre.
+          // SOLUCIÓN: agregar el producto directamente al CART (ya tenemos
+          // todos los datos del autocomplete). Si addQuickPick existe y tiene
+          // el code, usarlo; sino push manual al CART.
+          if (!p) { inp.value = ''; return; }
+          try {
+            const code = p.code || p.barcode || '';
+            // Caso 1: producto está en QUICKPICK → usar addQuickPick (sync con panel)
+            if (code && typeof window.QUICKPICK !== 'undefined' &&
+                Array.isArray(QUICKPICK) && QUICKPICK.find(x => x.code === code) &&
+                typeof addQuickPick === 'function') {
+              addQuickPick(code);
+              inp.value = ''; inp.focus();
+              return;
+            }
+            // Caso 2: producto NO está en QUICKPICK pero el autocomplete sí lo tiene
+            // → push directo al CART
+            const productForCart = {
+              id: p.id,
+              code: code || String(p.id || ''),
+              name: p.name || p.nombre || 'Producto',
+              price: Number(p.price || p.precio || 0),
+              qty: 1,
+              stock: Number(p.stock || p.qty || 0),
+              image_url: p.image_url || (Array.isArray(p.images) && p.images[0] ? p.images[0].url : null),
+              images: Array.isArray(p.images) ? p.images : [],
+              description_long: p.description_long || null,
+              tech_info: p.tech_info || {}
+            };
+            if (typeof window.CART !== 'undefined' && Array.isArray(CART)) {
+              const existing = CART.find(c => c.code === productForCart.code && productForCart.code);
+              if (existing) { existing.qty++; }
+              else { CART.push(productForCart); }
+              if (typeof window.SELECTED_CART_INDEX !== 'undefined') {
+                window.SELECTED_CART_INDEX = CART.length - 1;
+              }
+              if (typeof renderCart === 'function') renderCart();
+              if (typeof showProductSidebar === 'function' && productForCart.code) {
+                try { showProductSidebar(productForCart.code); } catch(_){}
+              }
+              if (typeof showToast === 'function') showToast('+ ' + productForCart.name);
+            }
+            inp.value = ''; inp.focus();
+          } catch (e) {
+            console.warn('[autocomplete onSelect] err:', e.message);
+            inp.value = '';
           }
         }
       });
