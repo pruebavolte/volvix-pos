@@ -23,6 +23,7 @@
     // ALIMENTOS
     'restaurante':     { brand: 'Comandero',  url: 'comandero.html'   },
     'taqueria':        { brand: 'Comandero',  url: 'comandero.html'   },
+    'comandero':       { brand: 'Comandero',  url: 'comandero.html'   }, // V8.7.1: alias self-reference
     'pizzeria':        { brand: 'Comandero',  url: 'comandero.html'   },
     // V6 motor v3 — 11 marcas premium (5 hero originales + 6 nuevas)
     'cafeteria':       { brand: 'Espuma',     url: 'espuma.html'      }, // NUEVO
@@ -48,10 +49,12 @@
     'carniceria':      { brand: 'Tendito',    url: 'tendito.html'     },
     'zapateria':       { brand: 'Pareo',      url: 'pareo.html'       },
     'boutique':        { brand: 'Pareo',      url: 'pareo.html'       },
+    'pareo':           { brand: 'Pareo',      url: 'pareo.html'       }, // V8.7.1: alias self-reference
     'floreria':        { brand: 'Pétalo',     url: 'petalo.html'      }, // NUEVO premium
     // SERVICIOS
     'taller_mecanico': { brand: 'Refacciona', url: 'refacciona.html'  }, // NUEVO premium
     'mecanico':        { brand: 'Refacciona', url: 'refacciona.html'  }, // NUEVO
+    'refacciona':      { brand: 'Refacciona', url: 'refacciona.html'  }, // V8.7.1: alias self-reference
     'lavanderia':      { brand: 'Burbuja',    url: 'burbuja.html'     }, // NUEVO premium
     'tintoreria':      { brand: 'Burbuja',    url: 'burbuja.html'     }, // NUEVO
     'carwash':         { brand: 'Burbuja',    url: 'burbuja.html'     }, // NUEVO (relacionado limpieza)
