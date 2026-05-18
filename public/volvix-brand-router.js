@@ -3111,6 +3111,16 @@
     // Purificadora de agua → tendito (productos a domicilio)
     if (/purificadora (de )?agua|garrafones? (de )?agua|reparto (de )?agua|distribuidora (de )?agua/.test(n))
       return VLX_BRANDS.tendito || { brand:'Tendito', url:'tendito.html' };
+    // V9.9.3 — Raspados/nieves/helados → nieve (postre/dulce) NO brillo (estética).
+    // Bug: "raspados con leche" capturaba "leche" como producto lácteo/estética.
+    if (/raspad[ao]s?|nieve(s)? (de|para|con)|helad[ao]s? (de|con|estilo)|cucharadas? (de )?nieve|cocadas?|paletas? (heladas?|de hielo)/.test(n))
+      return VLX_BRANDS.nieve || { brand:'Nieve', url:'nieve.html' };
+    // V9.9.3 — Costura, mercería, hilos, telas por metro, modistería → hilito
+    if (/costura(s)?|merceria|hilos? (para |de )?costura|telas? por metro|modisteria|sastrer[ií]a|arreglos? (de )?ropa|cose|hilvanar/.test(n))
+      return VLX_BRANDS.hilito || { brand:'Hilito', url:'hilito.html' };
+    // V9.9.3 — Carbón, leña, combustibles para asar → tendito (consumo abarrotes)
+    if (/\bcarb[oó]n\b|le[nñ]a (para|de) asar|brique?tas?|combustibles? (para )?(asar|parrilla|carne)/.test(n))
+      return VLX_BRANDS.tendito || { brand:'Tendito', url:'tendito.html' };
 
     if (/^(renta|alquil)/.test(n) || / (renta|alquila|alquiler) /.test(' '+n+' '))
       return VLX_BRANDS.tarima || { brand:'Tarima', url:'tarima.html' };
