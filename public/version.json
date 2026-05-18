@@ -1,18 +1,17 @@
 {
-  "version": "1.0.364",
+  "version": "1.0.365",
   "major": 1,
   "minor": 0,
-  "patch": 364,
+  "patch": 365,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-18T10:15:00.000Z",
-  "built_at": "2026-05-18T10:15:00.000Z",
+  "date": "2026-05-18T10:30:00.000Z",
+  "built_at": "2026-05-18T10:30:00.000Z",
   "changelog": [
-    "V9.0.3 FIX FINAL: el patch del widget booking dejó 10+ archivos sin parchar (pata.html entre ellos por diferencias de whitespace CRLF/LF). Aplicado patch quirúrgico final a TODOS los HTMLs que aún tenían el bug 'b.taken.indexOf'. Pata.html ya renderiza correctamente.",
-    "V9.0.2 FIX MASIVO: widget booking + 8 HARD_EXCEPTIONS",
-    "V9.0.1 FIX: HARD_EXCEPTIONS al inicio de resolve()",
-    "V9.0 PRE-PITCH FIX: HARD_EXCEPTIONS + picker hide defensivo",
-    "V8.9 BUG CRITICAL: backend api/giros.js servía templates planos",
-    "V8.8.x, V8.7.x: fases anteriores"
+    "V9.0.4+V9.0.5 PRE-PITCH FIX MASIVO: (1) Widget booking ahora soporta estructura ALT (slots con name/available, sin barberos) — arregla render de merengue/burbuja/y similares. Aplicado a 206 HTMLs. (2) PLAIN_TO_PREMIUM extendido con 50 mappings nuevos para que el backend NO sirva templates planos: taquería→comandero, dental→pulso, veterinaria→pata, abarrotes→tendito, lavandería→burbuja, vapeshop→discreto, lencería→discreto, y muchos más.",
+    "V9.0.3: parche surgical 10 HTMLs faltantes del widget booking",
+    "V9.0.2: widget booking + 8 HARD_EXCEPTIONS",
+    "V9.0.1: HARD_EXCEPTIONS al inicio de resolve()",
+    "V8.9 BUG CRITICAL: backend api/giros.js servía templates planos"
   ]
 }
