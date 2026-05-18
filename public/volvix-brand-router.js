@@ -3094,6 +3094,12 @@
     // ═══════════════════════════════════════════════════════════════
     if (/^(renta|alquil)/.test(n) || / (renta|alquila|alquiler) /.test(' '+n+' '))
       return VLX_BRANDS.tarima || { brand:'Tarima', url:'tarima.html' };
+    // V9.8.1 — antojitos mexicanos / comida de mole → comandero (cocina mexicana)
+    if (/\bmole\b|venta de mole|mole poblano|mole rojo|mole verde|mole negro|mole almendrado|tamales? (de|con|al|por)?|venta de tamales|tamalero|tamales? oaxaque|tamales? barbones|elote[s]? (en )?vaso|elotitos?|esquites?|venta de elotes?|elotero|elotero|chilaquiles?|gorditas? (de|con)?|sopes?|huaraches?|tlacoyos?|panuchos?|salbutes?|memelas?|antojitos? mexicanos?/.test(n))
+      return VLX_BRANDS.comandero || { brand:'Comandero', url:'comandero.html' };
+    // V9.8.1 — "cabello chino"/"cabello rizado"/permanente etc NO son cocina asiática → brillo/estética
+    if (/cabello chino|cabello rizado|permanente|rizos|alaciado|tratamiento (de )?cabello|tinte (de |para )?cabello|coloraci[oó]n (de )?cabello|peinado|salon de belleza|sal[oó]n de belleza|estilismo/.test(n))
+      return VLX_BRANDS.brillo || { brand:'Brillo', url:'brillo.html' };
     // V9.6.2: regex más restrictivo para no capturar "ropa de bebe" → tendito
     // Solo captura: pañales literal | productos de bebé genéricos (alimento, leche, biberones, etc.)
     if (/^panales?$|^pañales?$|panal de|pañal de|alimento(s)? (de |para )?bebe|leche para bebe|biberon|chupone(s)?|carrito(s)? para bebe|cuna(s)? para bebe/.test(n))
