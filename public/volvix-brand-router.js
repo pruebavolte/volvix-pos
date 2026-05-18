@@ -1900,12 +1900,14 @@
     'odontóloga'                        : 'pulso',
     'ortodoncista'                      : 'pulso',
     'endodoncista'                      : 'pulso',
-    'optica'                            : 'pulso',
-    'óptica'                            : 'pulso',
+    'optica'                            : 'armazon',
+    'óptica'                            : 'armazon',
+    'optica premium'                    : 'armazon',
+    'óptica premium'                    : 'armazon',
     'oftalmologo'                       : 'pulso',
     'oftalmologia'                      : 'pulso',
     'oftalmología'                      : 'pulso',
-    'optometra'                         : 'pulso',
+    'optometra'                         : 'armazon',
     'podologo'                          : 'pulso',
     'podología'                         : 'pulso',
     'salud'                             : 'pulso',
@@ -2199,6 +2201,10 @@
     if (/farmac|botica|drogueria/.test(q))
       return '/receta.html';
 
+    // V8.5.1: MASCOTAS ANTES que belleza (peluqueria canina ≠ peluquería humana)
+    if (/veterinari|\bvet\b|mascot|perro|gato|petshop|pet shop|animales|estetica canina|peluqueria canina|peluquería canina|estética canina/.test(q))
+      return '/pata.html';
+
     // BELLEZA Y ESTÉTICA → brillo (sexshop ya tiene alias a discreto, no llega aquí)
     if (/belleza|salon|spa|estetic|unas|manicur|pedicur|depilac|maquill|peluqu|ceja|pestana/.test(q))
       return '/brillo.html';
@@ -2264,7 +2270,7 @@
       return '/escama.html';
 
     // V8.5: AUTO / TALLER MECÁNICO → refacciona
-    if (/auto|carro|vehiculo|taller|mecanic|llanta|refaccion|aceite|afinacion/.test(q))
+    if (/auto|carro|vehiculo|taller|mecanic|llanta|refaccion|aceite|afinacion|vulcaniz|hojalater|pintura auto/.test(q))
       return '/refacciona.html';
 
     // V8.5: EDUCACIÓN / ESCUELA → bloque
@@ -2275,9 +2281,7 @@
     if (/libr|libreria|book|biblio|editor/.test(q))
       return '/bloque.html';
 
-    // V8.5: VETERINARIA / MASCOTAS → pata
-    if (/veterinari|vet|mascot|perro|gato|petshop|pet shop|animales|estetica canina|peluqueria canina/.test(q))
-      return '/pata.html';
+    // (Mascotas movido más arriba para que prevalga sobre belleza humana)
 
     // DEFAULT: marca con identidad más "general / warm local" = tendito
     return '/tendito.html';
