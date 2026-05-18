@@ -1,0 +1,71 @@
+name: Security Scan
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+  schedule:
+    - cron: '0 4 * * *'   # Daily 04:00 UTC
+
+jobs:
+  audit:
+    name: npm audit + Snyk
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install --no-audit --no-fund
+          fi
+
+      - name: npm audit (high & critical)
+        run: |
+          if [ ! -f package.json ]; then
+            echo "No package.json — skipping audit"
+            exit 0
+          fi
+          set +e
+          npm audit --audit-level=high --json > audit.json
+          STATUS=$?
+          set -e
+          cat audit.json | head -200 || true
+          CRIT=$(node -e "try{const a=require('./audit.json');const v=a.metadata?.vulnerabilities||{};console.log(v.critical||0)}catch(e){console.log(0)}")
+          HIGH=$(node -e "try{const a=require('./audit.json');const v=a.metadata?.vulnerabilities||{};console.log(v.high||0)}catch(e){console.log(0)}")
+          echo "Critical: $CRIT | High: $HIGH"
+          if [ "$CRIT" -gt 0 ]; then
+            echo "FAIL: critical vulnerabilities present"
+            exit 1
+          fi
+          if [ "$HIGH" -gt 0 ]; then
+            echo "WARN: high vulnerabilities present (non-blocking)"
+          fi
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: audit.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Snyk scan (optional)
+        if: ${{ env.SNYK_TOKEN != '' }}
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          npm install -g snyk
+          snyk test --severity-threshold=high || exit 1

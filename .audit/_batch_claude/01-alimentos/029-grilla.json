@@ -1,0 +1,104 @@
+{
+  "slug": "grilla",
+  "brand": "Grilla",
+  "tagline": "El sistema para hamburgueserías gourmet donde la carne se pesa al gramo y los toppings premium se cobran completos",
+  "giro": "hamburguesería gourmet",
+  "giroPlural": "hamburgueserías gourmet",
+  "vibe": "darkPremium",
+  "palette": {
+    "bg": "#1A1410",
+    "surface": "#2A1F18",
+    "paper": "#3A2C22",
+    "ink": "#F0E2C8",
+    "ink2": "#D0B888",
+    "muted": "#8A7055",
+    "line": "#4D3B28",
+    "accent": "#B71C1C",
+    "accent2": "#FFD600"
+  },
+  "fonts": {
+    "display": "Anton",
+    "body": "Inter",
+    "script": "Permanent Marker",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para hamburgueserías gourmet en México · 2026",
+    "h1": "Cada <em>patty</em>,<br>cada <em>toppings</em>,<br>premium.",
+    "deck": "El POS hecho para que el patty Angus se pese al gramo, el bacon no se 'queme' del personal, y las papas trufa se cobren completas sin descuentos al cuate.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?gourmet,burger,angus&q=85",
+    "heroAlt": "Hamburguesa gourmet con queso derretido",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?burger,gourmet&q=80", "tag": "Burger gourmet", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?angus,patty&q=80", "tag": "Patty Angus", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bacon,strips&q=80", "tag": "Bacon crocante", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?truffle,fries&q=80", "tag": "Papas trufa", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?onion,rings&q=80", "tag": "Aros de cebolla", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?craft,beer&q=80", "tag": "Cerveza artesanal", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?burger,joint&q=80", "tag": "Salón industrial", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cheese,melt&q=80", "tag": "Queso derretido", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?grill,fire&q=80", "tag": "Plancha al fuego", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?cook,grill&q=80", "caption": "Cocinero voltea patty al punto"},
+      {"url": "https://source.unsplash.com/random/800x600/?bascula,carne&q=80", "caption": "Báscula pesa cada patty"},
+      {"url": "https://source.unsplash.com/random/800x600/?customer,burger&q=80", "caption": "Cliente disfruta gourmet"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · grill · en vivo",
+    "title": "Tu plancha, <em>burger por burger</em>, al punto exacto",
+    "deck": "Cada orden con peso de patty y término. KDS muestra: doble patty 180g + bacon + queso cheddar, término medio. Cocinero ve todo. Cero burgers pasadas.",
+    "secondary": "En las burgers gourmet, una burger término malo es 1 cliente que dice 'no es premium' y se va.",
+    "data": {
+      "orders": [
+        {"table": "M03", "name": "Don Andrés", "state": "urgent", "items": ["Double Angus 180g x2|término medio + bacon + cheddar", "1 IPA artesanal"], "waitMin": 12},
+        {"table": "M01", "name": "Pareja jóvenes", "state": "prep", "items": ["1 Classic 150g|término medio", "1 Veggie patty", "2 papas trufa"], "waitMin": 9},
+        {"table": "M07", "name": "Familia", "state": "queue", "items": ["2 kids burger 100g", "1 onion rings", "3 sodas"], "waitMin": 6},
+        {"table": "M02", "name": "Don Tomás", "state": "ready", "items": ["1 Mushroom Swiss 180g", "1 cerveza Lager"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Báscula para patty exacto", "d": "Cada patty pesado al servir. 180g Angus = $X. Sistema verifica. Cero pattys 'al ojo' que descuadran inventario."},
+    {"ico": "monitor", "h": "Término visible en KDS", "d": "Medio (verde), medio bien (amarillo), bien cocido (rojo). Cocinero ve sin confusión. Cero burgers devueltas por término."},
+    {"ico": "archive", "h": "Inventario por corte premium", "d": "Angus: 10 kg. Wagyu: 3 kg. Veggie: 4 kg. Bacon: 5 kg. Cuando baja, alerta antes del rush nocturno."},
+    {"ico": "percent", "h": "Margen por burger premium", "d": "Classic costo $35 vendes $135. Wagyu costo $85 vendes $295. Sistema te dice qué empujar."},
+    {"ico": "truck", "h": "Pedidos delivery con temp control", "d": "Burger sale con empaque térmico. Cliente paga premium. Cero queja por 'llegó fría'."},
+    {"ico": "barcode", "h": "Combos con toppings cobrados", "d": "Combo Premium = burger + papas trufa + cerveza craft. Toppings se cobran cada uno. Cero combos a medias por descuento al cuate."}
+  ],
+  "stats": [
+    {"v": "74", "l": "Burgers servidas hoy"},
+    {"v": "18", "l": "Kg carne Angus"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi cocinero <span class=\"hl\">'quemaba' bacon y se lo llevaba</span>. 'Se chamuscó.' Eran 2-3 kilos al mes. Con Grilla cada bacon entra y sale del inventario. Identifiqué la fuga y recuperé $4 mil al mes.",
+    "sig": "Don Tomás R.",
+    "role": "Grilla Gourmet Burgers, Polanco, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Pattys 'mal hechos' que sí se comieron",
+      "rob": "Cocinero reporta 2-3 pattys 'mal hechos' por turno, los desecha y se los lleva. En realidad están bien. $200-400 al día en carne premium.",
+      "fix": "Pattys descartados requieren <strong>foto y autorización del gerente</strong>. Si pasan de 2 al día, alerta. Auditoría semanal."
+    },
+    {
+      "title": "Toppings premium 'cortesía'",
+      "rob": "Cocinero pone bacon + queso premium sin cobrarlo. A clientes amigos. 6-10 burgers por turno = $200-350 al día en toppings regalados.",
+      "fix": "Toppings <strong>cobrados por botón obligatorio</strong>. Sistema bloquea si burger sale sin extras facturados. Cero cortesías al cariño."
+    },
+    {
+      "title": "Cerveza artesanal 'evaporada'",
+      "rob": "Mesero sirve glass al cliente y guarda 100ml por botella para él. Reporta 'evaporación natural'. 3-4 botellas semana = $1,200-1,800.",
+      "fix": "Cerveza barril con <strong>nivel monitoreado digital</strong>. Sistema cuadra ml servidos vs vendidos. Diferencias arriba de 3% alertan."
+    }
+  ]
+}

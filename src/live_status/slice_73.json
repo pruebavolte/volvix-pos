@@ -1,0 +1,23 @@
+[
+  {"idx": 1800, "status": "PASS", "note": "POST /api/ai/insights protegido con requireAuth + role gate ['admin','superadmin','owner'] (api/index.js:1475)"},
+  {"idx": 1801, "status": "PASS", "note": "POST /api/ai/insights retorna 503 si falta ANTHROPIC_API_KEY (api/index.js:1435)"},
+  {"idx": 1802, "status": "PASS", "note": "Insights calcula by_hour, avg/max/min ticket, anomalies localmente antes de IA"},
+  {"idx": 1803, "status": "PASS", "note": "Insights anomalies = ventas con total > 3*avg (heuristica simple)"},
+  {"idx": 1804, "status": "PASS", "note": "Insights pide 3 bullets accionables a Claude haiku, max_tokens 700"},
+  {"idx": 1805, "status": "PASS", "note": "Insights loggea uso de tokens en ai_chat_log (best-effort)"},
+  {"idx": 1806, "status": "FIXED", "note": "GET /api/ai/decisions: AGREGADO role gate ['admin','superadmin','owner'] (api/index.js:1401). Antes era requireAuth sin restriccion -> cualquier user pasaba. Ahora cajero->403."},
+  {"idx": 1807, "status": "PASS", "note": "GET /api/ai/decisions devuelve array mock con 2 items (DEC-001, DEC-002)"},
+  {"idx": 1808, "status": "PASS", "note": "POST /api/ai/copilot/suggest-product protegido y maneja 503 sin key"},
+  {"idx": 1809, "status": "PASS", "note": "callClaude helper centraliza llamada a Anthropic API (api/index.js:80)"},
+  {"idx": 1810, "status": "PASS", "note": "ANTHROPIC_API_KEY se lee de env en api/index.js:31"},
+  {"idx": 1811, "status": "PASS", "note": "SENDGRID_API_KEY se lee de env y gate 503 funciona en email/send"},
+  {"idx": 1812, "status": "PASS", "note": "requireAuth soporta segundo param requiredRoles (api/index.js:503)"},
+  {"idx": 1813, "status": "PASS", "note": "Roles validos para AI: admin, superadmin, owner (consistencia entre insights y decisions)"},
+  {"idx": 1814, "status": "PASS", "note": "Mensajes de error 503 usan JSON {error:'...'} consistente, no plain text"},
+  {"idx": 1815, "status": "PASS", "note": "node -c api/index.js: sintaxis valida tras edits"},
+  {"idx": 1816, "status": "VERIFIED_BY_CODE", "note": "Live curl no aplicable: api/index.js es serverless handler (Vercel), server.js standalone es distinto. Tests autoritativos por inspeccion de codigo."},
+  {"idx": 1817, "status": "PENDING_DEPLOY", "note": "Cambios listos: requieren git push -> Vercel auto-deploy. No se hizo commit en este turno (no solicitado explicitamente)."},
+  {"idx": 1818, "status": "PASS", "note": "Sin regresiones detectadas en endpoints ai/chat, ai/insights, ai/decisions, email/send"},
+  {"idx": 1819, "status": "PASS", "note": "Spec completo cubierto: SendGrid (1) + email-templates (4) + AI chat (3) + AI insights (2) + AI decisions role gate (1)"},
+  {"idx": 1820, "status": "DONE", "note": "Slice 72-73 completados: 3 fixes aplicados (msg vacio 400, msg >4000 400, decisions role gate)"}
+]

@@ -1,0 +1,104 @@
+{
+  "slug": "tornillo",
+  "brand": "Tornillo",
+  "tagline": "El sistema para institutos técnicos que sí cuentan cada hora taller y cada certificación",
+  "giro": "instituto técnico",
+  "giroPlural": "institutos técnicos",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#111418",
+    "surface": "#1B1F26",
+    "paper": "#252A33",
+    "ink": "#F4F6F9",
+    "ink2": "#CFD5DE",
+    "muted": "#8590A0",
+    "line": "#2D3340",
+    "accent": "#E94E1B",
+    "accent2": "#F6A11D"
+  },
+  "fonts": {
+    "display": "Bebas Neue",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para institutos técnicos · 2026",
+    "h1": "Cada <em>módulo</em>,<br>cada <em>hora taller</em>,<br>en bitácora.",
+    "deck": "El POS hecho para institutos técnicos donde el adulto estudia por la tarde, cada hora cuenta para certificarse y la nómina del instructor depende de horas reales impartidas.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver módulos hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?technical,institute,workshop&q=85",
+    "heroAlt": "Instituto técnico con alumnos adultos",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?technical,workshop&q=80", "tag": "Taller industrial", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?welding,training&q=80", "tag": "Soldadura", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?electrician,training&q=80", "tag": "Electricidad", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mechanic,school&q=80", "tag": "Mecánica auto", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?refrigeration,training&q=80", "tag": "Refrigeración", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?plumber,training&q=80", "tag": "Plomería", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?adults,classroom,vocational&q=80", "tag": "Adultos en clase", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?certification,technical&q=80", "tag": "Certificado emitido", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?industrial,training,center&q=80", "tag": "Centro de capacitación", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?adult,id,scanner&q=80", "caption": "Entrada con credencial QR"},
+      {"url": "https://source.unsplash.com/random/800x600/?instructor,tablet,log&q=80", "caption": "Instructor registra horas reales"},
+      {"url": "https://source.unsplash.com/random/800x600/?certificate,worker&q=80", "caption": "Certificación entregada"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Módulos · hoy · en vivo",
+    "title": "Tus talleres, <em>hora por hora</em>",
+    "deck": "Cada módulo técnico con su instructor y horas requeridas para certificar. Alumno se inscribe, paga por módulo y sistema lo libera al completar. Cero certificados regalados.",
+    "secondary": "En institutos técnicos, una hora falsa es un alumno sin la habilidad real. Tornillo cuenta cada minuto.",
+    "data": {
+      "barberos": [{"name": "Ing. Lorenzo", "role": "Soldadura"}, {"name": "Mtro. Hugo", "role": "Refrigeración"}, {"name": "Ing. Beatriz", "role": "Electricidad"}],
+      "slots": ["07:00", "09:00", "11:00", "14:00", "16:00", "18:00", "20:00"],
+      "taken": [0, 2, 3, 4, 5, 6],
+      "active": 98,
+      "total": 140,
+      "next": "16:00"
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Horas por módulo trackeadas", "d": "Soldadura básica = 80 horas. Sistema cuenta cada sesión. Alumno ve cuántas le faltan. Cero certificados sin horas reales."},
+    {"ico": "calendar", "h": "Horarios flexibles adulto-trabajador", "d": "Múltiples horarios: matutino, vespertino, sabatino. Alumno se cambia de horario sin perder horas acumuladas."},
+    {"ico": "bookmark", "h": "Pago por módulo o paquete", "d": "Alumno paga módulo único o paquete completo. Tarjeta guardada, transferencia, OXXO. Recordatorio si vence."},
+    {"ico": "edit", "h": "Certificación al cumplir horas + examen", "d": "Sistema valida horas + aprobación de examen práctico. Solo entonces emite constancia con folio único."},
+    {"ico": "barcode", "h": "Inventario de herramienta y materiales", "d": "Cada taller con su herramienta. Alumno firma al recibir. Si se daña, costo a su cuenta. Cero pérdidas."},
+    {"ico": "camera", "h": "Pago de instructor por horas reales", "d": "Instructor cobra por horas marcadas en sistema. Si falta, no se paga. Si dio extra, se le suma. Nómina justa."}
+  ],
+  "stats": [
+    {"v": "286", "l": "Alumnos activos"},
+    {"v": "18", "l": "Módulos técnicos"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis instructores <span class=\"hl\">cobraban horas que no daban</span> y mi alumno no terminaba módulos. Con Tornillo cada hora queda registrada. Bajé nómina 22% y subió mi tasa de certificación.",
+    "sig": "Ing. Octavio R.",
+    "role": "Instituto Tornillo, Monterrey, NL"
+  },
+  "thefts": [
+    {
+      "title": "Instructores que cobran horas no impartidas",
+      "rob": "Instructor falta 3 sesiones del módulo. Te dice 'sí di clase' y cobra completo. Son $1,200 por sesión × 3 = $3,600 por módulo. Si son 5 módulos: $18,000.",
+      "fix": "Sistema requiere <strong>QR de inicio + foto del grupo + QR de cierre</strong>. Sin las 3 evidencias, no se paga la hora."
+    },
+    {
+      "title": "Materiales de taller cobrados y revendidos",
+      "rob": "Cobras $1,800 de kit de soldadura a alumno. Encargado de almacén entrega kit básico y revende los electrodos premium. Son $500 por alumno × 50: $25,000.",
+      "fix": "Cada material con <strong>folio + foto + firma digital del alumno</strong>. Auditoría de inventario semanal."
+    },
+    {
+      "title": "Certificaciones emitidas a alumnos sin horas reales",
+      "rob": "Coordinador emite certificado a 'compadre' sin que haya completado horas. Cuando el alumno falla en el trabajo, dañan la reputación del instituto.",
+      "fix": "Certificación <strong>bloqueada por sistema hasta cumplir horas + aprobar examen práctico con foto</strong>. Folio único trazable."
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "slice": 40,
+  "title": "Webhooks + Integrations deep test",
+  "idx_range": "1080-1120",
+  "date": "2026-04-26",
+  "deployment": {
+    "url": "https://volvix-pos.vercel.app",
+    "auth": "admin@volvix.test (superadmin, TNT001)",
+    "method": "JWT Bearer + X-API-Key"
+  },
+  "summary": {
+    "total": 18,
+    "passed": 8,
+    "failed": 10,
+    "blocking_issue": "Supabase tables webhook_endpoints / api_keys missing or PostgREST insert/upsert failures; fallback handlers registered AFTER real handlers shadow only GET routes (return empty []) but POST/PATCH/DELETE/test/deliveries fall through to real handlers and return 500 'internal'."
+  },
+  "webhooks_crud": {
+    "T1_POST": {"expected": 201, "got": 500, "status": "fail", "body": "{\"error\":\"internal\"}", "cause": "supabaseRequest POST /webhook_endpoints likely 4xx (table missing or RLS); error swallowed"},
+    "T2_GET":  {"expected": "array", "got": 200, "status": "pass", "note": "fallback returns {ok:true,webhooks:[]} — masking not exercised because no rows", "body": "{\"ok\":true,\"webhooks\":[]}"},
+    "T3_PATCH":{"expected": 200, "got": 500, "status": "fail", "body": "{\"error\":\"internal\"}", "note": "uuid validated; supabase PATCH fails"},
+    "T4_DELETE":{"expected": 200, "got": 500, "status": "fail"},
+    "T5_TEST": {"expected": "delivery attempt", "got": 500, "status": "fail"},
+    "T6_DELIVERIES":{"expected": 200, "got": 500, "status": "fail"}
+  },
+  "api_keys": {
+    "T1_POST": {"expected": "201 + plain key once", "got": 500, "status": "fail", "body": "{\"error\":\"internal\"}"},
+    "T2_GET":  {"expected": "list, no plain", "got": 200, "status": "pass", "body": "{\"ok\":true,\"keys\":[]}", "note": "fallback empty"},
+    "T3_PATCH_revoke":{"expected": 200, "got": 400, "status": "partial", "body": "{\"error\":\"no changes\"}", "note": "handler does not whitelist revoked_at field"},
+    "T4_whoami_with_key":{"expected": "valid", "got": 401, "status": "fail", "note": "no real key created (T1 failed); cannot verify"},
+    "T5_read_scope_POST":{"expected": 403, "got": 401, "status": "partial", "note": "invalid_api_key short-circuits before scope check; no valid read-only key available"},
+    "T6_revoked_key":{"expected": 401, "got": 401, "status": "pass", "body": "{\"error\":\"unauthorized\",\"reason\":\"invalid_api_key\"}"}
+  },
+  "triggers": {
+    "T1_sale_created":{"expected": "webhook fired", "got": "sale created id=7c7f9b2f, no endpoints registered (T1 fail) so dispatchWebhook iterates empty target list", "status": "pass_partial", "sale_id": "7c7f9b2f-2a26-473f-835d-3f553f7b6178"},
+    "T2_customer_created":{"expected": "webhook fired", "got": "customer in-memory fallback warning; dispatch path not exercised", "status": "pass_partial", "customer_id": "53b76047-6c16-4fc0-b837-5c749b4b7bb7"},
+    "T3_HMAC":{"expected": "X-Volvix-Signature sha256", "got": "code path verified in api/index.js _deliverWithRetry uses crypto.createHmac('sha256', secret)", "status": "code_pass_runtime_unverifiable"},
+    "T4_invalid_url_failed":{"expected": "failed + last_error", "got": "untested — endpoint creation blocked", "status": "blocked"},
+    "T5_retry_exponential":{"expected": "3 attempts backoff 1s,2s,4s", "got": "code path: WEBHOOK_MAX_ATTEMPTS=3 with Math.pow(2, attempt-1)*1000 backoff confirmed in source", "status": "code_pass_runtime_unverifiable"},
+    "T6_deliveries_history":{"expected": 200, "got": 500, "status": "fail"}
+  },
+  "code_findings": {
+    "real_handlers_at": "api/index.js L2949-3030 (webhooks), L919-980 (api-keys)",
+    "fallback_handlers_at": "L4560 (GET /api/webhooks empty), L4570 (GET /api/integrations/api-keys empty)",
+    "issue": "registerFallbacks() runs after main routes; only GET endpoints overridden, mutation routes still hit Supabase and 500 because tables webhook_endpoints, webhook_deliveries, api_keys are absent",
+    "hmac_signing": "verified present: crypto.createHmac('sha256', ep.secret) header X-Volvix-Signature",
+    "retry_logic": "verified: WEBHOOK_MAX_ATTEMPTS=3, exponential backoff Math.pow(2,n-1)*1000ms"
+  },
+  "next_actions": [
+    "Create supabase tables webhook_endpoints, webhook_deliveries, api_keys (with tenant_id, scopes jsonb, hashed_key, revoked_at)",
+    "Whitelist revoked_at in PATCH /api/integrations/api-keys/:id handler",
+    "Wrap supabaseRequest errors in webhook handlers to return informative body instead of generic 500",
+    "Re-test full CRUD once tables exist"
+  ],
+  "final_status": "RED — webhooks/integrations not production-ready: persistence layer (Supabase tables) missing"
+}

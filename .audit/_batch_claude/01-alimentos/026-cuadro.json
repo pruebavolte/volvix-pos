@@ -1,0 +1,104 @@
+{
+  "slug": "cuadro",
+  "brand": "Cuadro",
+  "tagline": "El sistema para wafflerías donde cada topping se cobra y la masa rinde lo que debe",
+  "giro": "wafflería",
+  "giroPlural": "wafflerías",
+  "vibe": "playful",
+  "palette": {
+    "bg": "#FFF7E8",
+    "surface": "#FFFFFF",
+    "paper": "#FFE5B0",
+    "ink": "#3D2008",
+    "ink2": "#5C3210",
+    "muted": "#8A5530",
+    "line": "#F0CC78",
+    "accent": "#D6730B",
+    "accent2": "#FFB347"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat Brush",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para wafflerías mexicanas · 2026",
+    "h1": "Cada <em>topping</em>,<br>cada <em>waffle</em>,<br>cobrado.",
+    "deck": "El POS hecho para que las fresas, la nutella y la crema batida se cobren completas, la masa de waffle rinda lo que debe, y los combos premium no se vendan al precio simple.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?waffle,toppings,sweet&q=85",
+    "heroAlt": "Waffle con frutas y crema batida",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?waffle,nutella&q=80", "tag": "Waffle nutella", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?waffle,fruits&q=80", "tag": "Waffle frutos rojos", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?belgian,waffle&q=80", "tag": "Belga clásico", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?whipped,cream&q=80", "tag": "Crema batida", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?strawberries,sliced&q=80", "tag": "Fresas frescas", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?syrup,maple&q=80", "tag": "Miel maple", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?waffle,bar&q=80", "tag": "Barra de toppings", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ice,cream,scoop&q=80", "tag": "Bola de helado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?dessert,colorful&q=80", "tag": "Postre colorido", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?waffle,maker&q=80", "caption": "Plancha de waffle al rojo"},
+      {"url": "https://source.unsplash.com/random/800x600/?toppings,bar&q=80", "caption": "Barra de toppings"},
+      {"url": "https://source.unsplash.com/random/800x600/?customer,waffle&q=80", "caption": "Cliente decora su waffle"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · plancha · en vivo",
+    "title": "Tu cocina, <em>waffle por waffle</em>, sin perder toppings",
+    "deck": "Cada orden con toppings detallados. KDS muestra: 1 waffle belga con nutella + fresa + crema batida + bola helado vainilla. Empleado ve todo.",
+    "secondary": "En las wafflerías, un topping 'olvidado' al cobrar son $20-35 cada vez. 12 al día = $240-420.",
+    "data": {
+      "orders": [
+        {"table": "M02", "name": "Sra. Berenice", "state": "urgent", "items": ["1 waffle belga|nutella + fresa + crema", "1 cappuccino"], "waitMin": 7},
+        {"table": "M05", "name": "Niños cumpleaños", "state": "prep", "items": ["3 waffles kids|chocolate + chispas", "3 leches"], "waitMin": 9},
+        {"table": "M01", "name": "Pareja jóvenes", "state": "queue", "items": ["1 waffle compartir|todos los toppings"], "waitMin": 5},
+        {"table": "M07", "name": "Don Pedro", "state": "ready", "items": ["1 waffle simple", "1 café"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Toppings visibles en KDS por color", "d": "Nutella (café), fresas (rojo), crema (blanco), helado (azul). Empleado ve sin equivocarse. Cero waffles a medias."},
+    {"ico": "barcode", "h": "Cobro automático por topping", "d": "Cada topping se agrega al ticket. Sistema bloquea si se sale sin botón. Cero toppings 'gratis' al cuate."},
+    {"ico": "archive", "h": "Inventario de toppings premium", "d": "Nutella: 3 kg. Frutos rojos: 4 kg. Crema batida: 5 L. Cuando baja, alerta antes del turno tarde."},
+    {"ico": "percent", "h": "Margen por waffle completo", "d": "Waffle simple costo $18, vendes $55. Premium 4 toppings: costo $42, vendes $145. Sistema te dice qué empujar."},
+    {"ico": "calendar", "h": "Combos para fin de semana", "d": "Sábado tarde explota. Sistema sugiere preparar 4kg extra de fresa y 2L crema batida. Cero faltas en hora pico."},
+    {"ico": "split", "h": "Waffle para compartir dividido", "d": "Pareja pide 1 waffle XL para 2. Sistema divide al cobrar entre 2. Cero matemáticas mentales."}
+  ],
+  "stats": [
+    {"v": "98", "l": "Waffles servidos hoy"},
+    {"v": "62", "l": "% con topping premium", "suffix": "%"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi empleado <span class=\"hl\">'regalaba' la crema batida y la nutella</span> a sus clientas amigas. Con Cuadro, cada topping es un botón. En 1 mes recuperé $9 mil que se iban en toppings premium.",
+    "sig": "Sra. Patricia M.",
+    "role": "Wafflería Sweet Cuadro, Polanco, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Toppings premium 'cortesía'",
+      "rob": "Empleado pone nutella + crema sin cobrar. A clientas amigas. 8-12 waffles por turno = $200-360 al día en toppings regalados.",
+      "fix": "Toppings <strong>cobrados por botón obligatorio</strong>. Sistema bloquea si waffle sale sin extras facturados. Cero toppings al cariño."
+    },
+    {
+      "title": "Masa 'rendida' con más agua",
+      "rob": "Cocinera echa más agua a la masa para 'rendir' 2-3 waffles más por kilo. Textura cambia, cliente nota y deja de venir. Pérdida silenciosa.",
+      "fix": "Receta de masa <strong>con kilos fijos por lote</strong>. Sistema cuadra waffles producidos vs masa usada. Diferencias arriba de 10% alertan."
+    },
+    {
+      "title": "Helado 'extra bola' a clientes especiales",
+      "rob": "Empleado pone 2 bolas helado cobrando 1. Diferencia se va a propina o bolsillo. 6-10 waffles por turno = $180-300.",
+      "fix": "Bolas helado <strong>contadas por botón cobrado</strong>. Si waffle sale con 2 bolas, sistema cobra automático. Cero 'extra' regalado."
+    }
+  ]
+}

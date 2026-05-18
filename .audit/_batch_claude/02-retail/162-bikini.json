@@ -1,0 +1,106 @@
+{
+  "slug": "bikini",
+  "brand": "Bikini",
+  "tagline": "El POS hecho para tiendas de trajes de baño que sí viven de la temporada",
+  "giro": "trajes de baño",
+  "giroPlural": "tiendas de trajes de baño",
+  "vibe": "vibrant",
+  "palette": {
+    "bg": "#FFFAF0",
+    "surface": "#FFFFFF",
+    "paper": "#FFF4DC",
+    "ink": "#0B1E2C",
+    "ink2": "#1F3A4E",
+    "muted": "#6685A0",
+    "line": "#FFD78A",
+    "accent": "#FF6B5B",
+    "accent2": "#00B4C9"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Sacramento",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas de trajes de baño · 2026",
+    "h1": "Cada <em>temporada</em>,<br>cada <em>talla</em>,<br>cada playa.",
+    "deck": "El punto de venta hecho para tiendas que viven 4 meses del año: stock por talla y temporada, promos por destino vacacional, paquetes con pareo y sandalias, fichas de clienta con su modelo favorito.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?swimwear,bikini,beach&q=85",
+    "heroAlt": "Trajes de baño coloridos en exhibidor de playa",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?bikini,swimwear&q=80", "tag": "Bikinis", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?onepiece,swimsuit&q=80", "tag": "Enteros", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?swim,shorts,men&q=80", "tag": "Shorts caballero", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cover,up,beach&q=80", "tag": "Pareos y caftanes", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sandals,beach&q=80", "tag": "Sandalias playa", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sunhat&q=80", "tag": "Sombreros", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?beach,store&q=80", "tag": "Tienda playera", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bikini,tropical&q=80", "tag": "Estampados tropicales", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?cancun,beach&q=80", "tag": "Destino playa", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?bikini,fitting&q=80", "caption": "Clienta se prueba y vendedora consulta sistema"},
+      {"url": "https://source.unsplash.com/random/800x600/?swimwear,rack&q=80", "caption": "Stock organizado por talla y temporada"},
+      {"url": "https://source.unsplash.com/random/800x600/?beach,bag,sale&q=80", "caption": "Paquetes con pareo y sombrero"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>por talla y modelo</em>",
+    "deck": "Cada bikini con tallas separadas para top y bottom. Cuando se acerca semana santa, el sistema te avisa qué reponer. Cuando termina temporada, calcula stock para liquidación.",
+    "secondary": "En trajes de baño, 4 meses de venta financian 12. No puedes fallar el stock.",
+    "data": {
+      "product": "Bikini estampado tropical",
+      "tallas": ["XS", "S", "M", "L", "XL"],
+      "stock": [
+        {"color": "Verde palmera", "vals": [3, 6, 8, 4, 2]},
+        {"color": "Coral floral", "vals": [2, 5, 7, 3, 1]},
+        {"color": "Azul mar", "vals": [4, 7, 9, 5, 2]}
+      ],
+      "lowThreshold": 2
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock top/bottom separados", "d": "Talla M arriba y talla L abajo, sí se puede. Cada parte con su contador. Cero pares incompletos en bolsa."},
+    {"ico": "calendar", "h": "Alertas de temporada", "d": "Semana santa, verano, vacaciones de invierno. El sistema te avisa 30 días antes qué reponer. Cero corridas tarde."},
+    {"ico": "split", "h": "Paquetes con pareo y sandalias", "d": "Arma combo (bikini + pareo + sandalia) por $X. Se descuentan los 3 del stock. Vendedora vende experiencia, no piezas sueltas."},
+    {"ico": "percent", "h": "Comisiones por vendedora", "d": "Define el % por pieza o paquete. Vendedora ve sus ventas en vivo. Cero peleas al cierre."},
+    {"ico": "camera", "h": "Devoluciones con foto", "d": "Sistema obliga foto de etiqueta sellada. Si fue usado, alerta. Bloquea cambios sin sello higiénico intacto."},
+    {"ico": "gift", "h": "Ficha de clienta vacacional", "d": "Su modelo favorito, sus destinos. Cuando entra temporada, le mandas WhatsApp con lo nuevo que le va a gustar."}
+  ],
+  "stats": [
+    {"v": "324", "l": "Trajes en stock"},
+    {"v": "26", "l": "Vendidos hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Antes <span class=\"hl\">se me quedaba la talla XS y se me agotaba la M</span> a media temporada. Con Bikini el sistema me grita qué reponer y qué bajar de precio. Mi liquidación es 50% menos.",
+    "sig": "Valeria T.",
+    "role": "Tienda de trajes de baño en Cancún, QROO"
+  },
+  "thefts": [
+    {
+      "title": "Pareos y accesorios sin SKU que se llevan",
+      "rob": "Empleada toma pareos, sombreros y sandalias del display sin SKU obligatorio. Son piezas pequeñas y caras. En tienda de playa son 8-12 piezas al mes.",
+      "fix": "Todo accesorio con <strong>SKU obligatorio y antirrobo</strong>. Auditoría de stock por turno. Diferencias requieren explicación firmada."
+    },
+    {
+      "title": "Cambios de bikini usado en la playa",
+      "rob": "Clienta compra bikini, lo usa en Cancún, regresa diciendo 'no me quedó' y se lleva otro. Vendedora lo acepta sin etiqueta sellada y lo revende.",
+      "fix": "Devoluciones <strong>requieren etiqueta higiénica intacta y foto</strong>. Si fue usado, alerta al gerente. Bloquea cambios sin sello."
+    },
+    {
+      "title": "Promos de temporada descontadas a mano",
+      "rob": "Vendedora aplica 30% del sistema y 15% extra a mano en efectivo, embolsándose la diferencia. Cliente paga lo que esperaba pero tú cobras menos.",
+      "fix": "Descuentos arriba del 20% <strong>requieren código del gerente</strong>. Reporte diario: tickets con descuento manual = autorización registrada."
+    }
+  ]
+}

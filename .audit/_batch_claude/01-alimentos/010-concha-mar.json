@@ -1,0 +1,104 @@
+{
+  "slug": "concha-mar",
+  "brand": "Concha",
+  "tagline": "El sistema para ostionerías donde cada docena se cuenta y la cucharita de almeja no se pierde",
+  "giro": "ostionería",
+  "giroPlural": "ostionerías",
+  "vibe": "fresh",
+  "palette": {
+    "bg": "#E8F1F5",
+    "surface": "#FFFFFF",
+    "paper": "#D2E4EC",
+    "ink": "#0E2A3A",
+    "ink2": "#1F4055",
+    "muted": "#557080",
+    "line": "#A8C5D2",
+    "accent": "#01579B",
+    "accent2": "#FF7043"
+  },
+  "fonts": {
+    "display": "Lora",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para ostionerías mexicanas · 2026",
+    "h1": "Cada <em>docena</em>,<br>cada <em>almeja</em>,<br>cobrada.",
+    "deck": "El POS hecho para que las docenas de ostión salgan completas, la callo de hacha no se 'pierda' del refri, y cada limón llegue partido a la mesa.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?oysters,seafood,ostiones&q=85",
+    "heroAlt": "Docena de ostiones frescos en hielo",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?oysters,fresh&q=80", "tag": "Docena de ostiones", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?clams,almejas&q=80", "tag": "Almejas chocolatas", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?callo,hacha&q=80", "tag": "Callo de hacha", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?limon,picado&q=80", "tag": "Limón picado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?salsa,verde&q=80", "tag": "Salsa para ostión", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cerveza,michelada&q=80", "tag": "Michelada al lado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?ostioneria,interior&q=80", "tag": "Barra de ostiones", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pulpo,enamorado&q=80", "tag": "Pulpo enamorado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?seafood,platter&q=80", "tag": "Tabla de mariscos", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?ostionero,abriendo&q=80", "caption": "Ostionero abre ostiones al momento"},
+      {"url": "https://source.unsplash.com/random/800x600/?refri,mariscos&q=80", "caption": "Refri con producto fresco"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,ostiones&q=80", "caption": "Cliente disfruta docena"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Barra · cocina · en vivo",
+    "title": "Tu barra, <em>docena por docena</em>, sin perderse",
+    "deck": "Cada orden con cantidad exacta. KDS muestra: 1 docena ostión, 1/2 docena almeja, callo de hacha. Ostionero abre y emplata. Cero docenas a medias.",
+    "secondary": "En las ostionerías, un ostión 'que se rompió al abrir' son $25-40 cada vez. 10 al turno = $300 perdidos.",
+    "data": {
+      "orders": [
+        {"table": "M04", "name": "Don Octavio", "state": "urgent", "items": ["1 docena ostión", "1/2 docena almeja", "2 micheladas"], "waitMin": 10},
+        {"table": "M02", "name": "Familia Ramos", "state": "prep", "items": ["2 docenas ostión", "1 callo hacha 200g", "4 cervezas"], "waitMin": 7},
+        {"table": "M07", "name": "Pareja", "state": "queue", "items": ["1 docena ostión|sin salsa picante", "1 agua mineral"], "waitMin": 4},
+        {"table": "M11", "name": "Doña Estela", "state": "ready", "items": ["1/2 docena ostión", "1 limón extra"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Inventario por docena y tipo", "d": "Ostión: 8 docenas. Almeja chocolata: 4 docenas. Callo hacha: 2 kg. Cuando bajas, alerta. Cero clientes desilusionados."},
+    {"ico": "monitor", "h": "Pantalla de fresco del día", "d": "Llegó hoy: ostión gallo, almeja blanca, callo hacha. KDS muestra fecha de llegada. Cero mariscos pasados al cliente."},
+    {"ico": "percent", "h": "Merma normal del ostión", "d": "5-8% de los ostiones se rompen al abrir. Si el ostionero reporta 15%, alerta. Cero 'ostiones rotos' que se comió."},
+    {"ico": "barcode", "h": "Comanda con extras visibles", "d": "Extra limón, sin salsa, salsa aparte. Aparece en KDS. Cero mesas que esperan limón 10 minutos."},
+    {"ico": "split", "h": "Cuenta dividida sin pelearse", "d": "Mesa de 6 cuates, cada uno pidió diferente. Sistema divide al instante. Cero 'yo no pedí los callo de hacha'."},
+    {"ico": "calendar", "h": "Frescura del producto por turno", "d": "Mariscos con fecha de llegada. Si pasan 36 horas sin venderse, alerta para promoción o desecho. Cero clientes con producto añejo."}
+  ],
+  "stats": [
+    {"v": "28", "l": "Docenas servidas hoy"},
+    {"v": "6", "l": "Kg de callo de hacha"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi ostionero <span class=\"hl\">decía que 'se rompían' 20 ostiones al día</span>. Con Concha veo merma real: 5-8%. El resto se los llevaba a su casa. Cortado, recuperé $13 mil mensuales solo en ostión.",
+    "sig": "Don Pancho L.",
+    "role": "Ostionería La Concha, Ensenada, Baja California"
+  },
+  "thefts": [
+    {
+      "title": "Ostiones 'rotos' que sí estaban buenos",
+      "rob": "Ostionero reporta 15-20 ostiones rotos por turno. La merma normal es 5-8%. Los buenos se los lleva o vende aparte. $300-500 diarios.",
+      "fix": "Ostiones rotos requieren <strong>foto de la concha rota</strong>. Si pasan de 8%, alerta. Auditoría semanal compara merma reportada vs estándar."
+    },
+    {
+      "title": "Callo de hacha cobrado al ojo",
+      "rob": "Mesero cobra 200g de callo cuando sirvió 280g. Diferencia se la queda en propina o regalo. $80-150 por mesa.",
+      "fix": "Callo de hacha <strong>pesado con báscula conectada</strong>. Sistema no deja cobrar sin peso registrado. Cliente paga lo que recibe."
+    },
+    {
+      "title": "Limones extras 'cobrados' al cliente nuevo",
+      "rob": "Mesero cobra $15 por 'limón extra' al cliente turista, cuando incluso al regular se lo da gratis. Se queda con la diferencia. $200-400 al turno.",
+      "fix": "Política de extras <strong>visible al cliente en menú digital</strong>. Si se cobra extra, ticket lo refleja obligatorio. Cero cobros bajo la mesa."
+    }
+  ]
+}

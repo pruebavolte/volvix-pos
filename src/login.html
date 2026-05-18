@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión · Volvix</title>
+  <meta name="theme-color" content="#0A0A0A">
+  <meta name="description" content="Sistema POS SaaS multi-vertical Volvix. Login seguro para comerciantes.">
+  <link rel="canonical" href="https://volvix-pos.vercel.app/login.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Iniciar sesión · Volvix">
+  <meta property="og:description" content="Sistema POS SaaS multi-vertical. Accede a tu cuenta Volvix.">
+  <meta property="og:image" content="https://volvix-pos.vercel.app/og-default.png">
+  <meta property="og:url" content="https://volvix-pos.vercel.app/login.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Iniciar sesión · Volvix">
+  <meta name="twitter:description" content="Sistema POS SaaS multi-vertical. Accede a tu cuenta Volvix.">
+  <meta name="twitter:image" content="https://volvix-pos.vercel.app/og-default.png">
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* ── BASE ── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ── FONDO ── */
+.login-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: radial-gradient(ellipse at 30% 20%, #1E3A8A 0%, #0A0A0A 65%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Partículas decorativas */
+.login-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 20% 30%, rgba(251,191,36,0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 70%, rgba(251,191,36,0.15) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 80% 20%, rgba(59,130,246,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 80%, rgba(59,130,246,0.15) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ── CARD ── */
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 400px;
+  background: rgba(18, 18, 18, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  animation: fadeUp 0.4s ease-out both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── LOGO ── */
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+.login-logo-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #FBBF24, #F59E0B);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 0 0 1px rgba(251,191,36,0.3), 0 8px 24px rgba(251,191,36,0.35);
+  animation: bounce 3s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* ── TEXTOS ── */
+.login-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #FAFAF9;
+  text-align: center;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.login-sub {
+  font-size: 13.5px;
+  color: #78716C;
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+/* ── FORMULARIO ── */
+.form-group {
+  margin-bottom: 14px;
+}
+.form-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #A8A29E;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.form-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #FAFAF9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.form-input::placeholder { color: #52524E; }
+.form-input:focus {
+  border-color: #3B82F6;
+  background: rgba(59,130,246,0.06);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.form-input.error {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+}
+
+/* ── BOTONES ── */
+.btn-primary {
+  width: 100%;
+  height: 46px;
+  background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0A0A0A;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(251,191,36,0.3);
+}
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-primary.loading {
+  position: relative;
+  color: transparent;
+}
+.btn-primary.loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(10,10,10,0.3);
+  border-top-color: #0A0A0A;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── ALERTS ── */
+.alert {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: none;
+  animation: slideIn 0.3s ease-out;
+}
+.alert.show { display: block; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.alert.error {
+  background: rgba(239,68,68,0.15);
+  color: #FCA5A5;
+  border: 1px solid rgba(239,68,68,0.3);
+}
+.alert.success {
+  background: rgba(34,197,94,0.15);
+  color: #86EFAC;
+  border: 1px solid rgba(34,197,94,0.3);
+}
+.alert.info {
+  background: rgba(59,130,246,0.15);
+  color: #93C5FD;
+  border: 1px solid rgba(59,130,246,0.3);
+}
+
+/* ── LINKS ── */
+.login-link-row {
+  text-align: center;
+  margin-top: 16px;
+}
+.login-link-row a {
+  font-size: 12px;
+  color: #3B82F6;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+.login-link-row a:hover {
+  color: #60A5FA;
+}
+
+/* ── TEST CREDENTIALS ── */
+.test-creds {
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 20px;
+  font-size: 11px;
+  color: #93C5FD;
+  line-height: 1.6;
+}
+.test-creds strong {
+  color: #FAFAF9;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .login-card { padding: 32px 24px; max-width: 92%; }
+  .login-title { font-size: 20px; }
+}
+@media (max-width: 480px) {
+  html, body { overflow: auto; }
+  .login-bg { padding: 16px 12px; min-height: 100dvh; }
+  .login-card { padding: 24px 18px; border-radius: 18px; }
+  .form-input { height: 48px; font-size: 16px; /* evita zoom iOS */ }
+  .btn-primary { height: 48px; font-size: 16px; }
+  .login-title { font-size: 18px; }
+  .login-sub { font-size: 12.5px; }
+}
+</style>
+  <script src="/volvix-uplift-wiring.js" defer></script>
+  <script src="/volvix-error-reporter.js" defer></script>
+</head>
+<body>
+  <div class="login-bg">
+    <div class="login-card">
+      <!-- Logo -->
+      <div class="login-logo">
+        <div class="login-logo-icon">⚡</div>
+      </div>
+
+      <!-- Títulos -->
+      <div class="login-title">Bienvenido a Volvix</div>
+      <div class="login-sub">Punto de venta inteligente · Offline-first</div>
+
+      <!-- Alert -->
+      <div id="alert" class="alert"></div>
+
+      <!-- Toggle Email/Teléfono -->
+      <div class="login-toggle" style="display:flex;gap:8px;margin-bottom:16px;background:#f3f4f6;padding:4px;border-radius:8px;">
+        <button type="button" id="tabEmail" onclick="switchLoginMode('email')" style="flex:1;padding:8px;border:none;border-radius:6px;background:#fff;cursor:pointer;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,0.05);">📧 Correo</button>
+        <button type="button" id="tabPhone" onclick="switchLoginMode('phone')" style="flex:1;padding:8px;border:none;border-radius:6px;background:transparent;cursor:pointer;font-weight:600;">📱 Teléfono</button>
+      </div>
+
+      <!-- Formulario -->
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group" id="emailGroup">
+          <label class="form-label" for="emailInput">Correo</label>
+          <input type="email" id="emailInput" class="form-input" placeholder="admin@volvix.test" autocomplete="username" aria-label="Correo electrónico">
+        </div>
+
+        <div class="form-group" id="phoneGroup" style="display:none;">
+          <label class="form-label" for="phoneInput">Teléfono (con +52)</label>
+          <input type="tel" id="phoneInput" class="form-input" placeholder="+5215512345678" autocomplete="tel" aria-label="Teléfono">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="passwordInput">Contraseña</label>
+          <input type="password" id="passwordInput" class="form-input" placeholder="Contraseña" autocomplete="current-password" aria-label="Contraseña" required minlength="1">
+        </div>
+
+        <button type="submit" class="btn-primary" id="btnLogin">Entrar</button>
+
+        <!-- Recovery link -->
+        <div style="text-align:center;margin-top:14px;">
+          <a href="#" onclick="showRecoveryModal(event)" style="color:#3b82f6;font-size:14px;text-decoration:none;">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <!-- Registro -->
+        <div style="text-align:center;margin-top:8px;font-size:14px;color:#6b7280;">
+          ¿Sin cuenta? <a href="/registro.html" style="color:#3b82f6;font-weight:600;text-decoration:none;">Crea tu cuenta gratis</a>
+        </div>
+      </form>
+
+      <!-- Modal recuperar contraseña -->
+      <div id="recoveryModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:#fff;padding:28px;border-radius:14px;max-width:420px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+          <h2 style="margin:0 0 8px;font-size:22px;">Recuperar contraseña</h2>
+          <p style="margin:0 0 18px;color:#6b7280;font-size:14px;">Te enviaremos un enlace de recuperación a tu correo.</p>
+          <input type="email" id="recoveryEmail" class="form-input" placeholder="tu@email.com" style="width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;margin-bottom:14px;">
+          <div id="recoveryAlert" style="display:none;padding:10px;border-radius:6px;margin-bottom:12px;font-size:14px;"></div>
+          <div style="display:flex;gap:10px;">
+            <button type="button" onclick="closeRecoveryModal()" style="flex:1;padding:12px;border:1px solid #d1d5db;background:#fff;border-radius:8px;cursor:pointer;font-weight:600;">Cancelar</button>
+            <button type="button" id="btnRecovery" onclick="submitRecovery()" style="flex:1;padding:12px;border:none;background:#3b82f6;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;">Enviar enlace</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Test credentials info (oculto en producción) -->
+      <div class="test-creds" id="testCreds" hidden>
+        <strong>Test:</strong> admin@volvix.test / Volvix2026!
+      </div>
+    </div>
+  </div>
+
+  <script>
+// Mostrar credenciales de prueba sólo en dev (localhost / 127.0.0.1 / *.local)
+(function revealTestCredsInDev(){
+  try {
+    const h = location.hostname;
+    const isDev = h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local') || h === '';
+    if (isDev) {
+      const el = document.getElementById('testCreds');
+      if (el) el.hidden = false;
+    }
+  } catch(e){}
+})();
+
+// Auto-redirect si ya hay sesión válida (evita login forzado tras F5)
+// R29: respetar parámetro ?redirect= si viene desde otra página protegida
+(function checkExistingSession(){
+  try {
+    const token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!token) return;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp && payload.exp * 1000 > Date.now()) {
+        // R29: si vino con ?redirect=/xxx.html lo respetamos, sino default a SalvadoreX
+        let dest = '/volvix-launcher.html';
+        try {
+          const params = new URLSearchParams(location.search);
+          const r = params.get('redirect');
+          // Solo aceptar paths internos (que empiecen con / y no //)
+          if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':')) {
+            dest = decodeURIComponent(r);
+          }
+        } catch(e){}
+        location.href = dest;
+        return;
+      }
+    } catch(e) {}
+    localStorage.removeItem('volvix_token');
+    localStorage.removeItem('volvixAuthToken');
+  } catch(e) {}
+})();
+
+function showAlert(msg, type = 'info') {
+  const alert = document.getElementById('alert');
+  alert.textContent = msg;
+  alert.className = `alert show ${type}`;
+  setTimeout(() => alert.classList.remove('show'), 4000);
+}
+
+function setLoading(btn, loading, text) {
+  const button = document.getElementById(btn);
+  button.disabled = loading;
+  if (loading) {
+    button.classList.add('loading');
+  } else {
+    button.classList.remove('loading');
+    button.textContent = text || 'Entrar';
+  }
+}
+
+// Toggle Email/Teléfono
+let loginMode = 'email';
+function switchLoginMode(mode) {
+  loginMode = mode;
+  const emailGroup = document.getElementById('emailGroup');
+  const phoneGroup = document.getElementById('phoneGroup');
+  const tabEmail = document.getElementById('tabEmail');
+  const tabPhone = document.getElementById('tabPhone');
+  if (mode === 'email') {
+    emailGroup.style.display = '';
+    phoneGroup.style.display = 'none';
+    tabEmail.style.background = '#fff';
+    tabEmail.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+    tabPhone.style.background = 'transparent';
+    tabPhone.style.boxShadow = 'none';
+    document.getElementById('emailInput').focus();
+  } else {
+    emailGroup.style.display = 'none';
+    phoneGroup.style.display = '';
+    tabPhone.style.background = '#fff';
+    tabPhone.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+    tabEmail.style.background = 'transparent';
+    tabEmail.style.boxShadow = 'none';
+    document.getElementById('phoneInput').focus();
+  }
+}
+
+// Modal de recuperación de contraseña
+function showRecoveryModal(e) {
+  if (e) e.preventDefault();
+  document.getElementById('recoveryModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('recoveryEmail').focus(), 100);
+}
+function closeRecoveryModal() {
+  document.getElementById('recoveryModal').style.display = 'none';
+  document.getElementById('recoveryEmail').value = '';
+  document.getElementById('recoveryAlert').style.display = 'none';
+}
+async function submitRecovery() {
+  const email = (document.getElementById('recoveryEmail').value || '').trim();
+  const alertEl = document.getElementById('recoveryAlert');
+  if (!email || !email.includes('@')) {
+    alertEl.textContent = 'Ingresa un correo válido';
+    alertEl.style.background = '#fee2e2';
+    alertEl.style.color = '#b91c1c';
+    alertEl.style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('btnRecovery');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    const r = await fetch('/api/auth/forgot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await r.json().catch(() => ({}));
+    alertEl.textContent = data.message || 'Si el email existe, recibirás instrucciones para restablecer tu contraseña.';
+    alertEl.style.background = '#d1fae5';
+    alertEl.style.color = '#065f46';
+    alertEl.style.display = 'block';
+    setTimeout(closeRecoveryModal, 3500);
+  } catch (e) {
+    alertEl.textContent = 'Error al enviar. Intenta de nuevo.';
+    alertEl.style.background = '#fee2e2';
+    alertEl.style.color = '#b91c1c';
+    alertEl.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enviar enlace';
+  }
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+
+  const email = (document.getElementById('emailInput').value || '').trim();
+  const phone = (document.getElementById('phoneInput').value || '').trim();
+  const password = (document.getElementById('passwordInput').value || '').trim();
+
+  // Validar según modo
+  if (loginMode === 'email') {
+    if (!email || !email.includes('@')) {
+      document.getElementById('emailInput').classList.add('error');
+      showAlert('Ingresa un correo válido', 'error');
+      return;
+    }
+    document.getElementById('emailInput').classList.remove('error');
+  } else {
+    if (!phone || !/^\+?\d{10,15}$/.test(phone.replace(/[\s\-\(\)]/g, ''))) {
+      document.getElementById('phoneInput').classList.add('error');
+      showAlert('Ingresa un teléfono válido (ej. +5215512345678)', 'error');
+      return;
+    }
+    document.getElementById('phoneInput').classList.remove('error');
+  }
+
+  if (!password) {
+    document.getElementById('passwordInput').classList.add('error');
+    showAlert('Ingresa tu contraseña', 'error');
+    return;
+  }
+  document.getElementById('passwordInput').classList.remove('error');
+
+  setLoading('btnLogin', true, 'Entrando...');
+
+  try {
+    const loginPayload = loginMode === 'email' ? { email, password } : { phone, password };
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(loginPayload),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'Error al iniciar sesión');
+    }
+
+    const result = await response.json();
+    if (!result.ok || !result.session) {
+      throw new Error(result.error || 'Sesión no válida');
+    }
+
+    // Guardar sesión (legacy)
+    localStorage.setItem('volvixSession', JSON.stringify(result.session));
+
+    // Guardar JWT Bearer token (R13 hardening)
+    const jwt = result.token || (result.session && result.session.token) || null;
+    if (jwt && window.Volvix && window.Volvix.auth) {
+      window.Volvix.auth.saveToken(jwt);
+    } else if (jwt) {
+      try { localStorage.setItem('volvixAuthToken', jwt); } catch (e) {}
+    }
+
+    showAlert('¡Bienvenido!', 'success');
+
+    // R29: respetar redirect= en URL si viene de otra página protegida
+    let dest = '/volvix-launcher.html';
+    try {
+      const params = new URLSearchParams(location.search);
+      const r = params.get('redirect');
+      if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':')) {
+        dest = decodeURIComponent(r);
+      }
+    } catch(e){}
+    setTimeout(() => { window.location.href = dest; }, 600);
+  } catch (err) {
+    let msg = err.message || 'Error al iniciar sesión';
+    if (msg.includes('Credenciales')) msg = 'Correo o contraseña incorrectos';
+    showAlert(msg, 'error');
+  } finally {
+    setLoading('btnLogin', false, 'Entrar');
+  }
+}
+
+// Enter en inputs
+document.getElementById('emailInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('passwordInput')?.focus();
+});
+document.getElementById('passwordInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('btnLogin')?.click();
+});
+  </script>
+<script src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+<script src="volvix-pwa-wiring.js" defer></script>
+<script src="volvix-i18n-wiring.js" defer></script>
+<script src="volvix-theme-wiring.js" defer></script>
+<script src="volvix-email-wiring.js" defer></script>
+<script src="volvix-webrtc-wiring.js" defer></script>
+<script src="volvix-master-controller.js" defer></script>
+<script src="volvix-calendar-wiring.js" defer></script>
+<script src="volvix-payments-wiring.js" defer></script>
+<script src="volvix-gamification-wiring.js" defer></script>
+<script src="volvix-perf-wiring.js" defer></script>
+<script src="volvix-realtime-wiring.js" defer></script>
+<script src="volvix-currency-wiring.js" defer></script>
+<script src="volvix-loyalty-wiring.js" defer></script>
+<script src="volvix-tax-wiring.js" defer></script>
+<script src="volvix-webhooks-wiring.js" defer></script>
+<script src="volvix-audit-wiring.js" defer></script>
+<script src="volvix-cache-wiring.js" defer></script>
+<script src="volvix-queue-wiring.js" defer></script>
+<script src="volvix-fulltext-wiring.js" defer></script>
+<script src="volvix-recommendations-wiring.js" defer></script>
+<script src="volvix-subscriptions-wiring.js" defer></script>
+<script src="volvix-plugins-wiring.js" defer></script>
+<script src="volvix-compliance-wiring.js" defer></script>
+<script src="volvix-cs-wiring.js" defer></script>
+<script src="volvix-ratelimit-wiring.js" defer></script>
+<script src="volvix-workflow-wiring.js" defer></script>
+<script src="volvix-ab-testing-wiring.js" defer></script>
+<script src="volvix-feedback-wiring.js" defer></script>
+<script src="volvix-inventory-ai-wiring.js" defer></script>
+
+<!-- R12b FIX-LEGAL-5: footer legal -->
+<footer style="text-align:center;padding:20px 16px;font-size:12px;color:#8a93a6;border-top:1px solid #1f2740;margin-top:24px;background:transparent;">
+  <div>© 2026 GrupoVolvix S.A. de C.V.</div>
+  <div style="margin-top:6px;">
+    <a href="/aviso-privacidad.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Aviso de Privacidad</a> ·
+    <a href="/terminos-condiciones.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Términos</a> ·
+    <a href="/cookies-policy.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Cookies</a> ·
+    <a href="/volvix-gdpr-portal.html" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Portal ARCO</a> ·
+    <a href="mailto:soporte@volvix.com" style="color:#60a5fa;text-decoration:none;margin:0 6px;">Soporte</a>
+  </div>
+</footer>
+<script defer src="/volvix-cookie-banner-wiring.js"></script>
+</body>
+</html>

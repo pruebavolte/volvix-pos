@@ -1,0 +1,359 @@
+/* ============================================================================
+ * volvix-import-export.css
+ * Shared styles for export/import modals and customer-credit modals.
+ * Scoped under .vlx-* classes — should not collide with app styles.
+ * ==========================================================================*/
+
+/* Modal overlay & container */
+.vlx-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+  animation: vlxFadeIn 0.15s ease-out;
+}
+@keyframes vlxFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes vlxSlideUp { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.vlx-modal {
+  background: #111827;
+  color: #F9FAFB;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  width: min(560px, 95vw);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: vlxSlideUp 0.2s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.vlx-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.vlx-modal-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #F9FAFB;
+}
+.vlx-modal-close {
+  background: transparent;
+  border: 0;
+  color: #9CA3AF;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.vlx-modal-close:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+.vlx-modal-close:focus-visible { outline: 2px solid #3B82F6; outline-offset: 2px; }
+
+.vlx-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.vlx-modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 0 0 12px 12px;
+}
+
+/* Buttons */
+.vlx-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s, transform 0.08s;
+}
+.vlx-btn:active { transform: translateY(1px); }
+.vlx-btn:focus-visible { outline: 2px solid #fbbf24; outline-offset: 2px; }
+.vlx-btn-primary {
+  background: #3B82F6;
+  color: #fff;
+}
+.vlx-btn-primary:hover { background: #2563EB; }
+.vlx-btn-primary:disabled { background: #4B5563; cursor: not-allowed; }
+.vlx-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: #E5E7EB;
+}
+.vlx-btn-secondary:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* Form fields */
+.vlx-form-row { margin-bottom: 12px; }
+.vlx-form-row label {
+  display: block;
+  font-size: 13px;
+  color: #D1D5DB;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.vlx-form-row input[type="text"],
+.vlx-form-row input[type="number"],
+.vlx-form-row input[type="date"],
+.vlx-form-row input[type="email"],
+.vlx-form-row input[type="search"],
+.vlx-form-row select,
+.vlx-form-row textarea {
+  width: 100%;
+  padding: 8px 10px;
+  background: #1F2937;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #F9FAFB;
+  font-size: 14px;
+  margin-top: 4px;
+  box-sizing: border-box;
+}
+.vlx-form-row input:focus,
+.vlx-form-row select:focus,
+.vlx-form-row textarea:focus {
+  outline: 2px solid #3B82F6;
+  outline-offset: 0;
+  border-color: #3B82F6;
+}
+.vlx-form-row textarea { resize: vertical; min-height: 60px; }
+
+.vlx-form-error {
+  color: #FCA5A5;
+  font-size: 13px;
+  margin-top: 8px;
+  min-height: 18px;
+}
+
+/* Checklist (used in export-all-reports) */
+.vlx-checklist {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 8px;
+}
+.vlx-checklist legend {
+  font-size: 13px;
+  color: #D1D5DB;
+  padding: 0 6px;
+}
+.vlx-check {
+  display: block;
+  font-size: 14px;
+  color: #E5E7EB;
+  margin: 6px 0;
+  cursor: pointer;
+}
+.vlx-check input { margin-right: 8px; }
+
+/* File drop zone */
+.vlx-dropzone {
+  border: 2px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  padding: 28px;
+  text-align: center;
+  color: #9CA3AF;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.vlx-dropzone:hover,
+.vlx-dropzone.vlx-dropzone-over {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: #3B82F6;
+  color: #DBEAFE;
+}
+
+/* Progress bar */
+.vlx-progress-wrap { margin: 12px 0; }
+.vlx-progress-label {
+  font-size: 13px;
+  color: #D1D5DB;
+  margin-bottom: 6px;
+}
+.vlx-progress-bar {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.vlx-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3B82F6, #60A5FA);
+  transition: width 0.25s ease-out;
+  border-radius: 999px;
+}
+.vlx-progress-text {
+  text-align: right;
+  font-size: 12px;
+  color: #9CA3AF;
+  margin-top: 4px;
+}
+
+/* CSV preview tables */
+.vlx-csv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.vlx-csv-table thead th {
+  position: sticky;
+  top: 0;
+  background: #1F2937;
+  color: #F9FAFB;
+  text-align: left;
+  padding: 8px 10px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.vlx-csv-table tbody td {
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #E5E7EB;
+}
+.vlx-csv-table tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.02); }
+.vlx-csv-table tbody tr:hover { background: rgba(59, 130, 246, 0.08); }
+
+.vlx-import-preview {
+  max-height: 280px;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  margin-top: 10px;
+}
+.vlx-import-summary {
+  background: rgba(59, 130, 246, 0.08);
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.vlx-import-summary p { margin: 2px 0; }
+
+.vlx-import-errors {
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #FCA5A5;
+  max-height: 160px;
+  overflow: auto;
+}
+.vlx-import-errors ul { margin: 6px 0 0; padding-left: 20px; }
+
+/* Customer credit specific */
+.vlx-balance-box {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.12), rgba(59, 130, 246, 0.04));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 15px;
+}
+.vlx-balance-label { color: #9CA3AF; }
+.vlx-balance-value {
+  color: #F9FAFB;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+.vlx-customer-search {
+  position: relative;
+  margin-bottom: 12px;
+}
+.vlx-customer-search label {
+  display: block;
+  font-size: 13px;
+  color: #D1D5DB;
+  font-weight: 500;
+}
+.vlx-customer-search input {
+  width: 100%;
+  padding: 8px 10px;
+  background: #1F2937;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #F9FAFB;
+  font-size: 14px;
+  margin-top: 4px;
+  box-sizing: border-box;
+}
+.vlx-cust-results {
+  max-height: 220px;
+  overflow: auto;
+  background: #1F2937;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  margin-top: 4px;
+}
+.vlx-cust-results:empty { display: none; }
+.vlx-cust-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: #E5E7EB;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.vlx-cust-item:hover,
+.vlx-cust-item:focus-visible { background: rgba(59, 130, 246, 0.12); outline: none; }
+.vlx-cust-item span { font-size: 12px; color: #9CA3AF; }
+.vlx-cust-balance { color: #FBBF24 !important; font-weight: 600; }
+.vlx-cust-empty {
+  padding: 10px 12px;
+  color: #9CA3AF;
+  font-size: 13px;
+}
+
+.vlx-history-list { margin-top: 12px; }
+.vlx-history-table { font-size: 13px; }
+.vlx-loading-text,
+.vlx-empty-text,
+.vlx-error-text {
+  text-align: center;
+  padding: 24px;
+  color: #9CA3AF;
+  font-size: 14px;
+}
+.vlx-error-text { color: #FCA5A5; }
+.vlx-load-more {
+  display: block;
+  margin: 12px auto 0;
+}
+
+/* Mini toast (fallback if no global showToast) */
+.vlx-mini-toast {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.vlx-toast-success { background: #10B981 !important; }
+.vlx-toast-error { background: #DC2626 !important; }
+.vlx-toast-info { background: #1F2937 !important; }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .vlx-modal { width: 100vw; max-height: 100vh; border-radius: 0; }
+  .vlx-modal-footer { flex-direction: column-reverse; }
+  .vlx-modal-footer .vlx-btn { width: 100%; }
+}

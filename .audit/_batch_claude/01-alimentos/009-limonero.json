@@ -1,0 +1,104 @@
+{
+  "slug": "limonero",
+  "brand": "Limonero",
+  "tagline": "El sistema para cevicherías donde el limón rinde lo que debe y la sierra se cobra al gramo",
+  "giro": "cevichería",
+  "giroPlural": "cevicherías",
+  "vibe": "fresh",
+  "palette": {
+    "bg": "#F0F8E8",
+    "surface": "#FFFFFF",
+    "paper": "#DDF0CB",
+    "ink": "#1A2E10",
+    "ink2": "#2E4A1F",
+    "muted": "#5E7A4A",
+    "line": "#B8D8A0",
+    "accent": "#558B2F",
+    "accent2": "#9CCC65"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para cevicherías mexicanas · 2026",
+    "h1": "Cada <em>cebiche</em>,<br>cada <em>limón</em>,<br>contado.",
+    "deck": "El POS hecho para que la sierra se pese al gramo, el limón no se 'pierda' en la cocina, y cada tostada de cebiche llegue con su porción exacta.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?ceviche,limon,mexicano&q=85",
+    "heroAlt": "Ceviche de sierra con limón y cebolla",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?ceviche,sierra&q=80", "tag": "Ceviche de sierra", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?limon,verde&q=80", "tag": "Limón verde fresco", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cebolla,morada&q=80", "tag": "Cebolla morada", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tostada,ceviche&q=80", "tag": "Tostada premium", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?camaron,fresco&q=80", "tag": "Camarón crudo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?aguacate,maduro&q=80", "tag": "Aguacate maduro", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?cevicheria,fresca&q=80", "tag": "Mostrador fresco", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pescado,fresco&q=80", "tag": "Pescado del día", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?ceviche,coctel&q=80", "tag": "Variedad de cebiches", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?cocinero,ceviche&q=80", "caption": "Cocinero pica pescado al momento"},
+      {"url": "https://source.unsplash.com/random/800x600/?bascula,cocina&q=80", "caption": "Báscula pesa porciones exactas"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,ceviche&q=80", "caption": "Cliente disfruta tostada fresca"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · ceviches · en vivo",
+    "title": "Tu barra, <em>tostada por tostada</em>, sin perderse",
+    "deck": "Cada orden con su pescado y su porción. Cocinero pesa, marina y emplatа. Cliente recibe lo que pagó. Cero discusiones por gramaje.",
+    "secondary": "En las cevicherías, 30g 'de menos' por tostada son $25-40 que el cliente paga de más.",
+    "data": {
+      "orders": [
+        {"table": "M02", "name": "Don Sergio", "state": "urgent", "items": ["3 tostadas sierra|extra limón", "1 michelada"], "waitMin": 8},
+        {"table": "M05", "name": "Familia Ríos", "state": "prep", "items": ["1 ceviche camarón|para 4", "4 cocas"], "waitMin": 6},
+        {"table": "M01", "name": "Lupita V.", "state": "queue", "items": ["2 tostadas marlín", "1 agua jamaica"], "waitMin": 3},
+        {"table": "M07", "name": "Cuates", "state": "ready", "items": ["2 ceviches mixtos", "4 cervezas"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Inventario por tipo de pescado", "d": "Sierra: 8 kg. Marlín: 5 kg. Camarón: 12 kg. Cuando bajas de 2 kg, alerta. Cero promesas que no se pueden cumplir."},
+    {"ico": "barcode", "h": "Báscula que pesa porción exacta", "d": "Cada tostada con 80g de pescado marinado. Báscula avisa si el cocinero echa más o menos. Cero porciones desiguales."},
+    {"ico": "percent", "h": "Rendimiento de limón por kilo", "d": "Un kilo de limón da 600ml de jugo. Si rinde 400ml, alguien lo está exprimiendo en su jarra. Sistema detecta."},
+    {"ico": "calendar", "h": "Frescura del pescado por turno", "d": "Cada lote con hora de entrada. Si pasa de 18 horas crudo o 6 marinado, sistema alerta. Cero cevichas pasados."},
+    {"ico": "monitor", "h": "Modificaciones visibles en KDS", "d": "Sin cebolla, extra limón, sin aguacate. Aparece en colores. Cocinero ve sin equivocarse. Cero tostadas devueltas."},
+    {"ico": "split", "h": "Cuenta dividida tostada por tostada", "d": "Mesa de 4 amigos, cada quien pidió diferente. Sistema divide al instante. Cero matemáticas a la hora del pago."}
+  ],
+  "stats": [
+    {"v": "143", "l": "Tostadas servidas hoy"},
+    {"v": "14", "l": "Kg de pescado fresco"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi cocinero <span class=\"hl\">'se quedaba con los limones'</span> para hacer aguas de limón aparte y venderlas. Con Limonero veo el rendimiento por kilo. Cortado en 2 semanas. Recuperé $4 mil al mes en limón solo.",
+    "sig": "Doña Carmela R.",
+    "role": "Cevichería La Sirenita, Vallarta, Jalisco"
+  },
+  "thefts": [
+    {
+      "title": "Sierra cobrada como pescado premium",
+      "rob": "Cocinero usa sierra ($90/kg) y cobra como huachinango ($180/kg). Cliente no nota porque va molido en ceviche. $300-500 por kilo cambiado.",
+      "fix": "Cada platillo <strong>asignado a su pescado de inventario</strong>. Cocinero descuenta del kilo correcto. Sistema cuadra ventas con kilos vendidos."
+    },
+    {
+      "title": "Limones que se llevan a casa",
+      "rob": "Empleados se llevan 2-3 kg de limón a la semana 'para la casa'. A $25/kg son $200-300 cada quincena de limón solo.",
+      "fix": "Inventario de limones con <strong>cierre diario obligatorio</strong>. Si el consumo no cuadra con tostadas servidas, alerta. Auditoría semanal automática."
+    },
+    {
+      "title": "Porciones desiguales al cocinar",
+      "rob": "Cocinero pone 60g a clientes nuevos, 100g a sus cuates. La diferencia se acumula y el dueño no la nota. $200-400 diarios.",
+      "fix": "Porciones <strong>pesadas con báscula conectada</strong>. Sistema solo deja pasar si peso coincide con receta (±5g). Cero porciones generosas."
+    }
+  ]
+}

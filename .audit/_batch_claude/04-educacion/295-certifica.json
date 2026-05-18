@@ -1,0 +1,104 @@
+{
+  "slug": "certifica",
+  "brand": "Certifica",
+  "tagline": "El sistema para certificaciones técnicas que sí emiten folios trazables y verificables",
+  "giro": "certificaciones técnicas",
+  "giroPlural": "centros de certificaciones técnicas",
+  "vibe": "minimalist",
+  "palette": {
+    "bg": "#F7F8FA",
+    "surface": "#FFFFFF",
+    "paper": "#ECEFF4",
+    "ink": "#0E1320",
+    "ink2": "#26314A",
+    "muted": "#5E6A82",
+    "line": "#D4D9E2",
+    "accent": "#0E7C66",
+    "accent2": "#4FB89D"
+  },
+  "fonts": {
+    "display": "IBM Plex Serif",
+    "body": "IBM Plex Sans",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para certificaciones técnicas · 2026",
+    "h1": "Cada <em>folio</em>,<br>cada <em>evaluación</em>,<br>verificable.",
+    "deck": "El POS hecho para centros que certifican AWS, Microsoft, Cisco, Scrum, PMP, ITIL donde cada examen tiene fecha oficial, evaluador acreditado y folio internacional.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver fechas hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?certification,exam,professional,tech&q=85",
+    "heroAlt": "Centro de certificación técnica",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?exam,room,certification&q=80", "tag": "Sala de examen", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?aws,certification&q=80", "tag": "AWS Solutions", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?microsoft,azure&q=80", "tag": "Microsoft Azure", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cisco,networking&q=80", "tag": "Cisco CCNA", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?scrum,master&q=80", "tag": "Scrum Master", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pmp,project,manager&q=80", "tag": "PMP", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?bootcamp,intensive&q=80", "tag": "Bootcamp", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?digital,badge&q=80", "tag": "Digital badge", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?professional,certified&q=80", "tag": "Profesional certificado", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?candidate,id,exam&q=80", "caption": "Candidato presenta ID"},
+      {"url": "https://source.unsplash.com/random/800x600/?proctor,exam,laptop&q=80", "caption": "Evaluador acreditado supervisa"},
+      {"url": "https://source.unsplash.com/random/800x600/?credly,badge,linkedin&q=80", "caption": "Badge en LinkedIn"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Exámenes · próximos · en vivo",
+    "title": "Tus certificaciones, <em>folio por folio</em>",
+    "deck": "Cada certificación con fechas oficiales del proveedor (AWS, Microsoft, Scrum.org). Candidato reserva fecha, paga, prepara y presenta. Sistema genera folio internacional.",
+    "secondary": "En certificaciones, un folio falso destruye una carrera. Certifica usa solo APIs oficiales.",
+    "data": {
+      "barberos": [{"name": "AWS Cert", "role": "Solutions Architect"}, {"name": "MS Cert", "role": "Azure Admin AZ-104"}, {"name": "Scrum.org", "role": "PSM I"}],
+      "slots": ["Lun 9am", "Mar 2pm", "Mié 9am", "Jue 4pm", "Vie 11am", "Sáb 10am"],
+      "taken": [0, 1, 2, 3, 4, 5],
+      "active": 48,
+      "total": 56,
+      "next": "Mañana 9am"
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Catálogo de certificaciones oficiales", "d": "AWS, Azure, GCP, Cisco, Scrum, PMP, ITIL, CompTIA. Sistema sincroniza fechas y cuotas oficiales del proveedor."},
+    {"ico": "calendar", "h": "Reserva con voucher oficial", "d": "Candidato reserva fecha. Sistema genera voucher con folio del proveedor. Cero exámenes sin folio internacional."},
+    {"ico": "bookmark", "h": "Pago de cuota + bootcamp incluido", "d": "Paquete: bootcamp de prep + cuota de examen + 1 retry. Tarjeta o transferencia. Cero costos sorpresa al candidato."},
+    {"ico": "camera", "h": "Examen con evaluador acreditado", "d": "Centro autorizado con cámaras y bitácora. Evaluador acreditado registra inicio, intermedio y cierre del examen."},
+    {"ico": "edit", "h": "Resultado con badge digital", "d": "Aprobado o no, sistema sincroniza con Credly/Acclaim. Candidato recibe badge en LinkedIn al instante."},
+    {"ico": "grid", "h": "Renovación automática de certificaciones", "d": "AWS y Scrum vencen cada 3 años. Sistema avisa al candidato 90 días antes con cuota de renovación."}
+  ],
+  "stats": [
+    {"v": "286", "l": "Candidatos al mes"},
+    {"v": "42", "l": "Certificaciones ofertadas"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi cliente reclamó que <span class=\"hl\">su certificado AWS no aparecía en Credly</span>. Era falso, alguien lo emitió por fuera. Con Certifica solo se emite vía API oficial. Cero certificados falsos.",
+    "sig": "Ing. Roberto C.",
+    "role": "Centro Certifica, Guadalajara, JAL"
+  },
+  "thefts": [
+    {
+      "title": "Vouchers de examen revendidos por fuera",
+      "rob": "Coordinador compra vouchers AWS al mayoreo ($1,800) y los revende a candidatos en $3,500 'sin pasar por la empresa'. Si vende 10/mes: $17,000 mensual perdidos para el centro.",
+      "fix": "Vouchers <strong>asignados a candidato al instante por API oficial + cobro en sistema</strong>. Cero vouchers 'sueltos' en manos de coordinador."
+    },
+    {
+      "title": "Certificados emitidos sin examen real",
+      "rob": "Evaluador 'amigo' emite certificación sin examen a 5 candidatos por $4,000 c/u en efectivo. Cuando los profesionales fallan en proyectos reales, AWS revoca acreditación del centro.",
+      "fix": "Examen requiere <strong>video del proctor + voucher oficial + folio API del proveedor + cámara de candidato</strong>. Cero certificados sin evidencia digital."
+    },
+    {
+      "title": "Bootcamps cobrados con instructor no acreditado",
+      "rob": "Centro cobra $18,000 por bootcamp 'oficial AWS' con instructor sin acreditación. Cuando AWS audita, retira reconocimiento del centro. Pierdes negocio completo.",
+      "fix": "Instructores con <strong>certificación vigente verificada por API + foto en sistema + auditoría anual</strong>. Cero bootcamps con instructor caducado."
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "slug": "hilo",
+  "brand": "Hilo",
+  "tagline": "El sistema para academias de costura que sí saben qué prenda hizo cada alumna",
+  "giro": "academia de costura",
+  "giroPlural": "academias de costura",
+  "vibe": "artisan",
+  "palette": {
+    "bg": "#FAF5EE",
+    "surface": "#FFFFFF",
+    "paper": "#F1E9D7",
+    "ink": "#2C2018",
+    "ink2": "#503D2A",
+    "muted": "#8B7560",
+    "line": "#DDCFB6",
+    "accent": "#9B2335",
+    "accent2": "#D4955A"
+  },
+  "fonts": {
+    "display": "Lora",
+    "body": "Nunito",
+    "script": "Sacramento",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para academias de costura · 2026",
+    "h1": "Cada <em>puntada</em>,<br>cada <em>patrón</em>,<br>en su lugar.",
+    "deck": "El POS hecho para academias de costura donde cada alumna aprende a coser, hace su prenda final y necesita máquina, telas, hilos y tiempo de plancha.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver talleres hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?sewing,school,machines,fabric&q=85",
+    "heroAlt": "Academia de costura con máquinas",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?sewing,classroom&q=80", "tag": "Aula de costura", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sewing,machine&q=80", "tag": "Máquina de coser", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pattern,fabric&q=80", "tag": "Patrón y tela", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?embroidery,hand&q=80", "tag": "Bordado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?fashion,sketch&q=80", "tag": "Diseño boceto", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?dressmaker,seamstress&q=80", "tag": "Modista trabajando", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?fashion,show,school&q=80", "tag": "Pasarela final", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?thread,colors&q=80", "tag": "Hilos surtidos", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?textiles,workshop&q=80", "tag": "Taller textil", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?student,sewing,entrance&q=80", "caption": "Alumna entra al taller"},
+      {"url": "https://source.unsplash.com/random/800x600/?teacher,fabric,evaluate&q=80", "caption": "Maestra evalúa puntada"},
+      {"url": "https://source.unsplash.com/random/800x600/?dress,finished,model&q=80", "caption": "Prenda terminada"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Talleres · hoy · en vivo",
+    "title": "Tus máquinas, <em>alumna por alumna</em>",
+    "deck": "Cada taller con sus máquinas asignadas a alumnas. Sistema lleva nivel (básico, intermedio, alta costura) y proyecto en curso. Cero máquinas sin asignación.",
+    "secondary": "En academias de costura, una máquina mal asignada es una alumna sin avance.",
+    "data": {
+      "barberos": [{"name": "Mtra. Yadira", "role": "Costura básica"}, {"name": "Mtra. Lupita", "role": "Modista intermedio"}, {"name": "Mtra. Rosalba", "role": "Alta costura"}],
+      "slots": ["10:00", "12:00", "14:00", "16:00", "17:30", "19:00"],
+      "taken": [0, 1, 2, 4, 5],
+      "active": 42,
+      "total": 56,
+      "next": "16:00"
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Módulos progresivos", "d": "Básico 40h, intermedio 60h, modista 80h, alta costura 120h. Sistema cuenta horas para certificación."},
+    {"ico": "calendar", "h": "Asignación de máquina por sesión", "d": "Sistema asigna máquina y prendaña por nivel. Mantenimiento programado. Cero máquinas descompuestas en clase."},
+    {"ico": "bookmark", "h": "Cuota mensual + paquete de patrones", "d": "Mensualidad fija + paquete inicial de patrones. Tarjeta, transferencia o pago semanal con recordatorios."},
+    {"ico": "edit", "h": "Proyecto final por alumna", "d": "Cada alumna escoge prenda final: vestido, traje, abrigo. Sistema lleva avance por sesión. Maestra valida cada parte."},
+    {"ico": "camera", "h": "Foto del avance por sesión", "d": "Maestra toma foto del trabajo en máquina al final. Alumna ve evolución. Padre patrocinador también."},
+    {"ico": "barcode", "h": "Venta de telas, hilos y mercería", "d": "Pequeña tienda de insumos. Alumna compra al instante. Sistema descuenta de tarjeta y stock."}
+  ],
+  "stats": [
+    {"v": "98", "l": "Alumnas activas"},
+    {"v": "32", "l": "Máquinas en taller"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Vendía hilos y telas <span class=\"hl\">en libreta y siempre me faltaba dinero</span>. Con Hilo cada venta pasa por sistema. Cero faltantes y descubrí qué telas se mueven más.",
+    "sig": "Mtra. Lourdes E.",
+    "role": "Academia Hilo, Puebla, PUE"
+  },
+  "thefts": [
+    {
+      "title": "Material de costura cobrado y revendido",
+      "rob": "Cobras $1,200 de paquete inicial (tijeras, alfileres, cinta, hilos). Encargada entrega básico de $400 y revende lo premium. Son $800 × 20 alumnas: $16,000 al inicio del curso.",
+      "fix": "Paquete inicial con <strong>folio + foto al recibir + firma de alumna</strong>. Proveedor único auditable."
+    },
+    {
+      "title": "Tienda de mercería sin pasar por caja",
+      "rob": "Alumna compra 2m de tela ($180) en efectivo a la encargada. Ella anota $90 y se queda con $90. Si pasa 10 veces al día: $900 diario, $27,000 al mes.",
+      "fix": "Toda venta con <strong>código de producto escaneado + ticket digital</strong>. Cero efectivo sin registro."
+    },
+    {
+      "title": "Certificación a alumna sin proyecto final aprobado",
+      "rob": "Coordinadora emite certificado a 'amiga' sin que haya terminado proyecto. Cuando trabaja en sastrería real, falla y mancha tu academia.",
+      "fix": "Certificación <strong>bloqueada por sistema hasta cumplir horas + proyecto final aprobado con foto</strong>. Folio único en BD."
+    }
+  ]
+}

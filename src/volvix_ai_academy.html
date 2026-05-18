@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix AI Academy · Capacitación auto-generada</title>
+<script src="/auth-gate.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  :root {
+    --bg: #FAFAF9;
+    --surface: #FFFFFF;
+    --border: #E7E5E4;
+    --text: #0A0A0A;
+    --text-2: #44403C;
+    --text-3: #78716C;
+    --accent: #7C3AED;
+    --accent-2: #6D28D9;
+    --gold: #FBBF24;
+    --success: #16A34A;
+  }
+  body { background: var(--bg); color: var(--text); min-height: 100vh; }
+  button { font-family: inherit; cursor: pointer; }
+
+  .top {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+  .brand-ico {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #A855F7, #6D28D9);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+  }
+  .brand small { display: block; font-size: 10px; color: var(--text-3); font-weight: 500; letter-spacing: 0.5px; }
+  .tb-sep { flex: 1; }
+  .tb-btn {
+    padding: 7px 14px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .tb-btn:hover { border-color: var(--text-2); }
+  .tb-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    padding: 60px 6% 40px;
+    background: linear-gradient(135deg, #FAF5FF 0%, #FDF2F8 100%);
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    background: white;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 18px;
+    border: 1px solid rgba(124,58,237,0.2);
+  }
+  .hero h1 {
+    font-size: clamp(28px, 4.5vw, 42px);
+    font-weight: 900;
+    letter-spacing: -1.2px;
+    line-height: 1.1;
+    max-width: 720px;
+    margin: 0 auto 14px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p { font-size: 15px; color: var(--text-2); max-width: 540px; margin: 0 auto 26px; }
+
+  /* Search */
+  .search-bar {
+    max-width: 640px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 14px;
+    padding: 6px;
+    display: flex;
+    gap: 6px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+  }
+  .search-bar input {
+    flex: 1;
+    padding: 14px 18px;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .search-bar input:focus { outline: none; }
+  .search-bar button {
+    padding: 12px 20px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13.5px;
+  }
+
+  /* Stats */
+  .stats {
+    max-width: 900px;
+    margin: 30px auto 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    padding: 0 6%;
+  }
+  .stat {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  .stat-num { font-size: 26px; font-weight: 800; letter-spacing: -0.8px; color: var(--accent); }
+  .stat-label { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+
+  /* Main */
+  .main { padding: 40px 6% 80px; }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .section-head h2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .section-head p { font-size: 13px; color: var(--text-3); margin-top: 2px; }
+  .section-head a { font-size: 12.5px; color: var(--accent); font-weight: 600; }
+
+  /* Video grid */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .video-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .video-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.08);
+  }
+  .video-thumb {
+    aspect-ratio: 16/9;
+    position: relative;
+    overflow: hidden;
+  }
+  .video-thumb .play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.25);
+    color: white;
+    font-size: 42px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .video-card:hover .play { opacity: 1; }
+  .video-thumb .duration {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-weight: 600;
+    font-family: monospace;
+  }
+  .video-thumb .ai-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(251,191,36,0.9);
+    color: #0A0A0A;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .video-info { padding: 14px 16px; }
+  .video-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .video-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-3);
+    margin-top: 8px;
+  }
+
+  /* Manuales */
+  .manual-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 40px;
+  }
+  .manual-card {
+    background: white;
+    border-radius: 10px;
+    padding: 18px 16px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .manual-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .manual-cover {
+    aspect-ratio: 3/4;
+    background: linear-gradient(135deg, #7C3AED, #A855F7);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .manual-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 70%, rgba(0,0,0,0.4));
+  }
+  .manual-cover small {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-align: left;
+  }
+  .manual-title { font-size: 13px; font-weight: 700; line-height: 1.3; margin-bottom: 4px; }
+  .manual-meta { font-size: 10.5px; color: var(--text-3); }
+
+  /* Integrations */
+  .integrations {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    border: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .integ-head h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .integ-head p { font-size: 12.5px; color: var(--text-3); margin-bottom: 20px; }
+  .integ-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .integ-item {
+    padding: 14px 16px;
+    background: var(--bg);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .integ-item.active { border-color: var(--success); background: rgba(22,163,74,0.04); }
+  .integ-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    color: white;
+    font-weight: 700;
+  }
+  .integ-name { font-size: 12.5px; font-weight: 600; }
+  .integ-status {
+    margin-left: auto;
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 100px;
+  }
+  .integ-status.on { background: rgba(22,163,74,0.1); color: var(--success); }
+  .integ-status.off { background: rgba(245,158,11,0.1); color: #B45309; }
+
+  /* Generation modal */
+  .gen-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,10,0.7);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .gen-modal.open { display: flex; }
+  .gen-box {
+    background: white;
+    max-width: 620px;
+    width: 100%;
+    border-radius: 16px;
+    padding: 32px 28px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.2);
+  }
+  .gen-steps { display: flex; flex-direction: column; gap: 12px; margin: 24px 0; }
+  .gen-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--bg);
+    border-radius: 10px;
+    opacity: 0.3;
+    transition: opacity 0.3s;
+  }
+  .gen-step.active {
+    opacity: 1;
+    background: rgba(124,58,237,0.05);
+    border: 1px solid rgba(124,58,237,0.2);
+  }
+  .gen-step.done { opacity: 1; border: 1px solid rgba(22,163,74,0.2); background: rgba(22,163,74,0.04); }
+  .gen-step .step-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #E5E7EB;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .gen-step.active .step-icon { background: var(--accent); color: white; animation: spin 1.5s linear infinite; }
+  .gen-step.done .step-icon { background: var(--success); color: white; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .gen-step-text { font-size: 13px; font-weight: 500; }
+</style>
+<script src="volvix-api.js"></script>
+<script src="volvix-sync.js"></script>
+<script src="volvix-sync-widget.js"></script>
+</head>
+<body>
+
+<div class="top">
+  <div class="brand">
+    <div class="brand-ico">🎓</div>
+    <div>
+      <div>Volvix AI Academy</div>
+      <small>CAPACITACIÓN AUTO-GENERADA</small>
+    </div>
+  </div>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="window.open('volvix_owner_panel_v7.html','_blank')">← Owner Panel</button>
+  <button class="tb-btn primary" onclick="openGenerate()">+ Generar nuevo</button>
+</div>
+
+<section class="hero">
+  <div class="hero-badge">🤖 IA crea videos y manuales · No se repite contenido</div>
+  <h1>Cada video y manual se crea <span>una sola vez</span></h1>
+  <p>Si ya tenemos un video de "cómo hacer corte de caja", no generamos otro. La IA busca, reutiliza, y solo crea lo nuevo.</p>
+
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="¿Qué quieres aprender? ej. &quot;cobrar con tarjeta&quot;, &quot;hacer corte&quot;..." onkeypress="if(event.key==='Enter')searchVideo()">
+    <button onclick="searchVideo()">Buscar 🔎</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">187</div>
+      <div class="stat-label">Videos generados</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">94</div>
+      <div class="stat-label">Manuales PDF</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">12,486</div>
+      <div class="stat-label">Vistas este mes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">$0</div>
+      <div class="stat-label">Costo de duplicados</div>
+    </div>
+  </div>
+</section>
+
+<div class="main">
+
+  <!-- VIDEOS NUEVOS IA -->
+  <div class="section-head">
+    <div>
+      <h2>🎬 Videos más vistos</h2>
+      <p>Generados por IA una vez, reutilizados cada vez que un cliente lo necesita</p>
+    </div>
+    <a href="#">Ver todos →</a>
+  </div>
+  <div class="video-grid" id="video-grid"></div>
+
+  <!-- MANUALES -->
+  <div class="section-head">
+    <div>
+      <h2>📄 Manuales PDF</h2>
+      <p>Guías paso a paso generadas automáticamente por la IA</p>
+    </div>
+    <a href="#">Ver todos →</a>
+  </div>
+  <div class="manual-grid" id="manual-grid"></div>
+
+  <!-- INTEGRACIONES -->
+  <div class="integrations">
+    <div class="integ-head">
+      <h3>🔗 Integraciones de IA generativa</h3>
+      <p>Con tu Plan Pro Max x20 de Claude, ya no pagas extra por ninguna de estas</p>
+    </div>
+    <div class="integ-grid">
+      <div class="integ-item active">
+        <div class="integ-icon" style="background:#D97706;">🎨</div>
+        <div class="integ-name">Claude API (Pro Max x20)</div>
+        <span class="integ-status on">● ACTIVO</span>
+      </div>
+      <div class="integ-item active">
+        <div class="integ-icon" style="background:#10A37F;">G</div>
+        <div class="integ-name">ChatGPT · imágenes DALL-E</div>
+        <span class="integ-status on">● ACTIVO</span>
+      </div>
+      <div class="integ-item">
+        <div class="integ-icon" style="background:#F43F5E;">S</div>
+        <div class="integ-name">Skywork.ai · videos</div>
+        <span class="integ-status off">○ DISPONIBLE</span>
+      </div>
+      <div class="integ-item">
+        <div class="integ-icon" style="background:#0F172A;">11</div>
+        <div class="integ-name">ElevenLabs · voz en español</div>
+        <span class="integ-status on">● ACTIVO</span>
+      </div>
+      <div class="integ-item">
+        <div class="integ-icon" style="background:#6366F1;">R</div>
+        <div class="integ-name">Runway · video a video</div>
+        <span class="integ-status off">○ DISPONIBLE</span>
+      </div>
+      <div class="integ-item">
+        <div class="integ-icon" style="background:#DC2626;">Y</div>
+        <div class="integ-name">YouTube · publicación</div>
+        <span class="integ-status on">● ACTIVO</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reglas de la IA -->
+  <div style="background:white;border-radius:16px;padding:28px;border:1px solid var(--border);">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:4px;">⚙️ Reglas de reutilización</h3>
+    <p style="font-size:12.5px;color:var(--text-3);margin-bottom:18px;">Por qué no pagas por el mismo contenido 30 veces</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
+      <div style="padding:16px;background:var(--bg);border-radius:10px;">
+        <div style="font-size:22px;margin-bottom:6px;">🔍</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px;">1. Busca primero</div>
+        <div style="font-size:11.5px;color:var(--text-3);line-height:1.55;">Cada vez que un cliente pide capacitación, la IA busca por similaridad en los 187 videos ya creados.</div>
+      </div>
+      <div style="padding:16px;background:var(--bg);border-radius:10px;">
+        <div style="font-size:22px;margin-bottom:6px;">♻️</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px;">2. Reutiliza si existe</div>
+        <div style="font-size:11.5px;color:var(--text-3);line-height:1.55;">Si ya hay un video que cubre lo pedido (match > 85%), se envía ese. Cero costo adicional.</div>
+      </div>
+      <div style="padding:16px;background:var(--bg);border-radius:10px;">
+        <div style="font-size:22px;margin-bottom:6px;">🆕</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px;">3. Genera solo si falta</div>
+        <div style="font-size:11.5px;color:var(--text-3);line-height:1.55;">Solo si no existe: IA escribe guion, genera voz + imágenes, compila video, publica en la biblioteca.</div>
+      </div>
+      <div style="padding:16px;background:var(--bg);border-radius:10px;">
+        <div style="font-size:22px;margin-bottom:6px;">💾</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:4px;">4. Lo guarda para todos</div>
+        <div style="font-size:11.5px;color:var(--text-3);line-height:1.55;">Una vez creado, está disponible para <strong>todos</strong> los clientes. El siguiente que lo pida, lo recibe al instante.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GENERATE MODAL -->
+<div class="gen-modal" id="gen-modal" onclick="if(event.target===this)closeGen()">
+  <div class="gen-box">
+    <div style="font-size:18px;font-weight:700;margin-bottom:6px;">🤖 IA generando video nuevo</div>
+    <div style="font-size:13px;color:var(--text-3);margin-bottom:10px;" id="gen-topic">Tema: ...</div>
+
+    <div class="gen-steps">
+      <div class="gen-step" id="s1"><div class="step-icon">1</div><div class="gen-step-text">Buscando si ya existe en biblioteca (187 videos)...</div></div>
+      <div class="gen-step" id="s2"><div class="step-icon">2</div><div class="gen-step-text">No hay match. Iniciando generación...</div></div>
+      <div class="gen-step" id="s3"><div class="step-icon">3</div><div class="gen-step-text">Claude escribiendo guion (12 escenas)...</div></div>
+      <div class="gen-step" id="s4"><div class="step-icon">4</div><div class="gen-step-text">DALL-E generando imágenes de capturas...</div></div>
+      <div class="gen-step" id="s5"><div class="step-icon">5</div><div class="gen-step-text">ElevenLabs generando voz en español MX...</div></div>
+      <div class="gen-step" id="s6"><div class="step-icon">6</div><div class="gen-step-text">Compilando video final (3:42 min)...</div></div>
+      <div class="gen-step" id="s7"><div class="step-icon">7</div><div class="gen-step-text">Publicando en biblioteca y generando PDF...</div></div>
+    </div>
+
+    <div id="gen-result" style="display:none;padding:14px 16px;background:rgba(22,163,74,0.06);border:1px solid rgba(22,163,74,0.25);border-radius:10px;font-size:13px;">
+      <strong style="color:var(--success);">✅ ¡Listo!</strong>
+      Video y manual creados y disponibles para los <strong>200+ giros</strong> del sistema. Costo: $0.18 USD (una sola vez).
+    </div>
+
+    <button class="tb-btn" onclick="closeGen()" style="margin-top:18px;">Cerrar</button>
+  </div>
+</div>
+
+<script>
+const VIDEOS = [
+  { icon:'💳', title:'Cómo cobrar un ticket', dur:'2:14', views:1243, gradient:'linear-gradient(135deg, #EA580C, #F59E0B)', ai:true, uses:87 },
+  { icon:'📊', title:'Hacer corte de caja correctamente', dur:'3:28', views:986, gradient:'linear-gradient(135deg, #1E40AF, #3B82F6)', ai:true, uses:124 },
+  { icon:'📦', title:'Inventario inicial sin errores', dur:'5:02', views:742, gradient:'linear-gradient(135deg, #16A34A, #4ADE80)', ai:true, uses:68 },
+  { icon:'🧾', title:'Emitir factura CFDI 4.0', dur:'4:12', views:612, gradient:'linear-gradient(135deg, #7C3AED, #A855F7)', ai:true, uses:42 },
+  { icon:'📱', title:'Conectar impresora bluetooth', dur:'2:51', views:548, gradient:'linear-gradient(135deg, #DC2626, #F87171)', ai:true, uses:56 },
+  { icon:'💼', title:'Gestionar empleados y turnos', dur:'6:18', views:387, gradient:'linear-gradient(135deg, #0891B2, #06B6D4)', ai:true, uses:28 },
+  { icon:'🏷️', title:'Diseñar etiquetas con códigos de barras', dur:'4:45', views:356, gradient:'linear-gradient(135deg, #DB2777, #F472B6)', ai:true, uses:47 },
+  { icon:'🍽️', title:'Tomar comandas desde celular', dur:'3:02', views:298, gradient:'linear-gradient(135deg, #B91C1C, #F59E0B)', ai:true, uses:21 },
+];
+
+const MANUALS = [
+  { icon:'🚀', title:'Guía rápida de inicio', pages:24, color:'linear-gradient(135deg, #7C3AED, #A855F7)' },
+  { icon:'💳', title:'Procesamiento de pagos', pages:18, color:'linear-gradient(135deg, #16A34A, #22C55E)' },
+  { icon:'📦', title:'Manejo de inventario', pages:32, color:'linear-gradient(135deg, #EA580C, #F59E0B)' },
+  { icon:'🧾', title:'Facturación electrónica', pages:28, color:'linear-gradient(135deg, #1E40AF, #3B82F6)' },
+  { icon:'📊', title:'Reportes y análisis', pages:22, color:'linear-gradient(135deg, #DB2777, #EC4899)' },
+  { icon:'⚙️', title:'Configuración avanzada', pages:36, color:'linear-gradient(135deg, #0F172A, #475569)' },
+];
+
+function renderVideos() {
+  document.getElementById('video-grid').innerHTML = VIDEOS.map(v => `
+    <div class="video-card">
+      <div class="video-thumb" style="background:${v.gradient};display:flex;align-items:center;justify-content:center;font-size:52px;color:white;">
+        ${v.ai ? '<div class="ai-badge">🤖 IA</div>' : ''}
+        ${v.icon}
+        <div class="play">▶</div>
+        <div class="duration">${v.dur}</div>
+      </div>
+      <div class="video-info">
+        <div class="video-title">${v.title}</div>
+        <div class="video-meta">
+          <span>👁 ${v.views.toLocaleString()} vistas</span>
+          <span>♻️ ${v.uses} reutilizado</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderManuals() {
+  document.getElementById('manual-grid').innerHTML = MANUALS.map(m => `
+    <div class="manual-card">
+      <div class="manual-cover" style="background:${m.color};">
+        ${m.icon}
+        <small>VOLVIX MANUAL</small>
+      </div>
+      <div class="manual-title">${m.title}</div>
+      <div class="manual-meta">${m.pages} páginas · PDF</div>
+    </div>
+  `).join('');
+}
+
+function searchVideo() {
+  const q = document.getElementById('search-input').value.trim();
+  if (!q) return;
+  const found = VIDEOS.find(v => v.title.toLowerCase().includes(q.toLowerCase()));
+  if (found) {
+    VolvixUI.toast({type:'success', message:'✅ ¡Encontramos el video!\n\n"' + found.title + '" (' + found.dur + ')\n\nYa se ha usado ' + found.uses + ' veces. No vamos a generar otro igual — usa el existente.'});
+  } else {
+    openGenerate(q);
+  }
+}
+
+function openGenerate(topic) {
+  document.getElementById('gen-topic').textContent = 'Tema: ' + (topic || 'nuevo contenido');
+  document.getElementById('gen-modal').classList.add('open');
+  document.getElementById('gen-result').style.display = 'none';
+  document.querySelectorAll('.gen-step').forEach(s => {
+    s.classList.remove('active', 'done');
+    s.querySelector('.step-icon').textContent = s.id.replace('s','');
+  });
+  runGeneration();
+}
+
+async function runGeneration() {
+  const steps = ['s1','s2','s3','s4','s5','s6','s7'];
+  for (const s of steps) {
+    const el = document.getElementById(s);
+    el.classList.add('active');
+    await wait(900);
+    el.classList.remove('active');
+    el.classList.add('done');
+    el.querySelector('.step-icon').textContent = '✓';
+  }
+  document.getElementById('gen-result').style.display = 'block';
+}
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+function closeGen() { document.getElementById('gen-modal').classList.remove('open'); }
+
+renderVideos();
+renderManuals();
+</script>
+
+<script defer src="auth-helper.js"></script>
+<script src="volvix-ai-wiring.js" defer></script>
+<script src="volvix-ai-real-wiring.js" defer></script>
+<script src="volvix-charts-wiring.js" defer></script>
+<script src="volvix-notifications-wiring.js" defer></script>
+<script src="volvix-backup-wiring.js" defer></script>
+<script src="volvix-logger-wiring.js" defer></script>
+<script src="volvix-reports-wiring.js" defer></script>
+<script src="volvix-offline-wiring.js" defer></script>
+<script src="volvix-onboarding-wiring.js" defer></script>
+<script src="volvix-pwa-wiring.js" defer></script>
+<script src="volvix-i18n-wiring.js" defer></script>
+<script src="volvix-theme-wiring.js" defer></script>
+<script src="volvix-shortcuts-wiring.js" defer></script>
+<script src="volvix-search-wiring.js" defer></script>
+<script src="volvix-voice-wiring.js" defer></script>
+<script src="volvix-gamification-wiring.js" defer></script>
+<script src="volvix-perf-wiring.js" defer></script>
+<script src="volvix-email-wiring.js" defer></script>
+<script src="volvix-webrtc-wiring.js" defer></script>
+<script src="volvix-master-controller.js" defer></script>
+<script src="volvix-calendar-wiring.js" defer></script>
+<script src="volvix-payments-wiring.js" defer></script>
+<script src="volvix-realtime-wiring.js" defer></script>
+<script src="volvix-currency-wiring.js" defer></script>
+<script src="volvix-loyalty-wiring.js" defer></script>
+<script src="volvix-tax-wiring.js" defer></script>
+<script src="volvix-webhooks-wiring.js" defer></script>
+<script src="volvix-audit-wiring.js" defer></script>
+<script src="volvix-cache-wiring.js" defer></script>
+<script src="volvix-queue-wiring.js" defer></script>
+<script src="volvix-fulltext-wiring.js" defer></script>
+<script src="volvix-recommendations-wiring.js" defer></script>
+<script src="volvix-subscriptions-wiring.js" defer></script>
+<script src="volvix-plugins-wiring.js" defer></script>
+<script src="volvix-compliance-wiring.js" defer></script>
+<script src="volvix-cs-wiring.js" defer></script>
+<script src="volvix-ratelimit-wiring.js" defer></script>
+<script src="volvix-workflow-wiring.js" defer></script>
+<script src="volvix-ab-testing-wiring.js" defer></script>
+<script src="volvix-feedback-wiring.js" defer></script>
+<script src="volvix-inventory-ai-wiring.js" defer></script>
+</body>
+</html>

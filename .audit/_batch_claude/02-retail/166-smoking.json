@@ -1,0 +1,106 @@
+{
+  "slug": "smoking",
+  "brand": "Smoking",
+  "tagline": "El POS hecho para tiendas de etiqueta que sí rentan sin perder traje",
+  "giro": "trajes de etiqueta",
+  "giroPlural": "tiendas de trajes de etiqueta",
+  "vibe": "darkPremium",
+  "palette": {
+    "bg": "#0A0B10",
+    "surface": "#11131A",
+    "paper": "#181B24",
+    "ink": "#F6F1E0",
+    "ink2": "#C9C2A8",
+    "muted": "#807B62",
+    "line": "#222630",
+    "accent": "#B89766",
+    "accent2": "#D4B074"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Italianno",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas de etiqueta · 2026",
+    "h1": "Cada <em>smoking</em>,<br>cada <em>renta</em>,<br>regresa.",
+    "deck": "El punto de venta hecho para tiendas que rentan trajes de etiqueta: agenda de bodas y eventos, contratos digitales, depósitos en garantía, devolución con foto y fianza.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?tuxedo,formal,black,tie&q=85",
+    "heroAlt": "Smokings colgados en tienda de renta",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?tuxedo&q=80", "tag": "Smokings clásicos", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bowtie&q=80", "tag": "Corbatines", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cummerbund&q=80", "tag": "Fajines seda", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?formal,shoes,patent&q=80", "tag": "Zapatos charol", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?dress,shirt,wing&q=80", "tag": "Camisas pechera", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?suspenders&q=80", "tag": "Tirantes", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?formal,event&q=80", "tag": "Evento gala", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?white,tuxedo&q=80", "tag": "Smoking blanco", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?groom,formal&q=80", "tag": "Novio etiqueta", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?tuxedo,fitting&q=80", "caption": "Toma de medidas para renta"},
+      {"url": "https://source.unsplash.com/random/800x600/?formal,event,gala&q=80", "caption": "Cliente en evento con renta confirmada"},
+      {"url": "https://source.unsplash.com/random/800x600/?tuxedo,return&q=80", "caption": "Devolución con foto y fianza"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Renta y devolución",
+    "title": "Cada smoking, <em>con su contrato y su fecha</em>",
+    "deck": "Cliente renta smoking para boda el sábado. Contrato digital, depósito en garantía, foto al salir. Si no regresa lunes, alerta. Devolución con foto del estado.",
+    "secondary": "En etiqueta, un smoking que no regresa son $4,000-8,000 de pérdida pura.",
+    "data": {
+      "service": "Renta smoking",
+      "slots": [
+        {"hora": "Sáb 10:00", "cliente": "Boda Martínez (8 trajes)", "estado": "confirmada", "tipo": "Entrega viernes"},
+        {"hora": "Sáb 18:00", "cliente": "Gala López", "estado": "confirmada", "tipo": "Smoking blanco"},
+        {"hora": "Dom 10:00", "cliente": "Devoluciones", "estado": "pendiente", "tipo": "12 piezas"},
+        {"hora": "Lun 09:00", "cliente": "Inspección y limpieza", "estado": "pendiente", "tipo": "Inventario"},
+        {"hora": "Lun 14:00", "cliente": "Libre", "estado": "libre", "tipo": ""}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Agenda de eventos y bodas", "d": "Una boda de 8 trajes se agenda con fecha exacta. Sistema avisa qué tallas reservar, cuándo entregar, cuándo recoger."},
+    {"ico": "edit", "h": "Contrato digital con depósito", "d": "Cliente firma contrato en tablet, deja $1,500 de depósito. Si no regresa el lunes, depósito se aplica como venta. Cero pérdidas."},
+    {"ico": "camera", "h": "Foto al salir y al regresar", "d": "Cada renta sale con foto del traje impecable. Al regresar, foto del estado. Si hay daño, se cobra del depósito automáticamente."},
+    {"ico": "split", "h": "Paquetes completos novio + padrinos", "d": "Boda con 6 padrinos: arma paquete completo (smoking + camisa + corbatín + zapatos + faja). Sistema descuenta del stock por talla."},
+    {"ico": "percent", "h": "Comisiones por asesor", "d": "Asesor que cierra boda completa gana más. Sistema calcula al cierre. Cero pleitos en quincena."},
+    {"ico": "archive", "h": "Inventario por talla y modelo", "d": "Cada smoking con su talla y número de inventario único. Cuando sale en renta, cuándo regresa, cuántas veces se ha rentado."}
+  ],
+  "stats": [
+    {"v": "92", "l": "Smokings en inventario"},
+    {"v": "14", "l": "Rentados hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Antes <span class=\"hl\">se me perdían 2 o 3 smokings al año</span> porque el cliente decía 'se me olvidó traerlo'. Con Smoking el depósito cubre el traje completo. Cero pérdidas en 14 meses.",
+    "sig": "Eduardo G.",
+    "role": "Renta de etiqueta en Tlalnepantla, EDOMEX"
+  },
+  "thefts": [
+    {
+      "title": "Trajes rentados que nunca regresan",
+      "rob": "Cliente renta smoking para boda, no lo regresa. Empleada llama 1 vez, no contesta, expediente se cierra. Smoking se pierde ($5k-8k de costo).",
+      "fix": "Cada renta <strong>requiere depósito que cubre costo completo del traje</strong>. Si no regresa en 48h, depósito se aplica como venta. Cero pérdidas."
+    },
+    {
+      "title": "Rentas 'cobradas en efectivo' sin sistema",
+      "rob": "Empleada renta smoking a un cliente conocido, cobra $1,200 en efectivo aparte. Smoking sale del closet, regresa el lunes. Tú nunca lo viste salir.",
+      "fix": "Salidas <strong>requieren contrato digital firmado y depósito por sistema</strong>. Sin contrato, smoking no sale. Auditoría diaria por turno."
+    },
+    {
+      "title": "Daños no cobrados al devolver",
+      "rob": "Cliente regresa smoking con mancha de vino o quemadura de cigarro. Empleado lo acepta sin reportar y limpieza extra ($300-800) sale de tu bolsillo.",
+      "fix": "Devolución <strong>requiere foto comparada con la de salida</strong>. Si hay daño, se cobra del depósito automático. Cero limpiezas extras absorbidas."
+    }
+  ]
+}

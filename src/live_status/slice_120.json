@@ -1,0 +1,41 @@
+{
+  "slice": 120,
+  "title": "Devoluciones extendidas: workflow aprobacion + restock + stats",
+  "range": "2400-2420",
+  "results": [
+    {"idx": 2400, "name": "SQL R17_RETURNS_EXTENDED.sql idempotente", "status": "pass", "note": "db/R17_RETURNS_EXTENDED.sql crea columnas processed_by, original_payment_id, restock_qty, approved_by, approved_at via 'add column if not exists'."},
+    {"idx": 2401, "name": "Check refund_method (cash/card/store_credit/gift_card)", "status": "pass", "note": "Constraint pos_returns_refund_method_chk anadido si no existe. Update previo normaliza valores legacy 'efectivo' -> 'cash'."},
+    {"idx": 2402, "name": "Check status (pending/approved/rejected/completed)", "status": "pass", "note": "Drop dinamico del check antiguo via pg_constraint, recrea con set ampliado."},
+    {"idx": 2403, "name": "Trigger after_return_approved", "status": "pass", "note": "fn_after_return_approved itera items_returned jsonb y suma qty a pos_products.stock cuando status pasa a approved/completed con restock_qty=true."},
+    {"idx": 2404, "name": "Vista v_returns_stats", "status": "pass", "note": "Agrega por tenant+dia: total, by_status, refunded_total, top_reason (mode within group)."},
+    {"idx": 2405, "name": "POST /api/returns valida sale_id existe", "status": "pass", "note": "api/index.js consulta pos_sales?id=eq y retorna 404 si no encuentra."},
+    {"idx": 2406, "name": "POST /api/returns valida items subset", "status": "pass", "note": "Itera items_returned, busca product_id en sale.items, valida qty <= original."},
+    {"idx": 2407, "name": "POST /api/returns calcula refund_amount", "status": "pass", "note": "Reduce items: price * qty si body no provee refund_amount."},
+    {"idx": 2408, "name": "POST /api/returns force status=pending", "status": "pass", "note": "Status inicial siempre pending; processed_by=req.user.id."},
+    {"idx": 2409, "name": "GET /api/returns filtros status/from/to/customer", "status": "pass", "note": "Server-side: status, from, to via query string. customer filtrado en cliente."},
+    {"idx": 2410, "name": "POST /api/returns/:id/approve manager+", "status": "pass", "note": "Roles permitidos: manager, admin, superadmin. 403 si menor."},
+    {"idx": 2411, "name": "Approve > $500 requiere admin", "status": "pass", "note": "Si refund_amount > 500 y rol manager -> 403 'amount > $500 requires admin approval'."},
+    {"idx": 2412, "name": "Approve PATCH approved_by/approved_at", "status": "pass", "note": "Update setea approved_by, approved_at=now ISO, status=approved. Trigger SQL hace restock."},
+    {"idx": 2413, "name": "POST /api/returns/:id/reject manager+", "status": "pass", "note": "Mismo gate de roles. Acepta body.notes opcional."},
+    {"idx": 2414, "name": "GET /api/returns/stats", "status": "pass", "note": "Calcula total, by_status, refunded_total, return_rate (returns/sales), top_reasons (top 5)."},
+    {"idx": 2415, "name": "Stats fallback 42P01", "status": "pass", "note": "Si tabla pos_returns no existe retorna estructura vacia con note='tabla pendiente', no 500."},
+    {"idx": 2416, "name": "Cliente UI volvix-returns-wiring.js", "status": "pass", "note": "VolvixReturns.render(container,saleId): fetch venta, checkbox+qty por item, dropdown REASONS (6) + METHODS (4), POST /api/returns."},
+    {"idx": 2417, "name": "Cliente UI valida seleccion minima", "status": "pass", "note": "Si no hay items chequeados muestra 'Selecciona al menos un item' y aborta submit."},
+    {"idx": 2418, "name": "node --check api/index.js", "status": "pass", "note": "Syntax OK sin output."},
+    {"idx": 2419, "name": "node --check public/volvix-returns-wiring.js", "status": "pass", "note": "Syntax OK sin output."},
+    {"idx": 2420, "name": "Reporte R17_RETURNS_EXTENDED.md", "status": "pass", "note": "Documenta SQL, API endpoints, cliente, validacion."}
+  ],
+  "endpoints_verified": [
+    "GET /api/returns?status=&customer=&from=&to= (api/index.js)",
+    "POST /api/returns (api/index.js, valida sale_id+subset+qty)",
+    "POST /api/returns/:id/approve (api/index.js, manager+, gate $500)",
+    "POST /api/returns/:id/reject (api/index.js, manager+)",
+    "GET /api/returns/stats?from=&to= (api/index.js)"
+  ],
+  "files_changed": [
+    "db/R17_RETURNS_EXTENDED.sql",
+    "api/index.js",
+    "public/volvix-returns-wiring.js",
+    "R17_RETURNS_EXTENDED.md"
+  ]
+}

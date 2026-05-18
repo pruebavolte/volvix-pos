@@ -1,0 +1,106 @@
+{
+  "slice": 64,
+  "idx_range": [1620, 1640],
+  "task": "R14 observability — error tracker v2 + perf widget + endpoint validation",
+  "ts": "2026-04-26",
+  "deploy_target": "https://volvix-pos.vercel.app",
+  "scope": [
+    "verify volvix-error-tracker.js exists and meets v2 spec",
+    "create volvix-perf-widget.js (bottom-left expandable)",
+    "verify /api/errors/log endpoint persists with graceful fallback"
+  ],
+  "files_verified": {
+    "volvix-error-tracker.js": {
+      "exists": true,
+      "version": "v2 Sentry-like",
+      "size_bytes_approx": 7200,
+      "features_present": {
+        "performance_metrics": {
+          "ttfb": true,
+          "fp": true,
+          "fcp": true,
+          "lcp_via_PerformanceObserver": true,
+          "dom_load": true
+        },
+        "payload_context": {
+          "url": true,
+          "user_id": true,
+          "tenant_id": true,
+          "user_agent": true,
+          "viewport_w_h": true,
+          "ts_client": true
+        },
+        "stack_trace_cleanup": {
+          "removes": ["webpack-internal://", "webpack://", "/_next/static/chunks/webpack", "/__nextjs_", "node_modules/(next|react-dom|webpack)", ".vercel/output/", "node:internal/"],
+          "max_frames": 20
+        },
+        "buffer_batch_send": {
+          "batch_size": 10,
+          "interval_ms": 30000,
+          "flush_on_unload": true,
+          "uses_keepalive_fetch": true,
+          "uses_sendBeacon_on_unload": true
+        },
+        "throttle_per_minute": 10,
+        "auth": "Bearer JWT from localStorage(volvix_token|token) or window.VOLVIX_SESSION",
+        "manual_api": ["VolvixErrorTracker.capture", "flush", "metrics"]
+      },
+      "verdict": "PASS — all 4 requested capabilities already present"
+    }
+  },
+  "files_created": {
+    "volvix-perf-widget.js": {
+      "size_bytes_approx": 5100,
+      "position": "fixed bottom-left (left:8px, bottom:8px)",
+      "z_index": 2147483646,
+      "expandable": true,
+      "default_state": "collapsed (header + status badge only)",
+      "metrics_displayed": [
+        "FPS (rolling 1s, color-graded: green>=50, yellow>=30, red<30)",
+        "Heap used/limit MB (Chromium performance.memory; color-graded by % usage)",
+        "Online/offline (window online/offline events)",
+        "Slow ops count (PerformanceObserver longtask >50ms)",
+        "Network request count (fetch + XHR.open intercept)"
+      ],
+      "public_api": ["VolvixPerfWidget.metrics()", "show()", "hide()", "reset()"],
+      "opt_out": "set window.VOLVIX_PERF_HIDE = true before script loads",
+      "deps": "none — vanilla JS"
+    }
+  },
+  "endpoint_validation": {
+    "POST /api/errors/log": {
+      "file": "api/index.js",
+      "line": 1660,
+      "rate_limit": "30 req/min per IP via rateLimit('errlog:'+ip)",
+      "auth": "optional — decodes Bearer JWT for user_id/tenant_id",
+      "persistence": "supabaseRequest('POST', '/error_log', row)",
+      "fallback_graceful": true,
+      "fallback_behavior": [
+        "console.warn('[error_log fallback]', JSON.stringify(row)) — surfaces in Vercel logs",
+        "logRequest({level:'error', msg:'error_log insert failed'})",
+        "still returns {ok:true} so client retries don't pile up"
+      ],
+      "field_caps": {
+        "type": 50,
+        "message": 2000,
+        "stack": 8000,
+        "source": 500,
+        "url": 500,
+        "user_agent": 500
+      },
+      "verdict": "PASS — persists to supabase error_log table; graceful fallback to console + logRequest"
+    },
+    "GET /api/errors": {
+      "auth": "requireAuth + role in [admin, superadmin, owner]",
+      "fallback_when_table_missing": "returns {ok:true, count:0, items:[], note:'error_log table unavailable'}"
+    }
+  },
+  "backend_touched": false,
+  "deploy_required": false,
+  "deploy_skipped_reason": "Only 1 new static JS asset added (volvix-perf-widget.js). No api/index.js modification. Asset is served as-is by Vercel on next push; no build/validate step needed.",
+  "next_actions_for_user": [
+    "Add <script src=\"/volvix-perf-widget.js\" defer></script> to HTMLs that should display the widget",
+    "Optional: git add volvix-perf-widget.js && git commit && git push (Vercel auto-deploys static)"
+  ],
+  "verdict": "PASS"
+}

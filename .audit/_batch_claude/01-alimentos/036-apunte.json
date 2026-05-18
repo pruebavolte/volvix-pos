@@ -1,0 +1,104 @@
+{
+  "slug": "apunte",
+  "brand": "Apunte",
+  "tagline": "El sistema para cafeterías universitarias donde los combos estudiantiles cuadran y las propinas llegan",
+  "giro": "cafetería universitaria",
+  "giroPlural": "cafeterías universitarias",
+  "vibe": "scholar",
+  "palette": {
+    "bg": "#F2F4F8",
+    "surface": "#FFFFFF",
+    "paper": "#E0E5ED",
+    "ink": "#0E1A2A",
+    "ink2": "#1F3050",
+    "muted": "#506578",
+    "line": "#B0BCC8",
+    "accent": "#1565C0",
+    "accent2": "#FFA000"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para cafeterías universitarias · 2026",
+    "h1": "Cada <em>combo</em>,<br>cada <em>estudiante</em>,<br>servido.",
+    "deck": "El POS hecho para que los combos estudiantiles avancen la fila, los pagos con credencial sean inmediatos, y los exámenes finales vendas el triple sin caos.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?cafeteria,students,university&q=85",
+    "heroAlt": "Cafetería universitaria con estudiantes",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?cafeteria,line&q=80", "tag": "Fila al mediodía", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?student,coffee&q=80", "tag": "Café para estudiar", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sandwich,combo&q=80", "tag": "Combo sandwich", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bagel,cream&q=80", "tag": "Bagel con queso", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cookie,latte&q=80", "tag": "Galleta y latte", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?yogurt,fruit&q=80", "tag": "Yogurt con fruta", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?library,study&q=80", "tag": "Hora de estudiar", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?energy,drink&q=80", "tag": "Energética nocturna", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?students,group&q=80", "tag": "Grupo de amigos", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?barista,fast&q=80", "caption": "Barista atiende rápido"},
+      {"url": "https://source.unsplash.com/random/800x600/?credential,pay&q=80", "caption": "Pago con credencial"},
+      {"url": "https://source.unsplash.com/random/800x600/?students,exam&q=80", "caption": "Estudiantes en parciales"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Barra · estudiantes · en vivo",
+    "title": "Tu barra, <em>combo por combo</em>, sin filas eternas",
+    "deck": "Cada orden con combo estudiantil. KDS muestra: sandwich + bebida + galleta $65. Estudiante paga con QR o credencial. 30 segundos por persona.",
+    "secondary": "En las cafeterías universitarias, 5 min de fila pierde 10 clientes que se van al de afuera.",
+    "data": {
+      "orders": [
+        {"table": "TURNO-22", "name": "Ana (cred 4582)", "state": "urgent", "items": ["Combo sandwich + latte + galleta"], "waitMin": 3},
+        {"table": "TURNO-23", "name": "Memo (cred 3219)", "state": "prep", "items": ["Bagel queso", "Cold brew", "Cookie chocolate"], "waitMin": 2},
+        {"table": "TURNO-24", "name": "Grupo 4 amigas", "state": "queue", "items": ["4 cafés", "4 muffins", "1 yogurt grande"], "waitMin": 1},
+        {"table": "TURNO-25", "name": "Don Profesor", "state": "ready", "items": ["Cappuccino doble shot"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Pago con credencial universitaria", "d": "Estudiante escanea credencial, sistema cobra al saldo universitario. 5 segundos por persona. Cero filas en hora pico."},
+    {"ico": "monitor", "h": "Combos rápidos predefinidos", "d": "Combo 1 (sand + latte + galleta $65), Combo 2 (yogurt + jugo $48). Estudiante pide 'el 1' y avanza. Cero menú largo."},
+    {"ico": "calendar", "h": "Modo exámenes finales", "d": "Semanas de parciales: ventas suben 3x. Sistema sugiere preparar más muffins, más cold brews, más energéticas. Cero faltantes."},
+    {"ico": "archive", "h": "Inventario para 800 estudiantes", "d": "Sandwiches: 60. Muffins: 80. Granos café: 12 kg. Cuando bajas, alerta antes del rush."},
+    {"ico": "bookmark", "h": "Programa de lealtad estudiantil", "d": "10 cafés = 1 gratis. Sistema lo lleva por credencial. Cero papelitos perdidos en la mochila."},
+    {"ico": "percent", "h": "Margen por combo estudiantil", "d": "Combo $65 costo $24. Margen 63%. Sistema te dice cuál promover en hora muerta."}
+  ],
+  "stats": [
+    {"v": "412", "l": "Estudiantes servidos hoy"},
+    {"v": "30", "l": "Seg promedio por orden"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "En finales <span class=\"hl\">la fila daba la vuelta al edificio</span> y perdíamos 30 estudiantes que se iban. Con Apunte el pago con credencial es de 5 segundos. Atendemos a 400 más en la misma hora.",
+    "sig": "Sra. Rocío M.",
+    "role": "Cafetería Apunte, ITESM Monterrey, NL"
+  },
+  "thefts": [
+    {
+      "title": "Combos cobrados como items sueltos",
+      "rob": "Empleado cobra sandwich + latte + galleta sueltos ($85) en vez de combo ($65). Diferencia de $20 va a propina o bolsillo. 30 al día = $600.",
+      "fix": "Combos <strong>identificados por sistema al juntar items</strong>. Si lleva los 3 items combo, cobra combo automático. Cero precios al ojo."
+    },
+    {
+      "title": "Café 'cortesía' a profesores amigos",
+      "rob": "Empleada da café gratis a profesores 'porque sí'. 8-12 cafés por turno = $200-300 al día sin registro.",
+      "fix": "Cortesías a profesores requieren <strong>código del jefe de cafetería</strong>. Sistema lleva conteo. Si pasa de 3 al día, alerta."
+    },
+    {
+      "title": "Cobro doble al estudiante distraído",
+      "rob": "Cajera cobra con credencial Y en efectivo, se queda con el efectivo. Estudiante distraído no nota. $40-80 cada vez. 3-5 veces por turno.",
+      "fix": "Cobros con <strong>ticket digital obligatorio</strong>. Estudiante recibe comprobante por WhatsApp. Si doble cobro, sistema alerta y bloquea."
+    }
+  ]
+}

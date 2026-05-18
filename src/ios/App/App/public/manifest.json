@@ -1,0 +1,81 @@
+{
+  "name": "Volvix POS",
+  "short_name": "Volvix",
+  "description": "Sistema de punto de venta multi-giro offline-first",
+  "id": "/?source=pwa",
+  "start_url": "/pos.html?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#0A0A0A",
+  "theme_color": "#FBBF24",
+  "orientation": "any",
+  "lang": "es-MX",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nueva venta",
+      "short_name": "Vender",
+      "description": "Abrir el POS para registrar una venta",
+      "url": "/pos.html?action=new-sale",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Inventario",
+      "short_name": "Inventario",
+      "description": "Gestionar productos y stock",
+      "url": "/pos-inventario.html",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Corte de caja",
+      "short_name": "Corte",
+      "description": "Realizar corte de caja",
+      "url": "/pos-corte.html",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Reportes",
+      "short_name": "Reportes",
+      "description": "Ver reportes de ventas",
+      "url": "/pos-reportes.html",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "share_target": {
+    "action": "/pos.html",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text":  "text",
+      "url":   "url"
+    }
+  },
+  "screenshots": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Volvix POS — pantalla principal"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Volvix POS — móvil"
+    }
+  ],
+  "launch_handler": { "client_mode": ["navigate-existing", "auto"] },
+  "edge_side_panel": { "preferred_width": 480 }
+}

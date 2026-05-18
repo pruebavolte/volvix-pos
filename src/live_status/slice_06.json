@@ -1,0 +1,6 @@
+[
+  {"idx":53,"name":"Cambiar idioma","status":"skip","note":"UI manual — wiring presente: volvix-i18n-wiring.js expone window.setLanguage('es'|'en'|'pt') (líneas 501, 621). No hay endpoint backend para persistir."},
+  {"idx":54,"name":"Cambiar moneda","status":"skip","note":"UI manual — wiring presente: volvix-currency-wiring.js Volvix.Currency.setCurrent(code) (línea 36). Sin endpoint backend."},
+  {"idx":55,"name":"Theme dark/light","status":"skip","note":"UI manual — volvix-theme-wiring.js existe. No se encontró atributo data-theme en HTMLs (toggle probablemente vía clase CSS o localStorage). Sin endpoint backend."},
+  {"idx":56,"name":"Logo upload","status":"skip","note":"UI manual — no existe /api/owner/branding ni /api/tenants/:id en api/index.js. Solo /api/owner/brands (GET/POST) que gestiona marcas de productos, no branding del tenant. Logo upload no implementado en backend."}
+]

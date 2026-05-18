@@ -1,0 +1,104 @@
+{
+  "slug": "marea",
+  "brand": "Marea",
+  "tagline": "El sistema para marisquerías donde el camarón se cobra al gramo y el aguachile no se diluye",
+  "giro": "marisquería",
+  "giroPlural": "marisquerías",
+  "vibe": "fresh",
+  "palette": {
+    "bg": "#EAF4F8",
+    "surface": "#FFFFFF",
+    "paper": "#D8EAF1",
+    "ink": "#0A2A3F",
+    "ink2": "#1A4060",
+    "muted": "#5A7E94",
+    "line": "#B0D0DD",
+    "accent": "#0288D1",
+    "accent2": "#F7913B"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para marisquerías mexicanas · 2026",
+    "h1": "Cada <em>camarón</em>,<br>cada <em>aguachile</em>,<br>pesado.",
+    "deck": "El POS hecho para que el camarón U10 se cobre como U10, el aguachile no se aguada en la cocina, y las tostadas de cebiche no se vayan sin su limón.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?ceviche,mariscos,mexicano&q=85",
+    "heroAlt": "Aguachile rojo con camarones",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?aguachile,camaron&q=80", "tag": "Aguachile verde", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ceviche,pescado&q=80", "tag": "Ceviche de pescado", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tostada,marlin&q=80", "tag": "Tostada de marlín", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?camaron,plancha&q=80", "tag": "Camarón a la plancha", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?caldo,siete,mares&q=80", "tag": "Caldo 7 mares", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cocteles,camaron&q=80", "tag": "Coctel de camarón", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?marisqueria,interior&q=80", "tag": "Marisquería costera", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pulpo,mariscos&q=80", "tag": "Pulpo enamorado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?mariscos,playa&q=80", "tag": "Mariscos frescos", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?bascula,mariscos&q=80", "caption": "Báscula pesa el camarón crudo"},
+      {"url": "https://source.unsplash.com/random/800x600/?cocinero,mariscos&q=80", "caption": "Cocinero prepara aguachile"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,mariscos&q=80", "caption": "Familia comparte aguachile"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · mariscos · en vivo",
+    "title": "Tu cocina, <em>plato por plato</em>, sin atorones",
+    "deck": "Cada mesa pasa orden con tamaño del camarón. KDS muestra: aguachile U10 con 200g. Cocinero pesa y prepara. Cero discusiones de tamaño.",
+    "secondary": "En las marisquerías, 50g 'de menos' en un aguachile son $40-60 que el cliente paga de más sin saberlo.",
+    "data": {
+      "orders": [
+        {"table": "M03", "name": "Don Mario", "state": "urgent", "items": ["1 aguachile verde U10|250g", "2 cervezas"], "waitMin": 10},
+        {"table": "M07", "name": "Familia Castro", "state": "prep", "items": ["1 caldo 7 mares", "2 tostadas marlín", "1 coctel"], "waitMin": 7},
+        {"table": "M02", "name": "Pareja", "state": "queue", "items": ["1 ceviche pescado|sin cebolla", "1 michelada"], "waitMin": 4},
+        {"table": "M11", "name": "Cuates fin de semana", "state": "ready", "items": ["1 pulpo plancha", "2 cocteles", "4 tostadas"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Báscula conectada al cobro", "d": "Cada platillo pesa el camarón al servir. 200g de U10 = $X. Cero 'ay sí, son 250g' a ojo. Cliente paga lo que recibe."},
+    {"ico": "archive", "h": "Inventario por talla de camarón", "d": "Tienes 12 kg de U10, 18 kg de U16, 5 kg de pulpo. Cuando llegas a 2 kg, alerta. Cero promesas de aguachile premium que no hay."},
+    {"ico": "monitor", "h": "KDS con extras y modificaciones", "d": "Sin cebolla, sin chile, extra limón. Aparece en rojo en KDS. Cocinero no falla. Cero platillos devueltos por confusión."},
+    {"ico": "percent", "h": "Rendimiento del kilo de camarón", "d": "Un kilo de U10 debe dar 4-5 aguachiles de 200g. Si rinde 3, hay merma o el cocinero se está pasando."},
+    {"ico": "calendar", "h": "Frescura del marisco por lote", "d": "Cada entrada de pescado/camarón con fecha. Sistema avisa cuando un lote tiene 36 horas. Cero clientes con ceviche pasado."},
+    {"ico": "truck", "h": "Delivery con foto previa", "d": "Aguachile sale a domicilio con foto del plato emplatado. Si llega derramado, sabes en qué punto. Cero discusiones con cliente."}
+  ],
+  "stats": [
+    {"v": "62", "l": "Aguachiles servidos hoy"},
+    {"v": "18", "l": "Kg de camarón fresco"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi cocinero <span class=\"hl\">cobraba U10 pero ponía U16</span> y no me enteraba. Con Marea cada talla tiene su precio fijo y báscula conectada. Mis clientes notaron la diferencia. Subí 25% mi venta porque saben que es premium.",
+    "sig": "Don Memo S.",
+    "role": "Mariscos La Costa, Mazatlán, Sinaloa"
+  },
+  "thefts": [
+    {
+      "title": "Camarón U16 vendido como U10",
+      "rob": "Cocinero usa camarón más chico ($120/kg) y cobra como premium ($280/kg). Cliente no nota porque ya está marinado. $200-400 por kilo cambiado.",
+      "fix": "Cada platillo <strong>pesado con báscula identificadora de talla</strong>. Sistema verifica que la talla coincida con el precio cobrado."
+    },
+    {
+      "title": "Pulpo 'merma' que se llevó a casa",
+      "rob": "Cocinero reporta que pulpo encogió 35% al cocer (lo normal es 25%). El 10% extra se lo lleva. $400-600 cada quincena.",
+      "fix": "Pulpo se <strong>pesa crudo y cocido</strong>. Sistema compara con merma estándar. Diferencias arriba de 28% requieren foto y firma."
+    },
+    {
+      "title": "Tostadas 'cortesía' descontroladas",
+      "rob": "Mesero le da 3 tostadas extras a su cuate 'porque pidió mucho'. Cada tostada $40 — son $120 por mesa cómplice. 5 mesas diarias = $600.",
+      "fix": "Cortesías <strong>requieren código del gerente</strong>. Sistema lleva conteo. Si pasa de 2 cortesías por turno, alerta automática."
+    }
+  ]
+}

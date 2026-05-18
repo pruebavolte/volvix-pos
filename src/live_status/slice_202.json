@@ -1,0 +1,50 @@
+{
+  "slice": 202,
+  "range": "3040-3060",
+  "topic": "R18_MERCADOLIBRE_LATAM",
+  "ts": "2026-04-26",
+  "status": "completed",
+  "site_default": "MLM",
+  "sites_supported": ["MLM", "MLA", "MLB", "MCO", "MLC"],
+  "files_generated": {
+    "api_wiring": "api/mercadolibre-wiring.js",
+    "frontend_wiring": "volvix-mercadolibre-wiring.js",
+    "sql_migration": "db/R18_MERCADOLIBRE.sql",
+    "report_md": "R18_MERCADOLIBRE.md"
+  },
+  "endpoints_added": [
+    "POST /api/integrations/mercadolibre/oauth-callback",
+    "POST /api/integrations/mercadolibre/sync-listings",
+    "POST /api/integrations/mercadolibre/orders/webhook",
+    "GET  /api/integrations/mercadolibre/orders",
+    "GET  /api/integrations/mercadolibre/health"
+  ],
+  "tables_created": ["ml_oauth_tokens", "ml_listings", "ml_orders"],
+  "env_required": [
+    "MERCADOLIBRE_APP_ID",
+    "MERCADOLIBRE_APP_SECRET",
+    "MERCADOLIBRE_REDIRECT_URI"
+  ],
+  "env_optional": ["MERCADOLIBRE_SITE"],
+  "owner_panel_buttons": [
+    "#btn-mercadolibre-connect",
+    "#btn-mercadolibre-sync",
+    "#btn-mercadolibre-orders"
+  ],
+  "oauth_flow": "auth.mercadolibre.com.{tld}/authorization → callback → POST /oauth-callback → tokens persistidos en ml_oauth_tokens",
+  "ml_api_calls": {
+    "token_exchange": "POST api.mercadolibre.com/oauth/token",
+    "create_item":    "POST api.mercadolibre.com/sites/{site}/items",
+    "get_order":      "GET  api.mercadolibre.com/orders/{id}"
+  },
+  "wiring_strategy": "module auto-loadable (api/mercadolibre-wiring.js .register({...}))",
+  "next_actions": [
+    "Registrar require('./mercadolibre-wiring').register({...}) en api/index.js o vía master-controller",
+    "Deploy: setear MERCADOLIBRE_APP_ID / SECRET / REDIRECT_URI en Vercel",
+    "Aplicar migración db/R18_MERCADOLIBRE.sql en Supabase",
+    "Implementar refresh_token automático para access_token expirado",
+    "Mapear ml_orders → pos_sales para cierre de loop comercial"
+  ],
+  "score_estimated": 88,
+  "veredict": "READY-TO-WIRE — código y SQL completos; falta registrar el módulo en index.js y aplicar migración"
+}

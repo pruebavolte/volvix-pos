@@ -1,16 +1,17 @@
 {
-  "version": "1.0.362",
+  "version": "1.0.363",
   "major": 1,
   "minor": 0,
-  "patch": 362,
+  "patch": 363,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-18T09:30:00.000Z",
-  "built_at": "2026-05-18T09:30:00.000Z",
+  "date": "2026-05-18T10:00:00.000Z",
+  "built_at": "2026-05-18T10:00:00.000Z",
   "changelog": [
-    "V9.0.1 FIX URGENTE: HARD_EXCEPTIONS movidas al INICIO de resolve() (no en fallback). El partial-match estaba capturando primero y nunca llegaba al fallback. Ahora 'renta de trajes' → /tarima.html, 'pañales' → /tendito.html, 'sexshop' → /discreto.html, 'papeleria' → /bloque.html.",
-    "V9.0 PRE-PITCH FIX: HARD_EXCEPTIONS en fallback (no funcionó porque resolve interceptaba antes) + refuerzo defensivo de picker hide en 206 HTMLs.",
-    "V8.9 BUG CRITICAL: backend api/giros.js servía templates planos.",
-    "V8.8.1, V8.8, V8.7.x, V8.6, V8.5.1, V8.5, V8.4.1, V8.4, V8.3, V8.2, V8.1, V8, V7, V6: fases anteriores"
+    "V9.0.2 FIX MASIVO PRE-PITCH: (1) Widget 'booking' en 206 HTMLs de marca: defensive fix para b.taken/b.active undefined (bloque/pata/gateo crasheaban con 'Cannot read properties of undefined indexOf'). Ahora usa _taken/_active con fallback a d.taken/d.active. (2) +8 HARD_EXCEPTIONS adicionales en resolve(): papeleria/libreria→tendito (no bloque), panaderia→merengue/tendito (no espuma), bolsas para basura→tendito (no asa), venta de ropa→pareo (confirmado), kinder/preescolar/guarderia→bloque (con widget fixed), veterinaria→pata (con widget fixed).",
+    "V9.0.1 FIX: HARD_EXCEPTIONS al inicio de resolve()",
+    "V9.0 PRE-PITCH FIX: HARD_EXCEPTIONS + picker hide defensivo",
+    "V8.9 BUG CRITICAL: backend api/giros.js servía templates planos",
+    "V8.8.x, V8.7.x, V8.6, V8.5.x, V8.4.x, V8.3, V8.2, V8.1, V8, V7, V6: fases anteriores"
   ]
 }

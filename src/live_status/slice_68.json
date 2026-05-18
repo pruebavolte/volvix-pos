@@ -1,0 +1,65 @@
+{
+  "slice_id": 68,
+  "topic": "DB safety audit — R14_ALL_COMBINED.sql",
+  "idx_range": [1710, 1720],
+  "generated_at": "2026-04-26",
+  "source_file": "db/R14_ALL_COMBINED.sql",
+  "source_lines": 3182,
+  "safe_file": "db/R14_ALL_COMBINED_SAFE.sql",
+  "safe_lines": 3223,
+  "checks": {
+    "1_idempotency": {
+      "create_table_if_not_exists": 27,
+      "create_table_unsafe": 0,
+      "create_index_if_not_exists_or_concurrently": "all 64 use IF NOT EXISTS",
+      "create_index_unsafe": 0,
+      "create_policy_total": 64,
+      "drop_policy_if_exists_total": 64,
+      "policies_have_drop_guard": true,
+      "verdict": "PASS"
+    },
+    "2_dependency_order": {
+      "foreign_key_constraints": 22,
+      "manual_review": "FK targets (tenants, users, products, sales) are declared in earlier sections (R13 + first R14 chunks) before referenced. No forward references found.",
+      "verdict": "PASS"
+    },
+    "3_drop_table_safety": {
+      "drop_table_count": 3,
+      "locations": [
+        "line 773: DROP TABLE IF EXISTS public.invoice_log CASCADE",
+        "line 774: DROP TABLE IF EXISTS public.invoice_lines CASCADE",
+        "line 775: DROP TABLE IF EXISTS public.invoices CASCADE"
+      ],
+      "risk": "HIGH — re-running file destroys all CFDI invoice data",
+      "mitigated_in_safe": true,
+      "safe_action": "Replaced with CREATE TABLE IF NOT EXISTS (data-preserving)",
+      "verdict": "FIXED in SAFE"
+    },
+    "4_security_definer_search_path": {
+      "occurrences": 4,
+      "with_explicit_search_path": "apply_inventory_movement (line 417: SET search_path = public, app)",
+      "missing_search_path_in_combined": [
+        "convert(numeric, text, text) — fixed in SAFE line 1792",
+        "seed_vertical_for_tenant — fixed in SAFE",
+        "touch_api_key — fixed in SAFE"
+      ],
+      "risk": "search_path hijack on PostgREST-exposed RPCs",
+      "verdict": "FIXED in SAFE"
+    },
+    "5_seed_idempotency": {
+      "insert_into_total": 21,
+      "on_conflict_total": 11,
+      "destructive_seed_found": "TRUNCATE vertical_templates (line 2550)",
+      "risk": "Re-running deletes customer-added templates",
+      "mitigated_in_safe": true,
+      "safe_action": "UNIQUE(vertical, sku) + ON CONFLICT DO NOTHING",
+      "verdict": "FIXED in SAFE"
+    }
+  },
+  "summary": {
+    "issues_in_combined": 3,
+    "issues_in_safe": 0,
+    "recommendation": "Use db/R14_ALL_COMBINED_SAFE.sql for all deploys. Original COMBINED is destructive on re-run.",
+    "overall_verdict": "SAFE_VERSION_OK"
+  }
+}

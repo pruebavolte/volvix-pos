@@ -1,0 +1,106 @@
+{
+  "slug": "remolque",
+  "brand": "Remolque",
+  "tagline": "El sistema para renta de remolques que cobra cada eje y cada día",
+  "giro": "renta de remolques",
+  "giroPlural": "rentadoras de remolques",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#191B1F",
+    "surface": "#23262C",
+    "paper": "#2C2F36",
+    "ink": "#F0F2F5",
+    "ink2": "#CACED4",
+    "muted": "#7C8089",
+    "line": "#34373F",
+    "accent": "#D35400",
+    "accent2": "#E97A2A"
+  },
+  "fonts": {
+    "display": "Saira Condensed",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para renta de remolques · 2026",
+    "h1": "Cada <em>eje</em>,<br>cada <em>día</em>,<br>cobrado.",
+    "deck": "El POS hecho para renta de remolques: cama baja, redilas, motocicletero, lancha, casa rodante. Inventario por capacidad, depósito retenido, GPS opcional.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver remolques disponibles",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?trailer,rental,hitch&q=80",
+    "heroAlt": "Remolques de renta alineados en patio",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?trailer,utility&q=80", "tag": "Utilitario", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?flatbed,trailer&q=80", "tag": "Cama baja", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cargo,trailer&q=80", "tag": "Caja cargo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?motorcycle,trailer&q=80", "tag": "Motocicletero", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?boat,trailer&q=80", "tag": "Lancha", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?camper,trailer&q=80", "tag": "Camper", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?trailer-yard,depot&q=80", "tag": "Patio remolques", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?hitch,coupler&q=80", "tag": "Enganche", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?travel,trailer&q=80", "tag": "Travel trailer", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?inspection,trailer&q=80", "caption": "Inspección con foto firmada"},
+      {"url": "https://source.unsplash.com/random/800x600/?tire,trailer&q=80", "caption": "Estado de llantas registrado"},
+      {"url": "https://source.unsplash.com/random/800x600/?signature,deposit&q=80", "caption": "Depósito retenido en tarjeta"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu patio, <em>remolque por remolque</em>",
+    "deck": "Cada remolque con su capacidad, número de placas, estado, día de regreso. Cliente reserva, llega, lo lleva. Cero llamadas '¿tienen el motocicletero?'.",
+    "secondary": "Renta de remolque chica pierde 30% de ingresos por días no cobrados. Sistema cobra real.",
+    "data": {
+      "product": "Remolques por uso",
+      "tallas": ["Utilitario 4x6", "Utilitario 5x10", "Cama baja", "Cargo cerrada", "Motocicletero", "Lancha", "Camper", "Travel trailer"],
+      "stock": [
+        {"color": "Disponibles", "vals": [4, 3, 2, 5, 4, 3, 1, 2]},
+        {"color": "Rentados", "vals": [6, 8, 4, 7, 6, 5, 2, 3]},
+        {"color": "Servicio", "vals": [1, 1, 0, 1, 0, 1, 0, 0]}
+      ],
+      "lowThreshold": 2
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Reserva por días", "d": "Cliente reserva 3 días. Sistema bloquea esos días en el remolque. Cero overbooking."},
+    {"ico": "camera", "h": "Inspección al entregar", "d": "10 fotos: ejes, llantas, luces, piso, enganche. Cliente firma estado. Cero pleitos al regresar."},
+    {"ico": "edit", "h": "Depósito retenido", "d": "Tarjeta con $2,000-8,000 retenidos según remolque. Si regresa bien, se libera. Si hay daño, se cobra."},
+    {"ico": "barcode", "h": "Verificación enganche", "d": "Foto del enganche del auto del cliente. Si no es compatible, no sale. Cero accidentes con remolque suelto."},
+    {"ico": "monitor", "h": "GPS opcional", "d": "Remolques caros con GPS. Si sale del estado o se 'pierde', lo encuentras. Cero robos sin rastro."},
+    {"ico": "percent", "h": "Rendimiento por unidad", "d": "Sabes cuál remolque se renta más, cuál se queda. Decides qué comprar y qué vender."}
+  ],
+  "stats": [
+    {"v": "38", "l": "Remolques en flota"},
+    {"v": "72%", "l": "Ocupación promedio"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis remolques regresaban con <span class=\"hl\">llantas rotas y nadie pagaba</span>. 'Ya venía así', decían los clientes. Sin foto, sin prueba. Con Remolque cada llanta se fotografía. Cobro $1,800-3,000 al causante. Cero pérdidas.",
+    "sig": "Don Felipe O.",
+    "role": "Renta de Remolques El Felipe, Tlaquepaque, JAL"
+  },
+  "thefts": [
+    {
+      "title": "Llantas dañadas no cobradas",
+      "rob": "Remolque regresa con llanta reventada. Empleado no documenta. Próximo cliente lo lleva, falla en carretera. Tú pagas $1,500-3,000.",
+      "fix": "Inspección con <strong>foto firmada de cada llanta</strong> a la entrega y regreso. Daño se cobra al causante. Cero pérdidas."
+    },
+    {
+      "title": "Días extra no cobrados",
+      "rob": "Cliente renta 3 días, regresa al 5to. Empleado dice 'no tenía cómo cobrar más'. Tú pierdes 2 días: $500-1,500.",
+      "fix": "Sistema cobra <strong>días extra automático del depósito</strong>. Cliente sabe la tarifa diaria desde el contrato. Sin discusiones."
+    },
+    {
+      "title": "Remolques rentados por fuera",
+      "rob": "Empleado renta motocicletero al amigo del primo por $1,000 efectivo. Reporta como 'mantenimiento'. Tú no te enteras.",
+      "fix": "GPS opcional en remolques caros. <strong>Sin contrato activo, alerta de movimiento</strong>. Cero rentas paralelas."
+    }
+  ]
+}

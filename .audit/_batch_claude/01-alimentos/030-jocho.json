@@ -1,0 +1,104 @@
+{
+  "slug": "jocho",
+  "brand": "Jocho",
+  "tagline": "El sistema para hotdoguerías donde cada salchicha se cuenta y los toppings se cobran completos",
+  "giro": "hotdoguería",
+  "giroPlural": "hotdoguerías",
+  "vibe": "playful",
+  "palette": {
+    "bg": "#FFF2D8",
+    "surface": "#FFFFFF",
+    "paper": "#FFE0A8",
+    "ink": "#3D1F08",
+    "ink2": "#5C3210",
+    "muted": "#8A5530",
+    "line": "#F0C078",
+    "accent": "#E91E63",
+    "accent2": "#FFB300"
+  },
+  "fonts": {
+    "display": "Bebas Neue",
+    "body": "Inter",
+    "script": "Permanent Marker",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para hotdoguerías mexicanas · 2026",
+    "h1": "Cada <em>jocho</em>,<br>cada <em>topping</em>,<br>cobrado.",
+    "deck": "El POS hecho para que las salchichas no se 'pierdan' del freezer, los toppings premium (tocino, aguacate) se cobren completos, y los carritos nocturnos cuadren al cierre.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?hotdog,toppings,sonoran&q=85",
+    "heroAlt": "Hot dog sonorense con todos los toppings",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?hotdog,sonora&q=80", "tag": "Sonorense clásico", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bacon,wrapped&q=80", "tag": "Envuelto en tocino", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?chili,dog&q=80", "tag": "Chili dog", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cheese,dog&q=80", "tag": "Queso fundido", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mustard,ketchup&q=80", "tag": "Mostaza y catsup", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?onions,grilled&q=80", "tag": "Cebollas asadas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?hotdog,cart&q=80", "tag": "Carrito nocturno", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?avocado,sliced&q=80", "tag": "Aguacate fresco", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?fast,food,night&q=80", "tag": "Noche con jochos", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?cook,grill,sausage&q=80", "caption": "Cocinero pone salchichas a la plancha"},
+      {"url": "https://source.unsplash.com/random/800x600/?toppings,variety&q=80", "caption": "Barra de toppings"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,noche&q=80", "caption": "Cliente nocturno pide jocho"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Plancha · toppings · en vivo",
+    "title": "Tu plancha, <em>jocho por jocho</em>, sin perderse toppings",
+    "deck": "Cada orden con toppings detallados. KDS muestra: sonorense con tocino + queso + aguacate + frijol + cebolla + chiles. Cocinero ve todo.",
+    "secondary": "En las hotdoguerías, un topping premium 'olvidado' al cobrar son $15-25 cada vez. 20 al turno = $400.",
+    "data": {
+      "orders": [
+        {"table": "M01", "name": "Cuates noche", "state": "urgent", "items": ["4 sonorenses|todos con tocino + aguacate", "4 cocas"], "waitMin": 8},
+        {"table": "M03", "name": "Familia con niños", "state": "prep", "items": ["3 chili dogs", "2 jochos kids simples", "5 sodas"], "waitMin": 7},
+        {"table": "M02", "name": "Don Roberto", "state": "queue", "items": ["1 jocho con queso fundido + tocino", "1 cerveza"], "waitMin": 4},
+        {"table": "M07", "name": "Pareja", "state": "ready", "items": ["2 sonorenses sencillos"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Toppings visibles en KDS color", "d": "Tocino (rojo), aguacate (verde), queso (amarillo). Cocinero ve sin confusión. Cero jochos a medias."},
+    {"ico": "barcode", "h": "Cobro automático por topping", "d": "Cada topping suma al ticket. Sistema bloquea si jocho sale sin extras facturados. Cero toppings 'gratis' al cuate."},
+    {"ico": "archive", "h": "Inventario por proteína y topping", "d": "Salchichas: 80. Tocino: 4 kg. Aguacate: 25 piezas. Cuando baja, alerta antes del rush nocturno."},
+    {"ico": "truck", "h": "Carritos nocturnos con conteo", "d": "Cada carrito sale con 100 salchichas contadas, regresa con sobras. Sistema cuadra. Cero salchichas 'que se cayeron'."},
+    {"ico": "percent", "h": "Margen por sonorense vs simple", "d": "Simple costo $12 vendes $35. Sonorense premium costo $28 vendes $75. Sabes qué empujar."},
+    {"ico": "calendar", "h": "Pronóstico nocturno por día", "d": "Viernes vende 180, sábado 240. Sistema sugiere salchichas a marinar. Cero domingos con 30 clientes sin atender."}
+  ],
+  "stats": [
+    {"v": "294", "l": "Jochos vendidos hoy"},
+    {"v": "8", "l": "Carritos en ruta"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis bicicleteros nocturnos <span class=\"hl\">decían que vendieron 60 cuando salieron con 80</span> y se 'les cayeron' 20. Con Jocho cada carrito tiene conteo digital. Identifiqué la fuga y recuperé $11 mil al mes.",
+    "sig": "Don Salvador V.",
+    "role": "Jochos La Banqueta, Hermosillo, Sonora"
+  },
+  "thefts": [
+    {
+      "title": "Salchichas 'que se cayeron' del carrito",
+      "rob": "Bicicletero reporta que 'se cayeron 12 salchichas al banquetazo'. En realidad él y su cuate se las comieron. $150-250 cada vez.",
+      "fix": "Carritos con <strong>conteo digital firmado al salir</strong>. Sobras al regreso. Diferencia entre carga + sobras y vendido debe ser cero."
+    },
+    {
+      "title": "Tocino 'cortesía' al cliente amigo",
+      "rob": "Cocinero pone tocino sin cobrarlo. A clientes amigos. 10-15 jochos por turno = $150-225 al día en tocino regalado.",
+      "fix": "Tocino <strong>cobrado por botón obligatorio</strong>. Sistema bloquea si jocho sale sin extras facturados. Cero cortesías al cariño."
+    },
+    {
+      "title": "Aguacates 'que se echaron a perder'",
+      "rob": "Empleado reporta 3-5 aguacates 'maduros echados a perder' y se los lleva. En realidad están perfectos. $60-90 cada vez.",
+      "fix": "Aguacates con <strong>conteo diario y foto antes de tirar</strong>. Sistema cuadra contra jochos con aguacate. Diferencias alertan."
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "slug": "nieve",
+  "brand": "Nieve",
+  "tagline": "El sistema para neverías artesanales donde la bola se pesa al gramo y los sabores raros se cobran completos",
+  "giro": "nevería artesanal",
+  "giroPlural": "neverías artesanales",
+  "vibe": "artisan",
+  "palette": {
+    "bg": "#FAF4F0",
+    "surface": "#FFFFFF",
+    "paper": "#F0E5DD",
+    "ink": "#1F1A18",
+    "ink2": "#3A3025",
+    "muted": "#7A6555",
+    "line": "#D5C5B0",
+    "accent": "#8B4A6F",
+    "accent2": "#E8A87C"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para neverías artesanales mexicanas · 2026",
+    "h1": "Cada <em>bola</em>,<br>cada <em>sabor</em>,<br>al gramo.",
+    "deck": "El POS hecho para que la bola de nieve premium se cobre por gramaje, los sabores raros (chicozapote, mamey, queso) se vendan completos, y los conos de la tarde cuadren con la masa preparada al alba.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?artisan,gelato,scoop&q=85",
+    "heroAlt": "Bolas de helado artesanal en cono de waffle",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?gelato,scoops&q=80", "tag": "Bolas artesanales", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pistachio,gelato&q=80", "tag": "Pistache italiano", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mamey,ice&q=80", "tag": "Mamey mexicano", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cookies,cream&q=80", "tag": "Cookies & cream", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?dark,chocolate&q=80", "tag": "Chocolate amargo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?queso,nieve&q=80", "tag": "Nieve de queso", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?gelateria,counter&q=80", "tag": "Mostrador refrigerado", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?waffle,cone&q=80", "tag": "Conos de waffle", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?ice,cream,artisan&q=80", "tag": "Sabores artesanales", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?scoop,ice&q=80", "caption": "Nievero saca bola perfecta"},
+      {"url": "https://source.unsplash.com/random/800x600/?gelato,production&q=80", "caption": "Producción al alba"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,gelato&q=80", "caption": "Cliente elige sabor del día"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Mostrador · sabores · en vivo",
+    "title": "Tu mostrador, <em>bola por bola</em>, al peso justo",
+    "deck": "Cada orden con sabor y tamaño. KDS muestra: 2 bolas (pistache + mamey) en cono waffle. Nievero pesa cada bola. Cero porciones generosas que descuadran.",
+    "secondary": "En las neverías artesanales, 20g extra por bola son $8-12 que se acumulan a $400-600 al día.",
+    "data": {
+      "orders": [
+        {"table": "M01", "name": "Familia Méndez", "state": "urgent", "items": ["3 conos waffle|2 bolas c/u", "Topping nuez"], "waitMin": 4},
+        {"table": "M03", "name": "Don Roberto", "state": "prep", "items": ["1 vaso 3 bolas|pistache, mamey, queso"], "waitMin": 3},
+        {"table": "M02", "name": "Pareja", "state": "queue", "items": ["1 banana split", "2 cafés"], "waitMin": 5},
+        {"table": "TOGO-7", "name": "Sra. López", "state": "ready", "items": ["1 litro chocolate amargo"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Báscula para bola de nieve", "d": "Cada bola pesada al servir. 80g por bola estándar. Sistema verifica. Cero bolas 'al ojo' generosas que descuadran ventas."},
+    {"ico": "archive", "h": "Inventario por sabor artesanal", "d": "Pistache: 4 kg. Mamey: 2 kg. Chocolate amargo: 6 kg. Cuando baja, alerta. Cero clientes sin su sabor favorito."},
+    {"ico": "monitor", "h": "Sabores del día visibles", "d": "Cliente ve pantalla con sabores disponibles. Si se acabó el pistache, lo marca en rojo. Cero pedidos que no se pueden cumplir."},
+    {"ico": "percent", "h": "Costo por sabor premium", "d": "Pistache italiano $180/kg costo. Vainilla $80/kg. Sistema te dice qué bola deja más margen. Cero precios al ojo."},
+    {"ico": "calendar", "h": "Producción según día y clima", "d": "Sábado caluroso: produces 8 kg pistache. Lunes lluvia: 3 kg. Sistema sugiere. Cero sabores que se acaban a las 6 pm."},
+    {"ico": "gift", "h": "Cliente frecuente con su sabor", "d": "Don Roberto siempre pide mamey con queso. Sistema lo recuerda. Bola lista cuando llega. Cero esperas."}
+  ],
+  "stats": [
+    {"v": "234", "l": "Bolas servidas hoy"},
+    {"v": "12", "l": "Sabores activos"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi nievera <span class=\"hl\">servía 100g por bola</span> cuando la receta dice 80g. A sus clientas amigas. Con Nieve cada bola se pesa. Recuperé $8 mil al mes en pistache solo.",
+    "sig": "Don Eustaquio R.",
+    "role": "Nevería La Catedral, Dolores Hidalgo, Guanajuato"
+  },
+  "thefts": [
+    {
+      "title": "Bolas 'generosas' a clientas amigas",
+      "rob": "Nievera sirve 100-120g por bola cuando es 80g. A sus consentidas. 15-20 bolas al día = $300-500 perdidos en sabores premium.",
+      "fix": "Bolas se <strong>pesan con báscula al servir</strong>. Sistema bloquea si pasa +5g sin código del gerente. Cero porciones al cariño."
+    },
+    {
+      "title": "Sabor premium cobrado como básico",
+      "rob": "Nievera sirve pistache ($45) y cobra vainilla ($25). Diferencia se queda. $200-300 al turno en sabores caros vendidos baratos.",
+      "fix": "Sabores <strong>identificados por categoría en sistema</strong>. Premium cobra premium automático. Cero 'cobré normal'."
+    },
+    {
+      "title": "Litros para llevar 'incompletos'",
+      "rob": "Empleada sirve 800ml cobrando 1 litro. Diferencia se queda en otro tarro para vender aparte. $30-50 por litro mal servido.",
+      "fix": "Litros con <strong>báscula obligatoria al sellar</strong>. Sistema verifica peso antes del cobro. Cliente recibe lo que paga."
+    }
+  ]
+}

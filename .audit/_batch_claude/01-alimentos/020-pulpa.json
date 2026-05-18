@@ -1,0 +1,104 @@
+{
+  "slug": "pulpa",
+  "brand": "Pulpa",
+  "tagline": "El sistema para juguerías donde el kilo de fruta rinde lo que debe y ningún jugo sale sin cobrarse",
+  "giro": "juguería",
+  "giroPlural": "juguerías",
+  "vibe": "vibrant",
+  "palette": {
+    "bg": "#FFF5E0",
+    "surface": "#FFFFFF",
+    "paper": "#FFE8B8",
+    "ink": "#3D1F08",
+    "ink2": "#5C3010",
+    "muted": "#8A5530",
+    "line": "#F2C778",
+    "accent": "#E65100",
+    "accent2": "#FFA726"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat Brush",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para juguerías mexicanas · 2026",
+    "h1": "Cada <em>kilo de fruta</em>,<br>cada <em>jugo</em>,<br>cobrado.",
+    "deck": "El POS hecho para que el kilo de naranja rinda lo que debe, los jugos no se 'tomen' del personal, y las combinaciones premium no se vendan al precio de las normales.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?juice,fresh,fruits&q=85",
+    "heroAlt": "Jugos de fruta natural recién hechos",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?juice,orange&q=80", "tag": "Jugo de naranja", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?green,juice&q=80", "tag": "Jugo verde", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?detox,drink&q=80", "tag": "Bebida detox", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?fruits,bowl&q=80", "tag": "Plato de fruta", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tropical,smoothie&q=80", "tag": "Smoothie tropical", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ginger,shot&q=80", "tag": "Shot de jengibre", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?juice,bar&q=80", "tag": "Barra de jugos", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pineapple,cut&q=80", "tag": "Piña fresca", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?juicer,machine&q=80", "tag": "Extractor en acción", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?juicer,fresh&q=80", "caption": "Extractor exprime naranjas"},
+      {"url": "https://source.unsplash.com/random/800x600/?fresh,fruits&q=80", "caption": "Fruta del día apilada"},
+      {"url": "https://source.unsplash.com/random/800x600/?customer,juice&q=80", "caption": "Cliente lleva jugo de mañana"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Barra · jugos · en vivo",
+    "title": "Tu barra, <em>jugo por jugo</em>, sin perderse",
+    "deck": "Cada orden con tamaño y modificaciones. KDS muestra: 500ml jugo verde sin azúcar, 1lt naranja. Jugüero ve todo. Cero confusión.",
+    "secondary": "En las juguerías, 200ml 'de regalo' por jugo son $15-25 cada vez. 30 jugos al día = $600.",
+    "data": {
+      "orders": [
+        {"table": "M01", "name": "Don Mario", "state": "urgent", "items": ["1 lt jugo naranja|sin hielo", "1 vaso espresso"], "waitMin": 5},
+        {"table": "M03", "name": "Sra. Romero", "state": "prep", "items": ["500ml jugo verde", "1 fruta picada premium"], "waitMin": 4},
+        {"table": "M02", "name": "Pareja gym", "state": "queue", "items": ["2 smoothies proteína", "2 shots jengibre"], "waitMin": 3},
+        {"table": "TOGO-7", "name": "Familia López", "state": "ready", "items": ["3 jugos naranja 500ml", "1 piña picada"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Báscula para fruta cruda", "d": "Cada jugo pesa la fruta antes de extraer. 1kg naranja = 500ml jugo. Sistema cuadra. Cero rendiduras 'mágicas' que descuadran inventario."},
+    {"ico": "archive", "h": "Inventario por tipo de fruta", "d": "Naranja: 35 kg. Toronja: 12 kg. Apio: 4 kg. Cuando bajas, alerta. Cero promesas de jugo verde sin apio."},
+    {"ico": "percent", "h": "Rendimiento por kilo extraído", "d": "1 kg naranja = 500ml jugo (rendimiento 50%). Si rinde 400ml, el extractor está mal o falta peso. Sistema detecta."},
+    {"ico": "monitor", "h": "Combinaciones premium identificadas", "d": "Verde básico $40 (3 ingredientes). Premium $60 (5 ingredientes incluye apio y maca). Sistema cobra correcto."},
+    {"ico": "calendar", "h": "Pronóstico de fruta mañana", "d": "Lunes vendiste 18 lt jugo verde, hoy proyecta 22 lt. Sistema sugiere cuántos kg de espinaca pedir."},
+    {"ico": "truck", "h": "Pedidos a domicilio con frescura", "d": "Jugos salen con etiqueta de 2 horas. Sistema cuadra delivery con repartidor. Cero jugos que llegan oxidados."}
+  ],
+  "stats": [
+    {"v": "186", "l": "Jugos servidos hoy"},
+    {"v": "48", "l": "Kg de fruta extraída"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi empleada <span class=\"hl\">'se tomaba' 2-3 jugos por turno</span> sin marcarlos. Decía que el extractor 'no rinde'. Con Pulpa cada kilo cuadra contra jugos vendidos. En 2 semanas identifiqué la fuga.",
+    "sig": "Doña Lupita C.",
+    "role": "Juguería La Naranja Feliz, Tepic, Nayarit"
+  },
+  "thefts": [
+    {
+      "title": "Jugos 'para personal' sin registro",
+      "rob": "Empleados se sirven 2-3 jugos por turno 'porque tengo sed'. Sin marcarlos. Son $90-150 al día — $2,700-4,500 al mes.",
+      "fix": "Empleados tienen <strong>código personal con límite diario</strong>. Sistema lleva conteo. Si excede, alerta al dueño."
+    },
+    {
+      "title": "Combinación premium cobrada como básica",
+      "rob": "Jugüero hace jugo verde premium ($60) y cobra como básico ($40). Diferencia se va a propina o bolsillo. $200-400 al turno.",
+      "fix": "Combinaciones <strong>identificadas por ingredientes en sistema</strong>. Si lleva apio o maca, cobra premium automático. Cero precios al ojo."
+    },
+    {
+      "title": "Fruta 'que se echó a perder' que se llevaron",
+      "rob": "Empleada reporta 2 kg de fruta podrida, se la lleva 'para su casa'. En realidad estaba buena. $80-150 cada vez. 2-3 veces por semana.",
+      "fix": "Merma de fruta requiere <strong>foto antes de tirar</strong>. Si pasan de 3% al día, alerta. Auditoría semanal compara con estándar."
+    }
+  ]
+}

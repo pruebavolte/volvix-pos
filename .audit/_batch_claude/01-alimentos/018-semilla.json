@@ -1,0 +1,104 @@
+{
+  "slug": "semilla",
+  "brand": "Semilla",
+  "tagline": "El sistema para cocinas veganas donde cada plato lleva su ingrediente exacto y nada lleva trazas ocultas",
+  "giro": "cocina vegana",
+  "giroPlural": "cocinas veganas",
+  "vibe": "fresh",
+  "palette": {
+    "bg": "#F2F7EC",
+    "surface": "#FFFFFF",
+    "paper": "#E0EED2",
+    "ink": "#1A2A12",
+    "ink2": "#2F4520",
+    "muted": "#5A7048",
+    "line": "#B8D098",
+    "accent": "#558B2F",
+    "accent2": "#FFB300"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para cocinas veganas mexicanas · 2026",
+    "h1": "Cada <em>plato</em>,<br>cada <em>ingrediente</em>,<br>limpio.",
+    "deck": "El POS hecho para que cada platillo tenga su ficha de alérgenos, ningún ingrediente animal se cuele, y los clientes celiacos confíen al 100% en tu cocina.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?vegan,buddha,bowl&q=85",
+    "heroAlt": "Buddha bowl con quinoa y vegetales",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?vegan,bowl&q=80", "tag": "Buddha bowl", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?quinoa,vegetables&q=80", "tag": "Quinoa con verduras", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?vegan,burger&q=80", "tag": "Hamburguesa vegana", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?smoothie,bowl&q=80", "tag": "Smoothie bowl", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tofu,grilled&q=80", "tag": "Tofu marinado", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?kombucha,bottle&q=80", "tag": "Kombucha artesanal", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?vegan,restaurant&q=80", "tag": "Salón con plantas", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?vegan,dessert&q=80", "tag": "Postre vegano", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?fresh,greens&q=80", "tag": "Verduras frescas", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?chef,vegan&q=80", "caption": "Chef emplata bowl saludable"},
+      {"url": "https://source.unsplash.com/random/800x600/?ingredients,labeled&q=80", "caption": "Ingredientes etiquetados"},
+      {"url": "https://source.unsplash.com/random/800x600/?customer,vegan&q=80", "caption": "Cliente con alergia confía"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · alérgenos · en vivo",
+    "title": "Tu cocina, <em>plato por plato</em>, sin trazas",
+    "deck": "Cada orden con etiquetas de alérgenos. KDS muestra: bowl quinoa SIN gluten, hamburguesa SIN soya. Cocinero usa tabla separada. Cero contaminación cruzada.",
+    "secondary": "En las cocinas veganas, una contaminación cruzada es 1 cliente con reacción = 1 estrella en Google.",
+    "data": {
+      "orders": [
+        {"table": "M03", "name": "Sofía R.", "state": "urgent", "items": ["Buddha bowl|SIN gluten, SIN nuez", "1 kombucha"], "waitMin": 9},
+        {"table": "M01", "name": "Don Andrés", "state": "prep", "items": ["Hamburguesa vegana|SIN soya", "Papas dulces"], "waitMin": 6},
+        {"table": "M07", "name": "Pareja", "state": "queue", "items": ["1 ensalada power", "1 smoothie verde"], "waitMin": 3},
+        {"table": "M05", "name": "Lupita V.", "state": "ready", "items": ["1 tacos jackfruit", "1 té chai"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "KDS con alérgenos visibles", "d": "Sin gluten (rojo), sin nuez (azul), sin soya (verde). Cocinero ve sin confusión. Cero contaminación cruzada por descuido."},
+    {"ico": "archive", "h": "Inventario por ingrediente vegetal", "d": "Quinoa: 5 kg. Tofu: 3 kg. Garbanzo: 8 kg. Cuando baja, alerta. Cero promesas de bowls que no se cumplen."},
+    {"ico": "edit", "h": "Ficha técnica por platillo", "d": "Cada platillo con sus alérgenos potenciales. Cliente celiaco ve en el menú QR si es seguro. Cero adivinanzas."},
+    {"ico": "calendar", "h": "Frescura de vegetales por día", "d": "Lechuga llega lunes, dura 4 días. Sistema avisa cuando se vence. Cero ensaladas con verduras pasadas."},
+    {"ico": "barcode", "h": "Menú QR con info nutrimental", "d": "Cliente escanea, ve calorías, proteína, alérgenos. Pide con confianza. Cero quejas por información oculta."},
+    {"ico": "percent", "h": "Costo real por bowl premium", "d": "Bowl quinoa con aguacate y semilla costo $42, vendes $145. Margen 71%. Sabes qué bowls dejan más."}
+  ],
+  "stats": [
+    {"v": "78", "l": "Bowls servidos hoy"},
+    {"v": "100", "l": "% libre alérgenos", "suffix": "%"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Una clienta celiaca <span class=\"hl\">tuvo reacción porque mi cocinero usó la misma tabla</span>. Casi me cierra el local. Con Semilla, cada platillo tiene alérgenos visibles y tablas separadas. Cero incidentes en 1 año.",
+    "sig": "Sofía R.",
+    "role": "Restaurante Verde, Condesa, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Aguacate 'rendido' con menos por bowl",
+      "rob": "Cocinero pone medio aguacate cuando la receta dice 1 entero, para 'rendir'. Cliente paga premium ($45) y recibe medio. $25-40 por bowl.",
+      "fix": "Aguacates con <strong>conteo por bowl en receta digital</strong>. Sistema cuadra aguacates entrados vs bowls vendidos. Diferencias alertan."
+    },
+    {
+      "title": "Quinoa 'cortesía' que se llevan",
+      "rob": "Cocinera prepara extra quinoa 'porque sobró' y se la lleva en tupper. 500g-1kg por semana. $300-600 cada vez.",
+      "fix": "Quinoa con <strong>peso al inicio y cierre obligatorio</strong>. Sobras se fotografían. Diferencias arriba de 5% requieren foto y firma."
+    },
+    {
+      "title": "Producto 'vegano' que llevaba mantequilla",
+      "rob": "Cocinero usa mantequilla en vez de aceite vegano 'porque más rico'. Cliente vegano descubre, deja review negativa, pierdes clientela.",
+      "fix": "Cocina vegana con <strong>ingredientes etiquetados por color</strong>. Sistema obliga revisar checklist por platillo. Cero contaminación 'sin querer'."
+    }
+  ]
+}

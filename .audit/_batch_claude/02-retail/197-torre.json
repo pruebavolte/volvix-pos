@@ -1,0 +1,106 @@
+{
+  "slug": "torre",
+  "brand": "Torre",
+  "tagline": "El sistema para tiendas de cómputo que sí arman cada PC a medida",
+  "giro": "computadoras",
+  "giroPlural": "tiendas de computadoras",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#0B0E14",
+    "surface": "#13171F",
+    "paper": "#191D26",
+    "ink": "#EAEDF4",
+    "ink2": "#BFC6D3",
+    "muted": "#6E7886",
+    "line": "#22272F",
+    "accent": "#00E5FF",
+    "accent2": "#76FF03"
+  },
+  "fonts": {
+    "display": "Space Grotesk",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas de cómputo · 2026",
+    "h1": "Cada <em>componente</em>,<br>cada <em>torre</em>,<br>cada cliente.",
+    "deck": "El punto de venta hecho para tiendas de cómputo: stock por componente (CPU, GPU, RAM, SSD), armado a medida, instalación de software, garantías por pieza.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?computer,gaming,pc&q=85",
+    "heroAlt": "Tienda de computadoras con torres gaming",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?gaming,pc&q=80", "tag": "Gaming PCs", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cpu,processor&q=80", "tag": "Procesadores", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?gpu,graphics&q=80", "tag": "Tarjetas video", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ram,memory&q=80", "tag": "Memoria RAM", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ssd,storage&q=80", "tag": "SSD y discos", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?motherboard&q=80", "tag": "Tarjetas madre", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?pc,workshop&q=80", "tag": "Taller armado", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pc,case&q=80", "tag": "Gabinetes", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?gaming,setup&q=80", "tag": "Setup completo", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?pc,build&q=80", "caption": "Armado en taller con técnico"},
+      {"url": "https://source.unsplash.com/random/800x600/?pc,benchmark&q=80", "caption": "Pruebas antes de entregar"},
+      {"url": "https://source.unsplash.com/random/800x600/?pc,setup,delivery&q=80", "caption": "Instalación en casa del cliente"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>componente por categoría</em>",
+    "deck": "Cada componente con SKU y serial. Cliente arma PC desde catálogo (CPU + GPU + RAM + SSD). Sistema valida compatibilidad. Armado en taller con prueba.",
+    "secondary": "En cómputo, componentes incompatibles son devolución y cliente furioso. Torre los previene.",
+    "data": {
+      "product": "Componentes gaming",
+      "tallas": ["CPU", "GPU", "RAM", "SSD", "Motherboard"],
+      "stock": [
+        {"color": "Premium", "vals": [8, 6, 12, 14, 10]},
+        {"color": "Medio", "vals": [16, 14, 22, 18, 12]},
+        {"color": "Básico", "vals": [22, 18, 28, 24, 16]}
+      ],
+      "lowThreshold": 3
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por componente y serial", "d": "Cada CPU, GPU, RAM con serial único. Sabes qué partes mueven, cuáles se quedan en bodega."},
+    {"ico": "grid", "h": "Armado a medida con validación", "d": "Cliente arma PC desde catálogo. Sistema valida compatibilidad (socket CPU, RAM, fuente). Cero conflictos."},
+    {"ico": "monitor", "h": "Pruebas antes de entregar", "d": "Cada PC armada pasa por benchmark. Cliente firma estado al recibir. Cero entregas con falla."},
+    {"ico": "calendar", "h": "Servicio técnico con cita", "d": "Cliente trae PC para mantenimiento o falla: sistema agenda con técnico. Diagnóstico y costo aprobado. Cero quejas."},
+    {"ico": "percent", "h": "Comisiones por vendedor y técnico", "d": "Vendedor que cierra venta + técnico que arma. Sistema reparte al cierre. Cero peleas."},
+    {"ico": "bookmark", "h": "Financiamiento 12 MSI", "d": "PC armada $25k: 12 MSI con buró. Pagaré digital firmado. Cero papeleo."}
+  ],
+  "stats": [
+    {"v": "486", "l": "Componentes en stock"},
+    {"v": "18", "l": "PCs armadas hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi vendedor armaba PCs con componentes incompatibles. <span class=\"hl\">Cada error costaba 2-3 días</span> de rearmado. Con Torre el sistema valida compatibilidad antes de cotizar. Cero rearmados en 4 meses.",
+    "sig": "Ing. Diego M.",
+    "role": "Tienda de cómputo en Tlaquepaque, JAL"
+  },
+  "thefts": [
+    {
+      "title": "GPUs premium 'extraviadas' por empleados",
+      "rob": "GPU RTX premium son $15k-30k. Empleado dice 'no encontré en bodega' y la vende afuera. Sin serial registrado, no hay rastro.",
+      "fix": "Cada GPU/CPU con <strong>serial registrado al ingresar y antirrobo magnético</strong>. Si sale sin venta, alerta inmediata."
+    },
+    {
+      "title": "Componentes 'devueltos' que se venden como nuevos",
+      "rob": "Cliente devuelve RAM o SSD por incompatibilidad. Empleado los limpia, los pone en caja nueva y los revende como nuevos.",
+      "fix": "Devoluciones <strong>requieren SKU diferente (open-box)</strong> con precio menor obligatorio. Cero ventas como nuevo."
+    },
+    {
+      "title": "Servicios de armado cobrados por fuera",
+      "rob": "Cliente paga armado $1,500 en efectivo. Técnico lo registra como $500 y se queda con la diferencia.",
+      "fix": "Servicios <strong>se cobran por sistema con SKU específico</strong>. Comisión solo sobre ventas registradas."
+    }
+  ]
+}

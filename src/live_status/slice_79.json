@@ -1,0 +1,52 @@
+{
+  "slice": 79,
+  "idx_range": [1920, 1980],
+  "task": "R16 Final Smoke Test - 20 endpoints production",
+  "ts": "2026-04-26",
+  "base_url": "https://volvix-pos.vercel.app",
+  "auth": {
+    "method": "JWT bearer",
+    "user": "admin@volvix.test",
+    "role": "superadmin",
+    "tenant_id": "TNT001"
+  },
+  "summary": {
+    "total": 20,
+    "pass": 18,
+    "fail": 2,
+    "pass_rate_pct": 90,
+    "avg_latency_ms_pass": 272
+  },
+  "results": [
+    {"n": 1,  "method": "GET",  "path": "/api/health",                "expected": "200",      "actual": 200, "latency_ms": 255, "ok": true},
+    {"n": 2,  "method": "GET",  "path": "/api/health/deep",           "expected": "200",      "actual": 200, "latency_ms": 274, "ok": true},
+    {"n": 3,  "method": "POST", "path": "/api/login",                 "expected": "200",      "actual": 200, "latency_ms": 313, "ok": true, "note": "returns JWT token, role=superadmin"},
+    {"n": 4,  "method": "GET",  "path": "/api/products",              "expected": "200",      "actual": 200, "latency_ms": 255, "ok": true, "auth": "bearer"},
+    {"n": 5,  "method": "GET",  "path": "/api/customers",             "expected": "200",      "actual": 200, "latency_ms": 256, "ok": true, "auth": "bearer"},
+    {"n": 6,  "method": "GET",  "path": "/api/sales/latest",          "expected": "200",      "actual": 200, "latency_ms": 362, "ok": true, "auth": "bearer"},
+    {"n": 7,  "method": "GET",  "path": "/api/sales/today",           "expected": "200",      "actual": 200, "latency_ms": 207, "ok": true, "auth": "bearer"},
+    {"n": 8,  "method": "GET",  "path": "/api/cash/current",          "expected": "200|404",  "actual": 500, "latency_ms": 392, "ok": false, "auth": "bearer", "error": "internal", "likely_cause": "tabla cash_sessions no migrada en Supabase"},
+    {"n": 9,  "method": "GET",  "path": "/api/owner/dashboard",       "expected": "200",      "actual": 200, "latency_ms": 319, "ok": true, "auth": "bearer"},
+    {"n": 10, "method": "GET",  "path": "/api/openapi.yaml",          "expected": "200",      "actual": 200, "latency_ms": 231, "ok": true},
+    {"n": 11, "method": "GET",  "path": "/api/metrics",               "expected": "200",      "actual": 200, "latency_ms": 253, "ok": true, "auth": "bearer"},
+    {"n": 12, "method": "GET",  "path": "/sitemap.xml",               "expected": "200",      "actual": 200, "latency_ms": 210, "ok": true},
+    {"n": 13, "method": "GET",  "path": "/robots.txt",                "expected": "200",      "actual": 200, "latency_ms": 332, "ok": true},
+    {"n": 14, "method": "GET",  "path": "/volvix-qa-scenarios.html",  "expected": "404",      "actual": 404, "latency_ms": 220, "ok": true, "note": "blacklisted in vercel.json routes"},
+    {"n": 15, "method": "GET",  "path": "/api/products",              "expected": "401",      "actual": 401, "latency_ms": 243, "ok": true, "auth": "none", "note": "auth gate working"},
+    {"n": 16, "method": "GET",  "path": "/api/debug",                 "expected": "404",      "actual": 401, "latency_ms": 211, "ok": false, "note": "route exists but auth-gated; no es 404 puro"},
+    {"n": 17, "method": "GET",  "path": "/api/docs",                  "expected": "200",      "actual": 200, "latency_ms": 273, "ok": true},
+    {"n": 18, "method": "POST", "path": "/api/sales",                 "expected": "200|201",  "actual": 200, "latency_ms": 251, "ok": true, "auth": "bearer", "note": "body usa 'qty' no 'quantity'"},
+    {"n": 19, "method": "GET",  "path": "/api/inventory/stock",       "expected": "200",      "actual": 200, "latency_ms": 357, "ok": true, "auth": "bearer"},
+    {"n": 20, "method": "GET",  "path": "/api/billing/plans",         "expected": "200",      "actual": 200, "latency_ms": 295, "ok": true}
+  ],
+  "task1_auto_migrate": {
+    "status": "blocked_manual_required",
+    "reason": "no POSTGRES_URL/DATABASE_URL en .env.local tras vercel env pull, no hay psql en PATH, modulo pg no instalado",
+    "recommendation": "ejecutar db/R14_ALL_COMBINED.sql manualmente en Supabase SQL Editor; impacta endpoint #8 cash/current"
+  },
+  "files_created": [
+    "R16_FINAL_SMOKE.md",
+    "tests/smoke_r16.sh",
+    "live_status/slice_79.json"
+  ]
+}

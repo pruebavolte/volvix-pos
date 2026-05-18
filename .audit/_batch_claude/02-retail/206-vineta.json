@@ -1,0 +1,106 @@
+{
+  "slug": "vineta",
+  "brand": "Viñeta",
+  "tagline": "El POS hecho para comiquerías que sí cuidan cada número y edición",
+  "giro": "cómics",
+  "giroPlural": "comiquerías",
+  "vibe": "darkPremium",
+  "palette": {
+    "bg": "#11131C",
+    "surface": "#1A1E28",
+    "paper": "#212531",
+    "ink": "#F4F5FB",
+    "ink2": "#C6CCD7",
+    "muted": "#7C8390",
+    "line": "#272D38",
+    "accent": "#FFC400",
+    "accent2": "#E64A19"
+  },
+  "fonts": {
+    "display": "Bangers",
+    "body": "Inter",
+    "script": "Permanent Marker",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para comiquerías · 2026",
+    "h1": "Cada <em>número</em>,<br>cada <em>edición</em>,<br>cada lector.",
+    "deck": "El punto de venta hecho para comiquerías: stock por título y número, suscripciones de pull list, ediciones variantes, autenticación de comics raros, eventos.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?comic,book,marvel&q=85",
+    "heroAlt": "Comiquería con cómics y figuras",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?comic,marvel&q=80", "tag": "Marvel", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?dc,comics&q=80", "tag": "DC", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?indie,comic&q=80", "tag": "Indie", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?graphic,novel&q=80", "tag": "Novelas gráficas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?comic,variant&q=80", "tag": "Variantes", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?vintage,comic&q=80", "tag": "Vintage", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?comic,store&q=80", "tag": "Comiquería", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?comic,bag&q=80", "tag": "Bag & Board", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?comic,event,signing&q=80", "tag": "Firmas y eventos", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?comic,reading&q=80", "caption": "Cliente revisa pull list"},
+      {"url": "https://source.unsplash.com/random/800x600/?comic,grading&q=80", "caption": "Cómic calificado CGC"},
+      {"url": "https://source.unsplash.com/random/800x600/?comic,convention&q=80", "caption": "Convenciones y eventos"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>título por número</em>",
+    "deck": "Cada cómic con título, número, variante. Suscripciones de pull list automáticas. Cómics raros con calificación CGC. Eventos y firmas registrados.",
+    "secondary": "En comiquería, un Spider-Man #1 falso vendido como auténtico son $30k de pérdida.",
+    "data": {
+      "product": "Stock por editorial",
+      "tallas": ["Marvel", "DC", "Indie", "Manga", "Vintage"],
+      "stock": [
+        {"color": "Pull list", "vals": [184, 142, 86, 124, 28]},
+        {"color": "Variantes", "vals": [42, 38, 12, 18, 14]},
+        {"color": "Calificados", "vals": [8, 6, 4, 2, 24]}
+      ],
+      "lowThreshold": 5
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por título y número", "d": "Cada cómic con título, número, variante. Sabes qué títulos mueven, cuáles se quedan."},
+    {"ico": "bookmark", "h": "Pull list de suscriptores", "d": "Cliente apunta su pull list (Batman, X-Men). Cuando llega número nuevo, sistema le aparta y le avisa por WhatsApp."},
+    {"ico": "camera", "h": "Autenticación de cómics raros", "d": "Cómics $5k+ requieren foto y certificado CGC. Sistema bloquea venta sin certificado. Cero falsificaciones."},
+    {"ico": "calendar", "h": "Eventos y firmas", "d": "Agenda firma de autor. Cobra inscripción y boletos por sistema. Cero entradas vendidas afuera."},
+    {"ico": "gift", "h": "Ficha de lector leal", "d": "Sus títulos, sus autores favoritos. Sistema avisa de nuevos lanzamientos. Cero clientes perdidos."},
+    {"ico": "percent", "h": "Comisiones por vendedor", "d": "Define % por número o paquete. Vendedor ve en vivo. Cero peleas al cierre."}
+  ],
+  "stats": [
+    {"v": "1,486", "l": "Cómics en stock"},
+    {"v": "82", "l": "Vendidos hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis suscriptores eran 80 y cada miércoles llegaban a recoger su pull list. <span class=\"hl\">Si se me pasaba apartar un número, perdía cliente</span>. Con Viñeta el sistema aparta solo y avisa. Cero ventas perdidas.",
+    "sig": "Lic. Mateo R.",
+    "role": "Comiquería en Coyoacán, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Cómics raros 'extraviados'",
+      "rob": "Cómic vintage Spider-Man o Batman ($3k-25k). Empleado dice 'no encontré' y lo vende afuera. Sin SKU, no hay rastro.",
+      "fix": "Cómics premium con <strong>SKU obligatorio, foto y certificado al ingresar</strong>. Si sale sin venta, alerta. Auditoría diaria."
+    },
+    {
+      "title": "Variantes apartadas a sobreprecio por fuera",
+      "rob": "Edición variante limitada se agota en horas. Empleado aparta para amigos y revende al doble afuera. Tus suscriptores no reciben.",
+      "fix": "Variantes <strong>se reservan solo por sistema con anticipo</strong>. Lista de espera digital. Cero piezas en bolsa del vendedor."
+    },
+    {
+      "title": "Cómics falsos vendidos como auténticos",
+      "rob": "Empleado mete cómic restaurado o reimpresión y lo vende como original $15k. Cliente descubre y denuncia. Daño legal y reputacional.",
+      "fix": "Cómics $5k+ <strong>requieren certificado CGC al ingresar y verificación</strong>. Sistema bloquea venta sin certificado."
+    }
+  ]
+}

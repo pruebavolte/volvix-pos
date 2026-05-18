@@ -1,0 +1,108 @@
+{
+  "slug": "watt",
+  "brand": "Watt",
+  "tagline": "El sistema para electricistas que cobran cada metro de cable y cada centro de carga",
+  "giro": "electricista",
+  "giroPlural": "servicios eléctricos",
+  "vibe": "minimalist",
+  "palette": {
+    "bg": "#FFFFFF",
+    "surface": "#F7F8FA",
+    "paper": "#EFF1F4",
+    "ink": "#0F1419",
+    "ink2": "#3A4147",
+    "muted": "#6A737D",
+    "line": "#DDE1E6",
+    "accent": "#F39C12",
+    "accent2": "#FFB940"
+  },
+  "fonts": {
+    "display": "Manrope",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para electricistas certificados · 2026",
+    "h1": "Cada <em>cable</em>,<br>cada <em>centro</em>,<br>medido.",
+    "deck": "El POS hecho para electricistas residenciales e industriales: instalaciones, reparaciones, centros de carga, automatización. Cotización al metro, certificación firmada.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver obras activas",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?electrician,wiring,panel&q=80",
+    "heroAlt": "Electricista instalando centro de carga en muro",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?electrician,panel&q=80", "tag": "Centro de carga", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?wiring,conduit&q=80", "tag": "Cableado en tubo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?outlet,install&q=80", "tag": "Contactos", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?breaker,electrical&q=80", "tag": "Pastillas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?lighting,led&q=80", "tag": "Iluminación LED", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?multimeter,test&q=80", "tag": "Medición", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?electrician,tools&q=80", "tag": "Herramientas pro", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ground,wire&q=80", "tag": "Tierra física", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?smart-home,electric&q=80", "tag": "Automatización", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?certificate,electrician&q=80", "caption": "Certificación CFE y NOM-001"},
+      {"url": "https://source.unsplash.com/random/800x600/?diagram,electric&q=80", "caption": "Diagrama unifilar firmado"},
+      {"url": "https://source.unsplash.com/random/800x600/?warranty,electrician&q=80", "caption": "Garantía 12 meses por instalación"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Agenda · electricistas · en vivo",
+    "title": "Tus electricistas, <em>obra por obra</em>",
+    "deck": "Instalación contacto 30 min. Centro de carga nuevo 6 hrs. Casa completa 5 días. El sistema cotiza por tiempo real y materiales.",
+    "secondary": "Electricista mal hecho = corto, incendio, demanda. Sistema obliga calidad y certificación.",
+    "data": {
+      "service": "Centro de carga 12 circuitos + tierra física",
+      "duration": "1 día",
+      "slots": [
+        {"hora": "08:00", "mecanico": "Maestro Ing. Pérez", "estado": "ocupado", "auto": "Casa residencial Polanco"},
+        {"hora": "14:00", "mecanico": "Maestro Ing. Pérez", "estado": "libre"},
+        {"hora": "08:00", "mecanico": "Electricista Juan", "estado": "ocupado", "auto": "Local comercial"},
+        {"hora": "11:00", "mecanico": "Electricista Juan", "estado": "libre"},
+        {"hora": "AHORA", "mecanico": "Servicios express", "estado": "ocupado", "auto": "Reparación urgente"},
+        {"hora": "1 hr", "mecanico": "Servicios express", "estado": "libre"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Agenda por especialidad", "d": "Servicio residencial, comercial o industrial. Cada electricista con su especialidad. Cero asignar industrial a residencial."},
+    {"ico": "edit", "h": "Cotización por carga", "d": "Cliente da capacidad necesaria. Sistema cotiza calibre, breaker, tubo, mano de obra. Cero 'lo que diga el maestro'."},
+    {"ico": "barcode", "h": "Material por proyecto", "d": "Cada metro de cable, contacto, breaker vinculado a la obra. Auditoría al cierre. Cero materiales que desaparecen."},
+    {"ico": "monitor", "h": "Diagrama unifilar", "d": "Cada instalación con su diagrama. Cliente lo recibe en PDF. Si en 3 años regresa, ves la instalación original."},
+    {"ico": "camera", "h": "Foto del antes-después", "d": "Foto del centro de carga vacío y terminado. Foto del cable nuevo en tubo. Cliente firma. Cero 'no quedó bien'."},
+    {"ico": "percent", "h": "Garantía 12 meses", "d": "Cada instalación con garantía firmada. Si en 6 meses falla, regresas con su garantía. Cero re-cobros injustos."}
+  ],
+  "stats": [
+    {"v": "27", "l": "Obras activas"},
+    {"v": "180", "l": "Servicios este mes"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi electricista <span class=\"hl\">usaba cable calibre 12 y cobraba calibre 10</span> ($35/m vs $58/m). Diferencia $23/m, $920 en 40 metros. Con Watt cada rollo se escanea con código. Cero cambiazos en 7 meses.",
+    "sig": "Ing. Eduardo M.",
+    "role": "Servicios Eléctricos Eduardo M., Tlalnepantla, EDOMEX"
+  },
+  "thefts": [
+    {
+      "title": "Cable de menor calibre cobrado como mayor",
+      "rob": "Cliente paga cable 10 AWG ($58/m). Electricista instala 12 AWG ($35/m). Diferencia $23/m. En instalación de 50m son $1,150 robados.",
+      "fix": "Cada rollo de cable con <strong>código escaneado al usarse</strong>. Foto del cable visible en muro. Cliente verifica calibre con marcas."
+    },
+    {
+      "title": "Horas facturadas que no se trabajaron",
+      "rob": "Electricista cobra 8 hrs por instalación que tomó 4. Cliente paga doble. Diferencia $1,600-2,400 por obra.",
+      "fix": "Cronómetro <strong>arranca al llegar y se detiene al salir</strong> con foto. Cliente ve horas reales en factura. Sin discusiones."
+    },
+    {
+      "title": "Instalaciones sin tierra física",
+      "rob": "Cliente paga tierra física ($1,800). Electricista 'aparenta' la conexión, no la hace. Cuando falla, el cliente paga otra vez.",
+      "fix": "Foto del <strong>varilla copperweld enterrada + cable verde a panel</strong>. Medición de resistencia registrada. Sin las 3 cosas, no cierra."
+    }
+  ]
+}

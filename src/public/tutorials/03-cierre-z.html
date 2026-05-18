@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tutorial 03 — Cierre Z | Volvix POS</title>
+<link rel="stylesheet" href="_shared.css"></head>
+<body><div class="tutorial-container" id="container">
+<h1>Tutorial 03 — Cierre Z (fin del día)</h1>
+<div class="subtitle">Fin del día → Cortes → Cerrar Z → Imprimir</div>
+<div class="stage">
+  <div class="step step-1"><h2>Paso 1 · Abre el menú "Fin de día"</h2>
+    <div class="mock"><h3>🌙 Fin del día</h3>
+      <div class="grid"><div class="card">Ventas</div><div class="card hot">Cierre Z</div><div class="card">Reportes</div></div>
+      <div class="cursor" style="left:48%;top:30%">👆</div>
+    </div></div>
+  <div class="step step-2"><h2>Paso 2 · Revisa los cortes del día</h2>
+    <div class="mock"><h3>Resumen del día</h3>
+      <div class="row"><span>Total ventas</span><b>$3,450.00</b></div>
+      <div class="row"><span>Efectivo</span><b>$2,100</b></div>
+      <div class="row"><span>Tarjeta</span><b>$1,050</b></div>
+      <div class="row"><span>Transfer</span><b>$300</b></div>
+      <div class="row"><span>Tickets emitidos</span><b>87</b></div>
+    </div></div>
+  <div class="step step-3"><h2>Paso 3 · Cuenta el efectivo en caja</h2>
+    <div class="mock"><h3>Conteo de caja</h3>
+      <form>
+        <label>Efectivo contado<input value="2100.00"></label>
+        <label>Diferencia<input value="$0.00 ✓" disabled style="background:#d1fae5"></label>
+      </form>
+      <div class="banner banner-ok">✓ La caja cuadra perfecto</div>
+      <div class="cursor" style="left:60%;top:40%">👆</div>
+    </div></div>
+  <div class="step step-4"><h2>Paso 4 · Cerrar Z</h2>
+    <div class="mock"><h3>¿Cerrar día?</h3>
+      <div class="banner banner-warn">⚠️ No podrás registrar más ventas con esta fecha</div>
+      <button class="btn btn-red">🔒 CERRAR Z</button>
+      <div class="cursor" style="left:24%;top:60%">👆</div>
+    </div></div>
+  <div class="step step-5"><h2>Paso 5 · Imprime el reporte Z ✓</h2>
+    <div class="mock">
+      <div class="receipt">
+        ===== CIERRE Z #042 =====<br>
+        Fecha: 28/04/2026<br>
+        Ventas:      $3,450.00<br>
+        Tickets:     87<br>
+        Caja cuadra: ✓<br>
+        ─────────────────<br>
+        Operador: Juan P.
+      </div>
+      <button class="btn btn-blue">🖨️ Imprimir Z</button>
+    </div></div>
+</div>
+<div class="progress"><div class="progress-bar"></div></div>
+<div class="caption">Reproduciendo en bucle (25s).</div>
+<div class="controls">
+<button onclick="document.getElementById('container').classList.toggle('paused')">⏯️ Pausar/Reanudar</button>
+<button onclick="location.reload()">🔄 Reiniciar</button>
+</div></div></body></html>

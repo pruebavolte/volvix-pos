@@ -1,0 +1,106 @@
+{
+  "slug": "renta-moto",
+  "brand": "Renta Moto",
+  "tagline": "El sistema para rentadoras de motos que entregan con casco, garantía y firma",
+  "giro": "renta de motos",
+  "giroPlural": "rentadoras de motos",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#181818",
+    "surface": "#222226",
+    "paper": "#2A2A2F",
+    "ink": "#F0F0F2",
+    "ink2": "#CCCCD0",
+    "muted": "#82828A",
+    "line": "#34343A",
+    "accent": "#FF6B6B",
+    "accent2": "#FF8989"
+  },
+  "fonts": {
+    "display": "Saira Condensed",
+    "body": "Inter",
+    "script": "Permanent Marker",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para rentadoras de motos · 2026",
+    "h1": "Cada <em>moto</em>,<br>cada <em>casco</em>,<br>en contrato.",
+    "deck": "El POS hecho para rentadoras de motos en zonas turísticas y urbanas. Depósito retenido, foto del estado, casco entregado, GPS activo en cada unidad.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver flota disponible",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?motorcycle-rental,beach&q=80",
+    "heroAlt": "Flota de motos de renta en zona turística",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?motorcycle-fleet,parking&q=80", "tag": "Flota", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?scooter,beach&q=80", "tag": "Scooter playa", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?motorcycle,touring&q=80", "tag": "Touring", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?moped,city&q=80", "tag": "Urbana", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?helmet,gear&q=80", "tag": "Casco incluido", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?motorcycle,gps&q=80", "tag": "GPS activo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?rental,counter&q=80", "tag": "Mostrador", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?adventure,motorcycle&q=80", "tag": "Adventure", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?tourist,motorcycle&q=80", "tag": "Turistas felices", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?inspection,motorcycle&q=80", "caption": "Inspección con foto firmada"},
+      {"url": "https://source.unsplash.com/random/800x600/?license,driver&q=80", "caption": "Licencia y INE verificadas"},
+      {"url": "https://source.unsplash.com/random/800x600/?gps,phone&q=80", "caption": "Tracking en vivo de cada moto"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu flota, <em>moto por moto</em>",
+    "deck": "Cada moto con su placa, modelo, estado, casco asociado, disponibilidad. Cliente elige por horas, días, semana. Reservas en línea reales.",
+    "secondary": "Renta de motos sin sistema = motos rentadas dos veces o cobros perdidos.",
+    "data": {
+      "product": "Flota motos por tipo",
+      "tallas": ["Scooter 125cc", "Scooter 150cc", "Moped 50cc", "Sport 250cc", "Sport 600cc", "Touring", "Adventure", "Eléctrica"],
+      "stock": [
+        {"color": "Disponibles", "vals": [8, 12, 6, 4, 2, 3, 2, 5]},
+        {"color": "Rentadas", "vals": [14, 18, 8, 6, 3, 4, 3, 7]},
+        {"color": "Servicio", "vals": [2, 2, 1, 1, 1, 0, 0, 1]}
+      ],
+      "lowThreshold": 3
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Reserva online", "d": "Turista reserva por web antes de llegar. Sistema asigna moto específica. Llega y se la lleva. Cero filas."},
+    {"ico": "camera", "h": "Inspección con foto", "d": "12 fotos de la moto al entregar. Cliente firma en tablet. Mismo proceso al regresar. Daños nuevos = cobro justo."},
+    {"ico": "edit", "h": "Verificación licencia", "d": "Cliente sube foto de licencia + INE. Sistema valida. Cero rentar a quien no puede manejar."},
+    {"ico": "monitor", "h": "GPS en cada unidad", "d": "Sabes dónde está cada moto. Si sale de la zona permitida, alerta. Si se 'pierde', la encuentras."},
+    {"ico": "barcode", "h": "Casco asignado", "d": "Cada casco con su número, asignado a moto. Si se 'pierde', cobro automático del depósito. Cero cascos desaparecidos."},
+    {"ico": "percent", "h": "Rendimiento por unidad", "d": "Sabes cuál moto se renta más, cuál menos. Decides qué comprar y qué vender."}
+  ],
+  "stats": [
+    {"v": "62", "l": "Motos en flota"},
+    {"v": "78%", "l": "Ocupación temporada"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis cascos <span class=\"hl\">desaparecían 4-6 al mes</span>. $700 c/u, $3,000 mensuales. Empleados decían 'turistas se los llevan'. Con Renta Moto cada casco tiene número asignado, si no regresa se cobra del depósito. Cero pérdidas.",
+    "sig": "Don Luis A.",
+    "role": "Motos Renta El Luis, Playa del Carmen, Q.R."
+  },
+  "thefts": [
+    {
+      "title": "Cascos perdidos achacados a turistas",
+      "rob": "Empleado se 'lleva prestado' un casco para fin de semana y nunca lo regresa. Reporta como 'turista no devolvió'. $700-1,500 por casco.",
+      "fix": "Cada casco con <strong>número y QR asignado a moto</strong>. Si no regresa, se cobra del depósito del cliente. Cero excusas."
+    },
+    {
+      "title": "Daños cobrados al cliente incorrecto",
+      "rob": "Moto regresa con rayón pero empleado no documenta. Próximo cliente recibe rayón y reclama. Pleito, descuento, mala reseña.",
+      "fix": "Inspección con <strong>12 fotos firmadas a la entrega y regreso</strong>. Daño se cobra al causante. Reseñas perfectas."
+    },
+    {
+      "title": "Rentas en efectivo sin contrato",
+      "rob": "Empleado renta moto al amigo del primo por $500/día efectivo. Tú no te enteras, pero la moto se desgasta como cualquier renta.",
+      "fix": "GPS detecta <strong>movimiento sin contrato activo</strong>. Alerta inmediata. Cero rentas paralelas que dañan tu flota."
+    }
+  ]
+}

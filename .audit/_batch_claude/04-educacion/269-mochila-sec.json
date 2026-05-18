@@ -1,0 +1,104 @@
+{
+  "slug": "mochila-sec",
+  "brand": "Mochila",
+  "tagline": "El sistema para secundarias que sí saben quién entró, quién faltó y quién no pagó",
+  "giro": "secundaria privada",
+  "giroPlural": "secundarias privadas",
+  "vibe": "editorial",
+  "palette": {
+    "bg": "#F5F3EF",
+    "surface": "#FFFFFF",
+    "paper": "#EAE6DD",
+    "ink": "#142033",
+    "ink2": "#2B3A52",
+    "muted": "#5F6E85",
+    "line": "#CFC8B8",
+    "accent": "#A02C2C",
+    "accent2": "#D4A53C"
+  },
+  "fonts": {
+    "display": "Crimson Text",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para secundarias mexicanas · 2026",
+    "h1": "Cada <em>materia</em>,<br>cada <em>parcial</em>,<br>en sistema.",
+    "deck": "El POS hecho para secundarias privadas donde el alumno cambia de salón cada hora, el maestro captura desde su celular y el padre quiere boleta sin esperar 2 meses.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver horarios hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?middle,school,students,teen&q=85",
+    "heroAlt": "Alumnos de secundaria en aula",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?secondary,school,classroom&q=80", "tag": "Aula de secundaria", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?teen,uniform&q=80", "tag": "Uniforme", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?science,lab,teens&q=80", "tag": "Laboratorio", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?math,classroom&q=80", "tag": "Matemáticas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?school,library&q=80", "tag": "Biblioteca", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?teens,sports,school&q=80", "tag": "Deportes", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?school,group,students&q=80", "tag": "Grupo escolar", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?teacher,lesson&q=80", "tag": "Maestro en clase", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?school,computer,lab&q=80", "tag": "Centro de cómputo", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?school,id,card&q=80", "caption": "Credencial con QR de acceso"},
+      {"url": "https://source.unsplash.com/random/800x600/?teacher,tablet,grading&q=80", "caption": "Maestro captura desde tablet"},
+      {"url": "https://source.unsplash.com/random/800x600/?parent,grades,phone&q=80", "caption": "Padre revisa calificaciones online"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Horarios · hoy · en vivo",
+    "title": "Tus grupos, <em>hora por hora</em>",
+    "deck": "Cada grupo con su rotación de materias. Maestro toma asistencia con QR de credencial. Padre ve qué clase tiene su hijo a las 11. Cero confusiones.",
+    "secondary": "En secundarias chicas, una rotación mal hecha es un alumno en el salón equivocado y un maestro sin grupo.",
+    "data": {
+      "barberos": [{"name": "Mtra. Liliana", "role": "Español 1°"}, {"name": "Mtro. Ramírez", "role": "Matemáticas 2°"}, {"name": "Mtro. Heriberto", "role": "Ciencias 3°"}],
+      "slots": ["07:00", "07:50", "08:40", "09:30", "10:20", "11:10", "12:00", "12:50", "13:40"],
+      "taken": [0, 1, 2, 3, 5, 6, 7],
+      "active": 218,
+      "total": 240,
+      "next": "12:00"
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Asistencia por materia con QR", "d": "Alumno escanea su credencial al entrar al salón. Sistema sabe en qué materia está cada hora. Cero pintas en horario libre."},
+    {"ico": "monitor", "h": "Calificaciones por parcial", "d": "Cada maestro captura desde celular. Sistema calcula promedio bimestral. Padre lo ve sin esperar junta."},
+    {"ico": "bookmark", "h": "Colegiaturas con tarjeta guardada", "d": "Cobro día 1, link de pago si rebota. Padre paga desde celular en 30 segundos. Morosidad baja al 5%."},
+    {"ico": "edit", "h": "Reporte conductual por incidencia", "d": "Prefecto marca 'sin uniforme', 'gritó en clase', 'usó celular'. Padre lo recibe en WhatsApp el mismo día."},
+    {"ico": "grid", "h": "Boletas digitales firmadas", "d": "Sistema arma boleta al cerrar parcial. Director firma digital. Padre descarga PDF con sello. Cero boletas perdidas."},
+    {"ico": "camera", "h": "Pase de salida con autorización", "d": "Alumno solo sale antes del horario si padre autoriza desde su app. Vigilancia ve aprobación en tablet."}
+  ],
+  "stats": [
+    {"v": "412", "l": "Alumnos activos"},
+    {"v": "32", "l": "Materias"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Antes <span class=\"hl\">los maestros entregaban boletas a mano</span> y siempre había errores. Con Mochila el sistema arma la boleta sola con los promedios. Cero reclamos en 5 meses.",
+    "sig": "Ing. Fernando G.",
+    "role": "Secundaria Mochila, Aguascalientes, AGS"
+  },
+  "thefts": [
+    {
+      "title": "Colegiaturas pagadas que se 'pierden'",
+      "rob": "Padre paga $5,500 en efectivo a admisión. Encargada anota 'parcial' y se queda con $2,000. Cuando padre reclama, ya no hay registro.",
+      "fix": "Pagos solo por <strong>tarjeta, transferencia o link con folio digital</strong>. Recibo automático al WhatsApp del padre."
+    },
+    {
+      "title": "Becas otorgadas sin estudio socioeconómico",
+      "rob": "Subdirector da beca al hijo de un compadre 'porque lo conoce'. Son $2,200 menos al mes, sin documento que justifique. Año escolar: $22,000 perdidos.",
+      "fix": "Becas con <strong>estudio socioeconómico digital + autorización del dueño</strong>. Reporte mensual de todos los descuentos aplicados."
+    },
+    {
+      "title": "Materiales y libros cobrados pero no entregados",
+      "rob": "Cobras $2,800 de paquete editorial por alumno. Encargada 'olvida' entregar 15 paquetes y los revende a otra escuela. Son $42,000 perdidos.",
+      "fix": "Cada libro con <strong>folio + firma digital del padre al recibir</strong>. Stock de papelería ligado al sistema en tiempo real."
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "slice": 5,
+  "title": "Barcode + CFDI",
+  "range": "46-52",
+  "results": [
+    {"idx": 46, "name": "Camara scanner barcode", "status": "skip", "note": "Requiere navegador con permisos de camara y getUserMedia; no testeable headless en este slice"},
+    {"idx": 47, "name": "USB wedge scanner", "status": "skip", "note": "Requiere hardware HID fisico inyectando keystrokes; no testeable sin device"},
+    {"idx": 48, "name": "POST /api/invoices/cfdi (generar)", "status": "skip", "note": "Handler existe (api/index.js:3843, requireAuth admin/owner/superadmin). En NODE_ENV=production retorna 503 si falta PAC. Requiere PAC Finkok configurado o NODE_ENV=development con sale_id valido"},
+    {"idx": 49, "name": "Descargar XML CFDI", "status": "skip", "note": "Depende de test 48 (CFDI generado). Requiere PAC Finkok configurado"},
+    {"idx": 50, "name": "Descargar PDF CFDI", "status": "skip", "note": "Depende de test 48. Requiere PAC Finkok configurado"},
+    {"idx": 51, "name": "POST /api/invoices/cfdi/cancel", "status": "skip", "note": "Handler existe (api/index.js:3891, requireAuth admin/owner/superadmin). Requiere CFDI previo + PAC Finkok"},
+    {"idx": 52, "name": "Validar RFC (volvix-cfdi-wiring.js)", "status": "pass", "note": "Funcion Volvix.cfdi.validators.validarRFC presente. Regex separado: persona moral /^[A-ZN&]{3}[0-9]{6}[A-Z0-9]{3}$/ y fisica /^[A-ZN&]{4}[0-9]{6}[A-Z0-9]{3}$/ - equivalente al spec /^[A-ZN&]{3,4}\\d{6}[A-Z\\d]{3}$/. Soporta RFC genericos XAXX010101000 y XEXX010101000"}
+  ],
+  "endpoints_verified": [
+    "POST /api/invoices/cfdi (api/index.js:3843)",
+    "POST /api/invoices/cfdi/cancel (api/index.js:3891)",
+    "GET /api/invoices/cfdi/:uuid/status (api/index.js:3918)"
+  ],
+  "summary": {"pass": 1, "fail": 0, "skip": 6, "total": 7},
+  "deploy": false,
+  "deploy_reason": "Sin cambios de codigo; solo verificacion estatica"
+}

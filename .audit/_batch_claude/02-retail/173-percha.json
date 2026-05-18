@@ -1,0 +1,106 @@
+{
+  "slug": "percha",
+  "brand": "Percha",
+  "tagline": "El sistema para consignatarios que sí pagan a cada vendedor",
+  "giro": "consignatario",
+  "giroPlural": "tiendas consignatarias",
+  "vibe": "editorial",
+  "palette": {
+    "bg": "#F2EDE5",
+    "surface": "#FFFFFF",
+    "paper": "#E8E1D2",
+    "ink": "#1B1814",
+    "ink2": "#3C3528",
+    "muted": "#7A6D55",
+    "line": "#D2C8B0",
+    "accent": "#476A2E",
+    "accent2": "#7BAA50"
+  },
+  "fonts": {
+    "display": "Playfair Display",
+    "body": "Inter",
+    "script": "Allura",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para consignatarios · 2026",
+    "h1": "Cada <em>vendedor</em>,<br>cada <em>prenda</em>,<br>su comisión.",
+    "deck": "El punto de venta hecho para tiendas de consignación: cada prenda con su dueño original, comisiones automáticas, pagos quincenales, fichas con fotos de ingreso y precio acordado.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?consignment,boutique,fashion&q=85",
+    "heroAlt": "Tienda consignataria con prendas curadas",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?consignment,store&q=80", "tag": "Curaduría premium", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?designer,dress&q=80", "tag": "Diseñador consignado", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?luxury,bag&q=80", "tag": "Bolsas premium", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?designer,shoes&q=80", "tag": "Calzado diseñador", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?vintage,couture&q=80", "tag": "Couture vintage", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?luxury,accessory&q=80", "tag": "Accesorios lujo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?boutique,interior,curated&q=80", "tag": "Boutique curada", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?fashion,tag,price&q=80", "tag": "Etiqueta con dueño", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?consignment,counter&q=80", "tag": "Recepción consigna", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?consignment,receive&q=80", "caption": "Recepción con foto y precio acordado"},
+      {"url": "https://source.unsplash.com/random/800x600/?fashion,purchase&q=80", "caption": "Venta y reparto de comisión"},
+      {"url": "https://source.unsplash.com/random/800x600/?payment,fashion&q=80", "caption": "Pago quincenal a consignante"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>dueño por prenda</em>",
+    "deck": "Cada prenda con su dueño original, precio acordado, comisión pactada (40/60, 50/50, 60/40). Cuando se vende, sistema calcula y notifica al dueño. Pago quincenal automático.",
+    "secondary": "En consignación, una comisión mal pagada es un dueño que no vuelve a traerte ropa.",
+    "data": {
+      "product": "Inventario por consignante",
+      "tallas": ["Día 1-30", "Día 31-60", "Día 61-90", "Retirar"],
+      "stock": [
+        {"color": "Tipo: Vestidos", "vals": [42, 28, 14, 6]},
+        {"color": "Tipo: Bolsas", "vals": [28, 18, 9, 4]},
+        {"color": "Tipo: Calzado", "vals": [36, 22, 12, 5]}
+      ],
+      "lowThreshold": 5
+    }
+  },
+  "features": [
+    {"ico": "edit", "h": "Ingreso con dueño y comisión", "d": "Cada prenda al ingresar lleva nombre del dueño, precio acordado y % de comisión. Foto al recibir. Cero confusiones después."},
+    {"ico": "percent", "h": "Reparto automático al vender", "d": "Vendido a $1,000 con 60/40: dueño recibe $600, tienda $400. Sistema calcula y registra. Cero peleas en pagos."},
+    {"ico": "calendar", "h": "Pago quincenal con corte", "d": "Cada quincena, sistema genera lista de pagos por dueño. Transferencia o efectivo con firma. Cero pagos olvidados."},
+    {"ico": "archive", "h": "Política 90 días en exhibición", "d": "Si no se vende en 90 días, dueño recoge o autoriza outlet. Sistema notifica con 7 días de aviso. Cero conflictos por prendas viejas."},
+    {"ico": "camera", "h": "Devoluciones con foto", "d": "Sistema obliga foto del estado original y al regresar. Si dañó, se descuenta del pago al dueño. Cero conflictos."},
+    {"ico": "monitor", "h": "Portal del consignante", "d": "Dueño consulta desde su celular: qué se vendió, cuánto le toca, cuándo le pagan. Cero llamadas preguntando."}
+  ],
+  "stats": [
+    {"v": "624", "l": "Prendas consignadas"},
+    {"v": "32", "l": "Vendidas hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Tenía 80 consignantes y <span class=\"hl\">cada quincena me peleaba con todos por las comisiones</span>. Con Percha cada dueño ve su portal, lo que vendió y cuánto le toca. Cero pleitos en 11 meses.",
+    "sig": "Renata C.",
+    "role": "Consignación premium en Polanco, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Prendas vendidas 'sin reportar' al dueño",
+      "rob": "Vendedora vende bolsa premium consignada, cobra los $5k, no marca en sistema. Dueña pregunta, vendedora dice 'no se ha vendido'. Sistema no detecta.",
+      "fix": "Cada prenda con <strong>SKU del dueño y notificación automática al vender</strong>. Dueña recibe SMS al cerrar la venta. Cero ventas ocultas."
+    },
+    {
+      "title": "Comisiones ajustadas a favor de la tienda",
+      "rob": "Vendedora marca venta con comisión 70/30 cuando el acuerdo era 60/40. Dueño recibe menos. Si no revisa, tienda se queda con la diferencia.",
+      "fix": "Comisión <strong>fija al ingresar y no editable después</strong>. Cualquier cambio requiere autorización del dueño y del gerente. Cero ajustes silenciosos."
+    },
+    {
+      "title": "Prendas 'retiradas' por dueño que nunca pasaron por él",
+      "rob": "Vendedora marca prendas como 'retiradas por dueño' y se las lleva. Sin firma de retiro, no hay rastro. Dueño cree que se vendió mal o se extravió.",
+      "fix": "Retiros <strong>requieren firma digital del dueño en tablet y foto</strong>. Cero retiros sin evidencia. Auditoría mensual por dueño."
+    }
+  ]
+}

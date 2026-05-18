@@ -1,0 +1,78 @@
+{
+  "slice": 18,
+  "title": "Email + AI + Webhooks + Push endpoints",
+  "generated_at": "2026-04-26",
+  "target": "https://volvix-pos.vercel.app",
+  "auth": "Bearer JWT (admin@volvix.test, role=superadmin, tenant=TNT001)",
+  "tests": [
+    {
+      "id": 1,
+      "method": "POST",
+      "path": "/api/email/send",
+      "body": {"to": "test@volvix.test", "subject": "x", "body": "x"},
+      "expected": "200 or 503 if SENDGRID_API_KEY missing",
+      "actual_status": 200,
+      "actual_body": {"ok": false, "error": "SENDGRID_API_KEY missing"},
+      "verdict": "fail",
+      "issue": "Returns 200 with ok:false instead of 503 when SENDGRID_API_KEY is missing.",
+      "fix_applied": "Edited api/index.js POST /api/email/send: added explicit 503 response when SENDGRID_API_KEY is empty (also returns 502 on send failure). Will take effect on next deploy."
+    },
+    {
+      "id": 2,
+      "method": "GET",
+      "path": "/api/ai/decisions",
+      "expected": "200 array",
+      "actual_status": 200,
+      "actual_body_type": "array",
+      "actual_sample": [{"id": "DEC-001", "decision": "extend"}, {"id": "DEC-002", "decision": "create"}],
+      "verdict": "pass"
+    },
+    {
+      "id": 3,
+      "method": "POST",
+      "path": "/api/ai/chat",
+      "body": {"message": "hola"},
+      "expected": "200 or 503 without ANTHROPIC_API_KEY",
+      "actual_status": 503,
+      "actual_body": {"error": "ANTHROPIC_API_KEY no configurada"},
+      "verdict": "pass"
+    },
+    {
+      "id": 4,
+      "method": "POST",
+      "path": "/api/ai/insights",
+      "expected": "200 with sales insights (or 503 without ANTHROPIC_API_KEY)",
+      "actual_status": 503,
+      "actual_body": {"error": "ANTHROPIC_API_KEY no configurada"},
+      "verdict": "pass",
+      "note": "ANTHROPIC_API_KEY not configured in production; 503 is the documented fallback. Local KPI summary computation works but Claude call gates the response."
+    },
+    {
+      "id": 5,
+      "method": "GET",
+      "path": "/api/webhooks",
+      "expected": "200 array (may be empty)",
+      "actual_status": 200,
+      "actual_body": {"ok": true, "webhooks": []},
+      "verdict": "pass"
+    },
+    {
+      "id": 6,
+      "method": "GET",
+      "path": "/api/push/vapid-public-key",
+      "expected": "200 or 503",
+      "actual_status": 200,
+      "actual_body": {"ok": true, "key": null},
+      "verdict": "pass",
+      "note": "VAPID_PUBLIC_KEY env not configured; handler returns key:null with 200, acceptable per spec."
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "pass": 5,
+    "fail": 1,
+    "fixes_applied": [
+      "api/index.js POST /api/email/send: pre-check SENDGRID_API_KEY -> 503 (was 200 ok:false). Pending deploy."
+    ]
+  }
+}

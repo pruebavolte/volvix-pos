@@ -1,0 +1,104 @@
+{
+  "slug": "tribuna",
+  "brand": "Tribuna",
+  "tagline": "El sistema para bares deportivos donde cada cubeta cuadra y los partidos no se pierden por mal servicio",
+  "giro": "bar deportivo",
+  "giroPlural": "bares deportivos",
+  "vibe": "athletic",
+  "palette": {
+    "bg": "#0F1A2E",
+    "surface": "#1A2640",
+    "paper": "#243250",
+    "ink": "#F0F0F0",
+    "ink2": "#C0CCDD",
+    "muted": "#7080A0",
+    "line": "#3A4865",
+    "accent": "#E63946",
+    "accent2": "#FFD600"
+  },
+  "fonts": {
+    "display": "Bebas Neue",
+    "body": "Inter",
+    "script": "Permanent Marker",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para bares deportivos mexicanos · 2026",
+    "h1": "Cada <em>cubeta</em>,<br>cada <em>juego</em>,<br>servido.",
+    "deck": "El POS hecho para que las cubetas se cuenten al instante, los pedidos en hora pico no se pierdan, y nunca falte chela en el clásico Chivas-América.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?sports,bar,beer&q=85",
+    "heroAlt": "Bar deportivo con TVs y cervezas",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?sports,bar&q=80", "tag": "Bar deportivo", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?beer,bucket&q=80", "tag": "Cubeta de cervezas", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?wings,buffalo&q=80", "tag": "Alitas búfalo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?nachos,cheese&q=80", "tag": "Nachos con queso", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?football,tv&q=80", "tag": "Partido en TV", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?soccer,fans&q=80", "tag": "Fans del América", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?sports,bar,big&q=80", "tag": "Bar con tribuna", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?michelada,beer&q=80", "tag": "Michelada cubana", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?stadium,view&q=80", "tag": "Pantallas gigantes", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?bartender,sports&q=80", "caption": "Bartender llena pedidos"},
+      {"url": "https://source.unsplash.com/random/800x600/?big,screen,game&q=80", "caption": "Partido en pantalla gigante"},
+      {"url": "https://source.unsplash.com/random/800x600/?fans,cheering&q=80", "caption": "Fans celebran gol"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Bar · partido · en vivo",
+    "title": "Tu bar, <em>cubeta por cubeta</em>, sin perderse al gol",
+    "deck": "Cada orden con cantidad. KDS muestra: 3 cubetas (18 cervezas), 4 alitas BBQ, 2 nachos, 2 micheladas. Cocinero ve todo. Cero pedidos perdidos.",
+    "secondary": "En los bares deportivos, una mesa que espera 20 min en partido grita 'aquí no atienden' y se va.",
+    "data": {
+      "orders": [
+        {"table": "M12", "name": "Mesa Chivas (6 fans)", "state": "urgent", "items": ["2 cubetas cervezas|12 piezas", "1 alitas BBQ 10pz", "Tabla de papas"], "waitMin": 8},
+        {"table": "M05", "name": "Familia Hernández", "state": "prep", "items": ["1 michelada cubana", "1 nachos surtidos", "2 sodas niños"], "waitMin": 6},
+        {"table": "M02", "name": "Pareja", "state": "queue", "items": ["2 cervezas pintas", "1 boneless ranch"], "waitMin": 4},
+        {"table": "M07", "name": "Don Tomás (regular)", "state": "ready", "items": ["1 cubeta clásica", "Cacahuates"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "KDS por partido o evento", "d": "Sábado clásico: ventas 4x. Sistema agenda preparación de cubetas y alitas adelantado. Cero faltantes en gol."},
+    {"ico": "barcode", "h": "Cubetas pre-armadas con conteo", "d": "Cubeta 6 cervezas, cubeta 12, cubeta familiar 24. Sistema cuenta. Cero cubetas a medias."},
+    {"ico": "calendar", "h": "Agenda de partidos importantes", "d": "Champions, Liga MX, clásicos. Sistema sugiere reservar mesas, preparar inventario, contratar más meseros."},
+    {"ico": "archive", "h": "Inventario por marca de chela", "d": "Tecate: 240 latas. Indio: 180 latas. Heineken: 96 latas. Cuando baja, alerta antes del partido."},
+    {"ico": "percent", "h": "Margen por evento deportivo", "d": "Sábado clásico vende $45 mil vs $12 mil normal. Sistema te dice qué eventos invertir en preparación."},
+    {"ico": "split", "h": "Cuenta grupal dividida", "d": "Mesa de 10 fans. Sistema divide por igual o por persona. Cero matemáticas a la hora pico."}
+  ],
+  "stats": [
+    {"v": "92", "l": "Cubetas vendidas hoy"},
+    {"v": "12", "l": "TVs en pantalla"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "En los clásicos <span class=\"hl\">'se nos perdían' pedidos porque era mucho ruido</span>. Con Tribuna cada orden va al KDS sin gritar. Atendimos 60% más en el último clásico. Mis meseros no se estresan.",
+    "sig": "Don Andrés F.",
+    "role": "Tribuna Sports Bar, Cuauhtémoc, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Cervezas 'cortesía' en partido lleno",
+      "rob": "Mesero da chelas gratis a sus cuates 'porque es el clásico'. Sin marcarlas. 8-12 cervezas por turno = $200-400 en hora pico.",
+      "fix": "Cortesías requieren <strong>código del gerente y motivo</strong>. Sistema lleva conteo. Si pasa de 3 por evento, alerta inmediata."
+    },
+    {
+      "title": "Cubeta 'incompleta' en pedido grande",
+      "rob": "Mesero entrega cubeta de 12 cobrando como 12, pero solo lleva 10. Las 2 sobrantes se las queda para otra venta. $50-80 por cubeta.",
+      "fix": "Cubetas <strong>pre-armadas con conteo digital al salir de barra</strong>. Mesero firma. Mesa firma al recibir. Cero cubetas cortas."
+    },
+    {
+      "title": "Alitas 'que se acabaron' en hora pico",
+      "rob": "Cocinero reporta 'se acabaron las alitas' a las 10 pm en pleno partido. En realidad apartó 30 para llevarse. Cliente se va frustrado.",
+      "fix": "Inventario alitas con <strong>conteo digital obligatorio al inicio</strong>. Sistema cuadra contra órdenes. Diferencias alertan."
+    }
+  ]
+}

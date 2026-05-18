@@ -1,0 +1,105 @@
+{
+  "slug": "tallo",
+  "brand": "Tallo",
+  "tagline": "El sistema para floristerías que sí cuidan cada ramo del día",
+  "giro": "floristería",
+  "giroPlural": "floristerías",
+  "vibe": "fresh",
+  "palette": {
+    "bg": "#F4F8EC",
+    "surface": "#FFFFFF",
+    "paper": "#E8F0D8",
+    "ink": "#0E1A0E",
+    "ink2": "#283D28",
+    "muted": "#6B7E6B",
+    "line": "#C8D9B0",
+    "accent": "#E91E63",
+    "accent2": "#76FF03"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Manrope",
+    "script": "Allura",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para floristerías · 2026",
+    "h1": "Cada <em>flor</em>,<br>cada <em>ramo</em>,<br>cada entrega.",
+    "deck": "El punto de venta hecho para floristerías: stock por flor y caducidad, pedidos con entrega a domicilio, fechas especiales agendadas, KDS para taller de arreglos.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?flowers,bouquet,florist&q=85",
+    "heroAlt": "Floristería con ramos coloridos",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?roses,bouquet&q=80", "tag": "Ramos rosas", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tulips&q=80", "tag": "Tulipanes", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sunflower&q=80", "tag": "Girasoles", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?orchid&q=80", "tag": "Orquídeas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?wedding,flowers&q=80", "tag": "Ramos novia", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?funeral,arrangement&q=80", "tag": "Coronas fúnebres", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?flower,shop&q=80", "tag": "Floristería", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?florist,working&q=80", "tag": "Taller", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?flower,delivery&q=80", "tag": "Entrega", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?florist,cutting&q=80", "caption": "Florista arma ramo en taller"},
+      {"url": "https://source.unsplash.com/random/800x600/?flower,fresh&q=80", "caption": "Stock con fecha de llegada"},
+      {"url": "https://source.unsplash.com/random/800x600/?delivery,florist&q=80", "caption": "Entrega a domicilio"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "KDS del taller",
+    "title": "Cada ramo, <em>en su orden</em>",
+    "deck": "Pedidos entran a pantalla del taller. Floristas arman en orden de entrega. Sistema marca caducidad de flores. Cero ramos olvidados o flores mermadas.",
+    "secondary": "En floristería, una flor 'mermada' diario son $200-400 al mes. Tallo elimina la fuga.",
+    "data": {
+      "orders": [
+        {"id": "001", "items": ["Ramo 12 rosas rojas", "Caja con moño"], "time": "10:30", "estado": "preparando"},
+        {"id": "002", "items": ["Arreglo cumpleaños mediano", "Mensaje personalizado"], "time": "11:00", "estado": "preparando"},
+        {"id": "003", "items": ["Corona fúnebre grande"], "time": "11:30", "estado": "pendiente"},
+        {"id": "004", "items": ["Ramo de novia cascada"], "time": "13:00", "estado": "pendiente"},
+        {"id": "005", "items": ["6 girasoles + envoltura"], "time": "15:00", "estado": "pendiente"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por flor y caducidad", "d": "Cada flor con fecha de llegada. Rosas duran 7 días, lirios 5. Sistema marca flores próximas a vencer."},
+    {"ico": "monitor", "h": "KDS para taller de arreglos", "d": "Pedidos entran al taller con tiempo de entrega. Florista ve qué arreglo va siguiente. Cero ramos olvidados."},
+    {"ico": "truck", "h": "Entregas con horario exacto", "d": "Cliente pide entrega a las 16:00. Sistema asigna mensajero y notifica al recibir con foto. Cero entregas tarde."},
+    {"ico": "calendar", "h": "Fechas especiales agendadas", "d": "Día de las madres, San Valentín, bodas. Sistema avisa qué flores reponer 15 días antes. Cero corridas tarde."},
+    {"ico": "gift", "h": "Ficha de cliente recurrente", "d": "Su esposa, sus aniversarios, sus colores. Sistema le sugiere ramo a tiempo. Cero clientes olvidando fechas."},
+    {"ico": "percent", "h": "Comisiones por florista", "d": "Define % por ramo o categoría. Florista ve en vivo. Cero peleas al cierre."}
+  ],
+  "stats": [
+    {"v": "1,486", "l": "Flores en stock"},
+    {"v": "32", "l": "Ramos hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis floristas 'mermaban' flores a diario diciendo que estaban marchitas y se las llevaban. <span class=\"hl\">Eran 30-40 flores al mes</span>. Con Tallo cada flor tiene fecha y foto de baja. Mermas bajaron 85%.",
+    "sig": "Doña Carmen V.",
+    "role": "Floristería en Xochimilco, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Flores 'mermadas' que se llevan a casa",
+      "rob": "Empleada marca flores como 'marchitas' al final del turno y se las lleva. Una docena de rosas son $200. Son 40-60 flores al mes en floristería.",
+      "fix": "Mermas <strong>requieren foto y autorización del gerente</strong>. Cada baja con tipo de flor, fecha y motivo. Auditoría diaria por turno."
+    },
+    {
+      "title": "Pedidos cobrados doble en fechas pico",
+      "rob": "En San Valentín, cliente paga $1,500 por ramo grande en efectivo. Empleada cobra y entrega de stock sin registrar. Tú nunca lo viste.",
+      "fix": "Pedidos en fechas pico <strong>requieren ticket por sistema obligatorio</strong>. Sin ticket, no sale ramo. Auditoría especial días pico."
+    },
+    {
+      "title": "Entregas falsas no realizadas",
+      "rob": "Cliente paga ramo con entrega a domicilio. Mensajero firma 'entregado' sin entregar. Cliente reclama, mensajero ya vendió el ramo afuera.",
+      "fix": "Entregas <strong>requieren foto con destinatario y firma digital</strong>. Si no hay evidencia, cobro se reversa. Cero entregas fantasma."
+    }
+  ]
+}

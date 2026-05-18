@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tutorial 08 — Devolución | Volvix POS</title>
+<link rel="stylesheet" href="_shared.css"></head>
+<body><div class="tutorial-container" id="container">
+<h1>Tutorial 08 — Procesar una devolución</h1>
+<div class="subtitle">Buscar venta → Seleccionar items → Refund → Nota de crédito</div>
+<div class="stage">
+  <div class="step step-1"><h2>Paso 1 · Busca el ticket</h2>
+    <div class="mock"><h3>↩️ Devoluciones</h3>
+      <input class="input" placeholder="Folio o teléfono..." value="A-00425">
+      <div class="banner banner-ok">Ticket A-00425 · 28/04 · $145.00</div>
+      <div class="cursor" style="left:60%;top:38%">👆</div>
+    </div></div>
+  <div class="step step-2"><h2>Paso 2 · Marca los items a devolver</h2>
+    <div class="mock"><h3>Ticket A-00425</h3>
+      <div class="row"><span><input type="checkbox" checked> Latte</span><span>$45</span></div>
+      <div class="row"><span><input type="checkbox"> Pan</span><span>$15</span></div>
+      <div class="row"><span><input type="checkbox" checked> Sandwich</span><span>$85</span></div>
+      <div class="row"><b>A devolver:</b><b>$130.00</b></div>
+    </div></div>
+  <div class="step step-3"><h2>Paso 3 · Elige el motivo</h2>
+    <div class="mock"><h3>Motivo de devolución</h3>
+      <form><label>Razón<select><option>Producto en mal estado</option><option>Cliente no satisfecho</option></select></label>
+      <label>Notas (opcional)<input placeholder="Detalles..."></label></form>
+      <div class="cursor" style="left:50%;top:35%">👆</div>
+    </div></div>
+  <div class="step step-4"><h2>Paso 4 · Procesa el reembolso</h2>
+    <div class="mock"><h3>Devolver $130.00</h3>
+      <div class="grid"><div class="card hot">💵 Efectivo</div><div class="card">💳 Tarjeta</div><div class="card">📋 Nota crédito</div></div>
+      <button class="btn btn-red">↩️ Procesar reembolso</button>
+      <div class="cursor" style="left:24%;top:75%">👆</div>
+    </div></div>
+  <div class="step step-5"><h2>Paso 5 · Nota de crédito impresa ✓</h2>
+    <div class="mock">
+      <div class="banner banner-ok">✅ Devolución registrada · Stock actualizado</div>
+      <div class="receipt">
+        ===== DEVOLUCIÓN =====<br>
+        Folio: NC-00088<br>
+        Ref: A-00425<br>
+        Latte:    -$45<br>
+        Sandwich: -$85<br>
+        TOTAL DEV: $130<br>
+        Motivo: mal estado
+      </div>
+      <button class="btn btn-blue">🖨️ Imprimir</button>
+    </div></div>
+</div>
+<div class="progress"><div class="progress-bar"></div></div>
+<div class="caption">Reproduciendo en bucle (25s).</div>
+<div class="controls">
+<button onclick="document.getElementById('container').classList.toggle('paused')">⏯️ Pausar/Reanudar</button>
+<button onclick="location.reload()">🔄 Reiniciar</button>
+</div></div></body></html>

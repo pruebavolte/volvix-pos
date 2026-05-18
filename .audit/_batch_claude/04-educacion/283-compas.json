@@ -1,0 +1,104 @@
+{
+  "slug": "compas",
+  "brand": "Compas",
+  "tagline": "El sistema para academias de baile que sí cobran cada clase y llenan cada salón",
+  "giro": "academia de baile",
+  "giroPlural": "academias de baile",
+  "vibe": "vibrant",
+  "palette": {
+    "bg": "#190B1C",
+    "surface": "#23142A",
+    "paper": "#2F1E36",
+    "ink": "#FFF1F5",
+    "ink2": "#E0C2D0",
+    "muted": "#9C7B8E",
+    "line": "#3E2A48",
+    "accent": "#FF2D87",
+    "accent2": "#FFC400"
+  },
+  "fonts": {
+    "display": "Italiana",
+    "body": "Inter",
+    "script": "Allura",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para academias de baile · 2026",
+    "h1": "Cada <em>clase</em>,<br>cada <em>cupo</em>,<br>llenos.",
+    "deck": "El POS hecho para academias de baile donde hay ballet, jazz, hip-hop, salsa, contemporáneo, los grupos son por nivel y los maestros cobran por clase con asistencia mínima.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver clases hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?dance,studio,ballet,students&q=85",
+    "heroAlt": "Estudio de baile con grupo",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?ballet,studio&q=80", "tag": "Estudio ballet", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?jazz,dance,class&q=80", "tag": "Jazz", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?hip,hop,dance&q=80", "tag": "Hip-hop", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?salsa,couple,dance&q=80", "tag": "Salsa", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?contemporary,dance&q=80", "tag": "Contemporáneo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ballet,kids&q=80", "tag": "Ballet infantil", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?dance,performance,stage&q=80", "tag": "Presentación", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?dance,shoes&q=80", "tag": "Zapatillas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?dance,studio,mirror&q=80", "tag": "Espejos y barra", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?student,dance,arriving&q=80", "caption": "Alumno entra con QR"},
+      {"url": "https://source.unsplash.com/random/800x600/?dance,teacher,tablet&q=80", "caption": "Maestro registra asistencia"},
+      {"url": "https://source.unsplash.com/random/800x600/?dance,recital,parent&q=80", "caption": "Padre reserva recital"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Clases · hoy · en vivo",
+    "title": "Tus salones, <em>clase por clase</em>",
+    "deck": "Cada salón con su clase del horario: ballet inicial, jazz intermedio, salsa avanzada. Alumno reserva su lugar desde celular. Si no llega, sistema libera el cupo en 10 min.",
+    "secondary": "En academias de baile, una clase con 3 alumnos pierde dinero. Compas llena los salones.",
+    "data": {
+      "barberos": [{"name": "Mtra. Daniela", "role": "Ballet"}, {"name": "Mtro. Carlos", "role": "Hip-hop"}, {"name": "Mtra. Paola", "role": "Salsa"}],
+      "slots": ["10:00", "12:00", "14:00", "16:00", "17:00", "18:30", "20:00"],
+      "taken": [0, 2, 3, 4, 5, 6],
+      "active": 124,
+      "total": 168,
+      "next": "17:00"
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Niveles claros por estilo", "d": "Cada estilo con 3 niveles: inicial, intermedio, avanzado. Sistema sube al alumno cuando el maestro lo aprueba."},
+    {"ico": "calendar", "h": "Reserva por clase con cupo", "d": "Alumno reserva su lugar en jazz del jueves desde celular. Si no llega 10 min antes, pierde lugar. Otro alumno entra."},
+    {"ico": "bookmark", "h": "Membresía o pago por clase", "d": "Membresía mensual ilimitada o paga por clase suelta. Tarjeta guardada para cobro automático. Cero morosos."},
+    {"ico": "percent", "h": "Comisión a maestro por asistencia", "d": "Maestro cobra X por clase con asistencia mínima. Si clase queda vacía, no se paga. Justo y transparente."},
+    {"ico": "camera", "h": "Videos de coreografía privados", "d": "Maestra graba la coreografía, sube al sistema. Alumnos la repasan en casa. Cero 'me perdí ese paso'."},
+    {"ico": "grid", "h": "Recitales y vestuario por alumno", "d": "Recital de fin de año con vestuario por alumno. Sistema cobra cuota, registra talla y entrega traje con folio."}
+  ],
+  "stats": [
+    {"v": "286", "l": "Alumnos activos"},
+    {"v": "32", "l": "Clases por semana"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Tenía clases con <span class=\"hl\">3 alumnos donde pagaba 1 maestro</span> y perdía dinero. Con Compas el sistema avisa cupo mínimo. Llenamos al 85% en 4 meses.",
+    "sig": "Mtra. Andrea M.",
+    "role": "Academia Compas, Cancún, QROO"
+  },
+  "thefts": [
+    {
+      "title": "Maestro cobra clase vacía",
+      "rob": "Maestro dice 'sí di la clase' pero solo llegaron 2 alumnos. Cobra completa $600. Si pasa 3 veces a la semana × 4 maestros: $7,200/mes perdidos.",
+      "fix": "Sistema requiere <strong>QR de inicio + foto del grupo + asistencia mínima registrada</strong>. Sin cupo mínimo, no se paga completa."
+    },
+    {
+      "title": "Vestuario de recital cobrado y no entregado",
+      "rob": "Cobras $1,800 de vestuario de gala a 40 alumnas = $72,000. Encargada entrega vestuario chino genérico de $400 y se queda $1,400 × 40: $56,000.",
+      "fix": "Vestuario con <strong>fotos de modelo final + firma digital al recibir + comparativo de tela</strong>. Padre aprueba antes de fabricación."
+    },
+    {
+      "title": "Membresías con descuentos sin autorización",
+      "rob": "Recepcionista da 'precio especial' del 30% a amigos. Son $450 menos por mes × 8 alumnos: $3,600 mensual. Tú no lo ves en el ticket.",
+      "fix": "Descuentos requieren <strong>autorización del dueño + código único + reporte mensual</strong>. Cero descuentos 'humanitarios' sin registro."
+    }
+  ]
+}

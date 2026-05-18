@@ -1,0 +1,104 @@
+{
+  "slug": "licuado",
+  "brand": "Licuado",
+  "tagline": "El sistema para smoothies donde el scoop de proteína se cobra y la fruta congelada no se 'pierde'",
+  "giro": "smoothies",
+  "giroPlural": "barras de smoothies",
+  "vibe": "playful",
+  "palette": {
+    "bg": "#FFF0F5",
+    "surface": "#FFFFFF",
+    "paper": "#FFDDE8",
+    "ink": "#2E0A1A",
+    "ink2": "#4F1A30",
+    "muted": "#7E4060",
+    "line": "#F2B8CD",
+    "accent": "#E91E63",
+    "accent2": "#9C27B0"
+  },
+  "fonts": {
+    "display": "Quicksand",
+    "body": "Inter",
+    "script": "Pacifico",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para barras de smoothies mexicanas · 2026",
+    "h1": "Cada <em>scoop</em>,<br>cada <em>smoothie</em>,<br>cobrado.",
+    "deck": "El POS hecho para que cada scoop de proteína se cobre, la fruta congelada no se 'derrita' en el freezer, y los smoothies premium no se vendan al precio del básico.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?smoothie,protein,fruit&q=85",
+    "heroAlt": "Smoothie de frutos rojos con proteína",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?smoothie,berries&q=80", "tag": "Smoothie frutos rojos", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?protein,scoop&q=80", "tag": "Proteína en polvo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?acai,bowl&q=80", "tag": "Açaí bowl", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?banana,frozen&q=80", "tag": "Plátano congelado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mango,smoothie&q=80", "tag": "Smoothie mango", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?peanut,butter&q=80", "tag": "Crema cacahuate", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?smoothie,bar&q=80", "tag": "Barra colorida", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?chia,seeds&q=80", "tag": "Chía y semillas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?blender,fruits&q=80", "tag": "Licuadora pro", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?blender,smoothie&q=80", "caption": "Licuadora pro mezcla todo"},
+      {"url": "https://source.unsplash.com/random/800x600/?protein,powder&q=80", "caption": "Scoop preciso por tarro"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,gym&q=80", "caption": "Cliente gym recoge smoothie"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Barra · smoothie · en vivo",
+    "title": "Tu barra, <em>smoothie por smoothie</em>, sin errores",
+    "deck": "Cada orden con receta y modificaciones. KDS muestra: smoothie protein con 2 scoops, banana, frutos rojos. Empleado ve todo. Cero scoops 'olvidados'.",
+    "secondary": "En las barras de smoothies, un scoop extra de proteína ($45) regalado al cliente amigo son 5-8 al día — $225-360.",
+    "data": {
+      "orders": [
+        {"table": "M02", "name": "Andrés F. (gym)", "state": "urgent", "items": ["Smoothie post-workout|2 scoops proteína", "1 shot jengibre"], "waitMin": 5},
+        {"table": "M01", "name": "Sra. Rocío", "state": "prep", "items": ["Açaí bowl|extra granola", "Café americano"], "waitMin": 4},
+        {"table": "M03", "name": "Pareja", "state": "queue", "items": ["2 smoothies tropicales", "1 plátano picado"], "waitMin": 3},
+        {"table": "TOGO-12", "name": "Carlos R.", "state": "ready", "items": ["Smoothie verde", "Proteína vegana"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Recetas con scoops exactos", "d": "Smoothie protein = 2 scoops proteína, 1 plátano, 100g fresa. Sistema verifica. Cero scoops 'al ojo' que se cuelan."},
+    {"ico": "archive", "h": "Inventario por proteína y fruta", "d": "Whey vainilla: 3 kg. Plátano congelado: 8 kg. Fresa: 5 kg. Cuando baja, alerta para reposición."},
+    {"ico": "barcode", "h": "Add-ons cobrados obligatorio", "d": "Extra scoop, extra plátano, extra chía. Aparece en ticket. Sistema bloquea si no se cobran. Cero extras 'regalados'."},
+    {"ico": "percent", "h": "Costo por smoothie premium", "d": "Smoothie protein costo $32, vendes $95. Margen 66%. Sistema te dice cuál vender más."},
+    {"ico": "edit", "h": "Suscripción gym semanal", "d": "Cliente paga $X semanal, recibe 5 smoothies post-workout. Sistema cobra automático."},
+    {"ico": "truck", "h": "Delivery rápido para gym", "d": "Gimnasio cercano, smoothie listo en 4 min. Cliente recoge al salir. Cero clientes que se van porque no esperan."}
+  ],
+  "stats": [
+    {"v": "127", "l": "Smoothies servidos hoy"},
+    {"v": "4.2", "l": "Kg proteína vendida"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi smoothie protein <span class=\"hl\">salía con scoop extra al cuate del gym</span> y nunca se cobraba. Con Licuado el scoop extra es botón obligatorio. En 1 mes recuperé $7 mil en proteína.",
+    "sig": "Andrés F.",
+    "role": "Smoothie Bar Pulse, Mérida, Yucatán"
+  },
+  "thefts": [
+    {
+      "title": "Scoops extra 'regalados' al gym buddy",
+      "rob": "Empleado da 3 scoops cuando la receta dice 2. A clientes amigos del gym. 8-12 smoothies al día = $360-540 en proteína premium regalada.",
+      "fix": "Scoops cobrados por <strong>botón obligatorio en sistema</strong>. Si se sale sin botón, alerta. Auditoría diaria cuadra proteína usada vs vendida."
+    },
+    {
+      "title": "Fruta congelada 'que se derritió' al llevar",
+      "rob": "Empleada se lleva 1 kg fresa congelada 'porque se descongeló'. En realidad está bien. $80-150 cada vez. 2-3 veces por semana.",
+      "fix": "Fruta congelada con <strong>conteo al inicio y cierre</strong>. Diferencias requieren foto. Si pasa de 3% diario, alerta."
+    },
+    {
+      "title": "Smoothie premium cobrado como básico",
+      "rob": "Empleado prepara smoothie premium ($95) y cobra como básico ($55). Diferencia se va a propina o bolsillo. $200-400 al turno.",
+      "fix": "Smoothies <strong>identificados por receta en sistema</strong>. Si lleva 2+ scoops o frutas premium, cobra premium automático."
+    }
+  ]
+}

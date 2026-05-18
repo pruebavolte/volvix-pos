@@ -1,0 +1,88 @@
+{
+  "name": "Volvix POS — Sales to Google Sheets + Slack",
+  "flow": [
+    {
+      "id": 1,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "metadata": { "designer": { "x": 0, "y": 0 } },
+      "parameters": {},
+      "mapper": {
+        "url": "{{connection.api_url}}/api/sales?order=created_at.desc&limit=25",
+        "method": "GET",
+        "headers": [
+          { "name": "X-API-Key", "value": "{{connection.api_key}}" }
+        ],
+        "qs": [],
+        "parseResponse": true
+      },
+      "label": "Volvix → List recent sales (polling)"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "label": "Router",
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "google-sheets:addRow",
+              "version": 2,
+              "mapper": {
+                "spreadsheetId": "{{1.spreadsheet_id}}",
+                "sheetName": "Sales",
+                "values": {
+                  "A": "{{1.id}}",
+                  "B": "{{1.created_at}}",
+                  "C": "{{1.total}}",
+                  "D": "{{1.currency}}",
+                  "E": "{{1.customer_id}}"
+                }
+              },
+              "label": "Append row to Sheets"
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 4,
+              "module": "slack:CreateMessage",
+              "version": 4,
+              "filter": {
+                "name": "Only big sales",
+                "conditions": [[
+                  { "a": "{{1.total}}", "o": "number:greater", "b": "1000" }
+                ]]
+              },
+              "mapper": {
+                "channel": "#sales",
+                "text": "🟢 Big sale {{1.total}} {{1.currency}} — ID {{1.id}}"
+              },
+              "label": "Post to Slack #sales"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": { "orphans": [] },
+    "zone": "us1.make.com",
+    "notes": "Replace {{connection.api_url}} and {{connection.api_key}} via Make 'Custom Apps' → Volvix connection. Trigger interval recommended: 5 min."
+  }
+}

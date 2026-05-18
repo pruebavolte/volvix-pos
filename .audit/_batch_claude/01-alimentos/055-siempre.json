@@ -1,0 +1,104 @@
+{
+  "slug": "siempre",
+  "brand": "Siempre",
+  "tagline": "El sistema para tiendas 24h donde el turno nocturno cuadra y los productos no se 'pierden' al amanecer",
+  "giro": "tienda de conveniencia 24h",
+  "giroPlural": "tiendas de conveniencia 24h",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#1A1A2E",
+    "surface": "#252540",
+    "paper": "#303050",
+    "ink": "#F0F0F8",
+    "ink2": "#C5C5D8",
+    "muted": "#7A7A95",
+    "line": "#404068",
+    "accent": "#FF6B35",
+    "accent2": "#FFD600"
+  },
+  "fonts": {
+    "display": "Inter Tight",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas 24h mexicanas · 2026",
+    "h1": "Cada <em>turno</em>,<br>cada <em>caja</em>,<br>cuadrada.",
+    "deck": "El POS hecho para que el turno nocturno cuadre el efectivo, los productos no se 'pierdan' entre cambios de turno, y los pedidos a domicilio nocturnos no se atoren.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?convenience,store,oxxo&q=85",
+    "heroAlt": "Tienda de conveniencia 24 horas",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?7eleven,inside&q=80", "tag": "Tienda 24/7", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?slushie,drinks&q=80", "tag": "Bebidas frozen", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?coffee,gas&q=80", "tag": "Café 24h", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?hotdog,roller&q=80", "tag": "Hot dogs caliente", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?chips,wall&q=80", "tag": "Botanas y dulces", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?night,clerk&q=80", "tag": "Empleado nocturno", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?gas,station,store&q=80", "tag": "Conveniencia rápida", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?atm,machine&q=80", "tag": "ATM en tienda", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?late,night,store&q=80", "tag": "Madrugada activa", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?cashier,night&q=80", "caption": "Cajera nocturna"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,medianoche&q=80", "caption": "Cliente medianoche"},
+      {"url": "https://source.unsplash.com/random/800x600/?delivery,fast&q=80", "caption": "Delivery rápido"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Tienda · turnos · en vivo",
+    "title": "Tu caja, <em>turno por turno</em>, sin perderse",
+    "deck": "Cada turno con cierre obligatorio. Mañana: $8,400. Tarde: $12,200. Noche: $6,800. Sistema cuadra contra ventas. Cero faltantes 'olvidados'.",
+    "secondary": "En las tiendas 24h, el turno nocturno acumula $200-500 en 'faltantes' que el dueño termina pagando.",
+    "data": {
+      "orders": [
+        {"table": "TURNO-NOCHE", "name": "Cajera Lupita 22-6h", "state": "urgent", "items": ["Ventas: $6,820", "Efectivo cuadra: $6,810", "Faltante: $10"], "waitMin": 0},
+        {"table": "DELIVERY-12", "name": "Don Memo (madrugada)", "state": "prep", "items": ["6 cervezas", "1 papitas", "Tip $20"], "waitMin": 8},
+        {"table": "CAJA-2", "name": "Cliente fila", "state": "queue", "items": ["Recarga Telcel $100", "1 café"], "waitMin": 2},
+        {"table": "CIERRE-TURNO", "name": "Pendiente mañanero", "state": "ready", "items": ["Conteo inicial caja $1,500"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Cierre de turno obligatorio", "d": "Cada cambio de turno: caja cuenta efectivo. Sistema cuadra vs ventas. Diferencias firmadas digital. Cero faltantes inexplicados."},
+    {"ico": "truck", "h": "Delivery 24h", "d": "Rappi, Didi nocturnos. KDS recibe pedidos en pantalla. Cajero arma. Repartidor llega. Cero pedidos perdidos."},
+    {"ico": "barcode", "h": "Recargas y servicios 24h", "d": "Telcel, CFE, agua, internet. Cliente paga, sistema procesa. Comisión al dueño automática."},
+    {"ico": "archive", "h": "Inventario por categoría", "d": "Cervezas: 240 unidades. Refrescos: 180. Cigarros: 60 cajetillas. Sistema cuadra contra ventas turno por turno."},
+    {"ico": "calendar", "h": "Pico nocturno predicho", "d": "Viernes 2am: 3x ventas cervezas. Sistema sugiere reponer inventario antes de turno nocturno."},
+    {"ico": "percent", "h": "Margen por categoría", "d": "Cervezas: 18%. Cigarros: 12%. Botanas: 28%. Sistema te dice qué empujar en horario muerto."}
+  ],
+  "stats": [
+    {"v": "1,247", "l": "Transacciones hoy"},
+    {"v": "3", "l": "Turnos cuadrados"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi turno de noche <span class=\"hl\">'siempre tenía faltantes' de $300-500</span>. Con Siempre cada cambio de turno cuadra obligatorio. Diferencias firmadas. En 2 semanas identifiqué al cajero culpable. Cortado.",
+    "sig": "Don Tomás V.",
+    "role": "Tienda 24h Siempre Abierto, Iztacalco, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Faltantes 'inexplicados' en turno nocturno",
+      "rob": "Cajera nocturna se lleva $200-500 al turno diciendo 'no sé qué pasó'. El dueño termina pagando. $6-15 mil al mes.",
+      "fix": "Cierre de turno con <strong>conteo de efectivo cuadrado contra ventas digitales</strong>. Diferencias arriba de $50 requieren foto y firma. Cero 'faltantes' aceptados."
+    },
+    {
+      "title": "Productos 'caducados' del refri",
+      "rob": "Cajero reporta yogurts y leches 'caducados' al cierre y se los lleva. En realidad faltan 2 días. $80-150 por turno.",
+      "fix": "Caducidades con <strong>foto y autorización del gerente por WhatsApp</strong>. Si pasa de 3% merma, alerta. Auditoría semanal."
+    },
+    {
+      "title": "Recargas Telcel 'mal hechas'",
+      "rob": "Cajero cobra recarga $200, ingresa $100 en sistema. Cliente recibe $100 (a veces no nota). Cajero se queda $100. $300-500 al turno.",
+      "fix": "Recargas con <strong>ticket digital obligatorio por WhatsApp al cliente</strong>. Cliente verifica monto. Si reclama, sistema bloquea cajero."
+    }
+  ]
+}

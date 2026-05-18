@@ -1,0 +1,18 @@
+{
+  "slice": 45,
+  "title": "Cablear botones del POS principal a Supabase real",
+  "file": "salvadorex_web_v25.html",
+  "range": "500-540",
+  "buttons_wired": [
+    { "idx": 500, "id": "btn-new-prod", "label": "+ Nuevo producto", "action": "saveProduct()", "endpoint": "POST /api/products", "before": "demo (sin handler)", "after": "POST a Supabase + reload" },
+    { "idx": 510, "id": "btn-edit-prod", "label": "Editar", "action": "saveProduct(data, id)", "endpoint": "PUT /api/products/:id", "before": "botón sin handler en renderInv", "after": "PUT a Supabase + reload" },
+    { "idx": 520, "id": "btn-del-prod", "label": "Eliminar", "action": "deleteProduct(code,id)", "endpoint": "DELETE /api/products/:id", "before": "no existía", "after": "DELETE a Supabase + reload" },
+    { "idx": 525, "id": "inv-search", "label": "Búsqueda inline", "action": "renderInv(filter)", "endpoint": "client-side filter", "before": "no existía", "after": "filtra CATALOG por code/name" },
+    { "idx": 530, "id": "btn-export-prod", "label": "📤 Exportar", "action": "exportProductsCSV()", "endpoint": "GET /api/products?export=csv (con fallback cliente)", "before": "demo (sin handler)", "after": "descarga CSV server-side o fallback cliente" },
+    { "idx": 540, "id": "btn-import-prod", "label": "📥 Importar", "action": "importProductsCSV(file)", "endpoint": "POST /api/products/import (con fallback POST/uno)", "before": "demo (sin handler)", "after": "parsea CSV cliente + bulk POST + reload" }
+  ],
+  "files_modified": ["salvadorex_web_v25.html"],
+  "lines_added_approx": 110,
+  "api_touched": false,
+  "deploy": "skipped (sin acceso a vercel CLI desde el sandbox)"
+}

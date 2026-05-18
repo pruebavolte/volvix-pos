@@ -1,0 +1,27 @@
+{
+  "slice": "02",
+  "title": "Productos CRUD completo",
+  "deployed_at": "2026-04-26T21:16Z",
+  "deployment_url": "https://volvix-oah5afe56-grupo-volvixs-projects.vercel.app",
+  "tests": [
+    { "idx": 24, "name": "POST /api/products", "status": "PASS", "evidence": "201 id=fad55198-c254-4359-918b-ac746f816d1a" },
+    { "idx": 25, "name": "PATCH /api/products/:id", "status": "PASS", "evidence": "200 price updated 99.5->111.11, stock 3->2" },
+    { "idx": 26, "name": "DELETE /api/products/:id", "status": "PASS", "evidence": "200 {ok:true}" },
+    { "idx": 27, "name": "POST /api/onboarding/import-products", "status": "PASS", "evidence": "200 inserted=2 fallback=pos_products (tabla products no existe en supabase, fallback a pos_products)" },
+    { "idx": 28, "name": "GET /api/products?export=csv", "status": "PASS", "evidence": "200 Content-Type text/csv; valid CSV with header id,code,name,category,price,cost,stock" },
+    { "idx": 29, "name": "GET /api/products?q=coca", "status": "PASS", "evidence": "200 count=1 (filtra de 7 totales) name='Coca Cola 600ml'" },
+    { "idx": 30, "name": "GET /api/products?low_stock=true", "status": "PASS", "evidence": "200 count=2 maxStock=8 (umbral <=10, total 7 productos)" }
+  ],
+  "fixes_applied": [
+    "GET /api/products: nuevos query params q (ilike name/code/category), low_stock (stock<=10), export=csv (text/csv content-type), limit",
+    "enforcePlanLimits: ahora resuelve req.user via JWT/api-key antes de consultar tenant_id (antes devolvia 401 unauthorized en POST /api/products porque corria fuera de requireAuth)",
+    "POST /api/onboarding/import-products: fallback de tabla 'products' (no existe) a 'pos_products' con mapping sku->code; antes fallaba porque generic_blobs tampoco existe"
+  ],
+  "frontend_wiring": {
+    "file": "volvix-pos-wiring.js",
+    "uses_real_endpoints": true,
+    "calls": ["POST /api/products", "PATCH /api/products/:id", "GET /api/products"]
+  },
+  "no_hardcoded_data": true,
+  "all_passed": true
+}

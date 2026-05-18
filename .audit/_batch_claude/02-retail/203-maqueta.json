@@ -1,0 +1,106 @@
+{
+  "slug": "maqueta",
+  "brand": "Maqueta",
+  "tagline": "El sistema para tiendas de hobby que sí cuidan cada pieza fina",
+  "giro": "tienda hobby",
+  "giroPlural": "tiendas de hobby",
+  "vibe": "scholar",
+  "palette": {
+    "bg": "#F4F0E6",
+    "surface": "#FFFFFF",
+    "paper": "#ECE5CE",
+    "ink": "#1C1A12",
+    "ink2": "#3E3924",
+    "muted": "#7A6F50",
+    "line": "#D6CBA8",
+    "accent": "#5F3F1E",
+    "accent2": "#A07845"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Lora",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas de hobby · 2026",
+    "h1": "Cada <em>maqueta</em>,<br>cada <em>pintura</em>,<br>cada hobbyista.",
+    "deck": "El punto de venta hecho para tiendas de hobby: stock por categoría (modelismo, pintura, herramientas), fichas de cliente con sus proyectos, comunidad y eventos.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?model,kit,hobby&q=85",
+    "heroAlt": "Tienda de hobby con maquetas y pinturas",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?model,kit&q=80", "tag": "Maquetas plástico", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?paint,acrylic&q=80", "tag": "Pinturas acrílicas", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?brush,hobby&q=80", "tag": "Pinceles", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?airbrush&q=80", "tag": "Aerógrafos", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?diorama&q=80", "tag": "Dioramas", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?hobby,tools&q=80", "tag": "Herramientas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?hobby,store&q=80", "tag": "Tienda hobby", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?model,painting&q=80", "tag": "Modelo terminado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?warhammer,figures&q=80", "tag": "Wargaming", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?hobby,workbench&q=80", "caption": "Cliente arma proyecto"},
+      {"url": "https://source.unsplash.com/random/800x600/?hobby,club&q=80", "caption": "Comunidad y eventos"},
+      {"url": "https://source.unsplash.com/random/800x600/?paint,palette&q=80", "caption": "Asesoría de pintura"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>categoría por hobby</em>",
+    "deck": "Cada maqueta, pintura, pincel con SKU. Cliente busca proyecto, sistema sugiere todo lo necesario. Pinturas con catálogo de colores. Comunidad y eventos.",
+    "secondary": "En hobby, una pintura agotada paraliza el proyecto del cliente. Maqueta te avisa antes.",
+    "data": {
+      "product": "Stock por categoría hobby",
+      "tallas": ["Modelismo", "Pintura", "Wargaming", "Herramientas", "Accesorios"],
+      "stock": [
+        {"color": "Premium", "vals": [28, 86, 42, 38, 56]},
+        {"color": "Medio", "vals": [42, 124, 68, 52, 78]},
+        {"color": "Iniciantes", "vals": [56, 168, 38, 86, 92]}
+      ],
+      "lowThreshold": 8
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por categoría hobby", "d": "Cada SKU con categoría y subcategoría. Sabes qué hobbies mueven más, cuáles se quedan."},
+    {"ico": "edit", "h": "Ficha de proyecto del cliente", "d": "Cliente arma maqueta del Tigre 1: sistema guarda lista de pinturas y herramientas usadas. Próxima compra, sugiere lo faltante."},
+    {"ico": "calendar", "h": "Eventos y clases en tienda", "d": "Agenda taller de aerografía. Cobra inscripción por sistema. Cero inscritos fantasma."},
+    {"ico": "gift", "h": "Comunidad por afición", "d": "Cliente entra a grupo de wargaming. Sistema le notifica eventos y lanzamientos relevantes. Cero clientes perdidos."},
+    {"ico": "percent", "h": "Comisiones por vendedor", "d": "Define % por categoría. Vendedor ve en vivo. Cero peleas al cierre."},
+    {"ico": "monitor", "h": "Catálogo digital con tutoriales", "d": "Cliente busca pintura, sistema muestra técnicas y proyectos relacionados. Vendedor vende lección, no producto."}
+  ],
+  "stats": [
+    {"v": "1,486", "l": "Productos en stock"},
+    {"v": "32", "l": "Vendidos hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis clientes hobbyistas son leales pero <span class=\"hl\">se iban a comprar pintura a CDMX cuando se me agotaba</span> el color exacto. Con Maqueta el sistema me marca alerta antes. Cero clientes perdidos en 5 meses.",
+    "sig": "Don Mario H.",
+    "role": "Tienda hobby en Toluca, EDOMEX"
+  },
+  "thefts": [
+    {
+      "title": "Pinturas premium 'mermadas' por empleados",
+      "rob": "Empleado toma pinturas Vallejo o Citadel (de $80-400 c/u) marcándolas como 'tapas dañadas'. Son 8-15 frascos al mes en tienda hobby.",
+      "fix": "Mermas <strong>requieren foto del defecto y autorización del gerente</strong>. Cada baja con SKU y motivo verificable."
+    },
+    {
+      "title": "Maquetas premium 'extraviadas'",
+      "rob": "Maquetas Bandai o Hasegawa ($800-3,500). Empleado dice 'no encontré en bodega' y la vende afuera o se la lleva. Sin SKU obligatorio, no hay rastro.",
+      "fix": "Cada maqueta premium con <strong>SKU obligatorio y antirrobo</strong>. Si sale sin venta, alerta. Auditoría mensual por categoría."
+    },
+    {
+      "title": "Eventos cobrados por fuera",
+      "rob": "Taller de aerografía cobra inscripción $300 en efectivo. Instructor lo registra como $100 y se queda con la diferencia.",
+      "fix": "Eventos <strong>se cobran por sistema con código QR de inscripción</strong>. Cero inscritos sin registro. Auditoría post-evento."
+    }
+  ]
+}

@@ -1,0 +1,6020 @@
+{
+  "meta": {
+    "proyecto": "Volvix POS — SalvadoreX",
+    "version": "v2.0 — blitz 2026-05-15",
+    "generado": "2026-05-15T21:11:00.034Z",
+    "fuente": "generate-system-map.v2.js — 5 patches aplicados",
+    "archivos_escaneados": [
+      "public/salvadorex-pos.html",
+      "public/paneldecontrol.html"
+    ],
+    "patches_aplicados": [
+      "P1-botones",
+      "P2-screen-blocks",
+      "P3-roles",
+      "P4-realtime",
+      "P5-window-vars"
+    ]
+  },
+  "resumen": {
+    "nodos_total": 144,
+    "relaciones_total": 220,
+    "salvadorex_pos": {
+      "lineas": 22919,
+      "screens": 29,
+      "config_tabs": 9,
+      "modals": 13,
+      "buttons_capturados": 80,
+      "api_endpoints": 121,
+      "funciones_window": 672,
+      "roles_detectados": [
+        "superadmin",
+        "owner",
+        "admin",
+        "delivery",
+        "manager",
+        "cajero",
+        "cashier"
+      ],
+      "role_checks": 15,
+      "realtime_channels": 2,
+      "window_vars": 188,
+      "screens_con_bloque_encontrado": 29,
+      "screens_con_fallback": 0
+    },
+    "paneldecontrol": {
+      "lineas": 9097,
+      "perm_tabs": 5,
+      "buttons_capturados": 51,
+      "api_endpoints": 26,
+      "funciones_window": 104,
+      "roles_detectados": [
+        "superadmin",
+        "owner",
+        "admin",
+        "cajero",
+        "manager",
+        "platform_owner"
+      ],
+      "realtime_channels": 0,
+      "window_vars": 27
+    },
+    "api_compartidos": 8,
+    "api_solo_pos": 113,
+    "api_solo_pdc": 18
+  },
+  "archivos": {
+    "salvadorex_pos": {
+      "file": "public/salvadorex-pos.html",
+      "title": "SalvadoreX · Punto de Venta",
+      "size_bytes": 1275475,
+      "lines": 22919,
+      "last_modified": "2026-05-15T17:42:12.000Z",
+      "screens": [
+        "actualizador",
+        "apertura",
+        "ayuda",
+        "clientes",
+        "config",
+        "corte",
+        "cotizaciones",
+        "credito",
+        "dashboard",
+        "departamentos",
+        "devoluciones",
+        "facturacion",
+        "inventario",
+        "kardex",
+        "mapa",
+        "mobile-apps",
+        "perfil",
+        "pos",
+        "promociones",
+        "proveedores",
+        "quickpos",
+        "recargas",
+        "rentas",
+        "reportes",
+        "reservaciones",
+        "salud",
+        "servicios",
+        "usuarios",
+        "ventas"
+      ],
+      "config_tabs": [
+        "general",
+        "impresion",
+        "impuestos",
+        "licencia",
+        "modulos",
+        "negocio",
+        "pwa",
+        "sync",
+        "vista"
+      ],
+      "perm_tabs": [],
+      "modals": [
+        "app-pay",
+        "calc",
+        "cash",
+        "cfdi-cancel",
+        "cfdi-refacturar",
+        "granel",
+        "late-invoice",
+        "pay",
+        "pay-confirm",
+        "pay-verify",
+        "sale-detail",
+        "sale-search",
+        "search"
+      ],
+      "buttons": [
+        {
+          "id": "btn_pos_cargar_productos",
+          "label": "Cargar productos",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_continuar",
+          "label": "Continuar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_cerrar",
+          "label": "Cerrar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__rechazar",
+          "label": "✗ Rechazar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__acepto_brindar_acceso",
+          "label": "✓ Acepto · brindar acceso",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_cancelar_sesi_n",
+          "label": "Cancelar sesión",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__compartir_mi_pantalla_ah",
+          "label": "📺 Compartir mi pantalla ahora",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__terminar_sesi_n",
+          "label": "🛑 Terminar sesión",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__terminar",
+          "label": "🛑 Terminar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__reenviar_correo",
+          "label": "📩 Reenviar correo",
+          "handler": "window.__vlxResendVerify && window.__vlxResendVerify()",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_cerrar_tab",
+          "label": "Cerrar tab",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__cerrar_vista",
+          "label": "✕ Cerrar vista",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_renovar",
+          "label": "Renovar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__actualizar",
+          "label": "🔄 Actualizar",
+          "handler": "window.__volvixOfflineRefresh && window.__volvixOfflineRefresh()",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_iniciar_sesi_n",
+          "label": "Iniciar sesión",
+          "handler": "handleLogin(event)",
+          "calls": "handleLogin",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__3",
+          "label": "! 3",
+          "handler": "openNotificationsPanel()",
+          "calls": "openNotificationsPanel",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_cola_0",
+          "label": "Cola 0",
+          "handler": "r10aOpenPrintQueue()",
+          "calls": "r10aOpenPrintQueue",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_pendientes_0",
+          "label": "Pendientes 0",
+          "handler": "r10aOpenPendingPay()",
+          "calls": "r10aOpenPendingPay",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_voz",
+          "label": "VOZ",
+          "handler": "voxToggle()",
+          "calls": "voxToggle",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__saas",
+          "label": "👑 SAAS",
+          "handler": "openOwnerPanel()",
+          "calls": "openOwnerPanel",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_live_sync",
+          "label": "LIVE SYNC",
+          "handler": "showScreen('salud')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "salud"
+        },
+        {
+          "id": "btn_pos_ad",
+          "label": "AD",
+          "handler": "showScreen('perfil')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "perfil"
+        },
+        {
+          "id": "btn_pos_ayuda",
+          "label": "Ayuda",
+          "handler": "showScreen('ayuda')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "ayuda"
+        },
+        {
+          "id": "btn_pos_salir",
+          "label": "Salir",
+          "handler": "doLogout()",
+          "calls": "doLogout",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__vender",
+          "label": "💰 Vender",
+          "handler": "showScreen('pos')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "pos"
+        },
+        {
+          "id": "btn_pos__inventario",
+          "label": "📦 Inventario",
+          "handler": "showScreen('inventario')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "inventario"
+        },
+        {
+          "id": "btn_pos__reportes",
+          "label": "📊 Reportes",
+          "handler": "showScreen('reportes')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "reportes"
+        },
+        {
+          "id": "btn_pos__devoluciones",
+          "label": "↩️ Devoluciones",
+          "handler": "showScreen('devoluciones')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "devoluciones"
+        },
+        {
+          "id": "btn_pos__corte",
+          "label": "🔐 Corte",
+          "handler": "showScreen('corte')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "corte"
+        },
+        {
+          "id": "btn_pos__clientes",
+          "label": "👥 Clientes",
+          "handler": "showScreen('clientes')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "clientes"
+        },
+        {
+          "id": "btn_pos__config",
+          "label": "⚙️ Config",
+          "handler": "showScreen('config')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "config"
+        },
+        {
+          "id": "btn_pos__cr_ditos",
+          "label": "💳 Créditos",
+          "handler": "showScreen('credito')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "credito"
+        },
+        {
+          "id": "btn_pos__kardex",
+          "label": "📋 Kardex",
+          "handler": "showScreen('kardex')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "kardex"
+        },
+        {
+          "id": "btn_pos__proveedores",
+          "label": "🚚 Proveedores",
+          "handler": "showScreen('proveedores')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "proveedores"
+        },
+        {
+          "id": "btn_pos__facturas",
+          "label": "🧾 Facturas",
+          "handler": "showScreen('facturacion')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "facturacion"
+        },
+        {
+          "id": "btn_pos__historial",
+          "label": "📄 Historial",
+          "handler": "showScreen('ventas')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "ventas"
+        },
+        {
+          "id": "btn_pos__usuarios",
+          "label": "👨‍💼 Usuarios",
+          "handler": "showScreen('usuarios')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "usuarios"
+        },
+        {
+          "id": "btn_pos__dashboard",
+          "label": "📈 Dashboard",
+          "handler": "showScreen('dashboard')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "dashboard"
+        },
+        {
+          "id": "btn_pos__apertura",
+          "label": "🏪 Apertura",
+          "handler": "showScreen('apertura')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "apertura"
+        },
+        {
+          "id": "btn_pos__cotizaciones",
+          "label": "💬 Cotizaciones",
+          "handler": "showScreen('cotizaciones')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "cotizaciones"
+        },
+        {
+          "id": "btn_pos__recargas",
+          "label": "📱 Recargas",
+          "handler": "showScreen('recargas')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "recargas"
+        },
+        {
+          "id": "btn_pos__servicios",
+          "label": "💡 Servicios",
+          "handler": "showScreen('servicios')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "servicios"
+        },
+        {
+          "id": "btn_pos__tarjetas",
+          "label": "🎬 Tarjetas",
+          "handler": "showLocked('Tarjetas virtuales')",
+          "calls": "showLocked",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__promos",
+          "label": "🏷️ Promos",
+          "handler": "showScreen('promociones')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "promociones"
+        },
+        {
+          "id": "btn_pos__depto_",
+          "label": "🏢 Depto.",
+          "handler": "showScreen('departamentos')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "departamentos"
+        },
+        {
+          "id": "btn_pos__sugeridas",
+          "label": "🛒 Sugeridas",
+          "handler": "showLocked('Compras sugeridas (IA)')",
+          "calls": "showLocked",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__actualizar",
+          "label": "💱 Actualizar",
+          "handler": "showScreen('actualizador')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "actualizador"
+        },
+        {
+          "id": "btn_pos__rentas",
+          "label": "🔑 Rentas",
+          "handler": "showScreen('rentas')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "rentas"
+        },
+        {
+          "id": "btn_pos__reservas",
+          "label": "📅 Reservas",
+          "handler": "showScreen('reservaciones')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "reservaciones"
+        },
+        {
+          "id": "btn_pos__mapa",
+          "label": "🗺️ Mapa",
+          "handler": "showScreen('mapa')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "mapa"
+        },
+        {
+          "id": "btn_pos__m_s",
+          "label": "⋯ Más",
+          "handler": "openMasModulos()",
+          "calls": "openMasModulos",
+          "opens_modal": "mas-modulos",
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_vista_",
+          "label": "Vista ①",
+          "handler": "toggleVista()",
+          "calls": "toggleVista",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_enter_agregar_producto",
+          "label": "ENTER — Agregar Producto",
+          "handler": "searchProduct(document.getElementById('barcode-input').value)",
+          "calls": "searchProduct",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_ins_varios",
+          "label": "INS Varios",
+          "handler": "openVarios()",
+          "calls": "openVarios",
+          "opens_modal": "varios",
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_ctrl_p_art_com_n",
+          "label": "CTRL+P Art. Común",
+          "handler": "addCommonProduct()",
+          "calls": "addCommonProduct",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_f10_buscar",
+          "label": "F10 Buscar",
+          "handler": "openSearch()",
+          "calls": "openSearch",
+          "opens_modal": "search",
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_f11_mayoreo",
+          "label": "F11 Mayoreo",
+          "handler": "togglePriceTier()",
+          "calls": "togglePriceTier",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_f7_entradas",
+          "label": "F7 Entradas",
+          "handler": "cashIn()",
+          "calls": "cashIn",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_f8_salidas",
+          "label": "F8 Salidas",
+          "handler": "cashOut()",
+          "calls": "cashOut",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_del_borrar_art_",
+          "label": "DEL Borrar Art.",
+          "handler": "deleteCartItem()",
+          "calls": "deleteCartItem",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_f9_verificador",
+          "label": "F9 - Verificador",
+          "handler": "priceChecker()",
+          "calls": "priceChecker",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__panel",
+          "label": "📒 Panel",
+          "handler": "openCatalogPanel()",
+          "calls": "openCatalogPanel",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__cat_logo",
+          "label": "🖼️ Catálogo",
+          "handler": "openVisualCatalog()",
+          "calls": "openVisualCatalog",
+          "opens_modal": "visual-catalog",
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__granel",
+          "label": "⚖ Granel",
+          "handler": "openGranel()",
+          "calls": "openGranel",
+          "opens_modal": "granel",
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__descuento",
+          "label": "% Descuento",
+          "handler": "applyDiscount()",
+          "calls": "applyDiscount",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__calc",
+          "label": "🧮 Calc",
+          "handler": "openCalc()",
+          "calls": "openCalc",
+          "opens_modal": "calc",
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__nuevo",
+          "label": "+ Nuevo",
+          "handler": "newTicket()",
+          "calls": "newTicket",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_f5_cambiar",
+          "label": "F5 - Cambiar",
+          "handler": "openChangePriceModal()",
+          "calls": "openChangePriceModal",
+          "opens_modal": "change-price",
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_f6_pendiente",
+          "label": "F6 - Pendiente",
+          "handler": "savePendingSale()",
+          "calls": "savePendingSale",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_eliminar",
+          "label": "Eliminar",
+          "handler": "clearCart()",
+          "calls": "clearCart",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_asignar_cliente",
+          "label": "Asignar cliente",
+          "handler": "openCustomerSelector()",
+          "calls": "openCustomerSelector",
+          "opens_modal": "customer-selector",
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_f12_cobrar",
+          "label": "F12 - Cobrar",
+          "handler": "openPayment()",
+          "calls": "openPayment",
+          "opens_modal": "payment",
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_aplicar",
+          "label": "Aplicar",
+          "handler": "applyCouponToCart()",
+          "calls": "applyCouponToCart",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__quitar",
+          "label": "✕ Quitar",
+          "handler": "clearCouponFromCart()",
+          "calls": "clearCouponFromCart",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_reimprimir_ltimo_ticket",
+          "label": "Reimprimir Último Ticket",
+          "handler": "reimprimirUltimoTicket()",
+          "calls": "reimprimirUltimoTicket",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_enviar_a_impresora",
+          "label": "Enviar a Impresora",
+          "handler": "enviarAImpresora()",
+          "calls": "enviarAImpresora",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos_ventas_del_d_a_y_devoluci",
+          "label": "Ventas del día y Devoluciones",
+          "handler": "showScreen('ventas')",
+          "calls": "showScreen",
+          "opens_modal": null,
+          "navigates_to": "ventas"
+        },
+        {
+          "id": "btn_pos__exportar",
+          "label": "📤 Exportar",
+          "handler": "exportDashboardCSV()",
+          "calls": "exportDashboardCSV",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__imprimir_resumen",
+          "label": "🖨️ Imprimir resumen",
+          "handler": "printDashboardSummary()",
+          "calls": "printDashboardSummary",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pos__importar",
+          "label": "📥 Importar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        }
+      ],
+      "functions": [
+        "IMPERSONATING",
+        "MapaUI",
+        "RentasUI",
+        "ReservacionesUI",
+        "VOLVIX",
+        "VOLVIX_PLATFORM_TOGGLE",
+        "VolvixDataLoader",
+        "VolvixGiroConfig",
+        "_NEW_QUO_STATE",
+        "_NEW_RETURN_STATE",
+        "_POS_COUPON",
+        "_PROMO_CACHE",
+        "_PROMO_TAB",
+        "_QUO_CACHE",
+        "_RETURNS_CACHE",
+        "__IMPERSONATING_DEBUG",
+        "__INV_allProducts__",
+        "__buildInitialUsersFromSession",
+        "__checkVersionUpdate",
+        "__deriveTenantIdFromToken",
+        "__deriveTenantNameFromToken",
+        "__iconForCategory",
+        "__impErrs",
+        "__impLogReader",
+        "__perifRestore",
+        "__r10aAuditDoubleClick",
+        "__r10aAuthFetch",
+        "__r10aPaperWarned",
+        "__r10aRefreshPendingBadge",
+        "__r10aRefreshPrintQueueBadge",
+        "__r8aClearCartDraft",
+        "__r8aDraftKey",
+        "__r8aGetIdemSeed",
+        "__r8aGetQueueCount",
+        "__r8aLoadCartDraft",
+        "__r8aLogDrawer",
+        "__r8aLogPrint",
+        "__r8aOfferRecovery",
+        "__r8aPromptManualPin",
+        "__r8aRefreshQueueCount",
+        "__r8aSaveCartDraft",
+        "__r8aShowPrintFailedModal",
+        "__r8aSleep",
+        "__r8aTryOpenDrawerESCPOS",
+        "__r8aTryPrintOnce",
+        "__r8aTryRecoveryWhenReady",
+        "__r8aUpdateBannerAndIndicator",
+        "__r8b",
+        "__r8bAuthFetch",
+        "__r8bBootstrap",
+        "__r8bCheckInactivity",
+        "__r8bDetectClientInfo",
+        "__r8bDispatchEvent",
+        "__r8bForceLogout",
+        "__r8bHeartbeat",
+        "__r8bLoadSessionConfig",
+        "__r8bMarkActivity",
+        "__r8bOfferServerRecovery",
+        "__r8bOnEvent",
+        "__r8bPollEvents",
+        "__r8bSaveCartServer",
+        "__r8bScheduleCartSave",
+        "__r8bShowCountdownModal",
+        "__r8bStartHeartbeat",
+        "__r8bStartInactivityTracker",
+        "__r8bStartPolling",
+        "__r8bStopHeartbeat",
+        "__r8bStopPolling",
+        "__renderVersionFooter",
+        "__routingRestore",
+        "__slugifyCat",
+        "__vlxAppPayCancel",
+        "__vlxAppPayManagerConfirm",
+        "__vlxApplyDiscount",
+        "__vlxBtConnectCapacitor",
+        "__vlxBtConnectWeb",
+        "__vlxBtGetPlugin",
+        "__vlxBtRestorePrefs",
+        "__vlxBtSetButtons",
+        "__vlxBtStatus",
+        "__vlxBuildTicketCommands",
+        "__vlxClosePayVerifyModal",
+        "__vlxDeferredPwaPrompt",
+        "__vlxMixtoAddRow",
+        "__vlxOpenAppPayModal",
+        "__vlxOpenMixtoBreakdown",
+        "__vlxOpenPayVerifyModal",
+        "__vlxOpenUsdModal",
+        "__vlxPayVerifyApprove",
+        "__vlxPayVerifyRecalc",
+        "__vlxPayVerifyReject",
+        "__vlxResendVerify",
+        "__vlxScaleStartReading",
+        "__vlxSetDelivery",
+        "__vlxSetTipPercent",
+        "__vlxStrToBytes",
+        "__vlxToggleCfdi",
+        "__vlxToggleSection",
+        "__vlxValidateCfdi",
+        "__volvixAppPayConfirmed",
+        "__volvixCartLocked",
+        "__volvixCountOfflineSalesPending",
+        "__volvixDeterministicIdemKey",
+        "__volvixDevMode",
+        "__volvixEnqueueSaleOffline",
+        "__volvixGenerateCartToken",
+        "__volvixGetOrCreateCartToken",
+        "__volvixGiro",
+        "__volvixGiroData",
+        "__volvixOfflineQueueClean",
+        "__volvixOfflineRefresh",
+        "__volvixPayVerification",
+        "__volvixPayVerified",
+        "__volvixPreviewGiro",
+        "__volvixPreviewMode",
+        "__volvixPreviewModule",
+        "__volvixResetCartToken",
+        "__volvixSaleInFlight",
+        "__volvixSelectedPayMethod",
+        "__volvixUserRole",
+        "__volvixVersion",
+        "__volvixVersionFetching",
+        "__volvixWelcomeWizardChecked",
+        "_activeCutData",
+        "_activeCutId",
+        "_addCountLine",
+        "_api",
+        "_applyTierVisual",
+        "_applyVista",
+        "_authFetch",
+        "_authHeaders",
+        "_b39Modal",
+        "_buildCinemaSeats",
+        "_close",
+        "_confidenceLabel",
+        "_csvEscape",
+        "_daysAgo",
+        "_downloadCSV",
+        "_endSession",
+        "_ensureChartJs",
+        "_esc",
+        "_escMas",
+        "_fetchTopSellersAndSync",
+        "_fetchWithTimeout",
+        "_flushBatchUpload",
+        "_flushLinesPatch",
+        "_fmtDate",
+        "_getRecents",
+        "_hide",
+        "_idb",
+        "_importProductToTenant",
+        "_initTicketEditor",
+        "_input",
+        "_installShowCfgHook",
+        "_isExpiringSoon",
+        "_isManager",
+        "_kpi",
+        "_loadActiveCount",
+        "_logSearch",
+        "_lowStockTimer",
+        "_money",
+        "_normalize",
+        "_nqCustTimer",
+        "_ob",
+        "_onBarcodeEnter",
+        "_open",
+        "_parseCSV",
+        "_pdcMiniModal",
+        "_poll",
+        "_preloadRecentsToCatalog",
+        "_promoAppliesLabel",
+        "_promoIsActive",
+        "_promoIsExpired",
+        "_promoIsScheduled",
+        "_promoSearchTimer",
+        "_promoTypeLabel",
+        "_quoFilterTimer",
+        "_refreshMasButtonVisibility",
+        "_renderCatalogModal",
+        "_renderCountSummary",
+        "_renderCountTable",
+        "_renderCustomerHeader",
+        "_repChart",
+        "_retFilterTimer",
+        "_row",
+        "_rsAcquireStream",
+        "_rsCleanupWebRTC",
+        "_rsDetectPlatform",
+        "_rsSignalPoll",
+        "_rsSignalSend",
+        "_rsStartWebRTC",
+        "_saveActiveCount",
+        "_scheduleBatchUpload",
+        "_searchProductInner",
+        "_select",
+        "_setActiveCutData",
+        "_setActiveCutId",
+        "_setScanBusy",
+        "_show",
+        "_showScreenWrapped",
+        "_showSearchPickerModal",
+        "_startPoll",
+        "_syncTopProductsToIDB",
+        "_toast",
+        "_today",
+        "_tok",
+        "_trackRecent",
+        "_tt",
+        "_updateBulkBar",
+        "_vSession",
+        "_vTenant",
+        "_vToken",
+        "_vlxApConfirm",
+        "_vlxApPoll",
+        "_vlxApStop",
+        "_vlxApTick",
+        "_vlxCloseModal",
+        "_vlxConfirmDestructive",
+        "_vlxDownloadCSV",
+        "_vlxFormatDate",
+        "_vlxFormatDateTime",
+        "_vlxFormatMoney",
+        "_vlxIsManager",
+        "_vlxOnEscapeOnce",
+        "_vlxOpenModal",
+        "_vlxStatusBadge",
+        "_watchPanel",
+        "_wireCatalogModal",
+        "_wireMapaEvents",
+        "abrirMenuPublico",
+        "activarTodos",
+        "add",
+        "addCommonProduct",
+        "addEventListener",
+        "addGranelToCart",
+        "addQuickPick",
+        "addToCart",
+        "agregarAFila",
+        "agregarDesdeModal",
+        "agregarItemReceta",
+        "applyCouponToCart",
+        "applyDiscount",
+        "applyFilter",
+        "applyHashRoute",
+        "applyHistorialFilter",
+        "applyIndustryTerminology",
+        "applyLowStockFilter",
+        "applyModuleRenames",
+        "approveReturn",
+        "atenderTurno",
+        "ayudaContacto",
+        "ayudaSeccion",
+        "bootIfHash",
+        "bulkApply",
+        "bulkPreview",
+        "calcChange",
+        "calcGranel",
+        "calcInput",
+        "calcResultante",
+        "calcSafeEval",
+        "cambiarStatus",
+        "cancelCount",
+        "captureNewQuoFormState",
+        "cardHtml",
+        "cargarFila",
+        "cargarIngredientes",
+        "cargarPosts",
+        "cargarProductos",
+        "cargarProductosSel",
+        "cargarRecetas",
+        "cargarTodo",
+        "cashIn",
+        "cashOut",
+        "cfdiCancel",
+        "cfdiLoad",
+        "cfdiNueva",
+        "cfdiOnboard",
+        "cfdiPDF",
+        "cfgPwaLoad",
+        "cfgPwaMediaLoad",
+        "check",
+        "checkHash",
+        "cleanup",
+        "clearCart",
+        "clearCouponFromCart",
+        "clearSaleSearch",
+        "close",
+        "closeCountSummary",
+        "closeCut",
+        "closeInvModal",
+        "closeModal",
+        "completePay",
+        "consolidatedScreens",
+        "convertQuotationToSale",
+        "copiarLink",
+        "copiarTexto",
+        "deleteCartItem",
+        "deleteProduct",
+        "deletePromotion",
+        "depEdit",
+        "depNuevo",
+        "depsLoad",
+        "desactivarTodos",
+        "digitalizarMenu",
+        "dispatchEvent",
+        "doLogout",
+        "downloadTemplate",
+        "editPromotion",
+        "editarIng",
+        "eliminarIng",
+        "eliminarPost",
+        "eliminarReceta",
+        "eliminarTurno",
+        "enviarAImpresora",
+        "esc",
+        "escapeAttr",
+        "escapeHtml",
+        "evaluateBanner",
+        "exportCSV",
+        "exportCSVInv",
+        "exportDashboardCSV",
+        "exportHistorialCSV",
+        "exportMovementsCSV",
+        "exportProductsCSV",
+        "exportPromotionsCSV",
+        "exportQuotationsCSV",
+        "exportReturnsCSV",
+        "fetch",
+        "filaApp",
+        "filterSearch",
+        "filtrarCat",
+        "filtrarIng",
+        "filtrarPlat",
+        "finalizeCount",
+        "flushOfflineQueue",
+        "fmt",
+        "focusBarcodeInput",
+        "forceSync",
+        "genEAN",
+        "generarPlan",
+        "generarPost",
+        "generarQR",
+        "generarQRModal",
+        "generarQRs",
+        "getCachedUser",
+        "getComputedStyle",
+        "getToken",
+        "guardarAjuste",
+        "guardarIngrediente",
+        "guardarPost",
+        "guardarProducto",
+        "guardarReceta",
+        "handleBulkCSV",
+        "handleKey",
+        "handleLogin",
+        "handleVerifyFlag",
+        "healthLoad",
+        "htmlEsc",
+        "idbGetAll",
+        "idbPutAll",
+        "idbQueue",
+        "importProductsCSV",
+        "importarCSV",
+        "importarDigitalizados",
+        "importarSugeridos",
+        "ingApp",
+        "init",
+        "initCutsModule",
+        "initInventoryModule",
+        "initPinToggle",
+        "initReportsModule",
+        "initTourToggle",
+        "initVista",
+        "injectBanner",
+        "installPWAPrompt",
+        "invToast",
+        "kardexExportCSV",
+        "kardexLoad",
+        "launchOnboarding",
+        "limpiarFila",
+        "llamarSiguiente",
+        "loadAdjustHistory",
+        "loadCatalogReal",
+        "loadCutSummary",
+        "loadCutsHistoryList",
+        "loadImpersonatedState",
+        "loadList",
+        "loadMovements",
+        "loadPrinterConfig",
+        "loadProductsFromAPI",
+        "loadPromotions",
+        "loadQuotations",
+        "loadReturns",
+        "logErr",
+        "lookupBarcode",
+        "lsGet",
+        "lsSet",
+        "matchMedia",
+        "menuApp",
+        "mktApp",
+        "money",
+        "moneyMX",
+        "newQuoAddProduct",
+        "newQuoRemove",
+        "newQuoSearchCustomer",
+        "newQuoSearchProduct",
+        "newQuoSelectCustomer",
+        "newQuoUpdatePrice",
+        "newQuoUpdateQty",
+        "newReturnNext",
+        "newReturnSearchSales",
+        "newReturnSelectSale",
+        "newReturnSubmit",
+        "newTicket",
+        "normalizeProductForCart",
+        "nuevaManual",
+        "nuevaPublicacion",
+        "onBarcodeLookup",
+        "onKey",
+        "onReady",
+        "onVistaChanged",
+        "onload",
+        "open",
+        "openAjuste",
+        "openCalc",
+        "openCatalogPanel",
+        "openCfdiCancel",
+        "openCfdiRefacturar",
+        "openChangePriceModal",
+        "openCustomerSelector",
+        "openCut",
+        "openEditar",
+        "openGranel",
+        "openHistorialDateFilter",
+        "openImport",
+        "openInvModal",
+        "openKardexModal",
+        "openLateInvoice",
+        "openLowStockAlerts",
+        "openMasModulos",
+        "openModal",
+        "openModalSuggest",
+        "openMovementDetailModal",
+        "openNewCustomerModal",
+        "openNewPromotionModal",
+        "openNewQuotationModal",
+        "openNewReturnModal",
+        "openNotificationsPanel",
+        "openNuevo",
+        "openOwnerPanel",
+        "openPayment",
+        "openRejectReturnModal",
+        "openReport",
+        "openSaleDetail",
+        "openSaleSearchModal",
+        "openSearch",
+        "openSendQuotationModal",
+        "openStockAdjustModal",
+        "openSyncPanel",
+        "openVarios",
+        "openVisualCatalog",
+        "ordenCompraNueva",
+        "pad2",
+        "pauseCount",
+        "payAddBill",
+        "payExactAmount",
+        "payNumKey",
+        "pickCountProduct",
+        "pickIcon",
+        "pickSearchResult",
+        "planApp",
+        "populateGranelSelect",
+        "pos",
+        "posLoadInventory",
+        "previewCSV",
+        "priceChecker",
+        "print",
+        "printCountReport",
+        "printCreditNote",
+        "printCutReceipt",
+        "printDashboardSummary",
+        "printQuotation",
+        "printerMsg",
+        "process",
+        "prompt",
+        "promptProductForm",
+        "provTab",
+        "proveedorEdit",
+        "proveedorNuevo",
+        "proveedoresLoad",
+        "proxyToBarcode",
+        "qpKey",
+        "quickPosCobrar",
+        "quitarItemReceta",
+        "r10aCheckPending",
+        "r10aDoFindSale",
+        "r10aManualVerify",
+        "r10aOpenFindSale",
+        "r10aOpenPendingPay",
+        "r10aOpenPrintQueue",
+        "r10aQueueTicket",
+        "r10aRegisterPendingPay",
+        "r10aRetryPrint",
+        "r10aShowModal",
+        "r10aShowSaleDetail",
+        "r4cApproveAdj",
+        "r4cCheckPending",
+        "r4cLoadAdjustments",
+        "r4cMaybeShowReopenBar",
+        "r4cRefreshOpenSalesAlert",
+        "r4cRejectAdj",
+        "r4cReopenZ",
+        "r4cSubmitAdjustment",
+        "r8aOpenCashDrawer",
+        "r8aOpenManualSearch",
+        "readBascula",
+        "recalcCostoReceta",
+        "recalcStockBadge",
+        "recargaCarrier",
+        "recargasHealth",
+        "recargasHistorial",
+        "refreshAdjustProductOptions",
+        "refreshLowStockAlerts",
+        "refreshUserFromServer",
+        "registerCash",
+        "reimprimirUltimoTicket",
+        "removeFromCart",
+        "renderAperturaState",
+        "renderCart",
+        "renderCategorias",
+        "renderCategories",
+        "renderClientes",
+        "renderCountStep",
+        "renderCredito",
+        "renderFFTree",
+        "renderFila",
+        "renderIngredientes",
+        "renderInv",
+        "renderMovementsRows",
+        "renderNewQuoModal",
+        "renderNewReturnStep",
+        "renderPlan",
+        "renderPosts",
+        "renderProductos",
+        "renderPromotionFormModal",
+        "renderPromotionsTable",
+        "renderQuickPick",
+        "renderQuotationsTable",
+        "renderRecetaItems",
+        "renderRecetas",
+        "renderReturnsTable",
+        "renderUsuarios",
+        "renderVentas",
+        "reprintSale",
+        "restorePendingSale",
+        "resumeCount",
+        "reviewCount",
+        "runSaleSearch",
+        "saltarTurno",
+        "savePendingSale",
+        "saveProduct",
+        "search",
+        "searchProduct",
+        "seedFromGiro",
+        "selectCartRow",
+        "selectCategory",
+        "selectPlatform",
+        "servicioPagar",
+        "serviciosHistorial",
+        "setCantReceta",
+        "setIngReceta",
+        "setLang",
+        "setPayMethod",
+        "setTono",
+        "setVista",
+        "setupCartObserver",
+        "setupImpErrorTrap",
+        "setupObservers",
+        "setupTimer",
+        "shouldRedirectToWizard",
+        "showCfg",
+        "showCutsHistory",
+        "showInvTab",
+        "showLabelPrintPanel",
+        "showLocked",
+        "showOnboarding",
+        "showPromoTab",
+        "showScreen",
+        "showSetupBanner",
+        "showToast",
+        "showWelcomeBanner",
+        "ssoCheck",
+        "startDevolucionFromSale",
+        "startNewCount",
+        "startOnboarding",
+        "startTour",
+        "submitAdjust",
+        "submitBulkAdjust",
+        "submitCfdiCancel",
+        "submitCfdiRefacturar",
+        "submitLateInvoice",
+        "submitNewQuotation",
+        "submitPromotionForm",
+        "sugerirIngredientes",
+        "switchTab",
+        "syncAll",
+        "syncLvCats",
+        "syncLvProducts",
+        "syncLvTicket",
+        "syncOxxoCart",
+        "syncToCatalog",
+        "tToast",
+        "tenantId",
+        "tiempoEspera",
+        "todayStr",
+        "togglePosSidebar",
+        "togglePriceTier",
+        "togglePromotion",
+        "toggleVisibilidad",
+        "toggleVista",
+        "triggerBackup",
+        "tryMount",
+        "updateCloseCount",
+        "updateInvStats",
+        "updateKPIs",
+        "updateMargen",
+        "updatePromotionsStats",
+        "updateQuotationsStats",
+        "updateReturnsStats",
+        "updateStats",
+        "updateTotal",
+        "updateTotals",
+        "val",
+        "viewEditQuotation",
+        "viewReturnDetail",
+        "vistaIs",
+        "vlxBtSavePrefs",
+        "vlxDrawerOpen",
+        "vlxFpDetect",
+        "vlxFpEnroll",
+        "vlxFpVerify",
+        "vlxPerifSave",
+        "vlxPerifTab",
+        "vlxPrinterBtConnect",
+        "vlxPrinterBtDisconnect",
+        "vlxPrinterBtScan",
+        "vlxPrinterBtTest",
+        "vlxPrinterNetTest",
+        "vlxPrinterSaveConfig",
+        "vlxPrinterSystemRefresh",
+        "vlxPrinterSystemTest",
+        "vlxPrinterTestPrint",
+        "vlxPrinterTypeChange",
+        "vlxPrinterUsbConnect",
+        "vlxRoutingAdd",
+        "vlxRoutingSave",
+        "vlxScaleConnect",
+        "vlxScaleRead",
+        "vlxTicketPreview",
+        "vlxTogglePin",
+        "vlxToggleTours",
+        "voxClosePanel",
+        "voxFuzzySearch",
+        "voxNormWord",
+        "voxOpenPanel",
+        "voxParseCommand",
+        "voxProcessCommand",
+        "voxSetState",
+        "voxStart",
+        "voxStop",
+        "voxToggle",
+        "wireScreenAutoLoad"
+      ],
+      "api_endpoints": [
+        "/api/admin/backup/trigger",
+        "/api/admin/giros/",
+        "/api/admin/tenant/",
+        "/api/admin/tenants",
+        "/api/app/branding",
+        "/api/app/branding.",
+        "/api/app/config",
+        "/api/app/media",
+        "/api/app/media/",
+        "/api/audit/manual-search",
+        "/api/auth/heartbeat",
+        "/api/auth/resend-verify",
+        "/api/auth/session-config",
+        "/api/auth/sessions/revoke",
+        "/api/barcode-lookup",
+        "/api/business-plan",
+        "/api/cart/draft",
+        "/api/cart/draft.",
+        "/api/cart/draft/clear",
+        "/api/customers",
+        "/api/cuts",
+        "/api/cuts/",
+        "/api/cuts/close",
+        "/api/cuts/open",
+        "/api/dashboard/today",
+        "/api/drawer/log",
+        "/api/drawer/manual-open",
+        "/api/events/poll",
+        "/api/facturama/cancel/",
+        "/api/facturama/credentials",
+        "/api/facturama/invoice/",
+        "/api/facturama/invoices",
+        "/api/giro/config",
+        "/api/ingredientes",
+        "/api/ingredientes/",
+        "/api/inventory-counts/",
+        "/api/inventory-counts/start",
+        "/api/inventory-movements",
+        "/api/inventory/alerts",
+        "/api/inventory/bulk-adjust",
+        "/api/inventory/dedupe",
+        "/api/inventory/duplicates",
+        "/api/inventory/movements",
+        "/api/labels/print",
+        "/api/log/client",
+        "/api/login",
+        "/api/logout",
+        "/api/marketing/generar-post",
+        "/api/marketing/posts",
+        "/api/menu-digital",
+        "/api/menu-digital/",
+        "/api/menu-digital/digitalize",
+        "/api/notifications",
+        "/api/notifications/",
+        "/api/notifications/read-all",
+        "/api/owner/low-stock",
+        "/api/owner/products/lookup",
+        "/api/payments/check-pending/",
+        "/api/payments/health",
+        "/api/payments/pending",
+        "/api/payments/poll-external",
+        "/api/payments/poll-external/",
+        "/api/payments/verify/pending",
+        "/api/pos/app-orders",
+        "/api/print-log/paper-status",
+        "/api/print-queue",
+        "/api/print-queue/",
+        "/api/printer/raw",
+        "/api/productos",
+        "/api/productos/",
+        "/api/products",
+        "/api/products/",
+        "/api/products/bulk-update",
+        "/api/products/categories",
+        "/api/products/check-barcode",
+        "/api/products/import",
+        "/api/products/next-barcode",
+        "/api/products/seed-from-giro",
+        "/api/products/top",
+        "/api/promotions",
+        "/api/promotions/",
+        "/api/promotions/validate",
+        "/api/purchases",
+        "/api/queue",
+        "/api/queue/",
+        "/api/quotations",
+        "/api/quotations/",
+        "/api/recargas/checkout",
+        "/api/recargas/health",
+        "/api/recargas/history",
+        "/api/recetas",
+        "/api/recetas/",
+        "/api/recetas/suggest",
+        "/api/remote-support/end",
+        "/api/remote-support/incoming",
+        "/api/remote-support/respond",
+        "/api/remote-support/signal",
+        "/api/remote-support/signal-pull",
+        "/api/reports/by-cashier",
+        "/api/reports/inventory-turnover",
+        "/api/reports/kardex",
+        "/api/reports/profit",
+        "/api/reports/sales",
+        "/api/reports/top-customers",
+        "/api/reports/top-products",
+        "/api/returns",
+        "/api/returns/",
+        "/api/sales",
+        "/api/sales/",
+        "/api/sales/pending",
+        "/api/sales/pending/",
+        "/api/sales/search",
+        "/api/search/log",
+        "/api/services/checkout",
+        "/api/services/history",
+        "/api/suppliers",
+        "/api/suppliers/",
+        "/api/support/ticket",
+        "/api/tenant/active-modules",
+        "/api/users/me",
+        "/api/version"
+      ],
+      "supabase_tables": [],
+      "external_refs": [
+        "login.html",
+        "paneldecontrol.html",
+        "pos-config.html",
+        "volvix-cfdi-templates.html",
+        "volvix-onboarding.html"
+      ],
+      "screen_blocks": {
+        "actualizador": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"bulkPreview()\"",
+            "onclick=\"bulkApply()\""
+          ],
+          "_block_found": true
+        },
+        "apertura": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"showScreen('"
+          ],
+          "_block_found": true
+        },
+        "ayuda": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"window.open('",
+            "onclick=\"ayudaContacto()\"",
+            "onclick=\"ayudaSeccion('",
+            "onclick=\"ayudaSeccion('",
+            "onclick=\"ayudaSeccion('",
+            "onclick=\"ayudaSeccion('",
+            "onclick=\"ayudaSeccion('",
+            "onclick=\"ayudaSeccion('"
+          ],
+          "_block_found": true
+        },
+        "clientes": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"openNewCustomerModal()\""
+          ],
+          "_block_found": true
+        },
+        "config": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"showCfg('",
+            "onclick=\"showCfg('",
+            "onclick=\"showScreen('",
+            "onclick=\"showCfg('",
+            "onclick=\"showCfg('",
+            "onclick=\"showCfg('",
+            "onclick=\"showCfg('",
+            "onclick=\"showCfg('",
+            "onclick=\"showScreen('",
+            "onclick=\"showCfg('",
+            "onclick=\"showCfg('",
+            "onclick=\"this.classList.toggle('",
+            "onclick=\"this.classList.toggle('",
+            "onclick=\"vlxToggleTours(this)\"",
+            "onclick=\"vlxTogglePin(this)\"",
+            "onclick=\"window.VolvixPrintConfig && window.VolvixPrintConfig.openConfig()\"",
+            "onclick=\"window.volvixElectron && window.volvixElectron.autoSetupPrinter && window.volvixElectron.autoSetupPrinter().then(r=>{if(typeof showToast==='",
+            "onclick=\"window.volvixElectron && window.volvixElectron.repairPrinter && window.volvixElectron.repairPrinter().then(r=>{if(typeof showToast==='",
+            "onclick=\"vlxPerifTab('",
+            "onclick=\"vlxPerifTab('"
+          ],
+          "_block_found": true
+        },
+        "corte": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"showScreen('"
+          ],
+          "_block_found": true
+        },
+        "cotizaciones": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"loadQuotations()\"",
+            "onclick=\"exportQuotationsCSV()\"",
+            "onclick=\"openNewQuotationModal()\""
+          ],
+          "_block_found": true
+        },
+        "credito": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [],
+          "_block_found": true
+        },
+        "dashboard": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"exportDashboardCSV()\"",
+            "onclick=\"printDashboardSummary()\""
+          ],
+          "_block_found": true
+        },
+        "departamentos": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"depNuevo()\"",
+            "onclick=\"depsLoad()\""
+          ],
+          "_block_found": true
+        },
+        "devoluciones": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"loadReturns()\"",
+            "onclick=\"exportReturnsCSV()\"",
+            "onclick=\"openNewReturnModal()\""
+          ],
+          "_block_found": true
+        },
+        "facturacion": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"cfdiNueva()\"",
+            "onclick=\"cfdiOnboard()\"",
+            "onclick=\"cfdiLoad()\"",
+            "onclick=\"cfdiOnboard()\""
+          ],
+          "_block_found": true
+        },
+        "inventario": {
+          "endpoints": [
+            "/api/admin/tenants"
+          ],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"showInvTab('",
+            "onclick=\"showInvTab('",
+            "onclick=\"showInvTab('",
+            "onclick=\"showInvTab('"
+          ],
+          "_block_found": true
+        },
+        "kardex": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"kardexLoad()\"",
+            "onclick=\"kardexExportCSV()\""
+          ],
+          "_block_found": true
+        },
+        "mapa": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"MapaUI && MapaUI.toggleMode()\"",
+            "onclick=\"MapaUI && MapaUI.openTemplates()\"",
+            "onclick=\"MapaUI && MapaUI.exportar()\"",
+            "onclick=\"MapaUI && MapaUI.importar()\"",
+            "onclick=\"MapaUI && MapaUI.addLayer()\"",
+            "onclick=\"MapaUI && MapaUI.zoomBy(-0.1)\"",
+            "onclick=\"MapaUI && MapaUI.zoomBy(0.1)\"",
+            "onclick=\"MapaUI && MapaUI.zoomFit()\""
+          ],
+          "_block_found": true
+        },
+        "mobile-apps": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"installPWAPrompt()\""
+          ],
+          "_block_found": true
+        },
+        "perfil": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [],
+          "_block_found": true
+        },
+        "pos": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"togglePosSidebar()\"",
+            "onclick=\"searchProduct(document.getElementById('",
+            "onclick=\"r8aOpenManualSearch()\"",
+            "onclick=\"openVarios()\"",
+            "onclick=\"addCommonProduct()\"",
+            "onclick=\"openSearch()\"",
+            "onclick=\"togglePriceTier()\"",
+            "onclick=\"cashIn()\"",
+            "onclick=\"cashOut()\"",
+            "onclick=\"deleteCartItem()\"",
+            "onclick=\"priceChecker()\"",
+            "onclick=\"openCatalogPanel()\"",
+            "onclick=\"openVisualCatalog()\"",
+            "onclick=\"openGranel()\"",
+            "onclick=\"applyDiscount()\"",
+            "onclick=\"showScreen('",
+            "onclick=\"showScreen('",
+            "onclick=\"openCalc()\"",
+            "onclick=\"newTicket()\"",
+            "onclick=\"openChangePriceModal()\""
+          ],
+          "_block_found": true
+        },
+        "promociones": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"loadPromotions()\"",
+            "onclick=\"exportPromotionsCSV()\"",
+            "onclick=\"openNewPromotionModal()\"",
+            "onclick=\"showPromoTab('",
+            "onclick=\"showPromoTab('",
+            "onclick=\"showPromoTab('",
+            "onclick=\"showPromoTab('"
+          ],
+          "_block_found": true
+        },
+        "proveedores": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"proveedorNuevo()\"",
+            "onclick=\"ordenCompraNueva()\"",
+            "onclick=\"proveedoresLoad()\"",
+            "onclick=\"provTab('",
+            "onclick=\"provTab('",
+            "onclick=\"provTab('"
+          ],
+          "_block_found": true
+        },
+        "quickpos": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"qpKey('",
+            "onclick=\"qpKey('",
+            "onclick=\"qpKey('",
+            "onclick=\"qpKey('",
+            "onclick=\"qpKey('",
+            "onclick=\"qpKey('",
+            "onclick=\"qpKey('",
+            "onclick=\"qpKey('",
+            "onclick=\"qpKey('",
+            "onclick=\"qpKey('",
+            "onclick=\"qpKey('",
+            "onclick=\"qpKey('",
+            "onclick=\"quickPosCobrar()\""
+          ],
+          "_block_found": true
+        },
+        "recargas": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"recargasHistorial()\"",
+            "onclick=\"recargasHealth()\"",
+            "onclick=\"recargaCarrier('",
+            "onclick=\"recargaCarrier('",
+            "onclick=\"recargaCarrier('",
+            "onclick=\"recargaCarrier('",
+            "onclick=\"recargaCarrier('"
+          ],
+          "_block_found": true
+        },
+        "rentas": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"RentasUI && RentasUI.agregarEquipo()\"",
+            "onclick=\"RentasUI && RentasUI.registrarDevolucion()\"",
+            "onclick=\"RentasUI && RentasUI.nuevoContrato()\""
+          ],
+          "_block_found": true
+        },
+        "reportes": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"openReport('",
+            "onclick=\"openSaleSearchModal(false)\"",
+            "onclick=\"openSaleSearchModal(true)\"",
+            "onclick=\"openSaleSearchModal(false)\"",
+            "onclick=\"openSaleSearchModal(true)\"",
+            "onclick=\"openReport('",
+            "onclick=\"openReport('",
+            "onclick=\"openReport('",
+            "onclick=\"openReport('",
+            "onclick=\"openReport('",
+            "onclick=\"openReport('"
+          ],
+          "_block_found": true
+        },
+        "reservaciones": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"ReservacionesUI && ReservacionesUI.configMesas()\"",
+            "onclick=\"ReservacionesUI && ReservacionesUI.waitlist()\"",
+            "onclick=\"ReservacionesUI && ReservacionesUI.nuevaReserva()\"",
+            "onclick=\"ReservacionesUI && ReservacionesUI.shiftDay(-1)\"",
+            "onclick=\"ReservacionesUI && ReservacionesUI.shiftDay(+1)\"",
+            "onclick=\"ReservacionesUI && ReservacionesUI.today()\""
+          ],
+          "_block_found": true
+        },
+        "salud": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"healthLoad()\""
+          ],
+          "_block_found": true
+        },
+        "servicios": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"serviciosHistorial()\"",
+            "onclick=\"servicioPagar('",
+            "onclick=\"servicioPagar('",
+            "onclick=\"servicioPagar('",
+            "onclick=\"servicioPagar('",
+            "onclick=\"servicioPagar('",
+            "onclick=\"servicioPagar('"
+          ],
+          "_block_found": true
+        },
+        "usuarios": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [],
+          "_block_found": true
+        },
+        "ventas": {
+          "endpoints": [],
+          "modals_opened": [],
+          "onclick_samples": [
+            "onclick=\"r10aOpenFindSale()\"",
+            "onclick=\"openHistorialDateFilter()\"",
+            "onclick=\"exportHistorialCSV()\""
+          ],
+          "_block_found": true
+        }
+      },
+      "roles_mencionados": [
+        "superadmin",
+        "owner",
+        "admin",
+        "delivery",
+        "manager",
+        "cajero",
+        "cashier"
+      ],
+      "role_checks_count": 15,
+      "role_checks_distinct": [
+        "superadmin",
+        "owner",
+        "admin",
+        "manager",
+        "cajero",
+        "cashier"
+      ],
+      "realtime": {
+        "supabase_channels": [],
+        "websockets": [],
+        "event_sources": [],
+        "broadcast_channels": [
+          "CHANNEL_NAME",
+          "'volvix-cart-sync'"
+        ],
+        "total": 2
+      },
+      "window_state": {
+        "window_vars": [
+          {
+            "name": "window.__volvixPreviewMode",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.__volvixPreviewModule",
+            "kind": "expression",
+            "value_preview": "qs.get('module') || ''"
+          },
+          {
+            "name": "window.__volvixPreviewGiro",
+            "kind": "expression",
+            "value_preview": "qs.get('giro')   || ''"
+          },
+          {
+            "name": "window.__volvixUserRole",
+            "kind": "expression",
+            "value_preview": "== 'superadmin' -->"
+          },
+          {
+            "name": "window.__volvixDevMode",
+            "kind": "expression",
+            "value_preview": "devMode"
+          },
+          {
+            "name": "window.__volvixWelcomeWizardChecked",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.location.href",
+            "kind": "string",
+            "value_preview": "'/volvix-onboarding.html'"
+          },
+          {
+            "name": "window.volvixElectron.simulateInput",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.process",
+            "kind": "expression",
+            "value_preview": "== 'object' && window.process.versions && window.process.ver"
+          },
+          {
+            "name": "window.Capacitor.isNativePlatform",
+            "kind": "expression",
+            "value_preview": "== 'function' && window.Capacitor.isNativePlatform())"
+          },
+          {
+            "name": "window.volvixElectron.captureScreen",
+            "kind": "expression",
+            "value_preview": "== 'function'),"
+          },
+          {
+            "name": "window.showToast",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.IMPERSONATING",
+            "kind": "object",
+            "value_preview": "{ email: imEmail, tid: imTid || null, since: Date.now(), has"
+          },
+          {
+            "name": "window.__impErrs",
+            "kind": "expression",
+            "value_preview": "window.__impErrs || []"
+          },
+          {
+            "name": "window.fetch",
+            "kind": "expression",
+            "value_preview": "origFetch"
+          },
+          {
+            "name": "window.__IMPERSONATING_DEBUG",
+            "kind": "object",
+            "value_preview": "{ giro: gj.item }"
+          },
+          {
+            "name": "window.__volvixOfflineRefresh",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.VOLVIX_PLATFORM_TOGGLE",
+            "kind": "expression",
+            "value_preview": "true antes del DOMContentLoaded. -->"
+          },
+          {
+            "name": "window.showCfg",
+            "kind": "expression",
+            "value_preview": "_wrap"
+          },
+          {
+            "name": "window._ob",
+            "kind": "expression",
+            "value_preview": "setTimeout(() => banner.classList.remove('show'), 4500)"
+          },
+          {
+            "name": "window.VolvixUI.toast",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.VOLVIX",
+            "kind": "expression",
+            "value_preview": "VOLVIX"
+          },
+          {
+            "name": "window.VolvixGiroConfig",
+            "kind": "object",
+            "value_preview": "{"
+          },
+          {
+            "name": "window.VolvixDataLoader",
+            "kind": "object",
+            "value_preview": "{"
+          },
+          {
+            "name": "window.VolvixUI.confirm",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window._tt",
+            "kind": "expression",
+            "value_preview": "setTimeout(() => t.classList.remove('show'), 2500)"
+          },
+          {
+            "name": "window.openNewCustomerModal",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.reimprimirUltimoTicket",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.VolvixUI.choose",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.enviarAImpresora",
+            "kind": "expression",
+            "value_preview": "async function (saleId, opts) {"
+          },
+          {
+            "name": "window._showSearchPickerModal",
+            "kind": "expression",
+            "value_preview": "_showSearchPickerModal"
+          },
+          {
+            "name": "window._getRecents",
+            "kind": "expression",
+            "value_preview": "_getRecents"
+          },
+          {
+            "name": "window._trackRecent",
+            "kind": "expression",
+            "value_preview": "_trackRecent"
+          },
+          {
+            "name": "window.VolvixProductSearch.search",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.VolvixProductSearch.getByCode",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.__volvixVersionFetching",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.__volvixVersion",
+            "kind": "expression",
+            "value_preview": "j"
+          },
+          {
+            "name": "window.VolvixAuth.logout",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.__r8b",
+            "kind": "object",
+            "value_preview": "{ state: R8B, save: __r8bSaveCartServer, hb: __r8bHeartbeat,"
+          },
+          {
+            "name": "window.VolvixUI.destructiveConfirm",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.__volvixCountOfflineSalesPending",
+            "kind": "expression",
+            "value_preview": "__volvixCountOfflineSalesPending"
+          },
+          {
+            "name": "window.__volvixOfflineQueueClean",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.__volvixCartLocked",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.CART.length",
+            "kind": "number",
+            "value_preview": "0"
+          },
+          {
+            "name": "window.__volvixSelectedPayMethod",
+            "kind": "expression",
+            "value_preview": "method"
+          },
+          {
+            "name": "window.__volvixSaleInFlight",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.VolvixAuth.getToken",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window._logSearch",
+            "kind": "expression",
+            "value_preview": "_logSearch"
+          },
+          {
+            "name": "window.posLoadInventory",
+            "kind": "expression",
+            "value_preview": "== 'function') await window.posLoadInventory()"
+          },
+          {
+            "name": "window.VolvixImport.openWizard",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.startDevolucionFromSale",
+            "kind": "expression",
+            "value_preview": "startDevolucionFromSale"
+          },
+          {
+            "name": "window.cfgPwaLoad",
+            "kind": "expression",
+            "value_preview": "cfgPwaLoad"
+          },
+          {
+            "name": "window.r10aRegisterPendingPay",
+            "kind": "expression",
+            "value_preview": "async function (saleData, terminalRef) {"
+          },
+          {
+            "name": "window.r10aCheckPending",
+            "kind": "expression",
+            "value_preview": "async function (pendingId) {"
+          },
+          {
+            "name": "window.r10aOpenPendingPay",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.r10aManualVerify",
+            "kind": "expression",
+            "value_preview": "async function (pendingId) {"
+          },
+          {
+            "name": "window.r10aOpenPrintQueue",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.r10aRetryPrint",
+            "kind": "expression",
+            "value_preview": "async function (queueId) {"
+          },
+          {
+            "name": "window.r10aQueueTicket",
+            "kind": "expression",
+            "value_preview": "async function (saleId, ticketPayload, errorMsg) {"
+          },
+          {
+            "name": "window.__r10aPaperWarned",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.r10aDoFindSale",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.r10aShowSaleDetail",
+            "kind": "expression",
+            "value_preview": "async function (saleId) {"
+          },
+          {
+            "name": "window.VolvixUI.form",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.r8aOpenCashDrawer",
+            "kind": "expression",
+            "value_preview": "async function (saleId) {"
+          },
+          {
+            "name": "window.vlxPrinterBtScan",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.vlxPrinterBtTest",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.vlxPrinterBtDisconnect",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.vlxPrinterSystemRefresh",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.vlxPrinterSystemTest",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.vlxDrawerOpen",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.vlxScaleConnect",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.vlxFpDetect",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.applyIndustryTerminology",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.__volvixGiro",
+            "kind": "expression",
+            "value_preview": "giro"
+          },
+          {
+            "name": "window.__volvixGiroData",
+            "kind": "expression",
+            "value_preview": "j.giro"
+          },
+          {
+            "name": "window.VolvixBarcode.showBarcodeDialog",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window._lowStockTimer",
+            "kind": "expression",
+            "value_preview": "setInterval(refreshLowStockAlerts, 5 * 60 * 1000)"
+          },
+          {
+            "name": "window.openKardexModal",
+            "kind": "expression",
+            "value_preview": "openKardexModal"
+          },
+          {
+            "name": "window.openLowStockAlerts",
+            "kind": "expression",
+            "value_preview": "openLowStockAlerts"
+          },
+          {
+            "name": "window.refreshLowStockAlerts",
+            "kind": "expression",
+            "value_preview": "refreshLowStockAlerts"
+          },
+          {
+            "name": "window.openStockAdjustModal",
+            "kind": "expression",
+            "value_preview": "openStockAdjustModal"
+          },
+          {
+            "name": "window.exportMovementsCSV",
+            "kind": "expression",
+            "value_preview": "exportMovementsCSV"
+          },
+          {
+            "name": "window._showScreenWrapped",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.openReport",
+            "kind": "expression",
+            "value_preview": "async function(key) {"
+          },
+          {
+            "name": "window._repChart",
+            "kind": "expression",
+            "value_preview": "new Chart(ctx, Object.assign({ options:{responsive:true,main"
+          },
+          {
+            "name": "window.openNotificationsPanel",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.savePendingSale",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.restorePendingSale",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.forceSync",
+            "kind": "expression",
+            "value_preview": "async function (btn) {"
+          },
+          {
+            "name": "window.VolvixSync.syncNow",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.volvixSync.sync",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.flushOfflineQueue",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.triggerBackup",
+            "kind": "expression",
+            "value_preview": "async function (btn) {"
+          },
+          {
+            "name": "window.quickPosCobrar",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.exportDashboardCSV",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.exportHistorialCSV",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window._RETURNS_CACHE",
+            "kind": "array",
+            "value_preview": "[]"
+          },
+          {
+            "name": "window.loadReturns",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.viewReturnDetail",
+            "kind": "expression",
+            "value_preview": "async function (id) {"
+          },
+          {
+            "name": "window.approveReturn",
+            "kind": "expression",
+            "value_preview": "async function (id) {"
+          },
+          {
+            "name": "window.printCreditNote",
+            "kind": "expression",
+            "value_preview": "async function (id) {"
+          },
+          {
+            "name": "window._NEW_RETURN_STATE",
+            "kind": "object",
+            "value_preview": "{ sale: null, items: [], reason: '', notes: '' }"
+          },
+          {
+            "name": "window.newReturnSearchSales",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.newReturnSelectSale",
+            "kind": "expression",
+            "value_preview": "async function (saleId) {"
+          },
+          {
+            "name": "window._NEW_RETURN_STATE.sale",
+            "kind": "expression",
+            "value_preview": "sale"
+          },
+          {
+            "name": "window._NEW_RETURN_STATE.items",
+            "kind": "expression",
+            "value_preview": "picked"
+          },
+          {
+            "name": "window._NEW_RETURN_STATE.reason",
+            "kind": "expression",
+            "value_preview": "reason"
+          },
+          {
+            "name": "window._NEW_RETURN_STATE.notes",
+            "kind": "expression",
+            "value_preview": "(notesEl && notesEl.value || '').trim()"
+          },
+          {
+            "name": "window.newReturnSubmit",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window._retFilterTimer",
+            "kind": "expression",
+            "value_preview": "setTimeout(loadReturns, 300)"
+          },
+          {
+            "name": "window._PROMO_CACHE",
+            "kind": "array",
+            "value_preview": "[]"
+          },
+          {
+            "name": "window._PROMO_TAB",
+            "kind": "string",
+            "value_preview": "'active'"
+          },
+          {
+            "name": "window.loadPromotions",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.togglePromotion",
+            "kind": "expression",
+            "value_preview": "async function (id, newStatus) {"
+          },
+          {
+            "name": "window.submitPromotionForm",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window._POS_COUPON",
+            "kind": "null",
+            "value_preview": "null"
+          },
+          {
+            "name": "window.applyCouponToCart",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.renderCart",
+            "kind": "expression",
+            "value_preview": "== 'function') window.renderCart()"
+          },
+          {
+            "name": "window.updateTotal",
+            "kind": "expression",
+            "value_preview": "== 'function') window.updateTotal()"
+          },
+          {
+            "name": "window._promoSearchTimer",
+            "kind": "expression",
+            "value_preview": "setTimeout(function () { renderPromotionsTable(window._PROMO"
+          },
+          {
+            "name": "window._QUO_CACHE",
+            "kind": "array",
+            "value_preview": "[]"
+          },
+          {
+            "name": "window.loadQuotations",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.viewEditQuotation",
+            "kind": "expression",
+            "value_preview": "async function (id) {"
+          },
+          {
+            "name": "window.printQuotation",
+            "kind": "expression",
+            "value_preview": "async function (id) {"
+          },
+          {
+            "name": "window._NEW_QUO_STATE",
+            "kind": "object",
+            "value_preview": "{ customer: null, items: [], validity_days: 7, notes: '' }"
+          },
+          {
+            "name": "window._nqCustTimer",
+            "kind": "expression",
+            "value_preview": "setTimeout(newQuoSearchCustomer, 250)"
+          },
+          {
+            "name": "window.newQuoSearchCustomer",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window._NEW_QUO_STATE.customer",
+            "kind": "expression",
+            "value_preview": "c"
+          },
+          {
+            "name": "window.newQuoSearchProduct",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.submitNewQuotation",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window._quoFilterTimer",
+            "kind": "expression",
+            "value_preview": "setTimeout(loadQuotations, 300)"
+          },
+          {
+            "name": "window.showScreen",
+            "kind": "expression",
+            "value_preview": "wrapped"
+          },
+          {
+            "name": "window.launchOnboarding",
+            "kind": "expression",
+            "value_preview": "window.startOnboarding"
+          },
+          {
+            "name": "window.startTour",
+            "kind": "expression",
+            "value_preview": "window.startOnboarding"
+          },
+          {
+            "name": "window.showOnboarding",
+            "kind": "expression",
+            "value_preview": "window.startOnboarding"
+          },
+          {
+            "name": "window.runSaleSearch",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.openSaleDetail",
+            "kind": "expression",
+            "value_preview": "async function (saleId) {"
+          },
+          {
+            "name": "window.submitLateInvoice",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.submitCfdiCancel",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.submitCfdiRefacturar",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window._vlxIsManager",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.__volvixPayVerified",
+            "kind": "boolean",
+            "value_preview": "false"
+          },
+          {
+            "name": "window.__volvixPayVerification",
+            "kind": "null",
+            "value_preview": "null"
+          },
+          {
+            "name": "window.__vlxPayVerifyApprove",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.__volvixAppPayConfirmed",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.kardexLoad",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.proveedoresLoad",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.cfdiLoad",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.depsLoad",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.bulkApply",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.healthLoad",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.__vlxDeferredPwaPrompt",
+            "kind": "expression",
+            "value_preview": "e"
+          },
+          {
+            "name": "window.openPayment",
+            "kind": "expression",
+            "value_preview": "== 'function') { try { window.openPayment()"
+          },
+          {
+            "name": "window.openSearch",
+            "kind": "expression",
+            "value_preview": "== 'function') { try { window.openSearch()"
+          },
+          {
+            "name": "window.openCustomerSelector",
+            "kind": "expression",
+            "value_preview": "== 'function') { try { window.openCustomerSelector()"
+          },
+          {
+            "name": "window.searchProduct",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.__INV_allProducts__",
+            "kind": "expression",
+            "value_preview": "allProducts"
+          },
+          {
+            "name": "window.renderInv",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.renderQuickPick",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.exportProductsCSV",
+            "kind": "expression",
+            "value_preview": "== 'function') { try { return window.exportProductsCSV()"
+          },
+          {
+            "name": "window.loadProductsFromAPI",
+            "kind": "expression",
+            "value_preview": "== 'function') { try { await window.loadProductsFromAPI()"
+          },
+          {
+            "name": "window.openNuevo",
+            "kind": "expression",
+            "value_preview": "openNuevo"
+          },
+          {
+            "name": "window.openEditar",
+            "kind": "expression",
+            "value_preview": "openEditar"
+          },
+          {
+            "name": "window.guardarProducto",
+            "kind": "expression",
+            "value_preview": "guardarProducto"
+          },
+          {
+            "name": "window.openAjuste",
+            "kind": "expression",
+            "value_preview": "openAjuste"
+          },
+          {
+            "name": "window.calcResultante",
+            "kind": "expression",
+            "value_preview": "calcResultante"
+          },
+          {
+            "name": "window.guardarAjuste",
+            "kind": "expression",
+            "value_preview": "guardarAjuste"
+          },
+          {
+            "name": "window.recalcStockBadge",
+            "kind": "expression",
+            "value_preview": "recalcStockBadge"
+          },
+          {
+            "name": "window.updateMargen",
+            "kind": "expression",
+            "value_preview": "updateMargen"
+          },
+          {
+            "name": "window.genEAN",
+            "kind": "expression",
+            "value_preview": "genEAN"
+          },
+          {
+            "name": "window.onBarcodeLookup",
+            "kind": "expression",
+            "value_preview": "onBarcodeLookup"
+          },
+          {
+            "name": "window.lookupBarcode",
+            "kind": "expression",
+            "value_preview": "lookupBarcode"
+          },
+          {
+            "name": "window.openImport",
+            "kind": "expression",
+            "value_preview": "openImport"
+          },
+          {
+            "name": "window.previewCSV",
+            "kind": "expression",
+            "value_preview": "previewCSV"
+          },
+          {
+            "name": "window.importarCSV",
+            "kind": "expression",
+            "value_preview": "importarCSV"
+          },
+          {
+            "name": "window.downloadTemplate",
+            "kind": "expression",
+            "value_preview": "downloadTemplate"
+          },
+          {
+            "name": "window.exportCSV",
+            "kind": "expression",
+            "value_preview": "exportCSVInv"
+          },
+          {
+            "name": "window.seedFromGiro",
+            "kind": "expression",
+            "value_preview": "seedFromGiro"
+          },
+          {
+            "name": "window.openInvModal",
+            "kind": "expression",
+            "value_preview": "openInvModal"
+          },
+          {
+            "name": "window.closeInvModal",
+            "kind": "expression",
+            "value_preview": "closeInvModal"
+          },
+          {
+            "name": "window.filaApp",
+            "kind": "expression",
+            "value_preview": "filaApp"
+          },
+          {
+            "name": "window.ingApp",
+            "kind": "expression",
+            "value_preview": "ingApp"
+          },
+          {
+            "name": "window.menuApp",
+            "kind": "expression",
+            "value_preview": "menuApp"
+          },
+          {
+            "name": "window.mktApp",
+            "kind": "expression",
+            "value_preview": "mktApp"
+          },
+          {
+            "name": "window.planApp",
+            "kind": "expression",
+            "value_preview": "planApp"
+          },
+          {
+            "name": "window.RentasUI",
+            "kind": "expression",
+            "value_preview": "RentasUI"
+          },
+          {
+            "name": "window.ReservacionesUI",
+            "kind": "expression",
+            "value_preview": "ReservacionesUI"
+          },
+          {
+            "name": "window.MapaUI",
+            "kind": "expression",
+            "value_preview": "MapaUI"
+          }
+        ],
+        "function_assignments": [
+          "window.fetch",
+          "window.__vlxResendVerify",
+          "window.__impLogReader",
+          "window.toggleVista",
+          "window.r8aOpenManualSearch",
+          "window.__r10aAuditDoubleClick",
+          "window.r10aOpenFindSale",
+          "window.vlxBtSavePrefs",
+          "window.vlxTicketPreview",
+          "window.vlxPrinterTypeChange",
+          "window.vlxPerifTab",
+          "window.vlxPerifSave",
+          "window.vlxScaleRead",
+          "window.vlxFpEnroll",
+          "window.vlxFpVerify",
+          "window.vlxRoutingAdd",
+          "window.vlxRoutingSave",
+          "window.updateCloseCount",
+          "window.showScreen",
+          "window.togglePriceTier",
+          "window.openCatalogPanel",
+          "window.openVisualCatalog",
+          "window.openChangePriceModal",
+          "window.openCustomerSelector",
+          "window.printDashboardSummary",
+          "window.openHistorialDateFilter",
+          "window.applyHistorialFilter",
+          "window._vlxFormatDate",
+          "window._vlxFormatDateTime",
+          "window._vlxFormatMoney",
+          "window._vlxIsManager",
+          "window._vlxOpenModal",
+          "window._vlxOnEscapeOnce",
+          "window._vlxCloseModal",
+          "window._vlxConfirmDestructive",
+          "window.exportReturnsCSV",
+          "window.openRejectReturnModal",
+          "window.onload",
+          "window.openNewReturnModal",
+          "window.renderNewReturnStep",
+          "window.newReturnNext",
+          "window.showPromoTab",
+          "window.exportPromotionsCSV",
+          "window.deletePromotion",
+          "window.openNewPromotionModal",
+          "window.editPromotion",
+          "window.clearCouponFromCart",
+          "window.exportQuotationsCSV",
+          "window.openSendQuotationModal",
+          "window.convertQuotationToSale",
+          "window.openNewQuotationModal",
+          "window.newQuoSelectCustomer",
+          "window.newQuoAddProduct",
+          "window.newQuoUpdateQty",
+          "window.newQuoUpdatePrice",
+          "window.newQuoRemove",
+          "window.startOnboarding",
+          "window.openSaleSearchModal",
+          "window.clearSaleSearch",
+          "window.reprintSale",
+          "window.openLateInvoice",
+          "window.openCfdiCancel",
+          "window.openCfdiRefacturar",
+          "window.closeModal",
+          "window.__vlxOpenPayVerifyModal",
+          "window.__vlxClosePayVerifyModal",
+          "window.__vlxPayVerifyRecalc",
+          "window.__vlxPayVerifyReject",
+          "window.__vlxOpenAppPayModal",
+          "window.__vlxAppPayManagerConfirm",
+          "window.__vlxAppPayCancel",
+          "window.kardexExportCSV",
+          "window.provTab",
+          "window.proveedorNuevo",
+          "window.proveedorEdit",
+          "window.ordenCompraNueva",
+          "window.cfdiNueva",
+          "window.cfdiOnboard",
+          "window.cfdiPDF",
+          "window.cfdiCancel",
+          "window.recargaCarrier",
+          "window.recargasHistorial",
+          "window.recargasHealth",
+          "window.servicioPagar",
+          "window.serviciosHistorial",
+          "window.depNuevo",
+          "window.depEdit",
+          "window.bulkPreview",
+          "window.installPWAPrompt",
+          "window.ayudaSeccion",
+          "window.ayudaContacto",
+          "window.voxToggle",
+          "window.vlxToggleTours",
+          "window.vlxTogglePin",
+          "window.vlxPrinterSaveConfig",
+          "window.vlxPrinterBtConnect",
+          "window.vlxPrinterUsbConnect",
+          "window.vlxPrinterNetTest",
+          "window.vlxPrinterTestPrint",
+          "window.showCfg",
+          "window.print"
+        ],
+        "total": 188
+      }
+    },
+    "paneldecontrol": {
+      "file": "public/paneldecontrol.html",
+      "title": "SalvadoreX · Punto de Venta",
+      "size_bytes": 462073,
+      "lines": 9097,
+      "last_modified": "2026-05-14T21:28:22.000Z",
+      "screens": [
+        "inventario"
+      ],
+      "config_tabs": [],
+      "perm_tabs": [
+        "perm-tab-audit",
+        "perm-tab-feats",
+        "perm-tab-hierarchy",
+        "perm-tab-mods",
+        "perm-tab-users"
+      ],
+      "modals": [],
+      "buttons": [
+        {
+          "id": "btn_pdc_cargar_productos",
+          "label": "Cargar productos",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc_continuar",
+          "label": "Continuar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc_cerrar",
+          "label": "Cerrar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__m_dulos_23",
+          "label": "📦 Módulos 23",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__giros_37",
+          "label": "🎯 Giros 37",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__usuarios",
+          "label": "👤 Usuarios",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__audit_log",
+          "label": "📜 Audit log",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__versiones",
+          "label": "📲 Versiones",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__features",
+          "label": "🎛️ Features",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__",
+          "label": "🔄",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__setup_default",
+          "label": "⚡ Setup Default",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__override",
+          "label": "+ Override",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__descartar",
+          "label": "❌ Descartar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__guardar",
+          "label": "💾 Guardar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__refrescar",
+          "label": "🔄 Refrescar",
+          "handler": "vlxVersionsRefresh()",
+          "calls": "vlxVersionsRefresh",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__notificar_desactualizado",
+          "label": "📣 Notificar desactualizados",
+          "handler": "vlxVersionsNotifyAll()",
+          "calls": "vlxVersionsNotifyAll",
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__comp_",
+          "label": "🌳 Comp.",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__deps",
+          "label": "🔗 Deps",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__considera",
+          "label": "💡 Considera",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__desktop",
+          "label": "🖥 Desktop",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__m_vil",
+          "label": "📱 Móvil",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__ambos",
+          "label": "📊 Ambos",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc_m_dulos",
+          "label": "Módulos",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc_botones",
+          "label": "Botones",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc_override",
+          "label": "Override",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc_jerarqu_a",
+          "label": "Jerarquía",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc_audit",
+          "label": "Audit",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__on_on_off_",
+          "label": "' + (on ? 'ON' : 'OFF') + '",
+          "handler": "window.PERM.toggleModule(\\'' + k + '\\')",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__",
+          "label": "🗑️",
+          "handler": "window.PERM.removeOverride(\\'' + it.email + '\\',\\'' + it.featKey + '\\')",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__nuevo_giro",
+          "label": "+ Nuevo Giro",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__guardar_giro",
+          "label": "💾 Guardar Giro",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__eliminar",
+          "label": "🗑 Eliminar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc_aplicar",
+          "label": "Aplicar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__copiar_link",
+          "label": "📋 Copiar link",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__compartir",
+          "label": "📤 Compartir",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__volver_al_preview",
+          "label": "← Volver al preview",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__suspender",
+          "label": "🚫 Suspender",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__reactivar",
+          "label": "✓ Reactivar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__email",
+          "label": "📧 Email",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc_limpiar",
+          "label": "Limpiar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__",
+          "label": "👁",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__",
+          "label": "👁‍🗨",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__",
+          "label": "🖥",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__",
+          "label": "🗑",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__anterior",
+          "label": "‹ Anterior",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc_siguiente_",
+          "label": "Siguiente ›",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc_cancelar",
+          "label": "Cancelar",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__opts_submitlabel_confirm",
+          "label": "' + (opts.submitLabel || 'Confirmar') + '",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__escapetext_cancellabel_",
+          "label": "' + escapeText(cancelLabel) + '",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__escapetext_confirmlabel_",
+          "label": "' + escapeText(confirmLabel) + '",
+          "handler": "",
+          "calls": null,
+          "opens_modal": null,
+          "navigates_to": null
+        },
+        {
+          "id": "btn_pdc__notificar",
+          "label": "📣 Notificar",
+          "handler": "vlxVersionsNotify(\\'' + (r.email||'').replace(/'/g,",
+          "calls": "vlxVersionsNotify",
+          "opens_modal": null,
+          "navigates_to": null
+        }
+      ],
+      "functions": [
+        "INDUSTRY_LABELS",
+        "INDUSTRY_LABELS_FROM_BD",
+        "INDUSTRY_PRODUCT_FIELDS",
+        "INDUSTRY_PROFILES",
+        "INDUSTRY_PROFILES_FROM_BD",
+        "INDUSTRY_SELL_RULES",
+        "INDUSTRY_TERMS",
+        "PERM",
+        "__featuresInit",
+        "__pdc_toast_t",
+        "__permv14_beforeunloadWired",
+        "__vlxPlatform",
+        "__volvixDevMode",
+        "__volvixUserRole",
+        "__volvixWelcomeWizardChecked",
+        "_applyUsersFilters",
+        "_cbCell",
+        "_getRowGiro",
+        "_giroEditOverlay",
+        "_hydratedFromBd",
+        "_inlineRow",
+        "_matchSearch",
+        "_pdcMiniModal",
+        "_pv14ConfirmDelete",
+        "_pv14DoDelete",
+        "_pv14StartRemoteSupport",
+        "_txt",
+        "_wireInlineRow",
+        "addEventListener",
+        "applyIndustryTerminology",
+        "applyTenantStatusGuard",
+        "bootstrap",
+        "cellInput",
+        "check",
+        "detectLocalVersion",
+        "doSubmit",
+        "escapeAttr",
+        "escapeHtml",
+        "escapeText",
+        "fetch",
+        "fetchDevices",
+        "fetchGiroCatalog",
+        "fetchHierarchy",
+        "flashSaveIndicator",
+        "fmtLastLogin",
+        "fmtOnlineStatus",
+        "fmtSessionPlatform",
+        "fmtVersions",
+        "getCachedUser",
+        "getCombinedState",
+        "getComputedStyle",
+        "getCurrentRole",
+        "getDemoData",
+        "getGiroFromCatalog",
+        "getModuleLabelsFromCatalog",
+        "getOverridesByEmail",
+        "getToken",
+        "getTotalDirtyCount",
+        "hookVersionTab",
+        "initV14",
+        "isPlatformOwner",
+        "isValidFeatKey",
+        "loadAllCatalogs",
+        "loadFeatures",
+        "loadTenantCountsByGiro",
+        "onFeatToggle",
+        "onModToggle",
+        "open",
+        "patchPerm",
+        "permv14Modal",
+        "refreshBulkBar",
+        "refreshDirtyBadge",
+        "refreshNavCounts",
+        "refreshUserFromServer",
+        "renderConfigPane",
+        "renderGiroDetail",
+        "renderGiroPreview",
+        "renderGirosList",
+        "renderGirosPane",
+        "renderGotchas",
+        "renderModulesList",
+        "renderPreview",
+        "renderUsersUnified",
+        "renderVersionsTable",
+        "reportVersion",
+        "setActiveNav",
+        "shouldRedirectToWizard",
+        "showScreen",
+        "showSetupBanner",
+        "showToast",
+        "showWelcomeBanner",
+        "tToast",
+        "toast",
+        "tryMount",
+        "updateGlobalDirtyBadge",
+        "userTypeFor",
+        "vlxVersionsNotify",
+        "vlxVersionsNotifyAll",
+        "vlxVersionsRefresh",
+        "wireDetailTabs",
+        "wireDeviceTabs",
+        "wireSearch",
+        "wireSidebar",
+        "wireVersionFilters"
+      ],
+      "api_endpoints": [
+        "/api/admin/feature-modules",
+        "/api/admin/features",
+        "/api/admin/features/catalog",
+        "/api/admin/giros",
+        "/api/admin/giros/",
+        "/api/admin/remote-support/request",
+        "/api/admin/setup-defaults",
+        "/api/admin/tenant/",
+        "/api/admin/tenants",
+        "/api/admin/tenants/",
+        "/api/admin/tenants/bulk",
+        "/api/admin/user-override",
+        "/api/admin/user/by-email",
+        "/api/admin/users/",
+        "/api/admin/users/bulk",
+        "/api/admin/users/devices",
+        "/api/admin/users/hierarchy",
+        "/api/admin/users/inline-quick",
+        "/api/app/config",
+        "/api/log/client",
+        "/api/owner/low-stock",
+        "/api/pos/app-orders",
+        "/api/users/me",
+        "/api/version/notify",
+        "/api/version/report",
+        "/api/version/status"
+      ],
+      "supabase_tables": [],
+      "external_refs": [
+        "salvadorex-pos.html",
+        "volvix-onboarding.html"
+      ],
+      "screen_blocks": {
+        "inventario": {
+          "endpoints": [
+            "/api/pos/app-orders",
+            "/api/users/me"
+          ],
+          "modals_opened": [],
+          "onclick_samples": [],
+          "_block_found": false,
+          "_deuda": "no se encontró <section id=\"screen-inventario\">"
+        }
+      },
+      "roles_mencionados": [
+        "superadmin",
+        "owner",
+        "admin",
+        "cajero",
+        "manager",
+        "platform_owner"
+      ],
+      "role_checks_count": 4,
+      "role_checks_distinct": [
+        "superadmin",
+        "owner",
+        "admin"
+      ],
+      "realtime": {
+        "supabase_channels": [],
+        "websockets": [],
+        "event_sources": [],
+        "broadcast_channels": [],
+        "total": 0
+      },
+      "window_state": {
+        "window_vars": [
+          {
+            "name": "window.__volvixUserRole",
+            "kind": "expression",
+            "value_preview": "== 'superadmin' -->"
+          },
+          {
+            "name": "window.__volvixDevMode",
+            "kind": "expression",
+            "value_preview": "devMode"
+          },
+          {
+            "name": "window.__volvixWelcomeWizardChecked",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.location.href",
+            "kind": "string",
+            "value_preview": "'/volvix-onboarding.html'"
+          },
+          {
+            "name": "window.__pdc_toast_t",
+            "kind": "expression",
+            "value_preview": "setTimeout(function(){ bar.style.display='none'"
+          },
+          {
+            "name": "window.__featuresInit",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.INDUSTRY_TERMS",
+            "kind": "expression",
+            "value_preview": "INDUSTRY_TERMS"
+          },
+          {
+            "name": "window.INDUSTRY_PRODUCT_FIELDS",
+            "kind": "expression",
+            "value_preview": "INDUSTRY_PRODUCT_FIELDS"
+          },
+          {
+            "name": "window.INDUSTRY_SELL_RULES",
+            "kind": "expression",
+            "value_preview": "INDUSTRY_SELL_RULES"
+          },
+          {
+            "name": "window.INDUSTRY_PROFILES",
+            "kind": "expression",
+            "value_preview": "INDUSTRY_PROFILES"
+          },
+          {
+            "name": "window.INDUSTRY_LABELS",
+            "kind": "expression",
+            "value_preview": "INDUSTRY_LABELS"
+          },
+          {
+            "name": "window.applyIndustryTerminology",
+            "kind": "expression",
+            "value_preview": "applyIndustryTerminology"
+          },
+          {
+            "name": "window.PERM",
+            "kind": "expression",
+            "value_preview": "PERM"
+          },
+          {
+            "name": "window.__permv14_beforeunloadWired",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.PERM._flagCache",
+            "kind": "expression",
+            "value_preview": "window.PERM._flagCache || {})"
+          },
+          {
+            "name": "window._hydratedFromBd",
+            "kind": "expression",
+            "value_preview": "window._hydratedFromBd || {}"
+          },
+          {
+            "name": "window._giroEditOverlay",
+            "kind": "expression",
+            "value_preview": "window._giroEditOverlay || {}"
+          },
+          {
+            "name": "window.PERM.selectedTid",
+            "kind": "expression",
+            "value_preview": "targetTid"
+          },
+          {
+            "name": "window.PERM.loadTenants",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          },
+          {
+            "name": "window.PERM.renderForTenant",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.PERM._v14Patched",
+            "kind": "boolean",
+            "value_preview": "true"
+          },
+          {
+            "name": "window.INDUSTRY_PROFILES_FROM_BD",
+            "kind": "object",
+            "value_preview": "{}"
+          },
+          {
+            "name": "window.INDUSTRY_LABELS_FROM_BD",
+            "kind": "object",
+            "value_preview": "{}"
+          },
+          {
+            "name": "window.showToast",
+            "kind": "expression",
+            "value_preview": "== 'function') return window.showToast(msg, type)"
+          },
+          {
+            "name": "window.__vlxPlatform",
+            "kind": "expression",
+            "value_preview": "== 'windows' || navigator.userAgent.indexOf('VolvixElectron'"
+          },
+          {
+            "name": "window.vlxVersionsRefresh",
+            "kind": "expression",
+            "value_preview": "async function () {"
+          },
+          {
+            "name": "window.PERM.init",
+            "kind": "expression",
+            "value_preview": "== 'function') {"
+          }
+        ],
+        "function_assignments": [
+          "window.fetch",
+          "window.showToast",
+          "window.showScreen",
+          "window.toast",
+          "window.vlxVersionsNotify",
+          "window.vlxVersionsNotifyAll"
+        ],
+        "total": 27
+      }
+    }
+  },
+  "nodos": [
+    {
+      "id": "mod_pos",
+      "tipo": "modulo",
+      "nombre": "SalvadoreX POS",
+      "archivo": "public/salvadorex-pos.html",
+      "proposito": "Punto de venta operativo. 29 pantallas.",
+      "rol_principal": "cashier / business_owner",
+      "meta": {
+        "lineas": 22919,
+        "screens": 29,
+        "modificado": "2026-05-15T17:42:12.000Z",
+        "roles_detectados": [
+          "superadmin",
+          "owner",
+          "admin",
+          "delivery",
+          "manager",
+          "cajero",
+          "cashier"
+        ],
+        "window_vars": 188,
+        "realtime_channels": 2
+      }
+    },
+    {
+      "id": "mod_pdc_permisos",
+      "tipo": "modulo",
+      "nombre": "Panel de Control · Permisos",
+      "archivo": "public/paneldecontrol.html",
+      "proposito": "Gestión de permisos por tenant. Spin-off de POS (2026-05-12).",
+      "rol_principal": "platform_owner",
+      "meta": {
+        "lineas": 9097,
+        "perm_tabs": 5,
+        "modificado": "2026-05-14T21:28:22.000Z"
+      }
+    },
+    {
+      "id": "screen_pos_actualizador",
+      "tipo": "screen",
+      "nombre": "actualizador",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_apertura",
+      "tipo": "screen",
+      "nombre": "apertura",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_ayuda",
+      "tipo": "screen",
+      "nombre": "ayuda",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_clientes",
+      "tipo": "screen",
+      "nombre": "clientes",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_config",
+      "tipo": "screen",
+      "nombre": "config",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_corte",
+      "tipo": "screen",
+      "nombre": "corte",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_cotizaciones",
+      "tipo": "screen",
+      "nombre": "cotizaciones",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_credito",
+      "tipo": "screen",
+      "nombre": "credito",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_dashboard",
+      "tipo": "screen",
+      "nombre": "dashboard",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_departamentos",
+      "tipo": "screen",
+      "nombre": "departamentos",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_devoluciones",
+      "tipo": "screen",
+      "nombre": "devoluciones",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_facturacion",
+      "tipo": "screen",
+      "nombre": "facturacion",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_inventario",
+      "tipo": "screen",
+      "nombre": "inventario",
+      "parent": "mod_pos",
+      "endpoints_propios": [
+        "/api/admin/tenants"
+      ],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_kardex",
+      "tipo": "screen",
+      "nombre": "kardex",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_mapa",
+      "tipo": "screen",
+      "nombre": "mapa",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_mobile-apps",
+      "tipo": "screen",
+      "nombre": "mobile-apps",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_perfil",
+      "tipo": "screen",
+      "nombre": "perfil",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_pos",
+      "tipo": "screen",
+      "nombre": "pos",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_promociones",
+      "tipo": "screen",
+      "nombre": "promociones",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_proveedores",
+      "tipo": "screen",
+      "nombre": "proveedores",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_quickpos",
+      "tipo": "screen",
+      "nombre": "quickpos",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_recargas",
+      "tipo": "screen",
+      "nombre": "recargas",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_rentas",
+      "tipo": "screen",
+      "nombre": "rentas",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_reportes",
+      "tipo": "screen",
+      "nombre": "reportes",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_reservaciones",
+      "tipo": "screen",
+      "nombre": "reservaciones",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_salud",
+      "tipo": "screen",
+      "nombre": "salud",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_servicios",
+      "tipo": "screen",
+      "nombre": "servicios",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_usuarios",
+      "tipo": "screen",
+      "nombre": "usuarios",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "screen_pos_ventas",
+      "tipo": "screen",
+      "nombre": "ventas",
+      "parent": "mod_pos",
+      "endpoints_propios": [],
+      "modals_abiertos": [],
+      "_block_found": true
+    },
+    {
+      "id": "cfg_general",
+      "tipo": "cfg_tab",
+      "nombre": "Config · general",
+      "parent": "screen_pos_config"
+    },
+    {
+      "id": "cfg_impresion",
+      "tipo": "cfg_tab",
+      "nombre": "Config · impresion",
+      "parent": "screen_pos_config"
+    },
+    {
+      "id": "cfg_impuestos",
+      "tipo": "cfg_tab",
+      "nombre": "Config · impuestos",
+      "parent": "screen_pos_config"
+    },
+    {
+      "id": "cfg_licencia",
+      "tipo": "cfg_tab",
+      "nombre": "Config · licencia",
+      "parent": "screen_pos_config"
+    },
+    {
+      "id": "cfg_modulos",
+      "tipo": "cfg_tab",
+      "nombre": "Config · modulos",
+      "parent": "screen_pos_config"
+    },
+    {
+      "id": "cfg_negocio",
+      "tipo": "cfg_tab",
+      "nombre": "Config · negocio",
+      "parent": "screen_pos_config"
+    },
+    {
+      "id": "cfg_pwa",
+      "tipo": "cfg_tab",
+      "nombre": "Config · pwa",
+      "parent": "screen_pos_config"
+    },
+    {
+      "id": "cfg_sync",
+      "tipo": "cfg_tab",
+      "nombre": "Config · sync",
+      "parent": "screen_pos_config"
+    },
+    {
+      "id": "cfg_vista",
+      "tipo": "cfg_tab",
+      "nombre": "Config · vista",
+      "parent": "screen_pos_config"
+    },
+    {
+      "id": "pdctab_audit",
+      "tipo": "pdc_tab",
+      "nombre": "Permisos · audit",
+      "parent": "mod_pdc_permisos"
+    },
+    {
+      "id": "pdctab_feats",
+      "tipo": "pdc_tab",
+      "nombre": "Permisos · feats",
+      "parent": "mod_pdc_permisos"
+    },
+    {
+      "id": "pdctab_hierarchy",
+      "tipo": "pdc_tab",
+      "nombre": "Permisos · hierarchy",
+      "parent": "mod_pdc_permisos"
+    },
+    {
+      "id": "pdctab_mods",
+      "tipo": "pdc_tab",
+      "nombre": "Permisos · mods",
+      "parent": "mod_pdc_permisos"
+    },
+    {
+      "id": "pdctab_users",
+      "tipo": "pdc_tab",
+      "nombre": "Permisos · users",
+      "parent": "mod_pdc_permisos"
+    },
+    {
+      "id": "modal_pos_app-pay",
+      "tipo": "modal",
+      "nombre": "app-pay",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "modal_pos_calc",
+      "tipo": "modal",
+      "nombre": "calc",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "modal_pos_cash",
+      "tipo": "modal",
+      "nombre": "cash",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "modal_pos_cfdi-cancel",
+      "tipo": "modal",
+      "nombre": "cfdi-cancel",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "modal_pos_cfdi-refacturar",
+      "tipo": "modal",
+      "nombre": "cfdi-refacturar",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "modal_pos_granel",
+      "tipo": "modal",
+      "nombre": "granel",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "modal_pos_late-invoice",
+      "tipo": "modal",
+      "nombre": "late-invoice",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "modal_pos_pay",
+      "tipo": "modal",
+      "nombre": "pay",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "modal_pos_pay-confirm",
+      "tipo": "modal",
+      "nombre": "pay-confirm",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "modal_pos_pay-verify",
+      "tipo": "modal",
+      "nombre": "pay-verify",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "modal_pos_sale-detail",
+      "tipo": "modal",
+      "nombre": "sale-detail",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "modal_pos_sale-search",
+      "tipo": "modal",
+      "nombre": "sale-search",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "modal_pos_search",
+      "tipo": "modal",
+      "nombre": "search",
+      "parent": "mod_pos"
+    },
+    {
+      "id": "api__api_admin_backup_trigger",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/backup/trigger",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_app_branding",
+      "tipo": "endpoint",
+      "nombre": "/api/app/branding",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_app_branding_",
+      "tipo": "endpoint",
+      "nombre": "/api/app/branding.",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_app_media",
+      "tipo": "endpoint",
+      "nombre": "/api/app/media",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_app_media_",
+      "tipo": "endpoint",
+      "nombre": "/api/app/media/",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_audit_manual_search",
+      "tipo": "endpoint",
+      "nombre": "/api/audit/manual-search",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_auth_heartbeat",
+      "tipo": "endpoint",
+      "nombre": "/api/auth/heartbeat",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_auth_resend_verify",
+      "tipo": "endpoint",
+      "nombre": "/api/auth/resend-verify",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_auth_session_config",
+      "tipo": "endpoint",
+      "nombre": "/api/auth/session-config",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_auth_sessions_revoke",
+      "tipo": "endpoint",
+      "nombre": "/api/auth/sessions/revoke",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_barcode_lookup",
+      "tipo": "endpoint",
+      "nombre": "/api/barcode-lookup",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_business_plan",
+      "tipo": "endpoint",
+      "nombre": "/api/business-plan",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_cart_draft",
+      "tipo": "endpoint",
+      "nombre": "/api/cart/draft",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_cart_draft_",
+      "tipo": "endpoint",
+      "nombre": "/api/cart/draft.",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_cart_draft_clear",
+      "tipo": "endpoint",
+      "nombre": "/api/cart/draft/clear",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_customers",
+      "tipo": "endpoint",
+      "nombre": "/api/customers",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_cuts",
+      "tipo": "endpoint",
+      "nombre": "/api/cuts",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_cuts_",
+      "tipo": "endpoint",
+      "nombre": "/api/cuts/",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_cuts_close",
+      "tipo": "endpoint",
+      "nombre": "/api/cuts/close",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_cuts_open",
+      "tipo": "endpoint",
+      "nombre": "/api/cuts/open",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_dashboard_today",
+      "tipo": "endpoint",
+      "nombre": "/api/dashboard/today",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_drawer_log",
+      "tipo": "endpoint",
+      "nombre": "/api/drawer/log",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_drawer_manual_open",
+      "tipo": "endpoint",
+      "nombre": "/api/drawer/manual-open",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_events_poll",
+      "tipo": "endpoint",
+      "nombre": "/api/events/poll",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_facturama_cancel_",
+      "tipo": "endpoint",
+      "nombre": "/api/facturama/cancel/",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_facturama_credentials",
+      "tipo": "endpoint",
+      "nombre": "/api/facturama/credentials",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_facturama_invoice_",
+      "tipo": "endpoint",
+      "nombre": "/api/facturama/invoice/",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_facturama_invoices",
+      "tipo": "endpoint",
+      "nombre": "/api/facturama/invoices",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_giro_config",
+      "tipo": "endpoint",
+      "nombre": "/api/giro/config",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_ingredientes",
+      "tipo": "endpoint",
+      "nombre": "/api/ingredientes",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_ingredientes_",
+      "tipo": "endpoint",
+      "nombre": "/api/ingredientes/",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_inventory_counts_",
+      "tipo": "endpoint",
+      "nombre": "/api/inventory-counts/",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_inventory_counts_start",
+      "tipo": "endpoint",
+      "nombre": "/api/inventory-counts/start",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_inventory_movements",
+      "tipo": "endpoint",
+      "nombre": "/api/inventory-movements",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_inventory_alerts",
+      "tipo": "endpoint",
+      "nombre": "/api/inventory/alerts",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_inventory_bulk_adjust",
+      "tipo": "endpoint",
+      "nombre": "/api/inventory/bulk-adjust",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_inventory_dedupe",
+      "tipo": "endpoint",
+      "nombre": "/api/inventory/dedupe",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_inventory_duplicates",
+      "tipo": "endpoint",
+      "nombre": "/api/inventory/duplicates",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_inventory_movements",
+      "tipo": "endpoint",
+      "nombre": "/api/inventory/movements",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_labels_print",
+      "tipo": "endpoint",
+      "nombre": "/api/labels/print",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_login",
+      "tipo": "endpoint",
+      "nombre": "/api/login",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_logout",
+      "tipo": "endpoint",
+      "nombre": "/api/logout",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_marketing_generar_post",
+      "tipo": "endpoint",
+      "nombre": "/api/marketing/generar-post",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_marketing_posts",
+      "tipo": "endpoint",
+      "nombre": "/api/marketing/posts",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_menu_digital",
+      "tipo": "endpoint",
+      "nombre": "/api/menu-digital",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_menu_digital_",
+      "tipo": "endpoint",
+      "nombre": "/api/menu-digital/",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_menu_digital_digitalize",
+      "tipo": "endpoint",
+      "nombre": "/api/menu-digital/digitalize",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_notifications",
+      "tipo": "endpoint",
+      "nombre": "/api/notifications",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_notifications_",
+      "tipo": "endpoint",
+      "nombre": "/api/notifications/",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_notifications_read_all",
+      "tipo": "endpoint",
+      "nombre": "/api/notifications/read-all",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_owner_products_lookup",
+      "tipo": "endpoint",
+      "nombre": "/api/owner/products/lookup",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_payments_check_pending_",
+      "tipo": "endpoint",
+      "nombre": "/api/payments/check-pending/",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_payments_health",
+      "tipo": "endpoint",
+      "nombre": "/api/payments/health",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_payments_pending",
+      "tipo": "endpoint",
+      "nombre": "/api/payments/pending",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_payments_poll_external",
+      "tipo": "endpoint",
+      "nombre": "/api/payments/poll-external",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_payments_poll_external_",
+      "tipo": "endpoint",
+      "nombre": "/api/payments/poll-external/",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_payments_verify_pending",
+      "tipo": "endpoint",
+      "nombre": "/api/payments/verify/pending",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_print_log_paper_status",
+      "tipo": "endpoint",
+      "nombre": "/api/print-log/paper-status",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_print_queue",
+      "tipo": "endpoint",
+      "nombre": "/api/print-queue",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_print_queue_",
+      "tipo": "endpoint",
+      "nombre": "/api/print-queue/",
+      "exclusivo": "POS"
+    },
+    {
+      "id": "api__api_admin_feature_modules",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/feature-modules",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_features",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/features",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_features_catalog",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/features/catalog",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_giros",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/giros",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_remote_support_request",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/remote-support/request",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_setup_defaults",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/setup-defaults",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_tenants_",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/tenants/",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_tenants_bulk",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/tenants/bulk",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_user_override",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/user-override",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_user_by_email",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/user/by-email",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_users_",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/users/",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_users_bulk",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/users/bulk",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_users_devices",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/users/devices",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_users_hierarchy",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/users/hierarchy",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_users_inline_quick",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/users/inline-quick",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_version_notify",
+      "tipo": "endpoint",
+      "nombre": "/api/version/notify",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_version_report",
+      "tipo": "endpoint",
+      "nombre": "/api/version/report",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_version_status",
+      "tipo": "endpoint",
+      "nombre": "/api/version/status",
+      "exclusivo": "PDC"
+    },
+    {
+      "id": "api__api_admin_giros_",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/giros/",
+      "exclusivo": "compartido"
+    },
+    {
+      "id": "api__api_admin_tenant_",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/tenant/",
+      "exclusivo": "compartido"
+    },
+    {
+      "id": "api__api_admin_tenants",
+      "tipo": "endpoint",
+      "nombre": "/api/admin/tenants",
+      "exclusivo": "compartido"
+    },
+    {
+      "id": "api__api_app_config",
+      "tipo": "endpoint",
+      "nombre": "/api/app/config",
+      "exclusivo": "compartido"
+    },
+    {
+      "id": "api__api_log_client",
+      "tipo": "endpoint",
+      "nombre": "/api/log/client",
+      "exclusivo": "compartido"
+    },
+    {
+      "id": "api__api_owner_low_stock",
+      "tipo": "endpoint",
+      "nombre": "/api/owner/low-stock",
+      "exclusivo": "compartido"
+    },
+    {
+      "id": "api__api_pos_app_orders",
+      "tipo": "endpoint",
+      "nombre": "/api/pos/app-orders",
+      "exclusivo": "compartido"
+    },
+    {
+      "id": "api__api_users_me",
+      "tipo": "endpoint",
+      "nombre": "/api/users/me",
+      "exclusivo": "compartido"
+    }
+  ],
+  "relaciones": [
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_actualizador",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_apertura",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_ayuda",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_clientes",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_config",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_corte",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_cotizaciones",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_credito",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_dashboard",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_departamentos",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_devoluciones",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_facturacion",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_inventario",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_kardex",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_mapa",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_mobile-apps",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_perfil",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_pos",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_promociones",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_proveedores",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_quickpos",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_recargas",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_rentas",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_reportes",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_reservaciones",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_salud",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_servicios",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_usuarios",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "screen_pos_ventas",
+      "verb": "contiene"
+    },
+    {
+      "from": "screen_pos_config",
+      "to": "cfg_general",
+      "verb": "contiene"
+    },
+    {
+      "from": "screen_pos_config",
+      "to": "cfg_impresion",
+      "verb": "contiene"
+    },
+    {
+      "from": "screen_pos_config",
+      "to": "cfg_impuestos",
+      "verb": "contiene"
+    },
+    {
+      "from": "screen_pos_config",
+      "to": "cfg_licencia",
+      "verb": "contiene"
+    },
+    {
+      "from": "screen_pos_config",
+      "to": "cfg_modulos",
+      "verb": "contiene"
+    },
+    {
+      "from": "screen_pos_config",
+      "to": "cfg_negocio",
+      "verb": "contiene"
+    },
+    {
+      "from": "screen_pos_config",
+      "to": "cfg_pwa",
+      "verb": "contiene"
+    },
+    {
+      "from": "screen_pos_config",
+      "to": "cfg_sync",
+      "verb": "contiene"
+    },
+    {
+      "from": "screen_pos_config",
+      "to": "cfg_vista",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "pdctab_audit",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "pdctab_feats",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "pdctab_hierarchy",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "pdctab_mods",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "pdctab_users",
+      "verb": "contiene"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_app-pay",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_calc",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_cash",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_cfdi-cancel",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_cfdi-refacturar",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_granel",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_late-invoice",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_pay",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_pay-confirm",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_pay-verify",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_sale-detail",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_sale-search",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "mod_pos",
+      "to": "modal_pos_search",
+      "verb": "contiene_modal"
+    },
+    {
+      "from": "btn_pos_live_sync",
+      "to": "screen_pos_salud",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('salud')"
+    },
+    {
+      "from": "btn_pos_ad",
+      "to": "screen_pos_perfil",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('perfil')"
+    },
+    {
+      "from": "btn_pos_ayuda",
+      "to": "screen_pos_ayuda",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('ayuda')"
+    },
+    {
+      "from": "btn_pos__vender",
+      "to": "screen_pos_pos",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('pos')"
+    },
+    {
+      "from": "btn_pos__inventario",
+      "to": "screen_pos_inventario",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('inventario')"
+    },
+    {
+      "from": "btn_pos__reportes",
+      "to": "screen_pos_reportes",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('reportes')"
+    },
+    {
+      "from": "btn_pos__devoluciones",
+      "to": "screen_pos_devoluciones",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('devoluciones')"
+    },
+    {
+      "from": "btn_pos__corte",
+      "to": "screen_pos_corte",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('corte')"
+    },
+    {
+      "from": "btn_pos__clientes",
+      "to": "screen_pos_clientes",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('clientes')"
+    },
+    {
+      "from": "btn_pos__config",
+      "to": "screen_pos_config",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('config')"
+    },
+    {
+      "from": "btn_pos__cr_ditos",
+      "to": "screen_pos_credito",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('credito')"
+    },
+    {
+      "from": "btn_pos__kardex",
+      "to": "screen_pos_kardex",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('kardex')"
+    },
+    {
+      "from": "btn_pos__proveedores",
+      "to": "screen_pos_proveedores",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('proveedores')"
+    },
+    {
+      "from": "btn_pos__facturas",
+      "to": "screen_pos_facturacion",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('facturacion')"
+    },
+    {
+      "from": "btn_pos__historial",
+      "to": "screen_pos_ventas",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('ventas')"
+    },
+    {
+      "from": "btn_pos__usuarios",
+      "to": "screen_pos_usuarios",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('usuarios')"
+    },
+    {
+      "from": "btn_pos__dashboard",
+      "to": "screen_pos_dashboard",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('dashboard')"
+    },
+    {
+      "from": "btn_pos__apertura",
+      "to": "screen_pos_apertura",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('apertura')"
+    },
+    {
+      "from": "btn_pos__cotizaciones",
+      "to": "screen_pos_cotizaciones",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('cotizaciones')"
+    },
+    {
+      "from": "btn_pos__recargas",
+      "to": "screen_pos_recargas",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('recargas')"
+    },
+    {
+      "from": "btn_pos__servicios",
+      "to": "screen_pos_servicios",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('servicios')"
+    },
+    {
+      "from": "btn_pos__promos",
+      "to": "screen_pos_promociones",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('promociones')"
+    },
+    {
+      "from": "btn_pos__depto_",
+      "to": "screen_pos_departamentos",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('departamentos')"
+    },
+    {
+      "from": "btn_pos__actualizar",
+      "to": "screen_pos_actualizador",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('actualizador')"
+    },
+    {
+      "from": "btn_pos__rentas",
+      "to": "screen_pos_rentas",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('rentas')"
+    },
+    {
+      "from": "btn_pos__reservas",
+      "to": "screen_pos_reservaciones",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('reservaciones')"
+    },
+    {
+      "from": "btn_pos__mapa",
+      "to": "screen_pos_mapa",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('mapa')"
+    },
+    {
+      "from": "btn_pos_ventas_del_d_a_y_devoluci",
+      "to": "screen_pos_ventas",
+      "verb": "navega_a_screen",
+      "contexto": "showScreen('ventas')"
+    },
+    {
+      "from": "btn_pos__m_s",
+      "to": "modal_pos_mas-modulos",
+      "verb": "abre_modal",
+      "contexto": "openMasModulos()"
+    },
+    {
+      "from": "btn_pos_ins_varios",
+      "to": "modal_pos_varios",
+      "verb": "abre_modal",
+      "contexto": "openVarios()"
+    },
+    {
+      "from": "btn_pos_f10_buscar",
+      "to": "modal_pos_search",
+      "verb": "abre_modal",
+      "contexto": "openSearch()"
+    },
+    {
+      "from": "btn_pos__cat_logo",
+      "to": "modal_pos_visual-catalog",
+      "verb": "abre_modal",
+      "contexto": "openVisualCatalog()"
+    },
+    {
+      "from": "btn_pos__granel",
+      "to": "modal_pos_granel",
+      "verb": "abre_modal",
+      "contexto": "openGranel()"
+    },
+    {
+      "from": "btn_pos__calc",
+      "to": "modal_pos_calc",
+      "verb": "abre_modal",
+      "contexto": "openCalc()"
+    },
+    {
+      "from": "btn_pos_f5_cambiar",
+      "to": "modal_pos_change-price",
+      "verb": "abre_modal",
+      "contexto": "openChangePriceModal()"
+    },
+    {
+      "from": "btn_pos_asignar_cliente",
+      "to": "modal_pos_customer-selector",
+      "verb": "abre_modal",
+      "contexto": "openCustomerSelector()"
+    },
+    {
+      "from": "btn_pos_f12_cobrar",
+      "to": "modal_pos_payment",
+      "verb": "abre_modal",
+      "contexto": "openPayment()"
+    },
+    {
+      "from": "btn_pos_iniciar_sesi_n",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "handleLogin"
+    },
+    {
+      "from": "btn_pos__3",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "openNotificationsPanel"
+    },
+    {
+      "from": "btn_pos_cola_0",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "r10aOpenPrintQueue"
+    },
+    {
+      "from": "btn_pos_pendientes_0",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "r10aOpenPendingPay"
+    },
+    {
+      "from": "btn_pos_voz",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "voxToggle"
+    },
+    {
+      "from": "btn_pos__saas",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "openOwnerPanel"
+    },
+    {
+      "from": "btn_pos_salir",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "doLogout"
+    },
+    {
+      "from": "btn_pos__tarjetas",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "showLocked"
+    },
+    {
+      "from": "btn_pos__sugeridas",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "showLocked"
+    },
+    {
+      "from": "btn_pos_vista_",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "toggleVista"
+    },
+    {
+      "from": "btn_pos_enter_agregar_producto",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "searchProduct"
+    },
+    {
+      "from": "btn_pos_ctrl_p_art_com_n",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "addCommonProduct"
+    },
+    {
+      "from": "btn_pos_f11_mayoreo",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "togglePriceTier"
+    },
+    {
+      "from": "btn_pos_f7_entradas",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "cashIn"
+    },
+    {
+      "from": "btn_pos_f8_salidas",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "cashOut"
+    },
+    {
+      "from": "btn_pos_del_borrar_art_",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "deleteCartItem"
+    },
+    {
+      "from": "btn_pos_f9_verificador",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "priceChecker"
+    },
+    {
+      "from": "btn_pos__panel",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "openCatalogPanel"
+    },
+    {
+      "from": "btn_pos__descuento",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "applyDiscount"
+    },
+    {
+      "from": "btn_pos__nuevo",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "newTicket"
+    },
+    {
+      "from": "btn_pos_f6_pendiente",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "savePendingSale"
+    },
+    {
+      "from": "btn_pos_eliminar",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "clearCart"
+    },
+    {
+      "from": "btn_pos_aplicar",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "applyCouponToCart"
+    },
+    {
+      "from": "btn_pos__quitar",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "clearCouponFromCart"
+    },
+    {
+      "from": "btn_pos_reimprimir_ltimo_ticket",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "reimprimirUltimoTicket"
+    },
+    {
+      "from": "btn_pos_enviar_a_impresora",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "enviarAImpresora"
+    },
+    {
+      "from": "btn_pos__exportar",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "exportDashboardCSV"
+    },
+    {
+      "from": "btn_pos__imprimir_resumen",
+      "to": "mod_pos",
+      "verb": "llama_funcion",
+      "contexto": "printDashboardSummary"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_admin_backup_trigger",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_app_branding",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_app_branding_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_app_media",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_app_media_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_audit_manual_search",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_auth_heartbeat",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_auth_resend_verify",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_auth_session_config",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_auth_sessions_revoke",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_barcode_lookup",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_business_plan",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_cart_draft",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_cart_draft_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_cart_draft_clear",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_customers",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_cuts",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_cuts_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_cuts_close",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_cuts_open",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_dashboard_today",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_drawer_log",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_drawer_manual_open",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_events_poll",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_facturama_cancel_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_facturama_credentials",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_facturama_invoice_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_facturama_invoices",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_giro_config",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_ingredientes",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_ingredientes_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_inventory_counts_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_inventory_counts_start",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_inventory_movements",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_inventory_alerts",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_inventory_bulk_adjust",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_inventory_dedupe",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_inventory_duplicates",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_inventory_movements",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_labels_print",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_login",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_logout",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_marketing_generar_post",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_marketing_posts",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_menu_digital",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_menu_digital_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_menu_digital_digitalize",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_notifications",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_notifications_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_notifications_read_all",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_owner_products_lookup",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_payments_check_pending_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_payments_health",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_payments_pending",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_payments_poll_external",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_payments_poll_external_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_payments_verify_pending",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_print_log_paper_status",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_print_queue",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_print_queue_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_feature_modules",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_features",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_features_catalog",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_giros",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_remote_support_request",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_setup_defaults",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_tenants_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_tenants_bulk",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_user_override",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_user_by_email",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_users_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_users_bulk",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_users_devices",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_users_hierarchy",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_users_inline_quick",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_version_notify",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_version_report",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_version_status",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_admin_giros_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_giros_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_admin_tenant_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_tenant_",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_admin_tenants",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_admin_tenants",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_app_config",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_app_config",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_log_client",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_log_client",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_owner_low_stock",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_owner_low_stock",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_pos_app_orders",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_pos_app_orders",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "api__api_users_me",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "api__api_users_me",
+      "verb": "llama_api"
+    },
+    {
+      "from": "mod_pos",
+      "to": "mod_pdc_permisos",
+      "verb": "redirige_a",
+      "contexto": "salvadorex-pos.html#permisos → location.replace(\"/paneldecontrol.html\")",
+      "evidencia": "line ~21325",
+      "rol_requerido": "platform_owner"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "mod_pos",
+      "verb": "preview_iframe",
+      "contexto": "PDC carga POS como iframe ?preview=1&module=X",
+      "evidencia": "paneldecontrol.html:5742"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "mod_pos",
+      "verb": "redirige_si_no_es_permisos",
+      "contexto": "hash distinto de #permisos → /salvadorex-pos.html",
+      "evidencia": "paneldecontrol.html:2699"
+    },
+    {
+      "from": "mod_pdc_permisos",
+      "to": "mod_pos",
+      "verb": "origen_extraccion",
+      "contexto": "PDC extraído de POS el 2026-05-12",
+      "evidencia": "pos:5481"
+    },
+    {
+      "from": "mod_pos",
+      "to": "mod_pdc_permisos",
+      "verb": "comparte_endpoints",
+      "contexto": "/api/admin/giros/, /api/admin/tenant/, /api/admin/tenants, /api/app/config, /api/log/client, /api/owner/low-stock, /api/pos/app-orders, /api/users/me",
+      "count": 8
+    }
+  ],
+  "cross_references": {
+    "pos_referencia_pdc": [
+      {
+        "line": 25,
+        "snippet": "trata de un iframe embebido en /paneldecontrol.html para mostrar la vista"
+      },
+      {
+        "line": 5481,
+        "snippet": "<!-- ============ PERMISOS (Super Admin only) — MOVIDO A /paneldecontrol.html ============"
+      },
+      {
+        "line": 5482,
+        "snippet": "2026-05-12: bloque extraído a /paneldecontrol.html para aligerar este archivo."
+      },
+      {
+        "line": 21311,
+        "snippet": "2026-05-12: bloque CSS permv14-style MOVIDO a /paneldecontrol.html"
+      },
+      {
+        "line": 21316,
+        "snippet": "permv14-wiring + version-control-hook) MOVIDOS a /paneldecontrol.html."
+      },
+      {
+        "line": 21325,
+        "snippet": "try { location.replace('/paneldecontrol.html'); }"
+      },
+      {
+        "line": 21326,
+        "snippet": "catch(_) { location.href = '/paneldecontrol.html'; }"
+      }
+    ],
+    "pdc_referencia_pos": [
+      {
+        "line": 24,
+        "snippet": "<link rel=\"canonical\" href=\"https://systeminternational.app/salvadorex-pos.html\">"
+      },
+      {
+        "line": 2465,
+        "snippet": "ESTOS scripts SI SE CARGAN en salvadorex-pos.html donde si tienen sentido."
+      },
+      {
+        "line": 2466,
+        "snippet": "2026-05-12 18:42 — pre-extraccion el panel era PARTE de salvadorex-pos.html,"
+      },
+      {
+        "line": 2661,
+        "snippet": "SIGUE cargado en salvadorex-pos.html y landings donde si tiene sentido. -->"
+      },
+      {
+        "line": 2671,
+        "snippet": "STUBS — Esta página es solo para #permisos. salvadorex-pos.html"
+      },
+      {
+        "line": 2700,
+        "snippet": "try { location.href = '/salvadorex-pos.html#' + name; } catch(_){}"
+      },
+      {
+        "line": 5176,
+        "snippet": "console.log('[PERM] panel disponible en /salvadorex-pos.html#permisos');"
+      },
+      {
+        "line": 5742,
+        "snippet": "// embebida en iframe. salvadorex-pos.html?preview=1&module=X&giro=G oculta"
+      },
+      {
+        "line": 5749,
+        "snippet": "const previewUrl = '/salvadorex-pos.html?preview=1'"
+      },
+      {
+        "line": 8654,
+        "snippet": "// 👁‍🗨 Ver como — abre el POS DEL CLIENTE (salvadorex-pos.html) en nueva"
+      },
+      {
+        "line": 8659,
+        "snippet": "//   - AHORA abre /salvadorex-pos.html (el POS real del cliente)"
+      },
+      {
+        "line": 8693,
+        "snippet": "const url = new URL('/salvadorex-pos.html', location.origin);"
+      }
+    ]
+  },
+  "deudas": {
+    "roles_no_normalizados": "DEUDA: coexisten \"cashier\" y \"cajero\" sin normalización",
+    "screens_sin_bloque": [],
+    "window_vars_de_riesgo": [
+      {
+        "name": "window.IMPERSONATING",
+        "kind": "object",
+        "value_preview": "{ email: imEmail, tid: imTid || null, since: Date.now(), has"
+      },
+      {
+        "name": "window.fetch",
+        "kind": "expression",
+        "value_preview": "origFetch"
+      },
+      {
+        "name": "window.VOLVIX",
+        "kind": "expression",
+        "value_preview": "VOLVIX"
+      }
+    ],
+    "broadcast_channels_sin_verificar_close": [
+      "CHANNEL_NAME",
+      "'volvix-cart-sync'"
+    ]
+  }
+}

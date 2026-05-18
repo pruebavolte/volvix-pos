@@ -1,0 +1,107 @@
+{
+  "slug": "corte",
+  "brand": "Corte",
+  "tagline": "El sistema para carnicerías premium donde cada gramo se cobra y los cortes finos no se 'cambian' por baratos",
+  "giro": "carnicería premium",
+  "giroPlural": "carnicerías premium",
+  "vibe": "darkPremium",
+  "palette": {
+    "bg": "#1A0A08",
+    "surface": "#2B1410",
+    "paper": "#3B1E18",
+    "ink": "#F0DCC8",
+    "ink2": "#D0B898",
+    "muted": "#8A6F58",
+    "line": "#4D2818",
+    "accent": "#8B0000",
+    "accent2": "#D4AF37"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Italianno",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para carnicerías premium · 2026",
+    "h1": "Cada <em>corte</em>,<br>cada <em>gramo</em>,<br>premium.",
+    "deck": "El POS hecho para que el ribeye Angus se cobre por su precio, los cortes finos no se 'cambien' por baratos al empacar, y los clientes premium tengan su carne apartada.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver inventario corte",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?butcher,premium,beef&q=85",
+    "heroAlt": "Ribeye Angus en mostrador refrigerado",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?ribeye,angus&q=80", "tag": "Ribeye Angus", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tomahawk,steak&q=80", "tag": "Tomahawk", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?wagyu,beef&q=80", "tag": "Wagyu A5", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?dry,aged&q=80", "tag": "Dry aged 45 días", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?butcher,counter&q=80", "tag": "Mostrador refri", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?steak,marbled&q=80", "tag": "Marmoleo perfecto", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?butcher,shop&q=80", "tag": "Carnicería premium", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cleaver,butcher&q=80", "tag": "Hacha del carnicero", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?meat,packing&q=80", "tag": "Empacado al vacío", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?butcher,working&q=80", "caption": "Carnicero corta a pedido"},
+      {"url": "https://source.unsplash.com/random/800x600/?bascula,carne&q=80", "caption": "Báscula al gramo exacto"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,premium&q=80", "caption": "Cliente VIP elige corte"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Mostrador · cortes · en vivo",
+    "title": "Tu mostrador, <em>corte por corte</em>, premium",
+    "deck": "Cada corte con peso y precio. Ribeye Angus: 8 kg disponibles. Tomahawk: 4 piezas. Wagyu A5: 2 kg premium. Sistema alerta cuando baja.",
+    "secondary": "En las carnicerías premium, un corte premium 'cambiado' por básico son $400-1,500 perdidos por cliente engañado.",
+    "data": {
+      "product": "Cortes premium por origen",
+      "tallas": ["100g", "250g", "500g", "1kg", "Pieza completa"],
+      "stock": [
+        {"color": "Ribeye Angus", "vals": [0, 24, 18, 8, 2]},
+        {"color": "Tomahawk", "vals": [0, 0, 0, 0, 4]},
+        {"color": "Wagyu A5 Japonés", "vals": [12, 8, 4, 2, 0]},
+        {"color": "T-bone USDA Prime", "vals": [0, 18, 12, 5, 0]}
+      ],
+      "lowThreshold": 3
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Báscula al gramo conectada", "d": "Cada corte pesado al servir. 350g ribeye Angus = $X. Sistema verifica. Cero pesos 'al ojo'."},
+    {"ico": "archive", "h": "Inventario por origen y certificación", "d": "Angus USA: 12 kg. Wagyu A5 Japón: 4 kg. Sonora Mexicano: 8 kg. Cada lote certificado y rastreado."},
+    {"ico": "bookmark", "h": "Clientes VIP con apartado", "d": "Don Sergio compra 5 kg ribeye por semana. Sistema le aparta. Cero clientes sin su corte."},
+    {"ico": "monitor", "h": "Pantalla con cortes disponibles", "d": "Cliente ve cortes disponibles con foto y origen. Pide al carnicero. Cero clientes desilusionados."},
+    {"ico": "percent", "h": "Margen por corte premium", "d": "Ribeye Angus $720/kg costo $380. Wagyu $4,500/kg costo $2,800. Sistema te dice qué empujar."},
+    {"ico": "calendar", "h": "Dry aging por lote", "d": "Lote 47 ribeye dry aged: 45 días el viernes. Sistema avisa cuándo está listo para venta."}
+  ],
+  "stats": [
+    {"v": "127", "l": "Kg vendidos hoy"},
+    {"v": "8", "l": "Orígenes premium"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi carnicero <span class=\"hl\">'cambiaba' ribeye Angus por res nacional</span> a clientes nuevos. Cobraba premium. Con Corte cada pieza tiene código de origen. Cero cambios al empacar. Recuperé reputación de auténtico.",
+    "sig": "Don Sergio M.",
+    "role": "Carnicería Premium Corte, San Pedro Garza, NL"
+  },
+  "thefts": [
+    {
+      "title": "Cortes premium 'cambiados' por nacionales",
+      "rob": "Carnicero corta res nacional ($240/kg) y empaca como Angus USA ($720/kg). Cliente paga premium, recibe básico. $480 por kg cambiado.",
+      "fix": "Cada corte <strong>con código de origen escaneado al cortar</strong>. Sistema verifica que coincida con orden y precio. Cero cambios al empacar."
+    },
+    {
+      "title": "Kg 'cobrados de más' al cliente premium",
+      "rob": "Carnicero pesa 850g pero cobra 1 kg. Diferencia se queda en aparte para reventa. $80-150 por cliente. 20 clientes = $1,600-3,000.",
+      "fix": "Báscula <strong>conectada al sistema obligatorio</strong>. Cliente ve pantalla con peso exacto. Cero pesos 'redondeados'."
+    },
+    {
+      "title": "Dry aged 'fingido' sin tiempo real",
+      "rob": "Carnicero vende ribeye normal como dry aged 45 días. Cliente paga premium ($1,200 vs $700/kg). Cero rastreo real.",
+      "fix": "Dry aged con <strong>foto y fecha entrada al refri obligatorio</strong>. Sistema cuenta días. Cliente ve certificado al comprar. Cero fraude."
+    }
+  ]
+}

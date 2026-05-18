@@ -1,0 +1,47 @@
+{
+  "id": "papeleria-first-sale",
+  "title": "Tu primera venta en papeleria",
+  "industry": "papeleria",
+  "duration_min": 3,
+  "modules_required": ["pos", "inventory", "barcode", "copy_service"],
+  "roles": ["owner", "cashier", "manager"],
+  "demo_catalog_ref": "R12a",
+  "steps": [
+    {
+      "id": "step1",
+      "title": "Catalogo escolar y oficina",
+      "text": "Cuaderno Profesional 100h $48, Pluma Bic Negra $8, Lapiz HB $5, Goma Borrar $7, Sacapuntas $12, Regla 30cm $18, Tijeras Escolares $35, Pegamento Resistol $28, Carpeta Tres Argollas $85, Hojas Carta 500pz $145, Marcador Sharpie $32, Resaltador $18, Mochila Escolar $385, Calculadora Casio $185, Mochila Universidad $585, Diccionario Larousse $245, Set Geometria $58, Tijeras Industriales $115, Pegamento Liquido 250ml $65, Cinta Adhesiva 18mm $22. Servicios: Copia BN $0.50, Copia Color $3, Impresion BN $1, Impresion Color $5, Engargolado $35, Plastificacion Carta $25.",
+      "image": "/tutorials/01-primera-venta.html",
+      "action": "next"
+    },
+    {
+      "id": "step2",
+      "title": "Cliente trae lista escolar",
+      "text": "Escanea o busca: 3 Cuadernos $144, 2 Plumas Bic $16, 1 Goma $7, 1 Sacapuntas $12.",
+      "highlight_selector": "#search-input",
+      "action": "wait_for_multiple_items",
+      "expected_items": 4
+    },
+    {
+      "id": "step3",
+      "title": "Servicio de copias",
+      "text": "Cliente quiere 20 copias BN. Click 'Servicios' > 'Copia BN' > Cantidad 20. $10 al ticket.",
+      "highlight_selector": "#btn-services",
+      "action": "wait_for_service"
+    },
+    {
+      "id": "step4",
+      "title": "Cobra",
+      "text": "Total $189. Cliente paga $200 efectivo. Cambio $11.",
+      "highlight_selector": "#btn-cobrar",
+      "action": "wait_for_payment"
+    },
+    {
+      "id": "step5",
+      "title": "Listo",
+      "text": "Cuadernos, plumas y copias entregadas. Stock actualizado.",
+      "action": "complete",
+      "next_link": "/inventario"
+    }
+  ]
+}

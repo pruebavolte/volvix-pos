@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Portal unificado Volvix — accede a todas tus aplicaciones del ecosistema POS desde un solo lugar.">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="robots" content="noindex">
+  <meta property="og:title" content="Volvix Launcher — Portal Unificado">
+  <meta property="og:description" content="Tu centro de control para todo el ecosistema Volvix POS.">
+  <meta property="og:type" content="website">
+  <title>Volvix Launcher · Portal de Aplicaciones</title>
+
+  <!-- Auth-gate: protege la página y redirige a login si no hay sesión -->
+  <script src="/auth-gate.js"></script>
+  <script defer src="/auth-helper.js"></script>
+  <!-- R10d-C FIX-N4-6: client-side system health monitor -->
+  <script defer src="/volvix-system-monitor.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --vlx-bg: #0b1220;
+      --vlx-bg-2: #111a2e;
+      --vlx-surface: #16213a;
+      --vlx-surface-2: #1c2a47;
+      --vlx-border: rgba(255,255,255,0.08);
+      --vlx-border-strong: rgba(255,255,255,0.16);
+      --vlx-text: #e6edf7;
+      --vlx-text-2: #94a3b8;
+      --vlx-text-3: #64748b;
+      --vlx-accent: #3b82f6;
+      --vlx-accent-2: #8b5cf6;
+      --vlx-accent-glow: rgba(59,130,246,0.35);
+      --vlx-warn: #fbbf24;
+      --vlx-success: #10b981;
+      --vlx-danger: #ef4444;
+      --vlx-grad: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 60%, #ec4899 100%);
+      --vlx-grad-bg: radial-gradient(ellipse at top, #1e293b 0%, #0b1220 60%, #050810 100%);
+    }
+    [data-theme="light"] {
+      --vlx-bg: #f8fafc;
+      --vlx-bg-2: #ffffff;
+      --vlx-surface: #ffffff;
+      --vlx-surface-2: #f1f5f9;
+      --vlx-border: rgba(15,23,42,0.08);
+      --vlx-border-strong: rgba(15,23,42,0.16);
+      --vlx-text: #0f172a;
+      --vlx-text-2: #475569;
+      --vlx-text-3: #94a3b8;
+      --vlx-grad-bg: radial-gradient(ellipse at top, #e0e7ff 0%, #f8fafc 60%, #ffffff 100%);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--vlx-grad-bg);
+      color: var(--vlx-text);
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(59,130,246,0.15), transparent 40%),
+        radial-gradient(circle at 85% 70%, rgba(139,92,246,0.12), transparent 45%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ================== TOP BAR ================== */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(20px);
+      background: rgba(11,18,32,0.75);
+      border-bottom: 1px solid var(--vlx-border);
+      padding: 14px 24px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    [data-theme="light"] .topbar { background: rgba(255,255,255,0.85); }
+
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 800; font-size: 18px; letter-spacing: -0.02em;
+      text-decoration: none; color: var(--vlx-text);
+    }
+    .brand-logo {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--vlx-grad);
+      display: grid; place-items: center;
+      color: #fff; font-weight: 800; font-size: 18px;
+      box-shadow: 0 6px 20px var(--vlx-accent-glow);
+    }
+    .brand-text { background: var(--vlx-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    .topbar-spacer { flex: 1; }
+
+    .search-wrap {
+      flex: 1; max-width: 480px; position: relative;
+    }
+    .search-input {
+      width: 100%; padding: 10px 14px 10px 40px;
+      background: var(--vlx-surface); color: var(--vlx-text);
+      border: 1px solid var(--vlx-border); border-radius: 10px;
+      font-size: 14px; font-family: inherit;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .search-input:focus { outline: none; border-color: var(--vlx-accent); box-shadow: 0 0 0 3px var(--vlx-accent-glow); }
+    .search-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--vlx-text-3); pointer-events: none;
+    }
+    .kbd {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: var(--vlx-surface-2); color: var(--vlx-text-2);
+      border: 1px solid var(--vlx-border);
+      padding: 2px 6px; border-radius: 5px; font-size: 11px; font-family: ui-monospace, monospace;
+      pointer-events: none;
+    }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 10px 6px 6px;
+      background: var(--vlx-surface); border: 1px solid var(--vlx-border);
+      border-radius: 999px;
+    }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--vlx-grad); color: #fff;
+      display: grid; place-items: center; font-weight: 700; font-size: 13px;
+    }
+    .user-meta { display: flex; flex-direction: column; line-height: 1.15; }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .role-badge {
+      font-size: 10px; padding: 1px 6px; border-radius: 4px;
+      background: var(--vlx-accent); color: #fff; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em; align-self: flex-start;
+    }
+    .role-badge.r-superadmin { background: linear-gradient(135deg,#ef4444,#f59e0b); }
+    .role-badge.r-owner      { background: linear-gradient(135deg,#3b82f6,#8b5cf6); }
+    .role-badge.r-manager    { background: linear-gradient(135deg,#06b6d4,#3b82f6); }
+    .role-badge.r-cajero     { background: linear-gradient(135deg,#10b981,#06b6d4); }
+    .role-badge.r-vendor     { background: linear-gradient(135deg,#f59e0b,#fb923c); }
+
+    .icon-btn {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: var(--vlx-surface); border: 1px solid var(--vlx-border);
+      color: var(--vlx-text); cursor: pointer;
+      display: grid; place-items: center;
+      transition: background .15s, border-color .15s, transform .12s;
+    }
+    .icon-btn:hover { background: var(--vlx-surface-2); border-color: var(--vlx-border-strong); }
+    .icon-btn:active { transform: scale(0.94); }
+
+    .btn-logout {
+      padding: 8px 14px; border-radius: 9px;
+      background: var(--vlx-surface); border: 1px solid var(--vlx-border);
+      color: var(--vlx-text); cursor: pointer; font-size: 13px; font-weight: 600;
+      transition: background .15s, border-color .15s;
+    }
+    .btn-logout:hover { background: var(--vlx-danger); border-color: var(--vlx-danger); color: #fff; }
+
+    /* ================== MAIN ================== */
+    main { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 32px 24px 80px; }
+
+    .welcome {
+      margin-bottom: 28px;
+    }
+    .welcome h1 {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 800; letter-spacing: -0.025em; margin-bottom: 6px;
+    }
+    .welcome h1 .name {
+      background: var(--vlx-grad);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .welcome p { color: var(--vlx-text-2); font-size: 15px; }
+
+    /* ================== SECTIONS ================== */
+    .section {
+      background: var(--vlx-surface);
+      border: 1px solid var(--vlx-border);
+      border-radius: 16px;
+      margin-bottom: 18px;
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+    .section:hover { border-color: var(--vlx-border-strong); }
+
+    .section-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 22px; cursor: pointer; user-select: none;
+      background: transparent;
+      width: 100%; border: none; color: inherit; font: inherit; text-align: left;
+    }
+    .section-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: grid; place-items: center; font-size: 20px;
+      background: var(--vlx-surface-2); flex-shrink: 0;
+    }
+    .section-text { flex: 1; }
+    .section-title { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+    .section-desc { font-size: 12px; color: var(--vlx-text-2); }
+    .section-count {
+      font-size: 12px; font-weight: 600; color: var(--vlx-text-2);
+      background: var(--vlx-surface-2); padding: 4px 10px; border-radius: 999px;
+    }
+    .section-toggle {
+      color: var(--vlx-text-2);
+      transition: transform .25s ease;
+    }
+    .section.collapsed .section-toggle { transform: rotate(-90deg); }
+    .section-body {
+      padding: 0 22px 22px;
+      max-height: 4000px; overflow: hidden;
+      transition: max-height .3s ease, padding .3s ease;
+    }
+    .section.collapsed .section-body {
+      max-height: 0; padding-top: 0; padding-bottom: 0;
+    }
+
+    /* ================== APP GRID ================== */
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .app-card {
+      position: relative;
+      display: flex; flex-direction: column; gap: 10px;
+      padding: 18px;
+      background: var(--vlx-surface-2);
+      border: 1px solid var(--vlx-border);
+      border-radius: 12px;
+      text-decoration: none; color: var(--vlx-text);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .15s;
+      cursor: pointer; min-height: 130px;
+    }
+    .app-card:hover {
+      transform: translateY(-2px) scale(1.01);
+      border-color: var(--vlx-accent);
+      box-shadow: 0 12px 28px -10px var(--vlx-accent-glow);
+    }
+    .app-card:focus-visible { outline: 2px solid var(--vlx-accent); outline-offset: 2px; }
+
+    .card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .card-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: grid; place-items: center; font-size: 20px;
+      background: var(--vlx-bg-2);
+    }
+    .star-btn {
+      background: transparent; border: none; cursor: pointer;
+      width: 28px; height: 28px; border-radius: 6px;
+      color: var(--vlx-text-3); transition: color .12s, background .12s;
+      display: grid; place-items: center;
+    }
+    .star-btn:hover { background: var(--vlx-bg-2); color: var(--vlx-warn); }
+    .star-btn.starred { color: var(--vlx-warn); }
+    .card-title { font-weight: 700; font-size: 15px; line-height: 1.25; }
+    .card-desc { font-size: 12.5px; color: var(--vlx-text-2); line-height: 1.4; flex: 1; }
+    .card-foot { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .role-tag {
+      font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 4px;
+      background: var(--vlx-bg-2); color: var(--vlx-text-2);
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+
+    /* ================== EMPTY ================== */
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      background: var(--vlx-surface);
+      border: 1px dashed var(--vlx-border-strong);
+      border-radius: 16px; color: var(--vlx-text-2);
+    }
+    .empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 18px; margin-bottom: 6px; color: var(--vlx-text); }
+
+    /* ================== COMMAND PALETTE ================== */
+    .palette-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(5,8,16,0.75); backdrop-filter: blur(8px);
+      display: none; align-items: flex-start; justify-content: center; padding-top: 12vh;
+    }
+    .palette-overlay.open { display: flex; }
+    .palette {
+      width: min(640px, 92vw);
+      background: var(--vlx-surface);
+      border: 1px solid var(--vlx-border-strong);
+      border-radius: 14px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+    .palette-input {
+      width: 100%; padding: 18px 22px;
+      background: transparent; color: var(--vlx-text);
+      border: none; border-bottom: 1px solid var(--vlx-border);
+      font-size: 16px; font-family: inherit;
+    }
+    .palette-input:focus { outline: none; }
+    .palette-results { max-height: 50vh; overflow-y: auto; padding: 8px; }
+    .palette-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; border-radius: 8px;
+      cursor: pointer; color: var(--vlx-text); text-decoration: none;
+    }
+    .palette-item:hover, .palette-item.active { background: var(--vlx-surface-2); }
+    .palette-item .pi-icon { font-size: 18px; width: 28px; text-align: center; }
+    .palette-item .pi-meta { flex: 1; min-width: 0; }
+    .palette-item .pi-title { font-weight: 600; font-size: 14px; }
+    .palette-item .pi-desc { font-size: 12px; color: var(--vlx-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .palette-empty { padding: 30px; text-align: center; color: var(--vlx-text-2); font-size: 14px; }
+
+    /* ================== TOAST ================== */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--vlx-surface); border: 1px solid var(--vlx-border-strong);
+      padding: 12px 18px; border-radius: 10px;
+      color: var(--vlx-text); font-size: 14px; font-weight: 500;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+      opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+      z-index: 1100;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ================== RESPONSIVE ================== */
+    @media (max-width: 720px) {
+      .topbar { flex-wrap: wrap; padding: 10px 14px; gap: 10px; }
+      .search-wrap { order: 10; flex-basis: 100%; max-width: none; }
+      .user-meta { display: none; }
+      main { padding: 22px 14px 60px; }
+      .app-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+      .app-card { min-height: 110px; padding: 14px; }
+      .section-header { padding: 14px 16px; }
+      .section-body { padding: 0 16px 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============== TOP BAR ============== -->
+  <header class="topbar" role="banner">
+    <a href="/volvix-launcher.html" class="brand" aria-label="Volvix Launcher inicio">
+      <span class="brand-logo" aria-hidden="true">V</span>
+      <span class="brand-text">Volvix</span>
+    </a>
+
+    <div class="search-wrap" role="search">
+      <span class="search-icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </span>
+      <input type="search" id="searchInput" class="search-input" placeholder="Buscar aplicación…" aria-label="Buscar aplicación" autocomplete="off">
+      <span class="kbd" aria-hidden="true">Ctrl K</span>
+    </div>
+
+    <div class="topbar-spacer"></div>
+
+    <button id="themeToggle" class="icon-btn" aria-label="Cambiar tema" title="Cambiar tema (claro/oscuro)">
+      <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+
+    <div class="user-chip" id="userChip">
+      <div class="avatar" id="avatar" aria-hidden="true">?</div>
+      <div class="user-meta">
+        <span class="user-name" id="userName">Cargando…</span>
+        <span class="role-badge" id="roleBadge">…</span>
+      </div>
+    </div>
+
+    <button id="btnLogout" class="btn-logout" aria-label="Cerrar sesión">Salir</button>
+  </header>
+
+  <!-- ============== MAIN ============== -->
+  <main role="main">
+    <section class="welcome" aria-labelledby="welcomeHeading">
+      <h1 id="welcomeHeading">Hola, <span class="name" id="welcomeName">Volvix user</span></h1>
+      <p id="welcomeSubtitle">Selecciona una aplicación para comenzar. Tus apps están agrupadas según tu rol.</p>
+    </section>
+
+    <div id="sectionsRoot" aria-live="polite"></div>
+
+    <div id="emptyState" class="empty-state" hidden>
+      <div class="emoji" aria-hidden="true">🔒</div>
+      <h3>No tienes acceso a ninguna aplicación</h3>
+      <p>Contacta al administrador de tu cuenta para obtener permisos.</p>
+    </div>
+  </main>
+
+  <!-- ============== COMMAND PALETTE ============== -->
+  <div class="palette-overlay" id="paletteOverlay" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
+    <div class="palette" role="combobox" aria-expanded="true">
+      <input type="text" id="paletteInput" class="palette-input" placeholder="Escribe el nombre de una app y presiona Enter…" aria-label="Buscar app en paleta">
+      <div id="paletteResults" class="palette-results" role="listbox"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- ============== LOGIC ============== -->
+  <script>
+  (function () {
+    'use strict';
+
+    // ------- ROLE NORMALIZATION -------
+    const ROLE_LABELS = {
+      superadmin: 'Super Admin',
+      owner:      'Dueño',
+      manager:    'Gerente',
+      cajero:     'Cajero',
+      vendor:     'Proveedor',
+      kiosk:      'Kiosco',
+    };
+
+    // Read user from JWT or session.
+    function readUser() {
+      let token = null;
+      try { token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'); } catch (_) {}
+
+      let payload = null;
+      if (token) {
+        try {
+          const parts = token.split('.');
+          if (parts.length >= 2) {
+            const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            const pad = b64.length % 4 ? '='.repeat(4 - (b64.length % 4)) : '';
+            payload = JSON.parse(atob(b64 + pad));
+          }
+        } catch (_) {}
+      }
+
+      let session = null;
+      try {
+        const raw = localStorage.getItem('volvixSession');
+        if (raw) session = JSON.parse(raw);
+      } catch (_) {}
+
+      const role = (payload && payload.role) || (session && session.role) || 'cajero';
+      const email = (payload && payload.email) || (session && session.email) || 'usuario@volvix';
+      const tenant_id = (payload && payload.tenant_id) || (session && session.tenant_id) || null;
+      const tenant_name = (session && session.tenant_name) || tenant_id || '';
+      const full_name = (session && session.full_name) || email.split('@')[0];
+
+      return { role: String(role).toLowerCase(), email, tenant_id, tenant_name, full_name };
+    }
+
+    // Expose a tiny VolvixAuth getter so other code (and the sandbox tests) can read it.
+    window.VolvixAuth = window.VolvixAuth || {};
+    window.VolvixAuth.getUser = readUser;
+
+    function logout() {
+      try {
+        localStorage.removeItem('volvix_token');
+        localStorage.removeItem('volvixAuthToken');
+        localStorage.removeItem('volvixSession');
+      } catch (_) {}
+      window.location.replace('/login.html');
+    }
+
+    // ------- ROLE HIERARCHY -------
+    // Higher rank = more access.
+    const ROLE_RANK = { kiosk: 0, cajero: 1, vendor: 1, manager: 2, owner: 3, superadmin: 4 };
+    function rolesAllow(userRole, allowed) {
+      // allowed is array of role keys.
+      if (!allowed || allowed.length === 0) return true; // public for any logged-in user
+      return allowed.indexOf(userRole) !== -1;
+    }
+    function rolesAllowAtLeast(userRole, minRole) {
+      return (ROLE_RANK[userRole] || 0) >= (ROLE_RANK[minRole] || 0);
+    }
+
+    // ------- APP CATALOG -------
+    // group: section id; minRole: minimum role to see this app (any-role short-circuit if undefined).
+    const APPS = [
+      // Mi POS
+      { id: 'pos',         icon: '🛒', title: 'POS SalvadoreX',     desc: 'Punto de venta principal. Tickets, pagos, descuentos.', url: '/salvadorex_web_v25.html', group: 'pos',  minRole: 'cajero' },
+      { id: 'kds',         icon: '👨‍🍳', title: 'KDS Comandero',     desc: 'Pantalla de cocina, comandas en tiempo real.',          url: '/volvix-kds.html',         group: 'pos',  minRole: 'cajero' },
+      { id: 'kiosko',      icon: '📟', title: 'Kiosko Auto-servicio', desc: 'Kiosko self-service para clientes.',                  url: '/volvix-kiosk.html',       group: 'pos',  minRole: 'cajero' },
+
+      // Gestión del negocio
+      { id: 'owner',       icon: '🏢', title: 'Owner Panel',        desc: 'Centro de control del negocio. KPIs, equipo, ajustes.', url: '/volvix_owner_panel_v7.html', group: 'biz', minRole: 'manager' },
+      { id: 'multipos',    icon: '🏬', title: 'MultiPOS Suite',     desc: 'Administra múltiples sucursales desde un solo lugar.', url: '/multipos_suite_v3.html',   group: 'biz', minRole: 'owner' },
+      { id: 'vendor',      icon: '📦', title: 'Vendor Portal',      desc: 'Portal para proveedores: pedidos, facturación.',       url: '/volvix-vendor-portal.html', group: 'biz', minRole: 'vendor', alsoAllow: ['owner','superadmin'] },
+      { id: 'customer',    icon: '🤝', title: 'Customer Portal',    desc: 'Vista cliente: historial, recompensas, factura.',      url: '/volvix-customer-portal.html', group: 'biz', minRole: 'manager' },
+      { id: 'users',       icon: '👥', title: 'Gestión de usuarios', desc: 'Crea cajeros, gerentes, asigna permisos.',             url: '/volvix-user-management.html', group: 'biz', minRole: 'owner' },
+
+      // Diseño y herramientas
+      { id: 'etiquetas',   icon: '🏷️', title: 'Etiqueta Designer',   desc: 'Diseña etiquetas y códigos de barras imprimibles.',   url: '/etiqueta_designer.html',   group: 'tools', minRole: 'manager' },
+      { id: 'ai-engine',   icon: '🤖', title: 'AI Engine',           desc: 'Motor de inteligencia: forecasting, recomendaciones.', url: '/volvix_ai_engine.html',    group: 'tools', minRole: 'manager' },
+      { id: 'ai-academy',  icon: '🎓', title: 'AI Academy',          desc: 'Cursos para sacar el máximo provecho a tu POS.',       url: '/volvix_ai_academy.html',   group: 'tools', minRole: 'cajero' },
+      { id: 'ai-support',  icon: '💬', title: 'AI Support',          desc: 'Soporte conversacional 24/7 con IA.',                  url: '/volvix_ai_support.html',   group: 'tools', minRole: 'cajero' },
+
+      // Plataforma SaaS (superadmin)
+      { id: 'admin-saas',  icon: '🛡️', title: 'Admin SaaS',         desc: 'Panel global de la plataforma: tenants, planes.',     url: '/volvix-admin-saas.html',   group: 'saas', minRole: 'superadmin' },
+      { id: 'mega-dash',   icon: '📊', title: 'Mega Dashboard',     desc: 'KPIs platform-wide: ARR, churn, MAU.',                 url: '/volvix-mega-dashboard.html', group: 'saas', minRole: 'superadmin' },
+      { id: 'audit',       icon: '🔍', title: 'Audit Viewer',       desc: 'Visor de logs de auditoría y eventos críticos.',       url: '/volvix-audit-viewer.html', group: 'saas', minRole: 'owner' },
+      { id: 'bitacora',    icon: '📓', title: 'Bitácora Live',      desc: 'Bitácora de pruebas en tiempo real (interno).',        url: '/BITACORA_LIVE.html',       group: 'saas', minRole: 'superadmin' },
+      { id: 'remote',      icon: '🛰️', title: 'Volvix Remote',      desc: 'Control remoto y telemetría de terminales.',          url: '/volvix_remote.html',       group: 'saas', minRole: 'superadmin' },
+
+      // Marketing y onboarding
+      { id: 'landing-dyn', icon: '🚀', title: 'Landing Dynamic',     desc: 'Landing principal pública para captura de leads.',    url: '/landing_dynamic.html',     group: 'mkt', minRole: 'cajero' },
+      { id: 'hub',         icon: '🌐', title: 'Hub Landing',         desc: 'Landing central con todas las verticales.',           url: '/volvix-hub-landing.html',  group: 'mkt', minRole: 'cajero' },
+      { id: 'tour',        icon: '🎬', title: 'Grand Tour',          desc: 'Tour guiado por el ecosistema Volvix.',               url: '/volvix-grand-tour.html',   group: 'mkt', minRole: 'cajero' },
+      { id: 'onb-wizard',  icon: '🧭', title: 'Onboarding Wizard',   desc: 'Asistente de configuración inicial.',                 url: '/volvix-onboarding-wizard.html', group: 'mkt', minRole: 'manager' },
+      { id: 'onb-v2',      icon: '🎯', title: 'Onboarding v2',       desc: 'Onboarding rediseñado, paso a paso.',                 url: '/volvix-onboarding-v2.html', group: 'mkt', minRole: 'manager' },
+      { id: 'marketplace', icon: '🛍️', title: 'Marketplace',        desc: 'Catálogo público de plantillas y add-ons.',           url: '/marketplace.html',         group: 'mkt', minRole: 'cajero' },
+
+      // Documentación
+      { id: 'docs',        icon: '📚', title: 'Documentación',       desc: 'Manuales, tutoriales y guías de inicio.',             url: '/docs.html',                group: 'docs', minRole: 'cajero' },
+      { id: 'api-docs',    icon: '⚙️', title: 'API Docs',           desc: 'Referencia de la API REST de Volvix.',                url: '/volvix-api-docs.html',     group: 'docs', minRole: 'manager' },
+      { id: 'sitemap',     icon: '🗺️', title: 'Sitemap',            desc: 'Índice navegable de todas las páginas.',              url: '/volvix-sitemap.html',      group: 'docs', minRole: 'cajero' },
+      { id: 'modals-demo', icon: '🪟', title: 'Modals Demo',         desc: 'Demo de componentes UI (modales).',                   url: '/volvix-modals-demo.html',  group: 'docs', minRole: 'manager' },
+      { id: 'qa-scenarios',icon: '🧪', title: 'QA Scenarios',        desc: 'Escenarios de prueba manual.',                        url: '/volvix-qa-scenarios.html', group: 'docs', minRole: 'manager' },
+      { id: 'sandbox',     icon: '🧫', title: 'Sandbox',             desc: 'Entorno de pruebas para devs.',                       url: '/volvix-sandbox.html',      group: 'docs', minRole: 'manager' },
+      { id: 'pwa-final',   icon: '📱', title: 'PWA Test',           desc: 'Página de verificación PWA / offline.',               url: '/volvix-pwa-final.html',    group: 'docs', minRole: 'manager' },
+    ];
+
+    const SECTIONS = [
+      { id: 'pos',   icon: '🛒', title: 'Mi POS',                 desc: 'Punto de venta y operación diaria' },
+      { id: 'biz',   icon: '🏢', title: 'Gestión del negocio',    desc: 'Owner, sucursales, equipo, clientes' },
+      { id: 'tools', icon: '🛠️', title: 'Diseño y herramientas',  desc: 'Etiquetas, IA y utilidades' },
+      { id: 'saas',  icon: '🛡️', title: 'Plataforma SaaS',        desc: 'Solo super-admin' },
+      { id: 'mkt',   icon: '🚀', title: 'Marketing y onboarding', desc: 'Landings, tour, wizard' },
+      { id: 'docs',  icon: '📚', title: 'Documentación',          desc: 'Docs, API, sitemap, sandbox' },
+    ];
+
+    // ------- VISIBILITY -------
+    function visibleApps(user) {
+      return APPS.filter(app => {
+        if (app.alsoAllow && app.alsoAllow.indexOf(user.role) !== -1) return true;
+        return rolesAllowAtLeast(user.role, app.minRole || 'cajero');
+      });
+    }
+
+    // ------- STATE -------
+    const STATE = {
+      user: readUser(),
+      collapsed: loadJSON('vlx-launcher-collapsed', {}),
+      favorites: loadJSON('vlx-launcher-favs', []),
+      recents: loadJSON('vlx-launcher-recents', []),
+      query: '',
+    };
+
+    function loadJSON(key, fallback) {
+      try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+      catch (_) { return fallback; }
+    }
+    function saveJSON(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
+    }
+
+    // ------- RENDER -------
+    function renderHeader() {
+      const u = STATE.user;
+      const initials = (u.full_name || u.email || '?').slice(0,2).toUpperCase();
+      document.getElementById('avatar').textContent = initials;
+      document.getElementById('userName').textContent = u.full_name || u.email;
+      const badge = document.getElementById('roleBadge');
+      badge.textContent = ROLE_LABELS[u.role] || u.role;
+      badge.className = 'role-badge r-' + u.role;
+      document.getElementById('welcomeName').textContent = (u.full_name || u.email).split(' ')[0];
+      const sub = document.getElementById('welcomeSubtitle');
+      if (u.tenant_name) {
+        sub.textContent = `Tenant: ${u.tenant_name} · Rol: ${ROLE_LABELS[u.role] || u.role}. Selecciona una app para comenzar.`;
+      }
+    }
+
+    function renderSections() {
+      const root = document.getElementById('sectionsRoot');
+      root.innerHTML = '';
+      const apps = visibleApps(STATE.user);
+      const q = (STATE.query || '').toLowerCase().trim();
+      const filtered = q
+        ? apps.filter(a => (a.title + ' ' + a.desc).toLowerCase().includes(q))
+        : apps;
+
+      if (filtered.length === 0) {
+        document.getElementById('emptyState').hidden = false;
+        if (q) {
+          document.getElementById('emptyState').querySelector('h3').textContent = 'Sin resultados para “' + q + '”';
+          document.getElementById('emptyState').querySelector('p').textContent = 'Intenta con otra palabra o limpia la búsqueda.';
+        } else {
+          document.getElementById('emptyState').querySelector('h3').textContent = 'No tienes acceso a ninguna aplicación';
+          document.getElementById('emptyState').querySelector('p').textContent = 'Contacta al administrador de tu cuenta para obtener permisos.';
+        }
+        return;
+      } else {
+        document.getElementById('emptyState').hidden = true;
+      }
+
+      // Favorites pseudo-section (only when not searching)
+      if (!q && STATE.favorites.length > 0) {
+        const favApps = filtered.filter(a => STATE.favorites.indexOf(a.id) !== -1);
+        if (favApps.length > 0) {
+          root.appendChild(buildSection({ id: 'favs', icon: '⭐', title: 'Favoritos', desc: 'Tus apps preferidas' }, favApps));
+        }
+      }
+      // Recents (only when not searching)
+      if (!q && STATE.recents.length > 0) {
+        const recentApps = STATE.recents
+          .map(id => filtered.find(a => a.id === id))
+          .filter(Boolean)
+          .slice(0, 5);
+        if (recentApps.length > 0) {
+          root.appendChild(buildSection({ id: 'recents', icon: '🕒', title: 'Recientes', desc: 'Las últimas que usaste' }, recentApps));
+        }
+      }
+
+      SECTIONS.forEach(sec => {
+        const items = filtered.filter(a => a.group === sec.id);
+        if (items.length === 0) return;
+        root.appendChild(buildSection(sec, items));
+      });
+    }
+
+    function buildSection(sec, apps) {
+      const wrap = document.createElement('section');
+      wrap.className = 'section' + (STATE.collapsed[sec.id] ? ' collapsed' : '');
+      wrap.dataset.sectionId = sec.id;
+
+      const header = document.createElement('button');
+      header.type = 'button';
+      header.className = 'section-header';
+      header.setAttribute('aria-expanded', !STATE.collapsed[sec.id]);
+      header.setAttribute('aria-controls', 'sec-body-' + sec.id);
+      header.innerHTML = `
+        <div class="section-icon" aria-hidden="true">${sec.icon}</div>
+        <div class="section-text">
+          <div class="section-title">${sec.title}</div>
+          <div class="section-desc">${sec.desc}</div>
+        </div>
+        <span class="section-count" aria-label="${apps.length} apps">${apps.length}</span>
+        <span class="section-toggle" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      `;
+      header.addEventListener('click', () => {
+        STATE.collapsed[sec.id] = !STATE.collapsed[sec.id];
+        saveJSON('vlx-launcher-collapsed', STATE.collapsed);
+        wrap.classList.toggle('collapsed');
+        header.setAttribute('aria-expanded', !STATE.collapsed[sec.id]);
+      });
+      wrap.appendChild(header);
+
+      const body = document.createElement('div');
+      body.className = 'section-body';
+      body.id = 'sec-body-' + sec.id;
+
+      const grid = document.createElement('div');
+      grid.className = 'app-grid';
+      apps.forEach(app => grid.appendChild(buildCard(app)));
+      body.appendChild(grid);
+      wrap.appendChild(body);
+      return wrap;
+    }
+
+    function buildCard(app) {
+      const card = document.createElement('a');
+      card.className = 'app-card';
+      card.href = app.url;
+      card.setAttribute('aria-label', app.title + ' — ' + app.desc);
+      card.dataset.appId = app.id;
+
+      const isFav = STATE.favorites.indexOf(app.id) !== -1;
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="card-icon" aria-hidden="true">${app.icon}</div>
+          <button class="star-btn ${isFav ? 'starred' : ''}" type="button"
+                  aria-label="${isFav ? 'Quitar de favoritos' : 'Agregar a favoritos'}"
+                  title="${isFav ? 'Quitar de favoritos' : 'Agregar a favoritos'}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </button>
+        </div>
+        <div class="card-title">${app.title}</div>
+        <div class="card-desc">${app.desc}</div>
+        <div class="card-foot">
+          <span class="role-tag">${ROLE_LABELS[app.minRole || 'cajero'] || app.minRole}+</span>
+        </div>
+      `;
+
+      // Star toggle
+      card.querySelector('.star-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleFavorite(app.id);
+      });
+
+      // Track recents on click (without preventing navigation)
+      card.addEventListener('click', () => trackRecent(app.id));
+
+      return card;
+    }
+
+    function toggleFavorite(id) {
+      const idx = STATE.favorites.indexOf(id);
+      if (idx === -1) STATE.favorites.unshift(id);
+      else STATE.favorites.splice(idx, 1);
+      saveJSON('vlx-launcher-favs', STATE.favorites);
+      renderSections();
+      showToast(idx === -1 ? 'Añadido a favoritos' : 'Quitado de favoritos');
+    }
+
+    function trackRecent(id) {
+      const arr = STATE.recents.filter(x => x !== id);
+      arr.unshift(id);
+      STATE.recents = arr.slice(0, 5);
+      saveJSON('vlx-launcher-recents', STATE.recents);
+    }
+
+    // ------- THEME -------
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      try { localStorage.setItem('vlx-theme', t); } catch (_) {}
+      const ico = document.getElementById('themeIcon');
+      if (t === 'light') {
+        ico.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+      } else {
+        ico.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      }
+    }
+    function initTheme() {
+      let t = 'dark';
+      try { t = localStorage.getItem('vlx-theme') || 'dark'; } catch (_) {}
+      applyTheme(t);
+    }
+
+    // ------- COMMAND PALETTE -------
+    let palActiveIdx = 0;
+    function openPalette() {
+      const overlay = document.getElementById('paletteOverlay');
+      overlay.classList.add('open');
+      const inp = document.getElementById('paletteInput');
+      inp.value = '';
+      renderPalette('');
+      setTimeout(() => inp.focus(), 30);
+    }
+    function closePalette() {
+      document.getElementById('paletteOverlay').classList.remove('open');
+    }
+    function renderPalette(q) {
+      const out = document.getElementById('paletteResults');
+      const apps = visibleApps(STATE.user);
+      const ql = q.toLowerCase().trim();
+      const filtered = ql
+        ? apps.filter(a => (a.title + ' ' + a.desc).toLowerCase().includes(ql))
+        : apps.slice(0, 10);
+      palActiveIdx = 0;
+      if (filtered.length === 0) {
+        out.innerHTML = '<div class="palette-empty">Sin resultados</div>';
+        return;
+      }
+      out.innerHTML = filtered.map((a, i) => `
+        <a href="${a.url}" class="palette-item ${i === 0 ? 'active' : ''}" data-idx="${i}" data-app-id="${a.id}">
+          <span class="pi-icon" aria-hidden="true">${a.icon}</span>
+          <span class="pi-meta">
+            <span class="pi-title">${a.title}</span>
+            <span class="pi-desc">${a.desc}</span>
+          </span>
+        </a>
+      `).join('');
+      out.querySelectorAll('.palette-item').forEach(el => {
+        el.addEventListener('click', () => trackRecent(el.dataset.appId));
+      });
+    }
+    function paletteMove(delta) {
+      const items = document.querySelectorAll('#paletteResults .palette-item');
+      if (items.length === 0) return;
+      items[palActiveIdx]?.classList.remove('active');
+      palActiveIdx = (palActiveIdx + delta + items.length) % items.length;
+      items[palActiveIdx].classList.add('active');
+      items[palActiveIdx].scrollIntoView({ block: 'nearest' });
+    }
+    function paletteEnter() {
+      const item = document.querySelectorAll('#paletteResults .palette-item')[palActiveIdx];
+      if (item) {
+        trackRecent(item.dataset.appId);
+        window.location.href = item.href;
+      }
+    }
+
+    // ------- TOAST -------
+    let toastTimer;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+    }
+
+    // ------- INIT -------
+    function init() {
+      initTheme();
+      renderHeader();
+      renderSections();
+
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        STATE.query = e.target.value;
+        renderSections();
+      });
+
+      document.getElementById('themeToggle').addEventListener('click', () => {
+        const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+        applyTheme(cur === 'dark' ? 'light' : 'dark');
+      });
+
+      document.getElementById('btnLogout').addEventListener('click', logout);
+
+      // Command palette shortcut: Ctrl/Cmd + K
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          openPalette();
+        } else if (e.key === 'Escape') {
+          closePalette();
+        } else if (document.getElementById('paletteOverlay').classList.contains('open')) {
+          if (e.key === 'ArrowDown') { e.preventDefault(); paletteMove(1); }
+          else if (e.key === 'ArrowUp') { e.preventDefault(); paletteMove(-1); }
+          else if (e.key === 'Enter')   { e.preventDefault(); paletteEnter(); }
+        }
+      });
+
+      document.getElementById('paletteInput').addEventListener('input', (e) => {
+        renderPalette(e.target.value);
+      });
+
+      document.getElementById('paletteOverlay').addEventListener('click', (e) => {
+        if (e.target.id === 'paletteOverlay') closePalette();
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "slice": 203,
+  "range": [3060, 3080],
+  "module": "R18_AMAZON",
+  "status": "complete",
+  "items": [
+    { "idx": 3060, "task": "POST /api/integrations/amazon/orders/sync", "status": "ok" },
+    { "idx": 3061, "task": "POST /api/integrations/amazon/inventory/sync", "status": "ok" },
+    { "idx": 3062, "task": "POST /api/integrations/amazon/listings/upload", "status": "ok" },
+    { "idx": 3063, "task": "AMAZON_LWA_TOKEN env guard 503", "status": "ok" },
+    { "idx": 3064, "task": "amzFetch https helper", "status": "ok" },
+    { "idx": 3065, "task": "MarketplaceIds param", "status": "ok" },
+    { "idx": 3066, "task": "OrderStatus mapping", "status": "ok" },
+    { "idx": 3067, "task": "FBA inventory summaries", "status": "ok" },
+    { "idx": 3068, "task": "flat-file TSV builder", "status": "ok" },
+    { "idx": 3069, "task": "feed document creation", "status": "ok" },
+    { "idx": 3070, "task": "POST_FLAT_FILE_LISTINGS_DATA feed", "status": "ok" },
+    { "idx": 3071, "task": "db/R18_AMAZON.sql table", "status": "ok" },
+    { "idx": 3072, "task": "amazon_orders_mirror UNIQUE", "status": "ok" },
+    { "idx": 3073, "task": "indexes status/ts/internal", "status": "ok" },
+    { "idx": 3074, "task": "RLS policy", "status": "ok" },
+    { "idx": 3075, "task": "client wiring connect button", "status": "ok" },
+    { "idx": 3076, "task": "VolvixAmazon.syncOrders", "status": "ok" },
+    { "idx": 3077, "task": "VolvixAmazon.syncInventory", "status": "ok" },
+    { "idx": 3078, "task": "VolvixAmazon.uploadListings", "status": "ok" },
+    { "idx": 3079, "task": "R18_AMAZON.md report", "status": "ok" },
+    { "idx": 3080, "task": "slice_203.json written", "status": "ok" }
+  ],
+  "ts": "2026-04-26T00:00:00Z"
+}

@@ -1,0 +1,104 @@
+{
+  "slug": "espolvo",
+  "brand": "Espolvo",
+  "tagline": "El sistema para churrerías donde cada churro se cuenta y el chocolate caliente no se 'rinde' con agua",
+  "giro": "churrería",
+  "giroPlural": "churrerías",
+  "vibe": "playful",
+  "palette": {
+    "bg": "#FFF5E0",
+    "surface": "#FFFFFF",
+    "paper": "#FFE5B8",
+    "ink": "#3D1F08",
+    "ink2": "#5C3210",
+    "muted": "#8E5530",
+    "line": "#F2C778",
+    "accent": "#8B4513",
+    "accent2": "#E8A800"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat Brush",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para churrerías mexicanas · 2026",
+    "h1": "Cada <em>churro</em>,<br>cada <em>chocolate</em>,<br>servido.",
+    "deck": "El POS hecho para que cada churro relleno se cobre como relleno, el chocolate caliente no se 'aguada', y los pedidos para llevar lleguen calientitos con todo y azúcar.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?churros,chocolate,mexican&q=85",
+    "heroAlt": "Churros recién hechos con chocolate caliente",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?churros,sugar&q=80", "tag": "Churros con azúcar", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?chocolate,hot&q=80", "tag": "Chocolate caliente", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?churro,filled&q=80", "tag": "Churro relleno", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cajeta,sweet&q=80", "tag": "Cajeta de Celaya", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?churro,frying&q=80", "tag": "Friéndose al rojo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cinnamon,sugar&q=80", "tag": "Canela y azúcar", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?churreria,traditional&q=80", "tag": "Churrería clásica", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?nutella,churro&q=80", "tag": "Relleno de nutella", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?fair,churros&q=80", "tag": "Puesto en feria", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?churrero,frying&q=80", "caption": "Churrero saca churros calientes"},
+      {"url": "https://source.unsplash.com/random/800x600/?chocolate,prepare&q=80", "caption": "Chocolate caliente espeso"},
+      {"url": "https://source.unsplash.com/random/800x600/?kids,churros&q=80", "caption": "Niños esperan churros"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · plancha · en vivo",
+    "title": "Tu cocina, <em>churro por churro</em>, sin perderse",
+    "deck": "Cada orden con tipo y relleno. KDS muestra: 6 churros simples + 4 con cajeta + 2 chocolates espesos. Churrero ve todo. Cero rellenos olvidados.",
+    "secondary": "En las churrerías, un relleno de cajeta 'olvidado' al cobrar son $15-25 cada vez. 15 al día = $300.",
+    "data": {
+      "orders": [
+        {"table": "M04", "name": "Familia Castro", "state": "urgent", "items": ["10 churros|6 simples 4 cajeta", "3 chocolates espesos"], "waitMin": 8},
+        {"table": "M02", "name": "Don Memo", "state": "prep", "items": ["6 churros simples", "1 café americano"], "waitMin": 5},
+        {"table": "M07", "name": "Pareja", "state": "queue", "items": ["8 churros|4 nutella 4 dulce leche", "2 chocolates"], "waitMin": 4},
+        {"table": "TOGO-9", "name": "Sra. Lupita", "state": "ready", "items": ["20 churros simples para llevar"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "KDS por tipo de churro", "d": "Simples: 6. Rellenos cajeta: 4. Rellenos nutella: 2. Churrero ve todo. Cero rellenos olvidados al freír."},
+    {"ico": "barcode", "h": "Cobro automático por relleno", "d": "Sistema cobra relleno extra automático. Si cliente pide cajeta, factura $20 más. Cero rellenos 'olvidados' al cobrar."},
+    {"ico": "archive", "h": "Inventario por masa y relleno", "d": "Masa: 12 kg. Cajeta: 4 kg. Nutella: 2 kg. Chocolate polvo: 6 kg. Cuando baja, alerta."},
+    {"ico": "percent", "h": "Margen por tipo de churro", "d": "Churro simple $5 costo, vendes $15. Relleno costo $10, vendes $35. Sistema sugiere qué empujar."},
+    {"ico": "truck", "h": "Pedidos para llevar empacados", "d": "Pedido grande para llevar con empaque térmico. Sistema verifica cantidad antes de cerrar. Cero clientes que reciben menos."},
+    {"ico": "calendar", "h": "Producción según hora y clima", "d": "Tarde de lluvia: produces 30% más. Mañana fría: chocolates explotan. Sistema sugiere por hora."}
+  ],
+  "stats": [
+    {"v": "286", "l": "Churros vendidos hoy"},
+    {"v": "42", "l": "Chocolates calientes"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi empleada <span class=\"hl\">'olvidaba cobrar' los rellenos</span> a su mamá y a sus tías. 4-5 mesas por turno con relleno gratis. Con Espolvo cada relleno es botón obligatorio. Cero olvidos en 1 mes.",
+    "sig": "Don Carlos H.",
+    "role": "Churrería Don Churro, Cuernavaca, Morelos"
+  },
+  "thefts": [
+    {
+      "title": "Rellenos 'olvidados' al cobrar",
+      "rob": "Empleada cobra churros simples ($15 c/u) cuando llevaban cajeta ($35 c/u). 'Olvido' a clientas amigas. 8-12 churros por turno = $160-240.",
+      "fix": "Rellenos <strong>cobrados por botón obligatorio</strong>. Sistema marca color al cliente. Cero rellenos servidos sin cobro."
+    },
+    {
+      "title": "Chocolate caliente 'aguado' para rendir",
+      "rob": "Cocinera echa agua extra al chocolate caliente para 'rendir' 2-3 tazas más. Cliente regular nota y deja de venir. Pérdida silenciosa.",
+      "fix": "Receta de chocolate <strong>con gramaje fijo de cacao por taza</strong>. Inventario cacao cuadra con tazas vendidas. Diferencias alertan."
+    },
+    {
+      "title": "Churros para llevar 'incompletos'",
+      "rob": "Empleado empaca 18 churros cobrando 20. Diferencia se queda aparte para vender o llevar. $30-50 por orden.",
+      "fix": "Empaque con <strong>conteo digital obligatorio</strong>. Sistema verifica cantidad antes de cerrar. Cliente recibe lo que paga."
+    }
+  ]
+}

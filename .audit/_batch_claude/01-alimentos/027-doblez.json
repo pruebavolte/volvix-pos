@@ -1,0 +1,104 @@
+{
+  "slug": "doblez",
+  "brand": "Doblez",
+  "tagline": "El sistema para creperías donde el relleno se cobra completo y la masa rinde lo que debe",
+  "giro": "crepería",
+  "giroPlural": "creperías",
+  "vibe": "warmCozy",
+  "palette": {
+    "bg": "#FAF3E8",
+    "surface": "#FFFFFF",
+    "paper": "#F0E2C8",
+    "ink": "#2A1A0F",
+    "ink2": "#4A3020",
+    "muted": "#7A5A38",
+    "line": "#D5C49B",
+    "accent": "#A0522D",
+    "accent2": "#E68A50"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Italianno",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para creperías mexicanas · 2026",
+    "h1": "Cada <em>crepe</em>,<br>cada <em>relleno</em>,<br>cobrado.",
+    "deck": "El POS hecho para que cada crepe dulce o salada se cobre por su relleno real, la masa no se 'aguada' al medio servicio, y los combos premium no se confundan con simples.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?crepe,nutella,french&q=85",
+    "heroAlt": "Crepe doblada con nutella y plátano",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?crepe,sweet&q=80", "tag": "Crepe dulce", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?crepe,savory&q=80", "tag": "Crepe salada", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?nutella,banana&q=80", "tag": "Nutella y plátano", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ham,cheese&q=80", "tag": "Jamón y queso", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?strawberry,crepe&q=80", "tag": "Fresa y crema", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?spinach,mushroom&q=80", "tag": "Espinaca y champi", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?creperie,interior&q=80", "tag": "Creperia francesa", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?crepe,maker&q=80", "tag": "Plancha redonda", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?dessert,coffee&q=80", "tag": "Postre con café", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?crepe,making&q=80", "caption": "Crepero estira la masa"},
+      {"url": "https://source.unsplash.com/random/800x600/?fillings,fresh&q=80", "caption": "Rellenos listos al despacho"},
+      {"url": "https://source.unsplash.com/random/800x600/?pareja,crepe&q=80", "caption": "Pareja comparte crepe dulce"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · plancha · en vivo",
+    "title": "Tu cocina, <em>crepe por crepe</em>, sin perderse rellenos",
+    "deck": "Cada orden con rellenos detallados. KDS muestra: 1 crepe dulce con nutella + fresa + crema, 1 crepe salada con jamón + queso + champiñón. Crepero ve todo.",
+    "secondary": "En las creperías, un relleno premium 'olvidado' al cobrar son $25-40 cada vez.",
+    "data": {
+      "orders": [
+        {"table": "M03", "name": "Pareja cumpleaños", "state": "urgent", "items": ["Crepe dulce|nutella + fresa + crema", "Crepe salada|jamón queso", "2 cappuccinos"], "waitMin": 10},
+        {"table": "M07", "name": "Sra. Ríos", "state": "prep", "items": ["1 crepe veggie|espinaca + champi + queso", "1 té"], "waitMin": 7},
+        {"table": "M02", "name": "Familia López", "state": "queue", "items": ["2 crepes kids|nutella simple", "2 leches"], "waitMin": 5},
+        {"table": "M01", "name": "Don Andrés", "state": "ready", "items": ["1 crepe café au lait", "1 espresso"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "KDS por tipo dulce/salada", "d": "Estación dulce: nutella, fresa, plátano. Salada: jamón, queso, espinaca. Crepero ve sin equivocarse. Cero crepes mal armadas."},
+    {"ico": "barcode", "h": "Cobro automático por relleno", "d": "Cada relleno premium suma al ticket. Sistema bloquea si crepe sale sin extras facturados. Cero rellenos 'gratis'."},
+    {"ico": "archive", "h": "Inventario de masa y rellenos", "d": "Masa: 6 kg. Nutella: 2 kg. Fresa: 3 kg. Jamón: 4 kg. Cuando baja, alerta."},
+    {"ico": "percent", "h": "Margen por crepe premium vs simple", "d": "Crepe simple $35 costo $12. Premium 3 rellenos $95 costo $32. Sabes qué empujar."},
+    {"ico": "split", "h": "Crepe para compartir dividida", "d": "Pareja pide 1 crepe XL para 2. Sistema divide al cobrar. Cero matemáticas al cierre."},
+    {"ico": "calendar", "h": "Combos para domingo familiar", "d": "Domingo familiar explota. Sistema sugiere preparar 5kg fresa y 3kg nutella extra. Cero faltas a las 11 am."}
+  ],
+  "stats": [
+    {"v": "84", "l": "Crepes servidas hoy"},
+    {"v": "58", "l": "% con relleno premium", "suffix": "%"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi crepero <span class=\"hl\">'olvidaba' cobrar la nutella o la crema</span> a sus clientas favoritas. Con Doblez cada relleno es botón obligatorio. En 2 meses recuperé $11 mil en rellenos premium.",
+    "sig": "Doña Yolanda P.",
+    "role": "Creperia Le Doblez, San Ángel, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Rellenos premium 'olvidados' al cobrar",
+      "rob": "Crepero pone nutella + crema sin marcarlo en sistema. A clientes amigos. 6-10 crepes por turno = $180-320 al día en rellenos regalados.",
+      "fix": "Rellenos <strong>cobrados por botón obligatorio</strong>. Sistema bloquea crepe sin extras facturados. Cero 'cortesía' al cariño."
+    },
+    {
+      "title": "Crepe salada 'sin queso' que sí llevaba",
+      "rob": "Crepero pone queso pero cobra como sin queso ($20 menos). Diferencia se queda. 8-12 crepes por turno = $160-240.",
+      "fix": "Rellenos <strong>configurados como obligatorios o opcionales</strong>. Sistema cobra automático según los seleccionados. Cero precios al ojo."
+    },
+    {
+      "title": "Masa 'aguada' para rendir más",
+      "rob": "Crepero echa más leche a la masa para 'rendir' 4-5 crepes más por lote. Textura cambia, cliente nota y deja de venir.",
+      "fix": "Receta de masa <strong>con litros y huevos fijos por lote</strong>. Sistema cuadra crepes producidas vs masa usada. Diferencias arriba de 8% alertan."
+    }
+  ]
+}

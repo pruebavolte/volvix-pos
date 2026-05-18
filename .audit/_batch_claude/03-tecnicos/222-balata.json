@@ -1,0 +1,106 @@
+{
+  "slug": "balata",
+  "brand": "Balata",
+  "tagline": "El sistema para tiendas de refacciones que venden con la pieza correcta",
+  "giro": "tienda de refacciones",
+  "giroPlural": "tiendas de refacciones",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#1A1A1D",
+    "surface": "#23232A",
+    "paper": "#2B2B33",
+    "ink": "#F2F2F5",
+    "ink2": "#CECED4",
+    "muted": "#82828A",
+    "line": "#34343C",
+    "accent": "#3498DB",
+    "accent2": "#5BAEEC"
+  },
+  "fonts": {
+    "display": "Saira Condensed",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas de refacciones · 2026",
+    "h1": "Cada <em>número de parte</em>,<br>cada <em>aplicación</em>,<br>en sistema.",
+    "deck": "El POS hecho para tiendas de refacciones que necesitan saber qué balata va en qué Tsuru de qué año. Inventario por marca, año, modelo. Cero ventas equivocadas.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver catálogo en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?auto-parts,shelves,store&q=80",
+    "heroAlt": "Tienda de refacciones automotrices con estantería organizada",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?auto-parts,store&q=80", "tag": "Tienda principal", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?brake-pads,boxes&q=80", "tag": "Balatas en caja", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?spark-plug,boxes&q=80", "tag": "Bujías", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?oil-filter,car&q=80", "tag": "Filtros aceite", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?warehouse,parts&q=80", "tag": "Almacén", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?battery,car&q=80", "tag": "Baterías", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?retail,auto&q=80", "tag": "Mostrador", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?belt,car&q=80", "tag": "Bandas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?inventory,counter&q=80", "tag": "Inventario", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?barcode,scan&q=80", "caption": "Cada caja con código de barras escaneable"},
+      {"url": "https://source.unsplash.com/random/800x600/?catalog,book&q=80", "caption": "Catálogo digital por VIN o placas"},
+      {"url": "https://source.unsplash.com/random/800x600/?mechanic,parts&q=80", "caption": "Talleres compran en línea con cuenta"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu inventario, <em>SKU por SKU</em>",
+    "deck": "Cada balata por marca, modelo y año. Si tienes balatas para Tsuru 2018 pero no para Aveo 2020, lo ves en pantalla. Cero venta de pieza equivocada.",
+    "secondary": "El 30% de las devoluciones son por pieza que no aplicaba. Catálogo correcto = cero devoluciones.",
+    "data": {
+      "product": "Balatas delanteras",
+      "tallas": ["Tsuru 2015-2017", "Aveo 2018-2020", "Vento 2017+", "Versa 2016+", "Sentra 2014-2018", "Spark 2017+", "Beat 2019+", "March 2018+"],
+      "stock": [
+        {"color": "Brembo Premium", "vals": [8, 5, 12, 7, 3, 6, 4, 9]},
+        {"color": "Akebono OEM", "vals": [12, 8, 6, 10, 5, 4, 8, 7]},
+        {"color": "Génericas BR", "vals": [22, 18, 25, 20, 15, 12, 18, 16]}
+      ],
+      "lowThreshold": 5
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Catálogo por VIN", "d": "Cliente da placas o VIN. Sistema dice exactamente qué balata, qué filtro, qué bujía. Cero ventas equivocadas."},
+    {"ico": "archive", "h": "Inventario por aplicación", "d": "Tu balata Brembo no es para Aveo, es para Tsuru. El sistema te lo dice antes de venderla."},
+    {"ico": "truck", "h": "Pedido a proveedor", "d": "Cuando llegas a stock mínimo, el sistema te genera pedido a tu proveedor. Cero quedarte sin balatas en martes."},
+    {"ico": "percent", "h": "Crédito a talleres", "d": "Talleres con crédito a 15 días. Sistema avisa cuando se acerca límite. Cero deudas que se pierden."},
+    {"ico": "monitor", "h": "Cotizaciones por WhatsApp", "d": "Taller manda placas por chat. Mostrador cotiza en 30 segundos con el catálogo correcto."},
+    {"ico": "gift", "h": "Devoluciones rastreadas", "d": "Cada devolución con razón: 'no aplicaba', 'defectuosa', 'cliente desistió'. Sabes qué pieza tiene problema."}
+  ],
+  "stats": [
+    {"v": "4,820", "l": "SKUs en catálogo"},
+    {"v": "47", "l": "Ventas hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Antes <span class=\"hl\">vendíamos balatas equivocadas</span> al menos 3 veces por semana. Devolución, cliente enojado, pérdida de tiempo. Con Balata el catálogo va por VIN. Cero errores en 4 meses.",
+    "sig": "Don Polo M.",
+    "role": "Refaccionaria El Polo, Tultitlán, EDOMEX"
+  },
+  "thefts": [
+    {
+      "title": "Piezas Premium vendidas como genéricas",
+      "rob": "Empleado cobra balatas genéricas ($350) pero entrega Brembo ($890) a su compadre. Diferencia: $540 por venta. Pasa 2-3 veces por semana.",
+      "fix": "Cada caja se <strong>escanea al venderse</strong>. SKU coincide con precio. Cero descuentos manuales sin tu autorización por WhatsApp."
+    },
+    {
+      "title": "Inventario 'ajustado' por mermas falsas",
+      "rob": "Empleado reporta 5 baterías 'defectuosas' al mes ($1,200 c/u). En realidad se vendieron sin ticket. Pérdida: $6,000 mensuales.",
+      "fix": "Baja por merma requiere <strong>foto y autorización</strong>. Inventario físico semanal vs sistema. Diferencias se investigan."
+    },
+    {
+      "title": "Crédito de taller no cobrado",
+      "rob": "Taller debe $25,000, empleado se lleva un sobre con efectivo y dice que pagó. Tú no te enteras hasta 3 meses después.",
+      "fix": "Cada abono se registra con <strong>foto del comprobante o transferencia</strong>. Saldo del taller siempre visible. Sin sorpresas."
+    }
+  ]
+}

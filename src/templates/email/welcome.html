@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bienvenido a Volvix POS</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a1a;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f4f6f8;">
+  <tr>
+    <td align="center" style="padding:24px 12px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);padding:36px 24px;text-align:center;">
+            <h1 style="margin:0;color:#ffffff;font-size:26px;font-weight:700;letter-spacing:-0.5px;">Bienvenido a Volvix POS</h1>
+            <p style="margin:8px 0 0;color:#dbeafe;font-size:15px;">Tu cuenta esta lista para comenzar</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px 28px 16px;">
+            <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Hola,</p>
+            <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Te damos la bienvenida a <strong>{{business_name}}</strong>. Tu cuenta de Volvix POS ha sido creada exitosamente y estamos emocionados de acompanarte en el crecimiento de tu negocio.</p>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f9fafb;border-radius:8px;margin:20px 0;">
+              <tr>
+                <td style="padding:20px;">
+                  <p style="margin:0 0 8px;font-size:13px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Datos de tu cuenta</p>
+                  <p style="margin:0 0 6px;font-size:15px;"><strong>Email:</strong> {{owner_email}}</p>
+                  <p style="margin:0 0 6px;font-size:15px;"><strong>Tenant ID:</strong> <code style="background:#e5e7eb;padding:2px 8px;border-radius:4px;font-size:13px;">{{tenant_id}}</code></p>
+                  <p style="margin:0;font-size:13px;color:#6b7280;">Guarda este Tenant ID, lo necesitaras para iniciar sesion.</p>
+                </td>
+              </tr>
+            </table>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+              <tr>
+                <td align="center" style="padding:8px 0 24px;">
+                  <a href="{{login_url}}" style="display:inline-block;background:#1e3a8a;color:#ffffff;text-decoration:none;font-weight:600;font-size:16px;padding:14px 36px;border-radius:8px;">Iniciar sesion</a>
+                </td>
+              </tr>
+            </table>
+            <h3 style="margin:24px 0 12px;font-size:18px;color:#1e3a8a;">Primeros pasos</h3>
+            <ol style="margin:0 0 20px;padding-left:20px;font-size:15px;line-height:1.8;">
+              <li>Personaliza tu catalogo de productos y precios</li>
+              <li>Configura impresoras, cajas y formas de pago</li>
+              <li>Realiza tu <a href="{{login_url}}/tutorial-primer-venta" style="color:#3b82f6;">primera venta de prueba</a></li>
+              <li>Invita a tu equipo desde el panel de usuarios</li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 28px 28px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fef3c7;border-left:4px solid #f59e0b;border-radius:6px;">
+              <tr>
+                <td style="padding:14px 16px;">
+                  <p style="margin:0;font-size:14px;color:#78350f;"><strong>Soporte 24/7:</strong> Si tienes dudas, llamanos al {{support_phone}} o responde a este correo.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f9fafb;padding:20px 28px;text-align:center;font-size:12px;color:#6b7280;border-top:1px solid #e5e7eb;">
+            <p style="margin:0 0 6px;">Volvix POS &mdash; Sistema de punto de venta para tu negocio.</p>
+            <p style="margin:0;">Este correo fue enviado a {{owner_email}}. Si no creaste esta cuenta, contactanos de inmediato.</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

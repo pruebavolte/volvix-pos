@@ -1,0 +1,106 @@
+{
+  "slug": "tomo",
+  "brand": "Tomo",
+  "tagline": "El sistema para manguerías que sí cuidan cada serie",
+  "giro": "mangas",
+  "giroPlural": "mangerías",
+  "vibe": "playful",
+  "palette": {
+    "bg": "#FAF5F8",
+    "surface": "#FFFFFF",
+    "paper": "#F1E8EE",
+    "ink": "#1A0F1A",
+    "ink2": "#3A2138",
+    "muted": "#8C6E84",
+    "line": "#E6D4DF",
+    "accent": "#E91E63",
+    "accent2": "#FFC107"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para mangerías · 2026",
+    "h1": "Cada <em>tomo</em>,<br>cada <em>serie</em>,<br>cada otaku.",
+    "deck": "El punto de venta hecho para mangerías: stock por serie y número, preventa de tomos nuevos, ediciones limitadas, fichas de lector, eventos cosplay.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?manga,anime,japan&q=85",
+    "heroAlt": "Mangería con tomos en estantería",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?manga,shelves&q=80", "tag": "Series completas", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?shonen,manga&q=80", "tag": "Shonen", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?shojo,manga&q=80", "tag": "Shojo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?seinen,manga&q=80", "tag": "Seinen", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?anime,merchandise&q=80", "tag": "Merch anime", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?manga,artbook&q=80", "tag": "Artbooks", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?anime,store&q=80", "tag": "Mangería", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?manga,limited&q=80", "tag": "Ediciones limitadas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?cosplay,event&q=80", "tag": "Cosplay", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?manga,reading&q=80", "caption": "Lector revisa serie"},
+      {"url": "https://source.unsplash.com/random/800x600/?manga,collection&q=80", "caption": "Colección completa"},
+      {"url": "https://source.unsplash.com/random/800x600/?anime,convention&q=80", "caption": "Convenciones y eventos"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>serie por tomo</em>",
+    "deck": "Cada manga con serie y número exacto. Preventas de tomos nuevos. Ediciones limitadas con reserva. Lectores notificados cuando llega su serie.",
+    "secondary": "En mangerías, perder el tomo 25 de One Piece para tu cliente leal pierde su colección.",
+    "data": {
+      "product": "Stock por serie",
+      "tallas": ["Shonen", "Shojo", "Seinen", "Josei", "Merch"],
+      "stock": [
+        {"color": "Tomos sueltos", "vals": [248, 186, 142, 86, 124]},
+        {"color": "Series completas", "vals": [24, 18, 14, 6, 0]},
+        {"color": "Ediciones limit.", "vals": [12, 8, 6, 4, 18]}
+      ],
+      "lowThreshold": 5
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por serie y tomo", "d": "Cada manga con serie y número. Sabes qué series mueven, cuáles se quedan en estantería."},
+    {"ico": "bookmark", "h": "Preventas de tomos nuevos", "d": "Cliente reserva tomo nuevo de Chainsaw Man. Cuando llega, sistema le avisa por WhatsApp. Cero tomos en bolsa."},
+    {"ico": "gift", "h": "Ficha de lector con su serie", "d": "Su serie, sus tomos faltantes, su nivel. Cuando llega tomo, sistema le manda foto."},
+    {"ico": "calendar", "h": "Eventos cosplay y firmas", "d": "Agenda evento cosplay. Cobra inscripción por sistema. Premios desde stock. Cero confusiones."},
+    {"ico": "split", "h": "Combos serie completa", "d": "Arma combo (5 tomos seguidos con 10% off). Sistema descuenta los 5. Vendedora vende serie, no tomo."},
+    {"ico": "percent", "h": "Comisiones por vendedora", "d": "Define % por tomo o serie. Vendedora ve en vivo. Cero peleas."}
+  ],
+  "stats": [
+    {"v": "1,684", "l": "Tomos en stock"},
+    {"v": "94", "l": "Vendidos hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis lectores son obsesivos con sus colecciones. <span class=\"hl\">Si se me iba el tomo 47, perdía a mi cliente leal</span>. Con Tomo el sistema reserva el siguiente y avisa. Cero clientes perdidos.",
+    "sig": "Yuko T.",
+    "role": "Mangería en Tepito, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Ediciones limitadas revendidas a sobreprecio",
+      "rob": "Manga edición limitada se agota en horas. Empleado aparta tomos para amigos y revende afuera al doble. Tus lectores leales sin tomo.",
+      "fix": "Ediciones limitadas <strong>se reservan solo por sistema con anticipo</strong>. Lista de espera digital. Cero piezas en bolsa del vendedor."
+    },
+    {
+      "title": "Tomos premium 'mermados'",
+      "rob": "Artbook o tomo de lujo ($800-2,500). Empleado marca como 'dañado en transporte' y se lo lleva. Son 4-6 piezas al mes.",
+      "fix": "Mermas <strong>requieren foto del defecto y autorización del gerente</strong>. Cada baja con SKU y motivo."
+    },
+    {
+      "title": "Eventos cobrados por fuera",
+      "rob": "Inscripción a evento cosplay $200 en efectivo. Empleado registra $50 y se queda con la diferencia. Tus clientes pagan más de lo que cobras.",
+      "fix": "Eventos <strong>se cobran por sistema con código QR de inscripción</strong>. Cero inscritos sin registro."
+    }
+  ]
+}

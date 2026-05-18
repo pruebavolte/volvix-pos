@@ -1,0 +1,104 @@
+{
+  "slug": "agave",
+  "brand": "Agave",
+  "tagline": "El sistema para tequilerías bar donde cada caballito se sirve al ml y las botellas no se 'evaporan'",
+  "giro": "tequilería bar",
+  "giroPlural": "tequilerías bar",
+  "vibe": "darkPremium",
+  "palette": {
+    "bg": "#1A1208",
+    "surface": "#2A1B10",
+    "paper": "#3A2818",
+    "ink": "#F0E2C0",
+    "ink2": "#D0B580",
+    "muted": "#8A7045",
+    "line": "#4D3520",
+    "accent": "#D4AF37",
+    "accent2": "#7C4D3A"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Italianno",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tequilerías bar mexicanas · 2026",
+    "h1": "Cada <em>caballito</em>,<br>cada <em>botella</em>,<br>rastreado.",
+    "deck": "El POS hecho para que el tequila reposado se sirva al ml exacto, las botellas premium no se 'evaporen' del bar, y cada paloma se cobre con la marca correcta.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?tequila,bar,agave&q=85",
+    "heroAlt": "Caballitos de tequila reposado con sal y limón",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?tequila,shot&q=80", "tag": "Caballito reposado", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?paloma,drink&q=80", "tag": "Paloma clásica", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?margarita,salt&q=80", "tag": "Margarita salada", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?agave,plant&q=80", "tag": "Agave azul", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bartender,tequila&q=80", "tag": "Bartender experto", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?reposado,bottle&q=80", "tag": "Botella reposado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?tequila,bar,dark&q=80", "tag": "Bar oscuro", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sangrita,drink&q=80", "tag": "Sangrita acompañante", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?mexican,bar&q=80", "tag": "Ambiente mexicano", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?bartender,pour&q=80", "caption": "Bartender sirve al jigger"},
+      {"url": "https://source.unsplash.com/random/800x600/?bottles,backbar&q=80", "caption": "Backbar con botellas premium"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,bar&q=80", "caption": "Cliente prueba reposado"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Bar · cocina · en vivo",
+    "title": "Tu bar, <em>shot por shot</em>, sin perderse ml",
+    "deck": "Cada orden con marca y ml. KDS muestra: 1 caballito Don Julio 70 reposado, 2 palomas Tradicional, 1 margarita Centenario. Bartender ve todo.",
+    "secondary": "En las tequilerías, 10ml extra por shot premium son $30-50 que se acumulan a $400-600 al turno.",
+    "data": {
+      "orders": [
+        {"table": "M03", "name": "Don Octavio", "state": "urgent", "items": ["1 Don Julio 70|45ml", "Sangrita", "Botanas"], "waitMin": 6},
+        {"table": "M07", "name": "Pareja", "state": "prep", "items": ["1 margarita Centenario", "1 paloma reposado", "Guacamole"], "waitMin": 5},
+        {"table": "M02", "name": "Cuates", "state": "queue", "items": ["4 caballitos|2 reposado 2 añejo", "Limones y sal"], "waitMin": 4},
+        {"table": "M05", "name": "Sr. Ramírez", "state": "ready", "items": ["1 cata 3 tequilas|45ml c/u"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Jigger conectado al sistema", "d": "Cada shot pesado al servir. 45ml reposado = $X. Sistema verifica. Cero shots 'al ojo' que descuadran botella."},
+    {"ico": "archive", "h": "Inventario por botella premium", "d": "Don Julio 70: 4 botellas. Casa Dragones: 2 botellas. 1800 reposado: 8 botellas. Sistema rastrea cada apertura."},
+    {"ico": "monitor", "h": "Niveles de botella visibles", "d": "Bartender ve cuánto queda en cada botella en pantalla. Cero botellas que se 'acaban' pero seguían medio llenas."},
+    {"ico": "percent", "h": "Margen por cóctel premium", "d": "Margarita Casa Dragones $245 costo $98. Paloma reposado $145 costo $42. Sistema te dice qué empujar."},
+    {"ico": "split", "h": "Cuenta dividida sin pelearse", "d": "Mesa de 6, cada quien pidió diferente. Sistema divide al instante. Cero matemáticas al cierre."},
+    {"ico": "calendar", "h": "Catas y eventos especiales", "d": "Sábado: cata de 5 tequilas para 12 personas. Sistema agenda botellas, bartender, salón. Cero conflictos."}
+  ],
+  "stats": [
+    {"v": "284", "l": "Shots servidos hoy"},
+    {"v": "18", "l": "Botellas premium activas"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi bartender <span class=\"hl\">'evaporaba' 100ml por botella premium</span> y los guardaba en una botella aparte para vender. Con Agave cada ml se cuadra. Identifiqué la fuga, recuperé $32 mil en 3 meses.",
+    "sig": "Don Sergio H.",
+    "role": "Tequilería La Catedral, Tequila, Jalisco"
+  },
+  "thefts": [
+    {
+      "title": "Tragos 'cortesía' fuera de control",
+      "rob": "Bartender da shots gratis al cuate del bar. 'Total, es la casa.' 8-12 shots premium por turno = $400-700 al día en tequila regalado.",
+      "fix": "Cortesías requieren <strong>código del gerente y motivo</strong>. Sistema lleva conteo. Si pasa de 3 al día, alerta al dueño."
+    },
+    {
+      "title": "Botellas premium 'evaporadas'",
+      "rob": "Bartender sirve shot al cliente y guarda 50ml por botella en frasco aparte. Vende aparte después. 3-4 botellas por semana = $3-5 mil.",
+      "fix": "Botellas con <strong>nivel monitoreado digital y código QR único</strong>. Sistema cuadra ml servidos vs vendidos. Diferencias arriba de 3% alertan."
+    },
+    {
+      "title": "Margaritas con tequila barato cobradas premium",
+      "rob": "Cliente pide margarita Casa Dragones ($245). Bartender usa tequila regular ($120). Cliente no nota por la lima y sal. $125 por margarita cambiada.",
+      "fix": "Cada cóctel <strong>asignado a marca específica en sistema</strong>. Bartender descuenta de botella correcta. Auditoría inventarios semanal."
+    }
+  ]
+}

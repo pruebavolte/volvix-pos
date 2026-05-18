@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tutorial 04 — Modo offline | Volvix POS</title>
+<link rel="stylesheet" href="_shared.css"></head>
+<body><div class="tutorial-container" id="container">
+<h1>Tutorial 04 — Modo offline (sin internet)</h1>
+<div class="subtitle">Banner offline → Cobrar igual → Reconectar → Sync automático</div>
+<div class="stage">
+  <div class="step step-1"><h2>Paso 1 · Pierdes conexión</h2>
+    <div class="mock">
+      <div class="banner banner-warn">⚠️ Sin internet — modo OFFLINE activado</div>
+      <h3>POS</h3>
+      <p style="font-size:.85rem;color:#475569">No te preocupes: puedes seguir vendiendo. Las ventas quedan guardadas en el dispositivo.</p>
+      <div class="grid" style="margin-top:14px"><div class="card">Latte $45</div><div class="card">Pan $15</div><div class="card">Jugo $25</div></div>
+    </div></div>
+  <div class="step step-2"><h2>Paso 2 · Cobra normalmente</h2>
+    <div class="mock">
+      <div class="banner banner-warn">⚠️ Offline — venta queda en cola</div>
+      <h3>Carrito</h3>
+      <div class="row"><span>Latte</span><span>$45</span></div>
+      <div class="row"><span>Pan</span><span>$15</span></div>
+      <div class="row"><b>Total</b><b>$60</b></div>
+      <button class="btn">💳 Cobrar $60</button>
+      <div class="cursor" style="left:24%;top:78%">👆</div>
+    </div></div>
+  <div class="step step-3"><h2>Paso 3 · Ticket impreso, venta pendiente</h2>
+    <div class="mock">
+      <div class="receipt">
+        --- VOLVIX POS ---<br>
+        Latte    $45<br>
+        Pan      $15<br>
+        TOTAL    $60<br>
+        ⚠️ Pendiente de sync
+      </div>
+      <p style="font-size:.8rem;color:#475569;margin-top:8px">3 ventas en cola para subir</p>
+    </div></div>
+  <div class="step step-4"><h2>Paso 4 · Vuelve internet</h2>
+    <div class="mock">
+      <div class="banner banner-ok">✅ Internet restaurado — sincronizando...</div>
+      <h3>Sincronización en progreso</h3>
+      <div style="background:#e0f2fe;border-radius:6px;padding:6px;margin-top:8px">
+        <div style="background:#0ea5e9;height:8px;border-radius:3px;width:70%"></div>
+      </div>
+      <p style="font-size:.85rem;margin-top:8px">2 de 3 ventas subidas...</p>
+    </div></div>
+  <div class="step step-5"><h2>Paso 5 · Todo sincronizado ✓</h2>
+    <div class="mock">
+      <div class="banner banner-ok">✅ 3 ventas sincronizadas correctamente</div>
+      <h3>Estado del sistema</h3>
+      <div class="row"><span>Conectado</span><b style="color:#10b981">● Online</b></div>
+      <div class="row"><span>En cola</span><b>0 ventas</b></div>
+      <div class="row"><span>Última sync</span><b>hace 1 seg</b></div>
+      <p style="font-size:.8rem;color:#475569;margin-top:14px">Volvix protege tus ventas aunque te vayas la luz o el WiFi.</p>
+    </div></div>
+</div>
+<div class="progress"><div class="progress-bar"></div></div>
+<div class="caption">Reproduciendo en bucle (25s).</div>
+<div class="controls">
+<button onclick="document.getElementById('container').classList.toggle('paused')">⏯️ Pausar/Reanudar</button>
+<button onclick="location.reload()">🔄 Reiniciar</button>
+</div></div></body></html>

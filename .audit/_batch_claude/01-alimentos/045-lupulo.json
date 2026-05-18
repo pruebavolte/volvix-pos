@@ -1,0 +1,104 @@
+{
+  "slug": "lupulo",
+  "brand": "Lúpulo",
+  "tagline": "El sistema para cervecerías artesanales donde cada barril se mide al ml y los growlers se cobran completos",
+  "giro": "cervecería artesanal",
+  "giroPlural": "cervecerías artesanales",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#1A1810",
+    "surface": "#2A271A",
+    "paper": "#3A3625",
+    "ink": "#F0E5C0",
+    "ink2": "#D0BC80",
+    "muted": "#8A7548",
+    "line": "#4D3F20",
+    "accent": "#FFB300",
+    "accent2": "#558B2F"
+  },
+  "fonts": {
+    "display": "Anton",
+    "body": "Inter",
+    "script": "Permanent Marker",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para cervecerías artesanales mexicanas · 2026",
+    "h1": "Cada <em>barril</em>,<br>cada <em>tap</em>,<br>medido.",
+    "deck": "El POS hecho para que cada cerveza artesanal se sirva al ml exacto, los barriles no se 'evaporen' del tap, y los growlers para llevar se cobren con el contenido real.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?craft,beer,brewery&q=85",
+    "heroAlt": "Tarro de cerveza IPA recién servida",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?craft,beer&q=80", "tag": "Cerveza artesanal", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ipa,hops&q=80", "tag": "IPA con lúpulo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?stout,dark&q=80", "tag": "Stout oscura", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?wheat,beer&q=80", "tag": "Trigo wheat", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?growler,bottle&q=80", "tag": "Growler para llevar", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tap,beer&q=80", "tag": "Taps en barra", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?taproom,industrial&q=80", "tag": "Taproom industrial", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?brewery,fermenter&q=80", "tag": "Fermentadores", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?beer,flight&q=80", "tag": "Flight de cata", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?bartender,tap&q=80", "caption": "Bartender llena tarro"},
+      {"url": "https://source.unsplash.com/random/800x600/?growler,fill&q=80", "caption": "Growler llenándose"},
+      {"url": "https://source.unsplash.com/random/800x600/?customer,beer&q=80", "caption": "Cliente prueba flight"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Bar · taps · en vivo",
+    "title": "Tu bar, <em>tap por tap</em>, al ml exacto",
+    "deck": "Cada cerveza con tap y ml. KDS muestra: 1 IPA pinta 470ml, 2 stouts pintas, 1 growler trigo 1lt. Sistema descuenta del barril correcto.",
+    "secondary": "En las cervecerías artesanales, 30ml extra por pinta servida son $8-15 que se acumulan a $300-500 al turno.",
+    "data": {
+      "orders": [
+        {"table": "M03", "name": "Don Andrés", "state": "urgent", "items": ["1 pinta IPA Lúpulo", "1 papas trufa"], "waitMin": 4},
+        {"table": "M01", "name": "Cuates", "state": "prep", "items": ["4 pintas|2 IPA 1 stout 1 trigo", "Tabla quesos"], "waitMin": 5},
+        {"table": "M07", "name": "Pareja", "state": "queue", "items": ["Flight 5 cervezas|150ml c/u", "Botana mixta"], "waitMin": 6},
+        {"table": "TOGO-2", "name": "Sra. Patricia", "state": "ready", "items": ["1 growler 1lt IPA", "1 growler 1lt stout"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Niveles de barril en vivo", "d": "IPA: 18 lt restantes. Stout: 12 lt. Trigo: 22 lt. Bartender ve cuándo cambiar barril. Cero clientes con tap vacío."},
+    {"ico": "barcode", "h": "Flow meter en cada tap", "d": "Cada ml servido se cuenta. Pinta = 470ml. Growler = 1 lt. Sistema cuadra barril vs ventas. Diferencias alertan."},
+    {"ico": "archive", "h": "Inventario por estilo y batch", "d": "IPA West Coast batch 47. Stout imperial batch 22. Cada batch rastreado. Cliente sabe qué bebe."},
+    {"ico": "truck", "h": "Growlers con llenado verificado", "d": "Growler de 1lt se llena con báscula. Sistema verifica peso correcto. Cero growlers a medias."},
+    {"ico": "percent", "h": "Margen por estilo", "d": "IPA costo $18 vendes $85. Stout imperial costo $24 vendes $95. Sistema te dice cuál empujar."},
+    {"ico": "calendar", "h": "Lanzamientos especiales", "d": "Sábado: lanzamiento Imperial Stout edición limitada. Sistema agenda producción, redes, agenda cata."}
+  ],
+  "stats": [
+    {"v": "342", "l": "Pintas servidas hoy"},
+    {"v": "8", "l": "Taps activos"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis bartenders <span class=\"hl\">'llenaban hasta arriba' las pintas a sus cuates</span> y descuadraba el barril. Con Lúpulo cada ml se cuenta. En 1 mes recuperé $9 mil que se iban en cerveza regalada.",
+    "sig": "Don Federico R.",
+    "role": "Cervecería Lúpulo Loco, Roma Norte, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Pintas 'llenadas de más' al cuate",
+      "rob": "Bartender llena 520ml cuando la pinta es 470ml. A clientes amigos. 12-18 pintas por turno = $200-360 al día en cerveza regalada.",
+      "fix": "Pintas <strong>medidas con flow meter conectado al sistema</strong>. Sistema bloquea ml extras sin código. Cero pintas 'generosas'."
+    },
+    {
+      "title": "Barril 'evaporado' al limpiar",
+      "rob": "Bartender reporta 5 lt 'evaporados al limpiar' por turno. En realidad sirve copas sin marcar. $300-500 al turno en cerveza no facturada.",
+      "fix": "Cada barril con <strong>flow meter que cuenta cada ml</strong>. Sistema cuadra contra ventas. Diferencias arriba de 2% alertan al dueño."
+    },
+    {
+      "title": "Growlers para llevar 'incompletos'",
+      "rob": "Bartender llena growler con 800ml cobrando 1lt. Diferencia se queda en barril aparte. $40-60 por growler. 5 al día = $200-300.",
+      "fix": "Growlers con <strong>báscula obligatoria al llenar y al sellar</strong>. Sistema verifica peso = volumen contratado. Cero growlers cortos."
+    }
+  ]
+}

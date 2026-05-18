@@ -1,0 +1,104 @@
+{
+  "slug": "gusano",
+  "brand": "Gusano",
+  "tagline": "El sistema para mezcalerías donde cada copita se sirve al ml y las botellas pequeñas no se 'cambian'",
+  "giro": "mezcalería",
+  "giroPlural": "mezcalerías",
+  "vibe": "darkPremium",
+  "palette": {
+    "bg": "#1A0A05",
+    "surface": "#2B1410",
+    "paper": "#3B1E18",
+    "ink": "#F0DCB8",
+    "ink2": "#D0B080",
+    "muted": "#8A6845",
+    "line": "#4D2818",
+    "accent": "#C44536",
+    "accent2": "#D4AF37"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Italianno",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para mezcalerías mexicanas · 2026",
+    "h1": "Cada <em>copita</em>,<br>cada <em>maestro</em>,<br>rastreado.",
+    "deck": "El POS hecho para que el mezcal de cada maestro mezcalero se cobre completo, las botellas chicas no se 'cambien' por mezcal genérico, y la sal de gusano se cobre con cada copita.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?mezcal,oaxaca,copita&q=85",
+    "heroAlt": "Copita de mezcal con sal de gusano y naranja",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?mezcal,bottle&q=80", "tag": "Mezcal joven", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mezcal,glass&q=80", "tag": "Copita artesanal", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?gusano,sal&q=80", "tag": "Sal de gusano", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?orange,slice&q=80", "tag": "Naranja para acompañar", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?agave,wild&q=80", "tag": "Agave silvestre", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?palenque,oaxaca&q=80", "tag": "Palenque oaxaqueño", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?mezcal,bar&q=80", "tag": "Mezcalería íntima", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tobala,wild&q=80", "tag": "Tobalá silvestre", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?oaxacan,culture&q=80", "tag": "Cultura oaxaqueña", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?bartender,mezcal&q=80", "caption": "Bartender sirve copita"},
+      {"url": "https://source.unsplash.com/random/800x600/?mezcal,collection&q=80", "caption": "Colección de maestros"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,cata&q=80", "caption": "Cliente cata mezcal joven"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Bar · cata · en vivo",
+    "title": "Tu bar, <em>copita por copita</em>, al ml exacto",
+    "deck": "Cada orden con maestro y mezcal. KDS muestra: 1 copita tobalá Don Aquilino 45ml, 1 espadín Real Minero 45ml. Bartender sirve con jigger.",
+    "secondary": "En las mezcalerías, mezcal joven cambiado por reposado son $50-80 que el cliente no nota.",
+    "data": {
+      "orders": [
+        {"table": "M02", "name": "Doña Yolanda", "state": "urgent", "items": ["1 tobalá Don Aquilino|45ml", "Sal gusano", "Naranja"], "waitMin": 4},
+        {"table": "M05", "name": "Pareja", "state": "prep", "items": ["Cata 3 mezcales|espadín, tobalá, madrecuixe", "Botana"], "waitMin": 6},
+        {"table": "M01", "name": "Cuates", "state": "queue", "items": ["3 espadín joven", "Sal gusano para todos"], "waitMin": 3},
+        {"table": "M07", "name": "Don Tito", "state": "ready", "items": ["1 madrecuixe Real Minero|45ml"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Jigger para copita exacta", "d": "Cada copita pesada al servir. 45ml = $X. Sistema verifica. Cero copitas 'al ojo' que descuadran botella."},
+    {"ico": "archive", "h": "Inventario por maestro mezcalero", "d": "Don Aquilino tobalá: 3 botellas. Real Minero espadín: 5 botellas. Cada lote rastreado al palenque."},
+    {"ico": "monitor", "h": "Pantalla con maestros", "d": "Cliente ve nombre del maestro, agave, edad, palenque. Conoce qué bebe. Cero confusión sobre origen."},
+    {"ico": "barcode", "h": "Sal de gusano por copita", "d": "Cada copita sale con sal de gusano. Sistema cobra automático. Cero sal regalada al cuate."},
+    {"ico": "percent", "h": "Margen por agave silvestre", "d": "Espadín $120 copita costo $42. Tobalá silvestre $245 copita costo $98. Sistema te dice qué empujar."},
+    {"ico": "calendar", "h": "Catas guiadas con anticipación", "d": "Sábado: cata 5 mezcales para 8 personas. Sistema agenda botellas, sala. Cliente paga adelanto."}
+  ],
+  "stats": [
+    {"v": "147", "l": "Copitas servidas hoy"},
+    {"v": "18", "l": "Mezcales del menú"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi mezero <span class=\"hl\">cambiaba tobalá por espadín a clientes turistas</span>. Cobraba premium pero servía básico. Con Gusano cada copita descuenta de la botella correcta. Cero cambios al ojo.",
+    "sig": "Doña Yolanda M.",
+    "role": "Mezcalería El Gusano, Oaxaca Centro, Oaxaca"
+  },
+  "thefts": [
+    {
+      "title": "Mezcal joven cobrado como reposado",
+      "rob": "Bartender sirve espadín joven ($120) y cobra reposado ($180). Cliente turista no nota diferencia. $60 por copita cambiada. 8 al día = $480.",
+      "fix": "Cada copita <strong>asignada a botella específica en sistema</strong>. Bartender descuenta de la correcta. Sistema cuadra ml servidos por tipo."
+    },
+    {
+      "title": "Botellas pequeñas 'cambiadas'",
+      "rob": "Bartender lleva botella premium al backbar 'porque hay mucho movimiento'. Sirve de botella regular y cobra premium. $80-120 por shot cambiado.",
+      "fix": "Botellas premium <strong>marcadas con QR único y báscula al usar</strong>. Sistema cuadra peso y origen. Cero cambios escondidos."
+    },
+    {
+      "title": "Sal de gusano 'cortesía' sin control",
+      "rob": "Bartender pone sal de gusano sin cobrarla. Cuesta $25 por porción. 12-15 copitas por turno sin cobrar la sal = $300-375.",
+      "fix": "Sal de gusano <strong>cobrada por botón obligatorio por copita</strong>. Sistema bloquea si copita sale sin sal facturada. Cero cortesías al cariño."
+    }
+  ]
+}

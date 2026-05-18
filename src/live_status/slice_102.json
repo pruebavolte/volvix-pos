@@ -1,0 +1,57 @@
+{
+  "slice": 102,
+  "range": "2040-2060",
+  "topic": "R17_OCR_tickets",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "files_created": [
+    "volvix-ocr-wiring.js",
+    "db/R17_OCR.sql",
+    "R17_OCR.md"
+  ],
+  "files_modified": [
+    "api/index.js"
+  ],
+  "client": {
+    "engine": "Tesseract.js@5 CDN",
+    "langs": ["spa", "eng"],
+    "namespace": "Volvix.ocr",
+    "public_api": [
+      "scanReceipt(file)",
+      "parseMexicanTicket(text)",
+      "openScannerUI(el)",
+      "createPurchaseFromOcr(parsed)"
+    ],
+    "ui": "input[type=file accept=image/* capture=environment] + img preview + extracted text + pre-filled form (rfc/date/total) + submit button"
+  },
+  "parsers": {
+    "total": "regex TOTAL \\$?([0-9]+(?:[.,][0-9]{2}))",
+    "rfc":   "regex [A-ZÑ&]{3,4}\\d{6}[A-Z0-9]{3} (12 moral / 13 fisica)",
+    "date":  "DD/MM/YYYY o DD-MM-YYYY -> YYYY-MM-DD",
+    "items": "lineas desc + $precio, excluye TOTAL/SUBTOTAL/IVA/CAMBIO/EFECTIVO"
+  },
+  "endpoints_added": {
+    "POST /api/ocr/parse-receipt": {
+      "auth": "requireAuth",
+      "body": "{raw, parsed?:{rfc,total,date,items}}",
+      "response": "{vendor:{rfc,valid}, total, date, items_detected, suggested_purchase_id, scan_id}",
+      "persists": "ocr_scans (graceful si tabla falta)",
+      "validates": "RFC con regex SAT-compatible"
+    },
+    "POST /api/purchases/from-ocr": {
+      "auth": "requireAuth",
+      "validates": "total > 0 (sendValidation 400)",
+      "creates": "purchases(source=ocr) + linkea ocr_scans.purchase_id status=linked",
+      "fallback": "42P01 -> dry-run id ocr-<ts>"
+    }
+  },
+  "sql_R17_OCR": {
+    "table": "ocr_scans(id uuid pk, user_id uuid, tenant_id, raw_text, parsed jsonb, image_url, purchase_id, status check, created_at)",
+    "indexes": 5,
+    "rls": "SELECT/INSERT/UPDATE WHERE user_id=auth.uid()",
+    "idempotent": true
+  },
+  "compat": "R13 auth + R16 RLS hardening sin breaking changes",
+  "deploy_required": true,
+  "next": "subir imagen a Supabase Storage; cruzar RFC con R14_SAT_CATALOGS; sugerir vendor_id de RFCs vistos"
+}

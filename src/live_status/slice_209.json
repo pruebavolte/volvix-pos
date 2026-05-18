@@ -1,0 +1,47 @@
+{
+  "slice": 209,
+  "idx_range": [3180, 3200],
+  "module": "R18_MARKETPLACE",
+  "title": "Marketplace multi-vendor",
+  "status": "implemented",
+  "ts": "2026-04-26T00:00:00Z",
+  "artifacts": {
+    "sql": "db/R18_MARKETPLACE.sql",
+    "api": "api/index.js",
+    "report": "R18_MARKETPLACE.md"
+  },
+  "tables": [
+    "vendors",
+    "vendor_products",
+    "vendor_payouts",
+    "vendor_sale_splits"
+  ],
+  "endpoints": [
+    {"idx": 3180, "method": "GET",  "path": "/api/marketplace/vendors",                "auth": "tenant", "notes": "filtros tenant_id/status"},
+    {"idx": 3181, "method": "POST", "path": "/api/marketplace/vendors",                "auth": "user",   "notes": "commission_pct default 10"},
+    {"idx": 3182, "method": "POST", "path": "/api/marketplace/vendors/:id/kyc",        "auth": "admin",  "notes": "verifica docs id_front+id_back o tax_id; activa"},
+    {"idx": 3183, "method": "POST", "path": "/api/marketplace/payouts/calculate",      "auth": "admin",  "notes": "?period=YYYY-MM agrega splits y UPSERT payouts"},
+    {"idx": 3184, "method": "POST", "path": "/api/marketplace/payouts/:id/pay",        "auth": "admin",  "notes": "marca paid + paid_at"}
+  ],
+  "integration": {
+    "POST /api/sales": "tras dispatchWebhook llama global.__mpRegisterSaleSplits(saleRow, itemsIn) -> registra vendor_sale_splits por item.vendor_id"
+  },
+  "indexes": [
+    "idx_vendors_tenant",
+    "idx_vendors_owner",
+    "idx_vendorprod_vendor",
+    "idx_vendorprod_product",
+    "idx_payouts_vendor",
+    "idx_payouts_period",
+    "idx_splits_vendor_ts",
+    "idx_splits_sale"
+  ],
+  "constraints": [
+    "vendors.commission_pct CHECK 0-100",
+    "vendors.status IN (pending,active,suspended,closed)",
+    "vendor_payouts.status IN (pending,approved,paid,failed)",
+    "UNIQUE vendor_products(vendor_id,product_id)",
+    "UNIQUE vendor_payouts(vendor_id,period_start,period_end)"
+  ],
+  "next": ["stripe-connect-transfers", "webhook payout.paid", "csv/xlsx export por vendor", "approved-step + dual approval"]
+}

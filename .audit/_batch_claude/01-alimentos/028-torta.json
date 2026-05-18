@@ -1,0 +1,104 @@
+{
+  "slug": "torta",
+  "brand": "Torta",
+  "tagline": "El sistema para torterías donde cada bolillo se cuenta y los aguacates no se 'pierden' del refri",
+  "giro": "tortería",
+  "giroPlural": "torterías",
+  "vibe": "warmLocal",
+  "palette": {
+    "bg": "#FAF1E5",
+    "surface": "#FFFFFF",
+    "paper": "#F0DEC0",
+    "ink": "#2A1810",
+    "ink2": "#4A2F20",
+    "muted": "#7E5530",
+    "line": "#D5BD90",
+    "accent": "#A33815",
+    "accent2": "#E89B45"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para torterías mexicanas · 2026",
+    "h1": "Cada <em>torta</em>,<br>cada <em>aguacate</em>,<br>cobrado.",
+    "deck": "El POS hecho para que la torta cubana lleve todos sus ingredientes, ningún aguacate se 'pierda' del refri, y los pedidos de oficinistas lleguen completos a tiempo.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?torta,mexicana,bolillo&q=85",
+    "heroAlt": "Torta cubana con aguacate y jamón",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?torta,cubana&q=80", "tag": "Torta cubana", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bolillo,fresh&q=80", "tag": "Bolillos del día", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?aguacate,palta&q=80", "tag": "Aguacate maduro", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?jamon,queso&q=80", "tag": "Jamón y queso", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?milanesa,torta&q=80", "tag": "Torta milanesa", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pierna,horneada&q=80", "tag": "Pierna horneada", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?torteria,mostrador&q=80", "tag": "Mostrador clásico", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?jalapenos,salsa&q=80", "tag": "Jalapeños y salsa", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?lunch,mexicano&q=80", "tag": "Hora del lunch", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?tortero,armando&q=80", "caption": "Tortero arma la cubana"},
+      {"url": "https://source.unsplash.com/random/800x600/?refri,ingredientes&q=80", "caption": "Refri con ingredientes listos"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,oficina&q=80", "caption": "Oficinistas piden lunch"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Mostrador · ingredientes · en vivo",
+    "title": "Tu mostrador, <em>torta por torta</em>, sin faltarle nada",
+    "deck": "Cada orden con ingredientes detallados. KDS muestra: torta cubana con jamón + queso + pierna + huevo + milanesa + aguacate + frijol. Tortero ve todo.",
+    "secondary": "En las torterías, un ingrediente 'olvidado' en la torta es 1 cliente que reclama o no vuelve.",
+    "data": {
+      "orders": [
+        {"table": "M01", "name": "Oficinistas (15)", "state": "urgent", "items": ["15 tortas mixtas|6 cubana 5 milanesa 4 jamón", "15 aguas"], "waitMin": 14},
+        {"table": "M03", "name": "Don Memo", "state": "prep", "items": ["1 torta cubana|sin chile", "1 horchata"], "waitMin": 6},
+        {"table": "M02", "name": "Sra. Lupita", "state": "queue", "items": ["1 torta milanesa|extra queso", "1 jamaica"], "waitMin": 4},
+        {"table": "TOGO-9", "name": "Don Pedro", "state": "ready", "items": ["1 torta pierna", "1 horchata grande"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Ingredientes visibles por torta", "d": "Cubana = jamón + queso + pierna + huevo + milanesa + aguacate + frijol + jitomate + chile. Tortero ve checklist. Cero ingredientes 'olvidados'."},
+    {"ico": "archive", "h": "Inventario por proteína", "d": "Pierna: 6 kg. Milanesa: 8 kg. Jamón: 5 kg. Aguacate: 40 piezas. Cuando baja, alerta antes del lunch."},
+    {"ico": "truck", "h": "Pedidos de oficinas con checklist", "d": "Oficina pide 20 tortas surtidas. Sistema imprime checklist por torta. Empacado verifica. Cero pedidos a medias."},
+    {"ico": "barcode", "h": "Modificadores con precio", "d": "Sin chile, sin cebolla, extra aguacate ($15). Aparece en KDS. Cobro automático. Cero extras 'gratis'."},
+    {"ico": "percent", "h": "Margen por tipo de torta", "d": "Jamón costo $18 vendes $45. Cubana costo $32 vendes $85. Sistema te dice qué empujar para mejor margen."},
+    {"ico": "calendar", "h": "Pronóstico del lunch oficinas", "d": "Lunes oficina pide 25, viernes 40. Sistema sugiere bolillos a hornear. Cero faltas a la 1 pm."}
+  ],
+  "stats": [
+    {"v": "186", "l": "Tortas vendidas hoy"},
+    {"v": "62", "l": "Cubanas surtidas"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Las oficinas me reclamaban porque <span class=\"hl\">faltaba jamón o aguacate</span> en algunas tortas. Con Torta cada torta sale con checklist obligatorio. Cero quejas en 1 mes. Las oficinas piden 30% más.",
+    "sig": "Don Beto C.",
+    "role": "Tortería La Esquina, Naucalpan, Estado de México"
+  },
+  "thefts": [
+    {
+      "title": "Aguacates 'que se llevaron del refri'",
+      "rob": "Empleado se lleva 4-6 aguacates a la semana 'para su casa'. A $15 c/u son $60-90 cada vez — $240-360 al mes.",
+      "fix": "Aguacates con <strong>conteo diario inicial y cierre</strong>. Sistema cuadra contra tortas vendidas con aguacate. Diferencias alertan."
+    },
+    {
+      "title": "Torta 'incompleta' por descuido o robo",
+      "rob": "Tortero arma cubana sin pierna pero la cobra completa ($85). Se ahorra ingrediente, cliente se queja. La pierna se va a sandwich personal.",
+      "fix": "Tortas premium con <strong>checklist obligatorio antes de envolver</strong>. Sistema requiere confirmación visual. Cero tortas 'olvidonas'."
+    },
+    {
+      "title": "Extras cobrados solo a clientes nuevos",
+      "rob": "Tortero cobra extra aguacate ($15) a turistas pero gratis a sus cuates. Diferencia se va a propina o bolsillo. $80-150 al turno.",
+      "fix": "Extras <strong>visibles en menú digital al cliente</strong>. Si se cobra extra, ticket lo refleja obligatorio. Política igual para todos."
+    }
+  ]
+}

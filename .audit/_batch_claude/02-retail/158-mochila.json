@@ -1,0 +1,106 @@
+{
+  "slug": "mochila",
+  "brand": "Mochila",
+  "tagline": "El sistema para tiendas de ropa infantil que sí saben qué les queda a los niños",
+  "giro": "ropa infantil",
+  "giroPlural": "tiendas de ropa infantil",
+  "vibe": "playful",
+  "palette": {
+    "bg": "#FFF8EE",
+    "surface": "#FFFFFF",
+    "paper": "#FFEFD6",
+    "ink": "#1F1A24",
+    "ink2": "#3C2F44",
+    "muted": "#7A6884",
+    "line": "#FFD79A",
+    "accent": "#FF7A5A",
+    "accent2": "#FFC23C"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Nunito",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas de ropa infantil · 2026",
+    "h1": "Cada <em>niño</em>,<br>cada <em>talla</em>,<br>cada temporada.",
+    "deck": "El POS hecho para que ninguna playera se quede colgada cuando los chiquitos ya crecieron. Stock por edad, ficha del niño con su talla y su mamá, alertas cuando entra temporada escolar.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?kids,clothing,children&q=85",
+    "heroAlt": "Ropa colorida para niños colgada en tienda",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?kids,fashion&q=80", "tag": "Conjuntos coloridos", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?girl,dress,kid&q=80", "tag": "Vestidos niña", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?boy,shirt,kid&q=80", "tag": "Playeras niño", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?children,pants&q=80", "tag": "Pantalones", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?kids,uniform&q=80", "tag": "Uniformes", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?kids,jacket&q=80", "tag": "Chamarras", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?kids,store,colorful&q=80", "tag": "Tienda", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?kids,shoes&q=80", "tag": "Calzado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?kids,accessories&q=80", "tag": "Accesorios", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?mother,kid,shopping&q=80", "caption": "Mamá pregunta talla y vendedora consulta sistema"},
+      {"url": "https://source.unsplash.com/random/800x600/?kid,fitting&q=80", "caption": "Niño se prueba, sistema registra talla real"},
+      {"url": "https://source.unsplash.com/random/800x600/?colorful,clothing,rack&q=80", "caption": "Rack por edad y temporada"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>por edad y temporada</em>",
+    "deck": "Cada conjunto con tallas reales (2-3 años, 4-5, etc.). Cuando se acerca regreso a clases, el sistema avisa qué tallas se están agotando. Mamá pregunta, vendedora consulta y entrega en 10 segundos.",
+    "secondary": "Los niños crecen y la ropa se queda. Mochila te ayuda a moverla antes de que sea estorbo.",
+    "data": {
+      "product": "Conjunto algodón estampado",
+      "tallas": ["2A", "4A", "6A", "8A", "10A", "12A"],
+      "stock": [
+        {"color": "Estampado dinos", "vals": [4, 6, 5, 3, 2, 1]},
+        {"color": "Estampado flores", "vals": [3, 5, 6, 4, 2, 1]},
+        {"color": "Liso azul", "vals": [2, 4, 5, 3, 2, 0]}
+      ],
+      "lowThreshold": 2
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por edad y estampado", "d": "No solo 'conjunto algodón'; 'conjunto dinos 6A con 5 piezas'. Sabes qué edades mueven, cuáles se quedan."},
+    {"ico": "calendar", "h": "Alertas de temporada escolar", "d": "Faltan 30 días para regreso a clases, el sistema te grita qué uniformes y tallas reponer. Cero corridas de última hora."},
+    {"ico": "gift", "h": "Ficha del niño y la mamá", "d": "Edad del chiquito, talla actual, color que le gusta. Mamá entra, vendedora ya sabe qué ofrecer. Cero adivinanzas."},
+    {"ico": "percent", "h": "Comisiones por vendedora", "d": "Define el % por pieza o conjunto. Vendedora ve sus ventas en vivo. Cero pleitos al cierre."},
+    {"ico": "camera", "h": "Devoluciones con foto", "d": "Sistema obliga foto de la prenda y la etiqueta. Si el niño ya la usó, alerta al gerente. Bloquea cambios después de 7 días."},
+    {"ico": "truck", "h": "Traspasos entre sucursales", "d": "¿No tienes la talla 8A? Búscala en otra sucursal. Traspaso con un toque, mamá notificada por WhatsApp."}
+  ],
+  "stats": [
+    {"v": "318", "l": "Prendas en stock"},
+    {"v": "42", "l": "Vendidas hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Antes <span class=\"hl\">se me quedaba la ropa de temporada</span> y la vendía a mitad de precio en enero. Con Mochila ahora sé qué tallas mueven y reordeno justo. Mi inventario gira el doble.",
+    "sig": "Mónica L.",
+    "role": "Tienda infantil en Puebla, PUE"
+  },
+  "thefts": [
+    {
+      "title": "Ropa pequeña 'mermada' que sale por la puerta",
+      "rob": "Empleada marca prendas como 'manchadas' o 'descosidas' y se las lleva para sus hijos o sobrinos. En tienda infantil son 5-8 prendas al mes.",
+      "fix": "Mermas requieren <strong>foto del defecto y autorización del gerente</strong>. Cada baja queda registrada con nombre, hora y motivo."
+    },
+    {
+      "title": "Cambios de talla sin ticket",
+      "rob": "Mamá viene a 'cambiar' porque al niño no le quedó, vendedora le da una talla mayor que cuesta más, cobra la diferencia en efectivo y se la queda.",
+      "fix": "Cambios <strong>requieren ticket original</strong>. Diferencia se cobra por sistema. Reporte diario: cambios fuera de tolerancia = cero."
+    },
+    {
+      "title": "Uniformes escolares cobrados 'por fuera'",
+      "rob": "En agosto-septiembre las mamás pagan paquete de uniformes en efectivo. Vendedora cobra $1,500-3,000, no factura, se queda con el monto y entrega de stock sin registro.",
+      "fix": "Paquetes escolares <strong>se arman por sistema y emiten ticket único</strong>. Comisión solo sobre ventas registradas. Cero piezas que salen sin ticket en temporada alta."
+    }
+  ]
+}

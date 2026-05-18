@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tu prueba gratis termina pronto</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a1a;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f4f6f8;">
+  <tr>
+    <td align="center" style="padding:24px 12px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:linear-gradient(135deg,#dc2626 0%,#f59e0b 100%);padding:32px 24px;text-align:center;">
+            <p style="margin:0 0 8px;color:#fff7ed;font-size:14px;text-transform:uppercase;letter-spacing:1px;">Quedan</p>
+            <h1 style="margin:0;color:#ffffff;font-size:48px;font-weight:800;line-height:1;">{{days_left}}</h1>
+            <p style="margin:6px 0 0;color:#fef3c7;font-size:18px;font-weight:600;">dias de prueba</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px 28px 16px;">
+            <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Hola,</p>
+            <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Tu periodo de prueba gratis de Volvix POS termina en <strong>{{days_left}} dias</strong>. Para que tu negocio no pierda continuidad, te invitamos a actualizar a un plan completo antes de esa fecha.</p>
+            <h3 style="margin:24px 0 12px;font-size:18px;color:#1e3a8a;">Que ganas al actualizar?</h3>
+            <ul style="margin:0 0 24px;padding-left:20px;font-size:15px;line-height:1.8;">
+              <li><strong>Ventas ilimitadas</strong> sin limites de tickets</li>
+              <li><strong>Multi-sucursal</strong> y multi-usuario sin costo extra</li>
+              <li><strong>Soporte 24/7</strong> con tecnicos en tu zona horaria</li>
+              <li><strong>Facturacion CFDI 4.0</strong> y reportes contables</li>
+              <li><strong>Backups automaticos</strong> y recuperacion ante desastres</li>
+            </ul>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+              <tr>
+                <td align="center" style="padding:8px 0 16px;">
+                  <a href="{{upgrade_url}}" style="display:inline-block;background:#16a34a;color:#ffffff;text-decoration:none;font-weight:700;font-size:17px;padding:16px 40px;border-radius:10px;box-shadow:0 4px 6px rgba(22,163,74,0.25);">Continuar con mi plan</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:0 0 16px;font-size:13px;color:#6b7280;text-align:center;">Plan actual: <strong>{{current_plan}}</strong> &middot; <a href="{{upgrade_url}}" style="color:#3b82f6;">Comparar planes</a></p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 28px 28px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#eff6ff;border-radius:8px;">
+              <tr>
+                <td style="padding:16px 18px;">
+                  <p style="margin:0;font-size:14px;color:#1e40af;line-height:1.6;"><strong>Que pasa si no actualizo?</strong> Tu cuenta entrara en modo solo-lectura: podras ver tus reportes pero no procesar ventas nuevas. Tus datos siguen seguros 30 dias mas.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f9fafb;padding:18px 28px;text-align:center;font-size:12px;color:#6b7280;border-top:1px solid #e5e7eb;">
+            <p style="margin:0 0 6px;">Tienes dudas sobre el plan adecuado para tu negocio?</p>
+            <p style="margin:0;"><a href="{{upgrade_url}}" style="color:#3b82f6;">Habla con un asesor</a> &middot; Volvix POS</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

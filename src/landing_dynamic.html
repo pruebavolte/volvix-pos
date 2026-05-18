@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cargando...</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  :root {
+    --primary: #EA580C;
+    --primary-dark: #C2410C;
+    --primary-soft: #FFF7ED;
+    --text: #0A0A0A;
+    --text-2: #44403C;
+    --text-3: #78716C;
+    --bg: #FFFFFF;
+    --bg-2: #FAFAF9;
+    --border: #E7E5E4;
+    --success: #16A34A;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+
+  /* ======= NAV ======= */
+  nav.top {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 6%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: -0.3px;
+  }
+  .brand-logo {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--primary);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  }
+  .nav-links { display: flex; gap: 22px; align-items: center; }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--text-2); }
+  .nav-links a:hover { color: var(--primary); }
+  .nav-cta {
+    padding: 9px 18px;
+    background: var(--text);
+    color: white !important;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  /* ======= HERO DINÁMICO ======= */
+  .hero {
+    padding: 80px 6% 70px;
+    position: relative;
+    overflow: hidden;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+  }
+  .hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 60px;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+  .hero-text { max-width: 600px; }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .hero h1 {
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+  .hero h1 .accent { color: var(--primary); }
+  .hero p.sub {
+    font-size: clamp(16px, 2vw, 19px);
+    color: var(--text-2);
+    line-height: 1.55;
+    margin-bottom: 32px;
+  }
+  .hero-cta-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .btn-primary {
+    padding: 15px 28px;
+    background: var(--primary);
+    color: white;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: all 0.15s;
+  }
+  .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 12px 28px rgba(0,0,0,0.15); }
+  .btn-secondary {
+    padding: 15px 24px;
+    background: white;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-secondary:hover { border-color: var(--text); }
+  .hero-trust {
+    font-size: 13px;
+    color: var(--text-3);
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .hero-trust span::before { content: '✓ '; color: var(--success); font-weight: 700; }
+
+  /* Hero visual dinámico */
+  .hero-visual {
+    position: relative;
+    aspect-ratio: 1;
+    max-width: 480px;
+    margin-left: auto;
+  }
+  .hero-big-emoji {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 220px;
+    animation: float 4s ease-in-out infinite;
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.15));
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .hero-floaty-badge {
+    position: absolute;
+    padding: 10px 16px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hero-floaty-badge.b1 {
+    top: 10%; left: -5%;
+    animation: floatBadge 3.5s ease-in-out infinite;
+  }
+  .hero-floaty-badge.b2 {
+    bottom: 15%; right: -5%;
+    animation: floatBadge 3.5s 0.7s ease-in-out infinite;
+  }
+  .hero-floaty-badge.b3 {
+    top: 45%; right: 0;
+    animation: floatBadge 3.5s 1.4s ease-in-out infinite;
+  }
+  @keyframes floatBadge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .hero-floaty-badge .emoji {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    background: var(--primary-soft);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+
+  /* Variante oscura del hero */
+  .hero.dark {
+    background: radial-gradient(ellipse at 30% 30%, #1E293B 0%, #0F172A 100%);
+    color: white;
+  }
+  .hero.dark h1 { color: white; }
+  .hero.dark p.sub { color: #CBD5E1; }
+  .hero.dark .hero-trust { color: #94A3B8; }
+  .hero.dark .hero-floaty-badge {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border-color: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+  }
+  .hero.dark .btn-secondary {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  /* ======= PAINS SECTION ======= */
+  section.block { padding: 80px 6%; }
+  .section-head {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 50px;
+  }
+  .section-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  .section-head h2 {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .section-head p {
+    font-size: 16px;
+    color: var(--text-2);
+  }
+
+  .pains {
+    background: var(--bg-2);
+  }
+  .pains-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .pain-card {
+    background: white;
+    padding: 28px 24px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .pain-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+    transform: translateY(-3px);
+  }
+  .pain-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  .pain-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+  }
+  .pain-desc {
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.6;
+  }
+
+  /* ======= DEMO MOCKUP ======= */
+  .demo-wrap {
+    max-width: 1100px;
+    margin: 40px auto 0;
+    padding: 0 6%;
+  }
+  .demo-window {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.04);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .demo-topbar {
+    background: #1E1E1E;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .demo-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .demo-dot.red { background: #FF5F57; }
+  .demo-dot.yellow { background: #FEBC2E; }
+  .demo-dot.green { background: #28C840; }
+  .demo-url {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: #A0A0A0;
+    font-family: monospace;
+  }
+  .demo-body {
+    padding: 60px 40px;
+    background: linear-gradient(135deg, var(--primary-soft), white);
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .demo-body .emoji-large {
+    font-size: 120px;
+    margin-bottom: 20px;
+    animation: float 4s ease-in-out infinite;
+  }
+  .demo-body .demo-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .demo-body .demo-sub {
+    font-size: 14px;
+    color: var(--text-2);
+  }
+
+  /* ======= PRICING ======= */
+  .pricing {
+    background: var(--bg-2);
+  }
+  .pricing-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 20px;
+  }
+  .price-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 28px;
+    position: relative;
+  }
+  .price-card.featured {
+    border: 2px solid var(--primary);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    transform: scale(1.02);
+  }
+  .price-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .price-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 12px;
+  }
+  .price-amount {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .price-amount .cur { font-size: 20px; font-weight: 600; color: var(--text-2); }
+  .price-amount .num { font-size: 44px; font-weight: 900; letter-spacing: -2px; }
+  .price-amount .per { font-size: 14px; color: var(--text-3); }
+  .price-seats {
+    font-size: 12.5px;
+    color: var(--text-3);
+    margin-bottom: 16px;
+  }
+  .price-feats {
+    list-style: none;
+    margin: 20px 0;
+    padding: 0;
+  }
+  .price-feats li {
+    padding: 9px 0;
+    font-size: 14px;
+    color: var(--text-2);
+    display: flex;
+    gap: 10px;
+    border-bottom: 1px solid var(--bg-2);
+  }
+  .price-feats li:last-child { border-bottom: none; }
+  .price-feats li::before {
+    content: '✓';
+    color: var(--success);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .price-cta {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg-2);
+    color: var(--text);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    margin-top: 14px;
+  }
+  .price-card.featured .price-cta {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+  .price-card.featured .price-cta:hover { background: var(--primary-dark); }
+
+  /* ======= TESTIMONIAL ======= */
+  .testimonial {
+    background: var(--text);
+    color: white;
+    text-align: center;
+    padding: 80px 6%;
+  }
+  .testimonial blockquote {
+    max-width: 700px;
+    margin: 0 auto;
+    font-size: clamp(20px, 2.8vw, 28px);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.5px;
+  }
+  .testimonial blockquote::before {
+    content: '"';
+    font-size: 70px;
+    line-height: 0;
+    color: var(--primary);
+    margin-right: 4px;
+    font-family: 'Playfair Display', serif;
+  }
+  .testimonial-author {
+    margin-top: 26px;
+    font-size: 14px;
+    color: #A8A29E;
+  }
+  .testimonial-author strong { color: white; }
+
+  /* ======= FAQ ======= */
+  .faq-list {
+    max-width: 780px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .faq-item {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .faq-item:hover { border-color: var(--primary); }
+  .faq-q {
+    font-weight: 600;
+    font-size: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .faq-q::after {
+    content: '+';
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--text-3);
+  }
+  .faq-item.open .faq-q::after { content: '−'; }
+  .faq-a {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.6;
+    display: none;
+  }
+  .faq-item.open .faq-a { display: block; }
+
+  /* ======= FINAL CTA ======= */
+  .final-cta {
+    text-align: center;
+    padding: 80px 6%;
+    position: relative;
+  }
+  .final-cta h2 {
+    font-size: clamp(30px, 5vw, 48px);
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    margin-bottom: 14px;
+  }
+  .final-cta p {
+    font-size: 16px;
+    color: var(--text-2);
+    max-width: 540px;
+    margin: 0 auto 32px;
+  }
+
+  /* ======= FOOTER ======= */
+  footer {
+    padding: 40px 6%;
+    background: var(--text);
+    color: #A8A29E;
+    font-size: 13px;
+  }
+  .footer-row {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-weight: 700;
+  }
+  footer a {
+    color: #A8A29E;
+    margin-left: 16px;
+  }
+  footer a:hover { color: white; }
+
+  /* ======= RESPONSIVE ======= */
+  @media (max-width: 860px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 30px; }
+    .hero-visual { margin: 0 auto; max-width: 300px; }
+    .hero-big-emoji { font-size: 160px; }
+    .hero-floaty-badge { font-size: 11px; padding: 8px 12px; }
+  }
+  @media (max-width: 500px) {
+    .hero { padding: 40px 6% 50px; min-height: auto; }
+    .nav-links a:not(.nav-cta) { display: none; }
+    section.block { padding: 50px 6%; }
+  }
+</style>
+<script src="volvix-api.js"></script>
+<script src="volvix-sync.js"></script>
+<script src="volvix-sync-widget.js"></script>
+  <script src="/volvix-uplift-wiring.js" defer></script>
+  <script src="/volvix-error-reporter.js" defer></script>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script src="giros_catalog_v2.js"></script>
+<script>
+  function getParam(name) {
+    return new URLSearchParams(window.location.search).get(name);
+  }
+
+  function shade(hex, percent) {
+    const n = parseInt(hex.replace('#',''), 16);
+    const r = Math.max(0, Math.min(255, ((n >> 16) & 0xFF) + (percent*255/100)));
+    const g = Math.max(0, Math.min(255, ((n >> 8) & 0xFF) + (percent*255/100)));
+    const b = Math.max(0, Math.min(255, (n & 0xFF) + (percent*255/100)));
+    return '#' + [r,g,b].map(x => Math.round(x).toString(16).padStart(2,'0')).join('');
+  }
+
+  function capitalize(s) {
+    return (s || '').charAt(0).toUpperCase() + (s || '').slice(1);
+  }
+
+  function loadCustomizations(key) {
+    try {
+      const c = localStorage.getItem('volvix:landing:' + key);
+      return c ? JSON.parse(c) : {};
+    } catch { return {}; }
+  }
+
+  // Testimonials específicos por categoría
+  const TESTIMONIALS = {
+    alimentos: { text: 'Desde que tengo {systemName}, las comandas ya no se pierden, la cocina ve todo al instante y los meseros cobran más rápido. Subí mis ventas 30% el primer mes sin contratar más personal.', author: 'Roberto G., dueño de restaurante' },
+    belleza: { text: 'El sistema me cambió el negocio. Antes tenía 3 clientes perdidos por semana porque no recordaban su cita. Ahora {systemName} les manda recordatorio por WhatsApp y cero huecos en la agenda.', author: 'Alejandra M., salón de belleza' },
+    salud: { text: 'El expediente digital es lo mejor. Cada paciente tiene todo su historial a un clic. Ya no pierdo papeles ni me pasa que recete algo dos veces por error.', author: 'Dra. Patricia L., clínica' },
+    retail: { text: 'Tengo control real de mi inventario por primera vez. Sé exactamente qué se vende, qué no, a qué hora. {systemName} pagó solo con lo que dejé de perder en merma.', author: 'Jesús H., dueño de tienda' },
+    servicios: { text: 'Cada orden de servicio tiene su estatus, sus fotos, sus refacciones. Mis clientes ya no me llaman a cada rato porque pueden ver todo por WhatsApp. Me ahorro 2 horas diarias.', author: 'Ing. Miguel S., taller' },
+    educacion: { text: 'Antes perdía el fin de semana cobrando colegiaturas. Ahora {systemName} se encarga, los papás pagan por WhatsApp y yo veo quién debe en un tablero. Cambié de trabajo a dueño.', author: 'Profa. Elena V., colegio' },
+    rentas: { text: 'El calendario de renta es oro puro. Sé qué unidad está libre sin tener que llamar a nadie. Contratos se firman digitales, cero papeleo perdido.', author: 'Carlos R., rentadora' },
+    profesionales: { text: 'Me cobro como profesional. Cotizaciones, facturas, seguimiento. {systemName} me hizo ver que estaba cobrando menos de lo que valía mi trabajo.', author: 'Mariana T., estudio' },
+    construccion: { text: 'Los albañiles piden fiado, las cotizaciones son grandes, los materiales se mueven rápido. {systemName} aguanta el ritmo y mi contador me ama.', author: 'Arq. Pedro M., ferretería' },
+    automotriz: { text: 'El sistema aguanta el ajetreo del taller. Mis mecánicos registran todo desde el celular y al final del día tengo el corte claro.', author: 'Joaquín B., taller' },
+    otros: { text: 'Me organizó el negocio completo. Llevo 8 meses y no cambio a {systemName} por nada. Vale cada peso.', author: 'Raúl F., emprendedor' },
+  };
+
+  // FAQ específica por categoría (y general)
+  function generateFAQ(giro) {
+    const generalFaq = [
+      { q: '¿Funciona sin internet?', a: 'Sí, 100%. Tu ' + giro.name.toLowerCase() + ' sigue vendiendo aunque se vaya el internet. Cuando vuelve la conexión, todo se sincroniza solo.' },
+      { q: '¿Se puede usar en Windows y en mi celular?', a: 'Sí. Tenemos versión Web (cualquier navegador), Windows (instalador .msi de 10MB, solo doble clic) y Android (APK). Todas conectadas en tiempo real.' },
+      { q: '¿Qué pasa si quiero abrir otra sucursal?', a: 'El plan Enterprise te deja tener todas las sucursales que quieras. Controlas todas desde un solo panel y ves ventas consolidadas.' },
+      { q: '¿Cómo cancelo si no me gusta?', a: 'No hay contratos ni letras chiquitas. Cancelas cuando quieras desde tu panel y no te cobramos el siguiente mes. Tus datos siempre son tuyos.' },
+    ];
+
+    const specific = {
+      alimentos: { q: '¿Funciona con impresora de cocina?', a: 'Sí. Soportamos impresoras térmicas Epson, Star, POS-58 y muchas más. La comanda sale en cocina automáticamente.' },
+      belleza: { q: '¿Puedo cobrar comisiones distintas por servicio?', a: 'Claro. Cada estilista/barbero puede tener su tabla: 40% en corte, 30% en tinte, 15% en productos. El sistema las calcula automático.' },
+      salud: { q: '¿Es compatible con facturación SAT 4.0?', a: 'Sí. Timbramos facturas directamente con el SAT. Cumplimos con CFDI 4.0, addenda médica y libro de sustancias controladas.' },
+      retail: { q: '¿Puedo imprimir mis propios códigos de barras?', a: 'Sí. Tenemos un diseñador de etiquetas tipo paint donde arrastras los elementos (logo, nombre, precio, código QR) y las imprimes en cualquier impresora.' },
+      educacion: { q: '¿Los papás pueden ver los pagos de su hijo?', a: 'Sí. Cada papá tiene un acceso privado donde ve recibos, pagos pendientes y puede pagar desde WhatsApp con un botón.' },
+    };
+
+    const specificFaq = specific[giro.category];
+    return specificFaq ? [specificFaq, ...generalFaq] : generalFaq;
+  }
+
+  function renderGiro(giro) {
+    // Aplicar customizaciones del owner
+    const custom = loadCustomizations(giro.key);
+    const data = {
+      ...giro,
+      systemName: custom.systemName || giro.systemName,
+      tagline: custom.tagline || `El sistema #1 para ${giro.plural}`,
+      headline: custom.headline || giro.name,
+      subheadline: custom.subheadline || `Hecho específicamente para ${giro.plural}. Controla todo desde un solo lugar.`,
+      color: custom.color || giro.color,
+      accent: custom.accent || giro.accent,
+      pains: custom.pains || giro.pains,
+      pricing: custom.pricing || giro.pricing,
+      domain: custom.domain || giro.domain,
+    };
+
+    // CSS variables dinámicas
+    document.documentElement.style.setProperty('--primary', data.color);
+    document.documentElement.style.setProperty('--primary-dark', shade(data.color, -15));
+    document.documentElement.style.setProperty('--primary-soft', data.accent);
+
+    document.title = `${data.systemName} · ${data.tagline}`;
+
+    const isDark = giro.hero?.dark;
+    const testimonial = TESTIMONIALS[giro.category] || TESTIMONIALS.otros;
+    const testimonialText = testimonial.text.replace(/{systemName}/g, data.systemName);
+
+    // Floaties inteligentes basados en pains del giro
+    const floaties = [
+      giro.pains[0]?.title || 'Control total',
+      giro.pains[1]?.title || 'Ahorro real',
+      giro.pains[2]?.title || 'Crece más',
+    ];
+
+    const painsHTML = data.pains.map(p => `
+      <div class="pain-card">
+        <div class="pain-icon">${p.icon}</div>
+        <div class="pain-title">${p.title}</div>
+        <div class="pain-desc">${p.desc}</div>
+      </div>
+    `).join('');
+
+    const pricingHTML = data.pricing.map((p, i) => `
+      <div class="price-card ${i === 1 ? 'featured' : ''}">
+        ${i === 1 ? '<div class="price-badge">Más popular</div>' : ''}
+        <div class="price-name">${p.plan}</div>
+        <div class="price-amount">
+          <span class="cur">$</span>
+          <span class="num">${p.price}</span>
+          <span class="per">/ mes MXN</span>
+        </div>
+        <div class="price-seats">${p.seats} ${p.seats === 1 ? 'dispositivo' : 'dispositivos'} incluidos</div>
+        <ul class="price-feats">
+          ${p.features.map(f => `<li>${f}</li>`).join('')}
+        </ul>
+        <button class="price-cta">${i === 1 ? 'Elegir ' + p.plan : 'Empezar con ' + p.plan}</button>
+      </div>
+    `).join('');
+
+    const faq = generateFAQ(giro);
+    const faqHTML = faq.map(q => `
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">${q.q}</div>
+        <div class="faq-a">${q.a}</div>
+      </div>
+    `).join('');
+
+    document.getElementById('app').innerHTML = `
+      <nav class="top">
+        <a href="marketplace.html" class="brand">
+          <div class="brand-logo">${giro.icon}</div>
+          <span>${data.systemName}</span>
+        </a>
+        <div class="nav-links">
+          <a href="#features">Funciones</a>
+          <a href="#pricing">Precios</a>
+          <a href="#faq">Preguntas</a>
+          <a href="#cta" class="nav-cta">Empezar gratis</a>
+        </div>
+      </nav>
+
+      <section class="hero ${isDark ? 'dark' : ''}" style="background: ${giro.hero?.bg || `linear-gradient(135deg, ${data.accent} 0%, #FFFFFF 100%)`};">
+        <div class="hero-inner">
+          <div class="hero-text">
+            <div class="hero-badge">${giro.icon} El sistema #1 para ${giro.plural}</div>
+            <h1>${data.systemName}, <span class="accent">hecho para ${giro.plural}.</span></h1>
+            <p class="sub">${data.subheadline}</p>
+            <div class="hero-cta-row">
+              <a href="#cta" class="btn-primary">Empezar gratis 14 días →</a>
+              <a href="#features" class="btn-secondary">Ver cómo funciona</a>
+            </div>
+            <div class="hero-trust">
+              <span>Sin tarjeta</span>
+              <span>Funciona offline</span>
+              <span>Web · Windows · Android</span>
+            </div>
+          </div>
+          <div class="hero-visual">
+            <div class="hero-big-emoji">${giro.hero?.emoji || giro.icon}</div>
+            <div class="hero-floaty-badge b1">
+              <div class="emoji">${data.pains[0]?.icon || '✨'}</div>
+              <span>${floaties[0]}</span>
+            </div>
+            <div class="hero-floaty-badge b2">
+              <div class="emoji">${data.pains[1]?.icon || '💰'}</div>
+              <span>${floaties[1]}</span>
+            </div>
+            <div class="hero-floaty-badge b3">
+              <div class="emoji">${data.pains[2]?.icon || '📊'}</div>
+              <span>${floaties[2]}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="block pains" id="features">
+        <div class="section-head">
+          <div class="section-eyebrow">Por qué ${data.systemName}</div>
+          <h2>Hecho específicamente para ${giro.plural}</h2>
+          <p>Los dueños de ${giro.plural} tienen problemas muy específicos. Nosotros los resolvemos uno por uno.</p>
+        </div>
+        <div class="pains-grid">${painsHTML}</div>
+      </section>
+
+      <section class="block" style="padding-top:0;">
+        <div class="section-head">
+          <div class="section-eyebrow">Demostración</div>
+          <h2>Así se ve en tu ${giro.name.toLowerCase()}</h2>
+          <p>Haz clic en cualquier módulo para explorar la experiencia real.</p>
+        </div>
+        <div class="demo-wrap">
+          <div class="demo-window">
+            <div class="demo-topbar">
+              <div class="demo-dot red"></div>
+              <div class="demo-dot yellow"></div>
+              <div class="demo-dot green"></div>
+              <div class="demo-url">${data.domain}</div>
+            </div>
+            <div class="demo-body">
+              <div class="emoji-large">${giro.icon}</div>
+              <div class="demo-title">${data.systemName}</div>
+              <div class="demo-sub">Punto de venta personalizado para ${giro.plural}</div>
+              <button class="btn-primary" style="margin-top:20px;" onclick="openDemo('${giro.key}')">🖥️ Abrir sistema demo</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="testimonial">
+        <blockquote>${testimonialText}</blockquote>
+        <div class="testimonial-author">— <strong>${testimonial.author}</strong> · Cliente ${data.systemName}</div>
+      </section>
+
+      <section class="block pricing" id="pricing">
+        <div class="section-head">
+          <div class="section-eyebrow">Precios claros</div>
+          <h2>Elige tu plan</h2>
+          <p>Todos los planes incluyen prueba de 14 días. Cancelas cuando quieras.</p>
+        </div>
+        <div class="pricing-grid">${pricingHTML}</div>
+      </section>
+
+      <section class="block" id="faq" style="background:var(--bg-2);">
+        <div class="section-head">
+          <div class="section-eyebrow">Preguntas frecuentes</div>
+          <h2>Lo que quieres saber</h2>
+        </div>
+        <div class="faq-list">${faqHTML}</div>
+      </section>
+
+      <section class="block" id="industries" style="background:var(--bg-2);">
+        <div class="section-head">
+          <div class="section-eyebrow">Selector por industria</div>
+          <h2>¿Tu giro es otro? Mira la landing especializada</h2>
+          <p style="color:var(--text-2);max-width:640px;margin:10px auto 0;">Cada industria tiene su POS Volvix con funciones específicas. Encuentra la tuya.</p>
+        </div>
+        <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;padding:0 20px;">
+          <a href="/landing-abarrotes.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:12px;font-weight:600;font-size:14.5px;color:var(--text);transition:transform .15s,border-color .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#16A34A';this.style.boxShadow='0 8px 22px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)';this.style.boxShadow=''"><span style="font-size:22px">🛒</span> Abarrotes</a>
+          <a href="/landing-panaderia.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:12px;font-weight:600;font-size:14.5px;color:var(--text);transition:transform .15s,border-color .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#A16207';this.style.boxShadow='0 8px 22px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)';this.style.boxShadow=''"><span style="font-size:22px">🥖</span> Panadería</a>
+          <a href="/landing-farmacia.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:12px;font-weight:600;font-size:14.5px;color:var(--text);transition:transform .15s,border-color .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#0891B2';this.style.boxShadow='0 8px 22px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)';this.style.boxShadow=''"><span style="font-size:22px">💊</span> Farmacia</a>
+          <a href="/landing-restaurant.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:12px;font-weight:600;font-size:14.5px;color:var(--text);transition:transform .15s,border-color .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#DC2626';this.style.boxShadow='0 8px 22px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)';this.style.boxShadow=''"><span style="font-size:22px">🍽️</span> Restaurante</a>
+          <a href="/landing-cafe.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:12px;font-weight:600;font-size:14.5px;color:var(--text);transition:transform .15s,border-color .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#78350F';this.style.boxShadow='0 8px 22px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)';this.style.boxShadow=''"><span style="font-size:22px">☕</span> Café</a>
+          <a href="/landing-barberia.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:12px;font-weight:600;font-size:14.5px;color:var(--text);transition:transform .15s,border-color .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#1E3A8A';this.style.boxShadow='0 8px 22px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)';this.style.boxShadow=''"><span style="font-size:22px">💈</span> Barbería</a>
+          <a href="/landing-gasolinera.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:12px;font-weight:600;font-size:14.5px;color:var(--text);transition:transform .15s,border-color .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#CA8A04';this.style.boxShadow='0 8px 22px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)';this.style.boxShadow=''"><span style="font-size:22px">⛽</span> Gasolinera</a>
+          <a href="/landing-ropa.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:12px;font-weight:600;font-size:14.5px;color:var(--text);transition:transform .15s,border-color .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#DB2777';this.style.boxShadow='0 8px 22px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)';this.style.boxShadow=''"><span style="font-size:22px">👗</span> Tienda de Ropa</a>
+          <a href="/landing-electronica.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:12px;font-weight:600;font-size:14.5px;color:var(--text);transition:transform .15s,border-color .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#2563EB';this.style.boxShadow='0 8px 22px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)';this.style.boxShadow=''"><span style="font-size:22px">📱</span> Electrónica</a>
+          <a href="/landing-fitness.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:white;border:1px solid var(--border);border-radius:12px;font-weight:600;font-size:14.5px;color:var(--text);transition:transform .15s,border-color .15s,box-shadow .15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#EA580C';this.style.boxShadow='0 8px 22px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)';this.style.boxShadow=''"><span style="font-size:22px">🏋️</span> Gimnasio</a>
+        </div>
+      </section>
+
+      <section class="final-cta" id="cta" style="background: linear-gradient(135deg, ${data.accent}, white);">
+        <h2>Empieza hoy tu ${giro.name.toLowerCase()}</h2>
+        <p>14 días gratis. Sin tarjeta. Sin contratos. Cancelas cuando quieras.</p>
+        <a href="#" class="btn-primary" style="font-size:17px;padding:18px 36px;">Crear mi cuenta gratis →</a>
+      </section>
+
+      <footer>
+        <div class="footer-row">
+          <div class="footer-brand">
+            <div class="brand-logo">${giro.icon}</div>
+            <span>${data.systemName}</span>
+          </div>
+          <div>
+            Powered by <strong style="color:#FBBF24;">Volvix Core</strong> · ${giro.id || 'GIRXXX'}
+          </div>
+          <div>
+            <a href="marketplace.html">Otro giro</a>
+            <a href="#">Términos</a>
+            <a href="#">Privacidad</a>
+          </div>
+        </div>
+      </footer>
+    `;
+  }
+
+  function openDemo(giroKey) {
+    window.open('salvadorex_web_v24.html?giro=' + giroKey, '_blank');
+  }
+
+  function renderNotFound(key) {
+    document.title = 'Giro no encontrado';
+    document.getElementById('app').innerHTML = `
+      <nav class="top">
+        <a href="marketplace.html" class="brand">
+          <div class="brand-logo">V</div>
+          <span>Volvix</span>
+        </a>
+      </nav>
+      <div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:40px;text-align:center;">
+        <div style="max-width:440px;">
+          <div style="font-size:72px;margin-bottom:12px;">🤔</div>
+          <h1 style="font-size:24px;margin-bottom:10px;">No encontramos ese giro</h1>
+          <p style="color:var(--text-2);margin-bottom:24px;">El giro "${key}" no está registrado. Prueba buscarlo desde el marketplace.</p>
+          <a href="marketplace.html" class="btn-primary">← Volver al marketplace</a>
+        </div>
+      </div>
+    `;
+  }
+
+  // ========== MAIN ==========
+  const giroKey = getParam('giro');
+  if (!giroKey) {
+    window.location.href = 'marketplace.html';
+  } else {
+    let giro = GIROS_V2.find(g => g.key === giroKey);
+
+    // Buscar también en giros custom (creados por IA)
+    if (!giro) {
+      const custom = JSON.parse(localStorage.getItem('volvix:custom-giros') || '[]');
+      giro = custom.find(g => g.key === giroKey);
+      if (giro) {
+        // Inicializar hero si no tiene
+        giro.hero = giro.hero || { bg: 'linear-gradient(135deg, #FFF7ED, #FFFFFF)', emoji: giro.icon };
+        giro.pricing = giro.pricing || [
+          { plan: 'Básico', price: 399, seats: 1, features: ['1 dispositivo', 'Funciones esenciales', 'Soporte por email'] },
+          { plan: 'Pro', price: 799, seats: 3, features: ['3 dispositivos', 'Todos los módulos', 'WhatsApp integrado'] },
+          { plan: 'Enterprise', price: 1499, seats: 10, features: ['Dispositivos ilimitados', 'Multi-sucursal', 'Soporte 24/7'] },
+        ];
+      }
+    }
+
+    if (giro) {
+      renderGiro(giro);
+    } else {
+      renderNotFound(giroKey);
+    }
+  }
+
+  // Escuchar cambios en vivo desde el owner panel
+  try {
+    const ch = new BroadcastChannel('volvix-landing');
+    ch.onmessage = (e) => {
+      if (e.data.type === 'landing-update' && e.data.giroKey === giroKey) {
+        window.location.reload();
+      }
+    };
+  } catch {}
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'volvix:landing:' + giroKey) {
+      window.location.reload();
+    }
+  });
+</script>
+
+<script defer src="auth-helper.js"></script>
+<script src="volvix-extras-wiring.js" defer></script>
+<script src="volvix-logger-wiring.js" defer></script>
+<script src="volvix-reports-wiring.js" defer></script>
+<script src="volvix-offline-wiring.js" defer></script>
+<script src="volvix-pwa-wiring.js" defer></script>
+<script src="volvix-i18n-wiring.js" defer></script>
+<script src="volvix-theme-wiring.js" defer></script>
+<script src="volvix-shortcuts-wiring.js" defer></script>
+<script src="volvix-search-wiring.js" defer></script>
+<script src="volvix-voice-wiring.js" defer></script>
+<script src="volvix-gamification-wiring.js" defer></script>
+<script src="volvix-perf-wiring.js" defer></script>
+<script src="volvix-email-wiring.js" defer></script>
+<script src="volvix-webrtc-wiring.js" defer></script>
+<script src="volvix-master-controller.js" defer></script>
+<script src="volvix-calendar-wiring.js" defer></script>
+<script src="volvix-payments-wiring.js" defer></script>
+<script src="volvix-realtime-wiring.js" defer></script>
+<script src="volvix-currency-wiring.js" defer></script>
+<script src="volvix-loyalty-wiring.js" defer></script>
+<script src="volvix-tax-wiring.js" defer></script>
+<script src="volvix-webhooks-wiring.js" defer></script>
+<script src="volvix-audit-wiring.js" defer></script>
+<script src="volvix-cache-wiring.js" defer></script>
+<script src="volvix-queue-wiring.js" defer></script>
+<script src="volvix-fulltext-wiring.js" defer></script>
+<script src="volvix-recommendations-wiring.js" defer></script>
+<script src="volvix-subscriptions-wiring.js" defer></script>
+<script src="volvix-plugins-wiring.js" defer></script>
+<script src="volvix-compliance-wiring.js" defer></script>
+<script src="volvix-cs-wiring.js" defer></script>
+<script src="volvix-ratelimit-wiring.js" defer></script>
+<script src="volvix-workflow-wiring.js" defer></script>
+<script src="volvix-ab-testing-wiring.js" defer></script>
+<script src="volvix-feedback-wiring.js" defer></script>
+<script src="volvix-inventory-ai-wiring.js" defer></script>
+</body>
+</html>

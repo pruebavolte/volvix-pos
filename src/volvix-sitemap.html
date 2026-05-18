@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix — Sitemap Visual Completo</title>
+<meta name="description" content="Mapa visual completo del sistema Volvix POS SaaS: módulos, portales, dashboards y herramientas en una sola vista.">
+<meta name="theme-color" content="#0a0e1a">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://volvix-pos.vercel.app/volvix-sitemap.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Volvix — Sitemap Visual Completo">
+<meta property="og:description" content="Mapa visual completo de módulos, portales y herramientas Volvix POS.">
+<meta property="og:image" content="https://volvix-pos.vercel.app/og-default.png">
+<meta property="og:url" content="https://volvix-pos.vercel.app/volvix-sitemap.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Volvix — Sitemap Visual Completo">
+<meta name="twitter:description" content="Mapa visual completo de módulos, portales y herramientas Volvix POS.">
+<meta name="twitter:image" content="https://volvix-pos.vercel.app/og-default.png">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0a0e1a;
+    --bg-2:#101728;
+    --card:#151c30;
+    --card-hover:#1c2540;
+    --border:#22304d;
+    --primary:#5b8def;
+    --primary-2:#7c5cff;
+    --accent:#00d4aa;
+    --accent-2:#ffb547;
+    --danger:#ef476f;
+    --text:#e6edf7;
+    --text-dim:#8a96b3;
+    --text-mute:#5a6685;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  html,body{background:var(--bg);color:var(--text);font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+  body{background:radial-gradient(1200px 600px at 10% -10%,rgba(91,141,239,.18),transparent 60%),radial-gradient(900px 500px at 100% 0%,rgba(124,92,255,.15),transparent 60%),var(--bg);min-height:100vh}
+  a{color:inherit;text-decoration:none}
+
+  /* HEADER */
+  header.hero{padding:64px 32px 40px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+  header.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(91,141,239,.06),rgba(124,92,255,.06));pointer-events:none}
+  .logo{font-size:14px;letter-spacing:.4em;color:var(--primary);text-transform:uppercase;font-weight:700;margin-bottom:14px;position:relative}
+  h1.title{font-size:clamp(36px,6vw,64px);font-weight:800;letter-spacing:-.02em;line-height:1.05;background:linear-gradient(135deg,#fff 0%,#9bb6ff 60%,#c4a8ff 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;position:relative}
+  .subtitle{font-size:18px;color:var(--text-dim);margin-top:18px;max-width:760px;margin-left:auto;margin-right:auto;position:relative}
+  .meta{margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative}
+  .badge{padding:8px 16px;background:rgba(91,141,239,.12);border:1px solid rgba(91,141,239,.35);border-radius:999px;font-size:13px;color:#9bb6ff;font-weight:500}
+  .badge.green{background:rgba(0,212,170,.12);border-color:rgba(0,212,170,.35);color:var(--accent)}
+  .badge.amber{background:rgba(255,181,71,.12);border-color:rgba(255,181,71,.35);color:var(--accent-2)}
+
+  /* TOC */
+  nav.toc{max-width:1200px;margin:32px auto;padding:24px 32px;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
+  nav.toc h2{font-size:13px;text-transform:uppercase;letter-spacing:.2em;color:var(--text-mute);margin-bottom:14px;font-weight:700}
+  nav.toc ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+  nav.toc a{padding:8px 12px;border-radius:8px;color:var(--text-dim);font-size:14px;display:block;transition:all .15s}
+  nav.toc a:hover{background:rgba(91,141,239,.1);color:var(--primary)}
+
+  /* MAIN */
+  main{max-width:1280px;margin:0 auto;padding:24px 32px 80px}
+  section.cat{margin:48px 0}
+  section.cat header.cat-head{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:14px;border-bottom:2px solid var(--border)}
+  .cat-icon{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-size:22px;flex-shrink:0;background:linear-gradient(135deg,var(--primary),var(--primary-2));box-shadow:0 6px 20px rgba(91,141,239,.3)}
+  .cat-icon.green{background:linear-gradient(135deg,#00d4aa,#00a48a)}
+  .cat-icon.amber{background:linear-gradient(135deg,#ffb547,#ff8a47)}
+  .cat-icon.pink{background:linear-gradient(135deg,#ef476f,#c93b85)}
+  .cat-icon.cyan{background:linear-gradient(135deg,#00b8d4,#0085a8)}
+  .cat-icon.purple{background:linear-gradient(135deg,#7c5cff,#5b3cff)}
+  .cat-icon.gray{background:linear-gradient(135deg,#5a6685,#3a4565)}
+  .cat-title{font-size:24px;font-weight:700;letter-spacing:-.01em}
+  .cat-desc{font-size:14px;color:var(--text-dim);margin-top:2px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;transition:all .2s ease;display:block;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--primary);opacity:0;transition:opacity .2s}
+  .card:hover{background:var(--card-hover);border-color:var(--primary);transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.4)}
+  .card:hover::before{opacity:1}
+  .card .name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .card .name .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;box-shadow:0 0 8px var(--accent)}
+  .card .name .dot.amber{background:var(--accent-2);box-shadow:0 0 8px var(--accent-2)}
+  .card .name .dot.gray{background:var(--text-mute);box-shadow:none}
+  .card .name .dot.pink{background:var(--danger);box-shadow:0 0 8px var(--danger)}
+  .card .url{font-size:12px;color:var(--text-mute);font-family:'JetBrains Mono','Consolas',monospace;word-break:break-all;margin-bottom:8px}
+  .card .desc{font-size:13px;color:var(--text-dim);line-height:1.5}
+  .card .tag{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:3px 8px;border-radius:6px;background:rgba(91,141,239,.15);color:var(--primary);margin-top:10px;font-weight:600}
+  .card .tag.green{background:rgba(0,212,170,.15);color:var(--accent)}
+  .card .tag.amber{background:rgba(255,181,71,.15);color:var(--accent-2)}
+  .card .tag.pink{background:rgba(239,71,111,.15);color:var(--danger)}
+
+  /* FOOTER */
+  footer{padding:40px 32px;text-align:center;border-top:1px solid var(--border);color:var(--text-mute);font-size:13px;margin-top:64px}
+  footer .links{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+  footer .links a:hover{color:var(--primary)}
+
+  /* Stats */
+  .stats{max-width:1200px;margin:32px auto 0;padding:0 32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+  .stat .num{font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .stat .lbl{font-size:12px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;margin-top:4px;font-weight:600}
+
+  @media(max-width:640px){
+    header.hero{padding:40px 20px 28px}
+    main{padding:20px 16px 60px}
+    nav.toc{margin:20px 16px;padding:18px}
+    .stats{padding:0 16px}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="logo">Volvix · Plataforma Integral</div>
+  <h1 class="title">Sitemap Visual Completo</h1>
+  <p class="subtitle">Mapa de navegación de todo el ecosistema Volvix: paneles administrativos, POS, portales de cliente, herramientas internas, documentación y servicios públicos.</p>
+  <div class="meta">
+    <span class="badge green">● Live</span>
+    <span class="badge">v3.4.0</span>
+    <span class="badge amber">Última actualización: 2026-04-26</span>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="num">12</div><div class="lbl">Categorías</div></div>
+  <div class="stat"><div class="num">90+</div><div class="lbl">Páginas mapeadas</div></div>
+  <div class="stat"><div class="num">7</div><div class="lbl">Portales</div></div>
+  <div class="stat"><div class="num">100%</div><div class="lbl">Cobertura</div></div>
+</div>
+
+<nav class="toc">
+  <h2>Índice de categorías</h2>
+  <ul>
+    <li><a href="#public">Sitio público</a></li>
+    <li><a href="#auth">Autenticación</a></li>
+    <li><a href="#pos">Volvix POS</a></li>
+    <li><a href="#admin">Admin Dashboard</a></li>
+    <li><a href="#owner">Owner Portal</a></li>
+    <li><a href="#customer">Customer Portal</a></li>
+    <li><a href="#vendor">Vendor Portal</a></li>
+    <li><a href="#staff">Staff / Empleado</a></li>
+    <li><a href="#docs">Documentación</a></li>
+    <li><a href="#blog">Blog & Marketing</a></li>
+    <li><a href="#status">Status & Monitor</a></li>
+    <li><a href="#legal">Legal & Misc</a></li>
+    <li><a href="#apps">Apps móviles</a></li>
+    <li><a href="#marketplace">Marketplace</a></li>
+    <li><a href="#reports">Reportes & BI</a></li>
+    <li><a href="#devtools">Dev Tools</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- PÚBLICO -->
+<section class="cat" id="public">
+  <header class="cat-head">
+    <div class="cat-icon">🌐</div>
+    <div><div class="cat-title">Sitio público</div><div class="cat-desc">Páginas de marketing y landing accesibles sin sesión.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://volvix.com/"><div class="name"><span class="dot"></span>Home</div><div class="url">volvix.com/</div><div class="desc">Landing principal con hero, productos y CTA de demo.</div><span class="tag green">público</span></a>
+    <a class="card" href="https://volvix.com/pricing"><div class="name"><span class="dot"></span>Pricing</div><div class="url">volvix.com/pricing</div><div class="desc">Planes Starter, Pro y Enterprise con comparativa.</div><span class="tag green">público</span></a>
+    <a class="card" href="https://volvix.com/features"><div class="name"><span class="dot"></span>Features</div><div class="url">volvix.com/features</div><div class="desc">Detalle de capacidades del producto.</div><span class="tag green">público</span></a>
+    <a class="card" href="https://volvix.com/about"><div class="name"><span class="dot"></span>About</div><div class="url">volvix.com/about</div><div class="desc">Misión, equipo y trayectoria de Volvix.</div><span class="tag green">público</span></a>
+    <a class="card" href="https://volvix.com/contact"><div class="name"><span class="dot"></span>Contact</div><div class="url">volvix.com/contact</div><div class="desc">Formulario de contacto y soporte comercial.</div><span class="tag green">público</span></a>
+    <a class="card" href="https://volvix.com/demo"><div class="name"><span class="dot"></span>Solicitar demo</div><div class="url">volvix.com/demo</div><div class="desc">Agenda demo guiada con un asesor.</div><span class="tag green">público</span></a>
+    <a class="card" href="https://volvix.com/partners"><div class="name"><span class="dot"></span>Partners</div><div class="url">volvix.com/partners</div><div class="desc">Programa de partners y reseller.</div><span class="tag green">público</span></a>
+    <a class="card" href="https://volvix.com/customers"><div class="name"><span class="dot"></span>Casos de éxito</div><div class="url">volvix.com/customers</div><div class="desc">Historias de clientes y casos de uso.</div><span class="tag green">público</span></a>
+    <a class="card" href="https://volvix.com/integrations"><div class="name"><span class="dot"></span>Integraciones</div><div class="url">volvix.com/integrations</div><div class="desc">Catálogo de integraciones disponibles.</div><span class="tag green">público</span></a>
+    <a class="card" href="https://volvix.com/changelog"><div class="name"><span class="dot"></span>Changelog</div><div class="url">volvix.com/changelog</div><div class="desc">Historial de versiones y novedades.</div><span class="tag green">público</span></a>
+  </div>
+</section>
+
+<!-- AUTH -->
+<section class="cat" id="auth">
+  <header class="cat-head">
+    <div class="cat-icon green">🔐</div>
+    <div><div class="cat-title">Autenticación</div><div class="cat-desc">Acceso, registro, recuperación y MFA.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://app.volvix.com/login"><div class="name"><span class="dot"></span>Login</div><div class="url">app.volvix.com/login</div><div class="desc">Inicio de sesión con email/password o SSO.</div><span class="tag">auth</span></a>
+    <a class="card" href="https://app.volvix.com/signup"><div class="name"><span class="dot"></span>Sign up</div><div class="url">app.volvix.com/signup</div><div class="desc">Registro de nueva cuenta y onboarding.</div><span class="tag">auth</span></a>
+    <a class="card" href="https://app.volvix.com/forgot-password"><div class="name"><span class="dot"></span>Recuperar contraseña</div><div class="url">app.volvix.com/forgot-password</div><div class="desc">Reset por correo.</div><span class="tag">auth</span></a>
+    <a class="card" href="https://app.volvix.com/reset-password"><div class="name"><span class="dot"></span>Reset password</div><div class="url">app.volvix.com/reset-password</div><div class="desc">Pantalla de definición de nueva contraseña.</div><span class="tag">auth</span></a>
+    <a class="card" href="https://app.volvix.com/mfa"><div class="name"><span class="dot"></span>Verificación 2FA</div><div class="url">app.volvix.com/mfa</div><div class="desc">TOTP / SMS / WebAuthn.</div><span class="tag">auth</span></a>
+    <a class="card" href="https://app.volvix.com/sso"><div class="name"><span class="dot"></span>SSO Enterprise</div><div class="url">app.volvix.com/sso</div><div class="desc">SAML/OIDC para clientes Enterprise.</div><span class="tag amber">enterprise</span></a>
+    <a class="card" href="https://app.volvix.com/invite"><div class="name"><span class="dot"></span>Aceptar invitación</div><div class="url">app.volvix.com/invite/:token</div><div class="desc">Aceptación de invitaciones a workspace.</div><span class="tag">auth</span></a>
+    <a class="card" href="https://app.volvix.com/logout"><div class="name"><span class="dot gray"></span>Logout</div><div class="url">app.volvix.com/logout</div><div class="desc">Cierre de sesión global.</div><span class="tag">auth</span></a>
+  </div>
+</section>
+
+<!-- POS -->
+<section class="cat" id="pos">
+  <header class="cat-head">
+    <div class="cat-icon amber">🛒</div>
+    <div><div class="cat-title">Volvix POS</div><div class="cat-desc">Punto de venta para tiendas y restaurantes.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://pos.volvix.com/"><div class="name"><span class="dot"></span>POS Home</div><div class="url">pos.volvix.com/</div><div class="desc">Pantalla principal de venta con catálogo.</div><span class="tag">pos</span></a>
+    <a class="card" href="https://pos.volvix.com/checkout"><div class="name"><span class="dot"></span>Checkout</div><div class="url">pos.volvix.com/checkout</div><div class="desc">Cobro, pagos múltiples y propinas.</div><span class="tag">pos</span></a>
+    <a class="card" href="https://pos.volvix.com/orders"><div class="name"><span class="dot"></span>Órdenes activas</div><div class="url">pos.volvix.com/orders</div><div class="desc">Lista en tiempo real de órdenes en curso.</div><span class="tag">pos</span></a>
+    <a class="card" href="https://pos.volvix.com/orders/history"><div class="name"><span class="dot"></span>Historial de órdenes</div><div class="url">pos.volvix.com/orders/history</div><div class="desc">Búsqueda histórica con filtros.</div><span class="tag">pos</span></a>
+    <a class="card" href="https://pos.volvix.com/kds"><div class="name"><span class="dot"></span>KDS - Cocina</div><div class="url">pos.volvix.com/kds</div><div class="desc">Kitchen Display System para chefs.</div><span class="tag amber">restaurante</span></a>
+    <a class="card" href="https://pos.volvix.com/tables"><div class="name"><span class="dot"></span>Plano de mesas</div><div class="url">pos.volvix.com/tables</div><div class="desc">Vista de salón y gestión de comanda por mesa.</div><span class="tag amber">restaurante</span></a>
+    <a class="card" href="https://pos.volvix.com/products"><div class="name"><span class="dot"></span>Catálogo</div><div class="url">pos.volvix.com/products</div><div class="desc">Productos, modificadores y categorías.</div><span class="tag">pos</span></a>
+    <a class="card" href="https://pos.volvix.com/inventory"><div class="name"><span class="dot"></span>Inventario</div><div class="url">pos.volvix.com/inventory</div><div class="desc">Stock por sucursal, alertas y conteos.</div><span class="tag">pos</span></a>
+    <a class="card" href="https://pos.volvix.com/discounts"><div class="name"><span class="dot"></span>Descuentos & Cupones</div><div class="url">pos.volvix.com/discounts</div><div class="desc">Promociones y reglas de descuento.</div><span class="tag">pos</span></a>
+    <a class="card" href="https://pos.volvix.com/cash"><div class="name"><span class="dot"></span>Caja</div><div class="url">pos.volvix.com/cash</div><div class="desc">Apertura, cierre y arqueo de caja.</div><span class="tag">pos</span></a>
+    <a class="card" href="https://pos.volvix.com/refunds"><div class="name"><span class="dot pink"></span>Reembolsos</div><div class="url">pos.volvix.com/refunds</div><div class="desc">Devoluciones totales o parciales.</div><span class="tag pink">sensible</span></a>
+    <a class="card" href="https://pos.volvix.com/shifts"><div class="name"><span class="dot"></span>Turnos</div><div class="url">pos.volvix.com/shifts</div><div class="desc">Apertura/cierre de turno por cajero.</div><span class="tag">pos</span></a>
+    <a class="card" href="https://pos.volvix.com/printers"><div class="name"><span class="dot"></span>Impresoras</div><div class="url">pos.volvix.com/printers</div><div class="desc">Configuración de impresoras y tickets.</div><span class="tag">pos</span></a>
+    <a class="card" href="https://pos.volvix.com/offline"><div class="name"><span class="dot amber"></span>Modo offline</div><div class="url">pos.volvix.com/offline</div><div class="desc">Operación sin conexión y sincronización.</div><span class="tag amber">resiliencia</span></a>
+  </div>
+</section>
+
+<!-- ADMIN -->
+<section class="cat" id="admin">
+  <header class="cat-head">
+    <div class="cat-icon purple">⚙️</div>
+    <div><div class="cat-title">Admin Dashboard</div><div class="cat-desc">Panel administrativo del workspace.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://admin.volvix.com/"><div class="name"><span class="dot"></span>Dashboard</div><div class="url">admin.volvix.com/</div><div class="desc">KPIs principales: ventas, clientes, conversión.</div><span class="tag">admin</span></a>
+    <a class="card" href="https://admin.volvix.com/analytics"><div class="name"><span class="dot"></span>Analytics</div><div class="url">admin.volvix.com/analytics</div><div class="desc">Reportes avanzados y cohortes.</div><span class="tag">admin</span></a>
+    <a class="card" href="https://admin.volvix.com/sales"><div class="name"><span class="dot"></span>Ventas</div><div class="url">admin.volvix.com/sales</div><div class="desc">Reporte de ventas por período/canal.</div><span class="tag">admin</span></a>
+    <a class="card" href="https://admin.volvix.com/customers"><div class="name"><span class="dot"></span>Clientes</div><div class="url">admin.volvix.com/customers</div><div class="desc">Base de clientes y segmentación.</div><span class="tag">admin</span></a>
+    <a class="card" href="https://admin.volvix.com/products"><div class="name"><span class="dot"></span>Productos</div><div class="url">admin.volvix.com/products</div><div class="desc">Gestión global de catálogo.</div><span class="tag">admin</span></a>
+    <a class="card" href="https://admin.volvix.com/orders"><div class="name"><span class="dot"></span>Órdenes</div><div class="url">admin.volvix.com/orders</div><div class="desc">Vista consolidada multi-canal.</div><span class="tag">admin</span></a>
+    <a class="card" href="https://admin.volvix.com/locations"><div class="name"><span class="dot"></span>Sucursales</div><div class="url">admin.volvix.com/locations</div><div class="desc">Multi-sucursal y configuración por tienda.</div><span class="tag">admin</span></a>
+    <a class="card" href="https://admin.volvix.com/staff"><div class="name"><span class="dot"></span>Empleados</div><div class="url">admin.volvix.com/staff</div><div class="desc">Roles, permisos y horarios.</div><span class="tag">admin</span></a>
+    <a class="card" href="https://admin.volvix.com/integrations"><div class="name"><span class="dot"></span>Integraciones</div><div class="url">admin.volvix.com/integrations</div><div class="desc">Stripe, MercadoPago, SAT, contabilidad.</div><span class="tag">admin</span></a>
+    <a class="card" href="https://admin.volvix.com/webhooks"><div class="name"><span class="dot"></span>Webhooks</div><div class="url">admin.volvix.com/webhooks</div><div class="desc">Endpoints y eventos suscritos.</div><span class="tag">admin</span></a>
+    <a class="card" href="https://admin.volvix.com/api-keys"><div class="name"><span class="dot pink"></span>API Keys</div><div class="url">admin.volvix.com/api-keys</div><div class="desc">Gestión de tokens y secretos.</div><span class="tag pink">sensible</span></a>
+    <a class="card" href="https://admin.volvix.com/audit-log"><div class="name"><span class="dot"></span>Audit Log</div><div class="url">admin.volvix.com/audit-log</div><div class="desc">Bitácora de acciones y cambios.</div><span class="tag">admin</span></a>
+    <a class="card" href="https://admin.volvix.com/settings"><div class="name"><span class="dot"></span>Configuración</div><div class="url">admin.volvix.com/settings</div><div class="desc">Workspace, dominio, branding, idioma.</div><span class="tag">admin</span></a>
+    <a class="card" href="https://admin.volvix.com/notifications"><div class="name"><span class="dot"></span>Notificaciones</div><div class="url">admin.volvix.com/notifications</div><div class="desc">Reglas de email/SMS/push.</div><span class="tag">admin</span></a>
+  </div>
+</section>
+
+<!-- OWNER -->
+<section class="cat" id="owner">
+  <header class="cat-head">
+    <div class="cat-icon pink">👑</div>
+    <div><div class="cat-title">Owner Portal</div><div class="cat-desc">Vista ejecutiva para dueños y directores.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://owner.volvix.com/"><div class="name"><span class="dot"></span>Resumen ejecutivo</div><div class="url">owner.volvix.com/</div><div class="desc">P&amp;L, EBITDA y métricas clave.</div><span class="tag pink">owner</span></a>
+    <a class="card" href="https://owner.volvix.com/financials"><div class="name"><span class="dot"></span>Estados financieros</div><div class="url">owner.volvix.com/financials</div><div class="desc">P&amp;L, balance, flujo de efectivo.</div><span class="tag pink">owner</span></a>
+    <a class="card" href="https://owner.volvix.com/cashflow"><div class="name"><span class="dot"></span>Cashflow</div><div class="url">owner.volvix.com/cashflow</div><div class="desc">Proyección de flujo a 90 días.</div><span class="tag pink">owner</span></a>
+    <a class="card" href="https://owner.volvix.com/forecast"><div class="name"><span class="dot"></span>Forecast IA</div><div class="url">owner.volvix.com/forecast</div><div class="desc">Predicciones de venta y stock.</div><span class="tag pink">owner</span></a>
+    <a class="card" href="https://owner.volvix.com/locations"><div class="name"><span class="dot"></span>Comparativo sucursales</div><div class="url">owner.volvix.com/locations</div><div class="desc">Ranking y benchmark interno.</div><span class="tag pink">owner</span></a>
+    <a class="card" href="https://owner.volvix.com/payroll"><div class="name"><span class="dot"></span>Nómina</div><div class="url">owner.volvix.com/payroll</div><div class="desc">Costos laborales y horas trabajadas.</div><span class="tag pink">owner</span></a>
+    <a class="card" href="https://owner.volvix.com/billing"><div class="name"><span class="dot"></span>Facturación Volvix</div><div class="url">owner.volvix.com/billing</div><div class="desc">Suscripción, facturas y método de pago.</div><span class="tag pink">owner</span></a>
+    <a class="card" href="https://owner.volvix.com/users"><div class="name"><span class="dot"></span>Usuarios &amp; Roles</div><div class="url">owner.volvix.com/users</div><div class="desc">Permisos a nivel organización.</div><span class="tag pink">owner</span></a>
+  </div>
+</section>
+
+<!-- CUSTOMER -->
+<section class="cat" id="customer">
+  <header class="cat-head">
+    <div class="cat-icon cyan">👤</div>
+    <div><div class="cat-title">Customer Portal</div><div class="cat-desc">Portal de clientes finales.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://my.volvix.com/"><div class="name"><span class="dot"></span>Mi cuenta</div><div class="url">my.volvix.com/</div><div class="desc">Resumen y datos personales.</div><span class="tag">customer</span></a>
+    <a class="card" href="https://my.volvix.com/orders"><div class="name"><span class="dot"></span>Mis pedidos</div><div class="url">my.volvix.com/orders</div><div class="desc">Historial de compras y tracking.</div><span class="tag">customer</span></a>
+    <a class="card" href="https://my.volvix.com/loyalty"><div class="name"><span class="dot"></span>Puntos &amp; Lealtad</div><div class="url">my.volvix.com/loyalty</div><div class="desc">Programa de puntos y recompensas.</div><span class="tag">customer</span></a>
+    <a class="card" href="https://my.volvix.com/wallet"><div class="name"><span class="dot"></span>Wallet</div><div class="url">my.volvix.com/wallet</div><div class="desc">Saldo, gift cards y métodos guardados.</div><span class="tag">customer</span></a>
+    <a class="card" href="https://my.volvix.com/addresses"><div class="name"><span class="dot"></span>Direcciones</div><div class="url">my.volvix.com/addresses</div><div class="desc">Direcciones de envío.</div><span class="tag">customer</span></a>
+    <a class="card" href="https://my.volvix.com/support"><div class="name"><span class="dot"></span>Soporte</div><div class="url">my.volvix.com/support</div><div class="desc">Tickets y chat con soporte.</div><span class="tag">customer</span></a>
+    <a class="card" href="https://my.volvix.com/preferences"><div class="name"><span class="dot"></span>Preferencias</div><div class="url">my.volvix.com/preferences</div><div class="desc">Idioma, notificaciones, privacidad.</div><span class="tag">customer</span></a>
+  </div>
+</section>
+
+<!-- VENDOR -->
+<section class="cat" id="vendor">
+  <header class="cat-head">
+    <div class="cat-icon">🏭</div>
+    <div><div class="cat-title">Vendor Portal</div><div class="cat-desc">Portal para proveedores y marketplace sellers.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://vendors.volvix.com/"><div class="name"><span class="dot"></span>Dashboard proveedor</div><div class="url">vendors.volvix.com/</div><div class="desc">Resumen de pedidos y pagos pendientes.</div><span class="tag">vendor</span></a>
+    <a class="card" href="https://vendors.volvix.com/catalog"><div class="name"><span class="dot"></span>Mi catálogo</div><div class="url">vendors.volvix.com/catalog</div><div class="desc">Productos publicados y precios.</div><span class="tag">vendor</span></a>
+    <a class="card" href="https://vendors.volvix.com/orders"><div class="name"><span class="dot"></span>Órdenes recibidas</div><div class="url">vendors.volvix.com/orders</div><div class="desc">PO de tiendas Volvix.</div><span class="tag">vendor</span></a>
+    <a class="card" href="https://vendors.volvix.com/invoices"><div class="name"><span class="dot"></span>Facturas</div><div class="url">vendors.volvix.com/invoices</div><div class="desc">Facturación electrónica al retailer.</div><span class="tag">vendor</span></a>
+    <a class="card" href="https://vendors.volvix.com/payouts"><div class="name"><span class="dot"></span>Payouts</div><div class="url">vendors.volvix.com/payouts</div><div class="desc">Liquidaciones y comisiones.</div><span class="tag">vendor</span></a>
+    <a class="card" href="https://vendors.volvix.com/shipments"><div class="name"><span class="dot"></span>Envíos</div><div class="url">vendors.volvix.com/shipments</div><div class="desc">Guías y seguimiento.</div><span class="tag">vendor</span></a>
+    <a class="card" href="https://vendors.volvix.com/onboarding"><div class="name"><span class="dot amber"></span>Onboarding</div><div class="url">vendors.volvix.com/onboarding</div><div class="desc">Verificación KYC y banking.</div><span class="tag amber">setup</span></a>
+  </div>
+</section>
+
+<!-- STAFF -->
+<section class="cat" id="staff">
+  <header class="cat-head">
+    <div class="cat-icon green">🧑‍💼</div>
+    <div><div class="cat-title">Staff / Empleado</div><div class="cat-desc">Portal del empleado y operaciones diarias.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://staff.volvix.com/"><div class="name"><span class="dot"></span>Mi día</div><div class="url">staff.volvix.com/</div><div class="desc">Tareas, turno actual y notificaciones.</div><span class="tag green">staff</span></a>
+    <a class="card" href="https://staff.volvix.com/schedule"><div class="name"><span class="dot"></span>Horario</div><div class="url">staff.volvix.com/schedule</div><div class="desc">Agenda semanal y solicitudes de cambio.</div><span class="tag green">staff</span></a>
+    <a class="card" href="https://staff.volvix.com/clock"><div class="name"><span class="dot"></span>Checador</div><div class="url">staff.volvix.com/clock</div><div class="desc">Entrada, salida y descansos.</div><span class="tag green">staff</span></a>
+    <a class="card" href="https://staff.volvix.com/timeoff"><div class="name"><span class="dot"></span>Vacaciones</div><div class="url">staff.volvix.com/timeoff</div><div class="desc">Solicitud de días libres.</div><span class="tag green">staff</span></a>
+    <a class="card" href="https://staff.volvix.com/payslips"><div class="name"><span class="dot"></span>Recibos de nómina</div><div class="url">staff.volvix.com/payslips</div><div class="desc">Histórico descargable.</div><span class="tag green">staff</span></a>
+    <a class="card" href="https://staff.volvix.com/training"><div class="name"><span class="dot"></span>Capacitación</div><div class="url">staff.volvix.com/training</div><div class="desc">Cursos y certificaciones internas.</div><span class="tag green">staff</span></a>
+  </div>
+</section>
+
+<!-- DOCS -->
+<section class="cat" id="docs">
+  <header class="cat-head">
+    <div class="cat-icon">📚</div>
+    <div><div class="cat-title">Documentación</div><div class="cat-desc">Guías, API y referencias técnicas.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://docs.volvix.com/"><div class="name"><span class="dot"></span>Docs Home</div><div class="url">docs.volvix.com/</div><div class="desc">Punto de entrada a la documentación.</div><span class="tag">docs</span></a>
+    <a class="card" href="https://docs.volvix.com/getting-started"><div class="name"><span class="dot"></span>Getting started</div><div class="url">docs.volvix.com/getting-started</div><div class="desc">Onboarding paso a paso.</div><span class="tag">docs</span></a>
+    <a class="card" href="https://docs.volvix.com/guides"><div class="name"><span class="dot"></span>Guías</div><div class="url">docs.volvix.com/guides</div><div class="desc">How-to por escenario.</div><span class="tag">docs</span></a>
+    <a class="card" href="https://api.volvix.com/"><div class="name"><span class="dot"></span>API Reference</div><div class="url">api.volvix.com/</div><div class="desc">REST + GraphQL con ejemplos.</div><span class="tag">api</span></a>
+    <a class="card" href="https://docs.volvix.com/webhooks"><div class="name"><span class="dot"></span>Webhooks</div><div class="url">docs.volvix.com/webhooks</div><div class="desc">Eventos, payloads y firmas.</div><span class="tag">docs</span></a>
+    <a class="card" href="https://docs.volvix.com/sdks"><div class="name"><span class="dot"></span>SDKs</div><div class="url">docs.volvix.com/sdks</div><div class="desc">JS/TS, Python, PHP, Go, Ruby.</div><span class="tag">docs</span></a>
+    <a class="card" href="https://docs.volvix.com/security"><div class="name"><span class="dot"></span>Seguridad</div><div class="url">docs.volvix.com/security</div><div class="desc">Políticas, SOC2 y compliance.</div><span class="tag">docs</span></a>
+    <a class="card" href="https://docs.volvix.com/faq"><div class="name"><span class="dot"></span>FAQ</div><div class="url">docs.volvix.com/faq</div><div class="desc">Preguntas frecuentes.</div><span class="tag">docs</span></a>
+  </div>
+</section>
+
+<!-- BLOG -->
+<section class="cat" id="blog">
+  <header class="cat-head">
+    <div class="cat-icon amber">✍️</div>
+    <div><div class="cat-title">Blog & Marketing</div><div class="cat-desc">Contenido, recursos y newsletter.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://volvix.com/blog"><div class="name"><span class="dot"></span>Blog</div><div class="url">volvix.com/blog</div><div class="desc">Artículos del equipo y novedades.</div><span class="tag amber">marketing</span></a>
+    <a class="card" href="https://volvix.com/blog/category/product"><div class="name"><span class="dot"></span>Producto</div><div class="url">volvix.com/blog/category/product</div><div class="desc">Lanzamientos y deep-dives.</div><span class="tag amber">marketing</span></a>
+    <a class="card" href="https://volvix.com/blog/category/engineering"><div class="name"><span class="dot"></span>Engineering</div><div class="url">volvix.com/blog/category/engineering</div><div class="desc">Postmortems y arquitectura.</div><span class="tag amber">marketing</span></a>
+    <a class="card" href="https://volvix.com/resources"><div class="name"><span class="dot"></span>Recursos</div><div class="url">volvix.com/resources</div><div class="desc">Ebooks, plantillas y webinars.</div><span class="tag amber">marketing</span></a>
+    <a class="card" href="https://volvix.com/newsletter"><div class="name"><span class="dot"></span>Newsletter</div><div class="url">volvix.com/newsletter</div><div class="desc">Suscripción mensual.</div><span class="tag amber">marketing</span></a>
+    <a class="card" href="https://volvix.com/events"><div class="name"><span class="dot"></span>Eventos</div><div class="url">volvix.com/events</div><div class="desc">Conferencias y meetups.</div><span class="tag amber">marketing</span></a>
+    <a class="card" href="https://volvix.com/press"><div class="name"><span class="dot"></span>Prensa</div><div class="url">volvix.com/press</div><div class="desc">Kit de prensa y notas.</div><span class="tag amber">marketing</span></a>
+  </div>
+</section>
+
+<!-- STATUS -->
+<section class="cat" id="status">
+  <header class="cat-head">
+    <div class="cat-icon green">📡</div>
+    <div><div class="cat-title">Status & Monitor</div><div class="cat-desc">Operaciones, salud y observabilidad.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://status.volvix.com/"><div class="name"><span class="dot"></span>Status público</div><div class="url">status.volvix.com/</div><div class="desc">Estado de servicios en tiempo real.</div><span class="tag green">live</span></a>
+    <a class="card" href="https://status.volvix.com/incidents"><div class="name"><span class="dot"></span>Incidentes</div><div class="url">status.volvix.com/incidents</div><div class="desc">Histórico y postmortems.</div><span class="tag green">live</span></a>
+    <a class="card" href="https://status.volvix.com/maintenance"><div class="name"><span class="dot amber"></span>Mantenimientos</div><div class="url">status.volvix.com/maintenance</div><div class="desc">Ventanas planificadas.</div><span class="tag amber">programado</span></a>
+    <a class="card" href="https://monitor.volvix.com/"><div class="name"><span class="dot"></span>Monitor interno</div><div class="url">monitor.volvix.com/</div><div class="desc">Grafana, métricas y alertas.</div><span class="tag pink">interno</span></a>
+    <a class="card" href="https://logs.volvix.com/"><div class="name"><span class="dot"></span>Logs</div><div class="url">logs.volvix.com/</div><div class="desc">Loki / OpenSearch para SRE.</div><span class="tag pink">interno</span></a>
+    <a class="card" href="https://traces.volvix.com/"><div class="name"><span class="dot"></span>Traces</div><div class="url">traces.volvix.com/</div><div class="desc">Tempo / Jaeger distributed tracing.</div><span class="tag pink">interno</span></a>
+    <a class="card" href="https://health.volvix.com/"><div class="name"><span class="dot"></span>Health checks</div><div class="url">health.volvix.com/</div><div class="desc">Endpoints de health/readiness.</div><span class="tag green">live</span></a>
+  </div>
+</section>
+
+<!-- LEGAL -->
+<section class="cat" id="legal">
+  <header class="cat-head">
+    <div class="cat-icon gray">⚖️</div>
+    <div><div class="cat-title">Legal & Misc</div><div class="cat-desc">Términos, privacidad y páginas auxiliares.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://volvix.com/terms"><div class="name"><span class="dot gray"></span>Términos del servicio</div><div class="url">volvix.com/terms</div><div class="desc">Condiciones de uso de la plataforma.</div><span class="tag">legal</span></a>
+    <a class="card" href="https://volvix.com/privacy"><div class="name"><span class="dot gray"></span>Política de privacidad</div><div class="url">volvix.com/privacy</div><div class="desc">Tratamiento de datos personales.</div><span class="tag">legal</span></a>
+    <a class="card" href="https://volvix.com/cookies"><div class="name"><span class="dot gray"></span>Cookies</div><div class="url">volvix.com/cookies</div><div class="desc">Política y preferencias de cookies.</div><span class="tag">legal</span></a>
+    <a class="card" href="https://volvix.com/dpa"><div class="name"><span class="dot gray"></span>DPA</div><div class="url">volvix.com/dpa</div><div class="desc">Data Processing Agreement.</div><span class="tag">legal</span></a>
+    <a class="card" href="https://volvix.com/sla"><div class="name"><span class="dot gray"></span>SLA</div><div class="url">volvix.com/sla</div><div class="desc">Acuerdo de nivel de servicio.</div><span class="tag">legal</span></a>
+    <a class="card" href="https://volvix.com/security.txt"><div class="name"><span class="dot gray"></span>security.txt</div><div class="url">volvix.com/.well-known/security.txt</div><div class="desc">Reportes responsables.</div><span class="tag">legal</span></a>
+    <a class="card" href="https://volvix.com/sitemap.xml"><div class="name"><span class="dot gray"></span>sitemap.xml</div><div class="url">volvix.com/sitemap.xml</div><div class="desc">Sitemap para motores de búsqueda.</div><span class="tag">seo</span></a>
+    <a class="card" href="https://volvix.com/robots.txt"><div class="name"><span class="dot gray"></span>robots.txt</div><div class="url">volvix.com/robots.txt</div><div class="desc">Directivas para crawlers.</div><span class="tag">seo</span></a>
+    <a class="card" href="https://volvix.com/404"><div class="name"><span class="dot gray"></span>404</div><div class="url">volvix.com/404</div><div class="desc">Página de no-encontrado.</div><span class="tag">misc</span></a>
+    <a class="card" href="https://volvix.com/500"><div class="name"><span class="dot gray"></span>500</div><div class="url">volvix.com/500</div><div class="desc">Error interno del servidor.</div><span class="tag">misc</span></a>
+  </div>
+</section>
+
+<!-- APPS MOVILES -->
+<section class="cat" id="apps">
+  <header class="cat-head">
+    <div class="cat-icon cyan">📱</div>
+    <div><div class="cat-title">Apps móviles</div><div class="cat-desc">Aplicaciones nativas iOS / Android.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://apps.apple.com/app/volvix-pos"><div class="name"><span class="dot"></span>Volvix POS - iOS</div><div class="url">apps.apple.com/app/volvix-pos</div><div class="desc">App de punto de venta para iPhone/iPad.</div><span class="tag">mobile</span></a>
+    <a class="card" href="https://play.google.com/store/apps/details?id=com.volvix.pos"><div class="name"><span class="dot"></span>Volvix POS - Android</div><div class="url">play.google.com/.../volvix.pos</div><div class="desc">Versión Android del POS.</div><span class="tag">mobile</span></a>
+    <a class="card" href="https://apps.apple.com/app/volvix-manager"><div class="name"><span class="dot"></span>Volvix Manager - iOS</div><div class="url">apps.apple.com/app/volvix-manager</div><div class="desc">Panel ejecutivo móvil.</div><span class="tag">mobile</span></a>
+    <a class="card" href="https://play.google.com/store/apps/details?id=com.volvix.manager"><div class="name"><span class="dot"></span>Volvix Manager - Android</div><div class="url">play.google.com/.../volvix.manager</div><div class="desc">Panel ejecutivo Android.</div><span class="tag">mobile</span></a>
+    <a class="card" href="https://apps.apple.com/app/volvix-customer"><div class="name"><span class="dot"></span>Volvix Customer</div><div class="url">apps.apple.com/app/volvix-customer</div><div class="desc">App del cliente final con lealtad.</div><span class="tag">mobile</span></a>
+    <a class="card" href="https://volvix.com/download"><div class="name"><span class="dot"></span>Página de descargas</div><div class="url">volvix.com/download</div><div class="desc">Links a stores y apps de escritorio.</div><span class="tag">mobile</span></a>
+  </div>
+</section>
+
+<!-- MARKETPLACE -->
+<section class="cat" id="marketplace">
+  <header class="cat-head">
+    <div class="cat-icon purple">🧩</div>
+    <div><div class="cat-title">Marketplace & Plugins</div><div class="cat-desc">Extensiones, plugins y apps de terceros.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://marketplace.volvix.com/"><div class="name"><span class="dot"></span>Marketplace</div><div class="url">marketplace.volvix.com/</div><div class="desc">Tienda de plugins certificados.</div><span class="tag">marketplace</span></a>
+    <a class="card" href="https://marketplace.volvix.com/category/payments"><div class="name"><span class="dot"></span>Plugins de pago</div><div class="url">marketplace.volvix.com/category/payments</div><div class="desc">Stripe, MercadoPago, Conekta, OpenPay.</div><span class="tag">marketplace</span></a>
+    <a class="card" href="https://marketplace.volvix.com/category/accounting"><div class="name"><span class="dot"></span>Contabilidad</div><div class="url">marketplace.volvix.com/category/accounting</div><div class="desc">QuickBooks, Contpaqi, Aspel, Xero.</div><span class="tag">marketplace</span></a>
+    <a class="card" href="https://marketplace.volvix.com/category/shipping"><div class="name"><span class="dot"></span>Envíos</div><div class="url">marketplace.volvix.com/category/shipping</div><div class="desc">DHL, FedEx, Estafeta, 99minutos.</div><span class="tag">marketplace</span></a>
+    <a class="card" href="https://marketplace.volvix.com/submit"><div class="name"><span class="dot amber"></span>Publicar plugin</div><div class="url">marketplace.volvix.com/submit</div><div class="desc">Programa de partners de desarrollo.</div><span class="tag amber">developer</span></a>
+    <a class="card" href="https://developers.volvix.com/"><div class="name"><span class="dot"></span>Developer Hub</div><div class="url">developers.volvix.com/</div><div class="desc">Portal de desarrolladores Volvix.</div><span class="tag amber">developer</span></a>
+  </div>
+</section>
+
+<!-- REPORTES -->
+<section class="cat" id="reports">
+  <header class="cat-head">
+    <div class="cat-icon">📊</div>
+    <div><div class="cat-title">Reportes & BI</div><div class="cat-desc">Reportería avanzada y dashboards a medida.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://bi.volvix.com/"><div class="name"><span class="dot"></span>Volvix BI</div><div class="url">bi.volvix.com/</div><div class="desc">Suite de BI con dashboards configurables.</div><span class="tag">bi</span></a>
+    <a class="card" href="https://bi.volvix.com/reports/sales"><div class="name"><span class="dot"></span>Reporte de ventas</div><div class="url">bi.volvix.com/reports/sales</div><div class="desc">Detalle por hora, producto, vendedor.</div><span class="tag">bi</span></a>
+    <a class="card" href="https://bi.volvix.com/reports/inventory"><div class="name"><span class="dot"></span>Reporte de inventario</div><div class="url">bi.volvix.com/reports/inventory</div><div class="desc">Rotación, mermas y obsolescencia.</div><span class="tag">bi</span></a>
+    <a class="card" href="https://bi.volvix.com/reports/labor"><div class="name"><span class="dot"></span>Reporte laboral</div><div class="url">bi.volvix.com/reports/labor</div><div class="desc">Productividad por empleado.</div><span class="tag">bi</span></a>
+    <a class="card" href="https://bi.volvix.com/reports/tax"><div class="name"><span class="dot"></span>Impuestos</div><div class="url">bi.volvix.com/reports/tax</div><div class="desc">IVA, ISR, CFDI emitidos.</div><span class="tag">bi</span></a>
+    <a class="card" href="https://bi.volvix.com/exports"><div class="name"><span class="dot"></span>Exportaciones</div><div class="url">bi.volvix.com/exports</div><div class="desc">CSV, Excel, PDF programados.</div><span class="tag">bi</span></a>
+    <a class="card" href="https://bi.volvix.com/builder"><div class="name"><span class="dot"></span>Report Builder</div><div class="url">bi.volvix.com/builder</div><div class="desc">Constructor visual sin código.</div><span class="tag">bi</span></a>
+  </div>
+</section>
+
+<!-- DEV TOOLS -->
+<section class="cat" id="devtools">
+  <header class="cat-head">
+    <div class="cat-icon gray">🛠️</div>
+    <div><div class="cat-title">Dev Tools internas</div><div class="cat-desc">Herramientas para staff técnico de Volvix.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://internal.volvix.com/"><div class="name"><span class="dot pink"></span>Internal Console</div><div class="url">internal.volvix.com/</div><div class="desc">Backoffice de soporte L2/L3.</div><span class="tag pink">interno</span></a>
+    <a class="card" href="https://internal.volvix.com/impersonate"><div class="name"><span class="dot pink"></span>Impersonate</div><div class="url">internal.volvix.com/impersonate</div><div class="desc">Acceso como usuario para soporte.</div><span class="tag pink">sensible</span></a>
+    <a class="card" href="https://internal.volvix.com/feature-flags"><div class="name"><span class="dot"></span>Feature Flags</div><div class="url">internal.volvix.com/feature-flags</div><div class="desc">Rollouts y kill-switches.</div><span class="tag pink">interno</span></a>
+    <a class="card" href="https://ci.volvix.com/"><div class="name"><span class="dot"></span>CI/CD</div><div class="url">ci.volvix.com/</div><div class="desc">Pipelines de despliegue.</div><span class="tag pink">interno</span></a>
+    <a class="card" href="https://registry.volvix.com/"><div class="name"><span class="dot"></span>Container Registry</div><div class="url">registry.volvix.com/</div><div class="desc">Imágenes Docker internas.</div><span class="tag pink">interno</span></a>
+    <a class="card" href="https://wiki.volvix.com/"><div class="name"><span class="dot"></span>Wiki interna</div><div class="url">wiki.volvix.com/</div><div class="desc">Runbooks, ADRs y onboarding.</div><span class="tag pink">interno</span></a>
+  </div>
+</section>
+
+<!-- API ENDPOINTS -->
+<section class="cat" id="api-endpoints">
+  <header class="cat-head">
+    <div class="cat-icon">🔌</div>
+    <div><div class="cat-title">API & Webhooks - Endpoints destacados</div><div class="cat-desc">URLs principales de la API pública.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://api.volvix.com/v1/orders"><div class="name"><span class="dot"></span>GET /v1/orders</div><div class="url">api.volvix.com/v1/orders</div><div class="desc">Listar órdenes con paginación.</div><span class="tag">api</span></a>
+    <a class="card" href="https://api.volvix.com/v1/orders"><div class="name"><span class="dot"></span>POST /v1/orders</div><div class="url">api.volvix.com/v1/orders</div><div class="desc">Crear nueva orden.</div><span class="tag">api</span></a>
+    <a class="card" href="https://api.volvix.com/v1/products"><div class="name"><span class="dot"></span>GET /v1/products</div><div class="url">api.volvix.com/v1/products</div><div class="desc">Catálogo completo.</div><span class="tag">api</span></a>
+    <a class="card" href="https://api.volvix.com/v1/inventory"><div class="name"><span class="dot"></span>GET /v1/inventory</div><div class="url">api.volvix.com/v1/inventory</div><div class="desc">Niveles por sucursal.</div><span class="tag">api</span></a>
+    <a class="card" href="https://api.volvix.com/v1/customers"><div class="name"><span class="dot"></span>GET /v1/customers</div><div class="url">api.volvix.com/v1/customers</div><div class="desc">Base de clientes.</div><span class="tag">api</span></a>
+    <a class="card" href="https://api.volvix.com/v1/payments"><div class="name"><span class="dot"></span>POST /v1/payments</div><div class="url">api.volvix.com/v1/payments</div><div class="desc">Procesar cobro.</div><span class="tag">api</span></a>
+    <a class="card" href="https://api.volvix.com/graphql"><div class="name"><span class="dot"></span>GraphQL</div><div class="url">api.volvix.com/graphql</div><div class="desc">Endpoint GraphQL unificado.</div><span class="tag">api</span></a>
+    <a class="card" href="https://api.volvix.com/health"><div class="name"><span class="dot"></span>GET /health</div><div class="url">api.volvix.com/health</div><div class="desc">Health check público.</div><span class="tag green">live</span></a>
+  </div>
+</section>
+
+<!-- SHORTCUTS -->
+<section class="cat" id="shortcuts">
+  <header class="cat-head">
+    <div class="cat-icon amber">⚡</div>
+    <div><div class="cat-title">Atajos rápidos</div><div class="cat-desc">Accesos directos a las páginas más usadas.</div></div>
+  </header>
+  <div class="grid">
+    <a class="card" href="https://app.volvix.com/quick/new-order"><div class="name"><span class="dot"></span>Nueva orden</div><div class="url">app.volvix.com/quick/new-order</div><div class="desc">Crear orden en un click.</div><span class="tag amber">shortcut</span></a>
+    <a class="card" href="https://app.volvix.com/quick/new-product"><div class="name"><span class="dot"></span>Nuevo producto</div><div class="url">app.volvix.com/quick/new-product</div><div class="desc">Alta rápida de SKU.</div><span class="tag amber">shortcut</span></a>
+    <a class="card" href="https://app.volvix.com/quick/new-customer"><div class="name"><span class="dot"></span>Nuevo cliente</div><div class="url">app.volvix.com/quick/new-customer</div><div class="desc">Alta express de cliente.</div><span class="tag amber">shortcut</span></a>
+    <a class="card" href="https://app.volvix.com/quick/close-day"><div class="name"><span class="dot"></span>Cierre del día</div><div class="url">app.volvix.com/quick/close-day</div><div class="desc">Asistente de cierre fiscal/cajas.</div><span class="tag amber">shortcut</span></a>
+    <a class="card" href="https://app.volvix.com/quick/import"><div class="name"><span class="dot"></span>Importar datos</div><div class="url">app.volvix.com/quick/import</div><div class="desc">CSV de productos, clientes o stock.</div><span class="tag amber">shortcut</span></a>
+    <a class="card" href="https://app.volvix.com/quick/export"><div class="name"><span class="dot"></span>Exportar datos</div><div class="url">app.volvix.com/quick/export</div><div class="desc">Backup y exports masivos.</div><span class="tag amber">shortcut</span></a>
+    <a class="card" href="https://app.volvix.com/search"><div class="name"><span class="dot"></span>Búsqueda global</div><div class="url">app.volvix.com/search</div><div class="desc">Cmd/Ctrl+K — buscar en toda la app.</div><span class="tag amber">shortcut</span></a>
+    <a class="card" href="https://app.volvix.com/help"><div class="name"><span class="dot"></span>Ayuda contextual</div><div class="url">app.volvix.com/help</div><div class="desc">Tour guiado y atajos de teclado.</div><span class="tag amber">shortcut</span></a>
+    <a class="card" href="https://app.volvix.com/quick/refund"><div class="name"><span class="dot pink"></span>Reembolso rápido</div><div class="url">app.volvix.com/quick/refund</div><div class="desc">Devolución express por número de orden.</div><span class="tag pink">sensible</span></a>
+    <a class="card" href="https://app.volvix.com/quick/cash-drop"><div class="name"><span class="dot"></span>Retiro de caja</div><div class="url">app.volvix.com/quick/cash-drop</div><div class="desc">Registrar salida de efectivo.</div><span class="tag amber">shortcut</span></a>
+    <a class="card" href="https://app.volvix.com/quick/discount"><div class="name"><span class="dot"></span>Descuento manual</div><div class="url">app.volvix.com/quick/discount</div><div class="desc">Aplicar descuento autorizado.</div><span class="tag amber">shortcut</span></a>
+    <a class="card" href="https://app.volvix.com/quick/invoice"><div class="name"><span class="dot"></span>Facturar venta</div><div class="url">app.volvix.com/quick/invoice</div><div class="desc">Generar CFDI desde ticket.</div><span class="tag amber">shortcut</span></a>
+    <a class="card" href="https://app.volvix.com/quick/transfer"><div class="name"><span class="dot"></span>Transferencia stock</div><div class="url">app.volvix.com/quick/transfer</div><div class="desc">Mover inventario entre sucursales.</div><span class="tag amber">shortcut</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="links">
+    <a href="https://volvix.com/">Home</a>
+    <a href="https://docs.volvix.com/">Docs</a>
+    <a href="https://status.volvix.com/">Status</a>
+    <a href="https://volvix.com/contact">Contacto</a>
+    <a href="https://volvix.com/privacy">Privacidad</a>
+  </div>
+  <div>© 2026 Volvix · Sitemap visual generado el 2026-04-26 · v3.4.0</div>
+  <div style="margin-top:12px;font-size:11px;color:var(--text-mute);max-width:720px;margin-left:auto;margin-right:auto;line-height:1.6">
+    Este sitemap es un mapa visual de navegación de toda la plataforma Volvix.
+    Incluye accesos a paneles administrativos, POS, portales de clientes y proveedores,
+    documentación técnica, marketplace de plugins, herramientas internas, status en vivo
+    y páginas de marketing. Las URLs marcadas como <em>interno</em> requieren VPN o
+    permisos elevados; las marcadas como <em>sensible</em> requieren autenticación
+    multifactor. Última revisión completa de cobertura: 2026-04-26 por el equipo de Plataforma.
+  </div>
+  <div style="margin-top:14px;font-size:11px;color:var(--text-mute)">
+    Convenciones de iconos:
+    <span style="color:var(--accent)">● live</span> ·
+    <span style="color:var(--accent-2)">● programado/setup</span> ·
+    <span style="color:var(--danger)">● sensible/interno</span> ·
+    <span style="color:var(--text-mute)">● informativo</span>
+  </div>
+</footer>
+
+  <script defer src="auth-helper.js"></script>
+  <script defer src="volvix-i18n-wiring.js"></script>
+</body>
+</html>

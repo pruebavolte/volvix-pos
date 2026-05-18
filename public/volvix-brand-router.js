@@ -3085,12 +3085,12 @@
     if (!n) return null;
 
     // ═══════════════════════════════════════════════════════════════
-    // V9.0 HARD EXCEPTIONS (pre-pitch fix) — ANTES de cualquier match
-    // Bloquea matches incorrectos del partial-match para casos reportados:
-    // - 'renta de trajes' → debe ir a tarima (rentas/eventos), NO pareo
-    // - 'pañales' → debe ir a tendito, NO espuma (cafetería) por match "pan-"
-    // - 'sexshop' → confirmar discreto
-    // - 'papeleria' → confirmar bloque, NO espuma por match parcial
+    // V9.0.2 HARD EXCEPTIONS (pre-pitch fix EXTENDIDO) — ANTES de match
+    // Bloquea matches incorrectos del partial-match.
+    // Estas excepciones evitan que el partial-match envíe la query a
+    // una marca de categoría incorrecta, y previenen que landings
+    // rotas (bloque/pata/gateo) reciban tráfico hasta que se confirme
+    // que renderizan tras el fix del widget booking.
     // ═══════════════════════════════════════════════════════════════
     if (/^(renta|alquil)/.test(n) || / (renta|alquila|alquiler) /.test(' '+n+' '))
       return VLX_BRANDS.tarima || { brand:'Tarima', url:'tarima.html' };
@@ -3098,8 +3098,27 @@
       return VLX_BRANDS.tendito || { brand:'Tendito', url:'tendito.html' };
     if (/^sexshop$|^sex shop$|tienda erotica|productos intimos/.test(n))
       return VLX_BRANDS.discreto || { brand:'Discreto', url:'discreto.html' };
-    if (/^papeleria$|papeler|art escolar|utiles escolares/.test(n))
+    // V9.0.2 — papelería/librería NO van a bloque (preescolar mal calibrado), van a tendito
+    if (/^papeleria$|^papeleria |\bpapeler[ií]a\b|\butiles escolares?\b/.test(n))
+      return VLX_BRANDS.tendito || { brand:'Tendito', url:'tendito.html' };
+    if (/\blibrer[ií]a\b|\blibros?\b|venta de libros|tienda de libros/.test(n))
+      return VLX_BRANDS.tendito || { brand:'Tendito', url:'tendito.html' };
+    // V9.0.2 — panadería tiene su propia marca o va a tendito (NO espuma=cafetería)
+    if (/\bpanader[ií]a\b|\breposter[ií]a\b|\bpasteler[ií]a\b|bolillos?|pan de/.test(n))
+      return VLX_BRANDS.merengue || VLX_BRANDS.tendito || { brand:'Tendito', url:'tendito.html' };
+    // V9.0.2 — bolsas para basura ≠ bolsos de moda (asa). Van a tendito.
+    if (/bolsas? (para|de) basura|bolsas? negras?|productos? de limpieza|limpieza hogar/.test(n))
+      return VLX_BRANDS.tendito || { brand:'Tendito', url:'tendito.html' };
+    // V9.0.2 — venta de ropa genérica → pareo (no zapaterías específico pero retail moda)
+    //          OJO: pareo tiene tagline de zapaterías, pero su brand sigue siendo válido para ropa básica
+    if (/^venta de ropa$|\btienda de ropa\b|\bboutique de ropa\b|ropa para hombre|ropa para mujer/.test(n))
+      return VLX_BRANDS.pareo || { brand:'Pareo', url:'pareo.html' };
+    // V9.0.2 — kínder/preescolar/guardería → bloque (preescolar)
+    if (/\bk[ií]nder\b|\bpreescolar\b|\bguarder[ií]a\b|\bestancia infantil\b|\bmaternal\b/.test(n))
       return VLX_BRANDS.bloque || { brand:'Bloque', url:'bloque.html' };
+    // V9.0.2 — veterinaria → pata
+    if (/\bveterinari[ao]?s?\b|\bclinica veterinaria\b|\bcentro veterinario\b/.test(n))
+      return VLX_BRANDS.pata || { brand:'Pata', url:'pata.html' };
 
     // 1. Exact match en alias
     if (VLX_ALIASES[n] && VLX_BRANDS[VLX_ALIASES[n]]) {

@@ -1,0 +1,46 @@
+{
+  "id": "ropa-first-sale",
+  "title": "Tu primera venta en tienda de ropa",
+  "industry": "ropa",
+  "duration_min": 4,
+  "modules_required": ["pos", "inventory", "variants"],
+  "roles": ["owner", "cashier", "salesperson"],
+  "demo_catalog_ref": "R12a",
+  "steps": [
+    {
+      "id": "step1",
+      "title": "Tu inventario con variantes",
+      "text": "Camisa Algodon Blanca (S,M,L,XL) $385, Pantalon Jean Azul (28,30,32,34,36) $585, Vestido Floral (XS,S,M,L) $620, Blusa Casual Negra (S,M,L) $295, Saco Formal (38,40,42,44) $895, Falda Plisada (XS,S,M,L) $385, Short Mezclilla (28,30,32) $285, Sudadera Capucha (S,M,L,XL) $485, Playera Estampada (S,M,L) $185, Chamarra Piel (M,L,XL) $1850, Vestido Coctel (S,M) $785, Tenis Casual (24,25,26,27,28) $685.",
+      "image": "/tutorials/01-primera-venta.html",
+      "action": "next"
+    },
+    {
+      "id": "step2",
+      "title": "Cliente quiere camisa M",
+      "text": "Busca 'camisa blanca'. Selecciona variante 'Talla M'. Stock disponible: 8 piezas.",
+      "highlight_selector": "#search-input",
+      "action": "wait_for_variant_select"
+    },
+    {
+      "id": "step3",
+      "title": "Aplica descuento",
+      "text": "Hoy tienes 15% off en camisas. Click 'Descuento', selecciona '15%'. Total: $327.25.",
+      "highlight_selector": "#btn-descuento",
+      "action": "wait_for_discount"
+    },
+    {
+      "id": "step4",
+      "title": "Cobra y entrega",
+      "text": "Cliente paga $400 efectivo. Cambio $72.75. Imprime ticket con politica de cambios.",
+      "highlight_selector": "#btn-cobrar",
+      "action": "wait_for_payment"
+    },
+    {
+      "id": "step5",
+      "title": "Stock variante actualizado",
+      "text": "Camisa Blanca M ahora tiene 7. Si baja de 3, te avisaremos. Ve a Inventario para ver todas las tallas.",
+      "action": "complete",
+      "next_link": "/inventario"
+    }
+  ]
+}

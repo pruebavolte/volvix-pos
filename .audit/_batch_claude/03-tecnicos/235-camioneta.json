@@ -1,0 +1,106 @@
+{
+  "slug": "camioneta",
+  "brand": "Camioneta",
+  "tagline": "El sistema para renta de camionetas que cobran lo justo y entregan sin sorpresas",
+  "giro": "renta de camionetas",
+  "giroPlural": "rentadoras de camionetas",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#16191D",
+    "surface": "#1F2329",
+    "paper": "#272C33",
+    "ink": "#F0F2F5",
+    "ink2": "#CACFD4",
+    "muted": "#7A828A",
+    "line": "#2E343C",
+    "accent": "#27AE60",
+    "accent2": "#3FC97A"
+  },
+  "fonts": {
+    "display": "Barlow Condensed",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para renta de camionetas · 2026",
+    "h1": "Cada <em>pickup</em>,<br>cada <em>carga</em>,<br>controlada.",
+    "deck": "El POS hecho para renta de camionetas: pickups, redilas, cajas secas, refrigeradas. Para mudanzas, fletes, eventos. GPS, kilómetros, peso, todo registrado.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver flota disponible",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?pickup-truck,rental,fleet&q=80",
+    "heroAlt": "Flota de camionetas y pickups para renta",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?pickup,truck&q=80", "tag": "Pickup doble cabina", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?box-truck,delivery&q=80", "tag": "Caja seca 3.5T", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?moving-truck,box&q=80", "tag": "Mudanza", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?refrigerated,truck&q=80", "tag": "Refrigerada", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?stake-truck,redila&q=80", "tag": "Redila", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cargo,van&q=80", "tag": "Van carga", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?truck-fleet,depot&q=80", "tag": "Depot completo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?driver,truck&q=80", "tag": "Con chofer opcional", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?loading,boxes&q=80", "tag": "Carga lista", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?inspection,truck&q=80", "caption": "Inspección con foto firmada"},
+      {"url": "https://source.unsplash.com/random/800x600/?gps,fleet&q=80", "caption": "GPS en cada unidad"},
+      {"url": "https://source.unsplash.com/random/800x600/?weight,truck&q=80", "caption": "Peso registrado a la salida"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu flota, <em>unidad por unidad</em>",
+    "deck": "Cada camioneta con su capacidad, kilometraje, GPS, disponibilidad. Cliente elige por capacidad o tipo. Reservas reales en línea.",
+    "secondary": "Renta de camioneta sin sistema = cobros perdidos en horas extra y combustible.",
+    "data": {
+      "product": "Flota camionetas por capacidad",
+      "tallas": ["Pickup cab. sencilla", "Pickup doble cab.", "Caja 14 pies", "Caja 24 pies", "Redila chica", "Redila grande", "Van carga", "Refrigerada"],
+      "stock": [
+        {"color": "Disponibles", "vals": [6, 4, 3, 2, 4, 2, 5, 1]},
+        {"color": "Rentadas", "vals": [12, 8, 5, 4, 6, 3, 8, 2]},
+        {"color": "Servicio", "vals": [1, 1, 1, 0, 1, 0, 1, 0]}
+      ],
+      "lowThreshold": 2
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Reservas por tipo", "d": "Cliente elige pickup o caja seca de 24 pies. Sistema asigna unidad disponible. Cero 'no tenemos esa capacidad'."},
+    {"ico": "camera", "h": "Inspección + carga", "d": "Foto del exterior, interior y caja vacía. Cliente firma. Al regreso, foto de regreso. Daños nuevos = cobro justo."},
+    {"ico": "monitor", "h": "GPS + kilometraje", "d": "Sabes dónde está cada unidad. Cobro por km extra automático. Si sale del estado sin permiso, alerta."},
+    {"ico": "edit", "h": "Depósito en garantía", "d": "Tarjeta con $3,000-10,000 retenidos. Si regresa limpio, se libera. Si hay daño o km extra, se cobra."},
+    {"ico": "barcode", "h": "Combustible + horas", "d": "Foto del tanque y horómetro al salir. Diferencia al regreso se cobra. Cero pleitos."},
+    {"ico": "truck", "h": "Chofer opcional", "d": "Cliente puede rentar con chofer. Chofer registra entradas, salidas, descansos. Cero horas extras invisibles."}
+  ],
+  "stats": [
+    {"v": "45", "l": "Camionetas en flota"},
+    {"v": "82%", "l": "Ocupación temporada"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis empleados rentaban camionetas a constructores <span class=\"hl\">por fuera con efectivo</span>. Auto salía marcado como 'en mantenimiento'. Pasaba 6-8 veces al mes. Con Camioneta el GPS detecta movimiento sin contrato. Recuperé $40k mensuales.",
+    "sig": "Don Julián R.",
+    "role": "Renta de Camionetas El Julián, Mérida, YUC"
+  },
+  "thefts": [
+    {
+      "title": "Rentas paralelas en efectivo",
+      "rob": "Empleado renta camioneta a constructor por 1 semana, $2,500 efectivo. Reporta como 'en mantenimiento'. Pasa 6-8 veces al mes.",
+      "fix": "GPS detecta <strong>movimiento sin contrato activo</strong>. Alerta inmediata al dueño. Cero rentas fantasma que desgastan tu flota."
+    },
+    {
+      "title": "Kilómetros extra no cobrados",
+      "rob": "Cliente regresa con 500km extra. Empleado no documenta el km extra. Cliente paga la tarifa base, tú pierdes $1,500-3,000.",
+      "fix": "GPS registra <strong>kilometraje real automático</strong>. Diferencia se cobra del depósito sin discusiones."
+    },
+    {
+      "title": "Daños a carrocería achacados al siguiente",
+      "rob": "Cliente regresa con golpe. Empleado no documenta. Próximo cliente recibe el golpe, reclama. Tú pagas reparación.",
+      "fix": "Inspección con <strong>foto firmada de cada lado</strong> a la entrega y regreso. Daño se cobra al causante. Cero pérdidas."
+    }
+  ]
+}

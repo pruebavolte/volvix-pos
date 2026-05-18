@@ -1,0 +1,51 @@
+{
+  "slice": 207,
+  "idx_range": [3140, 3160],
+  "module": "R18_CRM_ADVANCED",
+  "title": "CRM avanzado con pipeline de ventas (B2B)",
+  "status": "completed",
+  "files": {
+    "sql": "db/R18_CRM_ADVANCED.sql",
+    "api": "api/crm-advanced.js",
+    "client": "public/volvix-crm-kanban.js",
+    "report": "R18_CRM.md"
+  },
+  "tables": [
+    "pipeline_stages",
+    "leads",
+    "crm_activities",
+    "crm_campaigns",
+    "crm_stage_log"
+  ],
+  "default_stages": [
+    {"name": "Lead", "order": 1, "probability": 10},
+    {"name": "Qualified", "order": 2, "probability": 25},
+    {"name": "Proposal", "order": 3, "probability": 50},
+    {"name": "Negotiation", "order": 4, "probability": 75},
+    {"name": "Closed Won", "order": 5, "probability": 100},
+    {"name": "Closed Lost", "order": 6, "probability": 0}
+  ],
+  "endpoints": [
+    "GET /api/crm/leads",
+    "POST /api/crm/leads",
+    "PATCH /api/crm/leads/:id",
+    "DELETE /api/crm/leads/:id",
+    "POST /api/crm/leads/:id/move-stage",
+    "GET /api/crm/activities",
+    "POST /api/crm/activities",
+    "GET /api/crm/pipeline-view",
+    "POST /api/crm/campaigns",
+    "GET /api/crm/forecast"
+  ],
+  "features": [
+    "kanban drag&drop multi-stage",
+    "auto-status won/lost en stages de cierre",
+    "stage transition log para auditoría",
+    "forecast ponderado por probability",
+    "campañas multicanal (email/sms/whatsapp/push)",
+    "actividades CRM (call/email/meeting/note)"
+  ],
+  "client_widget": "[data-volvix-crm-kanban]",
+  "forecast_formula": "SUM(value_estimated * probability/100) por stage abierto",
+  "ts": "2026-04-26"
+}

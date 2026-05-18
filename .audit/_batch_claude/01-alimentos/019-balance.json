@@ -1,0 +1,104 @@
+{
+  "slug": "balance",
+  "brand": "Balance",
+  "tagline": "El sistema para comida saludable donde cada caloría cuenta y cada macro está medido",
+  "giro": "comida saludable",
+  "giroPlural": "restaurantes de comida saludable",
+  "vibe": "minimalist",
+  "palette": {
+    "bg": "#F4F8F5",
+    "surface": "#FFFFFF",
+    "paper": "#E5EFE8",
+    "ink": "#0F1F1A",
+    "ink2": "#2A3A30",
+    "muted": "#6A7A6E",
+    "line": "#C0D5C8",
+    "accent": "#1B5E20",
+    "accent2": "#F57C00"
+  },
+  "fonts": {
+    "display": "Inter Tight",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para comida saludable mexicana · 2026",
+    "h1": "Cada <em>plato</em>,<br>cada <em>macro</em>,<br>medido.",
+    "deck": "El POS hecho para que cada plato tenga sus macros visibles, los clientes fitness sepan qué pedir, y las porciones no se vayan más allá de la dieta del cliente.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el menú con macros",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?healthy,fitness,bowl&q=85",
+    "heroAlt": "Plato fitness con pollo y verduras",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?healthy,plate&q=80", "tag": "Plato fitness", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?protein,bowl&q=80", "tag": "Bowl de proteína", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?grilled,chicken&q=80", "tag": "Pollo a la plancha", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?salad,fresh&q=80", "tag": "Ensalada power", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?wrap,healthy&q=80", "tag": "Wrap integral", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?green,smoothie&q=80", "tag": "Smoothie verde", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?healthy,restaurant&q=80", "tag": "Espacio minimalista", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?meal,prep&q=80", "tag": "Meal prep semanal", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?fitness,food&q=80", "tag": "Comida atlética", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?chef,healthy&q=80", "caption": "Chef pesa porción exacta"},
+      {"url": "https://source.unsplash.com/random/800x600/?nutrition,scale&q=80", "caption": "Báscula con macros"},
+      {"url": "https://source.unsplash.com/random/800x600/?gym,customer&q=80", "caption": "Cliente fitness elige plato"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · macros · en vivo",
+    "title": "Tu cocina, <em>plato por plato</em>, con macros exactos",
+    "deck": "Cada orden con macros visibles. KDS muestra: bowl 480 kcal, 35p / 40c / 18g. Cocinero pesa proteína al gramo. Cero diferencias entre menú y plato real.",
+    "secondary": "En la comida saludable, 20g extra de proteína 'regalada' son $35-50 al día perdidos.",
+    "data": {
+      "orders": [
+        {"table": "M02", "name": "Carlos F. (gym)", "state": "urgent", "items": ["Bowl alto proteína|180g pollo", "1 smoothie proteína"], "waitMin": 8},
+        {"table": "M05", "name": "Sra. Vargas", "state": "prep", "items": ["Wrap integral|sin queso", "Ensalada extra", "Agua mineral"], "waitMin": 6},
+        {"table": "M01", "name": "Pareja gym", "state": "queue", "items": ["2 bowls keto|sin arroz", "2 cold brew"], "waitMin": 4},
+        {"table": "MEAL-12", "name": "Don Andrés (semanal)", "state": "ready", "items": ["12 meal prep semanal"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Macros visibles por platillo", "d": "Cada plato con kcal, proteína, carbos, grasas. Cliente ve en menú QR. Cero 'no sé qué llevaba'. Confianza fitness al 100%."},
+    {"ico": "barcode", "h": "Báscula para proteína exacta", "d": "150g pollo, 100g salmón, 80g carne. Sistema verifica al servir. Cero porciones generosas que descuadran macros."},
+    {"ico": "archive", "h": "Meal prep semanal por cliente", "d": "Cliente apartar 12 comidas para la semana. Sistema genera lista de compras. Cero domingos cocinando 'al ojo'."},
+    {"ico": "calendar", "h": "Suscripción mensual fitness", "d": "Cliente paga $X mensual, recibe X comidas. Sistema cobra automático, agenda producción. Cero pagos olvidados."},
+    {"ico": "percent", "h": "Costo por gramo de proteína", "d": "Pollo $130/kg, salmón $280/kg, ternera $200/kg. Sistema te dice qué proteína deja más margen por bowl."},
+    {"ico": "edit", "h": "Personalización por dieta", "d": "Sin gluten, keto, paleo, vegana. Cliente filtra menú. Sistema muestra opciones aptas. Cero confusión."}
+  ],
+  "stats": [
+    {"v": "94", "l": "Bowls servidos hoy"},
+    {"v": "32", "l": "Suscriptores fitness"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis clientes fitness <span class=\"hl\">no confiaban en mis macros</span> porque 'al ojo' no convence al que cuenta gramos. Con Balance cada bowl pesa la proteína al gramo. Mi suscripción mensual creció 4x.",
+    "sig": "Carlos F.",
+    "role": "Balance Kitchen, San Pedro Garza García, NL"
+  },
+  "thefts": [
+    {
+      "title": "Proteína 'porción extra' a clientes amigos",
+      "rob": "Cocinero pone 200g pollo cuando el bowl es de 150g. A clientes amigos. 8 bowls al día = $200-300 perdidos en proteína premium.",
+      "fix": "Proteína se <strong>pesa con báscula al servir</strong>. Sistema bloquea si excede gramaje +5g. Cero porciones generosas al cariño."
+    },
+    {
+      "title": "Macros 'al ojo' que no son reales",
+      "rob": "Cocinero no pesa la porción y dice 'son 150g aprox'. Cliente cuenta calorías y baja confianza. Pierdes suscriptores fitness.",
+      "fix": "Báscula <strong>obligatoria por cada porción</strong>. Sistema imprime ticket con macros exactos. Cliente recibe info real."
+    },
+    {
+      "title": "Meal prep 'extras' que no se cobran",
+      "rop": "Cliente apartar 10 comidas, cocinera prepara 12 'porque sobró'. Cliente recibe gratis 2. $200-400 cada vez. 4 clientes al mes.",
+      "fix": "Meal prep con <strong>conteo automático por suscripción</strong>. Sistema imprime etiqueta por comida con cliente y fecha. Cero comidas 'extra'."
+    }
+  ]
+}

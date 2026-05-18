@@ -1,0 +1,104 @@
+{
+  "slug": "toga",
+  "brand": "Toga",
+  "tagline": "El sistema para universidades privadas que sí saben quién cursa, quién paga y quién se titula",
+  "giro": "universidad privada",
+  "giroPlural": "universidades privadas",
+  "vibe": "luxury",
+  "palette": {
+    "bg": "#0E0F14",
+    "surface": "#181A22",
+    "paper": "#21232E",
+    "ink": "#F8F4E8",
+    "ink2": "#D5CFB8",
+    "muted": "#807A66",
+    "line": "#2A2C38",
+    "accent": "#C49A3D",
+    "accent2": "#E0BC65"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Italianno",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para universidades privadas · 2026",
+    "h1": "Cada <em>crédito</em>,<br>cada <em>cuatrimestre</em>,<br>en tu plan.",
+    "deck": "El POS hecho para universidades donde el alumno escoge materias, el catedrático captura desde laptop y rectoría quiere ver morosidad, retención y avance académico en una pantalla.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver matrícula hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?university,campus,students,library&q=85",
+    "heroAlt": "Campus universitario con alumnos",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?university,campus&q=80", "tag": "Campus principal", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?library,university&q=80", "tag": "Biblioteca", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?lecture,hall&q=80", "tag": "Aula magna", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?graduation,gown&q=80", "tag": "Graduación", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?student,laptop,study&q=80", "tag": "Estudio", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?university,group,students&q=80", "tag": "Grupo de estudio", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?professor,lecture&q=80", "tag": "Cátedra magistral", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?research,lab,university&q=80", "tag": "Laboratorio", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?university,building&q=80", "tag": "Edificio rectoría", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?student,id,university&q=80", "caption": "Credencial universitaria digital"},
+      {"url": "https://source.unsplash.com/random/800x600/?professor,grades,laptop&q=80", "caption": "Catedrático captura calificaciones"},
+      {"url": "https://source.unsplash.com/random/800x600/?graduation,diploma&q=80", "caption": "Constancia de titulación"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Materias · cuatrimestre actual · en vivo",
+    "title": "Tu matrícula, <em>materia por materia</em>",
+    "deck": "Cada alumno con su carga académica del cuatrimestre. Catedrático toma asistencia con QR. Sistema cruza créditos cubiertos vs faltantes para titulación. Cero alumnos confundidos.",
+    "secondary": "En universidades, una materia mal inscrita atrasa la titulación un cuatrimestre completo. Toga lo previene.",
+    "data": {
+      "barberos": [{"name": "Dr. Rivas", "role": "Derecho Civil"}, {"name": "Mtra. Ortega", "role": "Mercadotecnia"}, {"name": "Ing. Salazar", "role": "Ingeniería"}],
+      "slots": ["07:00", "08:30", "10:00", "11:30", "13:00", "16:00", "17:30", "19:00", "20:30"],
+      "taken": [0, 1, 2, 5, 6, 7],
+      "active": 482,
+      "total": 600,
+      "next": "13:00"
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Plan de estudios por créditos", "d": "Cada licenciatura con su mapa curricular. Sistema valida prerrequisitos. Alumno no se inscribe a materia sin haber pasado la previa."},
+    {"ico": "calendar", "h": "Asistencia obligatoria 80%", "d": "Sistema avisa al catedrático y al alumno cuando se acerca al límite. Reprueba automáticamente si pasa."},
+    {"ico": "bookmark", "h": "Colegiaturas + inscripción cuatrimestral", "d": "Cobro recurrente con tarjeta guardada. Inscripción al inicio. Recargo automático si vence."},
+    {"ico": "edit", "h": "Kárdex académico exportable", "d": "Cada alumno con su historial completo. Para titulación, traslado, becas o entrega a SEP en minutos."},
+    {"ico": "grid", "h": "Trámite de titulación digital", "d": "Cuando alumno termina materias + servicio social + tesis, sistema arma expediente para SEP. Cero papelería perdida."},
+    {"ico": "camera", "h": "Identificación con foto en lista", "d": "Catedrático ve foto del alumno en su tablet. Cero suplantaciones en examen final."}
+  ],
+  "stats": [
+    {"v": "1,847", "l": "Alumnos activos"},
+    {"v": "12", "l": "Licenciaturas"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi cuello de botella era <span class=\"hl\">titulación: 90 días por alumno</span>. Con Toga el expediente se arma solo cuando completa requisitos. Hoy titulo en 15 días con sello SEP.",
+    "sig": "Dr. Eduardo M.",
+    "role": "Universidad Toga, Guadalajara, JAL"
+  },
+  "thefts": [
+    {
+      "title": "Inscripciones pagadas en efectivo que no se registran",
+      "rob": "Alumno paga $18,000 de inscripción en efectivo en caja. Cajera registra 'pago parcial' y se queda con $5,000. Sin folio digital, no se prueba.",
+      "fix": "Inscripciones <strong>obligatorias por tarjeta, transferencia o cheque con folio en sistema</strong>. Recibo digital al instante al alumno."
+    },
+    {
+      "title": "Becas otorgadas sin documentación",
+      "rob": "Coordinador da beca del 60% a 'hijo de socio' sin estudio. Son $12,000 menos al cuatrimestre. En 8 cuatrimestres: $96,000 perdidos sin documento.",
+      "fix": "Becas con <strong>autorización rectoral + estudio socioeconómico digital + comité firmante</strong>. Reporte mensual auditable."
+    },
+    {
+      "title": "Catedráticos que faltan sin reposición pagada al alumno",
+      "rob": "Catedrático falta 4 sesiones del cuatrimestre. Alumno paga $16,000 por materia y no recibe esas horas. Tú las pagas igual al catedrático.",
+      "fix": "Sistema lleva <strong>bitácora de clases impartidas vs programadas</strong>. Faltas sin reposición no se pagan al catedrático y generan crédito al alumno."
+    }
+  ]
+}

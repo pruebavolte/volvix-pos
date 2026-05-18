@@ -1,0 +1,38 @@
+{
+  "slice": 206,
+  "idx_range": [3120, 3140],
+  "module": "R18_HR",
+  "title": "Recursos Humanos (HR)",
+  "status": "implemented",
+  "ts": "2026-04-26T00:00:00Z",
+  "artifacts": {
+    "sql": "db/R18_HR.sql",
+    "api": "api/index.js",
+    "report": "R18_HR.md"
+  },
+  "tables": [
+    "attendance",
+    "time_off",
+    "performance_reviews",
+    "employee_documents"
+  ],
+  "endpoints": [
+    {"idx": 3120, "method": "POST",  "path": "/api/hr/attendance/check-in",          "auth": "employee", "notes": "geofence + late_minutes"},
+    {"idx": 3121, "method": "POST",  "path": "/api/hr/attendance/check-out",         "auth": "employee", "notes": "calcula hours_worked"},
+    {"idx": 3122, "method": "GET",   "path": "/api/hr/attendance",                   "auth": "employee", "notes": "filtros employee_id/from/to"},
+    {"idx": 3123, "method": "GET",   "path": "/api/hr/time-off",                     "auth": "employee", "notes": "filtros employee_id/status"},
+    {"idx": 3124, "method": "POST",  "path": "/api/hr/time-off",                     "auth": "employee", "notes": "crea pending"},
+    {"idx": 3125, "method": "PATCH", "path": "/api/hr/time-off",                     "auth": "manager",  "notes": "approve/reject"},
+    {"idx": 3126, "method": "GET",   "path": "/api/hr/performance-reviews",          "auth": "employee", "notes": "filtros employee_id/period"},
+    {"idx": 3127, "method": "POST",  "path": "/api/hr/performance-reviews",          "auth": "manager",  "notes": "ratings jsonb"},
+    {"idx": 3128, "method": "GET",   "path": "/api/hr/employees/:id/dashboard",      "auth": "employee", "notes": "resumen 30d + reviews + docs"}
+  ],
+  "settings_keys": ["hr_geofence"],
+  "indexes": [
+    "idx_attendance_emp_date",
+    "idx_timeoff_emp",
+    "idx_perfrev_emp",
+    "idx_empdocs_emp"
+  ],
+  "next": ["payroll-webhook", "csv-export", "push-on-timeoff-decision"]
+}

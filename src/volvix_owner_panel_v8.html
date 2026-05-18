@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix Core · Dashboard Administrativo v8</title>
+<script src="/auth-gate.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAF9;
+    --surface: #FFFFFF;
+    --surface-2: #F5F5F4;
+    --border: #E7E5E4;
+    --border-strong: #D6D3D1;
+    --text: #0C0A09;
+    --text-2: #57534E;
+    --text-3: #A8A29E;
+    --accent: #EA580C;
+    --accent-soft: #FFF7ED;
+    --ok: #16A34A;
+    --warn: #CA8A04;
+    --err: #DC2626;
+    --info: #2563EB;
+  }
+  * { box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .hidden { display: none !important; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+  /* LAYOUT */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .content { flex: 1; overflow-y: auto; padding: 24px 32px; }
+
+  /* SIDEBAR */
+  .brand { padding: 20px 16px; border-bottom: 1px solid var(--border); }
+  .brand-name { font-weight: 600; font-size: 13px; }
+  .nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 6px; color: var(--text-2); font-size: 13px; font-weight: 500; width: 100%; text-align: left; transition: all 0.1s; cursor: pointer; }
+  .nav-item:hover { background: var(--surface-2); color: var(--text); }
+  .nav-item.active { background: var(--text); color: white; }
+  .nav-item.icon { margin-right: 8px; }
+
+  /* TOPBAR */
+  .topbar { height: 56px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; padding: 0 32px; gap: 16px; }
+  .page-title { font-size: 15px; font-weight: 600; }
+  .page-sub { font-size: 12px; color: var(--text-3); }
+
+  /* COMPONENTS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+  .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  h2 { font-size: 22px; font-weight: 600; margin: 0 0 16px; }
+  h3 { font-size: 14px; font-weight: 600; margin: 0 0 12px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; border: 1px solid var(--border); background: var(--surface); color: var(--text); transition: all 0.1s; cursor: pointer; }
+  .btn:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .btn.primary { background: var(--text); color: white; border-color: var(--text); }
+  .btn.primary:hover { background: #27272A; }
+  .btn.accent { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn.accent:hover { background: #C2410C; }
+  .btn.sm { padding: 6px 10px; font-size: 12px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .kpi-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; }
+  .kpi-label { font-size: 11px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .kpi-value { font-size: 26px; font-weight: 700; margin-top: 8px; letter-spacing: -0.5px; }
+  .kpi-sub { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+  .trend-up { color: var(--ok); font-weight: 600; }
+  .trend-dn { color: var(--err); font-weight: 600; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 24px; flex-wrap: wrap; }
+  .tab { padding: 12px 16px; font-size: 13px; font-weight: 500; color: var(--text-3); border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; transition: all 0.1s; }
+  .tab:hover { color: var(--text-2); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* CHARTS */
+  .chart-container { position: relative; height: 300px; margin-bottom: 24px; }
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+  @media (max-width: 1200px) { .chart-row { grid-template-columns: 1fr; } }
+
+  /* TABLES */
+  table.tbl { width: 100%; border-collapse: collapse; }
+  table.tbl thead th { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+  table.tbl tbody td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  table.tbl tbody tr:hover { background: var(--surface-2); }
+  table.tbl tbody tr:last-child td { border-bottom: none; }
+
+  /* CHIPS */
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
+  .chip.ok { background: #F0FDF4; color: #166534; border-color: #BBF7D0; }
+  .chip.warn { background: #FEFCE8; color: #854D0E; border-color: #FEF08A; }
+  .chip.err { background: #FEF2F2; color: #991B1B; border-color: #FECACA; }
+  .chip.info { background: #EFF6FF; color: #1E40AF; border-color: #BFDBFE; }
+
+  /* TOOLBAR */
+  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .search-box { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
+  .search-box:focus { outline: none; border-color: var(--accent); }
+
+  /* MODAL */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+  .modal { background: var(--surface); border-radius: 10px; width: 90%; max-width: 600px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+  .modal-head { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .modal-body { padding: 22px; overflow-y: auto; flex: 1; }
+  .modal-foot { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* LOADING */
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top: 2px solid var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .app { flex-direction: column; height: auto; min-height: 100vh; overflow: visible; }
+    .sidebar { width: 100%; flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+    .main { overflow: visible; }
+    .content { padding: 16px; }
+    .chart-row { grid-template-columns: 1fr; }
+    .kpi { grid-template-columns: 1fr; }
+  }
+
+  /* PAGINATION */
+  .pagination { display: flex; gap: 6px; margin-top: 16px; justify-content: center; align-items: center; }
+  .pagination button { padding: 6px 10px; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 12px; }
+  .pagination button.active { background: var(--text); color: white; }
+  .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-name">📊 Dashboard</div>
+      <div style="font-size: 11px; color: var(--text-3); margin-top: 4px;">Admin v8</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="switchTab('dashboard')">
+        <span>📈 Dashboard</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('sales')">
+        <span>💰 Ventas</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('transactions')">
+        <span>📋 Transacciones</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('inventory')">
+        <span>📦 Inventario</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('users')">
+        <span>👥 Usuarios</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('reports')">
+        <span>📊 Reportes</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('integrations')">
+        <span>🔗 Integraciones</span>
+      </div>
+    </nav>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title" id="page-title">Dashboard Principal</div>
+        <div class="page-sub" id="page-sub">Resumen de negocio en tiempo real</div>
+      </div>
+      <div style="margin-left: auto; display: flex; gap: 8px;">
+        <button class="btn sm" onclick="exportCSV()">📥 Exportar CSV</button>
+        <button class="btn sm accent" onclick="refreshData()"><span class="spinner" id="spinner" style="display:none;"></span> Actualizar</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- TAB: DASHBOARD -->
+      <div id="dashboard" class="tab-content active">
+        <h2>Dashboard Principal</h2>
+
+        <!-- KPIs -->
+        <div class="kpi" id="kpis-container">
+          <div class="kpi-cell">
+            <div class="kpi-label">Total de Ventas</div>
+            <div class="kpi-value" id="kpi-total-sales">$0.00</div>
+            <div class="kpi-sub"><span id="kpi-sales-trend" class="trend-up">↑ 12.5%</span> vs mes anterior</div>
+          </div>
+          <div class="kpi-cell">
+            <div class="kpi-label">Transacciones</div>
+            <div class="kpi-value" id="kpi-trans-count">0</div>
+            <div class="kpi-sub">Completadas esta semana</div>
+          </div>
+          <div class="kpi-cell">
+            <div class="kpi-label">Ticket Promedio</div>
+            <div class="kpi-value" id="kpi-avg-ticket">$0.00</div>
+            <div class="kpi-sub">Tamaño promedio de venta</div>
+          </div>
+          <div class="kpi-cell">
+            <div class="kpi-label">Productos Activos</div>
+            <div class="kpi-value" id="kpi-products">0</div>
+            <div class="kpi-sub"><span class="chip warn">5</span> bajo stock</div>
+          </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="chart-row">
+          <div class="card">
+            <h3>Ventas por Día</h3>
+            <div class="chart-container">
+              <canvas id="chart-sales-by-day"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Métodos de Pago</h3>
+            <div class="chart-container">
+              <canvas id="chart-payment-methods"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-row">
+          <div class="card">
+            <h3>Top 10 Productos</h3>
+            <div class="chart-container">
+              <canvas id="chart-top-products"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Ventas por Categoría</h3>
+            <div class="chart-container">
+              <canvas id="chart-categories"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: SALES -->
+      <div id="sales" class="tab-content">
+        <h2>Análisis de Ventas</h2>
+
+        <div class="toolbar">
+          <select id="sales-period" class="search-box" style="flex:0; width:150px;" onchange="loadSalesData()">
+            <option value="today">Hoy</option>
+            <option value="week">Esta Semana</option>
+            <option value="month" selected>Este Mes</option>
+            <option value="year">Este Año</option>
+          </select>
+          <button class="btn" onclick="exportSalesCSV()">📥 Exportar CSV</button>
+        </div>
+
+        <div class="card">
+          <h3>Ventas por Producto</h3>
+          <table class="tbl" id="sales-by-product-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Monto</th>
+                <th>% del Total</th>
+              </tr>
+            </thead>
+            <tbody id="sales-by-product-body">
+              <tr><td colspan="4" style="text-align:center;">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: TRANSACTIONS -->
+      <div id="transactions" class="tab-content">
+        <h2>Historial de Transacciones</h2>
+
+        <div class="toolbar">
+          <input type="text" class="search-box" placeholder="Buscar por cliente, ID..." id="search-trans" onkeyup="loadTransactions()">
+          <select id="trans-filter" class="search-box" style="flex:0; width:150px;" onchange="loadTransactions()">
+            <option value="all">Todas</option>
+            <option value="completed">Completadas</option>
+            <option value="pending">Pendientes</option>
+            <option value="refunded">Reembolsadas</option>
+          </select>
+          <button class="btn" onclick="exportTransactionsCSV()">📥 Exportar CSV</button>
+        </div>
+
+        <div class="card">
+          <table class="tbl" id="transactions-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Monto</th>
+                <th>Método</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="transactions-body">
+              <tr><td colspan="6" style="text-align:center;">Cargando...</td></tr>
+            </tbody>
+          </table>
+          <div class="pagination" id="trans-pagination"></div>
+        </div>
+      </div>
+
+      <!-- TAB: INVENTORY -->
+      <div id="inventory" class="tab-content">
+        <h2>Inventario</h2>
+
+        <div class="toolbar">
+          <input type="text" class="search-box" placeholder="Buscar producto..." id="search-inv" onkeyup="loadInventory()">
+          <label style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="low-stock-only" onchange="loadInventory()">
+            Solo bajo stock (&lt;5)
+          </label>
+          <button class="btn" onclick="exportInventoryCSV()">📥 Exportar CSV</button>
+        </div>
+
+        <div class="card">
+          <table class="tbl" id="inventory-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>SKU</th>
+                <th>Stock Actual</th>
+                <th>Stock Mínimo</th>
+                <th>Estado</th>
+                <th>Categoría</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-body">
+              <tr><td colspan="6" style="text-align:center;">Cargando...</td></tr>
+            </tbody>
+          </table>
+          <div class="pagination" id="inv-pagination"></div>
+        </div>
+      </div>
+
+      <!-- TAB: USERS -->
+      <div id="users" class="tab-content">
+        <h2>Gestión de Usuarios</h2>
+
+        <div class="toolbar">
+          <input type="text" class="search-box" placeholder="Buscar usuario..." id="search-users" onkeyup="loadUsers()">
+          <select id="user-role" class="search-box" style="flex:0; width:150px;" onchange="loadUsers()">
+            <option value="all">Todos los roles</option>
+            <option value="owner">Propietario</option>
+            <option value="admin">Administrador</option>
+            <option value="cashier">Cajero</option>
+            <option value="employee">Empleado</option>
+          </select>
+          <button class="btn accent" onclick="inviteUser()">➕ Invitar Usuario</button>
+        </div>
+
+        <div class="card">
+          <table class="tbl" id="users-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Último Login</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="users-body">
+              <tr><td colspan="6" style="text-align:center;">Cargando...</td></tr>
+            </tbody>
+          </table>
+          <div class="pagination" id="users-pagination"></div>
+        </div>
+      </div>
+
+      <!-- TAB: REPORTS -->
+      <div id="reports" class="tab-content">
+        <h2>Reportes</h2>
+
+        <div class="toolbar">
+          <select id="report-type" class="search-box" style="flex:0; width:200px;">
+            <option value="sales-by-employee">Ventas por Empleado</option>
+            <option value="peak-hours">Horas Pico</option>
+            <option value="payment-breakdown">Desglose de Pagos</option>
+            <option value="refunds">Reembolsos</option>
+            <option value="customer-lifetime">Valor Vida del Cliente</option>
+          </select>
+          <button class="btn" onclick="generateReport()">📊 Generar Reporte</button>
+          <button class="btn" onclick="exportReportPDF()">📄 Descargar PDF</button>
+        </div>
+
+        <div class="card">
+          <div id="report-content" style="min-height: 400px;">
+            <p style="text-align: center; color: var(--text-3);">Selecciona un reporte y haz clic en "Generar"</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: INTEGRATIONS -->
+      <div id="integrations" class="tab-content">
+        <h2>Estado de Integraciones</h2>
+
+        <div class="card">
+          <div id="integrations-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+            <div class="card" style="border: 1px solid var(--border);">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>📱 WhatsApp Business</h3>
+                <span class="chip" id="wa-status">No configurado</span>
+              </div>
+              <p id="wa-details" style="font-size: 12px; color: var(--text-3); margin: 8px 0;">Estado desconocido</p>
+              <button class="btn sm" onclick="testWA()">🧪 Probar Conexión</button>
+            </div>
+
+            <div class="card" style="border: 1px solid var(--border);">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>☎️ Twilio SMS</h3>
+                <span class="chip" id="twilio-status">No configurado</span>
+              </div>
+              <p id="twilio-details" style="font-size: 12px; color: var(--text-3); margin: 8px 0;">Estado desconocido</p>
+              <button class="btn sm" onclick="testTwilio()">🧪 Probar Conexión</button>
+            </div>
+
+            <div class="card" style="border: 1px solid var(--border);">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>💳 PayPal</h3>
+                <span class="chip" id="paypal-status">No configurado</span>
+              </div>
+              <p id="paypal-details" style="font-size: 12px; color: var(--text-3); margin: 8px 0;">Estado desconocido</p>
+              <button class="btn sm" onclick="testPayPal()">🧪 Probar Conexión</button>
+            </div>
+
+            <div class="card" style="border: 1px solid var(--border);">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>📧 Email (Resend)</h3>
+                <span class="chip" id="email-status">No configurado</span>
+              </div>
+              <p id="email-details" style="font-size: 12px; color: var(--text-3); margin: 8px 0;">Estado desconocido</p>
+              <button class="btn sm" onclick="testEmail()">🧪 Probar Conexión</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================================
+  // CONFIGURACIÓN
+  // ============================================================================
+  const API_BASE = '/api/dashboard';
+  let currentTab = 'dashboard';
+  let currentPage = 0;
+  const ITEMS_PER_PAGE = 20;
+  let chartsCache = {};
+
+  // ============================================================================
+  // UTILIDADES
+  // ============================================================================
+  function switchTab(tab) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+    // Show selected
+    const contentEl = document.getElementById(tab);
+    if (contentEl) contentEl.classList.add('active');
+
+    // Mark nav
+    event.target.closest('.nav-item').classList.add('active');
+
+    // Update title
+    const titles = {
+      dashboard: '📈 Dashboard Principal',
+      sales: '💰 Análisis de Ventas',
+      transactions: '📋 Historial de Transacciones',
+      inventory: '📦 Inventario',
+      users: '👥 Gestión de Usuarios',
+      reports: '📊 Reportes Avanzados',
+      integrations: '🔗 Integraciones'
+    };
+
+    document.getElementById('page-title').textContent = titles[tab] || 'Dashboard';
+    currentTab = tab;
+
+    // Load data
+    if (tab === 'dashboard') loadDashboard();
+    else if (tab === 'sales') loadSalesData();
+    else if (tab === 'transactions') loadTransactions();
+    else if (tab === 'inventory') loadInventory();
+    else if (tab === 'users') loadUsers();
+    else if (tab === 'integrations') loadIntegrationStatus();
+  }
+
+  async function fetchAPI(endpoint) {
+    try {
+      const res = await fetch(API_BASE + endpoint);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error('API Error:', err);
+      return null;
+    }
+  }
+
+  function showSpinner() {
+    document.getElementById('spinner').style.display = 'inline-block';
+  }
+
+  function hideSpinner() {
+    document.getElementById('spinner').style.display = 'none';
+  }
+
+  function formatCurrency(val) {
+    return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(val);
+  }
+
+  function formatDate(dateStr) {
+    return new Date(dateStr).toLocaleDateString('es-MX');
+  }
+
+  // ============================================================================
+  // DASHBOARD PRINCIPAL
+  // ============================================================================
+  async function loadDashboard() {
+    showSpinner();
+
+    // Load KPIs
+    const kpis = await fetchAPI('/kpis?period=month');
+    if (kpis) {
+      document.getElementById('kpi-total-sales').textContent = kpis.totalSales || '$0.00';
+      document.getElementById('kpi-avg-ticket').textContent = kpis.avgTicketSize || '$0.00';
+      document.getElementById('kpi-trans-count').textContent = kpis.transactionsPerDay || '0';
+      const trend = parseFloat(kpis.salesGrowthPercent || 0);
+      document.getElementById('kpi-sales-trend').innerHTML = `<span class="${trend >= 0 ? 'trend-up' : 'trend-dn'}">${trend >= 0 ? '↑' : '↓'} ${Math.abs(trend).toFixed(1)}%</span>`;
+    }
+
+    // Load inventory count
+    const inv = await fetchAPI('/inventory?low-stock-only=false');
+    if (inv) {
+      document.getElementById('kpi-products').textContent = inv.total || '0';
+    }
+
+    // Load charts
+    await loadCharts();
+
+    hideSpinner();
+  }
+
+  async function loadCharts() {
+    // Sales by day
+    const salesByDay = await fetchAPI('/sales-by-day?period=month');
+    if (salesByDay && salesByDay.data) {
+      createChart('chart-sales-by-day', {
+        type: 'line',
+        labels: salesByDay.data.map(d => d.date),
+        data: salesByDay.data.map(d => parseFloat(d.amount || 0)),
+        label: 'Ventas ($)'
+      });
+    }
+
+    // Payment methods
+    const paymentMethods = await fetchAPI('/payment-methods?period=month');
+    if (paymentMethods && paymentMethods.data) {
+      createChart('chart-payment-methods', {
+        type: 'doughnut',
+        labels: paymentMethods.data.map(d => d.method),
+        data: paymentMethods.data.map(d => parseFloat(d.amount || 0)),
+        label: 'Métodos de Pago'
+      });
+    }
+
+    // Top products
+    const topProducts = await fetchAPI('/top-products?limit=10&period=month');
+    if (topProducts && topProducts.data) {
+      createChart('chart-top-products', {
+        type: 'bar',
+        labels: topProducts.data.map(d => d.name || d.id).slice(0, 10),
+        data: topProducts.data.map(d => parseFloat(d.amount || 0)).slice(0, 10),
+        label: 'Ventas por Producto ($)'
+      });
+    }
+
+    // Categories
+    const categories = await fetchAPI('/sales-by-category?period=month');
+    if (categories && categories.data) {
+      createChart('chart-categories', {
+        type: 'bar',
+        labels: categories.data.map(d => d.category),
+        data: categories.data.map(d => parseFloat(d.amount || 0)),
+        label: 'Ventas por Categoría ($)'
+      });
+    }
+  }
+
+  function createChart(canvasId, config) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+
+    // Destroy previous chart
+    if (chartsCache[canvasId]) chartsCache[canvasId].destroy();
+
+    const chartConfig = {
+      type: config.type,
+      data: {
+        labels: config.labels,
+        datasets: [{
+          label: config.label,
+          data: config.data,
+          backgroundColor: config.type === 'doughnut' || config.type === 'pie'
+            ? ['#EA580C', '#2563EB', '#16A34A', '#CA8A04', '#DC2626', '#8B5CF6', '#06B6D4', '#F59E0B']
+            : 'rgba(234, 88, 12, 0.7)',
+          borderColor: '#EA580C',
+          borderWidth: 1,
+          tension: config.type === 'line' ? 0.3 : 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: config.type === 'line' ? 'top' : 'bottom'
+          }
+        },
+        scales: config.type === 'doughnut' || config.type === 'pie' ? {} : {
+          y: { beginAtZero: true }
+        }
+      }
+    };
+
+    chartsCache[canvasId] = new Chart(ctx, chartConfig);
+  }
+
+  // ============================================================================
+  // VENTAS
+  // ============================================================================
+  async function loadSalesData() {
+    const period = document.getElementById('sales-period').value;
+    const data = await fetchAPI(`/sales-by-product?period=${period}`);
+
+    if (data && data.data) {
+      const total = data.data.reduce((sum, item) => sum + (item.amount || 0), 0);
+      let html = '';
+
+      data.data.forEach(item => {
+        const percent = total > 0 ? ((item.amount / total) * 100).toFixed(1) : 0;
+        html += `
+          <tr>
+            <td>${item.name || item.id}</td>
+            <td>${item.quantity}</td>
+            <td>${item.amountFormatted || '$0.00'}</td>
+            <td>${percent}%</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('sales-by-product-body').innerHTML = html || '<tr><td colspan="4">Sin datos</td></tr>';
+    }
+  }
+
+  // ============================================================================
+  // TRANSACCIONES
+  // ============================================================================
+  async function loadTransactions() {
+    const filter = document.getElementById('trans-filter').value;
+    const search = document.getElementById('search-trans').value;
+    const data = await fetchAPI(`/transactions?limit=${ITEMS_PER_PAGE}&offset=${currentPage * ITEMS_PER_PAGE}&filter=${filter}`);
+
+    if (data && data.items) {
+      let html = '';
+
+      data.items.forEach(item => {
+        const status = item.status || 'completed';
+        const statusClass = status === 'refunded' ? 'warn' : status === 'pending' ? 'info' : 'ok';
+        html += `
+          <tr>
+            <td>${formatDate(item.created_at || '')}</td>
+            <td>${item.customer_name || 'Cliente'}</td>
+            <td>${formatCurrency(item.amount || 0)}</td>
+            <td>${item.payment_method || 'Desconocido'}</td>
+            <td><span class="chip ${statusClass}">${status}</span></td>
+            <td><button class="btn sm" onclick="viewTransaction('${item.id}')">Ver</button></td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('transactions-body').innerHTML = html || '<tr><td colspan="6">Sin transacciones</td></tr>';
+      renderPagination('trans-pagination', Math.ceil((data.total || 0) / ITEMS_PER_PAGE), 'loadTransactions');
+    }
+  }
+
+  function viewTransaction(id) {
+    alert('Transacción: ' + id);
+  }
+
+  // ============================================================================
+  // INVENTARIO
+  // ============================================================================
+  async function loadInventory() {
+    const lowStockOnly = document.getElementById('low-stock-only').checked;
+    const data = await fetchAPI(`/inventory?low-stock-only=${lowStockOnly}`);
+
+    if (data && data.items) {
+      let html = '';
+
+      data.items.forEach(item => {
+        const stock = parseInt(item.stock || 0);
+        const minStock = parseInt(item.min_stock || 5);
+        const statusClass = stock < minStock ? 'warn' : 'ok';
+        html += `
+          <tr>
+            <td>${item.name || 'Producto'}</td>
+            <td><code>${item.sku || 'N/A'}</code></td>
+            <td>${stock}</td>
+            <td>${minStock}</td>
+            <td><span class="chip ${statusClass}">${stock < minStock ? 'Bajo' : 'Disponible'}</span></td>
+            <td>${item.category || '-'}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('inventory-body').innerHTML = html || '<tr><td colspan="6">Sin productos</td></tr>';
+    }
+  }
+
+  // ============================================================================
+  // USUARIOS
+  // ============================================================================
+  async function loadUsers() {
+    const role = document.getElementById('user-role').value;
+    const data = await fetchAPI(`/users?limit=${ITEMS_PER_PAGE}&offset=${currentPage * ITEMS_PER_PAGE}&role=${role}`);
+
+    if (data && data.items) {
+      let html = '';
+
+      data.items.forEach(user => {
+        const status = user.status || 'active';
+        const statusClass = status === 'active' ? 'ok' : 'err';
+        html += `
+          <tr>
+            <td>${user.name || user.email}</td>
+            <td>${user.email}</td>
+            <td><span class="chip">${user.role || 'usuario'}</span></td>
+            <td><span class="chip ${statusClass}">${status}</span></td>
+            <td>${user.last_login ? formatDate(user.last_login) : 'Nunca'}</td>
+            <td><button class="btn sm" onclick="editUser('${user.id}')">Editar</button></td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('users-body').innerHTML = html || '<tr><td colspan="6">Sin usuarios</td></tr>';
+      renderPagination('users-pagination', Math.ceil((data.total || 0) / ITEMS_PER_PAGE), 'loadUsers');
+    }
+  }
+
+  function inviteUser() {
+    const email = prompt('Email del nuevo usuario:');
+    if (!email) return;
+    alert('Invitación enviada a: ' + email);
+  }
+
+  function editUser(id) {
+    alert('Editando usuario: ' + id);
+  }
+
+  // ============================================================================
+  // INTEGRACIONES
+  // ============================================================================
+  async function loadIntegrationStatus() {
+    const data = await fetchAPI('/integration-status');
+
+    if (data) {
+      updateIntegrationUI('whatsapp', data.whatsapp);
+      updateIntegrationUI('twilio', data.twilio);
+      updateIntegrationUI('paypal', data.paypal);
+      updateIntegrationUI('email', data.email);
+    }
+  }
+
+  function updateIntegrationUI(service, status) {
+    const statusEl = document.getElementById(`${service}-status`);
+    const detailsEl = document.getElementById(`${service}-details`);
+
+    if (statusEl) {
+      const configured = status && status.configured;
+      statusEl.textContent = configured ? 'Activo' : 'Inactivo';
+      statusEl.className = configured ? 'chip ok' : 'chip err';
+    }
+
+    if (detailsEl) {
+      detailsEl.textContent = status && status.status === 'active' ? 'Conectado' : 'No configurado';
+    }
+  }
+
+  function testWA() { alert('Probando WhatsApp...'); }
+  function testTwilio() { alert('Probando Twilio...'); }
+  function testPayPal() { alert('Probando PayPal...'); }
+  function testEmail() { alert('Probando Email...'); }
+
+  // ============================================================================
+  // REPORTES
+  // ============================================================================
+  function generateReport() {
+    const type = document.getElementById('report-type').value;
+    alert('Generando reporte: ' + type);
+  }
+
+  function exportReportPDF() {
+    alert('Exportando a PDF...');
+  }
+
+  // ============================================================================
+  // EXPORTACIÓN
+  // ============================================================================
+  function exportCSV() {
+    if (currentTab === 'dashboard') exportSalesCSV();
+    else if (currentTab === 'transactions') exportTransactionsCSV();
+    else if (currentTab === 'inventory') exportInventoryCSV();
+  }
+
+  function exportSalesCSV() {
+    const period = document.getElementById('sales-period').value;
+    alert(`Exportando ventas (${period})...`);
+    // TODO: Implementar exportación real
+  }
+
+  function exportTransactionsCSV() {
+    alert('Exportando transacciones...');
+    // TODO: Implementar exportación real
+  }
+
+  function exportInventoryCSV() {
+    alert('Exportando inventario...');
+    // TODO: Implementar exportación real
+  }
+
+  // ============================================================================
+  // PAGINACIÓN
+  // ============================================================================
+  function renderPagination(containerId, totalPages, callback) {
+    const container = document.getElementById(containerId);
+    if (!container || totalPages <= 1) return;
+
+    let html = '';
+    for (let i = 0; i < totalPages; i++) {
+      html += `<button ${i === currentPage ? 'class="active"' : ''} onclick="currentPage=${i}; ${callback}()">${i + 1}</button>`;
+    }
+
+    container.innerHTML = html;
+  }
+
+  // ============================================================================
+  // INICIALIZACIÓN
+  // ============================================================================
+  function refreshData() {
+    showSpinner();
+    if (currentTab === 'dashboard') loadDashboard();
+    else if (currentTab === 'sales') loadSalesData();
+    else if (currentTab === 'transactions') loadTransactions();
+    else if (currentTab === 'inventory') loadInventory();
+    else if (currentTab === 'users') loadUsers();
+    else if (currentTab === 'integrations') loadIntegrationStatus();
+    hideSpinner();
+  }
+
+  // Auto-load on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    loadDashboard();
+  });
+</script>
+
+</body>
+</html>

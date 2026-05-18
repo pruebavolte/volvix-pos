@@ -1,0 +1,104 @@
+{
+  "slug": "tabule",
+  "brand": "Tabulé",
+  "tagline": "El sistema para cocinas libanesas donde los tacos árabes se cuentan y la pita rinde lo que debe",
+  "giro": "cocina libanesa",
+  "giroPlural": "cocinas libanesas",
+  "vibe": "warmCozy",
+  "palette": {
+    "bg": "#1E1410",
+    "surface": "#2D1F18",
+    "paper": "#3D2C22",
+    "ink": "#F5E5D0",
+    "ink2": "#DDC698",
+    "muted": "#9A815A",
+    "line": "#553D2A",
+    "accent": "#A0522D",
+    "accent2": "#7CB342"
+  },
+  "fonts": {
+    "display": "Amiri",
+    "body": "Inter",
+    "script": "Reem Kufi",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para cocinas libanesas en México · 2026",
+    "h1": "Cada <em>taco árabe</em>,<br>cada <em>hummus</em>,<br>servido.",
+    "deck": "El POS hecho para que el taco árabe se cobre por pieza, el pan pita rinda lo que debe, y el hummus no se 'gaste' antes del cierre del turno.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?lebanese,hummus,middle-eastern&q=85",
+    "heroAlt": "Tabla libanesa con hummus, kibbeh y pita",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?taco,arabe&q=80", "tag": "Tacos árabes", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?hummus,pita&q=80", "tag": "Hummus con pita", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?kibbeh,frito&q=80", "tag": "Kibbeh frito", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tabbouleh,salad&q=80", "tag": "Tabulé fresco", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?shawarma,carne&q=80", "tag": "Shawarma de carne", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?falafel,plate&q=80", "tag": "Falafel crujiente", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?lebanese,restaurant&q=80", "tag": "Salón con mosaicos", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?baklava,sweet&q=80", "tag": "Baklava de postre", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?middle,eastern,feast&q=80", "tag": "Mesa libanesa", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?cocinero,shawarma&q=80", "caption": "Cocinero corta shawarma"},
+      {"url": "https://source.unsplash.com/random/800x600/?pita,oven&q=80", "caption": "Pita recién horneada"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,libanes&q=80", "caption": "Familia poblana disfruta tacos"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · trompo · en vivo",
+    "title": "Tu cocina, <em>orden por orden</em>, sin perderse",
+    "deck": "Cada orden con tacos y entradas. KDS muestra: 6 tacos árabes, 1 hummus, 1 tabulé. Cocinero ve todo. Cero entradas olvidadas.",
+    "secondary": "En las cocinas libanesas, una entrada olvidada es 1 cliente que dice 'aquí tardan mucho'.",
+    "data": {
+      "orders": [
+        {"table": "M04", "name": "Familia Tame", "state": "urgent", "items": ["6 tacos árabes", "1 hummus", "1 tabulé", "Pan extra"], "waitMin": 10},
+        {"table": "M02", "name": "Don Salim", "state": "prep", "items": ["1 shawarma carne", "2 falafel", "1 té limón"], "waitMin": 7},
+        {"table": "M07", "name": "Pareja jóvenes", "state": "queue", "items": ["1 plato kibbeh", "1 ensalada fattoush"], "waitMin": 4},
+        {"table": "M01", "name": "Sra. Yousef", "state": "ready", "items": ["3 tacos árabes especiales", "Baklava"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "KDS para trompo árabe", "d": "Cortador ve órdenes en pantalla. 6 tacos árabes con extra pan. Cero confusión sobre cuántos cortar. Cero esperas largas."},
+    {"ico": "archive", "h": "Inventario por proteína marinada", "d": "Carne para trompo: 10 kg. Pollo: 6 kg. Cordero: 3 kg. Cuando baja, alerta para reposición."},
+    {"ico": "percent", "h": "Rendimiento del kilo de trompo", "d": "1 kg de carne marinada = 12-14 tacos. Si rinde 10, alguien corta grueso. Sistema detecta y alerta."},
+    {"ico": "barcode", "h": "Comanda por mesa con extras", "d": "Extra pan, sin cebolla, con yogurt. Aparece en KDS. Cocinero no falla. Cero tacos devueltos."},
+    {"ico": "calendar", "h": "Pronóstico de pan pita", "d": "Sábado vendiste 80 panes, hoy proyecta 100. Sistema sugiere cuántos hornear. Cero clientes sin pan a las 9 pm."},
+    {"ico": "split", "h": "Cuenta dividida estilo familiar", "d": "Mesa de 8 con muchos compartidos. Sistema divide por igual o por persona. Cero matemáticas mentales."}
+  ],
+  "stats": [
+    {"v": "142", "l": "Tacos árabes hoy"},
+    {"v": "14", "l": "Kg de trompo"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi cortador <span class=\"hl\">'apartaba' tacos para sus cuates</span> que llegaban en la tarde. Con Tabulé cada taco se cuenta por kilo de trompo. Identifiqué la fuga, recuperé $9 mil al mes en carne.",
+    "sig": "Don Jorge Said T.",
+    "role": "Tacos Árabes El Cedro, Puebla Centro, Puebla"
+  },
+  "thefts": [
+    {
+      "title": "Tacos árabes 'regalados' al cuate",
+      "rob": "Cortador da 3-5 tacos al amigo 'porque sí'. En una taquería poblana son $90-150 al día — $2,700-4,500 al mes.",
+      "fix": "Cortesías necesitan <strong>código del dueño</strong>. Sistema lleva conteo. Si pasa de 2 al día, alerta inmediata."
+    },
+    {
+      "title": "Hummus 'rendido' con más garbanzo",
+      "rob": "Cocinera echa 30% más garbanzo y menos tahini al hummus para 'rendir más'. Cliente regular nota el cambio y deja de venir. Pérdida silenciosa.",
+      "fix": "Receta de hummus <strong>con gramaje fijo por ingrediente</strong>. Inventario cuadra. Si tahini dura mucho más del normal, alerta."
+    },
+    {
+      "title": "Pan pita 'que se acabó' antes del cierre",
+      "rob": "Cocinero reporta que se acabó el pan a las 8 pm. En realidad apartó 20 panes para su familia. $60-120 cada vez. 3 veces por semana.",
+      "fix": "Pan con <strong>conteo al inicio y cierre obligatorio</strong>. Sobras se fotografían. Diferencias requieren explicación firmada."
+    }
+  ]
+}

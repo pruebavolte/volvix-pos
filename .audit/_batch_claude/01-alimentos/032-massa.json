@@ -1,0 +1,104 @@
+{
+  "slug": "massa",
+  "brand": "Massa",
+  "tagline": "El sistema para pizzerías italianas auténticas donde la masa madre rinde lo que debe",
+  "giro": "pizzería italiana",
+  "giroPlural": "pizzerías italianas",
+  "vibe": "editorial",
+  "palette": {
+    "bg": "#FAF6EE",
+    "surface": "#FFFFFF",
+    "paper": "#F0E5C8",
+    "ink": "#1F1A10",
+    "ink2": "#3A2F20",
+    "muted": "#7A6A50",
+    "line": "#D5C49B",
+    "accent": "#8B2C1B",
+    "accent2": "#5E8B45"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Italianno",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para pizzerías italianas en México · 2026",
+    "h1": "Cada <em>napoletana</em>,<br>cada <em>D.O.P.</em>,<br>auténtica.",
+    "deck": "El POS hecho para que la masa madre se respete los tiempos, el mozzarella di bufala se cobre como D.O.P., y las pizzas premium no se confundan con las simples.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?neapolitan,pizza,authentic&q=85",
+    "heroAlt": "Pizza napolitana margherita auténtica",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?margherita,pizza&q=80", "tag": "Margherita D.O.P.", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bufala,mozzarella&q=80", "tag": "Bufala fresca", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?prosciutto,parma&q=80", "tag": "Prosciutto Parma", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?basil,fresh&q=80", "tag": "Albahaca fresca", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?san,marzano&q=80", "tag": "Tomate San Marzano", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?wood,fired&q=80", "tag": "Horno 480°", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?pizzeria,italiana&q=80", "tag": "Trattoria auténtica", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?dough,sourdough&q=80", "tag": "Masa 72h fermentación", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?italian,family&q=80", "tag": "Familia italiana", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?pizzaiolo,napoli&q=80", "caption": "Pizzaiolo certificado AVPN"},
+      {"url": "https://source.unsplash.com/random/800x600/?dough,starter&q=80", "caption": "Masa madre activa"},
+      {"url": "https://source.unsplash.com/random/800x600/?customer,authentic&q=80", "caption": "Cliente prueba auténtica"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · horno 480° · en vivo",
+    "title": "Tu cocina, <em>pizza por pizza</em>, en 90 segundos",
+    "deck": "Cada orden con receta D.O.P. KDS muestra: margherita con bufala, San Marzano, albahaca. Pizzaiolo hornea 90 segundos a 480°. Cero pizzas mal cocidas.",
+    "secondary": "En las pizzerías premium, bufala servida como mozzarella normal son $50-80 que el cliente no nota al ojo.",
+    "data": {
+      "orders": [
+        {"table": "M05", "name": "Sra. Romana", "state": "urgent", "items": ["Margherita D.O.P.|bufala", "1 burrata appetizer", "1 chianti copa"], "waitMin": 12},
+        {"table": "M02", "name": "Familia Bianchi", "state": "prep", "items": ["1 prosciutto e funghi", "1 quattro formaggi", "1 lasagna"], "waitMin": 9},
+        {"table": "M07", "name": "Pareja", "state": "queue", "items": ["1 marinara clásica", "1 ensalada caprese"], "waitMin": 6},
+        {"table": "M01", "name": "Don Marco", "state": "ready", "items": ["1 capricciosa individual", "1 espresso"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Recetas D.O.P. visibles en KDS", "d": "Margherita = bufala 100g + San Marzano + albahaca 5 hojas + aceite oliva extra virgen. Pizzaiolo ve receta exacta. Cero confusión."},
+    {"ico": "archive", "h": "Inventario por insumo D.O.P.", "d": "Bufala: 4 kg/día. Prosciutto Parma: 3 kg. Tomate San Marzano: 6 latas. Sistema avisa cuando bajas."},
+    {"ico": "barcode", "h": "Premium vs estándar cobrado", "d": "Margherita normal $145 (mozzarella fior di latte). D.O.P. $245 (bufala). Sistema cobra según ingrediente real."},
+    {"ico": "percent", "h": "Margen por pizza tradicional", "d": "Marinara costo $42 vendes $135. Margherita D.O.P. costo $98 vendes $245. Sistema te dice qué empujar."},
+    {"ico": "calendar", "h": "Fermentación de masa por lote", "d": "Masa madre 72h fermentación. Sistema avisa cuando lote sale del refri. Cero pizzas con masa nueva sin fermentar."},
+    {"ico": "edit", "h": "Origen del ingrediente visible", "d": "Cliente ve en menú QR: 'mozzarella bufala D.O.P. Battipaglia, Italia'. Premium justificado. Cliente paga gusto."}
+  ],
+  "stats": [
+    {"v": "62", "l": "Pizzas servidas hoy"},
+    {"v": "3.4", "l": "Kg bufala D.O.P."},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi pizzaiolo <span class=\"hl\">usaba mozzarella normal y cobraba D.O.P.</span> a clientes nuevos. Con Massa cada pizza descuenta del inventario correcto. Identifiqué la fuga y el restaurante recuperó autoridad de auténtico.",
+    "sig": "Don Marco R.",
+    "role": "Pizzería Massa Napoletana, Polanco, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Bufala servida como mozzarella normal",
+      "rob": "Pizzaiolo usa mozzarella normal ($120/kg) y cobra D.O.P. ($380/kg). Cliente nuevo no nota. $260 por kg cambiado.",
+      "fix": "Cada pizza <strong>asignada a su insumo de inventario al armar</strong>. Sistema cuadra bufala usada vs pizzas D.O.P. vendidas."
+    },
+    {
+      "title": "Prosciutto 'rebanada generosa' al amigo",
+      "rob": "Pizzaiolo pone 100g de Parma cuando la receta dice 60g. A clientes amigos. 5-8 pizzas por turno = $300-500 en jamón premium regalado.",
+      "fix": "Insumos premium <strong>pesados con báscula al servir</strong>. Sistema bloquea si excede +5g sin código. Cero rebanadas al cariño."
+    },
+    {
+      "title": "Pizza 'mal salida' que se llevaron a casa",
+      "rob": "Pizzaiolo reporta pizza 'mal salida' del horno y se la lleva. En realidad está perfecta. $200-300 por pizza premium.",
+      "fix": "Descartes requieren <strong>foto y autorización del gerente</strong>. Si pasan de 1 al día, alerta. Sistema audita merma vs estándar."
+    }
+  ]
+}

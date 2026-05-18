@@ -1,0 +1,35 @@
+{
+  "slice": 114,
+  "idx_range": [2280, 2300],
+  "feature": "R17_RECURRING — Customer recurring subscriptions",
+  "status": "implemented",
+  "artifacts": {
+    "sql": "db/R17_RECURRING.sql",
+    "api": "api/index.js (R17 RECURRING section, before R14 LOYALTY)",
+    "client": "public/volvix-customer-subscriptions.js",
+    "report": "R17_RECURRING.md"
+  },
+  "tables": ["customer_subscriptions", "subscription_charges"],
+  "endpoints": [
+    "GET    /api/customer-subscriptions",
+    "POST   /api/customer-subscriptions",
+    "PATCH  /api/customer-subscriptions/:id",
+    "DELETE /api/customer-subscriptions/:id",
+    "POST   /api/customer-subscriptions/:id/charge",
+    "GET    /api/customer-subscriptions/due-today",
+    "POST   /api/admin/jobs/process-recurring"
+  ],
+  "intervals": ["weekly", "monthly", "yearly"],
+  "statuses": ["active", "paused", "canceled", "expired"],
+  "charge_flow": "active sub -> create pos_sales row -> insert subscription_charges -> advance next_charge_at by interval",
+  "stripe": "optional stripe_sub_id; sanity-checked via GET /v1/subscriptions/:id; no PaymentIntent creation in this slice",
+  "ui": "auto-mount on #customer-subscriptions-panel[data-customer-id]; pause/resume/cancel/charge buttons + new sub form",
+  "rls": "enabled, open policy (tighten in R18)",
+  "todo_next": [
+    "Stripe webhooks invoice.paid / payment_failed",
+    "Pre-charge email/SMS notification (reuse R14_EMAIL)",
+    "Strict tenant RLS",
+    "MRR/churn materialized view"
+  ],
+  "notes": "Latest existing slice was 80; jumped to 114 per task instructions."
+}

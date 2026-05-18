@@ -1,0 +1,108 @@
+{
+  "slug": "tueria",
+  "brand": "Tubería",
+  "tagline": "El sistema para plomeros que cobran cada metro de tubo y cada hora trabajada",
+  "giro": "plomería",
+  "giroPlural": "servicios de plomería",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#172029",
+    "surface": "#202B36",
+    "paper": "#28333F",
+    "ink": "#F0F2F5",
+    "ink2": "#CACFD4",
+    "muted": "#7A828A",
+    "line": "#2F3A45",
+    "accent": "#2980B9",
+    "accent2": "#46A6E0"
+  },
+  "fonts": {
+    "display": "Saira Condensed",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para plomeros mexicanos · 2026",
+    "h1": "Cada <em>fuga</em>,<br>cada <em>conexión</em>,<br>cobrada.",
+    "deck": "El POS hecho para plomeros que atienden casa-habitación, comercios, fugas urgentes. Cotización antes de salir, materiales en van, cobro digital al firmar.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver servicios activos",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?plumber,pipe,wrench&q=80",
+    "heroAlt": "Plomero reparando tubería de cobre bajo lavabo",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?plumber,bathroom&q=80", "tag": "Servicio baño", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pipe,wrench&q=80", "tag": "Tubería cobre", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?faucet,leak&q=80", "tag": "Fuga llave", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?water-heater,boiler&q=80", "tag": "Boiler", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bathroom,renovation&q=80", "tag": "Baño nuevo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?drain,clean&q=80", "tag": "Destape", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?plumber,van&q=80", "tag": "Van con material", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?valve,water&q=80", "tag": "Llave de paso", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?bathroom,clean&q=80", "tag": "Trabajo limpio", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?plumber,phone&q=80", "caption": "Cotización por WhatsApp con foto"},
+      {"url": "https://source.unsplash.com/random/800x600/?materials,box&q=80", "caption": "Material registrado en van"},
+      {"url": "https://source.unsplash.com/random/800x600/?signature,tablet&q=80", "caption": "Cliente firma servicio en celular"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Agenda · plomería · en vivo",
+    "title": "Tus plomeros, <em>zona por zona</em>",
+    "deck": "Cambio de llave 45 min. Reparar boiler 2 hrs. Fuga oculta 4 hrs. El sistema asigna por zona. Cliente sabe ETA real.",
+    "secondary": "Plomero que tarda 3 hrs en llegar a fuga = inundación. Asignación rápida es servicio premium.",
+    "data": {
+      "service": "Reparación boiler + fuga llave",
+      "duration": "2 hrs",
+      "slots": [
+        {"hora": "AHORA", "mecanico": "Don Pancho · Norte", "estado": "ocupado", "auto": "Fuga Casa García"},
+        {"hora": "1 hr", "mecanico": "Don Pancho · Norte", "estado": "libre"},
+        {"hora": "AHORA", "mecanico": "Lalo · Sur", "estado": "ocupado", "auto": "Boiler Sra. Méndez"},
+        {"hora": "2 hrs", "mecanico": "Lalo · Sur", "estado": "libre"},
+        {"hora": "AHORA", "mecanico": "Tonio · Centro", "estado": "libre"},
+        {"hora": "10:00 mañana", "mecanico": "Tonio · Centro", "estado": "ocupado", "auto": "Remodelación baño"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Asignación por zona", "d": "Cliente reporta fuga, sistema manda al plomero más cercano. ETA real en mapa. Cero esperas eternas."},
+    {"ico": "edit", "h": "Cotización pre-visita", "d": "Cliente manda foto del problema. Plomero cotiza antes de salir. Cero 'me cobró el doble cuando llegó'."},
+    {"ico": "barcode", "h": "Material en van", "d": "Cada conexión, tubo, sellador en inventario por van. Sabes qué lleva cada plomero y qué le falta."},
+    {"ico": "camera", "h": "Foto antes-después", "d": "Plomero documenta el problema y la solución. Cliente firma en celular. Cero 'no quedó bien'."},
+    {"ico": "monitor", "h": "Hora real cronometrada", "d": "Tiempo registrado desde llegada a salida. Cobro por hora justa. Cliente ve las horas reales en factura."},
+    {"ico": "percent", "h": "Cobro digital", "d": "Cliente paga con tarjeta o QR en la app. Plomero no toca efectivo. Cero pérdidas en bolsa."}
+  ],
+  "stats": [
+    {"v": "63", "l": "Servicios esta semana"},
+    {"v": "35", "l": "Min promedio llegada"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis plomeros <span class=\"hl\">cobraban 4 hrs cuando trabajaban 2</span> y se quedaban con efectivo. $400-800 por servicio. Con Tubería el cronómetro arranca al llegar. Cliente ve las horas reales. Cero engaños.",
+    "sig": "Don Roberto S.",
+    "role": "Plomería Don Roberto, Iztapalapa, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Horas facturadas que no se trabajaron",
+      "rob": "Servicio tarda 1.5 hrs real. Plomero cobra 4 hrs a $350/hr. Diferencia $875 por servicio. Pasa 4-6 veces a la semana.",
+      "fix": "Cronómetro <strong>arranca al llegar y se detiene al salir</strong> con foto. Cliente ve horas reales en factura. Cero discusiones."
+    },
+    {
+      "title": "Material de la van vendido por fuera",
+      "rob": "Plomero vende rollos de cobre y conexiones a otro plomero. Reporta como 'usado en servicio'. Tú pagas material que no se instaló.",
+      "fix": "Cada material se <strong>escanea al usarse con foto del lugar instalado</strong>. Sin foto, no sale del inventario. Auditoría semanal."
+    },
+    {
+      "title": "Cobros en efectivo no reportados",
+      "rob": "Cliente paga $1,800 en efectivo. Plomero te dice que cobró $1,200. Se queda $600. Pasa 5-8 veces por equipo a la semana.",
+      "fix": "Cobro <strong>solo digital desde la app</strong>. Cliente paga con tarjeta o QR. Plomero no toca efectivo. Cero pérdidas en bolsa."
+    }
+  ]
+}

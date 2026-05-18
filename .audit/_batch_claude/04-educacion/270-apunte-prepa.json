@@ -1,0 +1,104 @@
+{
+  "slug": "apunte-prepa",
+  "brand": "Apunte",
+  "tagline": "El sistema para preparatorias que sí saben quién entró a cada materia y quién pagó",
+  "giro": "preparatoria",
+  "giroPlural": "preparatorias",
+  "vibe": "scholar",
+  "palette": {
+    "bg": "#F4F2EC",
+    "surface": "#FFFFFF",
+    "paper": "#E7E3D7",
+    "ink": "#1A2238",
+    "ink2": "#2E3A55",
+    "muted": "#637085",
+    "line": "#CCC6B6",
+    "accent": "#1B5E20",
+    "accent2": "#C9A227"
+  },
+  "fonts": {
+    "display": "Lora",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para preparatorias mexicanas · 2026",
+    "h1": "Cada <em>materia</em>,<br>cada <em>crédito</em>,<br>rastreado.",
+    "deck": "El POS hecho para preparatorias donde el alumno escoge optativas, el maestro capta calificación desde celular y el papá quiere ver historial sin esperar la dirección.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver horarios hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?highschool,students,classroom&q=85",
+    "heroAlt": "Estudiantes de prepa en aula",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?highschool,classroom&q=80", "tag": "Aula de prepa", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?student,notes&q=80", "tag": "Apuntes de clase", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?chemistry,lab&q=80", "tag": "Laboratorio química", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?physics,classroom&q=80", "tag": "Física", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?library,study&q=80", "tag": "Biblioteca", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?campus,students&q=80", "tag": "Patio escolar", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?highschool,group&q=80", "tag": "Generación", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?teacher,lecture&q=80", "tag": "Cátedra", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?computer,lab,school&q=80", "tag": "Centro de cómputo", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?student,id,access&q=80", "caption": "Acceso con credencial digital"},
+      {"url": "https://source.unsplash.com/random/800x600/?teacher,grades,tablet&q=80", "caption": "Maestro captura desde tablet"},
+      {"url": "https://source.unsplash.com/random/800x600/?student,grades,laptop&q=80", "caption": "Alumno consulta calificaciones"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Materias · hoy · en vivo",
+    "title": "Tus horarios, <em>materia por materia</em>",
+    "deck": "Cada alumno con su horario personalizado de optativas. Maestro toma asistencia con QR. Sistema cruza qué materia tiene cada uno cada hora. Cero alumnos perdidos en pasillo.",
+    "secondary": "En prepas, un horario mal asignado es una reprobación injusta y un padre furioso.",
+    "data": {
+      "barberos": [{"name": "Mtro. Cárdenas", "role": "Cálculo"}, {"name": "Mtra. Beatriz", "role": "Literatura"}, {"name": "Mtro. Velázquez", "role": "Química"}],
+      "slots": ["07:00", "07:50", "08:40", "09:30", "10:30", "11:20", "12:10", "13:00", "13:50"],
+      "taken": [0, 1, 2, 4, 5, 6, 7],
+      "active": 268,
+      "total": 320,
+      "next": "12:10"
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Plan de estudios por créditos", "d": "Cada alumno escoge optativas dentro de su plan. Sistema valida que cumpla prerrequisitos. Cero materias mal inscritas."},
+    {"ico": "calendar", "h": "Asistencia por materia con QR", "d": "Alumno escanea credencial al entrar al salón. Sistema sabe en qué materia está cada hora. Cero pintas posibles."},
+    {"ico": "bookmark", "h": "Colegiaturas e inscripciones", "d": "Pago anual o mensual con tarjeta guardada. Inscripción al inicio del ciclo con firma digital. Recordatorios automáticos."},
+    {"ico": "edit", "h": "Boletas digitales con créditos", "d": "Sistema arma boleta con calificación + créditos cubiertos. Padre y alumno la descargan en PDF firmado por director."},
+    {"ico": "grid", "h": "Historial académico exportable", "d": "Cada alumno con su historial completo desde 1° semestre. Para titulación, traslado o universidad."},
+    {"ico": "camera", "h": "Pase de salida con autorización", "d": "Alumno menor de edad solo sale antes con autorización del padre desde app. Vigilancia ve verde o rojo."}
+  ],
+  "stats": [
+    {"v": "548", "l": "Alumnos activos"},
+    {"v": "42", "l": "Materias"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Tenía <span class=\"hl\">historial académico en Excel</span> y cada traslado me tardaba 3 días. Con Apunte se genera en 1 minuto con sello del director. Mis administrativos me agradecen.",
+    "sig": "Lic. Mónica T.",
+    "role": "Preparatoria Apunte, San Luis Potosí, SLP"
+  },
+  "thefts": [
+    {
+      "title": "Inscripciones cobradas dos veces",
+      "rob": "Papá paga inscripción $7,500 en efectivo. Encargada lo cobra dos veces 'por error' y se queda con la diferencia. Sin recibo digital, no se prueba.",
+      "fix": "Cada inscripción con <strong>folio único en BD + recibo digital al instante</strong>. Duplicados generan alerta automática."
+    },
+    {
+      "title": "Becas deportivas/académicas sin respaldo",
+      "rob": "Director da beca del 50% a 'destacado deportista' sin documentar. Son $3,000 menos al mes, 10 meses: $30,000 perdidos sin que tú lo sepas.",
+      "fix": "Becas con <strong>autorización del dueño + evidencia digital (acta deportiva, boleta)</strong>. Reporte mensual auditable."
+    },
+    {
+      "title": "Maestros que faltan sin reposición pagada al padre",
+      "rob": "Maestro falta 3 clases de cálculo. Tú no devuelves nada al padre. Padre paga $4,800/mes por 5 materias: vale $960 perdidos por padre.",
+      "fix": "Sistema lleva <strong>bitácora de clases impartidas vs programadas</strong>. Faltas no reemplazadas generan crédito automático al padre."
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "slug": "concha-pan",
+  "brand": "Concha",
+  "tagline": "El sistema para panaderías tradicionales donde el pan dulce sale a tiempo y la masa rinde lo que debe",
+  "giro": "panadería tradicional",
+  "giroPlural": "panaderías tradicionales",
+  "vibe": "warmLocal",
+  "palette": {
+    "bg": "#FAF1DD",
+    "surface": "#FFFFFF",
+    "paper": "#F0DDB8",
+    "ink": "#2A1A08",
+    "ink2": "#4A3015",
+    "muted": "#7E5530",
+    "line": "#D5BC8F",
+    "accent": "#A83C0F",
+    "accent2": "#E8B040"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para panaderías mexicanas · 2026",
+    "h1": "Cada <em>concha</em>,<br>cada <em>charola</em>,<br>contada.",
+    "deck": "El POS hecho para que el pan dulce salga calientito a las 6 am, las charolas no se 'pierdan' al despachar, y los regulares tengan su pan favorito apartado.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el conteo de charolas",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?panaderia,concha,mexican&q=85",
+    "heroAlt": "Conchas de pan dulce mexicanas en charola",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?conchas,bread&q=80", "tag": "Conchas calientes", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bolillo,fresh&q=80", "tag": "Bolillos del día", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cuernos,pan&q=80", "tag": "Cuernos azucarados", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?orejas,pan&q=80", "tag": "Orejas crujientes", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pan,muerto&q=80", "tag": "Pan de muerto", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?empanadas,dulces&q=80", "tag": "Empanadas dulces", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?panaderia,horno&q=80", "tag": "Horno tradicional", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?donas,glaseadas&q=80", "tag": "Donas glaseadas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?panaderia,mostrador&q=80", "tag": "Mostrador surtido", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?panadero,horno&q=80", "caption": "Panadero saca pan calientito"},
+      {"url": "https://source.unsplash.com/random/800x600/?charola,pan&q=80", "caption": "Charolas listas al mostrador"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,mañana&q=80", "caption": "Cliente mañanero apartado"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Horno · mostrador · en vivo",
+    "title": "Tu horno, <em>charola por charola</em>, sin perderse",
+    "deck": "Cada charola con conteo. Conchas: 48 piezas. Bolillos: 80. Cuernos: 24. Cuando bajas, alerta para hornear más. Cero clientes sin su pan.",
+    "secondary": "En las panaderías, una charola 'incompleta' que se llevó el empleado son $200-400 por turno.",
+    "data": {
+      "product": "Pan dulce tradicional",
+      "tallas": ["6am", "10am", "2pm", "6pm", "9pm"],
+      "stock": [
+        {"color": "Conchas vainilla", "vals": [48, 38, 22, 14, 6]},
+        {"color": "Conchas chocolate", "vals": [36, 28, 18, 10, 4]},
+        {"color": "Cuernos azúcar", "vals": [24, 18, 12, 6, 2]},
+        {"color": "Bolillos", "vals": [80, 60, 35, 18, 5]}
+      ],
+      "lowThreshold": 8
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Inventario por charola horneada", "d": "Cada charola con 24 piezas. Sistema cuenta cuántas hornearon, cuántas se vendieron. Cero charolas 'desaparecidas'."},
+    {"ico": "calendar", "h": "Horarios de horneada por demanda", "d": "6 am: rush mañanero. 10 am: amas de casa. 2 pm: bajo. 6 pm: cena. Sistema sugiere cuánto hornear cada turno."},
+    {"ico": "bookmark", "h": "Clientes con apartado mañanero", "d": "Don Toño aparta 12 conchas todos los días. Sistema las separa antes que llegue. Cero 'ya se acabaron'."},
+    {"ico": "percent", "h": "Costo por pieza vs venta", "d": "Concha costo $3.50, vendes $12. Margen 71%. Sistema te dice qué empujar."},
+    {"ico": "monitor", "h": "Pantalla de pan disponible", "d": "Caja y mostrador ven mismo stock. Cero promesas de pan que ya no hay. Cliente ve qué hay en pantalla."},
+    {"ico": "truck", "h": "Pedidos para eventos", "d": "Posada pide 200 conchas. Sistema agenda producción. Cliente recoge calientes. Cero pedidos olvidados."}
+  ],
+  "stats": [
+    {"v": "486", "l": "Piezas vendidas hoy"},
+    {"v": "32", "l": "Charolas horneadas"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi mostradera <span class=\"hl\">se llevaba 8-10 piezas al día</span> para sus comadres. Con Concha cada charola se cuenta al hornear y al vender. Diferencias se notan. En 1 mes ahorré $5 mil.",
+    "sig": "Don Florentino R.",
+    "role": "Panadería La Mejor, Texcoco, Estado de México"
+  },
+  "thefts": [
+    {
+      "title": "Piezas 'que se llevaron las comadres'",
+      "rob": "Mostradera regala 6-12 piezas al día a sus amigas. Sin cobro. $80-150 al día — $2,400-4,500 al mes en pan dulce.",
+      "fix": "Charolas <strong>contadas al hornear y al despachar</strong>. Sistema cuadra. Diferencias arriba de 3% al día alertan al dueño."
+    },
+    {
+      "title": "Pan 'rendido' con menos masa",
+      "rob": "Panadero reduce masa por concha de 80g a 65g para 'rendir' 3-4 más por kilo. Cliente nota tamaño chico y deja de venir.",
+      "fix": "Receta de masa <strong>con gramaje fijo por pieza</strong>. Sistema cuadra masa usada vs piezas producidas. Diferencias alertan."
+    },
+    {
+      "title": "Pan 'duro' que se llevaron",
+      "rob": "Empleado reporta 30 conchas 'duras' al cierre y se las lleva. En realidad están bien. $180-300 cada cierre. 5 días = $900-1,500.",
+      "fix": "Merma de pan duro requiere <strong>foto y autorización del dueño</strong>. Si pasa de 5% al día, alerta. Donaciones a asilos firmadas."
+    }
+  ]
+}

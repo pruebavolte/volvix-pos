@@ -1,0 +1,22 @@
+[
+  {"idx": 1780, "status": "PASS", "note": "Login admin con TOKEN obtenido (POST /api/login)"},
+  {"idx": 1781, "status": "PASS", "note": "POST /api/email/send valida to/subject -> 400 si faltan (api/index.js:5061)"},
+  {"idx": 1782, "status": "PASS", "note": "POST /api/email/send retorna 503 con mensaje claro 'SENDGRID_API_KEY no configurada' cuando falta env (api/index.js:5062)"},
+  {"idx": 1783, "status": "PASS", "note": "email-templates.js exporta welcomeTemplate (linea 45)"},
+  {"idx": 1784, "status": "PASS", "note": "email-templates.js exporta receiptTemplate (linea 67)"},
+  {"idx": 1785, "status": "PASS", "note": "email-templates.js exporta lowStockTemplate (linea 103)"},
+  {"idx": 1786, "status": "PASS", "note": "email-templates.js exporta passwordResetTemplate (linea 134)"},
+  {"idx": 1787, "status": "PASS", "note": "email-templates.js module.exports incluye los 4 templates (lineas 150-153)"},
+  {"idx": 1788, "status": "PASS", "note": "POST /api/email/send protegido con requireAuth (api/index.js:5058)"},
+  {"idx": 1789, "status": "PASS", "note": "sendEmail helper se invoca con template parametro (manual default)"},
+  {"idx": 1790, "status": "PASS", "note": "Status code 502 en falla de SendGrid downstream, 200 en exito"},
+  {"idx": 1791, "status": "PASS", "note": "POST /api/email/schedule existe y autenticado (api/index.js:5068)"},
+  {"idx": 1792, "status": "PASS", "note": "GET /api/features/ai_assistant expone ANTHROPIC_API_KEY presence (api/index.js:5094)"},
+  {"idx": 1793, "status": "PASS", "note": "POST /api/ai/chat protegido con requireAuth (api/index.js:1405)"},
+  {"idx": 1794, "status": "PASS", "note": "POST /api/ai/chat retorna 503 si falta ANTHROPIC_API_KEY (api/index.js:1407)"},
+  {"idx": 1795, "status": "FIXED", "note": "Validacion message vacio: agregada -> 400 'message requerido' (api/index.js:1413)"},
+  {"idx": 1796, "status": "FIXED", "note": "Validacion limit 4000: agregada -> 400 'message excede 4000 caracteres' en lugar de truncar (api/index.js:1414)"},
+  {"idx": 1797, "status": "PASS", "note": "Rate limit 20/min por user.id en /api/ai/chat (api/index.js:1408)"},
+  {"idx": 1798, "status": "PASS", "note": "ai_chat_log persistencia best-effort no bloqueante post-callClaude"},
+  {"idx": 1799, "status": "PASS", "note": "Modelo claude-3-5-haiku-20241022 max_tokens 1024 en chat"}
+]

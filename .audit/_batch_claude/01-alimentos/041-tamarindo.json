@@ -1,0 +1,107 @@
+{
+  "slug": "tamarindo",
+  "brand": "Tamarindo",
+  "tagline": "El sistema para dulcerías mexicanas donde cada bolsa de pulparindos se cuenta y nada se 'pica' del frasco",
+  "giro": "dulcería mexicana",
+  "giroPlural": "dulcerías mexicanas",
+  "vibe": "playful",
+  "palette": {
+    "bg": "#FFF5DC",
+    "surface": "#FFFFFF",
+    "paper": "#FFE0A8",
+    "ink": "#3D1F08",
+    "ink2": "#5C3210",
+    "muted": "#8A5530",
+    "line": "#F2C778",
+    "accent": "#E91E63",
+    "accent2": "#FFC107"
+  },
+  "fonts": {
+    "display": "Bebas Neue",
+    "body": "Inter",
+    "script": "Permanent Marker",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para dulcerías mexicanas · 2026",
+    "h1": "Cada <em>pulparindo</em>,<br>cada <em>tamarindo</em>,<br>contado.",
+    "deck": "El POS hecho para que ningún dulce se 'pique' del frasco abierto, los kilos de tamarindo prensado cuadren al cierre, y las bolsas para piñatas se preparen rápido sin errores.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?candy,mexican,pulparindos&q=85",
+    "heroAlt": "Dulces mexicanos surtidos en frascos",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?mexican,candy&q=80", "tag": "Surtido mexicano", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tamarindo,dulce&q=80", "tag": "Tamarindos enchilados", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?paleta,coraza&q=80", "tag": "Paletas Corazón", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?vero,mango&q=80", "tag": "Vero mango", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?chamoy,bottle&q=80", "tag": "Chamoy clásico", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?candies,bulk&q=80", "tag": "Dulces a granel", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?candy,store&q=80", "tag": "Mostrador colorido", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?piñata,fiesta&q=80", "tag": "Piñata mexicana", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?kids,candy&q=80", "tag": "Niños eligen", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?candy,scale&q=80", "caption": "Báscula pesa el surtido"},
+      {"url": "https://source.unsplash.com/random/800x600/?bags,party&q=80", "caption": "Bolsas para piñatas"},
+      {"url": "https://source.unsplash.com/random/800x600/?kids,buying&q=80", "caption": "Niños eligen dulces"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Mostrador · dulces · en vivo",
+    "title": "Tu mostrador, <em>kilo por kilo</em>, sin perderse",
+    "deck": "Cada frasco con conteo. Pulparindos: 4 kg. Tamarindos: 6 kg. Vero mango: 3 kg. Cuando baja, alerta. Cero clientes sin su favorito.",
+    "secondary": "En las dulcerías, dulces 'picados' del frasco por personal son $80-150 al día.",
+    "data": {
+      "product": "Dulces mexicanos a granel",
+      "tallas": ["1 pza", "100g", "250g", "500g", "1kg"],
+      "stock": [
+        {"color": "Pulparindos", "vals": [180, 12, 8, 4, 2]},
+        {"color": "Tamarindo enchilado", "vals": [240, 18, 12, 6, 3]},
+        {"color": "Vero mango", "vals": [160, 14, 8, 4, 2]},
+        {"color": "Paletas corazón", "vals": [120, 10, 5, 0, 0]}
+      ],
+      "lowThreshold": 5
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Báscula para venta a granel", "d": "Pesa el surtido, sistema calcula precio. 250g de pulparindos = $X. Cero dulces 'al ojo' que descuadran inventario."},
+    {"ico": "archive", "h": "Inventario por frasco abierto", "d": "Cada frasco con peso inicial y peso actual. Sistema cuadra venta vs consumo. Cero dulces 'picados' por personal."},
+    {"ico": "gift", "h": "Bolsas para piñata rápidas", "d": "Cliente pide 30 bolsas variadas. Sistema imprime checklist con cantidades. Empleada arma. Cero bolsas a medias."},
+    {"ico": "monitor", "h": "Pantalla de dulces disponibles", "d": "Caja y mostrador ven mismo stock. Cero promesas que ya no hay. Cliente ve qué hay en pantalla colorida."},
+    {"ico": "percent", "h": "Margen por kilo de dulce", "d": "Pulparindos a granel $180/kg costo $90/kg. Margen 50%. Sistema te dice qué empujar."},
+    {"ico": "truck", "h": "Pedidos piñatas con anticipación", "d": "Cliente pide 50 bolsas para sábado. Sistema agenda producción. Empleada arma viernes. Cero pedidos a medio."}
+  ],
+  "stats": [
+    {"v": "342", "l": "Bolsas vendidas hoy"},
+    {"v": "28", "l": "Kg surtidos despachados"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis empleados <span class=\"hl\">'picaban' del frasco</span> de pulparindos durante el turno. 'Total, son chiquitos.' Eran $100-150 al día. Con Tamarindo cada frasco se pesa al inicio y al cierre. Cortado en 2 semanas.",
+    "sig": "Doña Rosita V.",
+    "role": "Dulcería La Mexicana, Tepatitlán, Jalisco"
+  },
+  "thefts": [
+    {
+      "title": "Dulces 'picados' del frasco abierto",
+      "rob": "Empleados comen 10-20 dulces por turno 'porque son chiquitos'. 5 empleados x 15 dulces = 75 piezas diarias. $75-150 al día.",
+      "fix": "Cada frasco <strong>pesado al inicio y al cierre del turno</strong>. Sistema cuadra contra ventas registradas. Diferencias arriba de 3% alertan."
+    },
+    {
+      "title": "Bolsas piñata 'incompletas' al cliente",
+      "rob": "Empleada arma 40 bolsas cobrando 50. Las 10 'restantes' se las queda o reserva para otro pedido. $50-100 por pedido grande.",
+      "fix": "Bolsas con <strong>checklist digital y conteo final firmado</strong>. Sistema verifica cantidad antes de entregar. Cero pedidos a medio."
+    },
+    {
+      "title": "Pulparindos cobrados por menos peso",
+      "rob": "Empleada pesa 200g cobrando 150g. Diferencia se va a propina o aparte. $5-15 cada venta. 30 ventas = $150-450 al día.",
+      "fix": "Báscula <strong>conectada al sistema para cobrar</strong>. Cero pesos 'al ojo'. Cliente recibe ticket con peso real."
+    }
+  ]
+}

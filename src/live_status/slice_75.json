@@ -1,0 +1,41 @@
+{
+  "slice": 75,
+  "title": "Webhook signature verification deep",
+  "range": "1840-1860",
+  "results": [
+    {"idx": 1840, "name": "POST /api/webhooks crea endpoint con secret", "status": "pass", "note": "Handler api/index.js:3000-3014. genSecret() emite 'whsec_'+24 random bytes hex (line 2980-2982). Inserta en webhook_endpoints via supabaseRequest POST."},
+    {"idx": 1841, "name": "GET /api/webhooks lista con secret enmascarado", "status": "pass", "note": "api/index.js:2984-2992. Mascara secret a primeros 8 chars + '...'. Filtra por tenant_id si presente."},
+    {"idx": 1842, "name": "PATCH regenerate_secret rota secret", "status": "pass", "note": "api/index.js:3017-3035. Si body.regenerate_secret===true, llama genSecret() y persiste."},
+    {"idx": 1843, "name": "DELETE endpoint", "status": "pass", "note": "api/index.js:3037-3043. Valida UUID antes de borrar."},
+    {"idx": 1844, "name": "POST /test envia delivery firmado", "status": "pass", "note": "api/index.js:3045-3055. Usa _deliverWithRetry con event 'webhook.test'."},
+    {"idx": 1845, "name": "Disparo evento sale.created activa dispatchWebhook", "status": "pass", "note": "global.dispatchWebhook (line 2975) invocado desde handler de ventas. Filtra endpoints active=true cuyo events[] contenga el evento."},
+    {"idx": 1846, "name": "Header X-Volvix-Signature presente sha256=hex", "status": "pass", "note": "api/index.js:2894. Formato 'sha256=<hex>' producido por _webhookSign (line 2874-2876) con crypto.createHmac('sha256', secret).update(body).digest('hex')."},
+    {"idx": 1847, "name": "Header X-Volvix-Timestamp presente", "status": "pass", "note": "api/index.js:2895. String(Date.now()) en milisegundos."},
+    {"idx": 1848, "name": "Body JSON con id/event/ts/tenant_id/data", "status": "pass", "note": "api/index.js:2914. bodyObj construido y JSON.stringify antes de firmar (firma sobre cuerpo crudo)."},
+    {"idx": 1849, "name": "Firma sobre body crudo (no parsed)", "status": "pass", "note": "_deliverOnce stringify una vez (line 2915) y pasa misma cadena a _webhookSign y _httpPostSigned (line 2916-2917). Receiver debe usar req.body raw."},
+    {"idx": 1850, "name": "Reintentos con backoff", "status": "pass", "note": "WEBHOOK_MAX_ATTEMPTS=3 (line 2872), timeout 5000ms (line 2871). _deliverWithRetry implementa retry."},
+    {"idx": 1851, "name": "Fallback graceful si webhook_endpoints no existe", "status": "pass", "note": "dispatchWebhook envuelve lookup en try/catch silencioso dentro de setImmediate (api/index.js:2963-2973). Errores de tabla ausente NO rompen flujo de ventas."},
+    {"idx": 1852, "name": "Constant-time receiver comparison documentada", "status": "pass", "note": "Ejemplos en R16_WEBHOOK_VERIFY_EXAMPLES.md usan crypto.timingSafeEqual / hmac.compare_digest / hash_equals / hmac.Equal."},
+    {"idx": 1853, "name": "Replay protection via timestamp", "status": "pass", "note": "Ejemplos rechazan deliveries con timestamp >5min de skew. Servidor emite ts en ms, clientes comparan Date.now()."},
+    {"idx": 1854, "name": "Ejemplos receiver Node/Python/PHP/Go/bash", "status": "pass", "note": "R16_WEBHOOK_VERIFY_EXAMPLES.md cubre los 5 lenguajes con verificacion HMAC-SHA256 hex."},
+    {"idx": 1855, "name": "User-Agent identifica origen", "status": "pass", "note": "api/index.js:2893. 'Volvix-Webhooks/1.0'."},
+    {"idx": 1856, "name": "Content-Length correcto", "status": "pass", "note": "api/index.js:2892. Buffer.byteLength(bodyStr) -- evita truncado en multibyte."},
+    {"idx": 1857, "name": "Content-Type application/json", "status": "pass", "note": "api/index.js:2891."},
+    {"idx": 1858, "name": "Auth requerida en CRUD (owner/admin/superadmin)", "status": "pass", "note": "ROLES const en line 2978, aplicado via requireAuth en GET/POST/PATCH/DELETE/test."},
+    {"idx": 1859, "name": "Validacion UUID en :id params", "status": "pass", "note": "isUuid() guard en PATCH/DELETE/test (lines 3019, 3039, 3047)."},
+    {"idx": 1860, "name": "Errores entrega no rompen request original", "status": "pass", "note": "_deliverWithRetry invocado con .catch(()=>{}) en line 2970 dentro de setImmediate -- entrega async, no bloquea response."}
+  ],
+  "endpoints_verified": [
+    "GET /api/webhooks (api/index.js:2984)",
+    "POST /api/webhooks (api/index.js:3000)",
+    "PATCH /api/webhooks/:id (api/index.js:3017)",
+    "DELETE /api/webhooks/:id (api/index.js:3037)",
+    "POST /api/webhooks/:id/test (api/index.js:3045)"
+  ],
+  "artifacts": [
+    "R16_WEBHOOK_VERIFY_EXAMPLES.md (Node/Python/PHP/Go/bash receiver verification)"
+  ],
+  "summary": {"pass": 21, "fail": 0, "skip": 0, "total": 21},
+  "deploy": false,
+  "deploy_reason": "Verificacion estatica del codigo de firma + documentacion receiver-side. Sin cambios a api/index.js. Fallback graceful ya presente (try/catch en dispatchWebhook). HMAC-SHA256 hex sobre body crudo confirmado correcto."
+}

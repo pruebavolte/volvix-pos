@@ -1,0 +1,108 @@
+{
+  "slug": "grua",
+  "brand": "Grúa",
+  "tagline": "El sistema para servicios de grúa y traslado que llegan a tiempo y cobran lo justo",
+  "giro": "grúa y traslado",
+  "giroPlural": "servicios de grúa y traslado",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#1A1A1F",
+    "surface": "#24242B",
+    "paper": "#2C2C35",
+    "ink": "#F2F2F5",
+    "ink2": "#CCCCD2",
+    "muted": "#82828A",
+    "line": "#363640",
+    "accent": "#F39C12",
+    "accent2": "#FFB840"
+  },
+  "fonts": {
+    "display": "Saira Condensed",
+    "body": "Inter",
+    "script": "Permanent Marker",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para servicios de grúa · 2026",
+    "h1": "Cada <em>arrastre</em>,<br>cada <em>kilómetro</em>,<br>cobrado.",
+    "deck": "El POS hecho para grúas y servicios de traslado: arrastre, plataforma, salvamentos. Cotización por km, ruta confirmada, cliente firma al subir y bajar el auto.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver grúas en ruta",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?tow-truck,roadside&q=80",
+    "heroAlt": "Grúa con plataforma cargando auto en calle",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?tow-truck,car&q=80", "tag": "Grúa plataforma", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?wrecker,roadside&q=80", "tag": "Grúa arrastre", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?accident,car&q=80", "tag": "Salvamento", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?highway,emergency&q=80", "tag": "Carretera", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tow,winch&q=80", "tag": "Winch de cable", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?delivery,car&q=80", "tag": "Entrega taller", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?tow-fleet,trucks&q=80", "tag": "Flota grúas", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?safety,driver&q=80", "tag": "Operador certificado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?tow,depot&q=80", "tag": "Patio resguardo", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?map,gps&q=80", "caption": "Ruta con GPS y kilómetros reales"},
+      {"url": "https://source.unsplash.com/random/800x600/?insurance,client&q=80", "caption": "Aseguradora ve servicio en vivo"},
+      {"url": "https://source.unsplash.com/random/800x600/?phone,sign&q=80", "caption": "Cliente firma estado del auto al subir"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Servicios on-demand · en vivo",
+    "title": "Tus grúas, <em>en ruta</em>",
+    "deck": "Cliente pide grúa desde donde quedó varado. Sistema asigna la más cercana. Cotización por km real. Cliente sabe el monto antes que llegue.",
+    "secondary": "Grúa que tarda 90 min llegando pierde al cliente que paga. Asignación inteligente = mejor servicio.",
+    "data": {
+      "service": "Arrastre 15km + estancia",
+      "duration": "1 hr",
+      "slots": [
+        {"hora": "AHORA", "mecanico": "Grúa 1 · Norte", "estado": "ocupado", "auto": "Aveo, Periférico Nte"},
+        {"hora": "AHORA", "mecanico": "Grúa 2 · Centro", "estado": "ocupado", "auto": "Tsuru, Reforma"},
+        {"hora": "20 min", "mecanico": "Grúa 2 · Centro", "estado": "libre"},
+        {"hora": "AHORA", "mecanico": "Grúa 3 · Sur", "estado": "libre"},
+        {"hora": "AHORA", "mecanico": "Plataforma 1", "estado": "libre"},
+        {"hora": "35 min", "mecanico": "Plataforma 1", "estado": "ocupado", "auto": "Camioneta, Edomex"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Asignación inteligente", "d": "Cliente pide grúa, sistema manda la más cercana. ETA real. Cero grúas cruzando la ciudad sin ruta."},
+    {"ico": "monitor", "h": "Tracking en vivo", "d": "Cliente y aseguradora ven la grúa llegar en mapa. Cero 'voy en camino' falsos."},
+    {"ico": "edit", "h": "Cotización por km real", "d": "Distancia calculada por GPS. Cliente acepta antes que la grúa salga. Cero 'me cobraste de más'."},
+    {"ico": "camera", "h": "Estado del auto firmado", "d": "Foto del auto antes de subir. Cliente firma en celular. Foto al bajar. Cero 'eso lo hicieron ustedes'."},
+    {"ico": "truck", "h": "Convenios aseguradoras", "d": "Servicios facturados a aseguradoras con códigos. Pago en 30 días. Sin pedir documentos extra."},
+    {"ico": "percent", "h": "Comisión operador", "d": "Cada operador ve sus servicios del día. Bono por servicios sin reclamos."}
+  ],
+  "stats": [
+    {"v": "78", "l": "Servicios esta semana"},
+    {"v": "28", "l": "Min promedio llegada"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis operadores <span class=\"hl\">cobraban kilómetros de más en efectivo</span> sin que me enterara. $300-800 por servicio. Con Grúa el GPS calcula real, cliente acepta antes. Cero quejas y más ingresos.",
+    "sig": "Don Joel C.",
+    "role": "Grúas El Joel, Toluca, EDOMEX"
+  },
+  "thefts": [
+    {
+      "title": "Kilómetros inflados en efectivo",
+      "rob": "Cliente con seguro: grúa cobra al cliente 25km en efectivo aunque la aseguradora paga. Después cobra a la aseguradora 18km reales. Diferencia: $1,200.",
+      "fix": "GPS calcula <strong>distancia real registrada</strong>. Una sola tarifa, una sola factura. Cliente ve el cálculo en su celular."
+    },
+    {
+      "title": "Daños al auto en el arrastre",
+      "rob": "Operador raya el rin o golpea defensa. Niega que fue él. Cliente reclama, descuento o pleito. Por trabajo malo: $500-3,000.",
+      "fix": "Foto del auto en 12 ángulos al subir, firmada por cliente. <strong>Foto al bajar igual</strong>. Si hay nuevo daño, está documentado. Sin pleitos."
+    },
+    {
+      "title": "Servicios fantasma a aseguradoras",
+      "rob": "Operador crea servicio falso a aseguradora con datos de cliente real. Cobra a la aseguradora $1,800 por servicio que no existió.",
+      "fix": "Cada servicio con <strong>GPS, foto del auto y firma del cliente</strong>. Imposible facturar sin las 3 cosas. Aseguradora audita en segundos."
+    }
+  ]
+}

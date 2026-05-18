@@ -1,0 +1,96 @@
+{
+  "slice": 63,
+  "idx_range": [1590, 1620],
+  "task": "lighthouse_audit_estimated_no_chrome",
+  "timestamp": "2026-04-26",
+  "deploy_target": "https://volvix-pos.vercel.app",
+  "deploy_health": {
+    "manifest.json": 200,
+    "sw.js": 200,
+    "login.html": 200,
+    "salvadorex_web_v25.html": 200,
+    "volvix_owner_panel_v7.html": 200,
+    "multipos_suite_v3.html": 200
+  },
+  "criteria": {
+    "1_manifest_valid": {
+      "status": "PASS",
+      "name": "Volvix POS",
+      "icons_192": true,
+      "icons_512": true,
+      "maskable": true,
+      "start_url": "/login.html",
+      "display": "standalone",
+      "theme_color": "#3B82F6",
+      "background_color": "#0A0A0A",
+      "shortcuts": 3,
+      "share_target": true
+    },
+    "2_sw_registered": {
+      "status": "PASS",
+      "url": "/sw.js",
+      "http": 200,
+      "listeners": ["install", "activate", "fetch"]
+    },
+    "3_https_only": {"status": "PASS", "host": "vercel.app"},
+    "4_responsive_viewport": {
+      "login": "PASS",
+      "salvadorex_web_v25": "PASS",
+      "owner_panel_v7": "PASS",
+      "multipos_suite_v3": "PASS"
+    },
+    "5_theme_color": {
+      "login": "PASS (#0A0A0A)",
+      "salvadorex_web_v25": "PASS (#2D5F8F)",
+      "owner_panel_v7": "FAIL (missing)",
+      "multipos_suite_v3": "FAIL (missing)"
+    },
+    "6_apple_touch_icon": {
+      "status": "PARTIAL",
+      "found_in": ["volvix-pwa-final.html", "volvix-hub-landing.html"],
+      "missing_in": ["login", "salvadorex_web_v25", "owner_panel", "multipos"]
+    },
+    "7_lang_attribute": {
+      "login": "PASS (es)",
+      "salvadorex_web_v25": "PASS (es)",
+      "owner_panel_v7": "PASS (es)",
+      "multipos_suite_v3": "PASS (es)"
+    },
+    "8_title": {
+      "login": "PASS",
+      "salvadorex_web_v25": "PASS",
+      "owner_panel_v7": "PASS",
+      "multipos_suite_v3": "PASS"
+    },
+    "9_meta_description": {
+      "status": "FAIL",
+      "found_in": ["volvix-pwa-final.html", "volvix-hub-landing.html"],
+      "missing_in_main_4": true
+    },
+    "10_contrast_ratios": {"status": "PASS_HEURISTIC", "note": "no white-on-light-gray detected"},
+    "11_tap_targets_48px": {"status": "WARN", "note": "no explicit button{min-height} in login; relies on padding"},
+    "12_no_autoplay": {"status": "PASS", "autoplay_files": 1, "files": ["volvix-qa-scenarios.html"]}
+  },
+  "lighthouse_estimated_scores": {
+    "performance": 85,
+    "accessibility": 78,
+    "best_practices": 95,
+    "seo": 78,
+    "pwa": 90
+  },
+  "score_rationale": {
+    "performance": "Vercel CDN + Brotli + cache headers; SW caching boosts repeat visits",
+    "accessibility": "Slight downgrade vs 80 estimate: missing theme-color + apple-touch-icon in 2 main HTMLs",
+    "best_practices": "HTTPS, no deprecated libs, CSP active",
+    "seo": "Slight downgrade vs 85: meta description ausente en 4/4 HTMLs principales",
+    "pwa": "Manifest + SW + 3 listeners + shortcuts + share_target todos presentes"
+  },
+  "recommendations": [
+    "Agregar <meta name=description> a login.html, salvadorex_web_v25.html, volvix_owner_panel_v7.html, multipos_suite_v3.html",
+    "Agregar <meta name=theme-color> a owner_panel_v7 y multipos_suite_v3",
+    "Agregar <link rel=apple-touch-icon> a los 4 HTMLs principales",
+    "CSS: button { min-height: 48px } global para tap targets WCAG 2.5.5"
+  ],
+  "overall_estimated_lighthouse": 85,
+  "verdict": "PASS_WITH_MINOR_FIXES"
+}

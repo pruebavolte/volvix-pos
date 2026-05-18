@@ -1,0 +1,104 @@
+{
+  "slug": "savia",
+  "brand": "Savia",
+  "tagline": "El sistema para jugos naturales donde cada extracción se cobra completa y cada cliente confía en lo que toma",
+  "giro": "jugos naturales",
+  "giroPlural": "puestos de jugos naturales",
+  "vibe": "fresh",
+  "palette": {
+    "bg": "#F0F8E8",
+    "surface": "#FFFFFF",
+    "paper": "#DBEDC8",
+    "ink": "#0E2A12",
+    "ink2": "#1E4A20",
+    "muted": "#5E7E48",
+    "line": "#B8D898",
+    "accent": "#33691E",
+    "accent2": "#FFAB00"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para puestos de jugos mexicanos · 2026",
+    "h1": "Cada <em>vaso</em>,<br>cada <em>extracción</em>,<br>natural.",
+    "deck": "El POS hecho para que ningún vaso salga con agua escondida, las verduras frescas se vendan al día, y cada cliente mañanero pague exactamente lo que tomó.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?juice,natural,vegetables&q=85",
+    "heroAlt": "Jugo verde recién extraído",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?green,juice&q=80", "tag": "Jugo verde clásico", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?carrot,juice&q=80", "tag": "Jugo de zanahoria", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?beet,juice&q=80", "tag": "Jugo de betabel", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?celery,fresh&q=80", "tag": "Apio fresco", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?nopal,cactus&q=80", "tag": "Nopal con piña", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?spinach,green&q=80", "tag": "Espinaca y kale", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?juice,morning&q=80", "tag": "Puesto matutino", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?lemon,ginger&q=80", "tag": "Limón y jengibre", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?vegetables,fresh&q=80", "tag": "Verduras del día", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?juicer,vegetables&q=80", "caption": "Extractor procesa apio"},
+      {"url": "https://source.unsplash.com/random/800x600/?vendor,morning&q=80", "caption": "Don jugüero atiende al alba"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,trabajador&q=80", "caption": "Trabajador toma jugo camino al trabajo"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Barra · mañana · en vivo",
+    "title": "Tu barra, <em>vaso por vaso</em>, sin perderse",
+    "deck": "Cada orden con receta. KDS muestra: jugo verde 500ml con apio, nopal, piña, espinaca. Jugüero ve ingredientes exactos. Cero recetas adivinadas.",
+    "secondary": "En los puestos de jugo, una cucharada extra de azúcar diaria les cuesta clientes que se cuidan.",
+    "data": {
+      "orders": [
+        {"table": "M01", "name": "Sra. Berenice (oficina)", "state": "urgent", "items": ["500ml verde clásico|sin nopal", "1 pan tostado"], "waitMin": 4},
+        {"table": "M03", "name": "Don Roberto", "state": "prep", "items": ["1 lt zanahoria-betabel-apio", "Plato fruta"], "waitMin": 5},
+        {"table": "M02", "name": "Cuates gym", "state": "queue", "items": ["2 jugos verdes 750ml", "2 shots jengibre"], "waitMin": 3},
+        {"table": "M04", "name": "Doña Carmen", "state": "ready", "items": ["500ml jugo nopal", "Avena con miel"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Báscula para verduras crudas", "d": "Cada jugo pesa los ingredientes. 100g apio, 80g nopal, 150g piña. Sistema cuadra. Cero recetas 'rendidas' con agua."},
+    {"ico": "archive", "h": "Inventario por verdura fresca", "d": "Apio: 4 kg. Nopal: 6 kg. Espinaca: 3 kg. Cuando baja, alerta. Cero promesas que no se cumplen al mediodía."},
+    {"ico": "calendar", "h": "Frescura por día de verdura", "d": "Apio llega lunes, dura 3 días. Sistema avisa cuando vence. Cero jugos con verdura pasada."},
+    {"ico": "monitor", "h": "Receta visible en KDS", "d": "Jugo verde = apio + nopal + piña + espinaca + limón. Jugüero ve exacto. Cero recetas 'al ojo' que descuadran inventario."},
+    {"ico": "percent", "h": "Costo por receta de jugo", "d": "Verde clásico costo $18, vendes $35. Margen 49%. Sistema te dice qué recetas dejan más."},
+    {"ico": "edit", "h": "Suscripción semanal mañanera", "d": "Cliente paga $X semanal, recibe 5 jugos. Sistema cobra automático y agenda producción."}
+  ],
+  "stats": [
+    {"v": "142", "l": "Jugos servidos hoy"},
+    {"v": "38", "l": "Kg de verdura fresca"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi jugüero <span class=\"hl\">'rendía' el verde con más agua</span> y cobraba premium. Mis clientes regulares notaron. Con Savia cada receta lleva gramaje fijo de verduras. Recuperé 18 clientes que se habían ido.",
+    "sig": "Doña Concha M.",
+    "role": "Jugos Naturales La Mañanita, Mérida Centro, Yucatán"
+  },
+  "thefts": [
+    {
+      "title": "Jugos 'rendidos' con agua oculta",
+      "rob": "Jugüero echa 100ml agua a la jarra para 'rendir' 2-3 jugos más. Cliente fitness nota el sabor y deja de venir. Pérdida silenciosa.",
+      "fix": "Receta de cada jugo <strong>con gramaje fijo de verdura por ml</strong>. Sistema cuadra verduras entradas vs ml vendidos. Diferencias alertan."
+    },
+    {
+      "title": "Verdura 'mermada' que se llevan",
+      "rob": "Empleado reporta 1 kg de apio podrido y se lo lleva a casa. En realidad está bueno. $40-60 cada vez. 3 veces por semana.",
+      "fix": "Merma con <strong>foto y autorización del dueño obligatoria</strong>. Si pasa de 3% diario, alerta. Auditoría semanal automática."
+    },
+    {
+      "title": "Shots de jengibre 'cortesía'",
+      "rob": "Jugüero regala shots ($25 c/u) a clientes amigos 'para que regresen'. 4-6 shots por turno = $100-150 al día regalados.",
+      "fix": "Cortesías requieren <strong>código del dueño</strong>. Sistema lleva conteo y motivo. Si pasa de 2 al día, alerta inmediata."
+    }
+  ]
+}

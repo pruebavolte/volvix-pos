@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Descarga Volvix POS para Web, Windows, Android, iOS o instálalo como PWA.">
+  <title>Descargas — Volvix POS</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:#0A0A0A;color:#F5F5F5;min-height:100vh;
+      line-height:1.6;-webkit-font-smoothing:antialiased;
+    }
+    header{
+      padding:32px 24px;text-align:center;
+      border-bottom:1px solid #222;
+    }
+    header h1{font-size:32px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px}
+    header p{color:#999;font-size:16px;max-width:600px;margin:0 auto}
+    main{max-width:1200px;margin:0 auto;padding:48px 24px}
+    .grid{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:24px;
+    }
+    .card{
+      background:#141414;border:1px solid #222;border-radius:16px;
+      padding:32px 24px;display:flex;flex-direction:column;
+      transition:border-color 0.2s,transform 0.2s;
+    }
+    .card:hover{border-color:#3B82F6;transform:translateY(-2px)}
+    .card-icon{
+      width:56px;height:56px;background:#1F2937;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:28px;margin-bottom:20px;
+    }
+    .card h2{font-size:20px;font-weight:600;margin-bottom:8px}
+    .card .platform{color:#666;font-size:13px;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.05em}
+    .card p{color:#BBB;font-size:14px;flex-grow:1;margin-bottom:24px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:12px 20px;border-radius:8px;font-size:14px;font-weight:600;
+      text-decoration:none;cursor:pointer;border:none;
+      transition:background 0.2s,transform 0.1s;width:100%;
+    }
+    .btn:active{transform:scale(0.98)}
+    .btn-primary{background:#3B82F6;color:#fff}
+    .btn-primary:hover{background:#2563EB}
+    .btn-secondary{background:#222;color:#F5F5F5;border:1px solid #333}
+    .btn-secondary:hover{background:#2A2A2A}
+    .btn-disabled{background:#1A1A1A;color:#555;cursor:not-allowed}
+    .badge{
+      display:inline-block;background:#1F2937;color:#9CA3AF;
+      font-size:11px;padding:3px 8px;border-radius:4px;margin-left:8px;
+      text-transform:uppercase;letter-spacing:0.05em;font-weight:600;
+    }
+    .badge-soon{background:#451A03;color:#FCD34D}
+    .badge-new{background:#064E3B;color:#6EE7B7}
+    .pwa-instructions{
+      background:#0F1729;border:1px solid #1E3A8A;border-radius:8px;
+      padding:12px;font-size:12px;color:#93C5FD;margin-top:8px;
+      display:none;
+    }
+    .pwa-instructions.show{display:block}
+    footer{
+      max-width:1200px;margin:0 auto;padding:48px 24px 32px;
+      border-top:1px solid #222;color:#666;font-size:13px;text-align:center;
+    }
+    footer a{color:#999;text-decoration:none;margin:0 12px}
+    footer a:hover{color:#3B82F6}
+    .legal{margin-top:16px;font-size:11px;color:#444;line-height:1.5}
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Descargas — Volvix POS</h1>
+  <p>Elige cómo quieres usar Volvix POS. Web, móvil, escritorio o instalación nativa.</p>
+</header>
+
+<main>
+  <section class="grid" aria-label="Plataformas disponibles">
+
+    <!-- Versión Web -->
+    <article class="card">
+      <div class="card-icon" aria-hidden="true">🌐</div>
+      <div class="platform">Web · Funciona en cualquier navegador</div>
+      <h2>Versión Web</h2>
+      <p>Acceso instantáneo desde Chrome, Safari, Firefox o Edge. No requiere instalación. Recomendada para empezar rápido.</p>
+      <a href="/login.html" class="btn btn-primary" aria-label="Abrir Volvix POS Web">
+        Abrir
+      </a>
+    </article>
+
+    <!-- Windows .exe -->
+    <article class="card">
+      <div class="card-icon" aria-hidden="true">🖥️</div>
+      <div class="platform">Windows 10 / 11 · Aplicación nativa</div>
+      <h2>Windows <span class="badge badge-soon">Próximamente</span></h2>
+      <p>Aplicación de escritorio para Windows con soporte offline, integración con impresoras y lectores USB.</p>
+      <a href="#" class="btn btn-disabled" aria-disabled="true" onclick="event.preventDefault();return false;">
+        Disponible pronto
+      </a>
+    </article>
+
+    <!-- Android APK -->
+    <article class="card">
+      <div class="card-icon" aria-hidden="true">📱</div>
+      <div class="platform">Android 7.0+ · APK directo</div>
+      <h2>Android APK <span class="badge badge-soon">Próximamente</span></h2>
+      <p>Instalación directa para Android. Soporte completo para cámara, escáner de barras y notificaciones push.</p>
+      <a href="#" class="btn btn-disabled" aria-disabled="true" onclick="event.preventDefault();return false;">
+        Disponible pronto
+      </a>
+    </article>
+
+    <!-- iOS App Store -->
+    <article class="card">
+      <div class="card-icon" aria-hidden="true">🍎</div>
+      <div class="platform">iOS 14+ · App Store</div>
+      <h2>iOS <span class="badge badge-soon">Próximamente</span></h2>
+      <p>App nativa de iOS publicada en App Store. Funciona en iPhone y iPad. Optimizada para Apple Silicon.</p>
+      <a href="#" class="btn btn-disabled" aria-disabled="true" onclick="event.preventDefault();return false;">
+        Disponible pronto
+      </a>
+    </article>
+
+    <!-- PWA Install -->
+    <article class="card">
+      <div class="card-icon" aria-hidden="true">⚡</div>
+      <div class="platform">PWA · Instalable en cualquier dispositivo</div>
+      <h2>Instalar como PWA <span class="badge badge-new">Disponible</span></h2>
+      <p>Instala Volvix POS como aplicación en tu dispositivo. Funciona offline y se siente nativa.</p>
+      <button class="btn btn-secondary" onclick="togglePwaInstructions()" aria-expanded="false" aria-controls="pwa-help">
+        Ver instrucciones
+      </button>
+      <div id="pwa-help" class="pwa-instructions" role="region">
+        <strong>Chrome / Edge (Android, Windows):</strong><br>
+        Abre <a href="/login.html" style="color:#3B82F6">Volvix POS</a> → menú (⋮) → "Instalar app"<br><br>
+        <strong>Safari (iOS, macOS):</strong><br>
+        Abre <a href="/login.html" style="color:#3B82F6">Volvix POS</a> → botón compartir → "Añadir a pantalla de inicio"<br><br>
+        <strong>Firefox (Android):</strong><br>
+        Abre <a href="/login.html" style="color:#3B82F6">Volvix POS</a> → menú (⋮) → "Instalar"
+      </div>
+    </article>
+
+  </section>
+</main>
+
+<footer>
+  <nav aria-label="Enlaces legales">
+    <a href="/aviso-privacidad.html">Aviso de privacidad</a>
+    <a href="/cookies-policy.html">Política de cookies</a>
+    <a href="/docs.html">Documentación</a>
+    <a href="/login.html">Iniciar sesión</a>
+  </nav>
+  <p class="legal">
+    © 2026 Volvix POS. Todos los derechos reservados.<br>
+    Volvix POS es un servicio de Grupo Volvix. Las marcas y logos son propiedad de sus respectivos dueños.<br>
+    Al descargar o usar Volvix POS aceptas nuestros términos de servicio y política de privacidad. R12b.
+  </p>
+</footer>
+
+<script>
+  function togglePwaInstructions(){
+    var box=document.getElementById('pwa-help');
+    var btn=document.querySelector('[aria-controls="pwa-help"]');
+    var open=box.classList.toggle('show');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.textContent = open ? 'Ocultar instrucciones' : 'Ver instrucciones';
+  }
+
+  // Dynamic version detection — replace placeholders if real downloads exist
+  document.addEventListener('DOMContentLoaded', function(){
+    // If a real APK/EXE exists at /downloads/, swap the disabled buttons.
+    // (Backend can add ?v=XXX query param to invalidate cache.)
+    var probes = [
+      { url: '/downloads/volvix-pos-windows-latest.exe', selector: 'article:nth-of-type(2)', label: 'Descargar .exe' },
+      { url: '/downloads/volvix-pos-android-latest.apk', selector: 'article:nth-of-type(3)', label: 'Descargar APK' }
+    ];
+    probes.forEach(function(p){
+      fetch(p.url, { method: 'HEAD' }).then(function(r){
+        if(r.ok){
+          var card = document.querySelector(p.selector);
+          if(!card) return;
+          var btn = card.querySelector('.btn-disabled');
+          var badge = card.querySelector('.badge-soon');
+          if(btn){
+            btn.classList.remove('btn-disabled');
+            btn.classList.add('btn-primary');
+            btn.removeAttribute('aria-disabled');
+            btn.removeAttribute('onclick');
+            btn.href = p.url;
+            btn.textContent = p.label;
+          }
+          if(badge){
+            badge.classList.remove('badge-soon');
+            badge.classList.add('badge-new');
+            badge.textContent = 'Disponible';
+          }
+        }
+      }).catch(function(){ /* silently keep "próximamente" */ });
+    });
+  });
+</script>
+
+</body>
+</html>

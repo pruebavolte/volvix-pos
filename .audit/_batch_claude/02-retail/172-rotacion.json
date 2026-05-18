@@ -1,0 +1,106 @@
+{
+  "slug": "rotacion",
+  "brand": "Rotación",
+  "tagline": "El POS hecho para tiendas de segunda mano que sí mueven cada prenda",
+  "giro": "segunda mano",
+  "giroPlural": "tiendas de segunda mano",
+  "vibe": "warmLocal",
+  "palette": {
+    "bg": "#F7F2EA",
+    "surface": "#FFFFFF",
+    "paper": "#EDE5D5",
+    "ink": "#1F1A12",
+    "ink2": "#3D3320",
+    "muted": "#7A6A4D",
+    "line": "#D9CDB2",
+    "accent": "#5C8A3A",
+    "accent2": "#A4C46A"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Manrope",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas de segunda mano · 2026",
+    "h1": "Cada <em>prenda</em>,<br>cada <em>vida</em>,<br>cada vuelta.",
+    "deck": "El punto de venta hecho para tiendas thrift y de segunda mano: ingreso por kilo o por pieza, clasificación rápida, etiquetado masivo, rotación por días en exhibición.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?thrift,store,secondhand&q=85",
+    "heroAlt": "Tienda de segunda mano con prendas colgadas",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?thrift,clothing&q=80", "tag": "Prendas surtidas", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?secondhand,dress&q=80", "tag": "Vestidos usados", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?vintage,jeans&q=80", "tag": "Denim segunda mano", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?used,jacket&q=80", "tag": "Chaquetas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?thrift,shoes&q=80", "tag": "Calzado", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bag,used&q=80", "tag": "Bolsas usadas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?thrift,shop,interior&q=80", "tag": "Local thrift", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?clothing,donation&q=80", "tag": "Ingreso por kilo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?retro,fashion,rack&q=80", "tag": "Rack rotativo", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?clothes,sorting&q=80", "caption": "Clasificación y etiquetado rápido"},
+      {"url": "https://source.unsplash.com/random/800x600/?thrift,shopper&q=80", "caption": "Cliente busca por categoría y precio"},
+      {"url": "https://source.unsplash.com/random/800x600/?clothes,pile,sale&q=80", "caption": "Rotación con descuento por días"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>rotando cada día</em>",
+    "deck": "Cada prenda ingresa con fecha. A los 7 días sin venta, baja 20%. A los 14 días, 40%. A los 21 días, sale a outlet. Cero prendas dormidas eternamente.",
+    "secondary": "En segunda mano, el inventario que no rota es dinero atrapado en perchas.",
+    "data": {
+      "product": "Inventario por antigüedad",
+      "tallas": ["Día 1-7", "Día 8-14", "Día 15-21", "Día 22+"],
+      "stock": [
+        {"color": "Mujer", "vals": [124, 87, 56, 23]},
+        {"color": "Hombre", "vals": [98, 68, 42, 18]},
+        {"color": "Niños", "vals": [62, 38, 24, 9]}
+      ],
+      "lowThreshold": 10
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Ingreso por kilo o por pieza", "d": "Recibe lote de 50kg, sistema calcula costo por kg y precio sugerido. O ingreso por pieza con foto rápida."},
+    {"ico": "barcode", "h": "Etiquetado masivo en minutos", "d": "Etiquetadora imprime 100 etiquetas con código de barras y precio. Cero captura uno por uno."},
+    {"ico": "calendar", "h": "Rotación automática por días", "d": "Día 7: -20%. Día 14: -40%. Día 21: outlet. Sistema baja precios solo. Cero prendas dormidas eternamente."},
+    {"ico": "percent", "h": "Comisiones por vendedora", "d": "Define el % por pieza o categoría. Vendedora ve sus ventas en vivo. Cero peleas al cierre."},
+    {"ico": "split", "h": "Combos 3x2 y bolsa por $X", "d": "Arma combo (3 prendas por $X). Sistema descuenta del stock automático. Cero captura manual."},
+    {"ico": "truck", "h": "Donaciones a fundación", "d": "Prendas día 30+ van a donación con foto del receptor. Cero prendas perdidas o 'regaladas' por empleados."}
+  ],
+  "stats": [
+    {"v": "1,284", "l": "Prendas en stock"},
+    {"v": "126", "l": "Vendidas hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Recibo lotes grandes y antes <span class=\"hl\">se me quedaba ropa por meses</span> sin saber qué tenía. Con Rotación cada prenda baja sola de precio. Mi inventario gira en 4 semanas. Cero stock muerto.",
+    "sig": "Lola P.",
+    "role": "Thrift shop en Tonalá, JAL"
+  },
+  "thefts": [
+    {
+      "title": "Prendas premium 'no clasificadas' que se llevan",
+      "rob": "Llega lote con bolsa Coach o chamarra Levi's. Empleada las separa antes de ingresar al sistema y se las lleva. Tú nunca supiste que llegaron.",
+      "fix": "Ingreso requiere <strong>foto del lote al recibir y conteo firmado</strong>. Cada pieza premium con SKU obligatorio. Auditoría diaria por lote."
+    },
+    {
+      "title": "Combos 3x2 cobrados como individuales",
+      "rob": "Vendedora cobra combo (3 prendas por $X), marca solo 2 en sistema y se queda con el precio de 1 prenda. Cliente recibe 3, tu sistema marca 2.",
+      "fix": "Combos <strong>se arman por sistema con SKU único de paquete</strong>. Cero captura manual. Auditoría: piezas salidas vs piezas facturadas."
+    },
+    {
+      "title": "Donaciones 'caritativas' que se rentan por fuera",
+      "rob": "Vendedora marca prendas como 'donadas a fundación' y las vende en redes sociales o tianguis. Sin foto del receptor, no hay rastro.",
+      "fix": "Donaciones <strong>requieren foto del receptor con la prenda y firma</strong>. Cada baja registrada con destino verificable. Cero donaciones fantasma."
+    }
+  ]
+}

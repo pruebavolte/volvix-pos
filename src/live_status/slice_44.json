@@ -1,0 +1,42 @@
+{
+  "slice": 44,
+  "idx_range": [1240, 1320],
+  "category": "public_pages",
+  "base_url": "https://volvix-pos.vercel.app",
+  "tested_at": "2026-04-26",
+  "summary": {
+    "total": 12,
+    "passed": 11,
+    "failed": 1,
+    "missing_local": 1
+  },
+  "security_headers_global": {
+    "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'",
+    "hsts": "max-age=63072000; includeSubDomains; preload",
+    "x_frame_options": "DENY",
+    "x_content_type_options": "nosniff",
+    "referrer_policy": "strict-origin-when-cross-origin"
+  },
+  "pages": [
+    {"url": "/volvix-hub-landing.html",     "T1_status": 200, "T2_size_bytes": 52916, "T2_gt_5kb": true, "T3_content_type": "text/html; charset=utf-8", "T4_no_script_error": true, "T5_security_headers": true, "T6_public_no_auth": true, "result": "PASS"},
+    {"url": "/volvix-grand-tour.html",      "T1_status": 200, "T2_size_bytes": 80397, "T2_gt_5kb": true, "T3_content_type": "text/html; charset=utf-8", "T4_no_script_error": true, "T5_security_headers": true, "T6_public_no_auth": true, "result": "PASS"},
+    {"url": "/volvix-sitemap.html",         "T1_status": 200, "T2_size_bytes": 55727, "T2_gt_5kb": true, "T3_content_type": "text/html; charset=utf-8", "T4_no_script_error": true, "T5_security_headers": true, "T6_public_no_auth": true, "result": "PASS"},
+    {"url": "/volvix-api-docs.html",        "T1_status": 200, "T2_size_bytes": 42771, "T2_gt_5kb": true, "T3_content_type": "text/html; charset=utf-8", "T4_no_script_error": true, "T5_security_headers": true, "T6_public_no_auth": true, "result": "PASS"},
+    {"url": "/volvix-mega-dashboard.html",  "T1_status": 200, "T2_size_bytes": 39340, "T2_gt_5kb": true, "T3_content_type": "text/html; charset=utf-8", "T4_no_script_error": true, "T5_security_headers": true, "T6_public_no_auth": true, "result": "PASS"},
+    {"url": "/volvix-customer-portal-v2.html", "T1_status": 200, "T2_size_bytes": 14217, "T2_gt_5kb": true, "T3_content_type": "text/html; charset=utf-8", "T4_no_script_error": true, "T5_security_headers": true, "T6_public_no_auth": true, "result": "PASS"},
+    {"url": "/volvix-gdpr-portal.html",     "T1_status": 404, "T2_size_bytes": 81,    "T2_gt_5kb": false, "T3_content_type": "text/html; charset=utf-8", "T4_no_script_error": true, "T5_security_headers": true, "T6_public_no_auth": true, "result": "FAIL", "issue": "404_not_deployed", "local_exists": false, "in_vercelignore": false, "note": "Archivo no existe en local (verion 340/), solo R14_GDPR_COMPLIANCE.md. No esta en .vercelignore porque nunca se creo el HTML."},
+    {"url": "/volvix-onboarding-v2.html",   "T1_status": 200, "T2_size_bytes": 23701, "T2_gt_5kb": true, "T3_content_type": "text/html; charset=utf-8", "T4_no_script_error": true, "T5_security_headers": true, "T6_public_no_auth": true, "result": "PASS"},
+    {"url": "/volvix-sandbox.html",         "T1_status": 200, "T2_size_bytes": 42478, "T2_gt_5kb": true, "T3_content_type": "text/html; charset=utf-8", "T4_no_script_error": true, "T5_security_headers": true, "T6_public_no_auth": true, "result": "PASS"},
+    {"url": "/volvix-admin-saas.html",      "T1_status": 200, "T2_size_bytes": 44508, "T2_gt_5kb": true, "T3_content_type": "text/html; charset=utf-8", "T4_no_script_error": true, "T5_security_headers": true, "T6_public_no_auth": true, "result": "PASS"},
+    {"url": "/volvix-vendor-portal.html",   "T1_status": 200, "T2_size_bytes": 51609, "T2_gt_5kb": true, "T3_content_type": "text/html; charset=utf-8", "T4_no_script_error": true, "T5_security_headers": true, "T6_public_no_auth": true, "result": "PASS"},
+    {"url": "/volvix-customer-portal.html", "T1_status": 200, "T2_size_bytes": 47182, "T2_gt_5kb": true, "T3_content_type": "text/html; charset=utf-8", "T4_no_script_error": true, "T5_security_headers": true, "T6_public_no_auth": true, "result": "PASS"}
+  ],
+  "issues": [
+    {
+      "page": "volvix-gdpr-portal.html",
+      "severity": "medium",
+      "type": "missing_file",
+      "details": "El HTML no existe en C:/Users/DELL/Downloads/verion 340/. Solo existe R14_GDPR_COMPLIANCE.md (documentacion). No bloqueado por .vercelignore. Accion: crear el HTML o remover de la lista de paginas publicas."
+    }
+  ]
+}

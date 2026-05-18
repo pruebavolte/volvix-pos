@@ -1,0 +1,373 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.volvix.pos"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="24"
+9        android:targetSdkVersion="36" />
+10
+11    <!-- ====== Permisos POS Volvix ====== -->
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:5:5-67
+12-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:5:22-64
+13    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+13-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:6:5-79
+13-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:6:22-76
+14    <uses-permission android:name="android.permission.CAMERA" />
+14-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:7:5-65
+14-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:7:22-62
+15    <uses-permission android:name="android.permission.VIBRATE" />
+15-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:8:5-66
+15-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:8:22-63
+16    <uses-permission android:name="android.permission.WAKE_LOCK" />
+16-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:9:5-68
+16-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:9:22-65
+17
+18    <!-- Bluetooth para impresoras tickets / cobranza -->
+19    <uses-permission
+19-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:12:5-13:38
+20        android:name="android.permission.BLUETOOTH"
+20-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:12:22-65
+21        android:maxSdkVersion="30" />
+21-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:13:9-35
+22    <uses-permission
+22-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:14:5-15:38
+23        android:name="android.permission.BLUETOOTH_ADMIN"
+23-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:14:22-71
+24        android:maxSdkVersion="30" />
+24-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:15:9-35
+25    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+25-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:16:5-76
+25-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:16:22-73
+26    <uses-permission
+26-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:17:5-18:58
+27        android:name="android.permission.BLUETOOTH_SCAN"
+27-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:17:22-70
+28        android:usesPermissionFlags="neverForLocation" />
+28-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:18:9-55
+29
+30    <!-- Storage legacy (Android <= 12) -->
+31    <uses-permission
+31-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:21:5-22:38
+32        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+32-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:21:22-78
+33        android:maxSdkVersion="29" />
+33-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:22:9-35
+34    <uses-permission
+34-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:23:5-24:38
+35        android:name="android.permission.READ_EXTERNAL_STORAGE"
+35-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:23:22-77
+36        android:maxSdkVersion="32" />
+36-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:24:9-35
+37
+38    <!-- Notificaciones (Android 13+) -->
+39    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+39-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:27:5-77
+39-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:27:22-74
+40
+41    <!-- Hardware opcional: app instalable aunque no haya camara/BT -->
+42    <uses-feature
+42-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:30:5-32:36
+43        android:name="android.hardware.camera"
+43-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:31:9-47
+44        android:required="false" />
+44-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:32:9-33
+45    <uses-feature
+45-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:33:5-35:36
+46        android:name="android.hardware.camera.autofocus"
+46-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:34:9-57
+47        android:required="false" />
+47-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:35:9-33
+48    <uses-feature
+48-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:36:5-38:36
+49        android:name="android.hardware.bluetooth_le"
+49-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:37:9-53
+50        android:required="false" />
+50-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:38:9-33
+51
+52    <queries>
+52-->[:capacitor-camera] D:\github\volvix-pos\src\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:5-17:15
+53        <intent>
+53-->[:capacitor-camera] D:\github\volvix-pos\src\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:9-10:18
+54            <action android:name="android.media.action.IMAGE_CAPTURE" />
+54-->[:capacitor-camera] D:\github\volvix-pos\src\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:13-73
+54-->[:capacitor-camera] D:\github\volvix-pos\src\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:21-70
+55        </intent>
+56        <intent>
+56-->[:capacitor-camera] D:\github\volvix-pos\src\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:11:9-13:18
+57            <action android:name="android.intent.action.GET_CONTENT" />
+57-->[:capacitor-camera] D:\github\volvix-pos\src\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:13-72
+57-->[:capacitor-camera] D:\github\volvix-pos\src\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:21-69
+58        </intent>
+59        <intent>
+59-->[:capacitor-camera] D:\github\volvix-pos\src\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:14:9-16:18
+60            <action android:name="android.intent.action.PICK" />
+60-->[:capacitor-camera] D:\github\volvix-pos\src\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:15:13-65
+60-->[:capacitor-camera] D:\github\volvix-pos\src\node_modules\@capacitor\camera\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:15:21-62
+61        </intent>
+62    </queries>
+63
+64    <permission
+64-->[androidx.core:core:1.17.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:22:5-24:47
+65        android:name="com.volvix.pos.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+65-->[androidx.core:core:1.17.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:23:9-81
+66        android:protectionLevel="signature" />
+66-->[androidx.core:core:1.17.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:24:9-44
+67
+68    <uses-permission android:name="com.volvix.pos.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+68-->[androidx.core:core:1.17.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:26:5-97
+68-->[androidx.core:core:1.17.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:26:22-94
+69
+70    <uses-feature
+70-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:28:5-30:36
+71        android:name="android.hardware.camera.front"
+71-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:29:9-53
+72        android:required="false" />
+72-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:30:9-33
+73    <uses-feature
+73-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:36:5-38:36
+74        android:name="android.hardware.camera.flash"
+74-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:37:9-53
+75        android:required="false" />
+75-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:38:9-33
+76    <uses-feature
+76-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:39:5-41:36
+77        android:name="android.hardware.screen.landscape"
+77-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:40:9-57
+78        android:required="false" />
+78-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:41:9-33
+79    <uses-feature
+79-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:42:5-44:36
+80        android:name="android.hardware.wifi"
+80-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:43:9-45
+81        android:required="false" />
+81-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:44:9-33
+82
+83    <application
+83-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:40:5-75:19
+84        android:allowBackup="true"
+84-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:41:9-35
+85        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+85-->[androidx.core:core:1.17.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:28:18-86
+86        android:debuggable="true"
+87        android:extractNativeLibs="false"
+88        android:hardwareAccelerated="true"
+88-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:42:9-43
+89        android:icon="@mipmap/ic_launcher"
+89-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:43:9-43
+90        android:label="@string/app_name"
+90-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:44:9-41
+91        android:networkSecurityConfig="@xml/network_security_config"
+91-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:49:9-69
+92        android:requestLegacyExternalStorage="true"
+92-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:8:18-61
+93        android:roundIcon="@mipmap/ic_launcher_round"
+93-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:45:9-54
+94        android:supportsRtl="true"
+94-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:46:9-35
+95        android:theme="@style/AppTheme"
+95-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:47:9-40
+96        android:usesCleartextTraffic="false" >
+96-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:48:9-45
+97        <activity
+97-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:51:9-64:20
+98            android:name="com.volvix.pos.MainActivity"
+98-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:53:13-41
+99            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
+99-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:52:13-148
+100            android:exported="true"
+100-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:57:13-36
+101            android:label="@string/title_activity_main"
+101-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:54:13-56
+102            android:launchMode="singleTask"
+102-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:56:13-44
+103            android:theme="@style/AppTheme.NoActionBarLaunch" >
+103-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:55:13-62
+104            <intent-filter>
+104-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:59:13-62:29
+105                <action android:name="android.intent.action.MAIN" />
+105-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:60:17-69
+105-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:60:25-66
+106
+107                <category android:name="android.intent.category.LAUNCHER" />
+107-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:61:17-77
+107-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:61:27-74
+108            </intent-filter>
+109        </activity>
+110
+111        <provider
+112            android:name="androidx.core.content.FileProvider"
+112-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:67:13-62
+113            android:authorities="com.volvix.pos.fileprovider"
+113-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:68:13-64
+114            android:exported="false"
+114-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:69:13-37
+115            android:grantUriPermissions="true" >
+115-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:70:13-47
+116            <meta-data
+116-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:71:13-73:64
+117                android:name="android.support.FILE_PROVIDER_PATHS"
+117-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:72:17-67
+118                android:resource="@xml/file_paths" />
+118-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:73:17-51
+119        </provider>
+120
+121        <activity
+121-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:9:9-11:86
+122            android:name="io.ionic.libs.ioncameralib.view.IONCAMRLoadingActivity"
+122-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:10:13-82
+123            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+123-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:11:13-83
+124        <activity
+124-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:12:9-16:36
+125            android:name="io.ionic.libs.ioncameralib.view.IONCAMRImageEditorActivity"
+125-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:13:13-86
+126            android:enableOnBackInvokedCallback="true"
+126-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:14:13-55
+127            android:theme="@android:style/Theme.Black.NoTitleBar" />
+127-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:15:13-66
+128        <activity
+128-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:17:9-20:86
+129            android:name="io.ionic.libs.ioncameralib.view.IONCAMROpenPhotoPickerActivity"
+129-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:18:13-90
+130            android:exported="false"
+130-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:19:13-37
+131            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" /> <!-- Trigger Google Play services to install the backported photo picker module. -->
+131-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:20:13-83
+132        <service
+132-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:22:9-34:19
+133            android:name="com.google.android.gms.metadata.ModuleDependencies"
+133-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:23:13-78
+134            android:enabled="false"
+134-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:24:13-36
+135            android:exported="false" >
+135-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:25:13-37
+136            <intent-filter>
+136-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:27:13-29:29
+137                <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
+137-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:28:17-94
+137-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:28:25-91
+138            </intent-filter>
+139
+140            <meta-data
+140-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:31:13-33:36
+141                android:name="photopicker_activity:0:required"
+141-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:32:17-63
+142                android:value="" />
+142-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:33:17-33
+143        </service>
+144
+145        <provider
+145-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:36:9-44:20
+146            android:name="io.ionic.libs.ioncameralib.IONCAMRFileProvider"
+146-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:37:13-74
+147            android:authorities="com.volvix.pos.camera.provider"
+147-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:38:13-67
+148            android:exported="false"
+148-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:39:13-37
+149            android:grantUriPermissions="true" >
+149-->[io.ionic.libs:ioncamera-android:1.0.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\240b98250f19f78d3c0bb7a81ae5d353\transformed\ioncamera-android-1.0.0\AndroidManifest.xml:40:13-47
+150            <meta-data
+150-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:71:13-73:64
+151                android:name="android.support.FILE_PROVIDER_PATHS"
+151-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:72:17-67
+152                android:resource="@xml/ioncamera_paths" />
+152-->D:\github\volvix-pos\src\android\app\src\main\AndroidManifest.xml:73:17-51
+153        </provider>
+154        <provider
+154-->[androidx.emoji2:emoji2:1.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+155            android:name="androidx.startup.InitializationProvider"
+155-->[androidx.emoji2:emoji2:1.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
+156            android:authorities="com.volvix.pos.androidx-startup"
+156-->[androidx.emoji2:emoji2:1.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
+157            android:exported="false" >
+157-->[androidx.emoji2:emoji2:1.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
+158            <meta-data
+158-->[androidx.emoji2:emoji2:1.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+159                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+159-->[androidx.emoji2:emoji2:1.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+160                android:value="androidx.startup" />
+160-->[androidx.emoji2:emoji2:1.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\353d69426d62513a7e19e841051a3a44\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+161            <meta-data
+161-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\DELL\.gradle\caches\8.14.3\transforms\14a3b51da1167f75215e7e32d2231e74\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+162                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+162-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\DELL\.gradle\caches\8.14.3\transforms\14a3b51da1167f75215e7e32d2231e74\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+163                android:value="androidx.startup" />
+163-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\DELL\.gradle\caches\8.14.3\transforms\14a3b51da1167f75215e7e32d2231e74\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+164            <meta-data
+164-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
+165                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+165-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
+166                android:value="androidx.startup" />
+166-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
+167        </provider>
+168        <!--
+169        Service for holding metadata. Cannot be instantiated.
+170        Metadata will be merged from other manifests.
+171        -->
+172        <service
+172-->[androidx.camera:camera-core:1.4.2] C:\Users\DELL\.gradle\caches\8.14.3\transforms\1bed5d73aa0783bafdf646ee8d6db11d\transformed\camera-core-1.4.2\AndroidManifest.xml:29:9-33:78
+173            android:name="androidx.camera.core.impl.MetadataHolderService"
+173-->[androidx.camera:camera-core:1.4.2] C:\Users\DELL\.gradle\caches\8.14.3\transforms\1bed5d73aa0783bafdf646ee8d6db11d\transformed\camera-core-1.4.2\AndroidManifest.xml:30:13-75
+174            android:enabled="false"
+174-->[androidx.camera:camera-core:1.4.2] C:\Users\DELL\.gradle\caches\8.14.3\transforms\1bed5d73aa0783bafdf646ee8d6db11d\transformed\camera-core-1.4.2\AndroidManifest.xml:31:13-36
+175            android:exported="false" />
+175-->[androidx.camera:camera-core:1.4.2] C:\Users\DELL\.gradle\caches\8.14.3\transforms\1bed5d73aa0783bafdf646ee8d6db11d\transformed\camera-core-1.4.2\AndroidManifest.xml:32:13-37
+176
+177        <receiver
+177-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
+178            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+178-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
+179            android:directBootAware="false"
+179-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
+180            android:enabled="true"
+180-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
+181            android:exported="true"
+181-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
+182            android:permission="android.permission.DUMP" >
+182-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
+183            <intent-filter>
+183-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
+184                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+184-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
+184-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
+185            </intent-filter>
+186            <intent-filter>
+186-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
+187                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+187-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
+187-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
+188            </intent-filter>
+189            <intent-filter>
+189-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
+190                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+190-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
+190-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
+191            </intent-filter>
+192            <intent-filter>
+192-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
+193                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+193-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
+193-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\f95ab50c54d3211c648684c462933e30\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:25-92
+194            </intent-filter>
+195        </receiver>
+196
+197        <activity
+197-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:47:9-53:63
+198            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+198-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:48:13-74
+199            android:clearTaskOnLaunch="true"
+199-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:49:13-45
+200            android:screenOrientation="sensorLandscape"
+200-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:50:13-56
+201            android:stateNotNeeded="true"
+201-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:51:13-42
+202            android:theme="@style/zxing_CaptureTheme"
+202-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:52:13-54
+203            android:windowSoftInputMode="stateAlwaysHidden" />
+203-->[com.journeyapps:zxing-android-embedded:4.3.0] C:\Users\DELL\.gradle\caches\8.14.3\transforms\acdd5b924fd355fbec77be0d49fd60fd\transformed\zxing-android-embedded-4.3.0\AndroidManifest.xml:53:13-60
+204    </application>
+205
+206</manifest>

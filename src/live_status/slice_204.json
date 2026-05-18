@@ -1,0 +1,52 @@
+{
+  "slice": 204,
+  "range": "3080-3100",
+  "topic": "R18_ACCOUNTING_SAT_MX",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "scope": "Contabilidad SAT Mexico automatica: pólizas, gastos CFDI, balance, edo. resultados, contabilidad electrónica Anexo 24 RMF v1.3",
+  "deliverables": {
+    "sql": "db/R18_ACCOUNTING_SAT.sql",
+    "api_module": "api/accounting-sat.js",
+    "api_wiring": "api/index.js (require accounting-sat dentro del IIFE final)",
+    "report": "R18_ACCOUNTING.md"
+  },
+  "tables": [
+    "accounting_accounts (catalogo SAT 100-800, seed tenant_id=0 con 15 cuentas)",
+    "accounting_journal (libro diario pólizas D/I/E con debe|haber, sale_id, expense_id, cfdi_uuid)",
+    "expenses (CFDI proveedor: subtotal, iva, total, rfc_emisor, deducible, categoria, metodo_pago, forma_pago, uuid único)"
+  ],
+  "trigger": "trg_after_sale_insert -> fn_after_sale_insert_journal (asienta cargo 101.01 / abono 401.01 + 208.01 IVA)",
+  "view": "v_accounting_balance (balance comprobación en vivo)",
+  "endpoints": [
+    "GET  /api/accounting/journal (filtros from,to,cuenta,sale_id,expense_id; LIMIT 500)",
+    "POST /api/accounting/expenses (crea expense + asiento 601.01/118.01/102.01)",
+    "GET  /api/accounting/balance-sheet?as_of (activo, pasivo, capital + chequeo ecuación)",
+    "GET  /api/accounting/income-statement?from&to (ingresos, costos, gastos, ISR 30%, utilidad neta)",
+    "POST /api/accounting/cfdi-import (parse XML CFDI 4.0 -> expense + asiento 601/118/201 idempotente)",
+    "POST /api/accounting/contabilidad-electronica/generate?period=YYYY-MM (3 XML SAT Anexo 24: CT, BN, PL con CompNal UUID_CFDI)"
+  ],
+  "endpoints_count": 6,
+  "auth": "requireAuth multi-tenant (tenant_id de req.user)",
+  "sat_compliance": {
+    "anexo24_rmf_version": "1.3",
+    "catalogo_xmlns": "http://www.sat.gob.mx/esquemas/ContabilidadE/1_3/CatalogoCuentas",
+    "balanza_xmlns": "http://www.sat.gob.mx/esquemas/ContabilidadE/1_3/BalanzaComprobacion",
+    "polizas_xmlns": "http://www.sat.gob.mx/esquemas/ContabilidadE/1_3/PolizasPeriodo",
+    "compnal_cfdi": true,
+    "filename_pattern": "{RFC}{YYYY}{MM}{CT|BN|PL}.xml"
+  },
+  "accounting_logic": {
+    "venta_pos": "trigger DB asienta automaticamente: 101.01 Caja debe(total) / 401.01 Ventas haber(subtotal) / 208.01 IVA trasladado haber",
+    "gasto_manual": "601.01 debe + 118.01 IVA acreditable debe / 102.01 Bancos haber",
+    "cfdi_import": "601.01 debe + 118.01 debe / 201.01 Proveedores haber (PPD)",
+    "isr_pm": "30% sobre utilidad operativa positiva"
+  },
+  "files_modified": ["api/index.js (+wiring 17 lineas)"],
+  "files_created": ["db/R18_ACCOUNTING_SAT.sql", "api/accounting-sat.js", "R18_ACCOUNTING.md"],
+  "next_actions": [
+    "Sellado CSD con .cer/.key del contribuyente",
+    "Soporte régimen RESICO + DIOT",
+    "Conciliación bancaria automática"
+  ]
+}

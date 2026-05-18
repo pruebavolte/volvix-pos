@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sincronizar con Shopify — Centro de Ayuda Volvix</title>
+<meta name="description" content="Mantén stock e inventario sincronizado con tu tienda Shopify.">
+<meta name="theme-color" content="#6366f1">
+<link rel="stylesheet" href="_article-style.css">
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../docs.html" class="nav-logo"><span class="nav-logo-mark">V</span> Volvix Ayuda</a>
+    <a href="../multipos_suite_v3.html" style="color:#cbd5e1;font-size:14px;font-weight:600">Abrir POS →</a>
+  </div>
+</nav>
+<main class="container">
+  <div class="crumb">
+    <a href="../volvix-hub-landing.html">Inicio</a> / <a href="../docs.html">Ayuda</a> / <a href="../docs.html?cat=integraciones">Integraciones</a>
+  </div>
+  <article>
+    <span class="cat-tag">Integraciones</span>
+    <h1>Sincronizar con Shopify</h1>
+    <p class="lead">Mantén stock e inventario sincronizado con tu tienda Shopify.</p>
+    
+<h2>Qué se sincroniza</h2>
+<ul>
+  <li>Productos (nombre, SKU, precio, imagen, descripción).</li>
+  <li>Inventario en tiempo real (cada venta descuenta stock en ambos lados).</li>
+  <li>Pedidos online (entran al POS para preparación).</li>
+  <li>Clientes registrados.</li>
+</ul>
+
+<h2>Conectar Shopify</h2>
+<ol class="steps">
+  <li>En Shopify Admin → <strong>Apps → Develop apps</strong>.</li>
+  <li>Crea una app privada con permisos: read/write products, orders, inventory.</li>
+  <li>Genera el <strong>Admin API access token</strong>.</li>
+  <li>En Volvix, ve a <strong>Integraciones → Shopify</strong>.</li>
+  <li>Pega el dominio de tu tienda (<code>mitienda.myshopify.com</code>) y el token.</li>
+  <li>Pulsa <strong>Sincronizar ahora</strong>. La primera sync puede tardar 5-15 minutos.</li>
+</ol>
+
+<h2>Resolución de conflictos</h2>
+<p>Si un producto cambia simultáneamente en POS y Shopify, gana el <strong>último cambio</strong>. Configura la fuente maestra en <em>Integraciones → Shopify → Reglas</em>.</p>
+
+<div class="tip"><strong>Tip:</strong> Activa <strong>webhooks</strong> en Shopify para sincronización en tiempo real (sin esperar al ciclo de 5 min).</div>
+
+    <div class="next">
+      <a href="../docs.html">← Volver al centro de ayuda</a>
+      <a href="mailto:soporte@volvix.com">¿Necesitas más ayuda? Contáctanos →</a>
+    </div>
+  </article>
+</main>
+<footer>© 2026 Volvix POS · <a href="../docs.html" style="color:#818cf8">Centro de ayuda</a></footer>
+</body>
+</html>

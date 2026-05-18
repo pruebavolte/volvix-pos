@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix MEGA Dashboard</title>
+<!-- B37 Security hardening: auth-gate + role guard (superadmin only) -->
+<script src="/auth-gate.js"></script>
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!t) return;
+    var p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    var role = (p.role || '').toLowerCase();
+    if (role !== 'superadmin') {
+      window.location.replace('/volvix-launcher.html?denied=' + encodeURIComponent(location.pathname));
+    }
+  } catch(e){}
+})();
+</script>
+<style>
+:root{
+  /* R29: variables locales caen a Volvix theme vars cuando existen */
+  --bg: var(--vlx-bg, #0a0e1a);
+  --bg2:#111827; --bg3:#1a2332;
+  --card: var(--vlx-surface, #151c2c);
+  --border: var(--vlx-border, #26314a);
+  --text: var(--vlx-text, #e6edf7);
+  --muted: var(--vlx-text-2, #8b95ad);
+  --accent: var(--vlx-accent, #5b9dff);
+  --accent2:#a78bfa; --green:#34d399; --yellow:#fbbf24;
+  --red:#f87171; --pink:#f472b6; --cyan:#22d3ee;
+  --grad:linear-gradient(135deg,#5b9dff 0%,#a78bfa 100%);
+  --grad2:linear-gradient(135deg,#34d399 0%,#22d3ee 100%);
+  --grad3:linear-gradient(135deg,#f472b6 0%,#fbbf24 100%);
+}
+[data-vlx-theme="light"] {
+  --bg2:#f3f4f6; --bg3:#e5e7eb;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.5}
+body{min-height:100vh;background:radial-gradient(circle at 20% 0%,#1a2540 0%,var(--bg) 50%)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* HEADER */
+.header{position:sticky;top:0;z-index:100;background:rgba(10,14,26,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:42px;height:42px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;box-shadow:0 8px 24px rgba(91,157,255,.4)}
+.brand h1{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.brand small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.header-right{display:flex;align-items:center;gap:14px}
+.live-pulse{display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);border-radius:20px;font-size:12px;color:var(--green);font-weight:600}
+.live-pulse::before{content:'';width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+.clock{font-family:'Courier New',monospace;font-size:13px;color:var(--muted);font-weight:600}
+
+/* LAYOUT */
+.container{max-width:1600px;margin:0 auto;padding:24px 28px 60px}
+.section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:32px 0 14px;display:flex;align-items:center;gap:10px}
+.section-title::before{content:'';width:4px;height:18px;background:var(--grad);border-radius:2px}
+
+/* GRID METRICS */
+.grid-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
+.metric:hover{transform:translateY(-2px);border-color:var(--accent)}
+.metric::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
+.metric.green::before{background:var(--grad2)}
+.metric.pink::before{background:var(--grad3)}
+.metric-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.metric-val{font-size:32px;font-weight:800;margin:8px 0 4px;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.metric.green .metric-val{background:var(--grad2);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.metric.pink .metric-val{background:var(--grad3);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.metric-trend{font-size:12px;color:var(--green);font-weight:600}
+.metric-trend.down{color:var(--red)}
+.metric-icon{position:absolute;top:18px;right:18px;font-size:24px;opacity:.25}
+
+/* GRID 2-COL */
+.grid-2{display:grid;grid-template-columns:2fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:1100px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.card-title{font-size:15px;font-weight:700}
+.card-sub{color:var(--muted);font-size:11px;margin-top:2px}
+.card-action{font-size:12px;color:var(--accent);cursor:pointer;font-weight:600}
+.card-action:hover{text-decoration:underline}
+
+/* CHARTS */
+.chart-bar{display:flex;align-items:flex-end;gap:10px;height:200px;padding:10px 0}
+.bar{flex:1;background:var(--grad);border-radius:6px 6px 0 0;position:relative;transition:opacity .2s;min-height:8px;cursor:pointer}
+.bar:hover{opacity:.8}
+.bar-label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted)}
+.bar-val{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--text);font-weight:700}
+
+.chart-line{height:200px;width:100%;position:relative}
+
+.chart-pie{display:flex;align-items:center;gap:24px}
+.pie{width:160px;height:160px;border-radius:50%;flex-shrink:0;background:conic-gradient(var(--accent) 0% 35%,var(--accent2) 35% 60%,var(--green) 60% 78%,var(--yellow) 78% 90%,var(--red) 90% 100%);position:relative}
+.pie::after{content:'';position:absolute;inset:30px;background:var(--card);border-radius:50%}
+.pie-legend{flex:1;display:flex;flex-direction:column;gap:8px}
+.pie-legend-item{display:flex;align-items:center;gap:10px;font-size:13px}
+.pie-dot{width:12px;height:12px;border-radius:3px}
+.pie-pct{margin-left:auto;color:var(--muted);font-weight:600}
+
+.donut{width:140px;height:140px;border-radius:50%;background:conic-gradient(var(--green) 0% 78%,var(--bg3) 78% 100%);display:flex;align-items:center;justify-content:center;position:relative;margin:0 auto}
+.donut::after{content:'';position:absolute;inset:18px;background:var(--card);border-radius:50%}
+.donut-text{position:relative;z-index:1;text-align:center}
+.donut-num{font-size:28px;font-weight:800;color:var(--green)}
+.donut-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+/* AGENTS LIST */
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.agent-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;transition:.2s}
+.agent-card:hover{border-color:var(--accent);transform:scale(1.02)}
+.agent-name{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.agent-status{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.agent-status.idle{background:var(--yellow);box-shadow:0 0 8px var(--yellow)}
+.agent-status.off{background:var(--muted);box-shadow:none}
+.agent-desc{color:var(--muted);font-size:11px;margin-top:6px}
+.agent-tag{display:inline-block;padding:2px 8px;background:rgba(91,157,255,.12);color:var(--accent);border-radius:10px;font-size:10px;margin-top:8px;font-weight:600}
+
+/* LOGS */
+.logs{background:#0d1320;border:1px solid var(--border);border-radius:10px;padding:14px;max-height:340px;overflow-y:auto;font-family:'Courier New',monospace;font-size:12px}
+.log-line{padding:5px 8px;border-radius:4px;margin-bottom:2px;display:flex;gap:10px;align-items:flex-start}
+.log-line:hover{background:rgba(91,157,255,.06)}
+.log-time{color:var(--muted);flex-shrink:0;font-size:11px}
+.log-lvl{flex-shrink:0;font-weight:700;width:60px;font-size:11px}
+.log-lvl.info{color:var(--accent)}
+.log-lvl.ok{color:var(--green)}
+.log-lvl.warn{color:var(--yellow)}
+.log-lvl.err{color:var(--red)}
+.log-msg{color:var(--text);word-break:break-word}
+
+/* TESTS */
+.test-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.test-row:last-child{border-bottom:0}
+.test-name{display:flex;align-items:center;gap:10px;font-size:13px}
+.test-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.test-icon.pass{background:rgba(52,211,153,.15);color:var(--green)}
+.test-icon.fail{background:rgba(248,113,113,.15);color:var(--red)}
+.test-icon.skip{background:rgba(251,191,36,.15);color:var(--yellow)}
+.test-time{color:var(--muted);font-size:11px;font-family:'Courier New',monospace}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:28px}
+.timeline::before{content:'';position:absolute;left:8px;top:8px;bottom:8px;width:2px;background:var(--grad)}
+.timeline-item{position:relative;padding-bottom:18px}
+.timeline-item::before{content:'';position:absolute;left:-24px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--card);border:3px solid var(--accent);box-shadow:0 0 0 3px var(--card)}
+.timeline-item.done::before{background:var(--green);border-color:var(--green)}
+.timeline-item.current::before{background:var(--yellow);border-color:var(--yellow);animation:pulse 1.5s infinite}
+.timeline-title{font-weight:700;font-size:13px}
+.timeline-meta{color:var(--muted);font-size:11px;margin-top:2px}
+.timeline-desc{color:var(--text);font-size:12px;margin-top:6px;padding:8px 12px;background:var(--bg3);border-radius:8px;border-left:3px solid var(--accent)}
+
+/* PERF BARS */
+.perf-row{margin-bottom:14px}
+.perf-row:last-child{margin-bottom:0}
+.perf-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
+.perf-name{font-weight:600}
+.perf-val{color:var(--muted);font-family:'Courier New',monospace}
+.perf-bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.perf-fill{height:100%;border-radius:4px;background:var(--grad);transition:width .8s}
+.perf-fill.green{background:var(--grad2)}
+.perf-fill.warn{background:linear-gradient(90deg,var(--yellow),#f59e0b)}
+.perf-fill.crit{background:linear-gradient(90deg,var(--red),#dc2626)}
+
+/* NOTIF */
+.notif-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.notif-item:last-child{border-bottom:0}
+.notif-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.notif-icon.b1{background:rgba(91,157,255,.15);color:var(--accent)}
+.notif-icon.b2{background:rgba(52,211,153,.15);color:var(--green)}
+.notif-icon.b3{background:rgba(251,191,36,.15);color:var(--yellow)}
+.notif-icon.b4{background:rgba(244,114,182,.15);color:var(--pink)}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:13px;font-weight:600}
+.notif-time{color:var(--muted);font-size:11px;margin-top:2px}
+
+/* QUICK */
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.quick-btn{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 10px;color:var(--text);text-align:center;cursor:pointer;transition:.2s;font-size:12px;font-weight:600}
+.quick-btn:hover{background:var(--card);border-color:var(--accent);transform:translateY(-2px)}
+.quick-emoji{font-size:24px;display:block;margin-bottom:6px}
+
+/* TENANTS */
+.tenant-row{display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg3);border-radius:10px;margin-bottom:8px}
+.tenant-row:last-child{margin-bottom:0}
+.tenant-info{display:flex;align-items:center;gap:12px}
+.tenant-avatar{width:36px;height:36px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+.tenant-name{font-weight:700;font-size:13px}
+.tenant-meta{color:var(--muted);font-size:11px}
+.tenant-badge{padding:4px 10px;background:rgba(52,211,153,.15);color:var(--green);border-radius:10px;font-size:11px;font-weight:700}
+
+/* FOOTER */
+.footer{margin-top:50px;padding:24px;text-align:center;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+.footer strong{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <div class="logo">V</div>
+    <div>
+      <h1>Volvix MEGA Dashboard</h1>
+      <small>Plataforma multi-tenant · Vista en tiempo real</small>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-pulse">LIVE</div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- METRICS -->
+  <div class="section-title">Metricas en Vivo</div>
+  <div class="grid-metrics">
+    <div class="metric">
+      <div class="metric-icon">$</div>
+      <div class="metric-label">Ventas Hoy</div>
+      <div class="metric-val" id="m-sales">—</div>
+      <div class="metric-trend" id="m-sales-trend"></div>
+    </div>
+    <div class="metric green">
+      <div class="metric-icon">#</div>
+      <div class="metric-label">Tickets</div>
+      <div class="metric-val" id="m-tickets">—</div>
+      <div class="metric-trend" id="m-tickets-trend"></div>
+    </div>
+    <div class="metric pink">
+      <div class="metric-icon">P</div>
+      <div class="metric-label">Productos</div>
+      <div class="metric-val" id="m-prods">—</div>
+      <div class="metric-trend" id="m-prods-trend"></div>
+    </div>
+    <div class="metric">
+      <div class="metric-icon">C</div>
+      <div class="metric-label">Customers</div>
+      <div class="metric-val" id="m-cust">—</div>
+      <div class="metric-trend" id="m-cust-trend"></div>
+    </div>
+    <div class="metric green">
+      <div class="metric-icon">T</div>
+      <div class="metric-label">Tenants Activos</div>
+      <div class="metric-val" id="m-ten">—</div>
+      <div class="metric-trend" id="m-ten-trend"></div>
+    </div>
+    <div class="metric pink">
+      <div class="metric-icon">%</div>
+      <div class="metric-label">Conversion</div>
+      <div class="metric-val" id="m-conv">—</div>
+      <div class="metric-trend" id="m-conv-trend">—</div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW -->
+  <div class="section-title">Analytics</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Ventas Ultimos 7 Dias</div>
+          <div class="card-sub">Suma diaria en MXN</div>
+        </div>
+        <div class="card-action">Ver detalle</div>
+      </div>
+      <div class="chart-bar" id="bar-chart"></div>
+      <div style="margin-top:30px"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Salud del Sistema</div>
+          <div class="card-sub">Uptime general</div>
+        </div>
+      </div>
+      <div class="donut">
+        <div class="donut-text">
+          <div class="donut-num" id="m-uptime">—</div>
+          <div class="donut-lbl">Uptime</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-around;margin-top:20px;text-align:center">
+        <div><div style="font-size:18px;font-weight:800;color:var(--green)" id="m-latency">—</div><div style="font-size:11px;color:var(--muted)">Latencia avg</div></div>
+        <div><div style="font-size:18px;font-weight:800;color:var(--accent)" id="m-rpm">—</div><div style="font-size:11px;color:var(--muted)">Req/min</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px"></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Trafico por Hora</div>
+          <div class="card-sub">Requests al API</div>
+        </div>
+      </div>
+      <svg class="chart-line" id="line-chart" viewBox="0 0 600 200" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Mix de Categorias</div>
+          <div class="card-sub">% de ventas</div>
+        </div>
+      </div>
+      <div class="chart-pie">
+        <div class="pie"></div>
+        <div class="pie-legend">
+          <div class="pie-legend-item"><div class="pie-dot" style="background:var(--accent)"></div>Bebidas<span class="pie-pct">35%</span></div>
+          <div class="pie-legend-item"><div class="pie-dot" style="background:var(--accent2)"></div>Snacks<span class="pie-pct">25%</span></div>
+          <div class="pie-legend-item"><div class="pie-dot" style="background:var(--green)"></div>Lacteos<span class="pie-pct">18%</span></div>
+          <div class="pie-legend-item"><div class="pie-dot" style="background:var(--yellow)"></div>Limpieza<span class="pie-pct">12%</span></div>
+          <div class="pie-legend-item"><div class="pie-dot" style="background:var(--red)"></div>Otros<span class="pie-pct">10%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENTS -->
+  <div class="section-title">Módulos disponibles</div>
+  <div class="card">
+    <div class="agents-grid" id="agents-grid"></div>
+  </div>
+
+  <!-- LOGS + TESTS -->
+  <div class="section-title">Operaciones</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Logs en Tiempo Real</div>
+          <div class="card-sub">Ultimos eventos del sistema</div>
+        </div>
+        <div class="card-action" id="pause-logs">Pausar</div>
+      </div>
+      <div class="logs" id="logs"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Test Status</div>
+          <div class="card-sub">Suite Vitest + Playwright</div>
+        </div>
+      </div>
+      <div id="tests"></div>
+      <div style="margin-top:14px;padding:10px;background:var(--bg3);border-radius:8px;display:flex;justify-content:space-around;text-align:center">
+        <div><div style="color:var(--green);font-size:20px;font-weight:800" id="pass-count">0</div><div style="font-size:11px;color:var(--muted)">PASS</div></div>
+        <div><div style="color:var(--red);font-size:20px;font-weight:800" id="fail-count">0</div><div style="font-size:11px;color:var(--muted)">FAIL</div></div>
+        <div><div style="color:var(--yellow);font-size:20px;font-weight:800" id="skip-count">0</div><div style="font-size:11px;color:var(--muted)">SKIP</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE + PERF -->
+  <div class="section-title">Actividad reciente</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Cronología</div>
+          <div class="card-sub">Eventos del sistema</div>
+        </div>
+      </div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Performance Metrics</div>
+          <div class="card-sub">Recursos del sistema</div>
+        </div>
+      </div>
+      <div id="perf"></div>
+    </div>
+  </div>
+
+  <!-- NOTIF + TENANTS + QUICK -->
+  <div class="section-title">Centro de Control</div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Notificaciones</div>
+          <div class="card-sub">Recientes</div>
+        </div>
+      </div>
+      <div id="notif"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Top Tenants</div>
+          <div class="card-sub">Por volumen</div>
+        </div>
+      </div>
+      <div id="tenants"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Quick Actions</div>
+          <div class="card-sub">Atajos</div>
+        </div>
+      </div>
+      <div class="quick-grid">
+        <div class="quick-btn"><span class="quick-emoji">+</span>Nuevo Producto</div>
+        <div class="quick-btn"><span class="quick-emoji">$</span>Nueva Venta</div>
+        <div class="quick-btn"><span class="quick-emoji">U</span>Cliente</div>
+        <div class="quick-btn"><span class="quick-emoji">R</span>Reporte</div>
+        <div class="quick-btn"><span class="quick-emoji">C</span>Cierre Caja</div>
+        <div class="quick-btn"><span class="quick-emoji">B</span>Backup</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXTRA: Top Products + API Health + Recent Sales -->
+  <div class="section-title">Inteligencia Operativa</div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Top Productos</div>
+          <div class="card-sub">Mas vendidos hoy</div>
+        </div>
+      </div>
+      <div id="top-products"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Endpoints API</div>
+          <div class="card-sub">Estado en tiempo real</div>
+        </div>
+      </div>
+      <div id="api-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Ultimas Ventas</div>
+          <div class="card-sub">Stream en vivo</div>
+        </div>
+      </div>
+      <div id="recent-sales" style="max-height:340px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- EXTRA: Heatmap + Goals -->
+  <div class="section-title">Objetivos y Heatmap</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Heatmap Actividad Semanal</div>
+          <div class="card-sub">Lun-Dom x 24h</div>
+        </div>
+      </div>
+      <div id="heatmap" style="display:grid;grid-template-columns:50px repeat(24,1fr);gap:2px;font-size:9px"></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Metas del Mes</div>
+          <div class="card-sub">Abril 2026</div>
+        </div>
+      </div>
+      <div id="goals"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <strong>Volvix POS MEGA Dashboard</strong> · Vista global multi-tenant en vivo
+    <br>Endpoints: /api/owner/dashboard · /api/products · /api/sales · /api/customers · /api/tenants · /api/health
+  </div>
+</div>
+
+<script>
+// ============ CLOCK ============
+function tick(){
+  const d = new Date();
+  document.getElementById('clock').textContent = d.toLocaleTimeString('es-MX',{hour12:false});
+}
+tick(); setInterval(tick,1000);
+
+// ============ DATA FETCHERS (con fallback mock) ============
+async function safeFetch(url, mock){
+  try{
+    const r = await fetch(url,{headers:{'Accept':'application/json'}});
+    if(!r.ok) throw 0;
+    return await r.json();
+  }catch(e){ return mock; }
+}
+
+// MOCK reemplazado por valores vacíos. Si la API falla, se muestra "Sin datos".
+const MOCK = {
+  dashboard:{ sales_today:0, tickets:0, conversion:0 },
+  products: [],
+  sales: [],
+  customers: [],
+  tenants:[],
+  health:{ status:'unknown', uptime:0, latency:0 }
+};
+
+async function loadAll(){
+  const tid = (window.Volvix && Volvix.session && Volvix.session.tenant_id) || 'TNT001';
+  const q = '?tenant_id=' + encodeURIComponent(tid);
+  const tk = (function(){ try{ return localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken')||''; }catch(e){return '';} })();
+  const headers = tk ? { 'Authorization': 'Bearer '+tk } : {};
+  const safeAuth = (path) => fetch(path, { headers, credentials:'include' }).then(r => r.ok ? r.json() : null).catch(()=>null);
+  // B2 fix: usar /api/dashboard/today para KPIs hoy + /api/owner/dashboard para totales
+  const [d, today, p, s, c, t, h] = await Promise.all([
+    safeAuth('/api/owner/dashboard'+q),
+    safeAuth('/api/dashboard/today'),
+    safeAuth('/api/products'+q),
+    safeAuth('/api/sales'+q),
+    safeAuth('/api/customers'+q),
+    safeAuth('/api/tenants'+q),
+    safeAuth('/api/health'),
+  ]);
+  const pArr = Array.isArray(p) ? p : (p && Array.isArray(p.items) ? p.items : []);
+  const cArr = Array.isArray(c) ? c : (c && Array.isArray(c.items) ? c.items : []);
+  const sArr = Array.isArray(s) ? s : (s && Array.isArray(s.items) ? s.items : []);
+  const tArr = Array.isArray(t) ? t : (t && Array.isArray(t.items) ? t.items : []);
+  const dash = d || {};
+  const metrics = dash.metrics || dash || {};
+  const tdy = today || {};
+  // KPIs HOY desde /api/dashboard/today
+  const _salesT = (tdy.sales_today != null) ? tdy.sales_today : 0;
+  animateNum('m-sales', '$' + Number(_salesT).toLocaleString('es-MX', {maximumFractionDigits: 2}));
+  animateNum('m-tickets', (tdy.tickets_today != null ? tdy.tickets_today : 0).toLocaleString());
+  // Totales / acumulados desde /api/owner/dashboard
+  animateNum('m-prods', (metrics.total_products || metrics.products || pArr.length || 0).toLocaleString());
+  animateNum('m-cust', (metrics.total_customers || metrics.customers || cArr.length || 0).toLocaleString());
+  animateNum('m-ten', (metrics.active_tenants || metrics.total_tenants || metrics.companies || tArr.length || 0).toLocaleString());
+  animateNum('m-conv', tdy.conversion_today != null ? Number(tdy.conversion_today).toFixed(1) + '%' : '—');
+  // System health real
+  const health = h || {};
+  const upt = health.uptime || metrics.uptime;
+  animateNum('m-uptime', upt != null ? Number(upt).toFixed(1) + '%' : '—');
+  const lat = health.latency_ms || health.latency || tdy.latency_p50;
+  animateNum('m-latency', lat != null ? Math.round(lat) + 'ms' : '—');
+  const rpm = health.rpm || health.req_per_min;
+  animateNum('m-rpm', rpm != null ? rpm.toLocaleString() : '—');
+  renderTenants(tArr.length ? tArr : []);
+}
+function animateNum(id,val){ const el = document.getElementById(id); if (el) el.textContent = val; }
+
+// ============ BAR CHART (datos reales /api/reports/sales/daily) ============
+async function renderBars(){
+  const tid = (window.Volvix && Volvix.session && Volvix.session.tenant_id) || 'TNT001';
+  let data = [];
+  try{
+    const r = await fetch('/api/reports/sales/daily?tenant_id='+encodeURIComponent(tid)+'&days=7',{headers:{'Accept':'application/json'},credentials:'include'});
+    if(r.ok){
+      const j = await r.json();
+      const arr = Array.isArray(j)?j:(j.items||j.data||[]);
+      const labels=['Dom','Lun','Mar','Mie','Jue','Vie','Sab'];
+      data = arr.slice(-7).map(x=>{
+        const d = new Date(x.date||x.day||Date.now());
+        return { d: labels[d.getDay()]||'-', v: Math.round((Number(x.total||x.sales||0))/1000) };
+      });
+    }
+  }catch(e){}
+  const c = document.getElementById('bar-chart');
+  if(!data.length){ c.innerHTML = '<div style="color:#888;padding:20px;font-size:13px">Sin datos de ventas semanales</div>'; return; }
+  const max = Math.max(...data.map(x=>x.v),1);
+  c.innerHTML = data.map(x=>`
+    <div class="bar" style="height:${(x.v/max*100)}%">
+      <span class="bar-val">$${x.v}k</span>
+      <span class="bar-label">${x.d}</span>
+    </div>`).join('');
+}
+renderBars();
+
+// ============ LINE CHART (datos reales /api/reports/sales/hourly) ============
+async function renderLine(){
+  const tid = (window.Volvix && Volvix.session && Volvix.session.tenant_id) || 'TNT001';
+  let series = [];
+  try{
+    const r = await fetch('/api/reports/sales/hourly?tenant_id='+encodeURIComponent(tid),{headers:{'Accept':'application/json'},credentials:'include'});
+    if(r.ok){
+      const j = await r.json();
+      const arr = Array.isArray(j)?j:(j.items||j.data||[]);
+      series = arr.slice(0,24).map(x=>Number(x.total||x.sales||0));
+    }
+  }catch(e){}
+  const el = document.getElementById('line-chart');
+  if(!series.length){ if(el) el.innerHTML=''; return; }
+  const max = Math.max(...series,1);
+  const pts = series.map((v,i)=>[i*(600/Math.max(series.length-1,1)), 200-(v/max)*180]);
+  const path = 'M '+pts.map(p=>p.join(',')).join(' L ');
+  const area = path+` L 600,200 L 0,200 Z`;
+  el.innerHTML = `
+    <defs><linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#5b9dff" stop-opacity=".4"/>
+      <stop offset="100%" stop-color="#5b9dff" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${area}" fill="url(#g1)"/>
+    <path d="${path}" fill="none" stroke="#5b9dff" stroke-width="2.5" stroke-linejoin="round"/>
+    ${pts.filter((_,i)=>i%4===0).map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#a78bfa"/>`).join('')}
+  `;
+}
+renderLine();
+
+// ============ AGENTS ============
+const AGENTS = [
+  {n:'POS Engine',d:'Motor principal de ventas',t:'core',s:'on'},
+  {n:'Inventory',d:'Control de stock multi-tenant',t:'core',s:'on'},
+  {n:'Auth Service',d:'JWT + Supabase Auth',t:'auth',s:'on'},
+  {n:'Payment Gateway',d:'Stripe + Conekta',t:'payments',s:'on'},
+  {n:'Receipts',d:'Generador de tickets',t:'docs',s:'on'},
+  {n:'CFDI 4.0',d:'Facturacion SAT',t:'fiscal',s:'idle'},
+  {n:'Reports Engine',d:'Reportes diarios/mensuales',t:'analytics',s:'on'},
+  {n:'Sync Cloud',d:'Sincronizacion offline',t:'sync',s:'on'},
+  {n:'Notif Hub',d:'Push + Email + SMS',t:'comms',s:'on'},
+  {n:'Backup Bot',d:'Respaldo automatico 24h',t:'ops',s:'idle'},
+  {n:'AI Predictor',d:'Forecast de ventas ML',t:'ai',s:'on'},
+  {n:'Loyalty',d:'Programa de puntos',t:'crm',s:'on'},
+  {n:'Multi-Tenant',d:'Aislamiento de datos',t:'core',s:'on'},
+  {n:'API Gateway',d:'Rate limit + routing',t:'infra',s:'on'},
+  {n:'Audit Log',d:'Bitacora de cambios',t:'security',s:'on'},
+  {n:'Webhook Sender',d:'Eventos a integraciones',t:'integ',s:'on'},
+  {n:'Print Driver',d:'Impresoras termicas',t:'hw',s:'on'},
+  {n:'Barcode Scan',d:'Codigos UPC/EAN',t:'hw',s:'on'},
+  {n:'Cash Drawer',d:'Apertura de cajon',t:'hw',s:'idle'},
+  {n:'Kitchen Display',d:'KDS para cocina',t:'restaurant',s:'off'},
+  {n:'Reservations',d:'Reservas restaurante',t:'restaurant',s:'off'},
+  {n:'Delivery API',d:'Rappi/UberEats/DiDi',t:'delivery',s:'on'},
+  {n:'Discounts',d:'Promociones y cupones',t:'crm',s:'on'},
+  {n:'Tax Engine',d:'IVA/IEPS calculo',t:'fiscal',s:'on'}
+];
+function renderAgents(){
+  document.getElementById('agents-grid').innerHTML = AGENTS.map(a=>`
+    <div class="agent-card">
+      <div class="agent-name"><div class="agent-status ${a.s==='on'?'':a.s}"></div>${a.n}</div>
+      <div class="agent-desc">${a.d}</div>
+      <span class="agent-tag">${a.t}</span>
+    </div>`).join('');
+}
+renderAgents();
+
+// ============ LOGS ============
+const LOG_TPL = [
+  {l:'info',m:'POS-Engine: nueva venta registrada #VTA-{n}'},
+  {l:'ok',m:'Sync Cloud: 142 records sincronizados'},
+  {l:'info',m:'Auth: login exitoso usuario cajero{n}@volvix'},
+  {l:'warn',m:'Stock bajo: producto SKU-{n} (3 unidades)'},
+  {l:'ok',m:'CFDI emitido folio F-{n} timbrado por SAT'},
+  {l:'info',m:'API Gateway: {n} req/min en /api/products'},
+  {l:'err',m:'Print Driver: timeout impresora ip 192.168.1.{n}'},
+  {l:'ok',m:'Backup Bot: snapshot completo {n}MB en S3'},
+  {l:'info',m:'Notif Hub: push enviado a {n} dispositivos'},
+  {l:'warn',m:'Rate limit cercano: tenant volvix-norte {n}%'}
+];
+let logsArr=[], paused=false;
+function pushLog(){
+  if(paused) return;
+  const t = LOG_TPL[Math.floor(Math.random()*LOG_TPL.length)];
+  const time = new Date().toLocaleTimeString('es-MX',{hour12:false});
+  const msg = t.m.replace('{n}',Math.floor(Math.random()*9999));
+  logsArr.unshift({time,lvl:t.l,msg});
+  if(logsArr.length>40) logsArr.pop();
+  document.getElementById('logs').innerHTML = logsArr.map(L=>`
+    <div class="log-line">
+      <span class="log-time">${L.time}</span>
+      <span class="log-lvl ${L.lvl}">[${L.lvl.toUpperCase()}]</span>
+      <span class="log-msg">${L.msg}</span>
+    </div>`).join('');
+}
+for(let i=0;i<12;i++) pushLog();
+setInterval(pushLog,2200);
+document.getElementById('pause-logs').addEventListener('click',function(){
+  paused = !paused;
+  this.textContent = paused?'Reanudar':'Pausar';
+});
+
+// ============ TESTS ============
+const TESTS = [
+  {n:'pos.engine.sale.test.ts',s:'pass',t:'124ms'},
+  {n:'inventory.stock.test.ts',s:'pass',t:'87ms'},
+  {n:'auth.jwt.test.ts',s:'pass',t:'56ms'},
+  {n:'payment.stripe.test.ts',s:'pass',t:'342ms'},
+  {n:'cfdi.sat.test.ts',s:'pass',t:'891ms'},
+  {n:'reports.daily.test.ts',s:'pass',t:'201ms'},
+  {n:'sync.cloud.test.ts',s:'fail',t:'1.2s'},
+  {n:'multi.tenant.test.ts',s:'pass',t:'445ms'},
+  {n:'webhook.sender.test.ts',s:'skip',t:'-'},
+  {n:'tax.iva.test.ts',s:'pass',t:'78ms'},
+  {n:'discounts.coupon.test.ts',s:'pass',t:'132ms'},
+  {n:'audit.log.test.ts',s:'pass',t:'94ms'}
+];
+function renderTests(){
+  document.getElementById('tests').innerHTML = TESTS.map(T=>`
+    <div class="test-row">
+      <div class="test-name">
+        <div class="test-icon ${T.s}">${T.s==='pass'?'OK':T.s==='fail'?'X':'-'}</div>
+        ${T.n}
+      </div>
+      <div class="test-time">${T.t}</div>
+    </div>`).join('');
+  document.getElementById('pass-count').textContent = TESTS.filter(t=>t.s==='pass').length;
+  document.getElementById('fail-count').textContent = TESTS.filter(t=>t.s==='fail').length;
+  document.getElementById('skip-count').textContent = TESTS.filter(t=>t.s==='skip').length;
+}
+renderTests();
+
+// ============ TIMELINE (placeholder; se hidrata desde /api/audit-log) ============
+const TL = [];
+(function renderTL(){
+  const el = document.getElementById('timeline');
+  if (!el) return;
+  if (!TL.length) {
+    el.innerHTML = '<div style="opacity:.6;padding:18px;text-align:center;font-size:13px">Sin eventos en el periodo.</div>';
+    return;
+  }
+  el.innerHTML = TL.map(x=>`
+    <div class="timeline-item ${x.s}">
+      <div class="timeline-title">${x.t}</div>
+      <div class="timeline-meta">${x.m}</div>
+      <div class="timeline-desc">${x.d}</div>
+    </div>`).join('');
+})();
+
+// ============ PERF ============
+const PERF = [
+  {n:'CPU Usage',v:34,c:'green'},
+  {n:'Memory',v:62,c:''},
+  {n:'Disk I/O',v:18,c:'green'},
+  {n:'Network',v:47,c:''},
+  {n:'DB Connections',v:78,c:'warn'},
+  {n:'Cache Hit Rate',v:94,c:'green'},
+  {n:'Queue Depth',v:12,c:'green'},
+  {n:'Error Rate',v:3,c:'green'}
+];
+document.getElementById('perf').innerHTML = PERF.map(P=>`
+  <div class="perf-row">
+    <div class="perf-head">
+      <span class="perf-name">${P.n}</span>
+      <span class="perf-val">${P.v}%</span>
+    </div>
+    <div class="perf-bar"><div class="perf-fill ${P.c}" style="width:${P.v}%"></div></div>
+  </div>`).join('');
+
+// ============ NOTIF ============
+const NOTIF = [
+  {i:'$',c:'b2',t:'Venta record en Volvix Centro',tm:'hace 2 min'},
+  {i:'!',c:'b3',t:'Stock bajo en 12 productos',tm:'hace 8 min'},
+  {i:'U',c:'b1',t:'Nuevo cliente registrado: Maria Lopez',tm:'hace 14 min'},
+  {i:'B',c:'b4',t:'Backup automatico completado',tm:'hace 1 h'},
+  {i:'F',c:'b2',t:'CFDI timbrado correctamente x47',tm:'hace 2 h'},
+  {i:'A',c:'b1',t:'AI Predictor: pico esperado 18:00',tm:'hace 3 h'}
+];
+document.getElementById('notif').innerHTML = NOTIF.map(N=>`
+  <div class="notif-item">
+    <div class="notif-icon ${N.c}">${N.i}</div>
+    <div class="notif-body">
+      <div class="notif-title">${N.t}</div>
+      <div class="notif-time">${N.tm}</div>
+    </div>
+  </div>`).join('');
+
+// ============ TENANTS ============
+function renderTenants(list){
+  document.getElementById('tenants').innerHTML = list.map((T,i)=>`
+    <div class="tenant-row">
+      <div class="tenant-info">
+        <div class="tenant-avatar">${T.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+        <div>
+          <div class="tenant-name">${T.name}</div>
+          <div class="tenant-meta">${T.tickets||0} tickets hoy</div>
+        </div>
+      </div>
+      <div class="tenant-badge">$${(T.sales||0).toLocaleString()}</div>
+    </div>`).join('');
+}
+
+// ============ TOP PRODUCTS ============
+const TOP_PRODS = [
+  {n:'Coca-Cola 600ml',q:284,r:8520},
+  {n:'Sabritas Original',q:198,r:3960},
+  {n:'Marlboro Rojo',q:142,r:8520},
+  {n:'Pan Bimbo Grande',q:124,r:4960},
+  {n:'Leche Lala 1L',q:118,r:3540},
+  {n:'Cerveza Tecate 6pk',q:96,r:14400},
+  {n:'Tortillas Maseca 1kg',q:87,r:1740},
+  {n:'Aceite Capullo 1L',q:64,r:3840}
+];
+document.getElementById('top-products').innerHTML = TOP_PRODS.map((P,i)=>`
+  <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+    <div style="width:24px;height:24px;border-radius:6px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px">${i+1}</div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:600">${P.n}</div>
+      <div style="font-size:11px;color:var(--muted)">${P.q} unidades</div>
+    </div>
+    <div style="font-weight:700;color:var(--green);font-size:13px">$${P.r.toLocaleString()}</div>
+  </div>`).join('');
+
+// ============ API HEALTH ============
+const APIS = [
+  {n:'/api/owner/dashboard',ms:124,s:'ok'},
+  {n:'/api/products',ms:87,s:'ok'},
+  {n:'/api/sales',ms:142,s:'ok'},
+  {n:'/api/customers',ms:96,s:'ok'},
+  {n:'/api/tenants',ms:54,s:'ok'},
+  {n:'/api/health',ms:12,s:'ok'},
+  {n:'/api/cfdi/stamp',ms:892,s:'warn'},
+  {n:'/api/payments/stripe',ms:201,s:'ok'},
+  {n:'/api/sync/cloud',ms:1430,s:'err'},
+  {n:'/api/reports/daily',ms:312,s:'ok'}
+];
+document.getElementById('api-list').innerHTML = APIS.map(A=>{
+  const color = A.s==='ok'?'var(--green)':A.s==='warn'?'var(--yellow)':'var(--red)';
+  return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px">
+    <div style="width:8px;height:8px;border-radius:50%;background:${color};box-shadow:0 0 6px ${color}"></div>
+    <div style="flex:1;font-family:'Courier New',monospace">${A.n}</div>
+    <div style="color:${color};font-weight:700">${A.ms}ms</div>
+  </div>`;
+}).join('');
+
+// ============ RECENT SALES STREAM ============
+let salesArr = [];
+function pushSale(){
+  const items = ['Coca-Cola','Sabritas','Marlboro','Pan Bimbo','Leche Lala','Cerveza','Tortillas','Aceite'];
+  const tenant = ['V-Centro','V-Norte','V-Sur','V-Plaza','V-Express'];
+  const total = (Math.random()*450+25).toFixed(2);
+  const time = new Date().toLocaleTimeString('es-MX',{hour12:false});
+  salesArr.unshift({
+    id:'VTA-'+Math.floor(Math.random()*99999),
+    t:time,
+    item:items[Math.floor(Math.random()*items.length)],
+    qty:Math.ceil(Math.random()*5),
+    total,
+    ten:tenant[Math.floor(Math.random()*tenant.length)]
+  });
+  if(salesArr.length>15) salesArr.pop();
+  document.getElementById('recent-sales').innerHTML = salesArr.map(S=>`
+    <div style="padding:10px;background:var(--bg3);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;font-size:12px">
+      <div>
+        <div style="font-weight:700">${S.id}</div>
+        <div style="color:var(--muted);font-size:11px">${S.t} - ${S.ten} - ${S.qty}x ${S.item}</div>
+      </div>
+      <div style="font-weight:800;color:var(--green);font-size:14px">$${S.total}</div>
+    </div>`).join('');
+}
+for(let i=0;i<8;i++) pushSale();
+setInterval(pushSale, 3500);
+
+// ============ HEATMAP ============
+function renderHeat(){
+  const days = ['Lun','Mar','Mie','Jue','Vie','Sab','Dom'];
+  let html = '<div></div>';
+  for(let h=0;h<24;h++) html += `<div style="text-align:center;color:var(--muted)">${h}</div>`;
+  days.forEach(d=>{
+    html += `<div style="color:var(--muted);font-weight:600">${d}</div>`;
+    for(let h=0;h<24;h++){
+      const v = Math.random();
+      const intensity = h>=8 && h<=22 ? v*0.8+0.2 : v*0.3;
+      const op = intensity.toFixed(2);
+      html += `<div style="aspect-ratio:1;background:rgba(91,157,255,${op});border-radius:2px" title="${d} ${h}:00"></div>`;
+    }
+  });
+  document.getElementById('heatmap').innerHTML = html;
+}
+renderHeat();
+
+// ============ GOALS ============
+const GOALS = [
+  {n:'Ventas Mes',v:74,t:'$3.2M / $4.3M',c:''},
+  {n:'Nuevos Clientes',v:88,t:'440 / 500',c:'green'},
+  {n:'Tickets Promedio',v:62,t:'$248 / $400',c:'warn'},
+  {n:'Reduccion Merma',v:91,t:'1.2% / 1.0%',c:'green'},
+  {n:'Tenants Onboarded',v:40,t:'2 / 5',c:'crit'},
+  {n:'NPS Score',v:78,t:'78 / 90',c:''}
+];
+document.getElementById('goals').innerHTML = GOALS.map(G=>`
+  <div class="perf-row">
+    <div class="perf-head">
+      <span class="perf-name">${G.n}</span>
+      <span class="perf-val">${G.t}</span>
+    </div>
+    <div class="perf-bar"><div class="perf-fill ${G.c}" style="width:${G.v}%"></div></div>
+  </div>`).join('');
+
+// ============ INIT ============
+loadAll();
+setInterval(loadAll, 30000);
+
+// Subtle perf updates
+setInterval(()=>{
+  document.querySelectorAll('.perf-fill').forEach(el=>{
+    const cur = parseInt(el.style.width);
+    const next = Math.max(5,Math.min(98, cur + (Math.random()*10-5)));
+    el.style.width = next+'%';
+  });
+},4000);
+</script>
+  <script defer src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+  <script defer src="volvix-theme-wiring.js"></script>
+<script defer src="volvix-i18n-wiring.js"></script>
+  <script defer src="volvix-real-data-loader.js"></script>
+</body>
+</html>

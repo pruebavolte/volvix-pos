@@ -1,0 +1,104 @@
+{
+  "slug": "hornito",
+  "brand": "Hornito",
+  "tagline": "El sistema para taquerías de barbacoa donde cada kilo se rinde lo que debe",
+  "giro": "taquería de barbacoa",
+  "giroPlural": "taquerías de barbacoa",
+  "vibe": "warmLocal",
+  "palette": {
+    "bg": "#1F0F08",
+    "surface": "#2E1A10",
+    "paper": "#3D2316",
+    "ink": "#FFF1DC",
+    "ink2": "#E8CBA8",
+    "muted": "#A07A55",
+    "line": "#4F2E1E",
+    "accent": "#C44536",
+    "accent2": "#E68A50"
+  },
+  "fonts": {
+    "display": "Playfair Display",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para taquerías de barbacoa mexicanas · 2026",
+    "h1": "Cada <em>kilo</em>,<br>cada <em>maciza</em>,<br>cuadrada.",
+    "deck": "El POS hecho para que el borrego rinda lo que debe, los domingos no se te acabe la maciza a las 11, y el consomé llegue completo a cada cliente.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el conteo del horno",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?barbacoa,borrego,mexicano&q=85",
+    "heroAlt": "Barbacoa de borrego envuelta en maguey",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?barbacoa,tacos&q=80", "tag": "Tacos de barbacoa", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?consome,borrego&q=80", "tag": "Consomé caliente", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?maguey,pencas&q=80", "tag": "Pencas de maguey", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?horno,tierra&q=80", "tag": "Horno de tierra", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?carne,cocida&q=80", "tag": "Maciza tierna", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?salsa,borracha&q=80", "tag": "Salsa borracha", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?domingo,familia,mexicana&q=80", "tag": "Domingo de barbacoa", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tortilla,maiz&q=80", "tag": "Tortilla recién hecha", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?puesto,mercado&q=80", "tag": "Puesto del mercado", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?cocinero,barbacoa&q=80", "caption": "Barbacoyero deshebra la maciza"},
+      {"url": "https://source.unsplash.com/random/800x600/?bascula,carne&q=80", "caption": "Báscula pesa cada pedido"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,domingo&q=80", "caption": "Cliente lleva kilo para la familia"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Despacho · pedidos · en vivo",
+    "title": "Tu mostrador, <em>kilo por kilo</em>, sin perderse el orden",
+    "deck": "Cada cliente pide su corte: maciza, mixto, panza. El sistema pesa, cobra y avisa. Si se acaba la maciza, todos en cocina lo ven en pantalla.",
+    "secondary": "En las barbacoas de barrio, una maciza que se 'regala' al cuate es 250 g — $80-120 cada vez.",
+    "data": {
+      "orders": [
+        {"table": "DESP-1", "name": "Don Mauricio", "state": "urgent", "items": ["1 kg maciza", "1 lt consomé", "20 tortillas"], "waitMin": 7},
+        {"table": "DESP-2", "name": "Familia Pérez", "state": "prep", "items": ["1.5 kg mixto", "2 lt consomé", "30 tortillas"], "waitMin": 5},
+        {"table": "DESP-3", "name": "Lupita G.", "state": "queue", "items": ["500g maciza", "500ml consomé"], "waitMin": 3},
+        {"table": "MESA-2", "name": "Carlos H.", "state": "ready", "items": ["5 tacos surtidos", "1 consomé chico"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Rendimiento del borrego al horno", "d": "Un borrego de 18 kg da 8 kg de maciza, 4 kg de costilla, 6 kg de hueso para consomé. Si baja, el horno fue tarde o la carne mala."},
+    {"ico": "monitor", "h": "Pantalla de cortes disponibles", "d": "Maciza: 12 kg. Mixto: 8 kg. Panza: 4 kg. Cocina y caja ven lo mismo. Cuando llega a 1 kg, alerta para no prometer lo que no hay."},
+    {"ico": "calendar", "h": "Pre-pedidos para domingo", "d": "Los regulares apartan su kilo desde el viernes. Sistema les avisa cuando está listo. Cero clientes desilusionados a las 11 am."},
+    {"ico": "barcode", "h": "Báscula conectada al cobro", "d": "Pesas el kilo y el precio sale solo. Cero 'ay sí, cóbrele 280' a ojo. Cero diferencias entre lo pesado y lo cobrado."},
+    {"ico": "percent", "h": "Costo real por kilo vendido", "d": "El sistema sabe cuánto pagaste por borrego, leña, maguey. Te dice si estás vendiendo arriba o abajo del costo real."},
+    {"ico": "split", "h": "Cuenta dividida por cortes", "d": "El compadre pidió maciza, su esposa panza, los niños tortillas. Sistema separa por persona y cobra a cada quién su parte."}
+  ],
+  "stats": [
+    {"v": "47", "l": "Kg vendidos hoy"},
+    {"v": "2", "l": "Borregos al horno"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Antes mi cuñado decía que el borrego <span class=\"hl\">'no rindió' como antes</span>, pero no podía probarlo. Con Hornito veo el rendimiento por animal. Identifiqué al proveedor que me daba borregos chicos. Ahorré $18 mil al mes.",
+    "sig": "Don Mauricio T.",
+    "role": "Barbacoa Don Mauro, Texcoco, Estado de México"
+  },
+  "thefts": [
+    {
+      "title": "Maciza 'regalada' a la pareja del cocinero",
+      "rob": "Cocinero deja 400-500g de maciza apartada para su señora. 'Total, no se va a notar.' En el año son $25-40k que se van.",
+      "fix": "Cada kilo pesado al sacar del horno se <strong>compara con lo vendido</strong>. Si la diferencia pasa de 3%, alerta. Cocinero firma el inicio y el cierre."
+    },
+    {
+      "title": "Borrego más chico de lo facturado",
+      "rob": "Proveedor entrega borrego de 14 kg, factura 18 kg. Sin báscula formal, tú nunca te enteras. $1,500-2,500 por animal.",
+      "fix": "Cada entrada <strong>pesada con báscula conectada</strong>. Sistema marca diferencia con factura. Diferencias arriba de 500g requieren foto del animal."
+    },
+    {
+      "title": "Consomé 'aguado' para servir más",
+      "rob": "Cocinera echa litro y medio extra de agua al consomé para servir más vasos. Cliente regular lo nota y deja de venir. Pérdida silenciosa de clientela.",
+      "fix": "Receta del consomé <strong>con kilos de hueso y litros de agua fijos</strong>. Si los litros vendidos pasan el rendimiento normal, alerta de aguado."
+    }
+  ]
+}

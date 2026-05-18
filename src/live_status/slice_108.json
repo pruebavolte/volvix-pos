@@ -1,0 +1,38 @@
+{
+  "slice": 108,
+  "idx_range": [2160, 2180],
+  "feature": "R17_KIOSK",
+  "title": "Kiosk mode — auto-servicio para clientes",
+  "status": "completed",
+  "date": "2026-04-26",
+  "deliverables": {
+    "frontend": "volvix-kiosk.html",
+    "api_routes": [
+      "POST /api/kiosk/session",
+      "POST /api/kiosk/orders"
+    ],
+    "sql": "db/R17_KIOSK.sql",
+    "report": "R17_KIOSK.md"
+  },
+  "tables": ["kiosk_devices", "kiosk_orders"],
+  "auth": {
+    "model": "kiosk-jwt",
+    "ttl_seconds": 3600,
+    "scope": ["pos.read", "pos.order.create"]
+  },
+  "frontend_features": {
+    "fullscreen": true,
+    "card_size": "200x250",
+    "idle_timeout_s": 60,
+    "barcode_reader": true,
+    "languages": ["es", "en"],
+    "payment_methods": ["card", "cash"],
+    "cart_position": "right"
+  },
+  "rate_limits": {
+    "kiosk_session_per_ip_min": 30,
+    "kiosk_orders_per_kiosk_ip_min": 60
+  },
+  "rls": true,
+  "next_slice": 109
+}

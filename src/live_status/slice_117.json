@@ -1,0 +1,45 @@
+{
+  "slice": 117,
+  "idx_range": [2340, 2360],
+  "feature": "R17_REVIEWS",
+  "title": "Reseñas y calificaciones de clientes",
+  "status": "completed",
+  "ts": "2026-04-26T00:00:00Z",
+  "deliverables": {
+    "sql": "db/R17_REVIEWS.sql",
+    "api": "api/index.js",
+    "client": "volvix-reviews-wiring.js",
+    "report": "R17_REVIEWS.md"
+  },
+  "db": {
+    "tables": ["reviews", "review_responses"],
+    "rls": true,
+    "idempotent": true,
+    "indexes": [
+      "idx_reviews_tenant", "idx_reviews_product", "idx_reviews_customer",
+      "idx_reviews_sale", "idx_reviews_status", "idx_reviews_rating",
+      "idx_reviews_pub_product", "idx_review_responses_review", "idx_review_responses_user"
+    ]
+  },
+  "endpoints": [
+    "GET /api/reviews",
+    "GET /api/reviews/stats",
+    "POST /api/reviews",
+    "PATCH /api/reviews/:id",
+    "POST /api/reviews/:id/response",
+    "GET /api/reviews/:id/responses"
+  ],
+  "client_features": [
+    "stars_input_a11y",
+    "render_product_reviews_with_breakdown",
+    "auto_mount_data_attrs",
+    "post_purchase_email_trigger"
+  ],
+  "rules": {
+    "rating_range": "1-5",
+    "verified_purchase_required_on_post": true,
+    "moderation_states": ["pending", "published", "rejected"],
+    "admin_roles": ["admin", "owner", "superadmin", "manager"]
+  },
+  "notes": "Trigger email reusa /api/email/send con plantilla 'review_invite'; degrada silencioso si no existe."
+}

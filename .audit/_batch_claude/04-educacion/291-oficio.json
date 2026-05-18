@@ -1,0 +1,104 @@
+{
+  "slug": "oficio",
+  "brand": "Oficio",
+  "tagline": "El sistema para institutos de oficios que sí certifican electricistas, plomeros y soldadores reales",
+  "giro": "instituto de oficios",
+  "giroPlural": "institutos de oficios",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#0F1218",
+    "surface": "#181C24",
+    "paper": "#21262F",
+    "ink": "#F1F4F8",
+    "ink2": "#C8CFD9",
+    "muted": "#838C9B",
+    "line": "#2A2F39",
+    "accent": "#EE6C00",
+    "accent2": "#F2B43A"
+  },
+  "fonts": {
+    "display": "Russo One",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para institutos de oficios · 2026",
+    "h1": "Cada <em>oficio</em>,<br>cada <em>certificación</em>,<br>real.",
+    "deck": "El POS hecho para institutos de oficios donde se enseña albañilería, electricidad, plomería, herrería, carpintería con prácticas en talleres reales y certificación CONOCER.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver módulos hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?trades,training,workshop,tools&q=85",
+    "heroAlt": "Instituto de oficios con taller",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?electrician,training&q=80", "tag": "Electricidad", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?plumber,school&q=80", "tag": "Plomería", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?carpenter,workshop&q=80", "tag": "Carpintería", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?welder,training&q=80", "tag": "Soldadura", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bricklayer,construction&q=80", "tag": "Albañilería", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mechanic,auto,school&q=80", "tag": "Mecánica auto", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?trades,classroom&q=80", "tag": "Aula teórica", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?safety,equipment,worker&q=80", "tag": "Equipo de seguridad", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?conocer,certificate&q=80", "tag": "Cert. CONOCER", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?worker,id,workshop&q=80", "caption": "Alumno entra con casco"},
+      {"url": "https://source.unsplash.com/random/800x600/?instructor,tablet,trade&q=80", "caption": "Instructor registra avance"},
+      {"url": "https://source.unsplash.com/random/800x600/?certified,worker&q=80", "caption": "Trabajador certificado"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Talleres · hoy · en vivo",
+    "title": "Tus oficios, <em>módulo por módulo</em>",
+    "deck": "Cada módulo (electricidad residencial, plomería sanitaria, soldadura MIG) con sus horas requeridas para CONOCER. Sistema cuenta cada hora práctica. Cero certificados sin horas reales.",
+    "secondary": "En oficios, certificar sin horas reales es un trabajador que falla en obra. Oficio lleva control estricto.",
+    "data": {
+      "barberos": [{"name": "Mtro. Heriberto", "role": "Electricidad"}, {"name": "Mtro. Lorenzo", "role": "Plomería"}, {"name": "Mtro. Tomás", "role": "Soldadura"}],
+      "slots": ["07:00", "09:00", "14:00", "16:00", "18:00", "20:00"],
+      "taken": [0, 1, 2, 3, 4, 5],
+      "active": 142,
+      "total": 168,
+      "next": "20:00"
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Horas CONOCER por módulo", "d": "Electricidad residencial = 120h, plomería = 80h. Sistema cuenta cada sesión. Avisa cuando alumno completa para evaluación CONOCER."},
+    {"ico": "calendar", "h": "Horarios para trabajadores", "d": "Matutino, vespertino, sabatino y dominical. Alumno cambia de horario sin perder horas acumuladas."},
+    {"ico": "bookmark", "h": "Pago por módulo o financiamiento", "d": "Alumno paga módulo único, paquete o con financiamiento a meses. Tarjeta, OXXO o transferencia."},
+    {"ico": "barcode", "h": "Herramienta básica de práctica", "d": "Cada alumno con kit de herramienta. Firma al recibir. Si la pierde, costo a su cuenta. Cero pérdidas."},
+    {"ico": "camera", "h": "Evidencia fotográfica del trabajo", "d": "Maestro toma foto del trabajo terminado (cableado, soldadura, tubería). Queda en portafolio del alumno."},
+    {"ico": "edit", "h": "Certificación CONOCER con folio", "d": "Sistema arma expediente para evaluación CONOCER. Alumno presenta y recibe certificado oficial. Empleable de inmediato."}
+  ],
+  "stats": [
+    {"v": "324", "l": "Alumnos activos"},
+    {"v": "14", "l": "Oficios ofertados"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis alumnos llegaban al CONOCER <span class=\"hl\">sin las horas requeridas</span> y fallaban. Con Oficio cada hora queda registrada. Tasa de certificación pasó de 50% a 90%.",
+    "sig": "Mtro. Esteban R.",
+    "role": "Instituto Oficio, Mexicali, BC"
+  },
+  "thefts": [
+    {
+      "title": "Instructores que cobran horas no impartidas",
+      "rob": "Instructor de soldadura falta 6 horas del módulo. Cobra completo $4,800. Si pasa con 4 instructores al mes: $19,200 mensual perdidos.",
+      "fix": "Sistema requiere <strong>QR de inicio + foto del grupo + QR de cierre</strong>. Sin las 3 evidencias, no se paga la sesión."
+    },
+    {
+      "title": "Herramienta de práctica que 'se pierde'",
+      "rob": "Encargado de almacén 'pierde' multímetros y herramienta menor. En realidad se va a su domicilio. Son $8,000-15,000 al mes en pérdidas no reportadas.",
+      "fix": "Cada herramienta con <strong>folio + asignación a alumno + firma de devolución</strong>. Auditoría semanal de inventario."
+    },
+    {
+      "title": "Certificación CONOCER cobrada y no presentada",
+      "rob": "Cobras $3,500 de cuota CONOCER a 20 alumnos = $70,000. Coordinador inscribe 16 y se queda con $14,000. Los 4 alumnos llegan al evaluador sin estar registrados.",
+      "fix": "Inscripción <strong>directa a CONOCER con folio oficial + comprobante al alumno</strong>. Sistema valida lista 15 días antes."
+    }
+  ]
+}

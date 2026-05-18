@@ -1,0 +1,59 @@
+{
+  "slice": 118,
+  "idx_range": [2360, 2380],
+  "feature": "R17_GIFTCARDS",
+  "title": "Gift cards / vales prepagados",
+  "status": "completed",
+  "ts": "2026-04-26T00:00:00Z",
+  "deliverables": {
+    "sql": "db/R17_GIFTCARDS.sql",
+    "api": "api/index.js",
+    "report": "R17_GIFTCARDS.md"
+  },
+  "db": {
+    "tables": ["gift_cards", "gift_card_uses"],
+    "rls": true,
+    "idempotent": true,
+    "indexes": [
+      "gift_cards_tenant_idx", "gift_cards_status_idx",
+      "gift_cards_customer_idx", "gift_cards_expires_idx",
+      "gift_cards_code_idx",
+      "gift_card_uses_card_idx", "gift_card_uses_sale_idx",
+      "gift_card_uses_used_idx"
+    ],
+    "functions": ["public.gift_card_generate_code()"],
+    "code_format": "VLX-XXXX-XXXX-XXXX",
+    "alphabet": "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+  },
+  "endpoints": [
+    "POST /api/gift-cards",
+    "GET /api/gift-cards/:code",
+    "POST /api/gift-cards/:code/redeem",
+    "GET /api/gift-cards",
+    "PATCH /api/gift-cards/:id"
+  ],
+  "auth": {
+    "POST /api/gift-cards": "admin|owner|superadmin",
+    "GET /api/gift-cards/:code": "public",
+    "POST /api/gift-cards/:code/redeem": "authenticated",
+    "GET /api/gift-cards": "authenticated",
+    "PATCH /api/gift-cards/:id": "admin|owner|superadmin"
+  },
+  "rules": {
+    "statuses": ["active", "redeemed", "expired", "canceled"],
+    "auto_expire_on_lookup": true,
+    "auto_redeem_when_balance_zero": true,
+    "patch_actions": ["cancel", "extend"],
+    "qr_provider": "api.qrserver.com",
+    "checkout_helper": "globalThis.__gcValidateForCheckout(code, amount)"
+  },
+  "errors": [
+    "validation_failed", "not_found", "forbidden",
+    "conflict", "expired", "insufficient_balance",
+    "invalid_action", "create_failed"
+  ],
+  "validation": {
+    "node_check": "ok"
+  },
+  "notes": "Helper __gcValidateForCheckout permite al flujo POS validar payment_method='gift_card' antes de cerrar venta; el descuento real se hace via POST /api/gift-cards/:code/redeem con sale_id."
+}

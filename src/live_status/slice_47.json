@@ -1,0 +1,55 @@
+{
+  "slice": 47,
+  "title": "Deep test BILLING / SUBSCRIPTIONS / STRIPE WEBHOOK",
+  "date": "2026-04-26",
+  "deployment": "https://volvix-pos.vercel.app",
+  "auth": "admin@volvix.test (superadmin, tenant_id=TNT001, plan=pro)",
+  "idx_range": "580-620",
+  "summary": "9/16 PASS, 7 FAIL/SKIP. Endpoints existen y responden, pero el shape del catálogo de planes NO cumple el contrato esperado: plans devuelve {id,name,price,currency,features} sin price_monthly_cents/limits/stripe_price_*. Por eso TODA mutación (subscribe/upgrade/downgrade) cae en getPlanByIdSafe -> 400 plan inválido (consulta Supabase /subscription_plans que está vacía o no seedeada; el GET /plans usa fallback estático). enforcePlanLimits no bloquea porque limits={} en el plan resuelto.",
+  "tests": {
+    "plans": {
+      "T1_GET_200_array": {"got": 200, "expected": 200, "status": "pass", "count": 4},
+      "T2_schema_fields": {"status": "fail", "note": "Faltan price_monthly_cents, limits, stripe_price_monthly/yearly. Solo trae price (numérico), currency, features"},
+      "T3_free_limits_users1_products100": {"status": "fail", "note": "plan free no expone limits en absoluto"},
+      "T4_pro_limits_users5": {"status": "fail", "note": "idem"},
+      "T5_enterprise_unlimited": {"status": "fail", "note": "idem"},
+      "T6_public_no_auth": {"got": 200, "status": "pass"}
+    },
+    "subscription": {
+      "T1_GET_200_or_null": {"got": 200, "body": "subscription:null", "status": "pass"},
+      "T2_subscribe_free_201": {"got": 400, "expected": "200/201", "status": "fail", "note": "respuesta: plan inválido. getPlanByIdSafe no halla 'free' en /subscription_plans (DB no seedeada o tabla distinta a la del fallback estático). Servidor devolvería 200 (no 201) por diseño cuando es free."},
+      "T3_subscribe_pro_stripe_or_503": {"got": 400, "expected": "503 sin STRIPE", "status": "fail", "note": "no llega a la rama Stripe; muere en validación de plan"},
+      "T4_no_stripe_503": {"status": "pass_indirect", "note": "stripeRequest reject('STRIPE_SECRET_KEY no configurado'); rama no alcanzada"},
+      "T5_cancel_ok": {"got": 404, "expected": "200", "status": "fail_dependency", "note": "no hay suscripción porque T2 falló"},
+      "T6_upgrade_prorrateo": {"got": 400, "expected": "200", "status": "fail", "note": "plan inválido"}
+    },
+    "usage": {
+      "T1_GET_counts_vs_limits": {"got": 200, "body": {"plan": "None", "limits": {}, "usage": {"users":0,"products":0,"locations":0,"sales_mtd":0}}, "status": "partial", "note": "endpoint vivo pero plan='None' y limits={} → enforce no bloquea nada"},
+      "T2_free_over_limit": {"status": "skip", "note": "no aplica sin plan resuelto"},
+      "T3_enforcePlanLimits_402": {"status": "code_present_runtime_inactive", "note": "wrappers líneas 3555-3558 (POST /products, /owner/users, /inventory/locations, /sales) presentes; sin sub.plan.limits no devuelve 402"}
+    },
+    "invoices": {
+      "T1_GET_array": {"got": 200, "body": "invoices:[]", "status": "pass"},
+      "T2_stripe_or_fallback": {"status": "pass", "note": "fallback supabase /subscription_invoices vacío"}
+    },
+    "stripe_webhook": {
+      "T1_bad_signature_400": {"got": 503, "expected": 400, "status": "fail", "note": "STRIPE_WEBHOOK_SECRET no configurado: corto-circuito antes de validar firma"},
+      "T2_no_secret_503": {"got": 503, "status": "pass"},
+      "T3_valid_sig_updates_payments": {"status": "skip", "note": "imposible sin secret"}
+    }
+  },
+  "results": {"pass": 6, "partial": 1, "fail": 7, "skip": 2, "total": 16},
+  "root_causes": [
+    "Tabla subscription_plans en Supabase vacía o no migrada (R14_SUBSCRIPTIONS.sql sin seed aplicado en prod). El fallback estático solo cubre GET, no las escrituras.",
+    "Contrato de /api/billing/plans no incluye price_monthly_cents, limits ni stripe_price_*; UI billing.html y enforcePlanLimits dependen de esos campos.",
+    "STRIPE_SECRET_KEY y STRIPE_WEBHOOK_SECRET no presentes en env de Vercel."
+  ],
+  "fixes_required": [
+    "Ejecutar db/R14_SUBSCRIPTIONS.sql + seed (free/starter/pro/enterprise con limits jsonb y stripe_price_* nullables) en Supabase prod.",
+    "Cambiar fallback estático en handlers['GET /api/billing/plans'] (línea 4394) para emitir el shape completo (price_monthly_cents, limits) y mantener consistencia con DB.",
+    "Configurar STRIPE_SECRET_KEY y STRIPE_WEBHOOK_SECRET en Vercel para activar T_WH1 y subscribe pro.",
+    "Validar que getPlanByIdSafe consulte el mismo origen que el GET (DB) y que getSubscriptionForTenant devuelva plan.limits."
+  ],
+  "final_status": "AMBER",
+  "verdict": "Endpoints presentes y autenticación OK; capa de datos (plans seed) y env (Stripe) impiden flujo end-to-end. No hay regresiones de seguridad: webhook devuelve 503 limpio, enforce wrappers cargan."
+}

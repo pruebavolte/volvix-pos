@@ -1,0 +1,108 @@
+{
+  "slug": "plano",
+  "brand": "Plano",
+  "tagline": "El sistema para despachos de arquitectura que entregan proyectos firmados y a tiempo",
+  "giro": "arquitectura",
+  "giroPlural": "despachos de arquitectura",
+  "vibe": "editorial",
+  "palette": {
+    "bg": "#F8F7F4",
+    "surface": "#FFFFFF",
+    "paper": "#EEEDE8",
+    "ink": "#1A1A1A",
+    "ink2": "#454545",
+    "muted": "#828282",
+    "line": "#D5D3CD",
+    "accent": "#2C3E50",
+    "accent2": "#456480"
+  },
+  "fonts": {
+    "display": "Playfair Display",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para despachos de arquitectura · 2026",
+    "h1": "Cada <em>proyecto</em>,<br>cada <em>plano</em>,<br>firmado.",
+    "deck": "El POS hecho para despachos: proyecto ejecutivo, planos, permisos, supervisión de obra. Entregables claros, honorarios por etapa, DRO firmado donde aplique.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver proyectos activos",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?architecture,blueprint,office&q=80",
+    "heroAlt": "Arquitecto revisando planos en mesa de despacho",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?blueprint,architecture&q=80", "tag": "Planos ejecutivos", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?architect,sketch&q=80", "tag": "Bocetos iniciales", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?3d-render,building&q=80", "tag": "Render fotorealista", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?modern-building,design&q=80", "tag": "Diseño moderno", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?architect,table&q=80", "tag": "Mesa de trabajo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?permit,document&q=80", "tag": "Trámite permisos", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?office,architecture&q=80", "tag": "Despacho", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?meeting,plans&q=80", "tag": "Junta con cliente", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?finished-house,modern&q=80", "tag": "Obra terminada", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?stamp,sign&q=80", "caption": "DRO firmando con cédula"},
+      {"url": "https://source.unsplash.com/random/800x600/?contract,architect&q=80", "caption": "Contrato con CAM-SAM por etapas"},
+      {"url": "https://source.unsplash.com/random/800x600/?supervision,site&q=80", "caption": "Supervisión semanal en obra"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Agenda · proyectos · en vivo",
+    "title": "Tu despacho, <em>proyecto por proyecto</em>",
+    "deck": "Proyecto ejecutivo casa son 6 semanas. Permisos otras 8. Supervisión meses. El sistema te muestra carga real del equipo.",
+    "secondary": "Despacho que toma 5 proyectos cuando solo caben 3 = entregas tardías y mala reputación profesional.",
+    "data": {
+      "service": "Proyecto ejecutivo casa 200m² + permisos",
+      "duration": "14 semanas",
+      "slots": [
+        {"hora": "Sem 1-2", "mecanico": "Anteproyecto · Lic. Arq. Vega", "estado": "ocupado", "auto": "Casa Lomas"},
+        {"hora": "Sem 3-6", "mecanico": "Ejecutivo · Lic. Arq. Vega", "estado": "ocupado", "auto": "Casa Lomas"},
+        {"hora": "Sem 7-14", "mecanico": "Permisos · Trámites", "estado": "libre", "auto": "Próx: Casa Lomas"},
+        {"hora": "Sem 1-3", "mecanico": "Anteproyecto · Arq. Cruz", "estado": "ocupado", "auto": "Edificio comercial"},
+        {"hora": "Sem 4-8", "mecanico": "Ejecutivo · Arq. Cruz", "estado": "libre"},
+        {"hora": "Sem 1+", "mecanico": "Supervisión obra", "estado": "ocupado", "auto": "3 obras activas"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Cronograma por etapa", "d": "Anteproyecto, ejecutivo, permisos, supervisión. Cliente sabe semana exacta de cada entregable."},
+    {"ico": "edit", "h": "Honorarios por etapa", "d": "30% al firmar contrato, 40% al entregar ejecutivo, 30% al cierre. Cobro automático contra firma."},
+    {"ico": "camera", "h": "Render 3D obligatorio", "d": "Cliente ve el proyecto antes de invertir en obra. Aprueba o pide cambios. Cero arrepentimientos millonarios."},
+    {"ico": "barcode", "h": "Entregables versionados", "d": "Cada plano con su versión. Cliente sabe que tiene la versión final. Cero confusiones con planos viejos."},
+    {"ico": "monitor", "h": "Trámite de permisos", "d": "Cada permiso con su número de expediente. Status en sistema: ingresado, en revisión, observado, autorizado."},
+    {"ico": "bookmark", "h": "Bitácora supervisión", "d": "Cada visita a obra con foto, observaciones, firma de residente. Cliente recibe reporte semanal."}
+  ],
+  "stats": [
+    {"v": "9", "l": "Proyectos activos"},
+    {"v": "24", "l": "Permisos en trámite"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis arquitectos juniors <span class=\"hl\">copiaban planos de proyectos viejos sin actualizar</span> y cobraban como nuevos. Cliente recibía planos genéricos, demanda asegurada. Con Plano cada versión queda registrada con firma. Cero plagios internos.",
+    "sig": "Arq. Federico H.",
+    "role": "Despacho Federico H., Roma Norte, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Planos copiados de proyectos pasados",
+      "rob": "Arquitecto junior toma planos de otro cliente, cambia nombre, cobra como originales. Cliente paga $80k por un proyecto reciclado.",
+      "fix": "Cada plano con <strong>número de proyecto único en el archivo</strong>. Sistema detecta plantillas reutilizadas. Auditoría de originalidad."
+    },
+    {
+      "title": "Permisos cobrados que nunca se ingresaron",
+      "rob": "Asistente cobra al cliente $25k para 'gestionar permisos'. Nunca ingresa el trámite. 6 meses después, cliente descubre. Asistente se llevó el dinero.",
+      "fix": "Cada trámite con <strong>número de expediente registrado</strong>. Cliente verifica en portal oficial. Sin expediente, no se cobra el trámite."
+    },
+    {
+      "title": "Supervisiones de obra fantasma",
+      "rob": "Arquitecto cobra supervisión semanal $5k/visita. Reporta 4 visitas al mes, hace 2. Pasa 6-8 meses, son $40-60k de visitas no hechas.",
+      "fix": "Cada visita con <strong>foto georreferenciada en obra + firma del residente</strong>. Sin las 2 cosas, no se cobra la visita. Cliente ve evidencia."
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "slug": "escama",
+  "brand": "Escama",
+  "tagline": "El sistema para pescaderías donde la frescura se rastrea por lote y el pescado se cobra al gramo",
+  "giro": "pescadería",
+  "giroPlural": "pescaderías",
+  "vibe": "fresh",
+  "palette": {
+    "bg": "#E8F4F8",
+    "surface": "#FFFFFF",
+    "paper": "#D0E8F0",
+    "ink": "#0A2538",
+    "ink2": "#1F4258",
+    "muted": "#557080",
+    "line": "#A8C5DC",
+    "accent": "#01579B",
+    "accent2": "#FF7043"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para pescaderías mexicanas · 2026",
+    "h1": "Cada <em>pescado</em>,<br>cada <em>lote</em>,<br>fresco.",
+    "deck": "El POS hecho para que cada pescado tenga su fecha de llegada, el huachinango no se 'cambie' por mojarra al cobrar, y los pedidos para Cuaresma se entreguen frescos.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver frescura del día",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?fish,market,fresh&q=85",
+    "heroAlt": "Pescados frescos en hielo en mostrador",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?fish,market&q=80", "tag": "Mostrador con hielo", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?huachinango,fresh&q=80", "tag": "Huachinango", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?salmon,filet&q=80", "tag": "Salmón filete", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?camarones,fresh&q=80", "tag": "Camarón crudo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pulpo,fresh&q=80", "tag": "Pulpo entero", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mojarra,tilapia&q=80", "tag": "Mojarra", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?fishmonger,shop&q=80", "tag": "Pescadería tradicional", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bacalao,salted&q=80", "tag": "Bacalao salado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?seafood,fresh&q=80", "tag": "Mariscos del día", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?fishmonger,scaling&q=80", "caption": "Pescadero escama el pescado"},
+      {"url": "https://source.unsplash.com/random/800x600/?fish,ice&q=80", "caption": "Pescado en hielo fresco"},
+      {"url": "https://source.unsplash.com/random/800x600/?customer,fish&q=80", "caption": "Cliente elige Cuaresma"}
+    ]
+  },
+  "liveDemo": {
+    "type": "expiry",
+    "eyebrow": "Mostrador · frescura · en vivo",
+    "title": "Tu mostrador, <em>pescado por pescado</em>, fresco",
+    "deck": "Cada pescado con fecha de llegada. Huachinango llegó hoy 5am: VENDER HOY. Salmón llegó ayer: VENDER HOY. Sistema alerta lotes próximos a expirar.",
+    "secondary": "En las pescaderías, un pescado pasado es 1 cliente con intoxicación = cierre temporal del local.",
+    "data": {
+      "title": "Frescura — Pescadería La Escama",
+      "products": [
+        {"name": "Huachinango entero", "expiry": "2026-05-17 (hoy)", "stock": 18, "status": "muy fresco"},
+        {"name": "Salmón filete noruego", "expiry": "2026-05-18", "stock": 6, "status": "fresco"},
+        {"name": "Camarón U16 crudo", "expiry": "2026-05-18", "stock": 12, "status": "fresco"},
+        {"name": "Pulpo entero (vivo)", "expiry": "2026-05-19", "stock": 3, "status": "fresco"},
+        {"name": "Mojarra tilapia", "expiry": "2026-05-17 (hoy)", "stock": 24, "status": "vender hoy"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Frescura por lote rastreada", "d": "Cada lote con fecha y hora de llegada. Sistema alerta cuando pasa 24h, 36h. Cero pescado pasado al cliente."},
+    {"ico": "barcode", "h": "Báscula al gramo conectada", "d": "Pesas 1.4 kg huachinango, sistema cobra $X. Cero pesos al ojo. Cliente paga lo que recibe."},
+    {"ico": "archive", "h": "Inventario por especie", "d": "Huachinango: 18 kg. Salmón: 6 kg. Camarón U16: 12 kg. Sistema cuadra contra ventas."},
+    {"ico": "monitor", "h": "Pantalla con frescura visible", "d": "Cliente ve qué llegó hoy, qué llegó ayer. Decide qué llevar. Cero clientes engañados."},
+    {"ico": "percent", "h": "Margen por especie", "d": "Huachinango premium 42%. Mojarra básica 28%. Camarón U16 38%. Sistema te dice qué empujar."},
+    {"ico": "truck", "h": "Pedidos Cuaresma con anticipación", "d": "Cliente pide 5 kg bacalao para Cuaresma. Sistema agenda producción y entrega. Cero pedidos olvidados."}
+  ],
+  "stats": [
+    {"v": "84", "l": "Kg vendidos hoy"},
+    {"v": "18", "l": "Especies del día"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis clientes se quejaban porque <span class=\"hl\">el pescado 'olía un día más viejo'</span>. Mi pescadero se confundía. Con Escama cada lote tiene fecha visible. Cero quejas en 3 meses. La gente confía y compra premium.",
+    "sig": "Don Memo C.",
+    "role": "Pescadería La Escama, Mercado de Coyoacán, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Pescado 'viejo' vendido como fresco",
+      "rob": "Pescadero vende huachinango de hace 3 días como recién llegado. Cliente se intoxica. Pérdida del cliente + posible cierre del local.",
+      "fix": "Cada lote con <strong>fecha llegada escaneada al recibir y al vender</strong>. Sistema bloquea venta si pasa límite. Cero pescado pasado."
+    },
+    {
+      "title": "Huachinango cambiado por mojarra",
+      "rob": "Pescadero envuelve mojarra ($90/kg) y cobra huachinango ($220/kg). Cliente no nota envuelto. $130 por kg cambiado.",
+      "fix": "Cada pescado <strong>con código de especie al pesar</strong>. Sistema verifica que código coincida con precio. Cero cambios al envolver."
+    },
+    {
+      "title": "Camarón 'mermado' al congelar",
+      "rob": "Pescadero reporta 1 kg camarón 'congelado mal' y se lo lleva. En realidad está bien. $400-600 por kg premium.",
+      "fix": "Merma con <strong>foto antes de desechar y autorización del dueño</strong>. Si pasa de 3%, alerta. Auditoría semanal."
+    }
+  ]
+}

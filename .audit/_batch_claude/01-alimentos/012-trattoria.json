@@ -1,0 +1,104 @@
+{
+  "slug": "trattoria",
+  "brand": "Trattoria",
+  "tagline": "El sistema para cocinas italianas donde la pasta se rinde por porción y el parmigiano se cobra al gramo",
+  "giro": "cocina italiana",
+  "giroPlural": "cocinas italianas",
+  "vibe": "editorial",
+  "palette": {
+    "bg": "#FAF6EE",
+    "surface": "#FFFFFF",
+    "paper": "#F0E8D5",
+    "ink": "#1F2A1A",
+    "ink2": "#3A4530",
+    "muted": "#7A8060",
+    "line": "#D4CCB5",
+    "accent": "#8B2C1B",
+    "accent2": "#5E8B45"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Italianno",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para cocinas italianas en México · 2026",
+    "h1": "Cada <em>pasta</em>,<br>cada <em>al dente</em>,<br>servida.",
+    "deck": "El POS hecho para que la pasta no se pase de cocción, el parmigiano se cobre por la rallada, y el chianti no se 'derrame' del cellar sin venta.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?pasta,italian,trattoria&q=85",
+    "heroAlt": "Plato de pasta carbonara con queso rallado",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?carbonara,pasta&q=80", "tag": "Carbonara clásica", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?lasagna,bolognese&q=80", "tag": "Lasagna bolognese", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pizza,napolitana&q=80", "tag": "Pizza napoletana", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tiramisu,postre&q=80", "tag": "Tiramisú casero", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?risotto,milanese&q=80", "tag": "Risotto milanese", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?chianti,vino&q=80", "tag": "Chianti reserva", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?trattoria,interior&q=80", "tag": "Salón rústico", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bruschetta,pan&q=80", "tag": "Bruschetta clásica", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?cocina,italiana&q=80", "tag": "Cocina abierta", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?chef,pasta&q=80", "caption": "Chef voltea la pasta al sartén"},
+      {"url": "https://source.unsplash.com/random/800x600/?mozo,vino&q=80", "caption": "Mozo descorcha chianti"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,trattoria&q=80", "caption": "Comensal disfruta carbonara"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · pasta · en vivo",
+    "title": "Tu cocina, <em>pasta por pasta</em>, al dente exacto",
+    "deck": "Cada orden con tipo y término. KDS muestra: carbonara al dente, lasagna 12 min al horno. Chef ve los tiempos. Cero pastas recocidas.",
+    "secondary": "En las trattorias, una pasta recocida es 1 cliente que dice 'aquí no saben'.",
+    "data": {
+      "orders": [
+        {"table": "M07", "name": "Sra. Rinaldi", "state": "urgent", "items": ["Carbonara|al dente", "Bruschetta", "Chianti copa"], "waitMin": 12},
+        {"table": "M02", "name": "Familia Bianchi", "state": "prep", "items": ["Lasagna bolognese", "2 ravioli ricotta", "Tiramisú"], "waitMin": 9},
+        {"table": "M10", "name": "Pareja jóvenes", "state": "queue", "items": ["1 risotto milanese", "1 ensalada caprese"], "waitMin": 5},
+        {"table": "M04", "name": "Don Marco", "state": "ready", "items": ["Pizza margherita individual", "1 Peroni"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Tiempos de cocción por pasta", "d": "Carbonara: 8 min. Ravioli: 5 min. Lasagna: 25 min. Chef ve el cronómetro en KDS. Cero pastas que llegan tarde o pasadas."},
+    {"ico": "barcode", "h": "Báscula para parmigiano y trufa", "d": "Cada gramo de parmigiano o trufa se pesa al cobrar. Cero rendiduras 'generosas' que se quedan sin cobrar. $200-400 al día recuperados."},
+    {"ico": "archive", "h": "Inventario por pasta seca/fresca", "d": "Tagliatelle fresca: 4 kg. Spaghetti seco: 12 kg. Ravioli relleno: 80 piezas. Cuando baja, alerta antes del servicio."},
+    {"ico": "calendar", "h": "Cellar de vinos italianos por región", "d": "Chianti, barolo, prosecco. Sistema sugiere cuáles vender primero por edad. Cero vinos pasados que pierden valor."},
+    {"ico": "percent", "h": "Margen por pasta vendida", "d": "Carbonara costo $35, vendes a $180. Margen real visible. Sabes qué pastas dejan más y cuáles son loss-leaders."},
+    {"ico": "split", "h": "Cuenta dividida sin pelearse", "d": "Mesa de 6, dos parejas pidieron diferente. Sistema divide por pareja. Cero matemáticas a la hora del conto."}
+  ],
+  "stats": [
+    {"v": "73", "l": "Pastas servidas hoy"},
+    {"v": "8", "l": "Botellas chianti vendidas"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi chef <span class=\"hl\">rallaba parmigiano 'a ojo'</span> y le ponía hasta 80g a sus mesas favoritas. Con Trattoria cada rallada se pesa al cobrar. En un mes recuperé $9 mil en queso solo.",
+    "sig": "Don Marco R.",
+    "role": "Trattoria Roma, Polanco, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Parmigiano 'generoso' a clientes amigos",
+      "rob": "Chef ralla 80g de parmigiano cuando la receta dice 30g. A sus consentidos. 8-12 mesas por turno = $200-400 perdidos al día en queso premium.",
+      "fix": "Quesos premium se <strong>pesan obligatorio antes de salir</strong>. Sistema bloquea si excede 35g sin código del gerente. Cero rendiduras al cariño."
+    },
+    {
+      "title": "Trufa 'rendida' con aceite",
+      "rob": "Chef mezcla aceite de oliva con trufa para 'rendirla'. Cliente paga premium por trufa ($800/g) y recibe aceite ($40/g). Difícil de notar.",
+      "fix": "Trufa con <strong>báscula y registro de uso por platillo</strong>. Sistema cuadra trufa entrada vs trufa servida. Diferencias requieren explicación."
+    },
+    {
+      "title": "Pastas devueltas que sí se comieron",
+      "rob": "Mesero reporta 'cliente devolvió la pasta'. La cancela. Pero el cliente sí se la comió, pagó en efectivo y el mesero se quedó el dinero. $200-400 al turno.",
+      "fix": "Cancelaciones requieren <strong>foto del plato desechado</strong>. Si pasan de 2 por turno, alerta. Gerente debe autorizar cada una."
+    }
+  ]
+}

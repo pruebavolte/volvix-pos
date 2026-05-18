@@ -1,0 +1,104 @@
+{
+  "slug": "pizarra",
+  "brand": "Pizarra",
+  "tagline": "El sistema para primarias privadas que sí saben quién entró, quién pagó y quién faltó",
+  "giro": "primaria privada",
+  "giroPlural": "primarias privadas",
+  "vibe": "scholar",
+  "palette": {
+    "bg": "#F7F4ED",
+    "surface": "#FFFFFF",
+    "paper": "#EFE9DC",
+    "ink": "#1B2A3B",
+    "ink2": "#34465B",
+    "muted": "#6D7E94",
+    "line": "#D6CFC0",
+    "accent": "#0E4D8C",
+    "accent2": "#C8A14A"
+  },
+  "fonts": {
+    "display": "Playfair Display",
+    "body": "Source Sans Pro",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para primarias mexicanas · 2026",
+    "h1": "Cada <em>alumno</em>,<br>cada <em>calificación</em>,<br>en orden.",
+    "deck": "El POS hecho para primarias privadas donde la directora quiere control, el maestro quiere capturar rápido y el papá quiere ver boletas sin esperar la junta.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver asistencia hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?primary,school,classroom,kids&q=85",
+    "heroAlt": "Aula de primaria con pizarra",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?elementary,classroom&q=80", "tag": "Salón de primaria", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?school,uniform,kids&q=80", "tag": "Uniforme escolar", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?math,blackboard&q=80", "tag": "Matemáticas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?school,books,desk&q=80", "tag": "Libros de texto", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?school,recess,playground&q=80", "tag": "Recreo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?science,kids,experiment&q=80", "tag": "Laboratorio", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?school,assembly&q=80", "tag": "Honores", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?library,kids&q=80", "tag": "Biblioteca", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?school,teacher,students&q=80", "tag": "Clase con maestra", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?school,entrance,gate&q=80", "caption": "Entrada con credencial QR"},
+      {"url": "https://source.unsplash.com/random/800x600/?teacher,grading&q=80", "caption": "Maestro captura calificaciones"},
+      {"url": "https://source.unsplash.com/random/800x600/?parent,phone,school&q=80", "caption": "Papá consulta boleta digital"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Grupos · hoy · en vivo",
+    "title": "Tus salones, <em>materia por materia</em>",
+    "deck": "Cada salón con su titular y materias del día. Maestro toma asistencia en 1 click. Padre ve en vivo si su hijo entró. Cero llamadas '¿llegó mi hijo?'.",
+    "secondary": "En primarias privadas, una asistencia mal capturada es una colegiatura discutida y un papá molesto.",
+    "data": {
+      "barberos": [{"name": "Mtra. Verónica", "role": "1° A"}, {"name": "Mtro. Jorge", "role": "3° B"}, {"name": "Mtra. Hilda", "role": "5° A"}],
+      "slots": ["07:30", "08:30", "09:30", "10:30", "11:00", "12:00", "13:00", "14:00"],
+      "taken": [0, 1, 2, 3, 5, 6],
+      "active": 142,
+      "total": 180,
+      "next": "12:00"
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Captura de calificaciones por bloque", "d": "Maestro registra parciales desde tablet. Sistema calcula promedio automático. Cero errores de calculadora."},
+    {"ico": "calendar", "h": "Asistencia diaria por materia", "d": "Maestro pasa lista en 30 segundos. Si un alumno faltó, papá recibe SMS antes de las 10 AM."},
+    {"ico": "bookmark", "h": "Colegiaturas con cobro recurrente", "d": "Cobro día 1, recordatorio día 25 y día 28. Si falla la tarjeta, link de pago al papá. Morosidad baja al 4%."},
+    {"ico": "edit", "h": "Boletas digitales por bimestre", "d": "Sistema arma la boleta cuando maestros suben todas las materias. Director firma con un click. Papá la descarga en PDF."},
+    {"ico": "grid", "h": "Lista de autorizados para recoger", "d": "Papá registra a mamá, abuela, chofer con foto. Sin foto en sistema, no sale el alumno. Vigilante consulta en tablet."},
+    {"ico": "camera", "h": "Reporte de conducta y tareas", "d": "Maestro marca 'tarea entregada', 'mala conducta hoy'. Papá lo ve en su app sin esperar junta de padres."}
+  ],
+  "stats": [
+    {"v": "324", "l": "Alumnos activos"},
+    {"v": "18", "l": "Salones"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi secretaria tenía <span class=\"hl\">$15 mil de faltante</span> cada cierre. Nunca encontré dónde. Con Pizarra todo pasa por tarjeta y queda auditable. Cero pesos perdidos en 6 meses.",
+    "sig": "Lic. Roberto S.",
+    "role": "Colegio Pizarra, Querétaro, QRO"
+  },
+  "thefts": [
+    {
+      "title": "Colegiaturas en efectivo que no llegan",
+      "rob": "Papá paga $4,800 en efectivo a la secretaria. Ella registra 'pago parcial' y se queda $2,000. Tú lo descubres cuando el papá reclama y ya no se puede probar.",
+      "fix": "Pagos <strong>obligatorios por tarjeta o transferencia con folio</strong>. Efectivo solo con autorización del dueño y recibo digital firmado."
+    },
+    {
+      "title": "Material escolar cobrado y no entregado",
+      "rob": "Cobras $1,200 de paquete de cuadernos por alumno. Encargada de papelería 'olvida' entregar 8 paquetes y los revende fuera. Son $9,600 perdidos.",
+      "fix": "Cada paquete con <strong>QR + firma digital del papá al recibir</strong>. Stock de papelería se descuenta solo con firma."
+    },
+    {
+      "title": "Becas otorgadas sin documentación",
+      "rob": "Director otorga beca del 40% al hijo de un proveedor 'por compromiso'. Sin documentación. Son $1,800 menos al mes durante 10 meses: $18,000.",
+      "fix": "Becas con <strong>autorización del dueño + estudio socioeconómico digital</strong>. Reporte mensual de descuentos aplicados."
+    }
+  ]
+}

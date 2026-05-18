@@ -1,0 +1,1244 @@
+[
+ {
+  "path": "/api/1",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/admin",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/admin/backup/trigger",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/admin/jobs/low-stock-alert",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/ai",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/ai/chat",
+  "get": 404,
+  "post": 503,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/ai/copilot/suggest-product",
+  "get": 404,
+  "post": 503,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/ai/decide",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/ai/decisions",
+  "get": 200,
+  "post": 404,
+  "gbody": "[{\"id\":\"DEC-001\",\"request\":\"Quiero cobrar con propinas\",\"decision\":\"extend\",\"feature_id\":\"FEAT-0001-ext\",\"timestamp\":1777230457421},{\"id\":\"DEC-002\",\"request\":\"Necesito reporte por mesero\",\"decision\":\"create\",\"feature_id\":\"FEAT-0241\",\"timestamp\":17772"
+ },
+ {
+  "path": "/api/ai/forecast",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/ai/insights",
+  "get": 404,
+  "post": 503,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/ai/models",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"models\":[{\"id\":\"claude-opus-4\",\"provider\":\"anthropic\",\"enabled\":false},{\"id\":\"gpt-4o\",\"provider\":\"openai\",\"enabled\":false},{\"id\":\"gemini-pro\",\"provider\":\"google\",\"enabled\":false}]}"
+ },
+ {
+  "path": "/api/ai/suggest",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/ai/support",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/audit-log",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0}"
+ },
+ {
+  "path": "/api/audit_log",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/auth/login",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/auth/password-reset/confirm",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/auth/password-reset/request",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/auth/register",
+  "get": 404,
+  "post": 403,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/auth/session",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"authenticated\":true,\"user\":{\"id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"email\":\"admin@volvix.test\",\"role\":\"superadmin\",\"tenant_id\":\"TNT001\",\"iat\":1777234055,\"exp\":1777262855}}"
+ },
+ {
+  "path": "/api/billing/cancel",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/billing/downgrade",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/billing/invoices",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"invoices\":[]}"
+ },
+ {
+  "path": "/api/billing/plans",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"plans\":[{\"id\":\"free\",\"name\":\"Free\",\"price\":0,\"currency\":\"MXN\",\"features\":[\"Hasta 50 productos\",\"1 sucursal\"]},{\"id\":\"starter\",\"name\":\"Starter\",\"price\":299,\"currency\":\"MXN\",\"features\":[\"Productos ilimitados\",\"3 usuarios\"]},{\"id\":\"pro\",\"nam"
+ },
+ {
+  "path": "/api/billing/subscribe",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/billing/subscription",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"subscription\":null}"
+ },
+ {
+  "path": "/api/billing/upgrade",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/billing/usage",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"plan\":\"None\",\"limits\":{},\"usage\":{\"users\":0,\"products\":0,\"locations\":0,\"sales_mtd\":0}}"
+ },
+ {
+  "path": "/api/branch_inventory",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/branch_inventory/transfers",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/branches",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/branches/cashboxes",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/branches/permissions",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/cash/session",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"session\":null,\"open\":false}"
+ },
+ {
+  "path": "/api/cfdi/stamp",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/conekta",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/config",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"config\":{\"app_name\":\"Volvix POS\",\"version\":\"14.0.0\",\"currency\":\"MXN\",\"locale\":\"es-MX\",\"timezone\":\"America/Mexico_City\"}}"
+ },
+ {
+  "path": "/api/config/public",
+  "get": 503,
+  "post": 404,
+  "gbody": "{\"error\":\"SUPABASE_ANON_KEY no configurada\"}"
+ },
+ {
+  "path": "/api/crm",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/crm/stages",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/currencies",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"currencies\":[{\"code\":\"MXN\",\"name\":\"Peso mexicano\",\"symbol\":\"$\",\"rate\":1},{\"code\":\"USD\",\"name\":\"US Dollar\",\"symbol\":\"$\",\"rate\":0.058},{\"code\":\"EUR\",\"name\":\"Euro\",\"symbol\":\"€\",\"rate\":0.054},{\"code\":\"GBP\",\"name\":\"Libra\",\"symbol\":\"£\",\"rate\":0"
+ },
+ {
+  "path": "/api/customer/appointments",
+  "get": 404,
+  "post": 403,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/customer/invoice",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/customer/loyalty",
+  "get": 403,
+  "post": 404,
+  "gbody": "{\"error\":\"forbidden\"}"
+ },
+ {
+  "path": "/api/customer/me",
+  "get": 403,
+  "post": 404,
+  "gbody": "{\"error\":\"forbidden\"}"
+ },
+ {
+  "path": "/api/customer/orders",
+  "get": 403,
+  "post": 404,
+  "gbody": "{\"error\":\"forbidden\"}"
+ },
+ {
+  "path": "/api/customer/otp/request",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/customer/otp/verify",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/customer/password",
+  "get": 404,
+  "post": 403,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/customer/payment-methods",
+  "get": 403,
+  "post": 404,
+  "gbody": "{\"error\":\"forbidden\"}"
+ },
+ {
+  "path": "/api/customers",
+  "get": 200,
+  "post": 200,
+  "gbody": "[{\"id\":\"b236fab4-0f4c-4acb-801d-27fd3d90235e\",\"name\":\"Luis Fernandez\",\"email\":\"luis@example.com\",\"phone\":\"5554185926\",\"address\":null,\"credit_limit\":0,\"credit_balance\":500,\"points\":0,\"loyalty_points\":200,\"active\":true,\"user_id\":\"4934a3ac-d1a4-45cf-be8"
+ },
+ {
+  "path": "/api/customers/c_1",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/debug",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/docs",
+  "get": 200,
+  "post": 404,
+  "gbody": "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n  <title>Volvix POS — API Docs</title>\n  <link rel=\"stylesheet\" href=\"https://unpkg.com/swagger-ui-dist@5/swag"
+ },
+ {
+  "path": "/api/email/schedule",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/email/send",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/errors/log",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/errors/report",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/fb/capi",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/features",
+  "get": 200,
+  "post": 404,
+  "gbody": "[{\"id\":\"FEAT-0001\",\"name\":\"Cobrar ticket\",\"module\":\"pos\",\"status\":\"stable\",\"usage\":1843,\"price\":0},{\"id\":\"FEAT-0002\",\"name\":\"Agregar producto por código\",\"module\":\"pos\",\"status\":\"stable\",\"usage\":1843,\"price\":0},{\"id\":\"FEAT-0030\",\"name\":\"Corte de caja"
+ },
+ {
+  "path": "/api/features/activate",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/features/ai_assistant",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"feature\":\"ai_assistant\",\"enabled\":false}"
+ },
+ {
+  "path": "/api/features/request",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/feedback",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0}"
+ },
+ {
+  "path": "/api/forecasts",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/fx/rates",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"base\":\"MXN\",\"updated_at\":1777234070951,\"rates\":{\"USD\":0.058,\"EUR\":0.054,\"GBP\":0.046,\"CAD\":0.079,\"JPY\":8.7}}"
+ },
+ {
+  "path": "/api/fx/refresh",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/gdpr",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"endpoints\":[\"/api/gdpr/access\",\"/api/gdpr/erasure\",\"/api/gdpr/portability\"]}"
+ },
+ {
+  "path": "/api/gdpr/access",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/gdpr/erasure",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/gdpr/portability",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/health",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"time\":1777234071953,\"version\":\"7.2.0\",\"database\":\"Supabase\",\"supabase_connected\":true,\"users_table_accessible\":true}"
+ },
+ {
+  "path": "/api/health/deep",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"checks\":{\"supabase\":{\"ok\":true,\"latency_ms\":45},\"jwt_secret\":{\"ok\":true},\"allowed_origins\":{\"ok\":true,\"count\":1},\"supabase_url\":{\"ok\":true},\"supabase_service_key\":{\"ok\":true}},\"time\":1777234072161,\"uptime_sec\":43}"
+ },
+ {
+  "path": "/api/health/speedtest",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"latency_ms\":0,\"ts\":1777234072330}"
+ },
+ {
+  "path": "/api/integrations/api-keys",
+  "get": 200,
+  "post": 400,
+  "gbody": "{\"ok\":true,\"keys\":[]}"
+ },
+ {
+  "path": "/api/integrations/api-keys/whoami",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"tenant_id\":\"TNT001\",\"via\":\"jwt\",\"scopes\":null,\"email\":\"admin@volvix.test\"}"
+ },
+ {
+  "path": "/api/integrations/sat/ping",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"sat_available\":false,\"mode\":\"test\"}"
+ },
+ {
+  "path": "/api/integrations/whatsapp/ping",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"whatsapp_available\":false}"
+ },
+ {
+  "path": "/api/inventory",
+  "get": 200,
+  "post": 200,
+  "gbody": "[{\"id\":\"d50376d5-d1dd-4dfa-bfba-632e7096c7a2\",\"code\":\"7501011150207\",\"name\":\"Aceite 123 1L\",\"stock\":36,\"cost\":28,\"price\":42},{\"id\":\"bc6e5eb8-d1f8-4f2d-ac90-105a5a31f2a4\",\"code\":\"7501011150207\",\"name\":\"Aceite 123 1L\",\"stock\":36,\"cost\":28,\"price\":42},{"
+ },
+ {
+  "path": "/api/inventory/adjust",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/inventory/cash-open",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/inventory/counts",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0}"
+ },
+ {
+  "path": "/api/inventory/counts/start",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/inventory/locations",
+  "get": 200,
+  "post": 401,
+  "gbody": "{\"ok\":true,\"locations\":[]}"
+ },
+ {
+  "path": "/api/inventory/movements",
+  "get": 200,
+  "post": 400,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0}"
+ },
+ {
+  "path": "/api/inventory/stock",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"stock\":[]}"
+ },
+ {
+  "path": "/api/inventory/transfer",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0}"
+ },
+ {
+  "path": "/api/invoices",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/invoices/cfdi",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/invoices/cfdi/cancel",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/knowledge",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0}"
+ },
+ {
+  "path": "/api/knowledge/search",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"results\":[],\"q\":\"\"}"
+ },
+ {
+  "path": "/api/leads",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/login",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/logout",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/logs",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0}"
+ },
+ {
+  "path": "/api/loyalty",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"endpoints\":[\"/api/loyalty/tiers\",\"/api/loyalty/redeem\",\"/api/loyalty/adjust\",\"/api/loyalty/customers/:id\"]}"
+ },
+ {
+  "path": "/api/loyalty/adjust",
+  "get": 404,
+  "post": 401,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/loyalty/customers",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/loyalty/redeem",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/loyalty/tiers",
+  "get": 200,
+  "post": 400,
+  "gbody": "{\"ok\":true,\"tiers\":[{\"id\":\"bronze\",\"name\":\"Bronze\",\"min_points\":0,\"multiplier\":1},{\"id\":\"silver\",\"name\":\"Silver\",\"min_points\":500,\"multiplier\":1.25},{\"id\":\"gold\",\"name\":\"Gold\",\"min_points\":2000,\"multiplier\":1.5},{\"id\":\"platinum\",\"name\":\"Platinum\",\"mi"
+ },
+ {
+  "path": "/api/me",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"user\":{\"id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"email\":\"admin@volvix.test\",\"role\":\"superadmin\",\"tenant_id\":\"TNT001\",\"via\":\"jwt\"}}"
+ },
+ {
+  "path": "/api/mercadopago",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/metrics",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"uptime_ms\":39984,\"uptime_sec\":39,\"request_count\":72,\"error_count\":0,\"latency_ms\":{\"samples\":72,\"p50\":1,\"p95\":48,\"p99\":88},\"supabase_health\":{\"ok\":true,\"latency_ms\":45},\"env_status\":{\"SUPABASE_URL\":true,\"SUPABASE_SERVICE_KEY\":true,\"JWT_SEC"
+ },
+ {
+  "path": "/api/mfa/challenge",
+  "get": 404,
+  "post": 401,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/mfa/disable",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/mfa/setup",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/mfa/verify",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/onboarding/complete",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/onboarding/import-products",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/onboarding/sat-lookup",
+  "get": 400,
+  "post": 404,
+  "gbody": "{\"ok\":false,\"error\":\"rfc invalido\"}"
+ },
+ {
+  "path": "/api/onboarding/sat-regimenes",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"regimenes\":{\"601\":\"General de Ley Personas Morales\",\"603\":\"Personas Morales con Fines no Lucrativos\",\"612\":\"Personas Fisicas con Actividades Empresariales\",\"621\":\"Incorporacion Fiscal\",\"626\":\"Regimen Simplificado de Confianza (RESICO)\"}}"
+ },
+ {
+  "path": "/api/onboarding/start",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/onboarding/step",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/onboarding/template",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"vertical\":\"\",\"products\":[]}"
+ },
+ {
+  "path": "/api/openapi",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"openapi.yaml not found\"}"
+ },
+ {
+  "path": "/api/owner",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"dashboard\":\"/api/owner/dashboard\"}"
+ },
+ {
+  "path": "/api/owner/billing",
+  "get": 200,
+  "post": 404,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/owner/brands",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"brands\":[]}"
+ },
+ {
+  "path": "/api/owner/dashboard",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"metrics\":{\"total_users\":8,\"active_users\":6,\"total_tenants\":4,\"active_tenants\":3,\"total_sales\":3,\"total_revenue\":307.5,\"total_products\":131,\"low_stock_count\":12,\"total_customers\":16,\"active_customers\":16,\"mrr\":3097,\"arr\":37164},\"sales_by_d"
+ },
+ {
+  "path": "/api/owner/deploys",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"deploys\":[{\"id\":\"current\",\"commit\":\"HEAD\",\"deployed_at\":1777234081532,\"status\":\"live\"}]}"
+ },
+ {
+  "path": "/api/owner/domains",
+  "get": 200,
+  "post": 404,
+  "gbody": "[{\"id\":\"72f2ac39-38be-486d-9afc-e7733230cb84\",\"tenant_id\":\"436eab05-4c02-4d06-b0d4-37d2f7ae6e97\",\"hostname\":\"tiendaderopa.negocio.international\",\"is_primary\":true,\"verified\":false,\"created_at\":\"2026-04-08T20:05:20.734184+00:00\"},{\"id\":\"64ae8990-4b78-"
+ },
+ {
+  "path": "/api/owner/hierarchy",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"hierarchy\":{\"tenants\":[],\"users\":[]}}"
+ },
+ {
+  "path": "/api/owner/impersonate",
+  "get": 404,
+  "post": 403,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/owner/landings",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"landings\":[]}"
+ },
+ {
+  "path": "/api/owner/licenses",
+  "get": 200,
+  "post": 200,
+  "gbody": "[{\"id\":\"4b0655f0-ec54-4aac-8dd6-d2d2ee8c1bdc\",\"license_key\":\"LIC-1777233942046\",\"hardware_id\":null,\"machine_fingerprint\":\"pending\",\"machine_name\":null,\"platform\":null,\"restaurant_id\":null,\"restaurant_name\":null,\"activated_at\":\"2026-04-26T20:05:42.082"
+ },
+ {
+  "path": "/api/owner/logs",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"logs\":[],\"total\":0}"
+ },
+ {
+  "path": "/api/owner/low-stock",
+  "get": 200,
+  "post": 404,
+  "gbody": "[{\"id\":\"c986ecdc-309b-4ba7-80dc-f130b5ca096f\",\"code\":\"7501030423041\",\"name\":\"Bollos Wonder 8 pzs\",\"stock\":14,\"price\":32},{\"id\":\"2df92b64-f5a0-4f7d-a01f-f79d2dd8ad1e\",\"code\":\"7501030423041\",\"name\":\"Bollos Wonder 8 pzs\",\"stock\":14,\"price\":32},{\"id\":\"45"
+ },
+ {
+  "path": "/api/owner/modules",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"modules\":[{\"id\":\"pos\",\"name\":\"POS\",\"enabled\":true},{\"id\":\"inventory\",\"name\":\"Inventory\",\"enabled\":true},{\"id\":\"crm\",\"name\":\"CRM\",\"enabled\":true},{\"id\":\"reports\",\"name\":\"Reports\",\"enabled\":true}]}"
+ },
+ {
+  "path": "/api/owner/sales-report",
+  "get": 200,
+  "post": 404,
+  "gbody": "[{\"sale_date\":\"2026-04-18\",\"total_transactions\":1,\"total_revenue\":20.88,\"total_discounts\":0,\"average_ticket\":20.88},{\"sale_date\":\"2026-04-07\",\"total_transactions\":1,\"total_revenue\":13.92,\"total_discounts\":0,\"average_ticket\":13.92},{\"sale_date\":\"2026-"
+ },
+ {
+  "path": "/api/owner/settings",
+  "get": 200,
+  "post": 200,
+  "gbody": "{}"
+ },
+ {
+  "path": "/api/owner/stats",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"stats\":{\"tenants\":0,\"users\":0,\"sales_today\":0,\"revenue_today\":0}}"
+ },
+ {
+  "path": "/api/owner/sync-force",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/owner/sync-queue",
+  "get": 200,
+  "post": 404,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/owner/tenants",
+  "get": 200,
+  "post": 404,
+  "gbody": "[{\"id\":\"11111111-1111-1111-1111-111111111111\",\"name\":\"Abarrotes Don Chucho\",\"owner_user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"plan\":\"pro\",\"is_active\":true,\"expires_at\":null,\"created_at\":\"2026-04-26T01:42:29.718283+00:00\",\"updated_at\":\"2026-04-2"
+ },
+ {
+  "path": "/api/owner/users",
+  "get": 200,
+  "post": 401,
+  "gbody": "[{\"id\":\"cccccccc-cccc-cccc-cccc-ccccccccccc1\",\"email\":\"cajero@volvix.test\",\"role\":\"USER\",\"is_active\":true,\"plan\":\"pro\",\"full_name\":\"Cajero Volvix\",\"phone\":\"5550003\",\"company_id\":null,\"last_login_at\":\"2026-04-26T19:52:20.279+00:00\",\"created_at\":\"2026-"
+ },
+ {
+  "path": "/api/payments",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0}"
+ },
+ {
+  "path": "/api/payments/stripe",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/payments/stripe/intent",
+  "get": 404,
+  "post": 503,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/payments/stripe/webhook",
+  "get": 404,
+  "post": 503,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/ping",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"pong\":1777234085585}"
+ },
+ {
+  "path": "/api/pos/ping",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"pong\":1777234085754}"
+ },
+ {
+  "path": "/api/print",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"jobs\":[]}"
+ },
+ {
+  "path": "/api/printer/raw",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/printers",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"printers\":[]}"
+ },
+ {
+  "path": "/api/private",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/products",
+  "get": 200,
+  "post": 401,
+  "gbody": "[{\"id\":\"4fe7c274-8138-45cb-a38e-bf9faca81772\",\"code\":\"7501055303045\",\"name\":\"Coca Cola 600ml\",\"category\":\"refrescos\",\"price\":25,\"cost\":18,\"stock\":50,\"icon\":\"🥤\",\"tenant_id\":\"TNT001\"},{\"id\":\"4c4e17fe-9003-4c0f-b6b7-e6e706d9b3e1\",\"code\":\"7501020310028\""
+ },
+ {
+  "path": "/api/products/departments",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/products/p_1",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/products/today",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[{\"id\":\"0bf1d7af-98a0-4b07-9b33-0b11378747ff\",\"name\":\"Pan dulce\",\"price\":8.5,\"stock\":100},{\"id\":\"68c5fa58-12bd-42b0-bfdb-a9ff3825d7a9\",\"name\":\"Queso fresco 250g\",\"price\":120,\"stock\":20},{\"id\":\"f8a3938b-5914-410c-8a8f-f0db74299f82\","
+ },
+ {
+  "path": "/api/purchases",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/push/send",
+  "get": 404,
+  "post": 503,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/push/subscribe",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/push/unsubscribe",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/push/vapid-public-key",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"key\":null}"
+ },
+ {
+  "path": "/api/refresh",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/remote/connect",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/remote/start",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/reorder",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0}"
+ },
+ {
+  "path": "/api/reports",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"available\":[\"sales/daily\",\"sales/by-product\",\"sales/by-cashier\",\"inventory\",\"inventory/value\",\"profit\",\"abc-analysis\",\"customers/cohort\",\"daily\",\"tax\",\"cashflow\",\"products\",\"export\"]}"
+ },
+ {
+  "path": "/api/reports/abc-analysis",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0,\"generated_at\":1777234089744,\"classes\":{\"A\":[],\"B\":[],\"C\":[]}}"
+ },
+ {
+  "path": "/api/reports/cashflow",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0,\"generated_at\":1777234089916}"
+ },
+ {
+  "path": "/api/reports/customers/cohort",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0,\"generated_at\":1777234090088,\"cohorts\":[]}"
+ },
+ {
+  "path": "/api/reports/daily",
+  "get": 200,
+  "post": 404,
+  "gbody": "[{\"sale_date\":\"2026-04-18\",\"total_transactions\":1,\"total_revenue\":20.88,\"total_discounts\":0,\"average_ticket\":20.88},{\"sale_date\":\"2026-04-07\",\"total_transactions\":1,\"total_revenue\":13.92,\"total_discounts\":0,\"average_ticket\":13.92},{\"sale_date\":\"2026-"
+ },
+ {
+  "path": "/api/reports/export",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"url\":null,\"format\":\"csv\",\"message\":\"export pendiente\"}"
+ },
+ {
+  "path": "/api/reports/inventory",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"items\":[{\"id\":\"2df92b64-f5a0-4f7d-a01f-f79d2dd8ad1e\",\"name\":\"Bollos Wonder 8 pzs\",\"stock\":14,\"cost\":22,\"price\":32},{\"id\":\"c986ecdc-309b-4ba7-80dc-f130b5ca096f\",\"name\":\"Bollos Wonder 8 pzs\",\"stock\":14,\"cost\":22,\"price\":32},{\"id\":\"4515526e-305e-4b58-"
+ },
+ {
+  "path": "/api/reports/inventory/value",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0,\"generated_at\":1777234090913,\"total_value\":0,\"by_location\":[]}"
+ },
+ {
+  "path": "/api/reports/ping",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"pong\":1777234091082}"
+ },
+ {
+  "path": "/api/reports/products",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[{\"id\":\"c953ffed-8953-4827-93bd-a0d8f69f39f9\",\"name\":\"Coca Cola 600ml\",\"price\":18,\"stock\":84,\"cost\":13},{\"id\":\"7068fc2e-aa9f-4d7c-b47e-d268022c0ce3\",\"name\":\"Coca Cola 2L\",\"price\":38,\"stock\":42,\"cost\":28},{\"id\":\"44eccd90-09e4-446b-b"
+ },
+ {
+  "path": "/api/reports/profit",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0,\"generated_at\":1777234091567,\"revenue\":0,\"cost\":0,\"profit\":0,\"margin\":0}"
+ },
+ {
+  "path": "/api/reports/refresh",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/reports/sales",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"sales\":[{\"id\":\"e7abfa81-bce9-428f-9720-b8bad1e3c75d\",\"pos_user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"total\":195.5,\"payment_method\":\"efectivo\",\"items\":[{\"qty\":2,\"code\":\"7501055303045\",\"name\":\"Coca Cola 600ml\",\"price\":25,\"subtotal\":50},{\"qty\":3"
+ },
+ {
+  "path": "/api/reports/sales/by-cashier",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0,\"generated_at\":1777234092135,\"by_cashier\":[]}"
+ },
+ {
+  "path": "/api/reports/sales/by-product",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0,\"generated_at\":1777234092317,\"by_product\":[]}"
+ },
+ {
+  "path": "/api/reports/sales/daily",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0,\"generated_at\":1777234092486,\"daily\":[]}"
+ },
+ {
+  "path": "/api/reports/tax",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0,\"generated_at\":1777234092648}"
+ },
+ {
+  "path": "/api/roadmap",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[{\"id\":\"r1\",\"title\":\"Multi-tenant SaaS\",\"status\":\"done\"},{\"id\":\"r2\",\"title\":\"AI Copilot\",\"status\":\"in-progress\"},{\"id\":\"r3\",\"title\":\"Mobile native apps\",\"status\":\"planned\"}]}"
+ },
+ {
+  "path": "/api/roadmap/vote",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/sales",
+  "get": 200,
+  "post": 401,
+  "gbody": "[{\"id\":\"e7abfa81-bce9-428f-9720-b8bad1e3c75d\",\"pos_user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"total\":195.5,\"payment_method\":\"efectivo\",\"items\":[{\"qty\":2,\"code\":\"7501055303045\",\"name\":\"Coca Cola 600ml\",\"price\":25,\"subtotal\":50},{\"qty\":3,\"code\":\""
+ },
+ {
+  "path": "/api/sales/create",
+  "get": 404,
+  "post": 401,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/sales/latest",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"items\":[],\"total\":0}"
+ },
+ {
+  "path": "/api/sales/list",
+  "get": 200,
+  "post": 404,
+  "gbody": "[{\"id\":\"e7abfa81-bce9-428f-9720-b8bad1e3c75d\",\"pos_user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"total\":195.5,\"payment_method\":\"efectivo\",\"items\":[{\"qty\":2,\"code\":\"7501055303045\",\"name\":\"Coca Cola 600ml\",\"price\":25,\"subtotal\":50},{\"qty\":3,\"code\":\""
+ },
+ {
+  "path": "/api/sales/s_1",
+  "get": 404,
+  "post": 404,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/search",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"results\":[]}"
+ },
+ {
+  "path": "/api/staff/onshift",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"staff\":[],\"count\":0}"
+ },
+ {
+  "path": "/api/stats",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"stats\":{\"sales_today\":0,\"customers\":0,\"products\":0,\"revenue_today\":0}}"
+ },
+ {
+  "path": "/api/status",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"status\":\"live\",\"uptime_ms\":60820,\"ts\":1777234094677}"
+ },
+ {
+  "path": "/api/stock/ping",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"pong\":1777234094838}"
+ },
+ {
+  "path": "/api/subscribe",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/suppliers",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/support/tickets",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"tickets\":[],\"total\":0}"
+ },
+ {
+  "path": "/api/sync",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/sync/cloud",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"cloud\":\"connected\",\"last_sync\":1777234095798}"
+ },
+ {
+  "path": "/api/sync/status",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"online\":true,\"last_sync\":1777234095973,\"pending\":0,\"queue\":[]}"
+ },
+ {
+  "path": "/api/tax",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/tax/config",
+  "get": 200,
+  "post": 200,
+  "gbody": "[]"
+ },
+ {
+  "path": "/api/tax/mx/calculate",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/tax/mx/catalogs",
+  "get": 200,
+  "post": 404,
+  "gbody": "{\"ok\":true,\"catalogs\":[\"c_RegimenFiscal\",\"c_UsoCFDI\",\"c_FormaPago\",\"c_MetodoPago\",\"c_ClaveProdServ\",\"c_ClaveUnidad\",\"c_TasaOCuota\",\"c_Moneda\"]}"
+ },
+ {
+  "path": "/api/tax/mx/product-mapping",
+  "get": 404,
+  "post": 400,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/tenants",
+  "get": 200,
+  "post": 200,
+  "gbody": "[{\"id\":\"11111111-1111-1111-1111-111111111111\",\"name\":\"Abarrotes Don Chucho\",\"owner_user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"plan\":\"pro\",\"is_active\":true,\"expires_at\":null,\"created_at\":\"2026-04-26T01:42:29.718283+00:00\",\"updated_at\":\"2026-04-2"
+ },
+ {
+  "path": "/api/tickets",
+  "get": 200,
+  "post": 200,
+  "gbody": "[{\"id\":\"TKT-1047\",\"tenant\":\"TNT001\",\"title\":\"Impresora térmica no imprime\",\"status\":\"open\",\"aiHandling\":true,\"opened\":1777233977527},{\"id\":\"TKT-1046\",\"tenant\":\"TNT002\",\"title\":\"Error 301 al timbrar factura\",\"status\":\"solved\",\"solvedBy\":\"ai\",\"solvedIn"
+ },
+ {
+  "path": "/api/tickets/tk_1/print",
+  "get": 200,
+  "post": 200,
+  "gbody": "{\"ok\":true,\"ticket_id\":\"tk_1\",\"status\":\"ready\"}"
+ },
+ {
+  "path": "/api/twilio",
+  "get": 404,
+  "post": 200,
+  "gbody": "{\"error\":\"endpoint not found\"}"
+ },
+ {
+  "path": "/api/v1/products",
+  "get": 200,
+  "post": 404,
+  "gbody": "[{\"id\":\"4fe7c274-8138-45cb-a38e-bf9faca81772\",\"code\":\"7501055303045\",\"name\":\"Coca Cola 600ml\",\"category\":\"refrescos\",\"price\":25,\"cost\":18,\"stock\":50,\"icon\":\"🥤\",\"tenant_id\":\"TNT001\"},{\"id\":\"4c4e17fe-9003-4c0f-b6b7-e6e706d9b3e1\",\"code\":\"7501020310028\""
+ },
+ {
+  "path": "/api/ventas",
+  "get": 200,
+  "post": 401,
+  "gbody": "[{\"id\":\"e7abfa81-bce9-428f-9720-b8bad1e3c75d\",\"pos_user_id\":\"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1\",\"total\":195.5,\"payment_method\":\"efectivo\",\"items\":[{\"qty\":2,\"code\":\"7501055303045\",\"name\":\"Coca Cola 600ml\",\"price\":25,\"subtotal\":50},{\"qty\":3,\"code\":\""
+ },
+ {
+  "path": "/api/webhooks",
+  "get": 200,
+  "post": 400,
+  "gbody": "{\"ok\":true,\"webhooks\":[]}"
+ }
+]

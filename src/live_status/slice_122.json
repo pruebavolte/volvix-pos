@@ -1,0 +1,32 @@
+{
+  "slice": 122,
+  "range": "2440-2460",
+  "topic": "R17_SEGMENTS",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "files": {
+    "sql": "db/R17_SEGMENTS.sql",
+    "api": "api/index.js",
+    "report": "R17_SEGMENTS.md"
+  },
+  "schema": {
+    "tables": ["customer_segments", "segment_members", "segment_campaigns"],
+    "functions": ["compute_segment(segment_id)", "seed_predefined_segments(tenant_id)"],
+    "indexes": ["idx_segments_tenant", "idx_segments_active", "idx_segments_criteria_gin", "idx_segment_members_segment", "idx_segment_members_customer", "idx_segment_campaigns_segment", "idx_segment_campaigns_status"],
+    "criteria_dsl": ["min_total_spent", "min_visits", "max_visits", "days_since_last_visit", "max_days_since_first", "has_tier", "vertical", "min_avg_ticket"]
+  },
+  "endpoints": [
+    "POST /api/segments",
+    "GET /api/segments",
+    "POST /api/segments/:id/recompute",
+    "GET /api/segments/:id/members",
+    "POST /api/segments/:id/campaign"
+  ],
+  "predefined_segments": ["VIP", "Inactive", "New", "Big Spenders", "Frequent"],
+  "channels": ["email", "whatsapp", "sms"],
+  "auth": "requireAuth — tenant_id del JWT",
+  "auditing": "segment_campaigns con recipients/sent/failed/status",
+  "modified": true,
+  "deploy_required": true,
+  "notes": "Recompute delegado a Postgres (RPC compute_segment). Campaign reutiliza sendEmail/sendSMS. WhatsApp via Twilio prefijo whatsapp:."
+}

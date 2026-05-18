@@ -1,0 +1,106 @@
+{
+  "slug": "jogger",
+  "brand": "Jogger",
+  "tagline": "El POS hecho para tiendas de pants que sí cuidan la talla y el corte",
+  "giro": "tienda de pants",
+  "giroPlural": "tiendas de pants",
+  "vibe": "athletic",
+  "palette": {
+    "bg": "#F5F4F1",
+    "surface": "#FFFFFF",
+    "paper": "#ECEAE3",
+    "ink": "#0F1115",
+    "ink2": "#2A2D34",
+    "muted": "#6B6F77",
+    "line": "#D3D0C6",
+    "accent": "#7C5CFF",
+    "accent2": "#FF5C8A"
+  },
+  "fonts": {
+    "display": "Space Grotesk",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas de pants · 2026",
+    "h1": "Cada <em>pants</em>,<br>cada <em>corte</em>,<br>cada talla.",
+    "deck": "El punto de venta hecho para tiendas de pants y joggers: stock por talla y corte (slim, regular, baggy), paquetes 2x1 y combos con playera, fichas de cliente con su corte favorito.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?sweatpants,jogger,streetwear&q=85",
+    "heroAlt": "Pants y joggers colgados en exhibidor urbano",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?joggers,streetwear&q=80", "tag": "Joggers slim", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sweatpants&q=80", "tag": "Pants clásicos", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cargo,pants&q=80", "tag": "Cargo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?hoodie,streetwear&q=80", "tag": "Sudaderas combo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?track,pants&q=80", "tag": "Track pants", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?leggings,sport&q=80", "tag": "Leggings dama", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?streetwear,store&q=80", "tag": "Tienda urbana", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?fleece,pants&q=80", "tag": "Polar invierno", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?athleisure&q=80", "tag": "Athleisure", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?jogger,fitting&q=80", "caption": "Cliente prueba corte y talla"},
+      {"url": "https://source.unsplash.com/random/800x600/?streetwear,rack&q=80", "caption": "Stock por corte y temporada"},
+      {"url": "https://source.unsplash.com/random/800x600/?streetwear,combo&q=80", "caption": "Combo pants + sudadera con descuento"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>por corte y talla</em>",
+    "deck": "Cada modelo con su corte (slim, regular, baggy) y talla (S a XXL). Cliente pide y vendedor consulta al instante. Combos con sudadera o playera calculados automáticos.",
+    "secondary": "En tiendas de pants, el corte mal vendido regresa en 3 días. El corte bien vendido se lleva al amigo.",
+    "data": {
+      "product": "Jogger algodón premium",
+      "tallas": ["S", "M", "L", "XL", "XXL"],
+      "stock": [
+        {"color": "Negro slim", "vals": [4, 8, 10, 5, 2]},
+        {"color": "Gris regular", "vals": [3, 7, 9, 4, 2]},
+        {"color": "Beige baggy", "vals": [2, 5, 7, 3, 1]}
+      ],
+      "lowThreshold": 2
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por corte y talla", "d": "Cada modelo con su corte real. Sabes qué cortes mueven, cuáles se quedan en bodega."},
+    {"ico": "split", "h": "Combos pants + sudadera", "d": "Arma combo con descuento (pants + sudadera = $X). Se descuentan ambos del stock automáticamente. Vendedor vende outfit."},
+    {"ico": "gift", "h": "Ficha de cliente con corte favorito", "d": "Si compra slim, no le ofrezcas baggy. El sistema recuerda y vendedor acierta a la primera. Cero devoluciones por corte."},
+    {"ico": "percent", "h": "Comisiones por vendedor", "d": "Define el % por modelo o combo. Vendedor ve sus ventas en vivo. Cero peleas al cierre."},
+    {"ico": "camera", "h": "Devoluciones con foto", "d": "Sistema obliga foto del pants y etiqueta. Si fue usado, alerta. Bloquea cambios después de 7 días."},
+    {"ico": "truck", "h": "Traspasos entre sucursales", "d": "¿No tienes corte slim en XL? Búscalo en otra sucursal. Traspaso con un toque, cliente notificado por WhatsApp."}
+  ],
+  "stats": [
+    {"v": "298", "l": "Pants en stock"},
+    {"v": "36", "l": "Vendidos hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis clientes querían slim y mi vendedor les daba regular sin preguntar. <span class=\"hl\">Devoluciones diarias por corte equivocado</span>. Con Jogger el sistema le marca el corte favorito. Devoluciones bajaron 70%.",
+    "sig": "Iván R.",
+    "role": "Tienda de pants en Iztapalapa, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Combos cobrados como piezas individuales",
+      "rob": "Vendedor cobra combo (pants + sudadera) como 2 piezas sueltas al precio individual, marca solo 1 en sistema, se queda con la diferencia.",
+      "fix": "Combos <strong>se arman por sistema con SKU único</strong>. Cero captura manual. Auditoría: piezas salidas vs piezas facturadas."
+    },
+    {
+      "title": "Pants 'mermados' que salen para amigos",
+      "rob": "Empleado marca pants premium como 'manchados' o 'descosidos' y se los lleva. Joggers de marca son $1,200-2,500. Son 4-6 piezas al mes en tienda urbana.",
+      "fix": "Mermas requieren <strong>foto del defecto y autorización del gerente</strong>. Cada baja queda registrada con nombre y motivo."
+    },
+    {
+      "title": "Promo 2x1 con captura solo de 1",
+      "rob": "Promo 2x1: cliente lleva 2 pants, vendedor solo captura 1 en sistema y le cobra a mano el segundo en efectivo, embolsándose el monto.",
+      "fix": "Promo 2x1 <strong>genera SKU especial de paquete</strong>. Cero capturas a mano. Reporte diario de SKUs salidos vs tickets emitidos."
+    }
+  ]
+}

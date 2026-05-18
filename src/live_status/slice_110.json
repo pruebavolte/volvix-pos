@@ -1,0 +1,54 @@
+{
+  "slice": 110,
+  "range": "2200-2220",
+  "topic": "R17_SMS_TWILIO",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "files_changed": [
+    "api/index.js",
+    "db/R17_SMS.sql",
+    "R17_SMS.md"
+  ],
+  "endpoint": {
+    "method": "POST",
+    "path": "/api/sms/send",
+    "auth": "requireAuth",
+    "body": {"to": "string E.164", "message": "string"},
+    "responses": {
+      "200": "ok+twilio_sid",
+      "400": "to/message requeridos",
+      "503": "TWILIO env vars no configuradas",
+      "502": "twilio error",
+      "500": "sms_send_failed"
+    }
+  },
+  "twilio": {
+    "url": "https://api.twilio.com/2010-04-01/Accounts/${SID}/Messages.json",
+    "auth": "Basic base64(TWILIO_ACCOUNT_SID:TWILIO_AUTH_TOKEN)",
+    "from_env": "TWILIO_PHONE_NUMBER",
+    "content_type": "application/x-www-form-urlencoded"
+  },
+  "env_required": [
+    "TWILIO_ACCOUNT_SID",
+    "TWILIO_AUTH_TOKEN",
+    "TWILIO_PHONE_NUMBER"
+  ],
+  "db": {
+    "table": "sms_log",
+    "columns": ["id", "to_phone", "body", "status", "twilio_sid", "error", "sent_at", "tenant_id"],
+    "indexes": ["(sent_at desc,status)", "to_phone", "tenant_id", "twilio_sid"],
+    "rls": "admin-only select/insert; service-role bypass"
+  },
+  "helpers_added": {
+    "sendSMS": "POST a Twilio + log",
+    "logSMS":  "INSERT en sms_log via supabaseRequest"
+  },
+  "internal_triggers_ready": [
+    "OTP customer portal",
+    "password reset SMS",
+    "low-stock alert SMS"
+  ],
+  "deploy_required": true,
+  "sql_to_run": "db/R17_SMS.sql",
+  "report": "R17_SMS.md"
+}

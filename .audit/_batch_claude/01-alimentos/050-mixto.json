@@ -1,0 +1,104 @@
+{
+  "slug": "mixto",
+  "brand": "Mixto",
+  "tagline": "El sistema para coctelerías donde cada receta se respeta y los ml de licor se cobran completos",
+  "giro": "coctelería",
+  "giroPlural": "coctelerías",
+  "vibe": "vibrant",
+  "palette": {
+    "bg": "#1A0A1F",
+    "surface": "#2A1830",
+    "paper": "#3A2244",
+    "ink": "#F5E0F5",
+    "ink2": "#D8B5D8",
+    "muted": "#9070A0",
+    "line": "#4D2D55",
+    "accent": "#E91E63",
+    "accent2": "#FFC107"
+  },
+  "fonts": {
+    "display": "Quicksand",
+    "body": "Inter",
+    "script": "Pacifico",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para coctelerías mexicanas · 2026",
+    "h1": "Cada <em>cóctel</em>,<br>cada <em>receta</em>,<br>exacto.",
+    "deck": "El POS hecho para que cada cóctel respete su receta exacta, los licores premium no se 'rindan' con licores baratos, y los flairs no descuadren el inventario.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?cocktail,bar,colorful&q=85",
+    "heroAlt": "Cócteles coloridos en barra moderna",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?cocktail,fancy&q=80", "tag": "Cóctel signature", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?margarita,salt&q=80", "tag": "Margarita escarchada", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mojito,mint&q=80", "tag": "Mojito clásico", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pina,colada&q=80", "tag": "Piña colada", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?manhattan,whiskey&q=80", "tag": "Manhattan", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bartender,shaker&q=80", "tag": "Coctelero pro", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?cocktail,bar&q=80", "tag": "Barra moderna", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bloody,mary&q=80", "tag": "Bloody Mary", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?bottles,backbar&q=80", "tag": "Backbar premium", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?bartender,mixing&q=80", "caption": "Coctelero shake un Manhattan"},
+      {"url": "https://source.unsplash.com/random/800x600/?jigger,measure&q=80", "caption": "Jigger mide ml exacto"},
+      {"url": "https://source.unsplash.com/random/800x600/?customer,cocktail&q=80", "caption": "Cliente prueba signature"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Bar · cócteles · en vivo",
+    "title": "Tu bar, <em>cóctel por cóctel</em>, con receta exacta",
+    "deck": "Cada orden con receta visible. KDS muestra: 1 Negroni (30ml gin + 30ml campari + 30ml vermut), 1 Margarita (45ml tequila + 25ml triple sec + 25ml lima). Coctelero ve receta exacta.",
+    "secondary": "En las coctelerías, recetas 'al ojo' descuadran el inventario y la calidad — clientes notan y dejan de venir.",
+    "data": {
+      "orders": [
+        {"table": "M02", "name": "Sra. Patricia", "state": "urgent", "items": ["1 Negroni clásico|esfera hielo", "1 papas trufa"], "waitMin": 6},
+        {"table": "M05", "name": "Pareja jóvenes", "state": "prep", "items": ["1 mojito menta", "1 piña colada", "Botana coreana"], "waitMin": 5},
+        {"table": "M01", "name": "Cuates", "state": "queue", "items": ["3 margaritas|frozen", "1 boneless"], "waitMin": 4},
+        {"table": "M07", "name": "Don Federico", "state": "ready", "items": ["1 Old Fashioned premium", "Aceitunas"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Recetas digitales por cóctel", "d": "Cada cóctel con receta exacta. Margarita = 45ml tequila + 25ml triple sec + 25ml lima. Coctelero replica. Cero recetas al ojo."},
+    {"ico": "monitor", "h": "Jigger conectado al sistema", "d": "Cada ml registrado. Sistema cuadra licor usado vs cocteles vendidos. Diferencias alertan."},
+    {"ico": "archive", "h": "Inventario por marca premium", "d": "Tequila Don Julio: 4 botellas. Gin Hendricks: 3 botellas. Sistema rastrea cada apertura y nivel."},
+    {"ico": "percent", "h": "Margen por cóctel", "d": "Margarita básica $145 costo $42. Negroni premium $245 costo $95. Sistema te dice qué empujar."},
+    {"ico": "gift", "h": "Cocteles signature de la casa", "d": "8 cocteles signature exclusivos. Cada uno con foto, receta y tagline. Cliente ve menú QR y elige."},
+    {"ico": "split", "h": "Cuenta dividida al instante", "d": "Mesa de 6 con cocteles distintos. Sistema divide al cierre. Cero matemáticas mentales."}
+  ],
+  "stats": [
+    {"v": "188", "l": "Cócteles servidos hoy"},
+    {"v": "8", "l": "Signature de la casa"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi coctelero <span class=\"hl\">'rendía' los premium con vodka barata</span>. Cliente experto notó y nos puso 2 estrellas. Con Mixto cada cóctel descuenta del inventario correcto. Cero cambios al ojo. Recuperé reputación.",
+    "sig": "Sra. Andrea V.",
+    "role": "Coctelería Mixto, Roma Sur, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Licor premium 'cambiado' por básico",
+      "rob": "Coctelero usa vodka barata ($120) en Cosmopolitan que cobra como premium ($245). Cliente no nota bajo coloración. $125 por cóctel cambiado.",
+      "fix": "Cada cóctel <strong>asignado a botella específica al hacerlo</strong>. Sistema descuenta del inventario correcto. Auditoría semanal."
+    },
+    {
+      "title": "Recetas 'aguadas' para rendir",
+      "rob": "Coctelero echa 35ml en vez de 45ml para 'rendir' 2-3 cocteles más por botella. Cliente nota sabor débil, deja de venir. Pérdida silenciosa.",
+      "fix": "Jigger <strong>conectado al sistema con receta digital obligatoria</strong>. Sistema bloquea si ml no coincide. Cero recetas al ojo."
+    },
+    {
+      "title": "Cócteles 'cortesía' al cuate",
+      "rob": "Coctelero da margaritas gratis a su cuate del DJ. Sin marcar. 6-10 cocteles por turno = $900-1,500 al día en cocteles regalados.",
+      "fix": "Cortesías requieren <strong>código del gerente y motivo</strong>. Sistema lleva conteo. Si pasa de 2 por turno, alerta inmediata."
+    }
+  ]
+}

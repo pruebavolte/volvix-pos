@@ -1,0 +1,108 @@
+{
+  "slug": "trapeador",
+  "brand": "Trapeador",
+  "tagline": "El sistema para limpieza comercial que cobra cada turno y entrega oficinas impecables",
+  "giro": "limpieza comercial",
+  "giroPlural": "empresas de limpieza comercial",
+  "vibe": "minimalist",
+  "palette": {
+    "bg": "#FFFFFF",
+    "surface": "#F7F8FA",
+    "paper": "#EFF1F4",
+    "ink": "#0F1419",
+    "ink2": "#3A4147",
+    "muted": "#6A737D",
+    "line": "#DDE1E6",
+    "accent": "#0EA5C8",
+    "accent2": "#38C2DD"
+  },
+  "fonts": {
+    "display": "Manrope",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para limpieza comercial · 2026",
+    "h1": "Cada <em>turno</em>,<br>cada <em>oficina</em>,<br>lista al abrir.",
+    "deck": "El POS hecho para empresas de limpieza comercial: oficinas, plazas, clínicas, escuelas. Personal con checador, áreas con QR, supervisión digital. Cliente ve antes de abrir.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver turnos activos",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?office-cleaning,janitor,corporate&q=80",
+    "heroAlt": "Personal de limpieza con uniforme en pasillo de oficina",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?office-cleaning,floor&q=80", "tag": "Pisos comerciales", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bathroom,commercial&q=80", "tag": "Baños públicos", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?janitor,uniform&q=80", "tag": "Personal con uniforme", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cleaning,mall&q=80", "tag": "Plaza comercial", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?clinic,cleaning&q=80", "tag": "Clínica esterilizada", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?school,cleaning&q=80", "tag": "Escuela limpia", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?night-shift,cleaning&q=80", "tag": "Turno nocturno", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?industrial,cleaning&q=80", "tag": "Industrial", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?clean-office,morning&q=80", "tag": "Listo para abrir", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?qr-code,wall&q=80", "caption": "QR en cada área inspeccionable"},
+      {"url": "https://source.unsplash.com/random/800x600/?supervisor,tablet&q=80", "caption": "Supervisión digital en tiempo real"},
+      {"url": "https://source.unsplash.com/random/800x600/?clock,time&q=80", "caption": "Checador con foto y geo"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Turnos · limpieza · en vivo",
+    "title": "Tus turnos, <em>cliente por cliente</em>",
+    "deck": "Oficina nocturna 11pm-5am. Plaza comercial 6am-10am. Clínica 5am-7am + 7pm-9pm. El sistema te muestra turnos cubiertos y huecos.",
+    "secondary": "Limpieza comercial es entregar antes que abran. Tarde = pérdida de contrato.",
+    "data": {
+      "service": "Turno nocturno corporativo · 800m²",
+      "duration": "6 hrs",
+      "slots": [
+        {"hora": "23:00-05:00", "mecanico": "Equipo Lupita (3)", "estado": "ocupado", "auto": "Corporativo Polanco"},
+        {"hora": "23:00-05:00", "mecanico": "Equipo Carlos (4)", "estado": "ocupado", "auto": "Bufete jurídico"},
+        {"hora": "05:00-09:00", "mecanico": "Equipo Rocío (5)", "estado": "ocupado", "auto": "Plaza comercial"},
+        {"hora": "05:00-07:00", "mecanico": "Equipo Mary (3)", "estado": "ocupado", "auto": "Clínica matutina"},
+        {"hora": "19:00-21:00", "mecanico": "Equipo Mary (3)", "estado": "ocupado", "auto": "Clínica vespertina"},
+        {"hora": "Mañana", "mecanico": "Refuerzo emergencia", "estado": "libre"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Turnos cubiertos", "d": "Sistema te muestra qué turnos están cubiertos y cuáles faltan personal. Cero clientes sin servicio."},
+    {"ico": "monitor", "h": "Checador con foto + geo", "d": "Personal entra y sale con foto + ubicación. Cero 'estuve trabajando' sin haber ido."},
+    {"ico": "barcode", "h": "QR por área", "d": "Cada baño, pasillo, oficina con QR. Personal escanea al inspeccionar. Sistema sabe qué se limpió y cuándo."},
+    {"ico": "camera", "h": "Foto antes-después", "d": "Cada área fotografiada al terminar turno. Cliente abre y ve el resultado. Cero quejas matutinas."},
+    {"ico": "edit", "h": "Reporte por turno", "d": "Cliente recibe reporte diario: áreas atendidas, incidencias, suministros usados. Transparencia total."},
+    {"ico": "percent", "h": "Productividad por persona", "d": "Cada empleado con su rendimiento. Bono por reseñas 5 estrellas de cliente. Calidad sube sola."}
+  ],
+  "stats": [
+    {"v": "32", "l": "Contratos activos"},
+    {"v": "180", "l": "Empleados en turno"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi personal <span class=\"hl\">marcaba entrada y se iba a dormir 4 hrs</span>. Cliente llegaba a oficina sin limpiar. Perdí 3 contratos por eso. Con Trapeador hay QR por área que obliga inspección. Cero turnos vacíos.",
+    "sig": "Lic. Rosaura M.",
+    "role": "Limpiezas Comerciales Rosaura M., Tijuana, BC"
+  },
+  "thefts": [
+    {
+      "title": "Turnos cobrados sin trabajar",
+      "rob": "Empleado marca entrada, se duerme en bodega 4 hrs, marca salida. Cliente abre con oficina sin limpiar. Pierdes contrato $40-80k mensuales.",
+      "fix": "QR por área <strong>obliga inspección con foto al pasar</strong>. Sin QRs escaneados, no se reporta turno completo. Cliente ve evidencia."
+    },
+    {
+      "title": "Productos del cliente usados",
+      "rob": "Equipo no lleva químicos suficientes, usa los del cliente (papel, jabón). Cliente nota consumo anormal, sospecha mala calidad de servicio.",
+      "fix": "Cada químico con <strong>código escaneado al iniciar turno + inventario al cierre</strong>. Cero usar productos del cliente."
+    },
+    {
+      "title": "Suministros 'consumidos' que se llevan",
+      "rob": "Empleado reporta que se acabó papel higiénico, jabón, toallas. Cliente compra de más. En realidad se lo lleva a su casa.",
+      "fix": "Inventario de suministros con <strong>consumo registrado por área</strong>. Sistema detecta consumo anormal. Auditoría semanal."
+    }
+  ]
+}

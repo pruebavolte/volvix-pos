@@ -1,0 +1,104 @@
+{
+  "slug": "comedor",
+  "brand": "Comedor",
+  "tagline": "El sistema para fondas económicas donde el menú del día se vende completo, sin pleitos",
+  "giro": "fonda económica",
+  "giroPlural": "fondas económicas",
+  "vibe": "warmLocal",
+  "palette": {
+    "bg": "#FAF3E6",
+    "surface": "#FFFFFF",
+    "paper": "#F2E5CC",
+    "ink": "#2A1A0A",
+    "ink2": "#4A3018",
+    "muted": "#7E5A30",
+    "line": "#D8C49B",
+    "accent": "#C84B31",
+    "accent2": "#E68855"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para fondas mexicanas · 2026",
+    "h1": "Cada <em>menú del día</em>,<br>cada <em>cuenta</em>,<br>servida.",
+    "deck": "El POS hecho para que la fila avance, el guisado no se acabe a la 1:30, y las propinas del cierre lleguen completas a quien le tocan.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?fonda,mexicana,comida&q=85",
+    "heroAlt": "Comida corrida servida en plato hondo",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?comida,corrida,mexicana&q=80", "tag": "Comida corrida", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sopa,arroz&q=80", "tag": "Sopa de fideo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?guisado,mexicano&q=80", "tag": "Guisado del día", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?agua,fresca&q=80", "tag": "Aguas de sabor", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?frijoles,charros&q=80", "tag": "Frijoles charros", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?postre,gelatina&q=80", "tag": "Gelatina de postre", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?comedor,fonda&q=80", "tag": "Comedor lleno", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tortillas,canasta&q=80", "tag": "Canasta de tortillas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?fila,comida&q=80", "tag": "Fila al mediodía", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?mesera,fonda&q=80", "caption": "Mesera anota la orden corrida"},
+      {"url": "https://source.unsplash.com/random/800x600/?cocinera,guisado&q=80", "caption": "Cocinera sirve el guisado del día"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,mexicano,comer&q=80", "caption": "Cliente disfruta comida hecha"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · barra · en vivo",
+    "title": "Tu cocina, <em>plato por plato</em>, sin atorones",
+    "deck": "Las meseras pasan la orden. El KDS la organiza por tiempo. Sopa primero, plato fuerte después. Cliente termina en 18 min y libera la mesa.",
+    "secondary": "En las fondas, una mesa que se ocupa 45 min es 1 cliente menos por hora — $100-150 perdidos por mesa.",
+    "data": {
+      "orders": [
+        {"table": "M03", "name": "Don Toño (oficina)", "state": "urgent", "items": ["Menú: sopa fideo, bistec, agua jamaica"], "waitMin": 9},
+        {"table": "M07", "name": "Sra. González", "state": "prep", "items": ["Menú: arroz, mole, agua horchata"], "waitMin": 6},
+        {"table": "M01", "name": "Memo M.", "state": "queue", "items": ["Menú: sopa pasta, milanesa, refresco"], "waitMin": 3},
+        {"table": "M05", "name": "Pareja jóvenes", "state": "ready", "items": ["2 menús: pollo asado, gelatina"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Menú del día digital con stock", "d": "Cada guisado con sus porciones disponibles. Cuando llegas a 5, alerta. Cero 'ya no hay mole' a las 2 pm con clientes hambrientos."},
+    {"ico": "barcode", "h": "Comanda por mesa rápida", "d": "Mesera oprime: sopa fideo + pollo + agua jamaica. 3 segundos. KDS la recibe. Cero papelitos perdidos en el bolsillo del mandil."},
+    {"ico": "percent", "h": "Costo por plato corrido", "d": "Cada menú tiene su costo real (arroz, guiso, postre, tortilla). Sabes si tu $75 está dejando margen o estás trabajando para nada."},
+    {"ico": "split", "h": "Cuenta dividida sin matemáticas", "d": "Mesa de 4 amigos, uno pidió plato extra. Sistema divide al instante. Mesera no se queda calculando."},
+    {"ico": "calendar", "h": "Histórico por día de la semana", "d": "Lunes vendes 80 menús, viernes 140. El sistema sugiere cuánto guisar mañana. Cero sobras a la basura, cero faltantes a las 2."},
+    {"ico": "gift", "h": "Cliente frecuente con su plato favorito", "d": "Don Toño siempre pide menú con bistec. Sistema lo recuerda. Mesera le pregunta '¿lo de siempre?' y avanza la fila."}
+  ],
+  "stats": [
+    {"v": "147", "l": "Menús servidos hoy"},
+    {"v": "23", "l": "Mesas rotadas"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi fonda <span class=\"hl\">vendía menos los viernes porque se acababa el mole</span> a la 1:30. Con Comedor, el sistema me avisa antes y guisamos más. Subí 28 menús los viernes — $2,100 extra cada viernes.",
+    "sig": "Doña Lupita H.",
+    "role": "Fonda La Casona, Tlalpan, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Menús 'cortesía' al amigo del cocinero",
+      "rob": "Cocinero le sirve gratis al amigo de toda la vida 'porque le toca'. 2-3 menús diarios — $150-225 — son $4,500-6,750 al mes.",
+      "fix": "Cortesías necesitan <strong>código del dueño</strong>. Sistema lleva conteo. Si pasa de 1 al día, alerta inmediata al celular del dueño."
+    },
+    {
+      "title": "Aguas frescas 'rendidas con más agua'",
+      "rob": "Cocinera echa 2 litros extra de agua a la horchata para servir más vasos. Cliente regular nota el sabor y deja de venir. Pérdida silenciosa.",
+      "fix": "Receta de aguas <strong>con kilos de fruta y litros fijos</strong>. Si los vasos vendidos pasan el rendimiento normal, sistema marca alerta de aguado."
+    },
+    {
+      "title": "Ticket no entregado, dinero al bolsillo",
+      "rob": "Mesera cobra $75 en efectivo, no marca en caja, dice al cliente 'no necesita ticket, ¿verdad?'. Se queda con el menú. $300-600 diarios.",
+      "fix": "Sistema obliga <strong>ticket digital por WhatsApp</strong> con QR. Cliente recibe comprobante. Si pasa de 2 ventas sin ticket, alerta al gerente."
+    }
+  ]
+}

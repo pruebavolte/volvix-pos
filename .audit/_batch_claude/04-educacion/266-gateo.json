@@ -1,0 +1,104 @@
+{
+  "slug": "gateo",
+  "brand": "Gateo",
+  "tagline": "El sistema para kinders que sí saben quién entró, quién comió y quién se fue con quién",
+  "giro": "kindergarten",
+  "giroPlural": "kindergartens",
+  "vibe": "playful",
+  "palette": {
+    "bg": "#FFF9F0",
+    "surface": "#FFFFFF",
+    "paper": "#FFF1DD",
+    "ink": "#2C1B0F",
+    "ink2": "#4F3A28",
+    "muted": "#8E7864",
+    "line": "#F2DDB8",
+    "accent": "#FF7A59",
+    "accent2": "#FFB347"
+  },
+  "fonts": {
+    "display": "Fredoka",
+    "body": "Nunito",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para kinders mexicanos · 2026",
+    "h1": "Cada <em>peque</em>,<br>cada <em>asistencia</em>,<br>en tus manos.",
+    "deck": "El POS hecho para kindergartens donde el papá quiere saber qué comió su hijo, la maestra quiere saber quién faltó, y la dueña quiere cobrar cada colegiatura sin batallar.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver asistencia hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?kindergarten,children,blocks,playroom&q=85",
+    "heroAlt": "Niños jugando con bloques en kinder",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?kindergarten,classroom&q=80", "tag": "Salón de juegos", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?children,blocks&q=80", "tag": "Bloques de madera", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?kids,painting&q=80", "tag": "Hora de pintar", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?preschool,snack&q=80", "tag": "Lunch saludable", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?kindergarten,story&q=80", "tag": "Cuento del día", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?children,playground&q=80", "tag": "Recreo afuera", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?kids,music,class&q=80", "tag": "Clase de música", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?children,nap&q=80", "tag": "Siesta vespertina", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?kindergarten,teacher&q=80", "tag": "Miss con grupo", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?preschool,entrance&q=80", "caption": "Entrada con código QR del papá"},
+      {"url": "https://source.unsplash.com/random/800x600/?kids,lunch,table&q=80", "caption": "Lunch fotografiado y compartido"},
+      {"url": "https://source.unsplash.com/random/800x600/?kindergarten,parent&q=80", "caption": "Mamá recoge con autorización"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Asistencia · hoy · en vivo",
+    "title": "Tus grupos, <em>peque por peque</em>",
+    "deck": "Cada grupo con su miss y sus cupos. Papá registra al peque con QR al entrar. Si no llega, sistema avisa a mamá. Cero peques 'perdidos' en transporte.",
+    "secondary": "En kinders chicos, una asistencia mal tomada es una colegiatura mal cobrada y un papá enojado.",
+    "data": {
+      "barberos": [{"name": "Miss Karen", "role": "maternal"}, {"name": "Miss Lulú", "role": "kínder 1"}, {"name": "Miss Brenda", "role": "kínder 2"}],
+      "slots": ["07:30", "08:00", "08:30", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00"],
+      "taken": [0, 1, 2, 4, 6, 8],
+      "active": 24,
+      "total": 32,
+      "next": "13:00"
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Asistencia con QR del papá", "d": "Papá escanea su QR al dejar al peque. Sistema registra hora exacta. Si no llega a las 9, mamá recibe WhatsApp."},
+    {"ico": "camera", "h": "Foto del lunch del día", "d": "Miss toma foto del platillo. Papá ve qué comió su hijo y cuánto. Cero papás preguntando '¿comió bien?'."},
+    {"ico": "bookmark", "h": "Colegiatura por mes adelantado", "d": "Cobro automático el día 1. Recordatorio el 25, el 28 y el 1. Si rebota, link de pago al WhatsApp del papá."},
+    {"ico": "grid", "h": "Salida solo con autorizados", "d": "Lista de quién puede recoger al peque (mamá, abuela, tío). Sin foto registrada, no sale. Cero secuestros familiares."},
+    {"ico": "edit", "h": "Reporte diario a casa", "d": "Miss anota '6 horas', 'comió todo', 'pintó dibujo'. Papá lo recibe en WhatsApp al final del día."},
+    {"ico": "monitor", "h": "Inscripciones en línea", "d": "Papá nuevo se registra, sube acta de nacimiento, paga inscripción con tarjeta. Documento queda en BD del peque."}
+  ],
+  "stats": [
+    {"v": "84", "l": "Peques activos"},
+    {"v": "6", "l": "Grupos hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Antes <span class=\"hl\">cobraba colegiaturas en efectivo</span> y la secretaria 'se equivocaba' cada mes con $2-3 mil. Con Gateo todo pasa por tarjeta o transferencia. Cero faltantes en 6 meses.",
+    "sig": "Lic. Patricia M.",
+    "role": "Kínder Gateo, Coyoacán, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Colegiaturas en efectivo que no llegan",
+      "rob": "Secretaria recibe $3,500 de colegiatura, te dice 'la mamá no ha pagado' y se queda el efectivo. Si son 5 papás al mes, son $17,500 perdidos sin que sepas.",
+      "fix": "Cobros por <strong>tarjeta o transferencia directa al sistema</strong>. Efectivo requiere recibo digital firmado por papá. Cero 'no pagó'."
+    },
+    {
+      "title": "Inscripciones duplicadas mal facturadas",
+      "rob": "Papá nuevo paga $4,500 de inscripción. Secretaria lo cobra dos veces 'por error' y se queda con la segunda. Tú nunca te enteras porque no se cruzan.",
+      "fix": "Cada inscripción con <strong>folio único en BD</strong>. Cargos duplicados generan alerta automática. Papá recibe recibo digital al instante."
+    },
+    {
+      "title": "Becas otorgadas sin documentación",
+      "rob": "Maestra le da 'beca' del 50% al hijo de su compadre sin que sepas. Tú pierdes $2,250 al mes por 10 meses. Son $22,500 al año.",
+      "fix": "Toda beca con <strong>autorización digital de dueño + documento de respaldo</strong>. Sin firma, no se aplica descuento. Auditable mes a mes."
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "slug": "velada",
+  "brand": "Velada",
+  "tagline": "El sistema para cenadurías donde cada antojo de noche llega cobrado a tiempo",
+  "giro": "cenaduría",
+  "giroPlural": "cenadurías",
+  "vibe": "warmCozy",
+  "palette": {
+    "bg": "#1C1108",
+    "surface": "#2C1B10",
+    "paper": "#3A2516",
+    "ink": "#FAEED5",
+    "ink2": "#E0C99B",
+    "muted": "#A07A55",
+    "line": "#4E3520",
+    "accent": "#E8932E",
+    "accent2": "#F2B860"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para cenadurías mexicanas · 2026",
+    "h1": "Cada <em>pozole</em>,<br>cada <em>pambazo</em>,<br>servido.",
+    "deck": "El POS hecho para que los clientes de la noche cenen sin esperar, las tostadas no se acaben antes de las 10, y el efectivo del cierre cuadre sin discusión.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?pozole,mexicano,cenaduria&q=85",
+    "heroAlt": "Pozole rojo servido de noche",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?pozole,rojo&q=80", "tag": "Pozole rojo", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pambazo,mexicano&q=80", "tag": "Pambazo bañado", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tostada,tinga&q=80", "tag": "Tostada de tinga", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sope,frijol&q=80", "tag": "Sopes con frijol", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?enchiladas,verdes&q=80", "tag": "Enchiladas verdes", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?atole,champurrado&q=80", "tag": "Atole y champurrado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?cenaduria,interior&q=80", "tag": "Comedor familiar", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tamal,oaxaqueno&q=80", "tag": "Tamales calientes", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?antojitos,mexicanos&q=80", "tag": "Antojitos surtidos", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?mesera,mexicana&q=80", "caption": "Mesera toma orden con tablet"},
+      {"url": "https://source.unsplash.com/random/800x600/?cocinera,antojos&q=80", "caption": "Cocinera bañando pambazos"},
+      {"url": "https://source.unsplash.com/random/800x600/?familia,cenando&q=80", "caption": "Familia cenando tarde"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · noche · en vivo",
+    "title": "Tu cocina, <em>antojo por antojo</em>, sin retrasos",
+    "deck": "Cada mesera pasa la orden por tablet. El KDS la organiza por tiempo: pozole primero, pambazo después. Cero clientes esperando 40 minutos.",
+    "secondary": "En las cenadurías, una mesa que espera 30 min sin avisos se va y no vuelve.",
+    "data": {
+      "orders": [
+        {"table": "M04", "name": "Doña Carmen", "state": "urgent", "items": ["2 pozoles rojos", "4 tostadas tinga", "1 jamaica"], "waitMin": 11},
+        {"table": "M02", "name": "Familia Romero", "state": "prep", "items": ["3 pambazos", "1 sope frijol", "2 atoles"], "waitMin": 7},
+        {"table": "M07", "name": "Don Pedro", "state": "queue", "items": ["1 enchiladas verdes", "1 champurrado"], "waitMin": 4},
+        {"table": "M11", "name": "Lupita y novio", "state": "ready", "items": ["2 tamales", "2 atoles"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "KDS por estación de cocina", "d": "Antojos van a la plancha. Pozoles a la olla. Atoles a la barra. Cada estación ve sólo lo suyo. Cero tropezones en la hora pico."},
+    {"ico": "barcode", "h": "Mesa con QR para pedir solo", "d": "Cliente escanea, ve el menú con fotos, pide desde su mesa. Mesera no se brinca una orden. Cero 'ya pasaron 20 min'."},
+    {"ico": "archive", "h": "Inventario de masa y guisos", "d": "Tostadas listas: 80. Sope: 40 piezas. Pozole: 12 litros. Cuando algo baja, alerta antes de prometer lo que ya no hay."},
+    {"ico": "split", "h": "Cuenta familiar dividida", "d": "Una mesa de 8 personas. Cada quien pidió diferente. Sistema divide por persona o por familias. Pago rápido sin discusión."},
+    {"ico": "calendar", "h": "Horario por temporada", "d": "Octubre: pozole sube 40%. Diciembre: tamales explotan. Sistema sugiere qué preparar más cada semana del año."},
+    {"ico": "percent", "h": "Comisión por mesera al cierre", "d": "Cada mesera ve sus mesas, sus propinas, su cierre. El sistema calcula automático. Cero pelea por las cuentas malas."}
+  ],
+  "stats": [
+    {"v": "112", "l": "Cenas servidas hoy"},
+    {"v": "8", "l": "Litros de pozole"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Antes mis meseras <span class=\"hl\">se olvidaban de mesas</span> porque entraban muchas a la vez. Con Velada, el KDS las organiza solo. Las mesas tardan 12 min menos. Vendemos más en la misma noche.",
+    "sig": "Doña Patricia M.",
+    "role": "Cenaduría La Esquina, Coyoacán, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Pambazos 'devueltos' que sí se sirvieron",
+      "rob": "Mesera dice 'el cliente regresó el pambazo'. Lo cancela en sistema. Lo lleva a la cocina, pero no lo destruye — se lo come ella o se lo lleva. $300-500 al turno.",
+      "fix": "Cancelaciones requieren <strong>foto del platillo desechado</strong>. Encargado autoriza. Si pasa de 2 cancelaciones por turno, alerta automática."
+    },
+    {
+      "title": "Atole 'cortesía' fuera de control",
+      "rob": "Cocinera regala atoles 'porque sobraron' a sus amigas que llegan tarde. 8-12 atoles cada noche. $200-400 que no se cobran.",
+      "fix": "Atoles cortesía requieren <strong>código del gerente</strong>. Sistema lleva conteo. Si pasa de 3 por noche, alerta. Cero 'porque sobraron'."
+    },
+    {
+      "title": "Cierre con 'faltante' siempre redondeado",
+      "rob": "Cajera siempre dice 'faltaron $200 por cambio'. Es mentira: se queda con ellos. $200 diarios son $6 mil al mes que se pierden.",
+      "fix": "Cierre <strong>cuadra contra ventas digitales</strong>. Diferencias arriba de $50 requieren foto y firma. El faltante crónico se acaba en 2 semanas."
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "slug": "oxford",
+  "brand": "Oxford",
+  "tagline": "El POS hecho para zapaterías de caballero que sí cuidan el calzado",
+  "giro": "zapatos de caballero",
+  "giroPlural": "zapaterías de caballero",
+  "vibe": "editorial",
+  "palette": {
+    "bg": "#F1ECE3",
+    "surface": "#FFFFFF",
+    "paper": "#E6DECB",
+    "ink": "#161310",
+    "ink2": "#332C22",
+    "muted": "#766B55",
+    "line": "#CFC4AB",
+    "accent": "#5C3A1F",
+    "accent2": "#8C5E36"
+  },
+  "fonts": {
+    "display": "Bodoni Moda",
+    "body": "Inter",
+    "script": "Italianno",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para zapaterías de caballero · 2026",
+    "h1": "Cada <em>oxford</em>,<br>cada <em>número</em>,<br>cada caballero.",
+    "deck": "El punto de venta hecho para zapaterías de caballero: stock por número y horma, fichas de cliente con su talla, servicio de bola y reparación, paquetes con cinturón.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?oxford,shoes,men,leather&q=85",
+    "heroAlt": "Zapatos oxford de caballero en exhibidor",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?oxford,leather&q=80", "tag": "Oxford clásicos", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?derby,shoes&q=80", "tag": "Derby vestir", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?loafers,men&q=80", "tag": "Mocasines", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?brogue,shoes&q=80", "tag": "Brogues", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?monk,strap&q=80", "tag": "Monk strap", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?leather,boots,men&q=80", "tag": "Botas piel", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?menswear,shoes,store&q=80", "tag": "Zapatería caballero", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?shoe,polish&q=80", "tag": "Bola y abrillantado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?shoe,workshop&q=80", "tag": "Taller reparación", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?shoe,fitting,men&q=80", "caption": "Cliente prueba con horma exacta"},
+      {"url": "https://source.unsplash.com/random/800x600/?leather,shoes,care&q=80", "caption": "Mantenimiento y reparación con cita"},
+      {"url": "https://source.unsplash.com/random/800x600/?menswear,shoes,box&q=80", "caption": "Caja con etiqueta y certificado"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>número por horma</em>",
+    "deck": "Cada par con su número (24 a 31) y horma (estrecha, regular, ancha). Cliente entra, vendedor consulta su talla en ficha. Combos con cinturón del mismo color.",
+    "secondary": "En zapatos de caballero, mala horma = devolución segura. Oxford fuerza la horma correcta.",
+    "data": {
+      "product": "Oxford piel italiana",
+      "tallas": [24, 25, 26, 27, 28, 29, 30],
+      "stock": [
+        {"color": "Negro brillante", "vals": [2, 5, 8, 6, 3, 1, 0]},
+        {"color": "Café tostado", "vals": [3, 6, 9, 7, 4, 2, 1]},
+        {"color": "Coñac vintage", "vals": [1, 4, 7, 5, 2, 1, 0]}
+      ],
+      "lowThreshold": 2
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por número y horma", "d": "Cada par con número real y horma (E, EE, EEE). Sabes qué hormas mueven, cuáles se quedan."},
+    {"ico": "split", "h": "Combos zapato + cinturón", "d": "Arma combo (oxford + cinturón mismo color). Sistema descuenta ambos. Vendedor vende outfit, no par solo."},
+    {"ico": "edit", "h": "Ficha de cliente con horma", "d": "Su número, su horma, su material favorito. Cuando regresa, vendedor ya sabe qué le va. Cero adivinanzas."},
+    {"ico": "calendar", "h": "Servicio bola y reparación", "d": "Cliente trae oxford para bola o cambio de suela. Sistema agenda con taller. Notificación al recoger."},
+    {"ico": "percent", "h": "Comisiones por vendedor", "d": "Define el % por modelo o combo. Vendedor ve en vivo. Cero peleas al cierre."},
+    {"ico": "camera", "h": "Devoluciones con foto", "d": "Sistema obliga foto suela y caja. Si los usó, alerta. Bloquea cambios después de 10 días."}
+  ],
+  "stats": [
+    {"v": "286", "l": "Pares en stock"},
+    {"v": "22", "l": "Vendidos hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis clientes regresaban con devoluciones porque les vendían horma equivocada. <span class=\"hl\">3 de cada 10 pares volvían</span>. Con Oxford el sistema marca horma correcta. Devoluciones bajaron 80%.",
+    "sig": "Ramón G.",
+    "role": "Zapatería de caballero en León, GTO"
+  },
+  "thefts": [
+    {
+      "title": "Pares premium 'mermados' por empleados",
+      "rob": "Vendedor marca oxford de piel italiana como 'manchado' y se lo lleva. Pares premium son $2k-5k. En zapatería de caballero son 3-5 pares al mes.",
+      "fix": "Mermas <strong>requieren foto del defecto y autorización del gerente</strong>. Cada baja registrada con nombre, par y motivo."
+    },
+    {
+      "title": "Reparaciones cobradas por fuera",
+      "rob": "Cliente paga $800 por cambio de suela en efectivo. Empleado del taller la marca como $300 y se queda con la diferencia. Tú no ves los $500 de margen.",
+      "fix": "Servicios <strong>se cobran por sistema con SKU especial</strong>. Comisión solo sobre ventas registradas. Cero servicios fuera de caja."
+    },
+    {
+      "title": "Cambios de número con par usado en evento",
+      "rob": "Cliente compra oxford para boda, los usa el sábado, regresa el lunes diciendo 'me apretaron' y se lleva otros. Vendedor los acepta y revende como nuevos.",
+      "fix": "Devoluciones <strong>requieren foto suela y caja original</strong>. Si suela tiene marcas, alerta al gerente. Bloquea cambios sin caja intacta."
+    }
+  ]
+}

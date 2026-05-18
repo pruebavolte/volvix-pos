@@ -1,0 +1,106 @@
+{
+  "slug": "aura",
+  "brand": "Aura",
+  "tagline": "El POS hecho para tiendas esotéricas que sí cuidan cada energía",
+  "giro": "tienda esotérica",
+  "giroPlural": "tiendas esotéricas",
+  "vibe": "darkPremium",
+  "palette": {
+    "bg": "#0F0814",
+    "surface": "#1A1024",
+    "paper": "#22152E",
+    "ink": "#EEE5F8",
+    "ink2": "#C5B5DC",
+    "muted": "#7E6D96",
+    "line": "#2A1B38",
+    "accent": "#8E24AA",
+    "accent2": "#FFD600"
+  },
+  "fonts": {
+    "display": "Cinzel",
+    "body": "Manrope",
+    "script": "Italianno",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas esotéricas · 2026",
+    "h1": "Cada <em>cristal</em>,<br>cada <em>hierba</em>,<br>cada cliente.",
+    "deck": "El punto de venta hecho para tiendas esotéricas: stock por categoría (cristales, hierbas, velas, cartas), consultas con tarot agendadas, fichas de cliente, productos de temporada lunar.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?crystal,esoteric,tarot&q=85",
+    "heroAlt": "Tienda esotérica con cristales y velas",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?crystals,gemstones&q=80", "tag": "Cristales", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tarot,cards&q=80", "tag": "Cartas tarot", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?candles,ritual&q=80", "tag": "Velas rituales", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?incense&q=80", "tag": "Incienso", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?herbs,dried&q=80", "tag": "Hierbas secas", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pendulum&q=80", "tag": "Péndulos", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?esoteric,shop&q=80", "tag": "Tienda esotérica", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?amulet,protection&q=80", "tag": "Amuletos", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?tarot,reading&q=80", "tag": "Lectura tarot", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?tarot,session&q=80", "caption": "Consulta de tarot agendada"},
+      {"url": "https://source.unsplash.com/random/800x600/?crystal,energy&q=80", "caption": "Limpieza energética"},
+      {"url": "https://source.unsplash.com/random/800x600/?moon,ritual&q=80", "caption": "Rituales por fase lunar"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Agenda de consultas",
+    "title": "Cada consulta, <em>con su cliente y su anticipo</em>",
+    "deck": "Cliente agenda lectura de tarot, paga anticipo. Si no llega, anticipo se queda. Productos especiales según fase lunar. Comunidad y rituales.",
+    "secondary": "En esotéricas, cada consulta cancelada sin anticipo son 30 min perdidos y nadie pagó.",
+    "data": {
+      "service": "Consultas y rituales",
+      "slots": [
+        {"hora": "11:00", "cliente": "Sra. Velasco", "estado": "confirmada", "tipo": "Tarot 30 min"},
+        {"hora": "13:00", "cliente": "Sr. Martínez", "estado": "confirmada", "tipo": "Lectura cristales"},
+        {"hora": "15:00", "cliente": "Doña Carmen", "estado": "pendiente", "tipo": "Limpieza energética"},
+        {"hora": "17:00", "cliente": "Sra. Ortiz", "estado": "confirmada", "tipo": "Tarot extenso"},
+        {"hora": "19:00", "cliente": "Libre", "estado": "libre", "tipo": ""}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Consultas de tarot con anticipo", "d": "Cliente agenda lectura, paga $300 anticipo. Si no llega, anticipo se queda. Tarotista no pierde tiempo."},
+    {"ico": "archive", "h": "Stock por categoría esotérica", "d": "Cristales, hierbas, velas, cartas. Cada SKU con categoría. Sabes qué se mueve por temporada lunar."},
+    {"ico": "gift", "h": "Ficha de cliente con energía", "d": "Sus signos, sus cristales, sus rituales. Cuando hay fase lunar especial, sistema le avisa qué necesita."},
+    {"ico": "percent", "h": "Comisiones por tarotista", "d": "Cada tarotista con sus clientas y su comisión por consulta. Sistema reparte al cierre. Cero peleas."},
+    {"ico": "split", "h": "Combos rituales completos", "d": "Arma kit (cristal + vela + incienso) por ritual. Sistema descuenta los 3. Cliente lleva ritual completo."},
+    {"ico": "monitor", "h": "Catálogo con fases lunares", "d": "Productos sugeridos según fase lunar actual. Cliente entra, vendedora ofrece ritual del momento."}
+  ],
+  "stats": [
+    {"v": "684", "l": "Productos en stock"},
+    {"v": "8", "l": "Consultas hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi tarotista esperaba clientas que no llegaban. <span class=\"hl\">Perdía 4 horas al día sentada</span>. Con Aura cada consulta tiene anticipo. Si no llega, el anticipo cubre su tiempo. Cero plantones.",
+    "sig": "Doña Casilda M.",
+    "role": "Tienda esotérica en Coyoacán, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Cristales premium 'mermados' por empleados",
+      "rob": "Cristales como amatistas grandes o cuarzos rosa premium ($800-3,500). Empleado los marca como 'rotos' y se los lleva. Son 4-6 piezas al mes.",
+      "fix": "Mermas <strong>requieren foto del daño y autorización del dueño</strong>. Cada baja con SKU, peso y motivo verificable."
+    },
+    {
+      "title": "Consultas cobradas por fuera",
+      "rob": "Tarotista cobra $500 por lectura en efectivo. La registra como $300 y se queda con $200. Tienda no ve la comisión.",
+      "fix": "Consultas <strong>se cobran por sistema con SKU del servicio</strong>. Cero pagos en efectivo fuera de caja. Comisión solo sobre ventas registradas."
+    },
+    {
+      "title": "Ficha de clientes íntimas filtrada",
+      "rob": "Empleada toma fotos de fichas de clientas con problemas familiares y las usa para chantajear o vender chismes. Privacidad violada.",
+      "fix": "Fichas <strong>encriptadas por rol con bitácora de accesos</strong>. Cada consulta registrada con usuario y hora. Cero exportaciones."
+    }
+  ]
+}

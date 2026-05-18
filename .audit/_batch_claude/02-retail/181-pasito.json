@@ -1,0 +1,106 @@
+{
+  "slug": "pasito",
+  "brand": "Pasito",
+  "tagline": "El sistema para zapaterías infantiles que sí cuidan el pie de cada niño",
+  "giro": "zapatos infantiles",
+  "giroPlural": "zapaterías infantiles",
+  "vibe": "playful",
+  "palette": {
+    "bg": "#FFF6EC",
+    "surface": "#FFFFFF",
+    "paper": "#FFEAD3",
+    "ink": "#1A1C24",
+    "ink2": "#34344A",
+    "muted": "#7C7790",
+    "line": "#FFD89C",
+    "accent": "#FF8A3D",
+    "accent2": "#3DBFD4"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Nunito",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para zapaterías infantiles · 2026",
+    "h1": "Cada <em>pie</em>,<br>cada <em>número</em>,<br>cada chiquito.",
+    "deck": "El punto de venta hecho para zapaterías infantiles: stock por número (10 a 22), fichas con edad y crecimiento, alertas para regreso a clases, paquetes con calcetín.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?kids,shoes,children&q=85",
+    "heroAlt": "Zapatos infantiles coloridos en exhibidor",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?kids,shoes&q=80", "tag": "Tenis infantiles", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?school,shoes,kids&q=80", "tag": "Escolares", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?baby,shoes,first&q=80", "tag": "Primeros pasos", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?kids,sandals&q=80", "tag": "Sandalias", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?kids,boots&q=80", "tag": "Botas niño", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?girl,party,shoes&q=80", "tag": "Vestir niña", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?children,shoe,store&q=80", "tag": "Zapatería infantil", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?colorful,sneakers,kids&q=80", "tag": "Tenis coloridos", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?kids,foot,measure&q=80", "tag": "Medición pie", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?kid,shoe,fitting&q=80", "caption": "Medición de pie del niño en tienda"},
+      {"url": "https://source.unsplash.com/random/800x600/?mother,kid,shoes&q=80", "caption": "Mamá consulta talla en sistema"},
+      {"url": "https://source.unsplash.com/random/800x600/?school,uniform,shoes&q=80", "caption": "Combo escolar para regreso a clases"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>número por edad</em>",
+    "deck": "Cada par con sus números (10 a 22). Cuando se acerca regreso a clases, sistema avisa qué reponer. Mamá entra y vendedora consulta talla del niño en 5 segundos.",
+    "secondary": "Los niños crecen cada 3-4 meses. Pasito te ayuda a mover el inventario antes de que se quede chico.",
+    "data": {
+      "product": "Tenis escolar reforzado",
+      "tallas": [16, 17, 18, 19, 20, 21, 22],
+      "stock": [
+        {"color": "Negro escolar", "vals": [4, 8, 12, 10, 8, 4, 2]},
+        {"color": "Blanco deportivo", "vals": [3, 7, 10, 9, 7, 3, 1]},
+        {"color": "Coloridos", "vals": [5, 9, 14, 12, 9, 5, 2]}
+      ],
+      "lowThreshold": 3
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por número infantil", "d": "Cada par con sus números reales (10 a 22). Sabes qué números mueven, cuáles se quedan."},
+    {"ico": "calendar", "h": "Alertas regreso a clases", "d": "Faltan 30 días para clases, sistema te avisa qué números escolares reponer. Cero corridas de última hora."},
+    {"ico": "gift", "h": "Ficha del niño con su talla", "d": "Edad, talla actual, fecha de última compra. Cuando es momento de cambio, sistema avisa a mamá por WhatsApp."},
+    {"ico": "split", "h": "Combos zapato + calcetín", "d": "Arma combo (tenis + 3 calcetines). Sistema descuenta los 4. Vendedora vende paquete, no par solo."},
+    {"ico": "percent", "h": "Comisiones por vendedora", "d": "Define el % por par o combo. Vendedora ve en vivo. Cero peleas al cierre."},
+    {"ico": "camera", "h": "Devoluciones con foto", "d": "Sistema obliga foto suela y caja. Si los niños ya los usaron, alerta. Bloquea cambios después de 7 días."}
+  ],
+  "stats": [
+    {"v": "418", "l": "Pares en stock"},
+    {"v": "56", "l": "Vendidos hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Antes <span class=\"hl\">se me quedaban números chicos sin vender</span> porque los niños ya habían crecido. Con Pasito el sistema me marca qué números mueven y reordeno semanal. Cero stock muerto.",
+    "sig": "Lupita V.",
+    "role": "Zapatería infantil en Pachuca, HGO"
+  },
+  "thefts": [
+    {
+      "title": "Pares chiquitos 'mermados' por empleados",
+      "rob": "Empleada marca tenis o sandalias infantiles como 'descosidos' y se los lleva para sus hijos o sobrinos. Son 5-8 pares al mes en zapatería infantil.",
+      "fix": "Mermas <strong>requieren foto del defecto y autorización del gerente</strong>. Cada baja con nombre, par y motivo verificable."
+    },
+    {
+      "title": "Paquetes escolares cobrados por fuera",
+      "rob": "En agosto, mamás pagan paquete (zapatos + uniforme) en efectivo. Vendedora cobra $1,500, no factura, entrega de stock sin sistema. Tú nunca lo viste.",
+      "fix": "Paquetes <strong>se arman por sistema con SKU único</strong>. Comisión solo sobre ventas registradas. Cero paquetes salen sin ticket en temporada alta."
+    },
+    {
+      "title": "Cambios de talla 'porque ya no le quedó'",
+      "rob": "Mamá viene a cambiar zapatos del niño, vendedora le da talla mayor que cuesta más, cobra diferencia en efectivo y se la queda.",
+      "fix": "Cambios <strong>requieren ticket original escaneado</strong>. Diferencia se cobra por sistema. Reporte diario: cambios fuera de tolerancia."
+    }
+  ]
+}

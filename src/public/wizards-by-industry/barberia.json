@@ -1,0 +1,55 @@
+{
+  "id": "barberia-first-sale",
+  "title": "Tu primer servicio en barberia",
+  "industry": "barberia",
+  "duration_min": 4,
+  "modules_required": ["pos", "appointments", "services"],
+  "roles": ["owner", "cashier", "barber"],
+  "demo_catalog_ref": "R12a",
+  "steps": [
+    {
+      "id": "step1",
+      "title": "Tus servicios demo cargados",
+      "text": "Corte Caballero $150, Corte + Barba $220, Solo Barba $120, Corte Nino $100, Tinte $350, Decoloracion $450, Diseno Linea $50, Mascarilla Facial $180, Limpieza Facial $250, Manicura $200, Combo Premium (Corte+Barba+Mascarilla) $380. Productos: Cera Modeladora $185, Pomada Mate $165, Aceite Barba $145, Shampoo Pro $225.",
+      "image": "/tutorials/01-primera-venta.html",
+      "action": "next"
+    },
+    {
+      "id": "step2",
+      "title": "Asigna cita o walk-in",
+      "text": "Cliente sin cita. Click 'Walk-in', asigna al barbero disponible (Carlos). Inicia el cronometro de servicio.",
+      "highlight_selector": "#btn-walkin",
+      "action": "wait_for_walkin"
+    },
+    {
+      "id": "step3",
+      "title": "Agrega Corte + Barba",
+      "text": "Busca 'corte barba' y agrega. $220.",
+      "highlight_selector": "#search-input",
+      "action": "wait_for_search",
+      "expected_query": "corte barba"
+    },
+    {
+      "id": "step4",
+      "title": "Vende producto adicional",
+      "text": "Recomienda Cera Modeladora $185. Total servicio + producto: $405.",
+      "highlight_selector": ".search-result-item",
+      "action": "wait_for_multiple_items",
+      "expected_items": 2
+    },
+    {
+      "id": "step5",
+      "title": "Cobra y propina al barbero",
+      "text": "Cliente paga $500 efectivo. Cambio $95. Cliente deja $50 propina para Carlos. Click 'Asignar propina'.",
+      "highlight_selector": "#btn-cobrar",
+      "action": "wait_for_payment_with_tip"
+    },
+    {
+      "id": "step6",
+      "title": "Cliente fidelizado",
+      "text": "El sistema le envio cupon de 10% off para su proxima visita. Ve a Reportes/Servicios.",
+      "action": "complete",
+      "next_link": "/reportes"
+    }
+  ]
+}

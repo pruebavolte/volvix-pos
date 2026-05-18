@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Volvix POS — Audit Logs Viewer</title>
+<!-- B37 Security hardening: auth-gate + role guard (superadmin or owner) -->
+<script src="/auth-gate.js"></script>
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!t) return;
+    var p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    var role = (p.role || '').toLowerCase();
+    if (role !== 'superadmin' && role !== 'owner') {
+      window.location.replace('/volvix-launcher.html?denied=' + encodeURIComponent(location.pathname));
+    }
+  } catch(e){}
+})();
+</script>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --fg:#f1f5f9; --muted:#94a3b8; --accent:#3b82f6; --warn:#f59e0b; --crit:#ef4444; --ok:#22c55e; --br:#334155; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family:system-ui,-apple-system,sans-serif; font-size:13px; }
+  header { background:var(--card); padding:12px 20px; border-bottom:1px solid var(--br); display:flex; align-items:center; gap:16px; }
+  header h1 { margin:0; font-size:18px; }
+  header .auto { margin-left:auto; color:var(--muted); font-size:12px; }
+  .filters { background:var(--card); padding:14px 20px; border-bottom:1px solid var(--br); display:flex; flex-wrap:wrap; gap:10px; align-items:end; }
+  .filters label { display:flex; flex-direction:column; gap:4px; font-size:11px; color:var(--muted); text-transform:uppercase; }
+  .filters input, .filters select { background:#0b1220; color:var(--fg); border:1px solid var(--br); padding:6px 8px; border-radius:4px; font-size:13px; min-width:130px; }
+  .filters button { background:var(--accent); color:#fff; border:0; padding:8px 14px; border-radius:4px; cursor:pointer; font-size:13px; }
+  .filters button.secondary { background:#475569; }
+  .filters button:hover { opacity:.9; }
+  .stats { padding:8px 20px; color:var(--muted); font-size:12px; border-bottom:1px solid var(--br); display:flex; gap:18px; }
+  .scroll { overflow:auto; max-height:calc(100vh - 230px); }
+  table { width:100%; border-collapse:collapse; }
+  thead { position:sticky; top:0; background:var(--card); z-index:1; }
+  th { padding:8px; text-align:left; border-bottom:1px solid var(--br); font-size:11px; text-transform:uppercase; color:var(--muted); }
+  td { padding:8px; border-bottom:1px solid #1e293b; vertical-align:top; }
+  tr.row { cursor:pointer; }
+  tr.row:hover { background:#172033; }
+  .lvl-critical { color:var(--crit); font-weight:600; }
+  .lvl-warn { color:var(--warn); }
+  .lvl-info { color:var(--muted); }
+  .diff { background:#0b1220; border-left:3px solid var(--accent); padding:10px; margin:6px 0; }
+  .diff h4 { margin:0 0 6px; font-size:12px; color:var(--muted); }
+  .diff pre { margin:0; font-family:ui-monospace,monospace; font-size:11px; white-space:pre-wrap; word-break:break-all; color:#e2e8f0; }
+  .pager { padding:10px 20px; display:flex; gap:8px; align-items:center; background:var(--card); border-top:1px solid var(--br); }
+  .pager button { background:#334155; color:#fff; border:0; padding:6px 12px; border-radius:4px; cursor:pointer; }
+  .pager button:disabled { opacity:.4; cursor:not-allowed; }
+  .empty { padding:40px; text-align:center; color:var(--muted); }
+  .err { color:var(--crit); padding:14px 20px; background:#3b0a0a; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Audit Logs — Volvix POS</h1>
+  <span id="auto" class="auto">Auto-refresh: 60s</span>
+  <button id="toggleAuto" class="secondary" style="background:#475569;color:#fff;border:0;padding:6px 12px;border-radius:4px;cursor:pointer;">Pausar</button>
+</header>
+
+<div class="filters">
+  <label>Desde<input type="datetime-local" id="f-from"></label>
+  <label>Hasta<input type="datetime-local" id="f-to"></label>
+  <label>User ID<input type="text" id="f-user" placeholder="uuid"></label>
+  <label>Action<input type="text" id="f-action" placeholder="user.login"></label>
+  <label>Resource<input type="text" id="f-resource" placeholder="invoice"></label>
+  <label>Tenant<input type="text" id="f-tenant" placeholder="tenant_id"></label>
+  <label>Limit
+    <select id="f-limit">
+      <option>50</option><option selected>100</option><option>500</option><option>1000</option><option>5000</option>
+    </select>
+  </label>
+  <button id="btnApply">Aplicar</button>
+  <button id="btnClear" class="secondary">Limpiar</button>
+  <button id="btnExport" class="secondary">Export CSV</button>
+</div>
+
+<div class="stats">
+  <span>Total: <b id="stat-total">0</b></span>
+  <span>Página: <b id="stat-page">1</b></span>
+  <span>Última actualización: <b id="stat-ts">—</b></span>
+</div>
+
+<div id="errorBox"></div>
+
+<div class="scroll" id="scroll">
+  <table>
+    <thead>
+      <tr>
+        <th style="width:160px;">Timestamp</th>
+        <th style="width:90px;">Level</th>
+        <th style="width:160px;">User</th>
+        <th>Action</th>
+        <th>Resource</th>
+        <th style="width:120px;">IP</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div id="empty" class="empty" style="display:none;">No hay registros con los filtros actuales.</div>
+</div>
+
+<div class="pager">
+  <button id="btnPrev">« Anterior</button>
+  <span>Página <b id="pageNum">1</b></span>
+  <button id="btnNext">Siguiente »</button>
+</div>
+
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+<script src="volvix-auth-wiring.js"></script>
+<script src="volvix-audit-viewer-wiring.js"></script>
+</body>
+</html>

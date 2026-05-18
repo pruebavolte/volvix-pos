@@ -1,0 +1,104 @@
+{
+  "slug": "kappa",
+  "brand": "Kappa",
+  "tagline": "El sistema para cocinas japonesas donde el sashimi se cobra al gramo y el sake no se 'evapora'",
+  "giro": "cocina japonesa",
+  "giroPlural": "cocinas japonesas",
+  "vibe": "minimalist",
+  "palette": {
+    "bg": "#F7F4ED",
+    "surface": "#FFFFFF",
+    "paper": "#EDE6D6",
+    "ink": "#1A1A1A",
+    "ink2": "#3A3A3A",
+    "muted": "#7A7A7A",
+    "line": "#D5D0C2",
+    "accent": "#B83227",
+    "accent2": "#2C3E50"
+  },
+  "fonts": {
+    "display": "Noto Serif JP",
+    "body": "Inter",
+    "script": "Sawarabi Mincho",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para cocinas japonesas en México · 2026",
+    "h1": "Cada <em>nigiri</em>,<br>cada <em>sashimi</em>,<br>cuadrado.",
+    "deck": "El POS hecho para que el atún azul se cobre por su gramaje, el sake no se 'evapore' de la barra, y cada combo llegue completo a la mesa sin faltantes.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?sushi,japanese,nigiri&q=85",
+    "heroAlt": "Tabla de nigiri y sashimi fresco",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?sushi,plate&q=80", "tag": "Tabla de sushi", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sashimi,tuna&q=80", "tag": "Sashimi atún azul", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ramen,bowl&q=80", "tag": "Ramen tonkotsu", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tempura,fried&q=80", "tag": "Tempura crujiente", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?gyoza,dumplings&q=80", "tag": "Gyozas a la plancha", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sake,bottle&q=80", "tag": "Sake premium", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?sushi,bar&q=80", "tag": "Barra de sushi", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?wasabi,ginger&q=80", "tag": "Wasabi y jengibre", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?japanese,restaurant&q=80", "tag": "Salón zen", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?sushi,chef&q=80", "caption": "Sushiman corta atún al momento"},
+      {"url": "https://source.unsplash.com/random/800x600/?bascula,pescado&q=80", "caption": "Báscula pesa porción exacta"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,sushi&q=80", "caption": "Cliente disfruta combo premium"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Barra · cocina · en vivo",
+    "title": "Tu barra, <em>nigiri por nigiri</em>, sin perderse",
+    "deck": "Cada orden con pieza y proteína. KDS muestra: 6 nigiri atún azul, 2 hosomaki. Sushiman ve sin equivocarse. Cero combos a medias.",
+    "secondary": "En los sushi bars, una pieza de atún azul 'olvidada' son $80-150 cada vez.",
+    "data": {
+      "orders": [
+        {"table": "M03", "name": "Sra. Tanaka", "state": "urgent", "items": ["Combo premium 12 pz", "Sashimi atún 6 pz", "Sake junmai"], "waitMin": 14},
+        {"table": "M06", "name": "Familia López", "state": "prep", "items": ["2 ramen tonkotsu", "1 tempura mixta", "1 gyoza 6 pz"], "waitMin": 11},
+        {"table": "M01", "name": "Pareja", "state": "queue", "items": ["1 combo amantes 16 pz", "2 sodas japonesas"], "waitMin": 6},
+        {"table": "M08", "name": "Don Hideo", "state": "ready", "items": ["10 nigiri surtidos", "1 miso", "1 té verde"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Báscula para atún y salmón", "d": "Cada pieza con su peso. Atún azul 50g por nigiri. Sistema verifica al cobrar. Cero piezas 'generosas' que no se cobran."},
+    {"ico": "archive", "h": "Inventario por proteína fresca", "d": "Atún azul: 3 kg. Salmón: 5 kg. Hamachi: 2 kg. Cuando baja, alerta antes del servicio para reposición."},
+    {"ico": "monitor", "h": "Combos exactos por número de piezas", "d": "Combo premium = 12 piezas (6 nigiri, 4 sashimi, 2 maki). Sistema cuenta. Cero combos a 10 piezas por descuido."},
+    {"ico": "calendar", "h": "Frescura de pescado por lote", "d": "Cada entrada con fecha. Si atún azul pasa 36 horas, alerta para uso prioritario. Cero pescado pasado."},
+    {"ico": "percent", "h": "Costo por pieza vs precio venta", "d": "Nigiri atún costo $35, vendes a $90. Margen 61%. Sistema te dice qué piezas dejan más. Cero combos perdidosos."},
+    {"ico": "split", "h": "Cuenta dividida por pieza compartida", "d": "Mesa de 4 con combo gigante para compartir. Sistema divide entre 4 o por las piezas que cada uno tomó."}
+  ],
+  "stats": [
+    {"v": "188", "l": "Piezas servidas hoy"},
+    {"v": "2.4", "l": "Kg atún azul"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi sushiman <span class=\"hl\">cortaba 60g de atún azul</span> cuando la receta dice 40g. A sus mesas favoritas. Con Kappa cada pieza se pesa. En 3 meses recuperé $22 mil en pescado premium.",
+    "sig": "Sra. Yuki H.",
+    "role": "Sushi Sakura, Lomas, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Atún azul 'porción generosa' a amigos",
+      "rob": "Sushiman corta 60g por nigiri cuando la receta es 40g. A clientes amigos. 8-10 nigiri por turno = $400-600 perdidos en pescado premium.",
+      "fix": "Cada pieza <strong>pesada con báscula al servir</strong>. Sistema bloquea si excede gramaje sin autorización. Cero rebanadas al cariño."
+    },
+    {
+      "title": "Sake 'evaporado' de la barra",
+      "rob": "Mesero sirve copa al cliente y guarda 80ml para 'el del turno'. Reporta como 'evaporación'. En el mes son 2-3 botellas. $1,500-2,500.",
+      "fix": "Botellas con <strong>nivel digital monitoreado</strong>. Sistema cuadra ml servidos vs ml vendidos. Diferencias arriba de 5% alertan."
+    },
+    {
+      "title": "Combos 'a 10 piezas' cobrados como 12",
+      "rob": "Sushiman saca combo de 10 piezas y cobra 12. El extra se lo regala a su cuate aparte. Cliente no cuenta porque se confía. $300-500 al turno.",
+      "fix": "Combos con <strong>número fijo de piezas y foto al servir</strong>. Sistema requiere confirmación visual antes de cobrar. Cero combos cortos."
+    }
+  ]
+}

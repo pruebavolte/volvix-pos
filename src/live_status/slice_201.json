@@ -1,0 +1,63 @@
+{
+  "slice": 201,
+  "range": "3020-3040",
+  "topic": "R18_SHOPIFY_SYNC",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "files_modified": [
+    "api/index.js",
+    "db/R18_SHOPIFY.sql",
+    "volvix-shopify-wiring.js",
+    "R18_SHOPIFY.md"
+  ],
+  "endpoints": [
+    "POST /api/integrations/shopify/import-products (admin, 503-guard)",
+    "POST /api/integrations/shopify/export-products (admin, 503-guard)",
+    "POST /api/integrations/shopify/sync-orders (bidireccional)",
+    "POST /api/integrations/shopify/webhook (HMAC SHA256 timing-safe)"
+  ],
+  "env_required": [
+    "SHOPIFY_ACCESS_TOKEN",
+    "SHOPIFY_SHOP_DOMAIN",
+    "SHOPIFY_WEBHOOK_SECRET",
+    "SHOPIFY_API_VERSION (opt, default 2024-01)"
+  ],
+  "shopify_api_version": "2024-01",
+  "tables": {
+    "shopify_sync_state": ["tenant_id PK", "last_product_sync", "last_order_sync", "last_inventory_sync", "updated_at"],
+    "shopify_mappings":   ["id PK", "internal_id", "shopify_id", "type CHECK(product|order|inventory_item|customer|variant)"]
+  },
+  "constraints": [
+    "UNIQUE(type, shopify_id)",
+    "UNIQUE(type, internal_id)",
+    "trigger touch_shopify_sync_state -> updated_at",
+    "RLS enabled (admin policies)"
+  ],
+  "client_api": {
+    "global": "window.ShopifyAPI",
+    "methods": ["configure", "importProducts", "exportProducts", "syncOrders", "startAutoSync", "stopAutoSync", "status", "on"],
+    "events": ["products:imported", "products:exported", "orders:synced", "error"]
+  },
+  "webhook_topics": ["orders/create", "products/update"],
+  "hmac_verify": "crypto.timingSafeEqual(base64(HMAC-SHA256(rawBody, SECRET)), header)",
+  "guards": {
+    "missing_token": "503 shopify_not_configured",
+    "missing_secret_webhook": "503 shopify_webhook_secret_missing",
+    "invalid_hmac": "401 invalid_hmac"
+  },
+  "mapping_shopify_to_pos": {
+    "product.id -> shopify_mappings.shopify_id (type=product)",
+    "variant.sku -> pos_products.sku (fallback shopify-{id})",
+    "variant.price -> pos_products.price",
+    "variant.inventory_quantity -> pos_products.stock",
+    "order.id -> pos_sales.external_id (shopify-{id})",
+    "order.total_price -> pos_sales.total",
+    "order.financial_status -> pos_sales.status"
+  },
+  "bidirectional_sync": {
+    "pull_orders": "GET /orders.json?status=any&created_at_min={since}",
+    "push_orders": "POST /orders.json (pos_sales WHERE source=local AND shopify_pushed=false)"
+  },
+  "modified": true,
+  "report": "R18_SHOPIFY.md"
+}

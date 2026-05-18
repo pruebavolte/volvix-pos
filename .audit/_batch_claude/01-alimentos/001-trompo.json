@@ -1,0 +1,104 @@
+{
+  "slug": "trompo",
+  "brand": "Trompo",
+  "tagline": "El sistema para taquerías de pastor donde ningún taco sale sin cobrarse",
+  "giro": "taquería al pastor",
+  "giroPlural": "taquerías al pastor",
+  "vibe": "vibrant",
+  "palette": {
+    "bg": "#1A0805",
+    "surface": "#2A130C",
+    "paper": "#3A1B12",
+    "ink": "#FFF4E6",
+    "ink2": "#F0D9B5",
+    "muted": "#A07555",
+    "line": "#4A2418",
+    "accent": "#E63946",
+    "accent2": "#F9A03F"
+  },
+  "fonts": {
+    "display": "Bebas Neue",
+    "body": "Inter",
+    "script": "Permanent Marker",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para taquerías al pastor mexicanas · 2026",
+    "h1": "Cada <em>taco</em>,<br>cada <em>trompo</em>,<br>contado.",
+    "deck": "El POS hecho para que ningún taco salga sin pago, cada kilo de carne se rinda lo que debe, y al tortillero le toque lo justo al cierre.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?tacos,pastor,trompo&q=85",
+    "heroAlt": "Trompo de pastor girando con piña encima",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?tacos,pastor&q=80", "tag": "Tacos al pastor", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?trompo,carne&q=80", "tag": "Trompo girando", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pina,asada&q=80", "tag": "Piña al trompo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?taquero,mexicano&q=80", "tag": "Taquero al corte", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?salsa,verde,mexicana&q=80", "tag": "Salsa cruda", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cilantro,cebolla&q=80", "tag": "Cilantro y cebolla", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?taqueria,mexicana&q=80", "tag": "Plancha al rojo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tortilla,maiz&q=80", "tag": "Tortilla recién hecha", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?puesto,tacos&q=80", "tag": "Local lleno", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?taquero,trabajo&q=80", "caption": "Taquero corta directo al plato"},
+      {"url": "https://source.unsplash.com/random/800x600/?caja,registradora&q=80", "caption": "Cobro rápido por orden"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,taqueria&q=80", "caption": "Cliente pide su orden completa"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · trompo · en vivo",
+    "title": "Tu plancha, <em>orden por orden</em>, sin perderse uno",
+    "deck": "El taquero ve cada orden en pantalla. 5 al pastor para mesa 3, 3 con piña sí. Cuando los entrega, marca listo. Cero gritos, cero tacos perdidos.",
+    "secondary": "En las taquerías chicas, un taco regalado al cuate cada hora son $400-800 perdidos al día.",
+    "data": {
+      "orders": [
+        {"table": "M03", "name": "Don Pedro", "state": "urgent", "items": ["5 al pastor|con piña", "1 agua de jamaica"], "waitMin": 9},
+        {"table": "M07", "name": "Familia López", "state": "prep", "items": ["8 al pastor|sin cebolla", "3 quesadillas", "2 cocas"], "waitMin": 6},
+        {"table": "M01", "name": "Lupita R.", "state": "queue", "items": ["3 al pastor|gringa también"], "waitMin": 3},
+        {"table": "M05", "name": "Carlos M.", "state": "ready", "items": ["6 al pastor", "1 horchata"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "KDS para taquero al trompo", "d": "El cortador ve la orden en pantalla. Sabe cuántos al pastor, cuántos con piña, cuántos sin cebolla. Cero confusión en la hora pico."},
+    {"ico": "barcode", "h": "Comanda por mesa con número", "d": "Cada mesa con su QR. Cliente pide desde su celular o el mesero captura. Cuenta clara al cierre. Cero 'yo no pedí eso'."},
+    {"ico": "percent", "h": "Rendimiento del kilo de pastor", "d": "El sistema sabe cuántos tacos salen por kilo de adobo. Si la merma sube, alerta. Sabes si el taquero está cortando grueso de más."},
+    {"ico": "split", "h": "Cuenta dividida sin pelearse", "d": "Mesa de 6 cuates, cada quién pidió diferente. Sistema divide por persona o por igual. Cobra a cada uno por su lado en 30 segundos."},
+    {"ico": "truck", "h": "Pedidos para llevar y delivery", "d": "Recibe órdenes de Uber Eats, Rappi, Didi en una sola pantalla. Tu taquero ve todo junto. Cero órdenes pérdidas en la app."},
+    {"ico": "calendar", "h": "Pronóstico de carne para mañana", "d": "Viernes vendiste 14 kg, sábado 22 kg. El sistema sugiere cuánto adobar mañana. Cero sobras tiradas, cero faltantes."}
+  ],
+  "stats": [
+    {"v": "342", "l": "Tacos vendidos hoy"},
+    {"v": "18", "l": "Kg de pastor esta semana"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Antes mi compadre me decía que el trompo rendía menos, pero <span class=\"hl\">no sabía cuánto era 'normal'</span>. Con Trompo veo el rendimiento por kilo. Recuperé $14 mil al mes que se iban en tacos regalados.",
+    "sig": "Don Beto V.",
+    "role": "Tacos El Compa, Iztapalapa, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Tacos regalados al cuate",
+      "rob": "Llega el amigo del taquero, le da 4-5 tacos 'de cortesía'. En una taquería son $80-150 diarios — $2,400-4,500 al mes.",
+      "fix": "Todo taco pasa por sistema. <strong>Cortesías necesitan autorización del dueño</strong>. Si el taquero pasa de 3 cortesías al día, alerta al celular."
+    },
+    {
+      "title": "Kilos de carne 'extra' del proveedor",
+      "rob": "El proveedor entrega 18 kg, factura 20 kg. El dueño no pesa. En el año son $25-40 mil que se van.",
+      "fix": "Báscula conectada al sistema. <strong>Cada entrada de pastor pesada y comparada con factura</strong>. Diferencias se registran al instante."
+    },
+    {
+      "title": "Cobro al cliente en efectivo sin ticket",
+      "rob": "Mesa pide 12 tacos, taquero cobra $240 en efectivo, no marca en caja. Se va a su bolsillo. $300-800 diarios.",
+      "fix": "Cada mesa con su <strong>comanda numerada obligatoria</strong>. Sin comanda no sale el taco. Cierre cuadra contra órdenes, no contra honor."
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "slug": "lena",
+  "brand": "Leña",
+  "tagline": "El sistema para pizzerías al horno donde cada masa rinde lo que debe y el queso no se 'derrite' del refri",
+  "giro": "pizzería al horno",
+  "giroPlural": "pizzerías al horno",
+  "vibe": "warmCozy",
+  "palette": {
+    "bg": "#1F1208",
+    "surface": "#2E1B10",
+    "paper": "#3D2418",
+    "ink": "#F5E6CC",
+    "ink2": "#D9BC8A",
+    "muted": "#A0805A",
+    "line": "#553820",
+    "accent": "#C8102E",
+    "accent2": "#E8A800"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para pizzerías al horno mexicanas · 2026",
+    "h1": "Cada <em>pizza</em>,<br>cada <em>topping</em>,<br>cobrado.",
+    "deck": "El POS hecho para que la masa al horno rinda lo que debe, el pepperoni y los hongos no se 'pierdan' del refri, y los toppings extra se cobren completos.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?pizza,oven,wood&q=85",
+    "heroAlt": "Pizza al horno de leña recién sacada",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?pizza,wood,fired&q=80", "tag": "Pizza al horno", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pepperoni,pizza&q=80", "tag": "Pepperoni clásica", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?hawaiian,pizza&q=80", "tag": "Hawaiana piña", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?dough,fresh&q=80", "tag": "Masa fresca", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mozzarella,cheese&q=80", "tag": "Mozzarella", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mushrooms,toppings&q=80", "tag": "Hongos frescos", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?pizzeria,oven&q=80", "tag": "Horno de leña", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pizza,slice&q=80", "tag": "Rebanada caliente", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?family,pizza&q=80", "tag": "Familia compartiendo", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?pizzero,horno&q=80", "caption": "Pizzero saca pizza al horno"},
+      {"url": "https://source.unsplash.com/random/800x600/?toppings,prep&q=80", "caption": "Toppings listos para armar"},
+      {"url": "https://source.unsplash.com/random/800x600/?delivery,box&q=80", "caption": "Cajas listas para llevar"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · horno · en vivo",
+    "title": "Tu horno, <em>pizza por pizza</em>, sin perderse",
+    "deck": "Cada orden con toppings y tamaño. KDS muestra: pizza grande 14'' pepperoni + hongos + queso extra. Pizzero ve todo. Cero toppings olvidados.",
+    "secondary": "En las pizzerías, queso extra 'olvidado' al cobrar son $35-50 cada vez. 8 al día = $280-400.",
+    "data": {
+      "orders": [
+        {"table": "M03", "name": "Familia Vázquez", "state": "urgent", "items": ["1 grande pepperoni|extra queso", "1 mediana hawaiana", "2 cocas litro"], "waitMin": 16},
+        {"table": "M01", "name": "Cuates", "state": "prep", "items": ["1 XL meatlover|todos los toppings carnes", "1 jarra cerveza"], "waitMin": 14},
+        {"table": "M07", "name": "Pareja jóvenes", "state": "queue", "items": ["1 mediana margherita", "1 ensalada césar", "2 vinos"], "waitMin": 10},
+        {"table": "DELIVERY-12", "name": "Sra. Lupita", "state": "ready", "items": ["1 grande mixta", "1 grande champiñón"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Toppings visibles en KDS color", "d": "Pepperoni (rojo), hongos (café), aceitunas (negro). Pizzero ve checklist. Cero toppings olvidados al hornear."},
+    {"ico": "archive", "h": "Inventario por proteína y vegetal", "d": "Mozzarella: 8 kg. Pepperoni: 4 kg. Hongos: 3 kg. Cuando baja, alerta antes del viernes noche."},
+    {"ico": "barcode", "h": "Extras cobrados automático", "d": "Extra queso $35, doble pepperoni $40. Aparece en KDS. Cobro automático. Cero extras 'cortesía'."},
+    {"ico": "percent", "h": "Margen por tamaño", "d": "Chica $95 costo $35. Grande $220 costo $58. Sistema te dice qué tamaño deja más margen por minuto de horno."},
+    {"ico": "truck", "h": "Delivery con tiempo de horneo", "d": "Pedido a domicilio: pizza sale del horno a las 8:14, llega a casa a las 8:30. Cliente paga premium. Cero pizzas frías."},
+    {"ico": "calendar", "h": "Pronóstico fin de semana", "d": "Viernes vendiste 60 pizzas, sábado 95. Sistema sugiere masa a preparar. Cero domingos sin pizza a las 8 pm."}
+  ],
+  "stats": [
+    {"v": "118", "l": "Pizzas servidas hoy"},
+    {"v": "32", "l": "Kg mozzarella usada"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi pizzero <span class=\"hl\">'echaba el doble de pepperoni'</span> a sus pizzas y no se cobraba. Con Leña cada topping extra es botón obligatorio. En 2 meses recuperé $14 mil en pepperoni y queso.",
+    "sig": "Don Massimo R.",
+    "role": "Pizzería Da Leña, Coyoacán, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Toppings 'extra' regalados al cuate",
+      "rob": "Pizzero echa doble pepperoni o extra queso sin cobrarlo. A clientes amigos. 8-12 pizzas por turno = $300-450 al día en toppings premium regalados.",
+      "fix": "Toppings extra <strong>cobrados por botón obligatorio</strong>. Sistema bloquea si pizza sale sin extras facturados. Cero cortesías al cariño."
+    },
+    {
+      "title": "Mozzarella 'rendida' con menos por pizza",
+      "rob": "Pizzero echa 150g cuando la receta dice 200g. Para 'rendir'. Cliente nota pizza seca, deja review negativa, pierdes clientela.",
+      "fix": "Mozzarella con <strong>gramaje fijo por tamaño en receta digital</strong>. Sistema cuadra queso usado vs pizzas vendidas. Diferencias arriba de 8% alertan."
+    },
+    {
+      "title": "Pizza 'mal hecha' que se llevaron",
+      "rob": "Pizzero reporta 1-2 pizzas 'mal salidas' por turno y se las lleva. En realidad están bien. $200-400 al día.",
+      "fix": "Pizzas descartadas requieren <strong>foto y autorización del gerente</strong>. Si pasan de 1 al día, alerta. Auditoría semanal."
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "slug": "recuerdo",
+  "brand": "Recuerdo",
+  "tagline": "El POS hecho para tiendas de souvenirs que sí venden a cada turista",
+  "giro": "souvenirs",
+  "giroPlural": "tiendas de souvenirs",
+  "vibe": "warmLocal",
+  "palette": {
+    "bg": "#FDF6E8",
+    "surface": "#FFFFFF",
+    "paper": "#F6E8C8",
+    "ink": "#1F140A",
+    "ink2": "#3F2E1A",
+    "muted": "#7E6440",
+    "line": "#E0CC98",
+    "accent": "#D32F2F",
+    "accent2": "#FFC107"
+  },
+  "fonts": {
+    "display": "Bodoni Moda",
+    "body": "Lora",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas de souvenirs · 2026",
+    "h1": "Cada <em>recuerdo</em>,<br>cada <em>turista</em>,<br>cada destino.",
+    "deck": "El punto de venta hecho para tiendas de souvenirs: stock por destino, ventas en pesos y dólares, paquetes pre-armados para grupos, etiquetas multi-idioma.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?souvenir,mexican,tourist&q=85",
+    "heroAlt": "Tienda de souvenirs mexicanos coloridos",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?mexican,souvenir&q=80", "tag": "Souvenirs MX", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?keychain&q=80", "tag": "Llaveros", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?magnets,fridge&q=80", "tag": "Imanes", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tshirt,tourist&q=80", "tag": "Playeras turísticas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mexican,sombrero&q=80", "tag": "Sombreros", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tequila,bottle&q=80", "tag": "Tequila premium", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?souvenir,store&q=80", "tag": "Tienda turística", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?postcard&q=80", "tag": "Postales", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?cancun,beach&q=80", "tag": "Destino playa", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?tourist,shopping&q=80", "caption": "Turista compra en pesos o dólares"},
+      {"url": "https://source.unsplash.com/random/800x600/?tour,group&q=80", "caption": "Grupo de turistas con paquetes"},
+      {"url": "https://source.unsplash.com/random/800x600/?craft,souvenir&q=80", "caption": "Artesanías locales"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>SKU por destino</em>",
+    "deck": "Cada souvenir con SKU. Ventas en pesos y dólares con tipo de cambio actualizado. Paquetes para grupos turísticos. Etiquetas multi-idioma.",
+    "secondary": "En souvenirs, turista que no compra es bus que se va para siempre.",
+    "data": {
+      "product": "Stock por categoría",
+      "tallas": ["Llaveros", "Playeras", "Tequila", "Artesanía", "Sombreros"],
+      "stock": [
+        {"color": "Premium $200+", "vals": [42, 86, 28, 38, 24]},
+        {"color": "Medio $50-200", "vals": [124, 168, 18, 86, 56]},
+        {"color": "Económico <$50", "vals": [286, 0, 0, 124, 0]}
+      ],
+      "lowThreshold": 15
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por categoría", "d": "Cada souvenir con SKU. Sabes qué se mueve con turistas internacionales, cuáles con locales."},
+    {"ico": "monitor", "h": "Ventas pesos y dólares", "d": "Sistema acepta pago en pesos o dólares con tipo de cambio actualizado. Cliente paga en su moneda. Cero confusiones."},
+    {"ico": "split", "h": "Paquetes para grupos", "d": "Tour de 20 turistas: paquete con descuento volumen. Sistema descuenta todos los SKUs. Tour guide gana comisión."},
+    {"ico": "percent", "h": "Comisiones por tour guide", "d": "Define % por grupo o paquete. Tour guide ve en vivo. Cero peleas."},
+    {"ico": "barcode", "h": "Etiquetas multi-idioma", "d": "Etiquetas en español, inglés, francés. Turista lee precio en su idioma. Cero confusiones."},
+    {"ico": "gift", "h": "Empaque para viaje", "d": "Cliente compra tequila para llevar a vuelo, sistema marca empaque especial para viaje. Cero piezas rotas."}
+  ],
+  "stats": [
+    {"v": "1,684", "l": "Souvenirs en stock"},
+    {"v": "186", "l": "Vendidos hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis empleadas cobraban a turistas en dólares y se quedaban con la diferencia del tipo de cambio. <span class=\"hl\">Pérdidas de $200-400 diarios</span>. Con Recuerdo el tipo de cambio es del sistema. Cero pérdidas.",
+    "sig": "Don Ramón S.",
+    "role": "Souvenirs en Cancún, QROO"
+  },
+  "thefts": [
+    {
+      "title": "Tipo de cambio manipulado en efectivo",
+      "rob": "Turista paga $50 USD por souvenir $1,000 pesos. Empleada usa tipo de cambio de $18 ($900) y se queda con $100 cada venta. Son $200-500 diarios.",
+      "fix": "Tipo de cambio <strong>fijado por sistema con actualización diaria</strong>. Cero manipulación manual. Reporte diario de conversiones."
+    },
+    {
+      "title": "Souvenirs premium 'mermados' por empleados",
+      "rob": "Empleado toma tequilas premium ($500-2,000) o artesanías de plata marcándolos como 'rotos en bodega' y se los lleva. Son 3-5 al mes.",
+      "fix": "Mermas <strong>requieren foto del daño y autorización del gerente</strong>. Cada baja con SKU y motivo verificable."
+    },
+    {
+      "title": "Paquetes grupales cobrados por fuera",
+      "rob": "Tour de 20 turistas paga $15,000 en efectivo. Empleado registra $10,000 y se queda con $5,000. Tour guide reparte con empleado.",
+      "fix": "Paquetes grupales <strong>se cotizan y cobran por sistema con SKU de paquete</strong>. Cero captura manual. Auditoría diaria de grupos."
+    }
+  ]
+}

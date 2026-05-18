@@ -1,0 +1,108 @@
+{
+  "slug": "alternador",
+  "brand": "Alternador",
+  "tagline": "El sistema para talleres eléctricos automotrices que cobran cada falla resuelta",
+  "giro": "taller eléctrico automotriz",
+  "giroPlural": "talleres eléctricos automotrices",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#15171A",
+    "surface": "#1E2126",
+    "paper": "#262A30",
+    "ink": "#F0F2F5",
+    "ink2": "#CACFD4",
+    "muted": "#82898F",
+    "line": "#2E333A",
+    "accent": "#F1C40F",
+    "accent2": "#FFD83D"
+  },
+  "fonts": {
+    "display": "Saira Condensed",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para talleres eléctricos automotrices · 2026",
+    "h1": "Cada <em>falla</em>,<br>cada <em>cable</em>,<br>rastreado.",
+    "deck": "El POS hecho para electricistas automotrices que diagnostican con scan, cobran cada hora de búsqueda de corto, y entregan con foto de la falla real.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver órdenes activas",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?car-electric,wiring,mechanic&q=80",
+    "heroAlt": "Electricista automotriz revisando arnés",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?wiring,car&q=80", "tag": "Arnés completo", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?alternator,car&q=80", "tag": "Alternador", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?multimeter,test&q=80", "tag": "Multímetro", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?battery,car&q=80", "tag": "Batería", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?fuse,box&q=80", "tag": "Caja fusibles", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?scanner,obd&q=80", "tag": "Scanner OBD", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?garage,electric&q=80", "tag": "Mesa diagnóstico", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?starter,car&q=80", "tag": "Marcha", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?wires,colored&q=80", "tag": "Cableado nuevo", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?scanner,car&q=80", "caption": "Códigos de falla guardados con scan"},
+      {"url": "https://source.unsplash.com/random/800x600/?wiring,diagram&q=80", "caption": "Diagrama eléctrico del auto en sistema"},
+      {"url": "https://source.unsplash.com/random/800x600/?invoice,paper&q=80", "caption": "Factura con códigos y horas reales"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Agenda · diagnóstico eléctrico · en vivo",
+    "title": "Tu mesa, <em>turno por turno</em>",
+    "deck": "Cada diagnóstico tarda lo que tarda. Un corto puede ser 30 min o 4 hrs. El sistema cobra por hora real. Cliente sabe desde el inicio.",
+    "secondary": "En diagnóstico eléctrico la hora es la hora. Cero 'me cobraste de más'.",
+    "data": {
+      "service": "Diagnóstico falla eléctrica intermitente",
+      "duration": "2 hrs estimado",
+      "slots": [
+        {"hora": "08:00", "mecanico": "Mesa 1 · Don Toño", "estado": "ocupado", "auto": "Vento 2017"},
+        {"hora": "11:00", "mecanico": "Mesa 1 · Don Toño", "estado": "libre"},
+        {"hora": "13:00", "mecanico": "Mesa 1 · Don Toño", "estado": "ocupado", "auto": "Corolla 2019"},
+        {"hora": "08:00", "mecanico": "Mesa 2 · Chuy", "estado": "libre"},
+        {"hora": "10:00", "mecanico": "Mesa 2 · Chuy", "estado": "ocupado", "auto": "Spark 2020"},
+        {"hora": "15:00", "mecanico": "Mesa 2 · Chuy", "estado": "libre"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Códigos OBD guardados", "d": "Cada scan se guarda con el auto. Si regresa en 6 meses, ves los códigos anteriores. Diagnóstico al doble de rápido."},
+    {"ico": "edit", "h": "Hora real cobrada", "d": "Cronómetro arranca cuando el auto entra a mesa. Cliente firma cuántas horas se trabajaron. Cero discusiones."},
+    {"ico": "camera", "h": "Foto del cable dañado", "d": "Antes de cambiar arnés, foto del corto. Cliente ve la causa. Cero 'me cambiaron sin necesidad'."},
+    {"ico": "barcode", "h": "Refacciones por código", "d": "Cada alternador, marcha y módulo con su número de parte. Si falla en garantía, sabes la pieza exacta."},
+    {"ico": "bookmark", "h": "Historial eléctrico", "d": "Cada auto con su historial: batería de hace 6 meses, alternador de hace 2 años. Diagnóstico contextual."},
+    {"ico": "percent", "h": "Comisión por hora real", "d": "Mecánico cobra solo las horas que realmente trabajó. Si terminó en 1 hr lo que cotizó en 3, no cobra de más."}
+  ],
+  "stats": [
+    {"v": "12", "l": "Diagnósticos hoy"},
+    {"v": "5", "l": "Listos para entrega"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi muchacho cobraba <span class=\"hl\">3 horas en órdenes que terminaba en 1</span> y se las repartía con otro. Con Alternador hay cronómetro automático en cada mesa. Bajé el robo a cero.",
+    "sig": "Don Lalo P.",
+    "role": "Electricidad Automotriz El Lalo, Mérida, YUC"
+  },
+  "thefts": [
+    {
+      "title": "Horas facturadas que no se trabajaron",
+      "rob": "Diagnóstico tarda 45 min real pero le cobran al cliente 3 horas a $400/hr. Diferencia: $900 por cada falla.",
+      "fix": "Cronómetro digital arranca cuando el auto entra a mesa y se detiene al salir. <strong>Cliente ve las horas reales en factura</strong>."
+    },
+    {
+      "title": "Alternador 'reparado' que era nuevo y viceversa",
+      "rob": "Auto trae alternador rebuilt ($1,200). Mecánico instala uno usado limpio ($300), cobra el rebuilt al cliente, se lleva el bueno.",
+      "fix": "Cada alternador con <strong>foto del número de serie</strong> al instalarse. Comparable con el quitado. Cero cambiazos."
+    },
+    {
+      "title": "Falla 'no encontrada' que regresa al mes",
+      "rob": "Cobran diagnóstico de 2 horas pero no encuentran la falla. Cliente regresa, le cobran de nuevo. Pasan 4 visitas hasta encontrar.",
+      "fix": "Diagnóstico con <strong>código OBD documentado</strong>. Si regresa, los códigos anteriores aparecen primero. Cero re-cobros por la misma falla."
+    }
+  ]
+}

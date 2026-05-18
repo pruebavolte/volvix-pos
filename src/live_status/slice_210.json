@@ -1,0 +1,52 @@
+{
+  "slice": 210,
+  "range": "3200-3220",
+  "topic": "R18_NFT_LOYALTY_BLOCKCHAIN_MOCK",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "scope": "NFT loyalty + blockchain receipts (mock, no real chain)",
+  "sql_file": "db/R18_NFT_LOYALTY.sql",
+  "tables_created": [
+    "nft_collections(id, tenant_id, name, contract_address_mock, supply_total, minted_count)",
+    "customer_nfts(id, customer_id, collection_id, token_id, ipfs_hash_mock, minted_at)",
+    "blockchain_receipts(id, sale_id, tx_hash_mock, ipfs_url_mock, anchored_at)"
+  ],
+  "indexes": [
+    "idx_nftcol_tenant",
+    "idx_cnft_customer",
+    "idx_cnft_collection",
+    "idx_bcrcpt_sale",
+    "UNIQUE(collection_id, token_id)",
+    "UNIQUE(tx_hash_mock)"
+  ],
+  "endpoints_wired": [
+    "POST /api/nft/collections (admin/superadmin/owner)",
+    "POST /api/nft/mint (auth)",
+    "GET /api/customer/nfts (customer auth)",
+    "POST /api/blockchain/anchor-receipt (auth, threshold-gated)",
+    "GET /api/blockchain/receipts/:id/verify (auth)"
+  ],
+  "endpoints_count": 5,
+  "config_env": {
+    "BLOCKCHAIN_ANCHOR_MIN_USD": "default 100"
+  },
+  "mock_strategy": {
+    "tx_hash": "0x + crypto.randomBytes(32).hex",
+    "ipfs_hash": "Qm + crypto.randomBytes(22).hex.slice(0,44)",
+    "contract_address": "0x + crypto.randomBytes(20).hex",
+    "token_id": "padded sequential per collection"
+  },
+  "report": "R18_NFT_BLOCKCHAIN.md",
+  "real_integration_requirements": [
+    "Web3.js or ethers.js",
+    "RPC node (Infura/Alchemy)",
+    "IPFS pinning (Pinata/web3.storage)",
+    "ERC-721 contract + anchor contract",
+    "Wallet via KMS/HSM"
+  ],
+  "next_actions": [
+    "Smoke test 5 endpoints",
+    "Hook anchor-receipt into POST /api/sales on amount > threshold",
+    "Add tenant scoping in customer_nfts queries"
+  ]
+}

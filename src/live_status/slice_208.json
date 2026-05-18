@@ -1,0 +1,43 @@
+{
+  "slice": 208,
+  "range": "3160-3180",
+  "topic": "R18_ecommerce_storefront",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "files_created": [
+    "volvix-shop.html",
+    "api/shop.js",
+    "db/R18_SHOP.sql",
+    "R18_ECOMMERCE.md"
+  ],
+  "files_modified": [
+    "api/index.js (registro de require('./shop').register tras qr-payments)"
+  ],
+  "endpoints_added": [
+    "GET  /api/shop/:slug/info",
+    "GET  /api/shop/:slug/products",
+    "POST /api/shop/checkout",
+    "GET  /api/shop/orders/:id"
+  ],
+  "auth": "public (guest_checkout role en sales.meta)",
+  "schema_changes": {
+    "pos_tenants": ["shop_slug UNIQUE", "shop_enabled", "shop_logo", "shop_theme jsonb", "shop_name", "shop_about", "shop_currency", "shop_contact_email"],
+    "products": ["shop_visible boolean default true"],
+    "sales": ["source text", "guest_email text", "shipping_address jsonb"],
+    "customers": ["source text default 'pos'"],
+    "views": ["shop_public_products (anon SELECT grant)"]
+  },
+  "payment_methods_supported": ["card/stripe", "codi", "spei", "transfer", "cash_on_delivery"],
+  "client_features": ["catalog grid", "search + category filter", "localStorage cart", "mini-cart drawer", "checkout modal", "promo + gift card inputs", "order lookup by id+email", "tenant theme accent override"],
+  "security_notes": [
+    "totales recalculados server-side desde products",
+    "tenant 404 si shop_enabled=false",
+    "order lookup gated por guest_email exacto"
+  ],
+  "deploy_required": true,
+  "follow_up": [
+    "Stripe client_secret real",
+    "Webhook stripe -> sales.status=paid",
+    "RLS row-level para shop_public_products via vista"
+  ]
+}

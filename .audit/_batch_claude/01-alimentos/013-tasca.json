@@ -1,0 +1,104 @@
+{
+  "slug": "tasca",
+  "brand": "Tasca",
+  "tagline": "El sistema para cocinas españolas donde las tapas se cobran completas y el jamón se pesa al gramo",
+  "giro": "cocina española",
+  "giroPlural": "cocinas españolas",
+  "vibe": "warmCozy",
+  "palette": {
+    "bg": "#1F1208",
+    "surface": "#2E1B10",
+    "paper": "#3D2418",
+    "ink": "#F5E6CC",
+    "ink2": "#D9BC8A",
+    "muted": "#A0805A",
+    "line": "#553820",
+    "accent": "#A93226",
+    "accent2": "#E8B33D"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para cocinas españolas en México · 2026",
+    "h1": "Cada <em>tapa</em>,<br>cada <em>jamón ibérico</em>,<br>servida.",
+    "deck": "El POS hecho para que las tapas no se 'olviden' de la cuenta, el jamón ibérico se cobre por su peso, y la paella salga al tiempo justo del fogón.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?paella,spanish,tapas&q=85",
+    "heroAlt": "Paella valenciana con mariscos",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?paella,valenciana&q=80", "tag": "Paella valenciana", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?jamon,iberico&q=80", "tag": "Jamón ibérico", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tortilla,patatas&q=80", "tag": "Tortilla española", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tapas,variadas&q=80", "tag": "Tapas variadas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?gambas,ajillo&q=80", "tag": "Gambas al ajillo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sangria,rioja&q=80", "tag": "Sangría y rioja", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?tasca,interior&q=80", "tag": "Tasca tradicional", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?queso,manchego&q=80", "tag": "Queso manchego", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?bar,espanol&q=80", "tag": "Barra de tapas", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?jamonero,corte&q=80", "caption": "Cortador rebana jamón a mano"},
+      {"url": "https://source.unsplash.com/random/800x600/?paellero,fogon&q=80", "caption": "Paellero remueve la sartén"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,tapas&q=80", "caption": "Mesa de amigos con tapas"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · barra · en vivo",
+    "title": "Tu cocina, <em>tapa por tapa</em>, sin perderse",
+    "deck": "Cada orden con tapas y plato. KDS muestra: 3 tapas variadas, 1 paella mariscos. Cocinero ve todo. Cero tapas que se olvidan en la barra.",
+    "secondary": "En las tascas, una tapa de gambas 'olvidada' en la barra son $80-120 que el cliente no paga.",
+    "data": {
+      "orders": [
+        {"table": "M05", "name": "Don Javier", "state": "urgent", "items": ["100g jamón ibérico", "2 gambas ajillo", "1 rioja copa"], "waitMin": 11},
+        {"table": "M02", "name": "Familia Fdez.", "state": "prep", "items": ["Paella mariscos|para 4", "Pan ajo", "Sangría jarra"], "waitMin": 28},
+        {"table": "M09", "name": "Pareja jóvenes", "state": "queue", "items": ["Tortilla esp.", "Tabla queso", "Vino blanco"], "waitMin": 6},
+        {"table": "M07", "name": "Cuates", "state": "ready", "items": ["6 tapas variadas", "4 cañas Estrella"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Báscula para jamón ibérico", "d": "Cada porción pesada al cortar. 100g ibérico = $X. Sistema verifica al cobrar. Cero rebanadas 'extra' a clientes amigos."},
+    {"ico": "archive", "h": "Inventario por paleta y tabla", "d": "Paleta ibérica de 7 kg en barra. Sistema sabe cuánto queda. Cuando bajas de 1 kg, alerta para abrir otra."},
+    {"ico": "monitor", "h": "Tiempos de paella en KDS", "d": "Paella valenciana: 25 min. Mariscos: 22 min. Sistema avisa cuando van 5 min para servir. Cero paellas frías."},
+    {"ico": "calendar", "h": "Cellar de vinos españoles", "d": "Rioja, ribera, albariño. Sistema sugiere por edad y rotación. Cero botellas vencidas en bodega."},
+    {"ico": "split", "h": "Cuenta de tapas sin pelearse", "d": "Mesa de 6 amigos compartió 12 tapas. Sistema divide por igual o por persona. Cero discusiones en la barra."},
+    {"ico": "percent", "h": "Margen por plato vs tapa", "d": "Tapas dejan 70% margen, paellas 55%. Sistema te dice qué empujar en la barra esta noche. Cero estrategia 'al ojo'."}
+  ],
+  "stats": [
+    {"v": "94", "l": "Tapas servidas hoy"},
+    {"v": "1.8", "l": "Kg jamón ibérico"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi cortador <span class=\"hl\">'rebanaba con cariño' al amigo</span> y le daba 150g cobrando 80g. Con Tasca cada rebanada pesa y cobra automático. En 2 meses recuperé $14 mil en jamón solo.",
+    "sig": "Don José Antonio M.",
+    "role": "Tasca El Galeón, Roma Norte, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Jamón ibérico 'rebanada extra' al amigo",
+      "rob": "Cortador da 150g de jamón ibérico cobrando 80g. A clientes amigos. 5-8 mesas por turno = $400-700 al día en jamón premium regalado.",
+      "fix": "Jamón se <strong>pesa con báscula conectada al ticket</strong>. Sistema no deja cobrar si peso no coincide. Cortes 'al ojo' bloqueados."
+    },
+    {
+      "title": "Tapas 'cortesía' descontroladas",
+      "rob": "Mesero da 2-3 tapas gratis 'porque tardó la paella'. Sin autorización. Cada tapa son $80-120. 5 mesas por turno = $1,200-1,800.",
+      "fix": "Cortesías requieren <strong>código del gerente</strong>. Sistema permite máximo 1 tapa cortesía por mesa con causa registrada. Auditoría diaria."
+    },
+    {
+      "title": "Sangría 'rendida' con menos vino",
+      "rob": "Barman echa menos vino y más refresco a la sangría para 'rendir'. Cliente nota el sabor y deja de venir. Pérdida silenciosa de clientela.",
+      "fix": "Receta de sangría <strong>con ml fijos por jarra</strong>. Inventario de vino cuadra con jarras vendidas. Diferencias alertan."
+    }
+  ]
+}

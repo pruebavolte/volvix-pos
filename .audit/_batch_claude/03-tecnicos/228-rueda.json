@@ -1,0 +1,108 @@
+{
+  "slug": "rueda",
+  "brand": "Rueda",
+  "tagline": "El sistema para mecánicos a domicilio que llegan a la hora y con la pieza correcta",
+  "giro": "mecánico a domicilio",
+  "giroPlural": "mecánicos a domicilio",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#1A1C20",
+    "surface": "#24262C",
+    "paper": "#2C2F36",
+    "ink": "#F0F2F5",
+    "ink2": "#CACED4",
+    "muted": "#7C8089",
+    "line": "#34373F",
+    "accent": "#16A085",
+    "accent2": "#1FC4A0"
+  },
+  "fonts": {
+    "display": "Saira Condensed",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para mecánicos a domicilio · 2026",
+    "h1": "Cada <em>servicio</em>,<br>cada <em>kilómetro</em>,<br>cobrado.",
+    "deck": "El POS hecho para mecánicos que van al lugar del cliente. Cotización antes de salir, refacciones cargadas en la van, cobro al terminar con firma digital.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver servicios en ruta",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?roadside,mechanic,van&q=80",
+    "heroAlt": "Mecánico a domicilio atendiendo auto en calle",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?mechanic,roadside&q=80", "tag": "Servicio en calle", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?van,mechanic&q=80", "tag": "Van con herramientas", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?jumper,cables&q=80", "tag": "Pasacorriente", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tire,flat&q=80", "tag": "Llanta ponchada", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?battery,replace&q=80", "tag": "Cambio batería", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?wrench,car&q=80", "tag": "Diagnóstico in situ", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?mechanic,phone&q=80", "tag": "Llegada con app", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?engine,help&q=80", "tag": "Auxilio motor", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?roadside,service&q=80", "tag": "Asistencia 24h", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?gps,map&q=80", "caption": "Ubicación del cliente con GPS"},
+      {"url": "https://source.unsplash.com/random/800x600/?mechanic,sign&q=80", "caption": "Cliente firma servicio en celular"},
+      {"url": "https://source.unsplash.com/random/800x600/?payment,phone&q=80", "caption": "Cobro con terminal y QR"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Servicios on-demand · en vivo",
+    "title": "Tus mecánicos, <em>zona por zona</em>",
+    "deck": "Cliente pide servicio desde su ubicación. Sistema asigna al mecánico más cercano. Tiempo estimado real, cobertura por zona, sin perderse en el tráfico.",
+    "secondary": "Mecánico a domicilio que tarda 2 hrs pierde cliente. Asignación inteligente = llegada en 30 min.",
+    "data": {
+      "service": "Auxilio batería + traslado",
+      "duration": "45 min",
+      "slots": [
+        {"hora": "AHORA", "mecanico": "Don Tito · Norte", "estado": "ocupado", "auto": "Versa, Polanco"},
+        {"hora": "30 min", "mecanico": "Don Tito · Norte", "estado": "libre"},
+        {"hora": "AHORA", "mecanico": "Chuy · Sur", "estado": "ocupado", "auto": "Aveo, Coyoacán"},
+        {"hora": "45 min", "mecanico": "Chuy · Sur", "estado": "libre"},
+        {"hora": "AHORA", "mecanico": "Tonio · Centro", "estado": "libre"},
+        {"hora": "1 hr", "mecanico": "Tonio · Centro", "estado": "ocupado", "auto": "Spark, Roma"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Asignación por zona", "d": "Cliente pide servicio, sistema asigna al más cercano. Cero mecánicos cruzando la ciudad."},
+    {"ico": "monitor", "h": "Tracking en vivo", "d": "Cliente ve al mecánico llegar en mapa. Tiempo estimado real. Cero 'voy en camino' falsos."},
+    {"ico": "barcode", "h": "Refacciones en van", "d": "Inventario de cada van con baterías, llantas, bujías. Sabes qué llevas y qué te falta antes de salir."},
+    {"ico": "edit", "h": "Cotización antes de salir", "d": "Cliente acepta monto antes que llegue el mecánico. Cero 'me quiso cobrar el doble cuando llegó'."},
+    {"ico": "camera", "h": "Foto del antes-después", "d": "Mecánico documenta cada servicio. Cliente firma en celular. Cero 'no quedó bien'."},
+    {"ico": "percent", "h": "Cobro digital", "d": "Terminal en van + QR. Cliente paga con tarjeta o transferencia. Cero efectivo perdido en bolsa."}
+  ],
+  "stats": [
+    {"v": "47", "l": "Servicios hoy"},
+    {"v": "32", "l": "Min promedio llegada"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis mecánicos <span class=\"hl\">cobraban en efectivo y nunca llegaba a caja</span>. $200-500 por servicio se perdían. Con Rueda todo se cobra digital, el cliente firma en su celular. Recuperé $30k al mes.",
+    "sig": "Don Pancho R.",
+    "role": "Auxilio Mecánico El Pancho, Guadalajara, JAL"
+  },
+  "thefts": [
+    {
+      "title": "Cobros en efectivo que no llegan a caja",
+      "rob": "Mecánico cobra $850 al cliente en efectivo. Te dice que cobró $500. Se queda con $350. Pasa 5-8 veces al día por equipo.",
+      "fix": "Cobro <strong>solo digital desde la app</strong>. Cliente paga con tarjeta o QR. Mecánico no toca efectivo. Sin sorpresas."
+    },
+    {
+      "title": "Refacciones de la van vendidas por fuera",
+      "rob": "Mecánico vende batería de la van a un compadre, reporta como 'usada en servicio'. Tú pagas $1,500 sin servicio asociado.",
+      "fix": "Cada refacción se <strong>escanea al usarse con foto del auto donde se instaló</strong>. Sin foto, no cierra la salida del inventario."
+    },
+    {
+      "title": "Servicios cobrados doble",
+      "rob": "Mecánico atiende al amigo del primo por fuera, cobra al primo $800 en efectivo, después abre ticket fantasma a otro cliente con esa pieza.",
+      "fix": "Cada servicio se <strong>abre con ubicación GPS y datos del cliente</strong>. Imposible servicio sin cliente registrado. Trazabilidad total."
+    }
+  ]
+}

@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix Motor — Sistema POS por giro</title>
+<meta name="description" content="Sistema POS especializado para cada giro de negocio en México.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- TODAS las fuentes necesarias para cualquier marca -->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400;1,500&family=Bodoni+Moda:ital,wght@0,500;0,700;1,500&family=Archivo+Black&family=Oswald:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;700;800&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Italianno&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--body-font);
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.55;
+    overflow-x:hidden;
+    font-size:15px;
+    transition:background-color .4s ease,color .4s ease;
+  }
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  img{max-width:100%;display:block}
+  ::selection{background:var(--accent);color:var(--bg)}
+
+  .container{max-width:1280px;margin:0 auto;padding:0 28px;position:relative;z-index:2}
+
+  /* ============================================
+     PICKER (cuando no hay ?b= en la URL)
+     ============================================ */
+  #picker{
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:64px 28px;
+    background:#FAFAF7;
+    color:#0A0908;
+  }
+  #picker h1{font-family:Fraunces,serif;font-size:48px;font-weight:400;letter-spacing:-.03em;margin-bottom:14px}
+  #picker h1 em{font-style:italic;color:#C2410C}
+  #picker p{font-size:17px;color:#6B6B68;margin-bottom:36px;max-width:560px;text-align:center}
+  .picker-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;max-width:980px;width:100%}
+  .picker-card{
+    background:#fff;border:1px solid #E3E0D6;padding:24px;
+    border-radius:14px;transition:all .25s ease;cursor:pointer;
+    display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit;
+  }
+  .picker-card:hover{transform:translateY(-3px);box-shadow:0 12px 24px -8px rgba(0,0,0,.1);border-color:#0A0908}
+  .picker-brand{font-family:Fraunces,serif;font-size:24px;letter-spacing:-.02em;font-weight:500}
+  .picker-giro{font-size:13px;color:#6B6B68}
+
+  #app{display:none}
+  body.loaded #app{display:block}
+  body.loaded #picker{display:none}
+
+  /* ============================================
+     NAV
+     ============================================ */
+  .vmotor-nav{
+    position:sticky;top:0;z-index:50;
+    background:color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+  .v-logo{
+    display:flex;align-items:center;gap:10px;
+    font-family:var(--display-font);font-weight:500;font-size:22px;
+    color:var(--ink);letter-spacing:-.02em;
+  }
+  .v-logo-mark{
+    width:34px;height:34px;background:var(--accent);color:var(--bg);
+    display:grid;place-items:center;
+    font-family:var(--display-font);font-weight:600;font-size:18px;
+    border-radius:6px;transition:transform .3s ease;
+  }
+  .v-logo:hover .v-logo-mark{transform:rotate(-6deg)}
+  .v-nav-links{display:flex;gap:28px;align-items:center;font-size:14px;color:var(--muted);font-weight:500}
+  .v-nav-links a:hover{color:var(--ink)}
+  .v-nav-cta{display:flex;gap:10px;align-items:center}
+  .v-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:11px 20px;border-radius:10px;
+    font-size:14px;font-weight:600;
+    border:1px solid transparent;transition:all .25s ease;
+    text-decoration:none;cursor:pointer;
+  }
+  .v-btn-primary{background:var(--ink);color:var(--bg)}
+  .v-btn-primary:hover{background:var(--accent);transform:translateY(-1px)}
+  .v-btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .v-btn-ghost:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .v-btn-lg{padding:15px 28px;font-size:15px;border-radius:12px}
+
+  /* ============================================
+     HERO (split: copy + hero image)
+     ============================================ */
+  .v-hero{
+    padding:64px 0 80px;
+    position:relative;
+  }
+  .v-hero-grid{
+    display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;
+  }
+  .v-hero-eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:7px 14px;background:var(--surface);
+    border:1px solid var(--line);border-radius:999px;
+    font-size:12px;color:var(--muted);font-weight:500;margin-bottom:28px;
+  }
+  .v-hero-eyebrow::before{
+    content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent)}
+    50%{box-shadow:0 0 0 10px transparent}
+  }
+  .v-h1{
+    font-family:var(--display-font);
+    font-size:clamp(48px,7vw,96px);
+    font-weight:500;line-height:.95;
+    letter-spacing:-.035em;color:var(--ink);
+    margin-bottom:24px;
+  }
+  .v-h1 em{font-style:italic;color:var(--accent);font-weight:400}
+  .v-deck{
+    font-size:18px;color:var(--ink2);
+    line-height:1.55;margin-bottom:36px;max-width:520px;
+    padding-left:14px;border-left:2px solid var(--accent);
+  }
+  .v-ctas{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:32px}
+  .v-meta-line{
+    font-family:var(--mono-font);font-size:12px;
+    color:var(--muted);letter-spacing:.08em;text-transform:uppercase;
+  }
+
+  .v-hero-image{
+    aspect-ratio:3/4;
+    overflow:hidden;
+    background:var(--paper);
+    border:1px solid var(--line);
+    position:relative;
+  }
+  .v-hero-image img{
+    width:100%;height:100%;object-fit:cover;
+    filter:contrast(1.05) saturate(.95);
+  }
+  .v-hero-image::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,transparent 50%,color-mix(in srgb, var(--ink) 20%, transparent) 100%);
+    pointer-events:none;
+  }
+  .v-hero-pricing{
+    position:absolute;top:24px;right:24px;
+    background:var(--bg);border:1px solid var(--ink);
+    padding:14px 18px;text-align:center;z-index:2;
+  }
+  .v-hero-pricing-tag{font-family:var(--mono-font);font-size:10px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase}
+  .v-hero-pricing-v{font-family:var(--display-font);font-weight:500;font-size:32px;line-height:1;color:var(--ink);margin:4px 0}
+  .v-hero-pricing-sub{font-family:var(--mono-font);font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+
+  /* ============================================
+     GALLERY — masonry rica de imágenes del giro
+     ============================================ */
+  .v-gallery{
+    padding:96px 0;background:var(--paper);
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  }
+  .v-gallery-head{display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end;margin-bottom:40px;border-bottom:1px solid var(--line);padding-bottom:24px}
+  .v-section-tag{
+    font-family:var(--mono-font);font-size:11px;
+    color:var(--accent);text-transform:uppercase;letter-spacing:.18em;
+    margin-bottom:12px;display:flex;align-items:center;gap:10px;
+  }
+  .v-section-tag::before{content:"";width:24px;height:1px;background:var(--accent)}
+  .v-section-h{
+    font-family:var(--display-font);
+    font-size:clamp(36px,5vw,64px);
+    font-weight:500;line-height:1;letter-spacing:-.03em;
+    color:var(--ink);
+  }
+  .v-section-h em{font-style:italic;color:var(--accent);font-weight:400}
+  .v-gallery-credits{
+    font-family:var(--mono-font);font-size:11px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.15em;text-align:right;line-height:1.7;
+  }
+  .v-gallery-credits b{color:var(--ink);font-weight:600}
+
+  .v-gallery-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:140px;gap:12px;
+  }
+  .v-gallery-item{
+    position:relative;overflow:hidden;border-radius:12px;
+    background:var(--surface);cursor:pointer;
+    transition:transform .35s cubic-bezier(.2,.8,.2,1);
+  }
+  .v-gallery-item:hover{transform:translateY(-4px)}
+  .v-gallery-item img{
+    width:100%;height:100%;object-fit:cover;
+    transition:transform .7s ease;
+  }
+  .v-gallery-item:hover img{transform:scale(1.07)}
+  .v-gallery-item::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55) 100%);
+    opacity:0;transition:opacity .3s ease;
+  }
+  .v-gallery-item:hover::after{opacity:1}
+  .v-gallery-item .tag{
+    position:absolute;bottom:14px;left:14px;
+    color:#fff;font-size:13px;font-weight:500;
+    background:rgba(0,0,0,.55);padding:5px 12px;border-radius:6px;
+    backdrop-filter:blur(4px);
+    opacity:0;transform:translateY(8px);
+    transition:all .3s ease;z-index:1;
+  }
+  .v-gallery-item:hover .tag{opacity:1;transform:translateY(0)}
+  .v-gallery-item.lg{grid-column:span 2;grid-row:span 2}
+  .v-gallery-item.md{grid-column:span 2;grid-row:span 1}
+  .v-gallery-item.sm{grid-column:span 1;grid-row:span 1}
+
+  /* ============================================
+     CONTEXT IMAGES — 3 fotos con caption
+     ============================================ */
+  .v-context{padding:96px 0;background:var(--bg)}
+  .v-context-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+    margin-top:40px;
+  }
+  .v-context-card{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;
+    transition:all .3s ease;
+  }
+  .v-context-card:hover{transform:translateY(-4px);box-shadow:0 16px 32px -12px rgba(0,0,0,.1)}
+  .v-context-img{
+    aspect-ratio:4/3;background:var(--paper);position:relative;overflow:hidden;
+  }
+  .v-context-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+  .v-context-card:hover .v-context-img img{transform:scale(1.05)}
+  .v-context-card-body{padding:22px 24px}
+  .v-context-num{
+    font-family:var(--display-font);font-style:italic;font-size:14px;
+    color:var(--accent);margin-bottom:6px;
+  }
+  .v-context-cap{
+    font-family:var(--display-font);font-weight:500;
+    font-size:18px;letter-spacing:-.01em;color:var(--ink);
+    line-height:1.3;
+  }
+
+  /* ============================================
+     FEATURES — 6 funciones específicas
+     ============================================ */
+  .v-features{padding:96px 0;background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .v-features-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);
+    border-radius:16px;overflow:hidden;margin-top:40px;
+  }
+  .v-feat{background:var(--surface);padding:32px 28px;transition:background .25s ease}
+  .v-feat:hover{background:var(--paper)}
+  .v-feat-ico{
+    width:44px;height:44px;background:var(--ink);color:var(--bg);
+    border-radius:10px;display:grid;place-items:center;margin-bottom:18px;
+    transition:all .25s ease;
+  }
+  .v-feat:hover .v-feat-ico{background:var(--accent);transform:rotate(-4deg)}
+  .v-feat h3{
+    font-family:var(--display-font);font-size:20px;font-weight:500;
+    letter-spacing:-.01em;margin-bottom:8px;color:var(--ink);
+  }
+  .v-feat p{font-size:14px;color:var(--muted);line-height:1.55}
+
+  /* ============================================
+     STATS
+     ============================================ */
+  .v-stats{
+    padding:80px 0;background:var(--ink);color:var(--bg);
+    position:relative;overflow:hidden;
+  }
+  .v-stats::before{
+    content:"";position:absolute;top:-40%;right:-15%;
+    width:600px;height:600px;
+    background:radial-gradient(circle,color-mix(in srgb, var(--accent) 25%, transparent) 0%,transparent 60%);
+    pointer-events:none;
+    animation:slowRotate 30s linear infinite;
+  }
+  @keyframes slowRotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .v-stats-inner{position:relative;z-index:1}
+  .v-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(255,255,255,.15)}
+  .v-stat{padding:32px 24px 0 0;border-right:1px solid rgba(255,255,255,.15)}
+  .v-stat:last-child{border-right:none}
+  .v-stat:not(:first-child){padding-left:24px}
+  .v-stat-v{
+    font-family:var(--display-font);font-weight:500;
+    font-size:clamp(48px,6vw,76px);line-height:1;letter-spacing:-.03em;
+    color:var(--bg);margin-bottom:8px;font-variant-numeric:tabular-nums;
+  }
+  .v-stat-l{font-size:13px;color:rgba(255,255,255,.65);line-height:1.45}
+
+  /* ============================================
+     PULL QUOTE
+     ============================================ */
+  .v-quote{padding:120px 0;text-align:center;background:var(--bg);position:relative}
+  .v-quote::before{
+    content:"\201C";
+    position:absolute;top:50%;left:50%;
+    font-family:var(--display-font);font-size:280px;font-weight:500;
+    color:color-mix(in srgb, var(--accent) 12%, transparent);
+    transform:translate(-50%,-50%);line-height:.5;
+    pointer-events:none;
+  }
+  .v-quote-inner{position:relative;z-index:1;max-width:880px;margin:0 auto}
+  .v-quote-text{
+    font-family:var(--display-font);font-weight:400;font-style:italic;
+    font-size:clamp(24px,2.8vw,40px);line-height:1.25;letter-spacing:-.015em;
+    color:var(--ink);margin-bottom:32px;
+  }
+  .v-quote-text .hl{
+    background:color-mix(in srgb, var(--accent) 25%, transparent);
+    padding:0 4px;
+  }
+  .v-quote-sig{
+    font-family:var(--script-font);font-size:36px;color:var(--accent);
+    transform:rotate(-2deg);display:inline-block;margin-bottom:8px;line-height:1;
+  }
+  .v-quote-attr{
+    font-family:var(--mono-font);font-size:11px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.18em;
+  }
+
+  /* ============================================
+     ROBOS — dark section
+     ============================================ */
+  .v-thefts{
+    background:#0A0908;color:#F5F1E8;padding:96px 0;
+    position:relative;overflow:hidden;
+    border-top:1px solid var(--line);
+  }
+  .v-thefts::before{
+    content:"";position:absolute;inset:0;
+    background-image:repeating-linear-gradient(0deg,transparent 0,transparent 2px,rgba(255,255,255,.015) 2px,rgba(255,255,255,.015) 4px);
+    pointer-events:none;
+  }
+  .v-thefts::after{
+    content:"";position:absolute;top:-30%;right:-15%;
+    width:600px;height:600px;
+    background:radial-gradient(circle,rgba(220,38,38,.18) 0%,transparent 60%);
+    pointer-events:none;
+  }
+  .v-thefts-inner{position:relative;z-index:1}
+  .v-thefts-head{text-align:center;margin-bottom:56px}
+  .v-thefts-tag{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:6px 14px;background:rgba(220,38,38,.15);color:#FCA5A5;
+    border:1px solid rgba(220,38,38,.4);
+    font-family:var(--mono-font);font-size:11px;font-weight:600;
+    text-transform:uppercase;letter-spacing:.18em;margin-bottom:20px;
+  }
+  .v-thefts-tag .dot{
+    width:8px;height:8px;border-radius:50%;background:#EF4444;
+    animation:blinkRed 1.4s infinite;box-shadow:0 0 10px #EF4444;
+  }
+  @keyframes blinkRed{0%,100%{opacity:1}50%{opacity:.4}}
+  .v-thefts-h{
+    font-family:var(--display-font);font-weight:500;
+    font-size:clamp(34px,4.5vw,60px);line-height:1.05;letter-spacing:-.025em;
+    color:#F5F1E8;margin-bottom:14px;
+  }
+  .v-thefts-h em{font-style:italic;color:#FCA5A5;font-weight:400}
+  .v-thefts-lead{font-size:16px;color:#A1A1A1;max-width:580px;margin:0 auto;line-height:1.6}
+
+  .v-theft-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .v-theft{
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);
+    border-radius:14px;overflow:hidden;
+    transition:all .3s ease;
+  }
+  .v-theft:hover{transform:translateY(-4px);border-color:rgba(220,38,38,.4)}
+  .v-theft-rob{padding:24px 24px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .v-theft-tag{
+    font-family:var(--mono-font);font-size:11px;color:#FCA5A5;
+    text-transform:uppercase;letter-spacing:.15em;
+    margin-bottom:14px;display:flex;align-items:center;gap:8px;font-weight:600;
+  }
+  .v-theft h4{
+    font-family:var(--display-font);font-size:20px;font-weight:500;
+    color:#fff;margin-bottom:10px;letter-spacing:-.01em;line-height:1.15;
+  }
+  .v-theft-rob p{font-size:14px;color:#D4D4D4;line-height:1.6}
+  .v-theft-fix{padding:20px 24px 24px;background:rgba(34,197,94,.06)}
+  .v-theft-fix-tag{
+    font-family:var(--mono-font);font-size:11px;color:#86EFAC;
+    text-transform:uppercase;letter-spacing:.15em;
+    margin-bottom:10px;display:flex;align-items:center;gap:8px;font-weight:600;
+  }
+  .v-theft-fix p{font-size:13.5px;color:#E5E5E5;line-height:1.6}
+  .v-theft-fix p strong{color:#86EFAC;font-weight:600}
+
+  /* ============================================
+     CTA FINAL
+     ============================================ */
+  .v-cta{padding:120px 0;text-align:center;background:var(--bg)}
+  .v-cta-inner{max-width:880px;margin:0 auto}
+  .v-cta-tag{
+    font-family:var(--mono-font);font-size:12px;color:var(--accent);
+    text-transform:uppercase;letter-spacing:.2em;margin-bottom:18px;
+    display:flex;align-items:center;justify-content:center;gap:14px;
+  }
+  .v-cta-tag::before,.v-cta-tag::after{content:"";width:40px;height:1px;background:var(--accent)}
+  .v-cta-h{
+    font-family:var(--display-font);font-weight:500;
+    font-size:clamp(42px,5.5vw,76px);line-height:1;letter-spacing:-.03em;
+    color:var(--ink);margin-bottom:20px;
+  }
+  .v-cta-h em{font-style:italic;color:var(--accent);font-weight:400}
+  .v-cta-p{font-size:18px;color:var(--muted);max-width:520px;margin:0 auto 32px;line-height:1.55}
+  .v-cta-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+  .v-cta-checks{
+    display:flex;gap:28px;justify-content:center;flex-wrap:wrap;
+    padding-top:28px;border-top:1px solid var(--line);
+    font-family:var(--mono-font);font-size:11px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.18em;
+  }
+  .v-cta-checks div{display:flex;align-items:center;gap:8px}
+  .v-cta-checks svg{color:var(--accent)}
+
+  /* ============================================
+     FOOTER
+     ============================================ */
+  .v-footer{
+    background:var(--paper);border-top:1px solid var(--line);
+    padding:48px 0 28px;
+  }
+  .v-foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:32px}
+  .v-foot-brand p{font-size:14px;color:var(--muted);line-height:1.6;max-width:300px;margin-top:14px}
+  .v-foot-powered{
+    margin-top:18px;padding-top:14px;border-top:1px solid var(--line);
+    font-family:var(--mono-font);font-size:10px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.2em;
+  }
+  .v-foot-powered b{color:var(--ink)}
+  .v-foot-col h5{
+    font-family:var(--mono-font);font-size:11px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.15em;margin-bottom:14px;font-weight:600;
+  }
+  .v-foot-col ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+  .v-foot-col a{font-size:14px;color:var(--ink2)}
+  .v-foot-col a:hover{color:var(--accent)}
+  .v-foot-bottom{
+    padding-top:24px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+    font-family:var(--mono-font);font-size:11px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.12em;
+  }
+
+  /* ============================================
+     VIBES — overrides por familia
+     ============================================ */
+  /* DARK PREMIUM (Navaja, etc.) */
+  body[data-vibe="darkPremium"] .v-h1{text-transform:uppercase;letter-spacing:.01em;font-weight:500}
+  body[data-vibe="darkPremium"] .v-h1 em{font-style:normal;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:4px;text-underline-offset:6px}
+  body[data-vibe="darkPremium"] .v-section-h,
+  body[data-vibe="darkPremium"] .v-thefts-h,
+  body[data-vibe="darkPremium"] .v-cta-h{text-transform:uppercase;letter-spacing:.01em}
+  body[data-vibe="darkPremium"] .v-section-h em,
+  body[data-vibe="darkPremium"] .v-cta-h em{font-style:normal}
+  body[data-vibe="darkPremium"] .v-feat h3,
+  body[data-vibe="darkPremium"] .v-theft h4,
+  body[data-vibe="darkPremium"] .v-context-cap{text-transform:uppercase;letter-spacing:.04em}
+  body[data-vibe="darkPremium"] ::selection{color:var(--ink)}
+
+  /* VIBRANT (Comandero) — bold chunky */
+  body[data-vibe="vibrant"] .v-h1{text-transform:uppercase;letter-spacing:-.04em}
+  body[data-vibe="vibrant"] .v-h1 em{
+    font-style:normal;
+    background:linear-gradient(180deg,transparent 60%,var(--accent2) 60%);
+    padding:0 4px;color:var(--ink);
+  }
+  body[data-vibe="vibrant"] .v-section-h{text-transform:uppercase}
+  body[data-vibe="vibrant"] .v-section-h em{
+    font-style:normal;
+    background:linear-gradient(180deg,transparent 60%,var(--accent) 60%);
+    padding:0 4px;color:var(--ink);
+  }
+  body[data-vibe="vibrant"] .v-cta-h em{
+    font-style:normal;color:var(--accent2);
+  }
+
+  /* CLINICAL (Receta) — clean modern */
+  body[data-vibe="clinical"] .v-h1{font-weight:700;letter-spacing:-.04em}
+  body[data-vibe="clinical"] .v-h1 em{font-style:normal;color:var(--accent);font-weight:800}
+  body[data-vibe="clinical"] .v-section-h em{font-style:normal;color:var(--accent);font-weight:700}
+  body[data-vibe="clinical"] .v-feat h3{font-weight:700}
+
+  /* WARM LOCAL (Tendito) — friendly serif italic accents */
+  body[data-vibe="warmLocal"] .v-h1 em{font-family:var(--script-font);font-weight:400;font-size:1.15em}
+  body[data-vibe="warmLocal"] .v-section-h em{font-family:var(--script-font);font-weight:400;font-size:1.1em}
+
+  /* EDITORIAL (Pareo) — italic refined, default */
+  /* (no overrides needed - default styles handle this) */
+
+  /* ============================================
+     RESPONSIVE
+     ============================================ */
+  @media (max-width:980px){
+    .v-nav-links{display:none}
+    .v-hero-grid{grid-template-columns:1fr;gap:32px}
+    .v-hero-image{aspect-ratio:4/3}
+    .v-gallery-grid{grid-template-columns:repeat(2,1fr);grid-auto-rows:120px}
+    .v-gallery-item.lg,.v-gallery-item.md{grid-column:span 2}
+    .v-gallery-item.sm{grid-column:span 1}
+    .v-context-grid{grid-template-columns:1fr}
+    .v-features-grid{grid-template-columns:1fr}
+    .v-stats-grid{grid-template-columns:1fr 1fr}
+    .v-stat:nth-child(2){border-right:none}
+    .v-stat:nth-child(3),.v-stat:nth-child(4){border-top:1px solid rgba(255,255,255,.15);padding-top:32px}
+    .v-theft-grid{grid-template-columns:1fr}
+    .v-foot-grid{grid-template-columns:1fr 1fr}
+    .v-gallery-head{grid-template-columns:1fr;gap:14px}
+    .v-gallery-credits{text-align:left}
+  }
+  @media (max-width:640px){
+    .v-stats-grid{grid-template-columns:1fr}
+    .v-stat{border-right:none!important;padding-left:0!important;border-top:1px solid rgba(255,255,255,.15);padding-top:24px}
+    .v-stat:first-child{border-top:none}
+    .v-foot-grid{grid-template-columns:1fr}
+    .container{padding:0 20px}
+  }
+</style>
+</head>
+<body>
+
+<!-- PICKER (default state when no ?b= param) -->
+<div id="picker">
+  <h1>Motor de marcas <em>Volvix</em></h1>
+  <p>Elige una marca para ver su landing. La misma estructura, identidades completamente distintas — cambian fuentes, paleta, copy e imágenes según el giro.</p>
+  <div class="picker-grid" id="picker-grid"></div>
+</div>
+
+<!-- APP — rendered dynamically once brand is selected -->
+<div id="app"></div>
+
+<!-- Brand config (sourced from brands.config.js) -->
+<script src="brands.config.js"></script>
+
+<script>
+'use strict';
+
+// ============================================================
+// MOTOR — render any brand from config
+// ============================================================
+(function(){
+
+  // ICONS (Tabler-style, line)
+  const ICONS = {
+    archive:  '<path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/>',
+    bookmark: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+    percent:  '<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+    camera:   '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+    barcode:  '<path d="M3 5v14M7 5v14M11 5v14M15 5v14M19 5v14"/>',
+    truck:    '<rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+    grid:     '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+    monitor:  '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+    split:    '<polyline points="22 12 18 8 18 16 22 12"/><polyline points="2 12 6 16 6 8 2 12"/>',
+    edit:     '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+    gift:     '<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/>',
+    calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+    message:  '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/>',
+    package:  '<path d="M16.5 9.4L7.5 4.21M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/>',
+    star:     '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    bell:     '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/>',
+    shuffle:  '<polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/>',
+    shield:   '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    phone:    '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  };
+  function icon(name){
+    return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[name] || ICONS.star) + '</svg>';
+  }
+
+  // ============================================
+  // APPLY PALETTE + FONTS TO CSS VARS
+  // ============================================
+  function applyTheme(brand){
+    const r = document.documentElement;
+    const p = brand.palette;
+    r.style.setProperty('--bg',      p.bg);
+    r.style.setProperty('--surface', p.surface);
+    r.style.setProperty('--paper',   p.paper);
+    r.style.setProperty('--ink',     p.ink);
+    r.style.setProperty('--ink2',    p.ink2);
+    r.style.setProperty('--muted',   p.muted);
+    r.style.setProperty('--line',    p.line);
+    r.style.setProperty('--accent',  p.accent);
+    r.style.setProperty('--accent2', p.accent2 || p.accent);
+    r.style.setProperty('--display-font', '"' + brand.fonts.display + '", serif');
+    r.style.setProperty('--body-font',    '"' + brand.fonts.body + '", system-ui, sans-serif');
+    r.style.setProperty('--script-font',  '"' + brand.fonts.script + '", cursive');
+    r.style.setProperty('--mono-font',    '"' + brand.fonts.mono + '", monospace');
+    document.body.setAttribute('data-vibe', brand.vibe);
+
+    // SEO
+    document.title = brand.brand + ' — ' + brand.tagline;
+    const desc = document.querySelector('meta[name="description"]');
+    if (desc) desc.setAttribute('content', brand.tagline);
+  }
+
+  // ============================================
+  // RENDER SECTIONS
+  // ============================================
+  function renderNav(b){
+    return `<nav class="vmotor-nav">
+      <div class="container nav-inner">
+        <a href="#" class="v-logo">
+          <div class="v-logo-mark">${b.brand[0]}</div>
+          ${b.brand}
+        </a>
+        <div class="v-nav-links">
+          <a href="#galeria">Galería</a>
+          <a href="#contexto">Sistema</a>
+          <a href="#funciones">Funciones</a>
+          <a href="#perdidas">Pérdidas</a>
+        </div>
+        <div class="v-nav-cta">
+          <a href="#" class="v-btn v-btn-ghost">Acceder</a>
+          <a href="#cta" class="v-btn v-btn-primary">Empezar gratis</a>
+        </div>
+      </div>
+    </nav>`;
+  }
+
+  function renderHero(b){
+    return `<section class="v-hero">
+      <div class="container v-hero-grid">
+        <div>
+          <div class="v-hero-eyebrow">${b.hero.eyebrow}</div>
+          <h1 class="v-h1">${b.hero.h1}</h1>
+          <p class="v-deck">${b.hero.deck}</p>
+          <div class="v-ctas">
+            <a href="#cta" class="v-btn v-btn-primary v-btn-lg">
+              ${b.hero.ctaPrimary}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#galeria" class="v-btn v-btn-ghost v-btn-lg">${b.hero.ctaSecondary}</a>
+          </div>
+          <div class="v-meta-line">${b.hero.metaLine}</div>
+        </div>
+        <div class="v-hero-image">
+          <div class="v-hero-pricing">
+            <div class="v-hero-pricing-tag">Desde</div>
+            <div class="v-hero-pricing-v">$0</div>
+            <div class="v-hero-pricing-sub">MXN / mes</div>
+          </div>
+          <img src="${b.images.hero}" alt="${b.images.heroAlt || b.brand}" onerror="this.style.opacity=.3">
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function renderGallery(b){
+    const items = b.images.showcase.map((img, i) => `
+      <div class="v-gallery-item ${img.size || 'md'}">
+        <img src="${img.url}" alt="${img.tag}" loading="lazy" onerror="this.style.opacity=.2">
+        <span class="tag">${img.tag}</span>
+      </div>
+    `).join('');
+    return `<section class="v-gallery" id="galeria">
+      <div class="container">
+        <div class="v-gallery-head">
+          <div>
+            <div class="v-section-tag">— Catálogo</div>
+            <h2 class="v-section-h">Así se ve ${b.brand} en <em>${b.giroPlural}</em></h2>
+          </div>
+          <div class="v-gallery-credits">
+            ${b.images.showcase.length} imágenes<br>
+            <b>Catálogo en vivo</b><br>
+            Hecho para ${b.giro}
+          </div>
+        </div>
+        <div class="v-gallery-grid">${items}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderContext(b){
+    const cards = b.images.context.map((c, i) => `
+      <div class="v-context-card">
+        <div class="v-context-img">
+          <img src="${c.url}" alt="${c.caption}" loading="lazy" onerror="this.style.opacity=.2">
+        </div>
+        <div class="v-context-card-body">
+          <div class="v-context-num">No. 0${i+1}</div>
+          <div class="v-context-cap">${c.caption}</div>
+        </div>
+      </div>
+    `).join('');
+    return `<section class="v-context" id="contexto">
+      <div class="container">
+        <div class="v-section-tag">— Sistema en uso</div>
+        <h2 class="v-section-h">Así funciona en <em>tu ${b.giro}</em></h2>
+        <div class="v-context-grid">${cards}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderFeatures(b){
+    const cards = b.features.map(f => `
+      <div class="v-feat">
+        <div class="v-feat-ico">${icon(f.ico)}</div>
+        <h3>${f.h}</h3>
+        <p>${f.d}</p>
+      </div>
+    `).join('');
+    return `<section class="v-features" id="funciones">
+      <div class="container">
+        <div class="v-section-tag">— Funciones específicas</div>
+        <h2 class="v-section-h">6 herramientas para <em>${b.giroPlural}</em></h2>
+        <div class="v-features-grid">${cards}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderStats(b){
+    const cells = b.stats.map(s => `
+      <div class="v-stat">
+        <div class="v-stat-v" data-target="${s.v}" data-prefix="${s.prefix||''}" data-suffix="${s.suffix||''}">${s.prefix||''}0${s.suffix||''}</div>
+        <div class="v-stat-l">${s.l}</div>
+      </div>
+    `).join('');
+    return `<section class="v-stats">
+      <div class="container v-stats-inner">
+        <div class="v-stats-grid">${cells}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderQuote(b){
+    return `<section class="v-quote">
+      <div class="container v-quote-inner">
+        <p class="v-quote-text">${b.quote.text}</p>
+        <div class="v-quote-sig">— ${b.quote.sig}</div>
+        <div class="v-quote-attr">${b.quote.role}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderThefts(b){
+    const cards = b.thefts.map((t, i) => `
+      <article class="v-theft">
+        <div class="v-theft-rob">
+          <div class="v-theft-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Robo 0${i+1}
+          </div>
+          <h4>${t.title}</h4>
+          <p>${t.rob}</p>
+        </div>
+        <div class="v-theft-fix">
+          <div class="v-theft-fix-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
+            Cómo ${b.brand} lo evita
+          </div>
+          <p>${t.fix}</p>
+        </div>
+      </article>
+    `).join('');
+    return `<section class="v-thefts" id="perdidas">
+      <div class="container v-thefts-inner">
+        <div class="v-thefts-head">
+          <div class="v-thefts-tag"><span class="dot"></span>Pérdidas invisibles</div>
+          <h2 class="v-thefts-h">Así te roban en <em>tu ${b.giro}</em></h2>
+          <p class="v-thefts-lead">Es incómodo decirlo, pero todos los dueños de ${b.giroPlural} lo viven. Estos son los 3 más comunes y cómo ${b.brand} los corta de raíz.</p>
+        </div>
+        <div class="v-theft-grid">${cards}</div>
+      </div>
+    </section>`;
+  }
+
+  function renderCTA(b){
+    return `<section class="v-cta" id="cta">
+      <div class="container v-cta-inner">
+        <div class="v-cta-tag">Empezar hoy</div>
+        <h2 class="v-cta-h">Tu siguiente <em>venta</em>, más rápida.</h2>
+        <p class="v-cta-p">Crea tu cuenta, descarga ${b.brand}, configura tu ${b.giro} y empieza a vender hoy mismo. <strong>Sin tarjeta. Sin compromiso.</strong></p>
+        <div class="v-cta-ctas">
+          <a href="#" class="v-btn v-btn-primary v-btn-lg">
+            Empezar gratis →
+          </a>
+          <a href="#" class="v-btn v-btn-ghost v-btn-lg">Hablar con humano</a>
+        </div>
+        <div class="v-cta-checks">
+          <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Sin tarjeta</div>
+          <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Setup 5 min</div>
+          <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Offline 100%</div>
+          <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Soporte MX</div>
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function renderFooter(b){
+    return `<footer class="v-footer">
+      <div class="container">
+        <div class="v-foot-grid">
+          <div class="v-foot-brand">
+            <a href="#" class="v-logo">
+              <div class="v-logo-mark">${b.brand[0]}</div>
+              ${b.brand}
+            </a>
+            <p>${b.tagline}.</p>
+            <div class="v-foot-powered">Powered by <b>Volvix Systems</b></div>
+          </div>
+          <div class="v-foot-col"><h5>Sistema</h5><ul>
+            <li><a href="#galeria">Catálogo</a></li>
+            <li><a href="#contexto">En uso</a></li>
+            <li><a href="#funciones">Funciones</a></li>
+            <li><a href="#perdidas">Pérdidas</a></li>
+          </ul></div>
+          <div class="v-foot-col"><h5>Empezar</h5><ul>
+            <li><a href="#">Crear cuenta</a></li>
+            <li><a href="#">Precios</a></li>
+            <li><a href="#">Demo</a></li>
+            <li><a href="#">Soporte</a></li>
+          </ul></div>
+          <div class="v-foot-col"><h5>Volvix</h5><ul>
+            <li><a href="../motor.html">Otros giros</a></li>
+            <li><a href="#">Nosotros</a></li>
+            <li><a href="#">Privacidad</a></li>
+            <li><a href="#">Términos</a></li>
+          </ul></div>
+        </div>
+        <div class="v-foot-bottom">
+          <span>© 2026 ${b.brand} · Una marca de Volvix Systems</span>
+          <span>MX · NL · Hecho en México</span>
+        </div>
+      </div>
+    </footer>`;
+  }
+
+  // ============================================
+  // MAIN RENDER
+  // ============================================
+  function renderBrand(b){
+    applyTheme(b);
+    const app = document.getElementById('app');
+    app.innerHTML = [
+      renderNav(b),
+      renderHero(b),
+      renderGallery(b),
+      renderContext(b),
+      renderFeatures(b),
+      renderStats(b),
+      renderQuote(b),
+      renderThefts(b),
+      renderCTA(b),
+      renderFooter(b),
+    ].join('\n');
+
+    document.body.classList.add('loaded');
+
+    // Count-up animation on stats
+    const so = new IntersectionObserver(es => {
+      es.forEach(e => {
+        if (e.isIntersecting && !e.target.dataset.counted) {
+          e.target.dataset.counted = '1';
+          countUp(e.target);
+        }
+      });
+    }, {threshold:.5});
+    document.querySelectorAll('.v-stat-v[data-target]').forEach(el => so.observe(el));
+
+    // Reveal on scroll
+    const ro = new IntersectionObserver(es => {
+      es.forEach(e => { if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; } });
+    }, {threshold:.1});
+    ['.v-gallery','.v-context','.v-features','.v-stats','.v-quote','.v-thefts','.v-cta'].forEach(sel => {
+      const el = document.querySelector(sel);
+      if (el) {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(24px)';
+        el.style.transition = 'opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1)';
+        ro.observe(el);
+      }
+    });
+  }
+
+  function countUp(el){
+    const target = parseFloat(el.dataset.target);
+    if (isNaN(target) || target === 0) {
+      el.textContent = (el.dataset.prefix||'') + el.dataset.target + (el.dataset.suffix||'');
+      return;
+    }
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    const start = performance.now();
+    const dur = 1600;
+    function step(now){
+      const p = Math.min((now-start)/dur, 1);
+      const eased = 1 - Math.pow(1-p, 3);
+      const v = Math.round(target * eased);
+      const formatted = target >= 1000 ? v.toLocaleString('es-MX') : v;
+      el.textContent = prefix + formatted + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // ============================================
+  // PICKER (default home)
+  // ============================================
+  function renderPicker(){
+    const grid = document.getElementById('picker-grid');
+    if (!grid) return;
+    grid.innerHTML = Object.entries(BRANDS).map(([slug, b]) => `
+      <a class="picker-card" href="?b=${slug}">
+        <div class="picker-brand" style="color:${b.palette.accent}">${b.brand}</div>
+        <div class="picker-giro">Sistema para ${b.giroPlural}</div>
+      </a>
+    `).join('');
+  }
+
+  // ============================================
+  // BOOT
+  // ============================================
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('b') || params.get('brand');
+  if (slug && BRANDS[slug]) {
+    renderBrand(BRANDS[slug]);
+  } else {
+    renderPicker();
+  }
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,104 @@
+{
+  "slug": "masa",
+  "brand": "Masa",
+  "tagline": "El sistema para panaderías artesanales donde la masa madre se respeta y los lotes premium se rastrean",
+  "giro": "panadería artesanal",
+  "giroPlural": "panaderías artesanales",
+  "vibe": "artisan",
+  "palette": {
+    "bg": "#F5EFE2",
+    "surface": "#FFFFFF",
+    "paper": "#E8DDC0",
+    "ink": "#1F1812",
+    "ink2": "#3A2F20",
+    "muted": "#7A6A50",
+    "line": "#D0BE95",
+    "accent": "#5C3818",
+    "accent2": "#A78760"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para panaderías artesanales · 2026",
+    "h1": "Cada <em>hogaza</em>,<br>cada <em>fermentación</em>,<br>respetada.",
+    "deck": "El POS hecho para que la masa madre tenga sus 72 horas, cada hogaza salga al horno en su momento, y los suscriptores de pan fresco semanal reciban su lote.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?sourdough,artisan,bread&q=85",
+    "heroAlt": "Hogaza de masa madre con corteza",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?sourdough,bread&q=80", "tag": "Masa madre clásica", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?baguette,french&q=80", "tag": "Baguette francesa", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?focaccia,olive&q=80", "tag": "Focaccia con aceite", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?rye,bread&q=80", "tag": "Pan de centeno", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ciabatta,italian&q=80", "tag": "Ciabatta italiana", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?seeds,bread&q=80", "tag": "Multigrano", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?bakery,artisan&q=80", "tag": "Panadería artesanal", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?starter,sourdough&q=80", "tag": "Masa madre activa", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?bread,window&q=80", "tag": "Aparador con pan", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?baker,kneading&q=80", "caption": "Panadero amasa al alba"},
+      {"url": "https://source.unsplash.com/random/800x600/?dough,proofing&q=80", "caption": "Masa fermentando 72h"},
+      {"url": "https://source.unsplash.com/random/800x600/?subscriber,bread&q=80", "caption": "Cliente recoge lote semanal"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Horno · masa · en vivo",
+    "title": "Tu horno, <em>hogaza por hogaza</em>, sin atajos",
+    "deck": "Cada lote con fermentación rastreada. KDS muestra: masa madre lote 47 en hora 64/72. Sistema avisa cuando está lista. Cero panes con poca fermentación.",
+    "secondary": "En las panaderías artesanales, un pan sin fermentar bien es 1 cliente experto que nota y deja la suscripción.",
+    "data": {
+      "orders": [
+        {"table": "LOTE-48", "name": "Masa madre rye", "state": "urgent", "items": ["12 hogazas | hora 68/72", "Listo a las 6:00 am"], "waitMin": 240},
+        {"table": "LOTE-49", "name": "Baguettes francesas", "state": "prep", "items": ["24 baguettes | hora 16/24", "Listo a las 8:00 am"], "waitMin": 480},
+        {"table": "ORDEN-12", "name": "Sra. Carmen (susc)", "state": "queue", "items": ["1 hogaza masa madre", "1 focaccia"], "waitMin": 0},
+        {"table": "EVENTO-3", "name": "Restaurante La Trattoria", "state": "ready", "items": ["20 baguettes para mesa"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Fermentación rastreada por lote", "d": "Cada lote con hora de inicio y fin. Sistema avisa cuando llega a 72h. Cero hogazas horneadas con 48h por prisa."},
+    {"ico": "archive", "h": "Inventario por harina premium", "d": "Harina integral: 25 kg. Centeno: 12 kg. Espelta: 8 kg. Cuando baja, alerta para pedir."},
+    {"ico": "bookmark", "h": "Suscripción semanal", "d": "Cliente paga $X mensual, recibe 2 hogazas cada viernes. Sistema cobra automático y agenda producción."},
+    {"ico": "truck", "h": "Entrega B2B a restaurantes", "d": "Restaurante pide 20 baguettes diarias. Sistema agenda producción y entrega. Factura automática."},
+    {"ico": "percent", "h": "Margen por hogaza premium", "d": "Hogaza masa madre $185 costo $42. Margen 77%. Sistema te dice qué empujar para suscriptores."},
+    {"ico": "edit", "h": "Receta y proceso guardados", "d": "Cada pan con su receta digital. Si entra panadero nuevo, replica receta exacta. Cero panes diferentes entre días."}
+  ],
+  "stats": [
+    {"v": "94", "l": "Suscriptores activos"},
+    {"v": "144", "l": "Hogazas semanales"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis clientes premium <span class=\"hl\">notaban cuando la masa madre tenía menos fermentación</span>. Con Masa cada lote tiene su cronómetro digital. Mi suscripción subió 4x porque calidad es constante.",
+    "sig": "Sra. Antonia C.",
+    "role": "Panadería Masa Madre, Roma Norte, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Fermentación 'apurada' por prisa",
+      "rob": "Panadero hornea masa madre a las 48h cuando debe ser 72h. Calidad baja. Suscriptores notan, cancelan. Pérdida de $300-500 por suscriptor al mes.",
+      "fix": "Cada lote con <strong>cronómetro digital obligatorio</strong>. Sistema no permite hornear hasta cumplir tiempo. Cero panes con poca fermentación."
+    },
+    {
+      "title": "Hogaza 'mal salida' que se llevó",
+      "rob": "Panadero reporta hogaza 'mal salida' del horno y se la lleva. En realidad está perfecta. $185 cada vez. 1-2 por semana = $750-1,500 al mes.",
+      "fix": "Descartes con <strong>foto y autorización del dueño obligatoria</strong>. Sistema audita merma. Si pasa de 3%, alerta."
+    },
+    {
+      "title": "Harina premium 'rendida' con regular",
+      "rob": "Panadero mezcla harina premium ($60/kg) con regular ($25/kg) en 50/50. Cobra como premium. $17/kg de diferencia por kg cambiado.",
+      "fix": "Harinas <strong>etiquetadas con código y báscula al usar</strong>. Sistema cuadra harina usada vs panes producidos por tipo. Diferencias alertan."
+    }
+  ]
+}

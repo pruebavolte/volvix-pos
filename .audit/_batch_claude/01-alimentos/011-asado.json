@@ -1,0 +1,104 @@
+{
+  "slug": "asado",
+  "brand": "Asado",
+  "tagline": "El sistema para parrillas argentinas donde el corte se pesa al gramo y el malbec rinde lo que debe",
+  "giro": "parrilla argentina",
+  "giroPlural": "parrillas argentinas",
+  "vibe": "darkPremium",
+  "palette": {
+    "bg": "#1A0F08",
+    "surface": "#2A1810",
+    "paper": "#3A2418",
+    "ink": "#F0E2C8",
+    "ink2": "#D0B888",
+    "muted": "#8A6A45",
+    "line": "#4D3120",
+    "accent": "#8B0000",
+    "accent2": "#C9A85C"
+  },
+  "fonts": {
+    "display": "Playfair Display",
+    "body": "Inter",
+    "script": "Italianno",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para parrillas argentinas en México · 2026",
+    "h1": "Cada <em>bife</em>,<br>cada <em>chorizo</em>,<br>al punto.",
+    "deck": "El POS hecho para que el ojo de bife se cobre como ojo de bife, el malbec no se 'evapore' del cellar, y la parrilla salga con el término exacto que pidió cada mesa.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?steak,argentino,parrilla&q=85",
+    "heroAlt": "Bife de chorizo a la parrilla con malbec",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?asado,parrilla&q=80", "tag": "Asado argentino", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bife,chorizo&q=80", "tag": "Bife de chorizo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?provoleta,queso&q=80", "tag": "Provoleta a la plancha", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?chimichurri,verde&q=80", "tag": "Chimichurri casero", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?empanadas,argentinas&q=80", "tag": "Empanadas salteñas", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?malbec,vino&q=80", "tag": "Malbec mendocino", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?parrillada,carbon&q=80", "tag": "Parrilla al carbón", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?morcilla,chorizo&q=80", "tag": "Achuras variadas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?restaurant,argentino&q=80", "tag": "Salón íntimo", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?parrillero,trabajo&q=80", "caption": "Parrillero voltea bifes al punto"},
+      {"url": "https://source.unsplash.com/random/800x600/?sommelier,vino&q=80", "caption": "Mozo descorcha malbec"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,steak&q=80", "caption": "Comensal disfruta su corte"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Parrilla · salón · en vivo",
+    "title": "Tu parrilla, <em>corte por corte</em>, al término exacto",
+    "deck": "Cada orden con corte, peso y término. KDS muestra: ojo de bife 350g término medio. Parrillero sabe cuándo voltear. Cero bifes pasados de cocción.",
+    "secondary": "En las parrillas, un bife mal cocido es 1 cliente que no vuelve = $1,500-3,000 de LTV perdido.",
+    "data": {
+      "orders": [
+        {"table": "M12", "name": "Don Federico", "state": "urgent", "items": ["Ojo bife 400g|término medio", "Provoleta", "Malbec Catena"], "waitMin": 18},
+        {"table": "M04", "name": "Sra. Maldonado", "state": "prep", "items": ["Vacío 350g|jugoso", "Ensalada mixta", "Quilmes"], "waitMin": 14},
+        {"table": "M08", "name": "Pareja aniv.", "state": "queue", "items": ["Para 2: parrillada mixta 1.2 kg", "1 Malbec Reserva"], "waitMin": 22},
+        {"table": "M06", "name": "Familia", "state": "ready", "items": ["3 empanadas", "1 provoleta", "Bife 300g cocido"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Báscula que pesa el corte exacto", "d": "Cada bife pesado al servir. 350g de ojo de bife = $X. Sistema verifica. Cero clientes que pagan por 400g y reciben 320g."},
+    {"ico": "archive", "h": "Inventario por corte premium", "d": "Ojo de bife: 8 kg. Vacío: 12 kg. Entraña: 5 kg. Cuando bajas de 2 kg, alerta. Cero 'ya no hay ojo de bife' a las 9 pm."},
+    {"ico": "monitor", "h": "Término visible en KDS por color", "d": "Jugoso (azul), medio (verde), cocido (rojo). Parrillero ve sin equivocarse. Cero bifes devueltos por término malo."},
+    {"ico": "calendar", "h": "Cellar de vinos con rotación", "d": "Malbecs por añada. Sistema sugiere cuáles vender primero por edad de la botella. Cero vinos pasados que pierden valor."},
+    {"ico": "percent", "h": "Margen real por corte vendido", "d": "Cada corte con su costo: ojo bife $480/kg, vendes a $1,200. Sistema te dice margen real. Cero precios al cálculo."},
+    {"ico": "split", "h": "Cuenta dividida por pareja o por mesa", "d": "Mesa de 6 con dos parejas. Sistema divide por pareja, por persona o por igual. Cero matemáticas mentales al cerrar la mesa."}
+  ],
+  "stats": [
+    {"v": "47", "l": "Cortes servidos hoy"},
+    {"v": "12", "l": "Botellas malbec vendidas"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi parrillero <span class=\"hl\">'compensaba' con vacío cuando se le quemaba el ojo de bife</span>. El cliente terminaba pagando vacío al precio de ojo. Con Asado cada corte tiene su precio fijo. Cero pleitos y subí margen 18%.",
+    "sig": "Don Diego F.",
+    "role": "Parrilla La Pampa, San Ángel, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Corte premium 'cambiado' al cocinar",
+      "rob": "Parrillero sirve vacío ($380/kg) cuando se le quemó el ojo de bife ($820/kg). Cliente no nota porque el chimichurri lo cubre. $400-600 por cambio.",
+      "fix": "Cada corte <strong>asignado a su pieza de inventario al cortar</strong>. Si lo cambia, requiere autorización. Sistema cuadra kilos vendidos vs cobrados."
+    },
+    {
+      "title": "Malbec 'evaporado' del cellar",
+      "rob": "Mozo lleva botella a la mesa, abre, sirve una copa al cliente y guarda media botella para él. Reporta como 'evaporación natural'. $400-800 por botella.",
+      "fix": "Botellas <strong>con código QR único</strong>. Al servirse, el cliente firma digital. Si la botella reaparece sin ticket, alerta. Cero 'evaporaciones'."
+    },
+    {
+      "title": "Achuras 'cortesía' descontroladas",
+      "rob": "Parrillero regala chorizos, morcillas o mollejas al amigo. 'Total, son achuras.' Son $80-150 cada vez. 5-8 por turno = $400-1,200.",
+      "fix": "Achuras tienen <strong>su inventario propio</strong>. Sistema sabe cuántas entraron y cuántas se vendieron. Diferencia requiere foto y justificación."
+    }
+  ]
+}

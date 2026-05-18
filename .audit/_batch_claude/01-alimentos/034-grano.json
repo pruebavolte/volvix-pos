@@ -1,0 +1,104 @@
+{
+  "slug": "grano",
+  "brand": "Grano",
+  "tagline": "El sistema para coffee shops donde cada gramo de espresso cuenta y los regulares tienen su lugar",
+  "giro": "coffee shop",
+  "giroPlural": "coffee shops",
+  "vibe": "warmCozy",
+  "palette": {
+    "bg": "#F6EEE0",
+    "surface": "#FFFFFF",
+    "paper": "#EDE2CC",
+    "ink": "#2A1810",
+    "ink2": "#4A2F1F",
+    "muted": "#7A5C44",
+    "line": "#D9C9B0",
+    "accent": "#704214",
+    "accent2": "#C57843"
+  },
+  "fonts": {
+    "display": "Lora",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para coffee shops mexicanos · 2026",
+    "h1": "Cada <em>shot</em>,<br>cada <em>regular</em>,<br>recordado.",
+    "deck": "El POS hecho para que cada espresso lleve sus gramos exactos, los regulares tengan su pedido recordado, y las propinas digitales lleguen completas al barista.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?coffee,latte,barista&q=85",
+    "heroAlt": "Barista pulling shot de espresso",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?latte,art&q=80", "tag": "Latte art", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?espresso,shot&q=80", "tag": "Espresso doble", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cappuccino,foam&q=80", "tag": "Cappuccino", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cold,brew&q=80", "tag": "Cold brew", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pour,over&q=80", "tag": "Pour over", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?coffee,beans&q=80", "tag": "Granos premium", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?cafe,interior&q=80", "tag": "Salón acogedor", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pastry,cafe&q=80", "tag": "Pastel del día", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?coffee,morning&q=80", "tag": "Mañana ocupada", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?barista,working&q=80", "caption": "Barista prepara latte art"},
+      {"url": "https://source.unsplash.com/random/800x600/?coffee,scale&q=80", "caption": "Báscula para gramos exactos"},
+      {"url": "https://source.unsplash.com/random/800x600/?regular,coffee&q=80", "caption": "Regular recibe su lo de siempre"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Barra · espresso · en vivo",
+    "title": "Tu barra, <em>shot por shot</em>, sin perderse",
+    "deck": "Cada orden con bebida y modificaciones. KDS muestra: latte vainilla con leche entera, americano grande con shot extra. Barista ve todo.",
+    "secondary": "En los coffee shops, shots extras 'no cobrados' son $20-30 cada vez. 12 al día = $240-360.",
+    "data": {
+      "orders": [
+        {"table": "M02", "name": "Carmen R. (regular)", "state": "urgent", "items": ["Latte vainilla|leche entera, lo de siempre", "Pan dulce"], "waitMin": 5},
+        {"table": "M05", "name": "Don Luis", "state": "prep", "items": ["Cappuccino|deslactosada", "Croissant tostado"], "waitMin": 4},
+        {"table": "M01", "name": "Sra. Tina", "state": "queue", "items": ["Americano grande|shot extra"], "waitMin": 2},
+        {"table": "M07", "name": "Patricia", "state": "ready", "items": ["Cold brew grande", "Brownie"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Báscula para gramos de café", "d": "Espresso doble = 18g grano. Sistema verifica. Cero bebidas 'cargadas' que descuadran inventario."},
+    {"ico": "archive", "h": "Inventario por origen del grano", "d": "Etíope: 4 kg. Colombia: 6 kg. México Chiapas: 8 kg. Cuando baja, alerta. Cero 'ya no hay etíope'."},
+    {"ico": "bookmark", "h": "Clientes regulares con memoria", "d": "Carmen siempre pide latte vainilla. Sistema lo recuerda. Barista nuevo le dice 'lo de siempre' sin pena."},
+    {"ico": "percent", "h": "Propinas digitales por barista", "d": "Cliente paga con tarjeta y agrega propina. Sistema reparte por turno trabajado. Cero pelea con monedas al cierre."},
+    {"ico": "barcode", "h": "Menú QR para mesa rápido", "d": "Cliente escanea, pide desde mesa, paga. Barista lo ve en KDS. Cero esperar mesera 10 minutos."},
+    {"ico": "truck", "h": "Grab and go para llevar", "d": "App separada para to-go: cliente paga desde celular, llega y recoge en barra to-go. 3 minutos."}
+  ],
+  "stats": [
+    {"v": "187", "l": "Bebidas servidas hoy"},
+    {"v": "4.8", "l": "Kg café usado"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi barista <span class=\"hl\">'olvidaba' los regulares</span> y los clientes se sentían anónimos. Con Grano cada regular tiene memoria. Las ventas a clientes habituales subieron 35%. Las propinas digitales llegan completas.",
+    "sig": "Lucia R.",
+    "role": "Coffee Shop Grano, Querétaro Centro, Querétaro"
+  },
+  "thefts": [
+    {
+      "title": "Café 'para personal' descontrolado",
+      "rob": "Empleados se sirven 3-5 lattes y pasteles 'porque sí' sin marcarlos. $80-150 al día — $2,400-4,500 al mes.",
+      "fix": "Empleados tienen <strong>código personal con límite diario</strong> (2 bebidas, 1 pastel). Sistema bloquea al excederse. Alerta al gerente."
+    },
+    {
+      "title": "Propina 'que se perdió en el cambio'",
+      "rob": "Cajero toma propina en efectivo 'para repartir' y no la entrega completa al barista. $50-100 al turno desaparecen.",
+      "fix": "Propina se <strong>digitaliza al pago obligatorio</strong>. Se reparte automático por turno trabajado. Visible al barista en su celular."
+    },
+    {
+      "title": "Granos 'vencidos' que se llevaron",
+      "rob": "Empleado se lleva 1 kg café 'porque iba a vencer'. En realidad estaba bueno y se lo vendió a otra cafetería. $300-500 cada vez.",
+      "fix": "Granos con <strong>etiqueta de lote y fecha</strong>. Si sale del inventario sin venta, alerta. Auditoría cada cierre."
+    }
+  ]
+}

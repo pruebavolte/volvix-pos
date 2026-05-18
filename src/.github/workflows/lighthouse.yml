@@ -1,0 +1,93 @@
+name: Lighthouse Audit
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'   # Mondays 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  lighthouse:
+    name: Lighthouse weekly audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Lighthouse
+        run: npm install -g lighthouse chrome-launcher
+
+      - name: Resolve target URL
+        id: target
+        env:
+          PROD_URL: ${{ secrets.PROD_URL }}
+          PREVIEW_URL: ${{ secrets.PREVIEW_URL }}
+        run: |
+          URL="${PROD_URL:-$PREVIEW_URL}"
+          if [ -z "$URL" ]; then
+            echo "No PROD_URL or PREVIEW_URL secret set"
+            exit 1
+          fi
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Run Lighthouse
+        run: |
+          lighthouse "${{ steps.target.outputs.url }}" \
+            --output=json --output=html \
+            --output-path=./lighthouse-report \
+            --chrome-flags="--headless --no-sandbox --disable-gpu" \
+            --quiet
+
+      - name: Parse scores & evaluate threshold
+        id: scores
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const r = JSON.parse(fs.readFileSync('./lighthouse-report.report.json','utf8'));
+          const cats = r.categories;
+          const out = {
+            performance:    Math.round((cats.performance?.score || 0) * 100),
+            accessibility:  Math.round((cats.accessibility?.score || 0) * 100),
+            'best-practices': Math.round((cats['best-practices']?.score || 0) * 100),
+            seo:            Math.round((cats.seo?.score || 0) * 100),
+            pwa:            Math.round((cats.pwa?.score || 0) * 100),
+          };
+          console.log('Scores:', JSON.stringify(out));
+          const min = Math.min(...Object.values(out).filter(v => v > 0));
+          const lines = Object.entries(out).map(([k,v]) => `${k}: ${v}`).join('\n');
+          fs.writeFileSync(process.env.GITHUB_OUTPUT,
+            `min=${min}\nsummary<<END\n${lines}\nEND\n`, { flag:'a' });
+          EOF
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: |
+            lighthouse-report.report.html
+            lighthouse-report.report.json
+          retention-days: 30
+
+      - name: Notify Slack/Discord if score < 80
+        if: ${{ steps.scores.outputs.min != '' && steps.scores.outputs.min < 80 }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          SUMMARY: ${{ steps.scores.outputs.summary }}
+          MIN: ${{ steps.scores.outputs.min }}
+        run: |
+          MSG="Lighthouse alert: min score ${MIN} (<80)\n${SUMMARY}"
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            curl -s -X POST -H 'Content-Type: application/json' \
+              -d "{\"text\":\"${MSG}\"}" "$SLACK_WEBHOOK" || true
+          fi
+          if [ -n "$DISCORD_WEBHOOK" ]; then
+            curl -s -X POST -H 'Content-Type: application/json' \
+              -d "{\"content\":\"${MSG}\"}" "$DISCORD_WEBHOOK" || true
+          fi

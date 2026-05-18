@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Matriz de Pruebas Volvix POS — LOCAL</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  body{background:#0f172a;color:#e2e8f0;padding:20px;min-height:100vh}
+  .header{background:linear-gradient(135deg,#1e40af,#7c3aed);padding:20px;border-radius:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  .header h1{font-size:24px}
+  .header .badge{background:rgba(255,255,255,.2);padding:6px 14px;border-radius:20px;font-size:13px}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+  .controls input,.controls select,.controls button{padding:10px 14px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;font-size:14px}
+  .controls input{flex:1;min-width:200px}
+  .controls button{cursor:pointer;background:#3b82f6;border:none;font-weight:600}
+  .controls button:hover{background:#2563eb}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+  .stat{background:#1e293b;padding:16px;border-radius:10px;border-left:4px solid #3b82f6}
+  .stat .num{font-size:24px;font-weight:700}
+  .stat .lbl{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+  .stat.ok{border-left-color:#22c55e}
+  .stat.fail{border-left-color:#ef4444}
+  .stat.pending{border-left-color:#f59e0b}
+  table{width:100%;border-collapse:collapse;background:#1e293b;border-radius:10px;overflow:hidden;font-size:13px}
+  th{background:#0f172a;padding:12px 10px;text-align:left;font-weight:600;color:#94a3b8;text-transform:uppercase;font-size:11px;letter-spacing:.5px;position:sticky;top:0;z-index:10}
+  td{padding:10px;border-top:1px solid #334155;vertical-align:top}
+  tr:hover{background:#293548}
+  .url{font-family:"Courier New",monospace;font-size:11px;color:#60a5fa;word-break:break-all;max-width:280px}
+  .url a{color:#60a5fa;text-decoration:none}
+  .url a:hover{text-decoration:underline}
+  .platforms{display:flex;gap:4px;flex-wrap:wrap}
+  .plat{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+  .plat.web{background:#1e3a8a;color:#bfdbfe}
+  .plat.win{background:#0c4a6e;color:#7dd3fc}
+  .plat.and{background:#14532d;color:#86efac}
+  .plat.ios{background:#581c87;color:#d8b4fe}
+  .status{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;text-transform:uppercase;cursor:pointer;user-select:none}
+  .status.ok{background:#14532d;color:#86efac}
+  .status.fail{background:#7f1d1d;color:#fca5a5}
+  .status.pending{background:#78350f;color:#fde68a}
+  .status.skip{background:#334155;color:#94a3b8}
+  .module{font-weight:600;color:#fbbf24}
+  .button-name{color:#a5b4fc;font-weight:500}
+  details summary{cursor:pointer;padding:14px;background:#1e293b;border-radius:8px;margin-top:18px;font-weight:600;list-style:none;display:flex;align-items:center;gap:10px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:'▶';font-size:10px;transition:transform .2s}
+  details[open] summary::before{transform:rotate(90deg)}
+  details[open] summary{border-radius:8px 8px 0 0}
+  .notes{margin-top:30px;padding:20px;background:#1e293b;border-radius:10px;font-size:13px;line-height:1.7}
+  .notes h3{color:#fbbf24;margin-bottom:10px}
+  .notes code{background:#0f172a;padding:2px 6px;border-radius:4px;font-family:"Courier New";color:#60a5fa}
+  @media(max-width:900px){table{font-size:11px}.url{max-width:150px}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🧪 Matriz de Pruebas Volvix POS</h1>
+    <div style="margin-top:6px;font-size:12px;opacity:.85">Archivo LOCAL · NO subir a producción · Marca cada celda al probar</div>
+  </div>
+  <div class="badge">Local Test Matrix v1</div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num" id="totalCount">0</div><div class="lbl">Total tests</div></div>
+  <div class="stat ok"><div class="num" id="okCount">0</div><div class="lbl">✓ OK</div></div>
+  <div class="stat fail"><div class="num" id="failCount">0</div><div class="lbl">✗ Falla</div></div>
+  <div class="stat pending"><div class="num" id="pendingCount">0</div><div class="lbl">⌛ Pendiente</div></div>
+  <div class="stat"><div class="num" id="progressPct">0%</div><div class="lbl">Avance</div></div>
+</div>
+
+<div class="controls">
+  <input type="text" id="filterText" placeholder="🔍 Filtrar por módulo, botón, URL...">
+  <select id="filterStatus">
+    <option value="">Todos los estados</option>
+    <option value="pending">⌛ Pendientes</option>
+    <option value="ok">✓ OK</option>
+    <option value="fail">✗ Fallas</option>
+    <option value="skip">— Skip</option>
+  </select>
+  <select id="filterPlatform">
+    <option value="">Todas las plataformas</option>
+    <option value="web">Web</option>
+    <option value="win">Windows</option>
+    <option value="and">Android</option>
+    <option value="ios">iOS</option>
+  </select>
+  <button onclick="exportCSV()">📥 Exportar CSV</button>
+  <button onclick="resetAll()">🔄 Reset todo</button>
+</div>
+
+<table id="matrix">
+<thead>
+<tr>
+  <th style="width:30px">#</th>
+  <th>URL / Sistema</th>
+  <th>Plataforma</th>
+  <th>Módulo</th>
+  <th>Botón / Acción</th>
+  <th>Funcionalidad esperada</th>
+  <th style="width:90px">Estado</th>
+  <th>Notas</th>
+</tr>
+</thead>
+<tbody id="rows"></tbody>
+</table>
+
+<div class="notes">
+<h3>📋 Cómo usar este archivo</h3>
+<ol style="margin-left:20px">
+<li>Abre este HTML <strong>localmente</strong> con doble clic (no subirlo a Vercel)</li>
+<li>Para cada fila, haz click en el badge <span class="status pending">PENDIENTE</span> y cicla entre <strong>OK ⇢ FAIL ⇢ SKIP ⇢ PENDIENTE</strong></li>
+<li>Doble click en la columna <strong>Notas</strong> para escribir observaciones (qué error sale, screenshot, etc)</li>
+<li>El estado se guarda automáticamente en <code>localStorage</code> de tu navegador</li>
+<li>Al final exporta a CSV con el botón superior y mándalo de regreso</li>
+</ol>
+<h3 style="margin-top:14px">🌐 URL base de producción</h3>
+<code>https://volvix-pos.vercel.app</code>
+<h3 style="margin-top:14px">🔐 Credenciales de prueba</h3>
+<code>admin@volvix.test / Volvix2026!</code> · <code>owner@volvix.test / Volvix2026!</code> · <code>cajero@volvix.test / Volvix2026!</code>
+<br><strong>PIN POS:</strong> Admin <code>1234</code> · Cajero <code>0000</code>
+</div>
+
+<script>
+const BASE = 'https://volvix-pos.vercel.app';
+const TESTS = [
+  // ============ AUTH / LOGIN ============
+  { url: BASE+'/login.html', sys: 'Login', plat:['web','win','and','ios'], mod: 'Auth', btn: 'Login admin', fn: 'Loguear admin@volvix.test/Volvix2026! → POS' },
+  { url: BASE+'/login.html', sys: 'Login', plat:['web','win','and','ios'], mod: 'Auth', btn: 'Login owner', fn: 'Loguear owner@volvix.test → Owner Panel' },
+  { url: BASE+'/login.html', sys: 'Login', plat:['web','win','and','ios'], mod: 'Auth', btn: 'Login cajero', fn: 'Loguear cajero@volvix.test → POS limitado' },
+  { url: BASE+'/login.html', sys: 'Login', plat:['web'], mod: 'Auth', btn: 'Bad password', fn: 'Password incorrecto → mensaje error' },
+  { url: BASE+'/login.html', sys: 'Login', plat:['web'], mod: 'Auth', btn: 'Olvidé password', fn: 'Click → flujo password reset' },
+  { url: BASE+'/login.html', sys: 'Login', plat:['web'], mod: 'Auth', btn: 'Logout', fn: 'Cerrar sesión → vuelve a login' },
+
+  // ============ POS PRINCIPAL (salvadorex_web_v25.html) ============
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web','win','and','ios'], mod: 'PIN Lock', btn: 'Numpad 1234', fn: 'Desbloquea con PIN admin 1234' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'F1 Ventas', fn: 'Cambia a vista ventas' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'F2 Créditos', fn: 'Vista de créditos a clientes' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'F3 Productos', fn: 'Lista de productos con stock' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'F4 Inventario', fn: 'Vista inventario detallado' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Clientes', fn: 'Lista clientes + buscar' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Compras', fn: 'Vista compras a proveedores' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Configuración', fn: 'Settings del tenant' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Facturas', fn: 'Lista facturas CFDI generadas' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Corte', fn: 'Corte de caja X/Z' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Reportes', fn: 'Reportes de ventas/inventario' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Dashboard', fn: 'Dashboard con métricas' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Apertura', fn: 'Apertura de caja' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Cotizaciones', fn: 'Crear/listar cotizaciones' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Devoluciones', fn: 'Procesar devolución' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Historial', fn: 'Historial completo de ventas' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Usuarios', fn: 'CRUD de usuarios del tenant' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'POS', btn: 'Recargas', fn: 'Recargas de tiempo aire' },
+
+  // PRODUCTOS - CRUD completo
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Productos', btn: '+ Nuevo producto', fn: 'Modal crear producto → guarda en Supabase' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Productos', btn: 'Editar', fn: 'Editar producto existente → actualiza' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Productos', btn: 'Eliminar', fn: 'Borrar producto con confirmación' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Productos', btn: 'Importar CSV', fn: 'Subir CSV → preview → bulk insert' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Productos', btn: 'Exportar', fn: 'Descarga CSV/Excel de productos' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Productos', btn: 'Búsqueda', fn: 'Filtrar por nombre/código' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Productos', btn: 'Stock bajo filter', fn: 'Filtrar productos con stock crítico' },
+
+  // VENTAS - flujo completo
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Venta', btn: 'Agregar al carrito', fn: 'Click producto → suma al carrito' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Venta', btn: 'Cantidad +/-', fn: 'Modificar cantidad línea' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Venta', btn: 'Quitar línea', fn: 'Eliminar producto del carrito' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Venta', btn: 'Aplicar descuento', fn: 'Descuento por monto/% línea o total' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Venta', btn: 'Cobrar Efectivo', fn: 'Modal calcula cambio → guarda venta' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Venta', btn: 'Cobrar Tarjeta', fn: 'Stripe modal → procesa pago' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Venta', btn: 'Cobrar mixto', fn: 'Combinar métodos pago' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Venta', btn: 'Imprimir ticket', fn: 'Imprime ESC/POS o window.print' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Venta', btn: 'Guardar venta', fn: 'POST /api/sales → 201 + id' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Venta', btn: 'Cancelar venta', fn: 'Limpia carrito y resetea' },
+
+  // CLIENTES
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Clientes', btn: '+ Nuevo cliente', fn: 'Crear cliente con RFC, email, tel' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Clientes', btn: 'Editar cliente', fn: 'Actualizar datos cliente' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Clientes', btn: 'Buscar cliente', fn: 'Search incremental por nombre/RFC' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Clientes', btn: 'Histórico compras', fn: 'Ver compras del cliente' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Clientes', btn: 'Puntos lealtad', fn: 'Mostrar saldo + canjear' },
+
+  // BARCODE / SCANNER
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web','and','ios'], mod: 'Barcode', btn: 'Activar cámara', fn: 'Pide permiso → escanea EAN/QR' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['win','web'], mod: 'Barcode', btn: 'Lector USB', fn: 'Detecta keyboard wedge → autoadd' },
+
+  // FACTURAS CFDI
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'CFDI', btn: 'Generar factura', fn: 'Modal datos → POST /api/invoices/cfdi' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'CFDI', btn: 'Descargar XML', fn: 'Download XML del CFDI' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'CFDI', btn: 'Descargar PDF', fn: 'Download PDF representación impresa' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'CFDI', btn: 'Cancelar CFDI', fn: 'Cancelación SAT con motivo' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'CFDI', btn: 'Validar RFC', fn: 'Regex valida formato RFC' },
+
+  // CONFIG / SETTINGS
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Config', btn: 'Cambiar idioma', fn: 'es/en/pt → recarga UI' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Config', btn: 'Cambiar moneda', fn: 'MXN/USD/EUR → recalcula precios' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Config', btn: 'Theme dark/light', fn: 'Toggle modo oscuro' },
+  { url: BASE+'/salvadorex_web_v25.html', sys: 'POS', plat:['web'], mod: 'Config', btn: 'Logo upload', fn: 'Subir logo del negocio' },
+
+  // ============ OWNER PANEL ============
+  { url: BASE+'/volvix_owner_panel_v7.html', sys: 'Owner', plat:['web'], mod: 'Dashboard', btn: 'Métricas', fn: 'MRR, ARR, total ventas, productos' },
+  { url: BASE+'/volvix_owner_panel_v7.html', sys: 'Owner', plat:['web'], mod: 'Dashboard', btn: 'Gráfico ventas', fn: 'Chart.js ventas por día' },
+  { url: BASE+'/volvix_owner_panel_v7.html', sys: 'Owner', plat:['web'], mod: 'Tenants', btn: 'Lista tenants', fn: 'GET /api/tenants → tabla' },
+  { url: BASE+'/volvix_owner_panel_v7.html', sys: 'Owner', plat:['web'], mod: 'Tenants', btn: 'Crear tenant', fn: 'Modal nuevo negocio' },
+  { url: BASE+'/volvix_owner_panel_v7.html', sys: 'Owner', plat:['web'], mod: 'Tenants', btn: 'Pausar tenant', fn: 'is_active=false' },
+  { url: BASE+'/volvix_owner_panel_v7.html', sys: 'Owner', plat:['web'], mod: 'Users', btn: 'Lista users', fn: 'GET /api/owner/users' },
+  { url: BASE+'/volvix_owner_panel_v7.html', sys: 'Owner', plat:['web'], mod: 'Users', btn: 'Invitar user', fn: 'Email magic link' },
+  { url: BASE+'/volvix_owner_panel_v7.html', sys: 'Owner', plat:['web'], mod: 'Reports', btn: 'Reporte fiscal', fn: 'IVA, retenciones por periodo' },
+  { url: BASE+'/volvix_owner_panel_v7.html', sys: 'Owner', plat:['web'], mod: 'Reports', btn: 'Top productos', fn: 'GET /api/reports/sales/by-product' },
+  { url: BASE+'/volvix_owner_panel_v7.html', sys: 'Owner', plat:['web'], mod: 'Reports', btn: 'ABC analysis', fn: 'GET /api/reports/abc-analysis' },
+
+  // ============ MULTIPOS ============
+  { url: BASE+'/multipos_suite_v3.html', sys: 'MultiPOS', plat:['web'], mod: 'Sucursales', btn: 'Lista sucursales', fn: 'GET /api/branches' },
+  { url: BASE+'/multipos_suite_v3.html', sys: 'MultiPOS', plat:['web'], mod: 'Sucursales', btn: 'Transfer stock', fn: 'Mover inventario entre branches' },
+  { url: BASE+'/multipos_suite_v3.html', sys: 'MultiPOS', plat:['web'], mod: 'KDS', btn: 'Pantalla cocina', fn: 'Tickets pendientes restaurante' },
+
+  // ============ INTEGRACIONES ============
+  { url: BASE+'/api/docs', sys: 'Docs', plat:['web'], mod: 'API', btn: 'Swagger UI', fn: 'Renderiza openapi.yaml interactivo' },
+  { url: BASE+'/volvix-onboarding-v2.html', sys: 'Onboarding', plat:['web'], mod: 'Wizard', btn: '7 pasos completos', fn: 'Crea tenant + admin + productos seed' },
+  { url: BASE+'/volvix-customer-portal-v2.html', sys: 'Portal Cliente', plat:['web'], mod: 'Login', btn: 'Solicitar OTP', fn: 'Email → recibe código 6 dígitos' },
+  { url: BASE+'/volvix-customer-portal-v2.html', sys: 'Portal Cliente', plat:['web'], mod: 'Dashboard', btn: 'Mis compras', fn: 'GET /api/customer/orders' },
+  { url: BASE+'/volvix-gdpr-portal.html', sys: 'GDPR', plat:['web'], mod: 'Privacidad', btn: 'Solicitar mis datos', fn: 'POST /api/gdpr/access → email verify' },
+  { url: BASE+'/volvix-gdpr-portal.html', sys: 'GDPR', plat:['web'], mod: 'Privacidad', btn: 'Borrar cuenta', fn: 'POST /api/gdpr/erasure' },
+
+  // ============ PWA ============
+  { url: BASE+'/', sys: 'PWA', plat:['and','ios','win'], mod: 'Install', btn: 'Instalar app', fn: 'Banner install → home screen' },
+  { url: BASE+'/', sys: 'PWA', plat:['web'], mod: 'Offline', btn: 'Modo avión', fn: 'Sin red → carga del cache' },
+  { url: BASE+'/', sys: 'PWA', plat:['web'], mod: 'Offline', btn: 'Venta offline', fn: 'Crear venta sin red → encola' },
+  { url: BASE+'/', sys: 'PWA', plat:['web'], mod: 'Offline', btn: 'Sync auto', fn: 'Vuelve red → sube queue' },
+  { url: BASE+'/', sys: 'PWA', plat:['and'], mod: 'Push', btn: 'Permitir notif', fn: 'Suscribe webpush → llega notif test' },
+
+  // ============ API ENDPOINTS DIRECTOS ============
+  { url: BASE+'/api/health', sys: 'API', plat:['web'], mod: 'Health', btn: 'GET health', fn: '200 + supabase_connected:true' },
+  { url: BASE+'/api/health/deep', sys: 'API', plat:['web'], mod: 'Health', btn: 'GET deep health', fn: 'Todos checks OK' },
+  { url: BASE+'/api/login', sys: 'API', plat:['web'], mod: 'Auth', btn: 'POST login', fn: 'Devuelve token + session' },
+  { url: BASE+'/api/products', sys: 'API', plat:['web'], mod: 'CRUD', btn: 'GET products', fn: 'Array productos del tenant' },
+  { url: BASE+'/api/sales', sys: 'API', plat:['web'], mod: 'CRUD', btn: 'POST sales', fn: 'Crear venta → 201' },
+  { url: BASE+'/api/customers', sys: 'API', plat:['web'], mod: 'CRUD', btn: 'GET customers', fn: 'Array clientes' },
+  { url: BASE+'/api/owner/dashboard', sys: 'API', plat:['web'], mod: 'Owner', btn: 'GET dashboard', fn: 'Métricas globales' },
+  { url: BASE+'/api/metrics', sys: 'API', plat:['web'], mod: 'Monitoring', btn: 'GET metrics', fn: 'p50/p95/p99 latencias' },
+  { url: BASE+'/api/openapi.yaml', sys: 'API', plat:['web'], mod: 'Docs', btn: 'GET openapi', fn: 'Sirve YAML completo' },
+
+  // ============ SEGURIDAD ============
+  { url: BASE+'/volvix-qa-scenarios.html', sys: 'Sec', plat:['web'], mod: 'Confidencial', btn: 'GET 404', fn: 'Debe ser 404 (bloqueado)' },
+  { url: BASE+'/BITACORA_LIVE.html', sys: 'Sec', plat:['web'], mod: 'Confidencial', btn: 'GET 404', fn: 'Debe ser 404' },
+  { url: BASE+'/api/debug', sys: 'Sec', plat:['web'], mod: 'Confidencial', btn: 'GET 404', fn: 'Endpoint /debug eliminado' },
+  { url: BASE+'/api/products', sys: 'Sec', plat:['web'], mod: 'Auth', btn: 'Sin Bearer', fn: 'Sin token → 401' },
+];
+
+const platLabels = { web:'Web', win:'Windows', and:'Android', ios:'iOS' };
+const STATES = ['pending','ok','fail','skip'];
+const stateLabels = { pending:'⌛ PEND', ok:'✓ OK', fail:'✗ FAIL', skip:'— SKIP' };
+
+function loadState(){ try{return JSON.parse(localStorage.getItem('volvix_test_matrix')||'{}')}catch{return{}} }
+function saveState(s){ localStorage.setItem('volvix_test_matrix', JSON.stringify(s)) }
+let state = loadState();
+
+function render(){
+  const tbody = document.getElementById('rows');
+  const ft = document.getElementById('filterText').value.toLowerCase();
+  const fs = document.getElementById('filterStatus').value;
+  const fp = document.getElementById('filterPlatform').value;
+  let okN=0, failN=0, pendN=0;
+  TESTS.forEach((t,i)=>{ const k='t'+i; const cur = state[k]?.status || 'pending'; if(cur==='ok')okN++; else if(cur==='fail')failN++; else if(cur==='pending')pendN++; });
+  document.getElementById('totalCount').textContent = TESTS.length;
+  document.getElementById('okCount').textContent = okN;
+  document.getElementById('failCount').textContent = failN;
+  document.getElementById('pendingCount').textContent = pendN;
+  document.getElementById('progressPct').textContent = Math.round((okN+failN)/TESTS.length*100)+'%';
+  tbody.innerHTML = TESTS.map((t,i)=>{
+    const k='t'+i;
+    const cur = state[k]?.status || 'pending';
+    const note = state[k]?.note || '';
+    const blob = (t.url+t.sys+t.mod+t.btn+t.fn).toLowerCase();
+    if(ft && !blob.includes(ft)) return '';
+    if(fs && cur!==fs) return '';
+    if(fp && !t.plat.includes(fp)) return '';
+    return `<tr>
+      <td>${i+1}</td>
+      <td><div class="url"><a href="${t.url}" target="_blank">${t.url.replace(BASE,'')||'/'}</a></div><div style="font-size:10px;color:#94a3b8;margin-top:2px">${t.sys}</div></td>
+      <td><div class="platforms">${t.plat.map(p=>`<span class="plat ${p}">${platLabels[p]}</span>`).join('')}</div></td>
+      <td><span class="module">${t.mod}</span></td>
+      <td><span class="button-name">${t.btn}</span></td>
+      <td>${t.fn}</td>
+      <td><span class="status ${cur}" onclick="cycle(${i})">${stateLabels[cur]}</span></td>
+      <td><div contenteditable="true" onblur="saveNote(${i},this.textContent)" style="min-height:20px;outline:none;padding:4px;border-radius:4px;border:1px dashed #334155">${note}</div></td>
+    </tr>`;
+  }).join('');
+}
+function cycle(i){
+  const k='t'+i;
+  const cur = state[k]?.status || 'pending';
+  const next = STATES[(STATES.indexOf(cur)+1) % STATES.length];
+  state[k] = { ...state[k], status: next };
+  saveState(state); render();
+}
+function saveNote(i, text){
+  const k='t'+i;
+  state[k] = { ...state[k], note: text };
+  saveState(state);
+}
+function exportCSV(){
+  const rows = [['#','URL','Sistema','Plataformas','Modulo','Boton','Funcionalidad','Estado','Notas']];
+  TESTS.forEach((t,i)=>{
+    const k='t'+i;
+    rows.push([i+1, t.url, t.sys, t.plat.map(p=>platLabels[p]).join('|'), t.mod, t.btn, t.fn, stateLabels[state[k]?.status||'pending'], state[k]?.note||'']);
+  });
+  const csv = rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'volvix_pruebas_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+}
+function resetAll(){
+  if(confirm('Borrar TODOS los estados y notas?')){ state={}; saveState(state); render(); }
+}
+document.getElementById('filterText').addEventListener('input', render);
+document.getElementById('filterStatus').addEventListener('change', render);
+document.getElementById('filterPlatform').addEventListener('change', render);
+
+// LIVE AUTO-UPDATE: polls live_status/slice_NN.json every 3s and merges
+async function pollLiveStatus(){
+  let merged = [];
+  for (let i = 0; i < 25; i++) {
+    const n = String(i).padStart(2,'0');
+    try {
+      const r = await fetch('live_status/slice_' + n + '.json?_=' + Date.now());
+      if (!r.ok) continue;
+      const arr = await r.json();
+      if (Array.isArray(arr)) merged = merged.concat(arr);
+    } catch(e) {}
+  }
+  if (merged.length === 0) return;
+  merged.forEach(u => {
+    const k = 't' + u.idx;
+    state[k] = { status: u.status, note: u.note || '' };
+  });
+  saveState(state); render();
+  document.title = 'LIVE · ' + new Date().toLocaleTimeString();
+}
+setInterval(pollLiveStatus, 3000);
+pollLiveStatus();
+render();
+</script>
+</body>
+</html>

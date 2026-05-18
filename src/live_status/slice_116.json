@@ -1,0 +1,32 @@
+{
+  "slice": 116,
+  "idx_range": [2320, 2340],
+  "task": "R17_AUDIT_VIEWER",
+  "ts": "2026-04-26T00:00:00Z",
+  "status": "done",
+  "files_created": [
+    "volvix-audit-viewer.html",
+    "volvix-audit-viewer-wiring.js",
+    "R17_AUDIT_VIEWER.md"
+  ],
+  "files_modified": [
+    "api/index.js"
+  ],
+  "endpoint": {
+    "path": "GET /api/audit-log",
+    "params": ["from", "to", "user_id", "action", "resource", "tenant_id", "page", "limit"],
+    "roles": ["admin", "owner", "superadmin"],
+    "table": "volvix_audit_log",
+    "response": "{ ok, items, page, limit, total }"
+  },
+  "ui_features": [
+    "tabla paginada ts/user/action/resource/before/after/ip",
+    "filtros rango fechas + user + action + resource + tenant",
+    "click fila expande diff before/after JSON",
+    "export CSV completo",
+    "auto-refresh 60s con toggle pausar",
+    "scroll virtual cap 1000 filas DOM"
+  ],
+  "auth": "Volvix.auth.fetch con fallback Bearer token",
+  "notes": "Backend ya tenia handler R14; agregue ?page= y respuesta envuelta en {items,total}. Restriccion de roles preservada."
+}

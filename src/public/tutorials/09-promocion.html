@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tutorial 09 — Promoción | Volvix POS</title>
+<link rel="stylesheet" href="_shared.css"></head>
+<body><div class="tutorial-container" id="container">
+<h1>Tutorial 09 — Crear y aplicar promociones</h1>
+<div class="subtitle">Crear promo → Definir horario → Se aplica automático en venta</div>
+<div class="stage">
+  <div class="step step-1"><h2>Paso 1 · Abre el módulo Promociones</h2>
+    <div class="mock"><h3>🎁 Promociones</h3>
+      <button class="btn btn-blue">+ Nueva promoción</button>
+      <div style="margin-top:10px"><div class="row"><span>Happy Hour 5-7pm</span><b>Activa</b></div></div>
+      <div class="cursor" style="left:24%;top:30%">👆</div>
+    </div></div>
+  <div class="step step-2"><h2>Paso 2 · Configura tipo y descuento</h2>
+    <div class="mock"><h3>Nueva promoción</h3>
+      <form>
+        <label>Nombre<input value="2x1 lattes martes"></label>
+        <label>Tipo<select><option>2x1</option><option>% descuento</option></select></label>
+        <label>Aplica a<select><option>Latte</option></select></label>
+      </form>
+    </div></div>
+  <div class="step step-3"><h2>Paso 3 · Define cuándo aplica</h2>
+    <div class="mock"><h3>Horario</h3>
+      <form>
+        <label>Días<select><option>Solo martes</option></select></label>
+        <label>Desde<input value="08:00"></label>
+        <label>Hasta<input value="20:00"></label>
+      </form>
+      <div class="banner banner-ok" style="margin-top:6px">Aplica martes 08:00 a 20:00</div>
+    </div></div>
+  <div class="step step-4"><h2>Paso 4 · Activa y guarda</h2>
+    <div class="mock"><h3>Resumen</h3>
+      <div class="row"><span>Nombre</span><b>2x1 lattes martes</b></div>
+      <div class="row"><span>Estado</span><span class="toggle on"></span></div>
+      <button class="btn">💾 Guardar promo</button>
+      <div class="cursor" style="left:24%;top:75%">👆</div>
+    </div></div>
+  <div class="step step-5"><h2>Paso 5 · El POS la aplica automáticamente ✓</h2>
+    <div class="mock">
+      <h3>POS · Carrito (martes 14:00)</h3>
+      <div class="row"><span>Latte ☕ x2</span><span>$90</span></div>
+      <div class="row" style="color:#10b981"><span>🎁 Promo 2x1</span><b>-$45</b></div>
+      <div class="row"><b>Total</b><b>$45</b></div>
+      <div class="banner banner-ok">✅ Promo aplicada automáticamente</div>
+    </div></div>
+</div>
+<div class="progress"><div class="progress-bar"></div></div>
+<div class="caption">Reproduciendo en bucle (25s).</div>
+<div class="controls">
+<button onclick="document.getElementById('container').classList.toggle('paused')">⏯️ Pausar/Reanudar</button>
+<button onclick="location.reload()">🔄 Reiniciar</button>
+</div></div></body></html>

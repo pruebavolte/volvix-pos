@@ -1,0 +1,106 @@
+{
+  "slug": "accesorio",
+  "brand": "Accesorio",
+  "tagline": "El sistema para tiendas de accesorios que sí complementan cada outfit",
+  "giro": "accesorios para mujer",
+  "giroPlural": "tiendas de accesorios para mujer",
+  "vibe": "editorial",
+  "palette": {
+    "bg": "#FAF5EF",
+    "surface": "#FFFFFF",
+    "paper": "#F1E8DB",
+    "ink": "#1E1813",
+    "ink2": "#3F3024",
+    "muted": "#8A7765",
+    "line": "#DCCEB8",
+    "accent": "#B8567E",
+    "accent2": "#D88FA7"
+  },
+  "fonts": {
+    "display": "Playfair Display",
+    "body": "Inter",
+    "script": "Allura",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas de accesorios · 2026",
+    "h1": "Cada <em>pañuelo</em>,<br>cada <em>collar</em>,<br>completa el look.",
+    "deck": "El punto de venta hecho para tiendas de accesorios femeninos: stock por SKU y temporada, recomendaciones por outfit, paquetes de mamá-hija, regalos personalizados.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?accessories,women,scarf&q=85",
+    "heroAlt": "Accesorios femeninos en exhibidor curado",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?scarf,silk&q=80", "tag": "Pañuelos seda", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?belt,women,fashion&q=80", "tag": "Cinturones", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sunglasses,women&q=80", "tag": "Lentes sol", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?hat,women&q=80", "tag": "Sombreros", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?gloves,women&q=80", "tag": "Guantes", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?headband,women&q=80", "tag": "Diademas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?accessories,boutique&q=80", "tag": "Boutique", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?accessories,detail&q=80", "tag": "Detalle", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?accessories,gift&q=80", "tag": "Regalo personalizado", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?accessories,style&q=80", "caption": "Asesoría de outfit completo"},
+      {"url": "https://source.unsplash.com/random/800x600/?accessories,wrap&q=80", "caption": "Empaque regalo personalizado"},
+      {"url": "https://source.unsplash.com/random/800x600/?fashion,accessories,layered&q=80", "caption": "Combo capas y temporada"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>por categoría y SKU</em>",
+    "deck": "Cada accesorio con su SKU. Combos por outfit (pañuelo + cinturón + lentes). Cuando entra temporada, sistema sugiere piezas. Mamá entra, vendedora ya sabe qué le va.",
+    "secondary": "En accesorios, una clienta sin pieza correcta no completa el outfit. Accesorio lo evita.",
+    "data": {
+      "product": "Inventario por categoría",
+      "tallas": ["Pañuelos", "Cinturones", "Lentes", "Sombreros", "Otros"],
+      "stock": [
+        {"color": "Premium", "vals": [38, 28, 32, 18, 24]},
+        {"color": "Diseñador", "vals": [24, 18, 22, 12, 16]},
+        {"color": "Temporada", "vals": [56, 42, 48, 28, 34]}
+      ],
+      "lowThreshold": 5
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por categoría y SKU", "d": "Cada accesorio con su código. Sabes qué se mueve, qué se queda."},
+    {"ico": "gift", "h": "Empaque regalo personalizado", "d": "Clienta compra para regalo, sistema marca empaque especial con tarjeta firmada. Cero entregas indiscretas."},
+    {"ico": "split", "h": "Combos por outfit", "d": "Arma combo (pañuelo + cinturón + lentes) con descuento. Vendedora vende look completo, no pieza suelta."},
+    {"ico": "calendar", "h": "Alertas por temporada", "d": "Día de la madre, San Valentín, navidad. Sistema te avisa qué reponer 20 días antes."},
+    {"ico": "percent", "h": "Comisiones por vendedora", "d": "Define el % por pieza o combo. Vendedora ve en vivo. Cero pleitos al cierre."},
+    {"ico": "camera", "h": "Devoluciones con foto", "d": "Sistema obliga foto del accesorio y etiqueta. Si fue usado, alerta. Bloquea cambios después de 7 días."}
+  ],
+  "stats": [
+    {"v": "486", "l": "Accesorios en stock"},
+    {"v": "32", "l": "Vendidos hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis clientas venían por un pañuelo y se llevaban solo eso. Antes mis vendedoras no sugerían. Con Accesorio el sistema propone combo y <span class=\"hl\">mi ticket promedio subió 65%</span>. Mis vendedoras venden look.",
+    "sig": "Beatriz N.",
+    "role": "Accesorios femeninos en San Ángel, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Pañuelos y lentes premium 'mermados'",
+      "rob": "Empleada marca pañuelos Hermès o lentes Ray-Ban como 'manchados' y se los lleva. Son piezas de $1k-4k. En accesorios premium son 3-5 piezas al mes.",
+      "fix": "Mermas <strong>requieren foto del defecto y autorización del gerente</strong>. Cada baja con nombre y motivo verificable."
+    },
+    {
+      "title": "Combos cobrados como sueltos",
+      "rob": "Vendedora cobra combo (3 piezas), marca 2 en sistema y guarda el precio de la tercera. Cliente lleva 3, tu sistema marca 2.",
+      "fix": "Combos <strong>se arman por sistema con SKU único</strong>. Cero captura manual. Reporte diario de SKUs vs tickets."
+    },
+    {
+      "title": "Regalos cobrados por fuera",
+      "rob": "Clienta paga $1,500 en efectivo por regalo personalizado. Vendedora arma el regalo, no factura, se queda con el monto. Tú nunca lo viste.",
+      "fix": "Regalos <strong>se arman por sistema con SKU especial</strong>. Comisión solo sobre ventas registradas. Cero ventas fuera de caja."
+    }
+  ]
+}

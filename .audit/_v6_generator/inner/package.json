@@ -1,0 +1,14 @@
+{
+  "name": "volvix-brand-generator",
+  "version": "1.0.0",
+  "description": "Genera landings de marca on-demand para cada giro de negocio",
+  "scripts": {
+    "start": "node generator/server.js",
+    "test": "node generator/test-offline.js",
+    "generate": "node generator/brand-generator.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": { "node": ">=18.0.0" }
+}

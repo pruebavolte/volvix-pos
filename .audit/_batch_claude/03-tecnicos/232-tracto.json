@@ -1,0 +1,106 @@
+{
+  "slug": "tracto",
+  "brand": "Tracto",
+  "tagline": "El sistema para compra-venta de autos seminuevos con expediente verificado",
+  "giro": "compra venta autos",
+  "giroPlural": "compra-ventas de autos",
+  "vibe": "darkPremium",
+  "palette": {
+    "bg": "#0E1015",
+    "surface": "#181B22",
+    "paper": "#20232B",
+    "ink": "#F0F2F5",
+    "ink2": "#C8CCD2",
+    "muted": "#7A8089",
+    "line": "#282C35",
+    "accent": "#E67E22",
+    "accent2": "#FF9842"
+  },
+  "fonts": {
+    "display": "Oswald",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para compra-venta de autos · 2026",
+    "h1": "Cada <em>auto</em>,<br>cada <em>papel</em>,<br>en regla.",
+    "deck": "El POS hecho para lotes de seminuevos. Inventario con VIN, fotos, expediente legal, RFC del último dueño. Cliente compra con factura limpia, sin sorpresas.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver lote completo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?used-cars,dealership-lot&q=80",
+    "heroAlt": "Lote de autos seminuevos en exhibición",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?used-car,lot&q=80", "tag": "Lote completo", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sedan,used&q=80", "tag": "Sedán seminuevo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?suv,used&q=80", "tag": "SUV seminueva", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?inspection,car&q=80", "tag": "Inspección 150 puntos", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?carfax,history&q=80", "tag": "Historial reportes", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?signing,contract&q=80", "tag": "Firma de factura", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?dealer,used&q=80", "tag": "Sala de ventas", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?vin,plate&q=80", "tag": "VIN verificado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?test-drive,car&q=80", "tag": "Test drive", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?paper,car&q=80", "caption": "Expediente legal: factura, tarjetón, refrendos"},
+      {"url": "https://source.unsplash.com/random/800x600/?repuve,plate&q=80", "caption": "REPUVE consultado por VIN"},
+      {"url": "https://source.unsplash.com/random/800x600/?notary,sign&q=80", "caption": "Notario o gestor para trámite"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu lote, <em>unidad por unidad</em>",
+    "deck": "Cada auto con VIN, año, kilometraje, foto, dueño anterior, expediente. Sabes cuánto te costó, en cuánto la vendes, qué papeles le faltan.",
+    "secondary": "Vender un auto sin expediente completo = pleito y devolución. Sistema fuerza papeles antes de vender.",
+    "data": {
+      "product": "Lote de seminuevos por segmento",
+      "tallas": ["Aveo/Spark", "Tsuru/Vento", "Jetta/Sentra", "Civic/Corolla", "Camionetas", "SUVs", "Eléctricos", "Pickups"],
+      "stock": [
+        {"color": "Listos para venta", "vals": [8, 12, 10, 7, 5, 9, 1, 6]},
+        {"color": "En reacondicionado", "vals": [3, 4, 2, 3, 2, 4, 0, 2]},
+        {"color": "Falta expediente", "vals": [2, 3, 1, 2, 1, 2, 0, 1]}
+      ],
+      "lowThreshold": 3
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Expediente por unidad", "d": "Cada auto con factura, tarjetón, refrendos, REPUVE. Sin expediente completo, no se vende. Cero pleitos legales."},
+    {"ico": "camera", "h": "Fotos 360 grados", "d": "Cada unidad con 18 fotos: exterior, interior, motor, cajuela. Cliente ve antes de venir. Cero 'no era lo que vi'."},
+    {"ico": "barcode", "h": "VIN verificado en REPUVE", "d": "Sistema consulta el VIN al recibir el auto. Si tiene reporte, te avisa. Cero comprar autos robados."},
+    {"ico": "percent", "h": "Comisión asesor", "d": "Cada asesor ve sus ventas. Comisión por unidad cerrada. Bono por venta rápida (menos de 30 días)."},
+    {"ico": "edit", "h": "Tasación con datos", "d": "Trade-in valuado con comparativos reales. Foto, kilometraje, estado. Aprobación de gerente para evitar valuaciones sospechosas."},
+    {"ico": "monitor", "h": "Días en lote", "d": "Auto que pasa 60 días sin vender, alerta. Te dice si rebajar precio o publicitar más. Cero unidades estancadas."}
+  ],
+  "stats": [
+    {"v": "85", "l": "Unidades en lote"},
+    {"v": "32", "l": "Días promedio venta"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Compré un Sentra <span class=\"hl\">sin verificar REPUVE</span> porque mi gestor dijo 'estaba limpio'. Resultó reportado, perdí $130,000. Con Tracto el sistema verifica antes de pagar. Cero compras de riesgo en 1 año.",
+    "sig": "Don Lucio P.",
+    "role": "Lote de Seminuevos El Lucio, Aguascalientes, AGS"
+  },
+  "thefts": [
+    {
+      "title": "Compras de autos sin verificar",
+      "rob": "Gestor compra auto con reporte de robo en REPUVE 'porque estaba barato'. Cuando intentas venderlo, el comprador descubre y pleito. Pérdida: $80-200k.",
+      "fix": "Cada VIN se <strong>consulta en REPUVE antes de pagar</strong>. Si tiene reporte, sistema bloquea la compra. Cero unidades calientes."
+    },
+    {
+      "title": "Valuaciones infladas a compadres",
+      "rob": "Gestor le compra un auto al amigo a $150k cuando vale $100k. Diferencia $50k se reparte. Pasa 1-2 veces al mes.",
+      "fix": "Valuación con <strong>comparativa de mercado y aprobación de gerente</strong>. Foto del auto + datos. Cero compras opacas."
+    },
+    {
+      "title": "Ventas en efectivo no reportadas",
+      "rob": "Asesor vende auto en $180k pero registra venta de $150k, se queda con $30k en efectivo. Tú nunca lo ves.",
+      "fix": "Pago <strong>solo digital o con depósito a tu cuenta</strong>. Asesor no toca dinero. Cliente firma con foto del comprobante. Sin sorpresas."
+    }
+  ]
+}

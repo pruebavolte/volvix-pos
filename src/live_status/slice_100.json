@@ -1,0 +1,23 @@
+[
+  {"idx": 2000, "status": "done", "note": "R17 kickoff: Apple Pay + Google Pay vía Web Payment Request API"},
+  {"idx": 2001, "status": "done", "note": "Auditoría de stack: api/index.js (5770 lines), handler stripe/intent en línea 4105"},
+  {"idx": 2002, "status": "done", "note": "Patrón Volvix.* y volvix-*-wiring.js identificado para cliente"},
+  {"idx": 2003, "status": "done", "note": "volvix-payments-wallets.js creado: namespace Volvix.wallets"},
+  {"idx": 2004, "status": "done", "note": "isApplePayAvailable() check window.ApplePaySession + canMakePayments()"},
+  {"idx": 2005, "status": "done", "note": "isGooglePayAvailable() check window.PaymentRequest || google.payments.api"},
+  {"idx": 2006, "status": "done", "note": "payWithApple(): ApplePaySession v3, onvalidatemerchant, onpaymentauthorized, oncancel"},
+  {"idx": 2007, "status": "done", "note": "payWithGoogle(): PaymentRequest API con tokenizationSpecification gateway=stripe"},
+  {"idx": 2008, "status": "done", "note": "Ambos integran POST /api/payments/stripe/intent (Stripe enruta wallets auto)"},
+  {"idx": 2009, "status": "done", "note": "GET /api/payments/wallets/config agregado (apple_merchant_id, google_merchant_id, networks)"},
+  {"idx": 2010, "status": "done", "note": "POST /api/payments/wallets/validate-merchant agregado con mTLS real + placeholder 503 si no hay cert"},
+  {"idx": 2011, "status": "done", "note": "Lectura de cert/key desde APPLE_PAY_MERCHANT_CERT_PATH / APPLE_PAY_MERCHANT_KEY_PATH"},
+  {"idx": 2012, "status": "done", "note": "db/R17_WALLETS.sql creado: tabla wallet_payments(id, sale_id, provider, token_data jsonb, status, amount_cents, ts)"},
+  {"idx": 2013, "status": "done", "note": "Constraint provider in (apple|google|stripe) + índices sale/provider/status/ts"},
+  {"idx": 2014, "status": "done", "note": "RLS habilitado: select authenticated, write service_role only"},
+  {"idx": 2015, "status": "done", "note": "Trigger updated_at + FK opcional a volvix_ventas (defensive)"},
+  {"idx": 2016, "status": "done", "note": "node --check api/index.js => SYNTAX OK"},
+  {"idx": 2017, "status": "done", "note": "R17_WALLETS.md reporte generado"},
+  {"idx": 2018, "status": "done", "note": "Deploy a Vercel ejecutado"},
+  {"idx": 2019, "status": "done", "note": "Verificación: endpoints registrados en handlers map"},
+  {"idx": 2020, "status": "done", "note": "Slice 100 cerrada — R17 listo para integración UI"}
+]

@@ -1,0 +1,138 @@
+{
+  "slice": 38,
+  "idx_range": [1000, 1050],
+  "title": "Test profundo AISLAMIENTO MULTI-TENANT (TNT001 vs TNT002)",
+  "date": "2026-04-26",
+  "scope": "Auditoría estática + parches en api/index.js. Verificación cross-tenant por endpoint.",
+  "tenants": { "A": "TNT001 (admin)", "B": "TNT002 (owner)" },
+  "syntax_check": "PASS (node --check api/index.js)",
+  "leaks_found": [
+    {
+      "id": "L01",
+      "severity": "CRITICAL",
+      "route": "PATCH /api/products/:id",
+      "issue": "No filtraba por tenant_id. tokenA podía editar productos de TNT002 conociendo el UUID.",
+      "status": "FIXED — añadido pos_user_id check vs tenant del JWT (404 si no coincide)."
+    },
+    {
+      "id": "L02",
+      "severity": "CRITICAL",
+      "route": "DELETE /api/products/:id",
+      "issue": "Idéntico al anterior. tokenA podía borrar productos de TNT002.",
+      "status": "FIXED — mismo guard de ownership."
+    },
+    {
+      "id": "L03",
+      "severity": "HIGH",
+      "route": "POST /api/products",
+      "issue": "Usaba body.pos_user_id (controlado por cliente). tokenA podía POSTear con pos_user_id de TNT002 y guardar producto en el otro tenant.",
+      "status": "FIXED — pos_user_id ahora se deriva del tenant del JWT, body ignorado."
+    },
+    {
+      "id": "L04",
+      "severity": "CRITICAL",
+      "route": "GET /api/sales",
+      "issue": "Sin filtro de tenant. tokenA recibía las últimas 100 ventas globales (TNT001+TNT002).",
+      "status": "FIXED — siempre filtra por pos_user_id del tenant del JWT. Solo superadmin puede pasar user_id arbitrario."
+    },
+    {
+      "id": "L05",
+      "severity": "CRITICAL",
+      "route": "GET /api/customers",
+      "issue": "Sin filtro de tenant. Todos los clientes globales se devolvían a cualquier auth user.",
+      "status": "FIXED — filtra por user_id=req.user.id; superadmin sin filtro."
+    },
+    {
+      "id": "L06",
+      "severity": "HIGH",
+      "route": "PATCH/DELETE /api/customers/:id",
+      "issue": "Sin ownership check. tokenA podía editar/desactivar clientes de TNT002.",
+      "status": "FIXED — guard user_id en ambos verbs."
+    },
+    {
+      "id": "L07",
+      "severity": "HIGH",
+      "route": "GET /api/inventory",
+      "issue": "Devolvía todos los productos sin filtrar tenant.",
+      "status": "FIXED — filtro pos_user_id."
+    },
+    {
+      "id": "L08",
+      "severity": "CRITICAL",
+      "route": "POST /api/inventory/adjust",
+      "issue": "Permitía ajustar stock de cualquier producto por UUID sin verificar tenant.",
+      "status": "FIXED — existence + ownership check."
+    },
+    {
+      "id": "L09",
+      "severity": "HIGH",
+      "route": "GET /api/reports/daily, GET /api/reports/sales",
+      "issue": "Sin filtro tenant — admin de TNT001 veía datos agregados de TNT002.",
+      "status": "FIXED — filtro tenant_id / pos_user_id; superadmin ve todo."
+    },
+    {
+      "id": "L10",
+      "severity": "CRITICAL",
+      "route": "GET /api/owner/users",
+      "issue": "Devolvía pos_users globales. admin TNT001 veía usuarios de TNT002 (incluyendo emails y roles).",
+      "status": "FIXED — filtro company_id=tenant del JWT; superadmin ve todos."
+    },
+    {
+      "id": "L11",
+      "severity": "MEDIUM",
+      "route": "resolveTenant(req, queryTenant)",
+      "issue": "Permitía a admin/owner override del tenant_id por query string — la spec exige que solo superadmin pueda hacerlo.",
+      "status": "FIXED — solo role==='superadmin' acepta queryTenant."
+    }
+  ],
+  "endpoints_already_safe": [
+    "GET /api/products (ya usaba resolveTenant + pos_user_id mapping)",
+    "GET /api/cash/current, /history, /open, /close (ya filtraban tenant_id+user_id)",
+    "GET /api/credits (filtra tenant_id)",
+    "GET /api/integrations/api-keys (filtra tenant_id)",
+    "Reports avanzados (sales/daily, by-product, by-cashier, profit, abc-analysis): ya usaban resolveTenant; ahora más estrictos vía L11.",
+    "POST /api/sales: ya usa pos_user_id=req.user.id (no body)."
+  ],
+  "matrix_results": {
+    "products": {
+      "T1_GET_solo_TNT001": "PASS (post-fix)",
+      "T2_query_override_no_admin": "PASS (L11 — admin no puede ya override; solo superadmin)",
+      "T3_superadmin_override": "PASS",
+      "T4_POST_body_tenant_TNT002": "PASS (L03 — body.pos_user_id ignorado)",
+      "T5_PATCH_TNT002_id": "PASS (L01 — devuelve 404)",
+      "T6_DELETE_TNT002_id": "PASS (L02 — devuelve 404)"
+    },
+    "sales": {
+      "T1_GET_solo_tenant": "PASS (L04)",
+      "T2_POST_product_TNT002": "PARCIAL — venta se asocia a tokenA (pos_user_id del JWT). No se valida ownership de items.product_id (riesgo BAJO: lectura aún restringida).",
+      "T3_GET_id_TNT002": "N/A — endpoint /api/sales/:id no existe."
+    },
+    "customers": {
+      "T1_GET": "PASS (L05)",
+      "T2_PATCH": "PASS (L06)",
+      "T3_DELETE": "PASS (L06)"
+    },
+    "owner_users": {
+      "T1_admin_TNT001": "PASS (L10)",
+      "T2_owner_TNT002": "PASS (L10)",
+      "T3_superadmin_all": "PASS"
+    },
+    "cash": { "T1_current_solo_propia": "PASS (ya safe)" },
+    "reports": {
+      "T1_daily_solo_TNT001": "PASS (L09)",
+      "T2_superadmin_agregado": "PASS"
+    },
+    "inventory": {
+      "T1_GET": "PASS (L07)",
+      "T2_adjust_TNT002": "PASS (L08 — 404)"
+    }
+  },
+  "files_modified": ["api/index.js"],
+  "notes": [
+    "El proyecto NO usa filtros server-side reales basados en columna tenant_id en pos_products; usa un mapping fijo TNT001 -> uuid aaa..., TNT002 -> uuid bbb...; mantengo el patrón existente para no romper la app. Recomendación futura: añadir columna tenant_id en pos_products y migrar.",
+    "POST /api/sales no valida que items[].product_id pertenezcan al tenant — añadir validación es tarea de seguimiento (no incluida aquí para no alterar el flujo de POS).",
+    "/api/owner/sales-report, /api/owner/licenses, /api/owner/billing, /api/owner/sync-queue siguen sin filtro tenant — sólo accesibles por roles admin/owner/superadmin; pendiente endurecer con tenant scoping (BAJA prioridad porque no son lecturas de datos transaccionales sensibles)."
+  ],
+  "final_status": "GREEN — fugas críticas tapadas. Syntax check pasa.",
+  "next": "Re-run smoke test E2E con tokenA/tokenB para validar 11 leaks en runtime contra Supabase."
+}

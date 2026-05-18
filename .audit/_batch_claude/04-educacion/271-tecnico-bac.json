@@ -1,0 +1,104 @@
+{
+  "slug": "tecnico-bac",
+  "brand": "Tecnico",
+  "tagline": "El sistema para bachilleratos técnicos que sí saben quién práctica, quién paga y quién certifica",
+  "giro": "bachillerato técnico",
+  "giroPlural": "bachilleratos técnicos",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#10141A",
+    "surface": "#1A1F28",
+    "paper": "#222934",
+    "ink": "#F5F7FA",
+    "ink2": "#D2D8E0",
+    "muted": "#8893A1",
+    "line": "#2C3340",
+    "accent": "#F7B500",
+    "accent2": "#FFD05A"
+  },
+  "fonts": {
+    "display": "Oswald",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para bachilleratos técnicos · 2026",
+    "h1": "Cada <em>práctica</em>,<br>cada <em>certificación</em>,<br>en bitácora.",
+    "deck": "El POS hecho para bachilleratos técnicos donde el alumno hace prácticas en taller, el maestro registra horas y el papá quiere saber qué carrera técnica está avanzando.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver horarios hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?vocational,school,workshop,students&q=85",
+    "heroAlt": "Taller de bachillerato técnico",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?workshop,students,tools&q=80", "tag": "Taller técnico", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?electronics,lab&q=80", "tag": "Electrónica", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mechanic,school&q=80", "tag": "Mecánica", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?welding,student&q=80", "tag": "Soldadura", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?industrial,training&q=80", "tag": "Capacitación industrial", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?student,uniform,blue&q=80", "tag": "Uniforme de taller", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?vocational,classroom&q=80", "tag": "Aula teórica", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cnc,machine,student&q=80", "tag": "CNC", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?graduation,technical&q=80", "tag": "Graduación", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?student,id,scanner&q=80", "caption": "Entrada al taller con QR"},
+      {"url": "https://source.unsplash.com/random/800x600/?teacher,workshop,tablet&q=80", "caption": "Maestro registra horas práctica"},
+      {"url": "https://source.unsplash.com/random/800x600/?certificate,technical&q=80", "caption": "Certificado al completar módulo"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Talleres · hoy · en vivo",
+    "title": "Tus prácticas, <em>módulo por módulo</em>",
+    "deck": "Cada alumno con su módulo técnico activo. Maestro registra horas prácticas. Sistema cuenta cuántas faltan para certificar. Cero alumnos sin horas completas.",
+    "secondary": "En bachilleratos técnicos, la certificación oficial depende de horas exactas. Tecnico las cuenta una a una.",
+    "data": {
+      "barberos": [{"name": "Ing. Sergio R.", "role": "Mecatrónica"}, {"name": "Ing. Pedro M.", "role": "Electrónica"}, {"name": "Ing. Ana L.", "role": "Soldadura"}],
+      "slots": ["07:00", "08:30", "10:00", "11:30", "13:00", "14:30", "16:00", "17:30"],
+      "taken": [0, 1, 2, 3, 5, 6],
+      "active": 156,
+      "total": 200,
+      "next": "13:00"
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Bitácora de horas práctica", "d": "Cada módulo técnico requiere X horas. Maestro registra cada sesión. Sistema avisa cuando un alumno completa o se atrasa."},
+    {"ico": "calendar", "h": "Asistencia diferenciada teoría/taller", "d": "Alumno entra con QR a taller distinto al de aula. Sistema lleva ambas asistencias por separado."},
+    {"ico": "bookmark", "h": "Colegiatura + cuota de taller", "d": "Cobro mensual incluye materiales. Padre recibe desglose claro. Cobro automático con tarjeta guardada."},
+    {"ico": "edit", "h": "Certificación por competencia", "d": "Cuando alumno completa horas y aprueba evaluación, sistema genera constancia firmada por director y maestro."},
+    {"ico": "barcode", "h": "Inventario de herramienta y equipo", "d": "Cada herramienta con folio. Alumno la firma al recibirla en taller. Si no la devuelve, costo al padre."},
+    {"ico": "camera", "h": "Evidencia fotográfica de trabajo final", "d": "Maestro toma foto de cada proyecto terminado. Queda en BD del alumno como portafolio digital."}
+  ],
+  "stats": [
+    {"v": "286", "l": "Alumnos activos"},
+    {"v": "24", "l": "Módulos técnicos"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis maestros <span class=\"hl\">apuntaban horas en libreta</span> y se nos perdían certificaciones por horas faltantes. Con Tecnico cada hora queda registrada. Cero alumnos sin certificar este año.",
+    "sig": "Ing. Rodolfo H.",
+    "role": "Bachillerato Tecnico, Saltillo, COAH"
+  },
+  "thefts": [
+    {
+      "title": "Material de taller cobrado y no entregado",
+      "rob": "Cobras $1,800 de paquete técnico (herramienta básica) por alumno. Encargado entrega solo a la mitad y revende el resto. Son $90,000 si son 100 alumnos.",
+      "fix": "Cada herramienta con <strong>folio + firma digital del alumno al recibir</strong>. Inventario rastreado al gramo."
+    },
+    {
+      "title": "Becas técnicas otorgadas sin justificar",
+      "rob": "Subdirector da becas a 'hijos de empresarios aliados' sin documentación. Son $2,500 menos al mes por alumno. Si son 5: $125,000 al año.",
+      "fix": "Becas con <strong>autorización del dueño + carta justificativa + documento socioeconómico</strong>. Reporte mensual de descuentos."
+    },
+    {
+      "title": "Maestros que faltan a taller sin reposición",
+      "rob": "Maestro falta 8 horas de práctica. Alumno no reclama porque no sabe contar. Tú pagaste $3,500 al maestro por horas no impartidas.",
+      "fix": "Sistema lleva <strong>horas programadas vs impartidas en bitácora</strong>. Faltas sin reposición no se pagan al maestro."
+    }
+  ]
+}

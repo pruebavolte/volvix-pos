@@ -1,0 +1,7 @@
+{
+  "fixes": [
+    {"idx": 999, "status": "done", "note": "rate-limit login subido de 5/15min a 20/15min en api/index.js (línea ~571)"},
+    {"idx": 998, "status": "verified", "note": "GET /api/sales/latest ya existía en línea 4567 (requireAuth, devuelve últimas 20 ventas del tenant). No requirió cambios."},
+    {"idx": 997, "status": "done", "note": "Alias health-widget agregados: GET /api (info), GET /api/auth/login (405 con nota), GET /api/pos (200), GET /api/stock (200). GET /api/reports ya existía."}
+  ]
+}

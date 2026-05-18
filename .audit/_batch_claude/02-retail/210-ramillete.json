@@ -1,0 +1,105 @@
+{
+  "slug": "ramillete",
+  "brand": "Ramillete",
+  "tagline": "El POS hecho para tiendas de arreglos florales que sí entregan a tiempo",
+  "giro": "arreglos florales",
+  "giroPlural": "tiendas de arreglos florales",
+  "vibe": "romantic",
+  "palette": {
+    "bg": "#FBF4F0",
+    "surface": "#FFFFFF",
+    "paper": "#F4E6DC",
+    "ink": "#1B1110",
+    "ink2": "#3D2520",
+    "muted": "#8A6A60",
+    "line": "#E9D2C4",
+    "accent": "#D81B60",
+    "accent2": "#FF80AB"
+  },
+  "fonts": {
+    "display": "Playfair Display",
+    "body": "Manrope",
+    "script": "Allura",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para arreglos florales · 2026",
+    "h1": "Cada <em>arreglo</em>,<br>cada <em>evento</em>,<br>cada cliente.",
+    "deck": "El punto de venta hecho para tiendas de arreglos florales premium: pedidos por evento (boda, cumpleaños, condolencias), KDS de taller, entregas con foto, eventos con cotización.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?floral,arrangement,premium&q=85",
+    "heroAlt": "Arreglos florales premium en exhibidor",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?wedding,arrangement&q=80", "tag": "Bodas", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?birthday,flowers&q=80", "tag": "Cumpleaños", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?condolence,arrangement&q=80", "tag": "Condolencias", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?centerpiece,floral&q=80", "tag": "Centros mesa", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?baby,shower,flowers&q=80", "tag": "Baby showers", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?corporate,flowers&q=80", "tag": "Corporativo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?floral,studio&q=80", "tag": "Estudio floral", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bouquet,detail&q=80", "tag": "Detalle ramo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?wedding,decoration&q=80", "tag": "Decoración boda", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?florist,arranging&q=80", "caption": "Diseño del arreglo en taller"},
+      {"url": "https://source.unsplash.com/random/800x600/?event,floral&q=80", "caption": "Montaje en evento"},
+      {"url": "https://source.unsplash.com/random/800x600/?flowers,delivery,truck&q=80", "caption": "Entrega con hora exacta"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "KDS del taller",
+    "title": "Cada arreglo, <em>en su orden</em>",
+    "deck": "Pedidos entran a pantalla. Florista arma según evento y hora de entrega. Sistema valida flores disponibles. Foto antes de salir.",
+    "secondary": "En arreglos florales, un arreglo tarde a una boda es la peor reseña.",
+    "data": {
+      "orders": [
+        {"id": "001", "items": ["Boda Sánchez: 12 centros de mesa", "Ramo novia tipo cascada"], "time": "Sáb 10:00", "estado": "preparando"},
+        {"id": "002", "items": ["Cumpleaños 50 rosas premium"], "time": "Hoy 14:00", "estado": "preparando"},
+        {"id": "003", "items": ["Corona fúnebre grande"], "time": "Hoy 16:00", "estado": "pendiente"},
+        {"id": "004", "items": ["Baby shower 6 arreglos rosas"], "time": "Dom 11:00", "estado": "pendiente"},
+        {"id": "005", "items": ["Corporativo recepción"], "time": "Lun 09:00", "estado": "pendiente"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "KDS para taller", "d": "Pedidos en pantalla por hora de entrega. Florista arma en orden. Cero arreglos olvidados."},
+    {"ico": "calendar", "h": "Eventos con cotización", "d": "Boda con 12 centros + ramo novia: sistema arma cotización completa. Cliente firma antes de producción."},
+    {"ico": "truck", "h": "Entrega con hora exacta", "d": "Cliente pide entrega a las 16:00 en boda. Sistema asigna mensajero y notifica con foto. Cero entregas tarde."},
+    {"ico": "camera", "h": "Foto antes y al entregar", "d": "Cada arreglo con foto al salir del taller. Cliente ve qué recibe. Cero quejas por 'no era el de la foto'."},
+    {"ico": "edit", "h": "Ficha de cliente con eventos", "d": "Aniversarios, cumpleaños familiares. Sistema avisa con 15 días para que reserve arreglo."},
+    {"ico": "percent", "h": "Comisiones por florista", "d": "Define % por arreglo o evento. Florista ve en vivo. Cero peleas."}
+  ],
+  "stats": [
+    {"v": "62", "l": "Arreglos en taller"},
+    {"v": "18", "l": "Entregados hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi peor pesadilla era llegar tarde a una boda. <span class=\"hl\">Una vez llegamos 2 horas tarde y casi me demandan</span>. Con Ramillete el KDS marca prioridad por hora. Cero entregas tarde en 8 meses.",
+    "sig": "Lic. Mariana D.",
+    "role": "Arreglos florales en San Pedro, NL"
+  },
+  "thefts": [
+    {
+      "title": "Flores premium 'mermadas' antes del arreglo",
+      "rob": "Empleado marca rosas premium o peonías como 'venidas mal' antes de meterlas al arreglo y se las lleva. Son flores de $80-300 cada una.",
+      "fix": "Mermas <strong>requieren foto y autorización del gerente</strong>. Cada baja con SKU y motivo verificable. Auditoría diaria por turno."
+    },
+    {
+      "title": "Eventos cotizados con menos flores entregadas",
+      "rob": "Cliente paga $50k por arreglos de boda con 50 flores premium por centro. Empleado pone 35 y se queda con 15 por centro. Tú no ves la diferencia.",
+      "fix": "Eventos <strong>se arman por sistema con SKU por SKU</strong> de flor. Conteo final firmado por cliente al recibir. Cero diferencias."
+    },
+    {
+      "title": "Entregas no realizadas marcadas como entregadas",
+      "rob": "Mensajero firma 'entregado' sin entregar el arreglo. Lo vende afuera. Cliente reclama, tienda repone gratis y pierde doble.",
+      "fix": "Entregas <strong>requieren foto con destinatario y firma digital</strong>. Si no hay evidencia, cobro se reversa. Cero entregas fantasma."
+    }
+  ]
+}

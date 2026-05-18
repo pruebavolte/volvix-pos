@@ -1,0 +1,104 @@
+{
+  "slug": "brasa",
+  "brand": "Brasa",
+  "tagline": "El sistema para pollerías asadas donde cada cuarto y cada pollo entero se rinde justo",
+  "giro": "pollos asados",
+  "giroPlural": "pollerías asadas",
+  "vibe": "vibrant",
+  "palette": {
+    "bg": "#1A0A05",
+    "surface": "#2C1810",
+    "paper": "#3D2418",
+    "ink": "#FFEBC8",
+    "ink2": "#F5C586",
+    "muted": "#B07A40",
+    "line": "#553218",
+    "accent": "#E25822",
+    "accent2": "#F39C12"
+  },
+  "fonts": {
+    "display": "Bebas Neue",
+    "body": "Inter",
+    "script": "Permanent Marker",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para pollerías mexicanas · 2026",
+    "h1": "Cada <em>pollo</em>,<br>cada <em>cuarto</em>,<br>contado.",
+    "deck": "El POS hecho para que ningún cuarto se 'pierda' del rosticero, las salsas no se acaben a las 2, y los domingos vendas el doble sin pleitos en la fila.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el rosticero en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?pollo,asado,rosticero&q=85",
+    "heroAlt": "Pollos rostizados girando en el horno",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?pollo,rostizado&q=80", "tag": "Pollo entero asado", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?papas,fritas&q=80", "tag": "Papas a la francesa", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?arroz,blanco&q=80", "tag": "Arroz blanco", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ensalada,col&q=80", "tag": "Ensalada de col", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?salsa,verde,roja&q=80", "tag": "Salsas para pollo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tortilla,suave&q=80", "tag": "Tortillas calientes", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?rosticero,horno&q=80", "tag": "Rosticero al rojo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cliente,domingo&q=80", "tag": "Domingo familiar", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?polleria,mexicana&q=80", "tag": "Despacho lleno", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?pollero,trabajo&q=80", "caption": "Pollero corta el cuarto recién hecho"},
+      {"url": "https://source.unsplash.com/random/800x600/?fila,polleria&q=80", "caption": "Fila de domingo al mediodía"},
+      {"url": "https://source.unsplash.com/random/800x600/?bolsa,papel,pollo&q=80", "caption": "Pollo empacado para llevar"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Rosticero · despacho · en vivo",
+    "title": "Tu rosticero, <em>pollo por pollo</em>, sin perderse uno",
+    "deck": "Cada pollo entra al horno con su número de turno. KDS muestra cuándo sale. Cliente recibe SMS cuando está listo. Cero esperas eternas el domingo.",
+    "secondary": "En las pollerías, un cuarto que 'se llevó el ayudante' son $80-120 al día — $2,400-3,600 al mes.",
+    "data": {
+      "orders": [
+        {"table": "TURNO-12", "name": "Familia Mendoza", "state": "urgent", "items": ["2 pollos enteros", "2 papas", "salsas"], "waitMin": 14},
+        {"table": "TURNO-13", "name": "Don Roberto", "state": "prep", "items": ["1 pollo entero", "1 arroz", "tortillas"], "waitMin": 10},
+        {"table": "TURNO-14", "name": "Lupita y niños", "state": "queue", "items": ["2 cuartos pierna", "1 ensalada"], "waitMin": 6},
+        {"table": "TURNO-15", "name": "Sra. Hernández", "state": "ready", "items": ["1/2 pollo", "papas chicas"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Control del rosticero por número", "d": "Cada pollo entra con su número. KDS muestra hora de entrada y salida. Cero confusión sobre 'cuál pollo era de quién'."},
+    {"ico": "archive", "h": "Inventario de pollo crudo y asado", "d": "Sabes cuántos pollos crudos hay, cuántos en horno, cuántos listos. Cuando bajas de 5 listos en hora pico, alerta para meter más."},
+    {"ico": "percent", "h": "Rendimiento por pollo crudo", "d": "Un pollo de 1.6 kg debe dar 4 cuartos parejos. Si el pollero corta mal, lo notas en el rendimiento. Cero piernas 'desaparecidas'."},
+    {"ico": "split", "h": "Pedido en cuartos o entero", "d": "Cliente pide 1/4 pierna o 1 entero. Sistema descuenta del inventario correcto. Cero pollos 'medio vendidos'."},
+    {"ico": "truck", "h": "Pedidos para llevar y delivery", "d": "Rappi, Didi, propios. Una sola pantalla. Tu pollero ve todo. Cero domingos con 30 órdenes perdidas."},
+    {"ico": "calendar", "h": "Pronóstico de pollos para domingo", "d": "Domingo pasado vendiste 180, hoy proyecta 200. Sistema te dice cuántos crudos pedir el sábado. Cero domingos cortos."}
+  ],
+  "stats": [
+    {"v": "94", "l": "Pollos vendidos hoy"},
+    {"v": "8", "l": "Litros de salsa"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi pollero <span class=\"hl\">'apartaba' pollos para sus clientes amigos</span> y no me enteraba. Con Brasa cada pollo tiene su número. Identifiqué que se llevaba 4-5 al día. Cortado de raíz, recuperé $14 mil al mes.",
+    "sig": "Don Jorge L.",
+    "role": "Pollos Asados El Patrón, Naucalpan, Edomex"
+  },
+  "thefts": [
+    {
+      "title": "Cuartos 'que se quemaron' y sí estaban buenos",
+      "rob": "Pollero saca 2-3 cuartos diciendo 'se quemaron'. En realidad están perfectos, se los lleva o los regala. Son $80-150 al día — $2,400-4,500 al mes.",
+      "fix": "Pollos quemados requieren <strong>foto y autorización del gerente</strong>. Si pasan de 1 al día, alerta. Sistema compara con merma esperada (1-2%)."
+    },
+    {
+      "title": "Pollo entero cobrado como cuartos",
+      "rob": "Cliente paga $250 por pollo entero en efectivo. Pollero marca solo 2 cuartos en caja ($150) y se queda con $100. $300-500 diarios.",
+      "fix": "Cobro <strong>siempre digital con ticket</strong>. Cliente recibe comprobante por WhatsApp. Sin ticket, no sale el pollo del rosticero."
+    },
+    {
+      "title": "Salsas 'gratis' que rinden por menos",
+      "rob": "Cocinera rinde la salsa verde con más agua para no quedarse sin. Cliente regular nota el sabor y deja de venir. Pérdida silenciosa de clientela.",
+      "fix": "Receta de salsa <strong>con kilos fijos por litro</strong>. Sistema mide consumo vs ventas. Si la salsa rinde 20% más de lo normal, alerta de aguado."
+    }
+  ]
+}

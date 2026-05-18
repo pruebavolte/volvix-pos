@@ -1,0 +1,108 @@
+{
+  "slug": "chispa",
+  "brand": "Chispa",
+  "tagline": "El sistema para soldadores que cobran cada cordón y cada hora de trabajo",
+  "giro": "soldadura",
+  "giroPlural": "talleres de soldadura",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#171717",
+    "surface": "#212121",
+    "paper": "#292929",
+    "ink": "#F0F0F0",
+    "ink2": "#CACACA",
+    "muted": "#828282",
+    "line": "#353535",
+    "accent": "#F1C40F",
+    "accent2": "#FFD83D"
+  },
+  "fonts": {
+    "display": "Saira Condensed",
+    "body": "Inter",
+    "script": "Permanent Marker",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para soldadores especializados · 2026",
+    "h1": "Cada <em>cordón</em>,<br>cada <em>milímetro</em>,<br>certificado.",
+    "deck": "El POS hecho para soldadores especializados: estructuras, tubería de presión, acero inoxidable, aluminio. Cobro por hora, por metro, por proyecto. Garantía por cordón.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver trabajos activos",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?welding,arc,sparks&q=80",
+    "heroAlt": "Soldador especializado con careta y arco eléctrico",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?welding,tig&q=80", "tag": "Soldadura TIG", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?welding,mig&q=80", "tag": "Soldadura MIG", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?stainless,weld&q=80", "tag": "Inox sanitario", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?aluminum,weld&q=80", "tag": "Aluminio", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pipe,weld&q=80", "tag": "Tubería presión", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?structural,welder&q=80", "tag": "Estructural", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?welding-shop,workshop&q=80", "tag": "Taller", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?welder,certified&q=80", "tag": "Soldador certificado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?industrial,welding&q=80", "tag": "Trabajo industrial", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?certificate,weld&q=80", "caption": "Certificación AWS de cada soldador"},
+      {"url": "https://source.unsplash.com/random/800x600/?xray,weld&q=80", "caption": "Inspección no destructiva"},
+      {"url": "https://source.unsplash.com/random/800x600/?warranty,weld&q=80", "caption": "Garantía por cordón"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Agenda · soldadura · en vivo",
+    "title": "Tus soldadores, <em>obra por obra</em>",
+    "deck": "TIG en acero inoxidable son 4 hrs/metro. MIG estructural 1.5 hrs/metro. El sistema cotiza con horas reales. Cero promesas falsas.",
+    "secondary": "Soldadura mala = pieza rota, demanda, demanda. Sistema obliga calidad.",
+    "data": {
+      "service": "Tubería sanitaria inoxidable 18m · TIG",
+      "duration": "5 días",
+      "slots": [
+        {"hora": "Día 1-3", "mecanico": "TIG Don Joaquín", "estado": "ocupado", "auto": "Cocina industrial Hotel"},
+        {"hora": "Día 4-5", "mecanico": "TIG Don Joaquín", "estado": "libre"},
+        {"hora": "Día 1-2", "mecanico": "MIG Pedro", "estado": "ocupado", "auto": "Estructura nave"},
+        {"hora": "Día 3-5", "mecanico": "MIG Pedro", "estado": "libre"},
+        {"hora": "Día 1-4", "mecanico": "Aluminio Luis", "estado": "ocupado", "auto": "Pailería"},
+        {"hora": "Día 5+", "mecanico": "Inspector", "estado": "libre"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Agenda por soldador", "d": "TIG, MIG, aluminio: cada soldador con su especialidad y agenda. Cero saturar al maestro TIG."},
+    {"ico": "edit", "h": "Cotización con hora real", "d": "Cliente cotiza por metro lineal + tipo de soldadura + material + electrodo. Cero presupuestos al ojo."},
+    {"ico": "barcode", "h": "Electrodos por proyecto", "d": "Cada kilo de electrodo (7018, 6011, 308L) vinculado al proyecto. Sabes cuánto gastas en cada obra."},
+    {"ico": "monitor", "h": "Certificación AWS", "d": "Cada soldador con su certificación registrada. Cliente sabe quién soldó su pieza. Profesional 100%."},
+    {"ico": "camera", "h": "Foto del cordón", "d": "Foto de cada cordón al terminar. Cliente ve calidad. Si después falla, ves quién la hizo."},
+    {"ico": "percent", "h": "Comisión por proyecto", "d": "Cada soldador ve sus obras del mes. Bono si no hay reparaciones en garantía."}
+  ],
+  "stats": [
+    {"v": "11", "l": "Proyectos activos"},
+    {"v": "240", "l": "Metros soldados/mes"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi soldador <span class=\"hl\">usaba electrodo 6011 y cobraba al cliente 7018</span> ($45/kg vs $120/kg). Diferencia se la repartían. Con Chispa cada kilo de electrodo se asocia al proyecto. Cero cambiazos en 6 meses.",
+    "sig": "Don Vicente A.",
+    "role": "Soldadura Industrial El Vicente, Apodaca, NL"
+  },
+  "thefts": [
+    {
+      "title": "Electrodos baratos cobrados como Premium",
+      "rob": "Cliente paga proyecto con electrodo 7018 inox ($180/kg). Soldador usa 6011 común ($45/kg). Diferencia $135/kg, son $2,700 en 20kg.",
+      "fix": "Cada kilo de electrodo se <strong>escanea al usarse con proyecto vinculado</strong>. Foto del bote con código. Imposible cambiazo."
+    },
+    {
+      "title": "Trabajos 'por fuera' los domingos",
+      "rob": "Soldador abre el taller los domingos, hace estructuras pequeñas con electrodo y energía del taller. Cobra $1,500-3,000 efectivo. Pasa 3-4 veces al mes.",
+      "fix": "Taller se <strong>abre con código activo en sistema</strong>. Sin proyecto registrado, no hay acceso. Energía monitoreada por kWh."}
+    ,
+    {
+      "title": "Cordones a medias cobrados como completos",
+      "rob": "Cliente paga 18 metros de soldadura sanitaria. Soldador hace 14 metros bien y 4 metros 'a la rápida'. Cliente no ve hasta que falla.",
+      "fix": "Cada metro se <strong>fotografía al terminar</strong>. Inspección visual antes de pintar. Si después falla, ves dónde fue."
+    }
+  ]
+}

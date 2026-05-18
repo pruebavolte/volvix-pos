@@ -1,0 +1,108 @@
+{
+  "slug": "diesel-shop",
+  "brand": "Diésel Shop",
+  "tagline": "El sistema para talleres diésel que cobran cada inyector calibrado",
+  "giro": "taller diésel",
+  "giroPlural": "talleres diésel",
+  "vibe": "darkPremium",
+  "palette": {
+    "bg": "#0F1419",
+    "surface": "#181E25",
+    "paper": "#202830",
+    "ink": "#ECEFF2",
+    "ink2": "#C5CAD0",
+    "muted": "#7C828A",
+    "line": "#2A323A",
+    "accent": "#D35400",
+    "accent2": "#E67328"
+  },
+  "fonts": {
+    "display": "Oswald",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para talleres diésel · 2026",
+    "h1": "Cada <em>inyector</em>,<br>cada <em>turbo</em>,<br>calibrado.",
+    "deck": "El POS hecho para talleres diésel especializados: camiones, tracto-camiones, vehículos pesados. Cada calibración con su prueba, cada bomba con su banco.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver flota en servicio",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?diesel,truck,mechanic&q=80",
+    "heroAlt": "Mecánico diésel trabajando en motor de tractocamión",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?diesel,truck-engine&q=80", "tag": "Motor Cummins", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?injector,diesel&q=80", "tag": "Inyectores", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?turbo,engine&q=80", "tag": "Turbo Holset", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?fuel-pump,diesel&q=80", "tag": "Bomba inyección", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tractor,truck&q=80", "tag": "Tractocamión", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mechanic,wrench&q=80", "tag": "Calibración", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?diesel,workshop&q=80", "tag": "Nave especializada", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?engine,piston&q=80", "tag": "Pistón pesado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?truck,fleet&q=80", "tag": "Flota cliente", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?diesel,test&q=80", "caption": "Pruebas de bomba en banco"},
+      {"url": "https://source.unsplash.com/random/800x600/?fleet,truck&q=80", "caption": "Historial completo por unidad de flota"},
+      {"url": "https://source.unsplash.com/random/800x600/?invoice,fleet&q=80", "caption": "Factura para empresa transportista"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Agenda · taller diésel · en vivo",
+    "title": "Tu banco de pruebas, <em>turno por turno</em>",
+    "deck": "Calibrar 6 inyectores son 4 horas. Un turbo son 6 horas. El sistema te muestra qué cabe en el día y qué no. Cero promesas falsas a transportistas.",
+    "secondary": "Las flotas necesitan unidades de vuelta. Programar bien es vida.",
+    "data": {
+      "service": "Calibración 6 inyectores ISX",
+      "duration": "4 hrs",
+      "slots": [
+        {"hora": "07:00", "mecanico": "Banco inyectores", "estado": "ocupado", "auto": "Kenworth T800"},
+        {"hora": "11:00", "mecanico": "Banco inyectores", "estado": "ocupado", "auto": "Freightliner Cascadia"},
+        {"hora": "07:00", "mecanico": "Bahía 1", "estado": "ocupado", "auto": "Volvo VNL"},
+        {"hora": "14:00", "mecanico": "Bahía 1", "estado": "libre"},
+        {"hora": "07:00", "mecanico": "Bahía 2", "estado": "libre"},
+        {"hora": "12:00", "mecanico": "Bahía 2", "estado": "ocupado", "auto": "International LT"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Inyectores con prueba", "d": "Cada inyector calibrado con su gráfica de banco. Cliente ve la mejora antes-después. Cero 'no se nota nada'."},
+    {"ico": "bookmark", "h": "Historial por unidad", "d": "Cada camión con su bitácora: turbo de hace 18 meses, bomba calibrada hace 6. Las flotas mandan camiones sabiendo qué les toca."},
+    {"ico": "calendar", "h": "Banco de pruebas agendado", "d": "Solo cabe 1 set de inyectores cada 4 hrs. El sistema bloquea sobre-agendar. Transportista recibe hora real."},
+    {"ico": "monitor", "h": "Diagnóstico computarizado", "d": "Scan de ECM con códigos guardados. Si la unidad regresa, ves los códigos antiguos. Diagnóstico rápido."},
+    {"ico": "truck", "h": "Servicio a flotas", "d": "Empresas transportistas con N unidades. Factura mensual consolidada. Cobranza al área de mantenimiento."},
+    {"ico": "percent", "h": "Comisión por unidad", "d": "Cada mecánico ve sus servicios cerrados del mes. Si la unidad no regresa por la misma falla en 6 meses, bonus."}
+  ],
+  "stats": [
+    {"v": "23", "l": "Unidades atendidas/mes"},
+    {"v": "6", "l": "Flotas activas"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis transportistas reclamaban porque <span class=\"hl\">facturaba inyectores nuevos pero les ponía rebuilt</span> sin decir. Mi muchacho se quedaba con los nuevos. Con Diésel Shop cada parte tiene número en banco. Cero reclamos.",
+    "sig": "Don Beto S.",
+    "role": "Diésel Shop El Beto, Saltillo, COAH"
+  },
+  "thefts": [
+    {
+      "title": "Inyectores nuevos cambiados por rebuilt",
+      "rob": "Cliente paga 6 inyectores nuevos ($4,800 c/u = $28,800). Mecánico instala 6 rebuilt ($1,800 c/u), se lleva los nuevos. Robo: $18,000.",
+      "fix": "Cada inyector con <strong>número de serie fotografiado</strong> en banco antes de instalar. Comparable con factura del proveedor. Imposible cambiazo."
+    },
+    {
+      "title": "Diagnóstico de 'turbo' que era manguera",
+      "rob": "Camión llega con humo. Cobran turbo rebuilt ($25,000) cuando solo era una manguera de admisión floja ($300). Diferencia se reparte.",
+      "fix": "Diagnóstico con <strong>video de la falla</strong> y prueba de presión. Si después se demuestra que era manguera, el cliente tiene evidencia."
+    },
+    {
+      "title": "Horas de banco facturadas no usadas",
+      "rob": "Cobran 8 hrs de banco cuando la calibración tomó 3. Diferencia: $1,500-2,500. El mecánico se queda con el sobrante.",
+      "fix": "Banco de pruebas con <strong>log digital del uso</strong>. Inicio y fin de cada calibración. Factura sale con horas reales del log."
+    }
+  ]
+}

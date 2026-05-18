@@ -1,0 +1,104 @@
+{
+  "slug": "wokito",
+  "brand": "Wokito",
+  "tagline": "El sistema para cocinas chinas donde el arroz frito rinde lo que debe y el dim sum no se 'pierde' del vapor",
+  "giro": "cocina china",
+  "giroPlural": "cocinas chinas",
+  "vibe": "vibrant",
+  "palette": {
+    "bg": "#1A0A08",
+    "surface": "#2B1410",
+    "paper": "#3B1E18",
+    "ink": "#FFE8D5",
+    "ink2": "#F0BE82",
+    "muted": "#A87545",
+    "line": "#552820",
+    "accent": "#C8102E",
+    "accent2": "#F4C430"
+  },
+  "fonts": {
+    "display": "Noto Serif SC",
+    "body": "Inter",
+    "script": "ZCOOL XiaoWei",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para cocinas chinas en México · 2026",
+    "h1": "Cada <em>wok</em>,<br>cada <em>dim sum</em>,<br>servido.",
+    "deck": "El POS hecho para que el arroz frito rinda lo que debe, los dim sum no se 'pierdan' en el vapor, y los combos de comida para llevar lleguen completos.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?chinese,wok,dimsum&q=85",
+    "heroAlt": "Wok en llamas con arroz frito",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?chinese,food&q=80", "tag": "Cocina al wok", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?dimsum,bamboo&q=80", "tag": "Dim sum al vapor", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?fried,rice&q=80", "tag": "Arroz frito", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?peking,duck&q=80", "tag": "Pato pekinés", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?noodles,chow&q=80", "tag": "Chow mein", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?spring,rolls&q=80", "tag": "Rollos primavera", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?chinese,restaurant&q=80", "tag": "Salón rojo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tea,chinese&q=80", "tag": "Té chino", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?wok,fire&q=80", "tag": "Wok al rojo vivo", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?chef,wok&q=80", "caption": "Cocinero saltea al wok"},
+      {"url": "https://source.unsplash.com/random/800x600/?dimsum,steamer&q=80", "caption": "Vaporeras de bambú"},
+      {"url": "https://source.unsplash.com/random/800x600/?delivery,chinese&q=80", "caption": "Pedido para llevar listo"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · vapor · en vivo",
+    "title": "Tu cocina, <em>wok por wok</em>, sin perderse",
+    "deck": "Cada orden con proteína y guarnición. KDS muestra: arroz frito pollo, 3 dim sum hakao, chow mein vegetariano. Cocinero ve todo.",
+    "secondary": "En las cocinas chinas, un dim sum 'extra' al cuate son $40-60 cada vez. 10 al turno = $500.",
+    "data": {
+      "orders": [
+        {"table": "M03", "name": "Familia Wong", "state": "urgent", "items": ["1 pato pekinés", "Arroz frito mariscos", "Té oolong"], "waitMin": 22},
+        {"table": "M06", "name": "Sra. Méndez", "state": "prep", "items": ["3 dim sum hakao", "1 chow mein pollo", "Té jazmín"], "waitMin": 8},
+        {"table": "M01", "name": "Pareja jóvenes", "state": "queue", "items": ["Combo pareja: 2 entradas, 2 fuertes", "2 sodas"], "waitMin": 5},
+        {"table": "TOGO-4", "name": "Don Luis", "state": "ready", "items": ["Para llevar: pollo agridulce, arroz blanco, rollo"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "KDS por estación (wok/vapor/horno)", "d": "Wok: arroces. Vapor: dim sum. Horno: pato. Cada estación ve sólo lo suyo. Cero choques en cocina."},
+    {"ico": "truck", "h": "Combos para llevar y delivery", "d": "Cada combo con items obligatorios. Sistema verifica al empacar: '4 items, ¿están todos?' Cero clientes que reciben combo a medias."},
+    {"ico": "archive", "h": "Inventario por proteína y vegetal", "d": "Pollo: 12 kg. Camarón: 6 kg. Carne res: 5 kg. Bok choy: 3 kg. Cuando bajas, alerta antes del turno."},
+    {"ico": "percent", "h": "Rendimiento del arroz por kilo", "d": "1 kg arroz crudo = 18 órdenes de arroz frito. Si rinde 14, hay merma o porción generosa. Sistema detecta."},
+    {"ico": "barcode", "h": "Comanda con modificaciones", "d": "Sin cebolla, sin chile, picante extra. Aparece en KDS color. Cocinero no falla. Cero platillos devueltos."},
+    {"ico": "split", "h": "Cuenta dividida para grupos", "d": "Mesa de 8 compartió 12 platillos. Sistema divide por igual o por items pedidos. Cero pelea al pagar."}
+  ],
+  "stats": [
+    {"v": "168", "l": "Órdenes servidas hoy"},
+    {"v": "23", "l": "Kg de arroz cocinado"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis pedidos para llevar <span class=\"hl\">llegaban incompletos al cliente</span>. Faltaba el rollo o el palillo. Con Wokito, el sistema obliga verificar items antes de cerrar. Cero quejas en 2 meses.",
+    "sig": "Sra. Mei W.",
+    "role": "Restaurante Dragón Dorado, Zona Rosa, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Dim sum 'cortesía' que se llevan a casa",
+      "rob": "Cocinero prepara dim sum extra 'que sobraron del turno' y se los lleva. 6-10 piezas por día. $80-150 cada vez.",
+      "fix": "Dim sum con <strong>conteo obligatorio al inicio y cierre</strong>. Sobras se fotografían. Diferencias arriba de 3% alertan al gerente."
+    },
+    {
+      "title": "Pato pekinés 'mal preparado' devuelto",
+      "rob": "Cocinero reporta que pato salió 'mal' y se descartó. Se lo lleva a casa. $400-600 cada vez. 1-2 al mes.",
+      "fix": "Productos premium descartados requieren <strong>foto antes de tirar y autorización del dueño</strong>. Cero patos 'mal salidos' que reaparecen en otra cocina."
+    },
+    {
+      "title": "Combos para llevar incompletos",
+      "rob": "Empleado empaca combo de 5 items, pone 4 y cobra completo. Cliente abre en casa y reclama. La diferencia 'desaparece' en stock. $80-120 por combo.",
+      "fix": "Empaque con <strong>checklist digital obligatorio</strong>. Cada item se marca al meter en bolsa. Sistema no deja cerrar combo incompleto."
+    }
+  ]
+}

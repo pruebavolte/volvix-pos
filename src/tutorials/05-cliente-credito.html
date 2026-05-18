@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tutorial 05 — Cliente a crédito | Volvix POS</title>
+<link rel="stylesheet" href="_shared.css"></head>
+<body><div class="tutorial-container" id="container">
+<h1>Tutorial 05 — Venta a crédito y abonos</h1>
+<div class="subtitle">Venta a crédito → Cliente paga deuda → Saldo actualiza</div>
+<div class="stage">
+  <div class="step step-1"><h2>Paso 1 · Selecciona el cliente</h2>
+    <div class="mock"><h3>Carrito · $250</h3>
+      <input class="input" placeholder="Buscar cliente..." value="María">
+      <div class="grid" style="grid-template-columns:1fr"><div class="card hot">👤 María López — saldo $0</div></div>
+      <div class="cursor" style="left:50%;top:60%">👆</div>
+    </div></div>
+  <div class="step step-2"><h2>Paso 2 · Elige "A crédito"</h2>
+    <div class="mock"><h3>Forma de pago</h3>
+      <div class="grid"><div class="card">💵 Efectivo</div><div class="card">💳 Tarjeta</div><div class="card hot">📋 Crédito</div></div>
+      <div class="banner banner-warn" style="margin-top:14px">Crédito disponible: $5,000</div>
+      <div class="cursor" style="left:80%;top:42%">👆</div>
+    </div></div>
+  <div class="step step-3"><h2>Paso 3 · Venta registrada como deuda</h2>
+    <div class="mock">
+      <div class="banner banner-ok">✅ Venta a crédito registrada</div>
+      <h3>👤 María López</h3>
+      <div class="row"><span>Deuda actual</span><b style="color:#ef4444">$250.00</b></div>
+      <div class="row"><span>Crédito disponible</span><b>$4,750.00</b></div>
+      <div class="row"><span>Última compra</span><b>hoy 14:25</b></div>
+    </div></div>
+  <div class="step step-4"><h2>Paso 4 · Cliente paga su deuda</h2>
+    <div class="mock"><h3>Recibir abono · María</h3>
+      <form><label>Monto a abonar<input value="250.00"></label>
+      <label>Método<select><option>Efectivo</option></select></label></form>
+      <button class="btn">💰 Registrar abono</button>
+      <div class="cursor" style="left:24%;top:78%">👆</div>
+    </div></div>
+  <div class="step step-5"><h2>Paso 5 · Saldo actualizado ✓</h2>
+    <div class="mock">
+      <div class="banner banner-ok">✅ Abono registrado · $250.00</div>
+      <h3>👤 María López</h3>
+      <div class="row"><span>Deuda</span><b style="color:#10b981">$0.00 ✓</b></div>
+      <div class="row"><span>Crédito disponible</span><b>$5,000.00</b></div>
+      <div class="receipt" style="margin-top:10px">
+        Abono recibido: $250<br>
+        Saldo restante: $0<br>
+        ¡Cuenta saldada! 🎉
+      </div>
+    </div></div>
+</div>
+<div class="progress"><div class="progress-bar"></div></div>
+<div class="caption">Reproduciendo en bucle (25s).</div>
+<div class="controls">
+<button onclick="document.getElementById('container').classList.toggle('paused')">⏯️ Pausar/Reanudar</button>
+<button onclick="location.reload()">🔄 Reiniciar</button>
+</div></div></body></html>

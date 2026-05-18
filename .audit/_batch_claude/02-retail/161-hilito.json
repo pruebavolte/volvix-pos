@@ -1,0 +1,106 @@
+{
+  "slug": "hilito",
+  "brand": "Hilito",
+  "tagline": "El sistema para tiendas de ropa interior que sí cuidan la talla exacta",
+  "giro": "ropa interior",
+  "giroPlural": "tiendas de ropa interior",
+  "vibe": "minimalist",
+  "palette": {
+    "bg": "#FAF7F4",
+    "surface": "#FFFFFF",
+    "paper": "#F1ECE6",
+    "ink": "#1A1714",
+    "ink2": "#3E3833",
+    "muted": "#86796D",
+    "line": "#DDD3C8",
+    "accent": "#9C6B5A",
+    "accent2": "#C9A18D"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Allura",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas de ropa interior · 2026",
+    "h1": "Cada <em>copa</em>,<br>cada <em>talla</em>,<br>cada clienta.",
+    "deck": "El punto de venta hecho para tiendas de ropa interior: stock por copa y banda, fichas de clienta con su talla exacta, paquetes y recomendaciones según historial.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?underwear,lingerie,intimate&q=85",
+    "heroAlt": "Ropa interior fina en exhibidor",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?underwear,women&q=80", "tag": "Brasieres", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?panties,women&q=80", "tag": "Panties", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?underwear,men&q=80", "tag": "Boxers hombre", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?shapewear&q=80", "tag": "Fajas y modeladores", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?camisole&q=80", "tag": "Camisetas y tops", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?socks&q=80", "tag": "Calcetines", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?underwear,store&q=80", "tag": "Tienda", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?intimates,lace&q=80", "tag": "Encaje", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?underwear,packaging&q=80", "tag": "Paquetes", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?bra,fitting&q=80", "caption": "Toma de talla registrada en ficha"},
+      {"url": "https://source.unsplash.com/random/800x600/?underwear,drawer&q=80", "caption": "Stock organizado por talla y copa"},
+      {"url": "https://source.unsplash.com/random/800x600/?lingerie,shop&q=80", "caption": "Vendedora recomienda por historial"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>por banda y copa</em>",
+    "deck": "Cada brasier con su banda (32-44) y copa (A-DD). Clienta pide su talla, vendedora consulta en 5 segundos. Cuando una combinación se agota, sale del catálogo solo.",
+    "secondary": "En ropa interior, decir 'esa talla no la manejamos' por mala captura cuesta clientas que no vuelven.",
+    "data": {
+      "product": "Brasier algodón básico",
+      "tallas": ["32", "34", "36", "38", "40", "42"],
+      "stock": [
+        {"color": "Negro", "vals": [4, 8, 10, 6, 3, 1]},
+        {"color": "Blanco", "vals": [3, 7, 9, 5, 3, 1]},
+        {"color": "Nude", "vals": [3, 6, 8, 5, 2, 0]}
+      ],
+      "lowThreshold": 2
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por banda y copa", "d": "Cada brasier con su talla real. Sabes qué combinaciones vuelan, cuáles se quedan."},
+    {"ico": "gift", "h": "Ficha de clienta con su talla", "d": "Su banda, su copa, sus colores favoritos. Cuando regresa, vendedora ya sabe qué ofrecer. Cero adivinanzas."},
+    {"ico": "percent", "h": "Comisiones por vendedora", "d": "Define el % por pieza o paquete (3 panties por $X). Vendedora ve en vivo. Cero peleas al cierre."},
+    {"ico": "camera", "h": "Devoluciones con foto", "d": "Sistema obliga foto de etiqueta sellada. Si la prenda fue usada, alerta. Bloquea cambios sin etiqueta intacta."},
+    {"ico": "split", "h": "Paquetes 3x2 y combos", "d": "Arma paquetes (3 panties por $X). Se descuentan los 3 del stock automáticamente. Cero errores de captura."},
+    {"ico": "truck", "h": "Envío a domicilio discreto", "d": "Clienta pide envío sin etiquetas visibles. Sistema marca el pedido como confidencial. Mensajería entrega en bolsa neutra."}
+  ],
+  "stats": [
+    {"v": "486", "l": "Piezas en stock"},
+    {"v": "39", "l": "Vendidas hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis clientas regresan porque <span class=\"hl\">yo me sé su talla mejor que ellas</span>. Con Hilito el sistema me la guarda y me avisa cuándo entra modelo nuevo. Es como tener memoria fotográfica.",
+    "sig": "Patricia M.",
+    "role": "Tienda de ropa interior en León, GTO"
+  },
+  "thefts": [
+    {
+      "title": "Piezas chicas que 'desaparecen' del cajón",
+      "rob": "Empleada toma panties o calcetines del display y los echa a su bolsa. Son piezas pequeñas, fáciles de esconder. En tienda de ropa interior son 10-15 piezas al mes.",
+      "fix": "Cada pieza con <strong>antirrobo magnético y SKU obligatorio</strong>. Auditoría de stock por turno. Diferencias requieren explicación firmada."
+    },
+    {
+      "title": "Paquetes 3x2 cobrados como individuales",
+      "rob": "Vendedora cobra 3 panties al precio individual, marca solo 2 en sistema, se queda con el precio de 1 pieza. Cliente recibe 3, tu sistema marca 2.",
+      "fix": "Paquetes <strong>se arman por sistema con SKU de combo</strong>. Cero captura manual. Auditoría diaria: piezas salidas vs piezas facturadas."
+    },
+    {
+      "title": "Devoluciones de prendas usadas",
+      "rob": "Cliente compra brasier, lo usa una semana, lo regresa diciendo 'no me quedó'. Vendedora lo acepta sin foto y lo vuelve a poner en exhibición.",
+      "fix": "Devoluciones <strong>requieren etiqueta sellada y foto del estado</strong>. Si la prenda fue usada, alerta al gerente. Bloquea cambios sin sello."
+    }
+  ]
+}

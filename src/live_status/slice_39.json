@@ -1,0 +1,53 @@
+{
+  "slice": 39,
+  "idx_range": [1050, 1080],
+  "category": "PWA + Offline + Service Worker",
+  "url": "https://volvix-pos.vercel.app",
+  "timestamp": "2026-04-26T21:35:00Z",
+  "results": {
+    "service_worker": {
+      "T1_sw_js_200_with_js_content_type": { "status": "PASS", "http": 200, "content_type": "application/javascript; charset=utf-8", "size": 10077 },
+      "T2_manifest_valid": { "status": "PASS", "http": 200, "content_type": "application/json; charset=utf-8", "fields": { "name": "Volvix POS", "icons_count": 3, "start_url": "/login.html" } },
+      "T3_offline_html_200": { "status": "FAIL", "http": 404, "note": "offline.html no existe en root publico (404 HTML fallback). Falta crearlo o servirlo." },
+      "T4_sw_cache_control_no_cache": { "status": "FAIL", "http_header": "Cache-Control: public, max-age=3600", "note": "SW cacheado 1h - dificulta actualizaciones inmediatas." },
+      "T5_sw_listeners": { "status": "PASS", "found": ["install","activate","fetch","sync","periodicsync","message","push","notificationclick"] },
+      "T6_static_files_count": { "status": "PASS", "entries_detected": 65, "note": ">40 entries OK." }
+    },
+    "push_endpoints": {
+      "T1_vapid_public_key_200": { "status": "PARTIAL", "http": 200, "body": "{\"ok\":true,\"key\":null}", "note": "Endpoint OK pero VAPID_PUBLIC_KEY no configurada (key=null)." },
+      "T2_subscribe_no_auth_401": { "status": "PASS", "http": 401, "body": "{\"error\":\"unauthorized\"}" },
+      "T3_subscribe_with_auth_200": { "status": "SKIP", "note": "Requiere token válido - no probado." },
+      "T4_send_admin": { "status": "PASS_AUTH_GATE", "http": 401, "note": "Bloqueado correctamente sin auth admin." },
+      "T5_subscriptions_admin": { "status": "FAIL_OR_NOAUTHGATE", "http": 404, "body": "{\"error\":\"endpoint not found\"}", "note": "Endpoint GET /api/push/subscriptions no existe (404). Esperado 401 con auth gate." },
+      "T6_unsubscribe_delete": { "status": "FAIL_OR_NOAUTHGATE", "http": 404, "body": "{\"error\":\"endpoint not found\"}", "note": "DELETE /api/push/subscribe responde 404. Esperaba 401 sin auth." }
+    },
+    "manifest_validation": {
+      "T1_name": { "status": "PASS", "value": "Volvix POS" },
+      "T2_icons_192_512": { "status": "PASS", "sizes": ["192x192","512x512","512x512"] },
+      "T3_start_url": { "status": "PASS", "value": "/login.html" },
+      "T4_display_standalone": { "status": "PASS", "value": "standalone" },
+      "T5_theme_color": { "status": "PASS", "value": "#3B82F6" },
+      "T6_shortcuts_min_1": { "status": "PASS", "count": 3 }
+    },
+    "offline_html": {
+      "T1_200_ok": { "status": "FAIL", "http": 404 },
+      "T2_contains_sin_conexion": { "status": "N/A", "note": "Archivo no existe." },
+      "T3_online_detect_script": { "status": "N/A", "note": "Archivo no existe." }
+    }
+  },
+  "summary": {
+    "total": 21,
+    "pass": 12,
+    "fail": 5,
+    "partial": 1,
+    "skip": 1,
+    "na": 2
+  },
+  "issues": [
+    "offline.html devuelve 404 en producción - PWA fallback no funcional",
+    "sw.js servido con Cache-Control max-age=3600 en vez de no-cache - retrasa actualizaciones del SW",
+    "VAPID_PUBLIC_KEY no configurada en env (key=null) - push notifications inactivas",
+    "GET /api/push/subscriptions responde 404 - endpoint admin no implementado o ruta distinta",
+    "DELETE /api/push/subscribe responde 404 - ruta unsubscribe no implementada"
+  ]
+}

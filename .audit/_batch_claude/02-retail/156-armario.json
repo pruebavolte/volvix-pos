@@ -1,0 +1,106 @@
+{
+  "slug": "armario",
+  "brand": "Armario",
+  "tagline": "El sistema para boutiques que sí saben qué le queda a quién",
+  "giro": "boutique de ropa femenina",
+  "giroPlural": "boutiques de ropa femenina",
+  "vibe": "editorial",
+  "palette": {
+    "bg": "#FBF6F1",
+    "surface": "#FFFFFF",
+    "paper": "#F4EAE0",
+    "ink": "#1B0F12",
+    "ink2": "#3A2229",
+    "muted": "#7A5C66",
+    "line": "#E2CFC6",
+    "accent": "#B0405C",
+    "accent2": "#D67A8E"
+  },
+  "fonts": {
+    "display": "Playfair Display",
+    "body": "Manrope",
+    "script": "Allura",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para boutiques mexicanas · 2026",
+    "h1": "Cada <em>vestido</em>,<br>cada <em>talla</em>,<br>cada clienta.",
+    "deck": "El punto de venta hecho para boutiques que viven de la temporada: stock por talla y color, lista de espera para piezas únicas, fichas de clienta con su última compra y su talla real.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el lookbook",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?boutique,fashion,women,dress&q=85",
+    "heroAlt": "Vestidos colgados en boutique femenina",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?boutique,dress&q=80", "tag": "Vestidos noche", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?blouse,women&q=80", "tag": "Blusas temporada", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?skirt,fashion&q=80", "tag": "Faldas plisadas", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pants,women,fashion&q=80", "tag": "Pantalones sastre", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?dress,floral&q=80", "tag": "Vestido floral", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?coat,women&q=80", "tag": "Abrigo lana", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?boutique,interior&q=80", "tag": "Showroom", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?fashion,detail&q=80", "tag": "Detalle bordado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?fitting,room&q=80", "tag": "Vestidor", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?clothing,rack&q=80", "caption": "Cada pieza con su talla disponible"},
+      {"url": "https://source.unsplash.com/random/800x600/?shopping,woman&q=80", "caption": "Clienta prueba y vendedora marca en el sistema"},
+      {"url": "https://source.unsplash.com/random/800x600/?cash,register,fashion&q=80", "caption": "Ticket con QR para devolución"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>talla por talla</em>, en tiempo real",
+    "deck": "Cada vestido con sus tallas reales. Si quedan 0 en M y la clienta lo pide, el sistema sugiere reservar la próxima reposición. Cuando una talla se agota, sale del catálogo digital solo.",
+    "secondary": "En boutiques, decir 'creí que tenía' cuesta clientas. Armario elimina ese error.",
+    "data": {
+      "product": "Vestido midi crepé",
+      "tallas": ["XS", "S", "M", "L", "XL", "XXL"],
+      "stock": [
+        {"color": "Negro", "vals": [2, 4, 6, 3, 1, 0]},
+        {"color": "Rojo vino", "vals": [1, 3, 5, 4, 2, 0]},
+        {"color": "Beige", "vals": [0, 2, 4, 3, 1, 0]}
+      ],
+      "lowThreshold": 2
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por talla y color", "d": "No solo 'vestido midi'; 'vestido midi negro M con 3 piezas'. Sabes qué tallas vuelan y cuáles se quedan colgadas."},
+    {"ico": "bookmark", "h": "Apartados de temporada", "d": "Clienta aparta vestido con $300, paga en 10 días. Si no regresa, la pieza vuelve al rack sola. Cero anticipos en bolsa de la vendedora."},
+    {"ico": "percent", "h": "Comisiones por vendedora", "d": "Define el % por pieza o categoría. Vendedora ve sus ventas en vivo. Cero pleitos al cierre de quincena."},
+    {"ico": "camera", "h": "Devoluciones con foto", "d": "El sistema obliga a fotografiar la prenda y la etiqueta. Si vino usada, alerta al gerente. Bloquea cambios después de 7 días."},
+    {"ico": "gift", "h": "Ficha de clienta VIP", "d": "Su talla real, su última compra, su color favorito. Cuando llega temporada nueva, le mandas WhatsApp con lo que sí le queda."},
+    {"ico": "truck", "h": "Traspasos entre sucursales", "d": "¿No tienes la talla? Búscala en la otra sucursal. Traspaso con un toque, clienta notificada por WhatsApp."}
+  ],
+  "stats": [
+    {"v": "412", "l": "Prendas en stock"},
+    {"v": "28", "l": "Vendidas hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Antes <span class=\"hl\">tenía que apuntar las tallas en un cuaderno</span> y siempre se me iba la talla M de mi clienta consentida. Con Armario, ahora le aparto y le aviso por WhatsApp. Me factura el doble.",
+    "sig": "Ana Sofía P.",
+    "role": "Boutique en Coyoacán, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Cambios de talla sin ticket",
+      "rob": "Clienta 'cambia' un vestido por otro de mayor valor, vendedora cobra la diferencia en efectivo y se la queda. Tú nunca lo ves porque no hay registro del cambio.",
+      "fix": "Cambios <strong>requieren ticket original escaneado</strong>. Diferencia de precio se cobra por el sistema. Reporte diario: cambios sin ticket = cero."
+    },
+    {
+      "title": "Prendas 'mermadas' que salen por la puerta",
+      "rob": "Empleada marca prendas como 'manchadas' o 'descosidas' y se las lleva. Una blusa de boutique son $800-2,500. Sin control, son 3-5 al mes.",
+      "fix": "Mermas requieren <strong>foto del defecto y autorización del gerente</strong>. Cada baja de inventario queda registrada con nombre y hora."
+    },
+    {
+      "title": "Apartado cobrado y nunca entregado",
+      "rob": "Clienta aparta un vestido con $500, no regresa. Vendedora se queda con el anticipo en efectivo y devuelve la pieza al stock 'como si nada'.",
+      "fix": "Apartados con <strong>fecha límite en sistema</strong>. Vence → pieza regresa sola. Anticipo va a crédito de la clienta, no a efectivo."
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "slice": 215,
+  "idx_range": [3280, 3320],
+  "module": "R18_FINAL_MASTER",
+  "title": "Reporte master final R18 + smoke test integral",
+  "status": "complete",
+  "ts": "2026-04-26T00:00:00Z",
+  "deployed_url": "https://volvix-pos.vercel.app",
+  "deployed_version": "7.2.0",
+  "local_target_version": "8.0.0",
+  "stats": {
+    "reports_R_md": 82,
+    "sql_files": 54,
+    "endpoints_base": 83,
+    "endpoints_total_estimate": 233,
+    "api_index_js_lines": 9020,
+    "total_js_lines": 129316,
+    "live_slices": 88,
+    "modules": 78,
+    "fibonacci_agents_R1_R18": 6764,
+    "rounds_completed": 18
+  },
+  "smoke_test": {
+    "method": "curl bearer JWT admin@volvix.test",
+    "endpoints_tested": 25,
+    "pass": 9,
+    "fail": 16,
+    "pass_rate_pct": 36,
+    "passed": [
+      "/api/health",
+      "/api/products",
+      "/api/sales",
+      "/api/customers",
+      "/api/inventory",
+      "/api/loyalty",
+      "/api/loyalty/tiers",
+      "/api/printers",
+      "/api/returns"
+    ],
+    "failed_404": [
+      "/api/bundles",
+      "/api/warehouses",
+      "/api/giftcards",
+      "/api/appointments",
+      "/api/promotions",
+      "/api/segments",
+      "/api/recurring",
+      "/api/tips",
+      "/api/wallets",
+      "/api/reviews",
+      "/api/hr/attendance",
+      "/api/hr/time-off",
+      "/api/audit",
+      "/api/integrations/zapier",
+      "/api/subscriptions/plans",
+      "/api/openapi.json"
+    ],
+    "root_cause_404": "Producción en v7.2.0 no incluye endpoints R14-R18 (presentes en código local, deploy pendiente)"
+  },
+  "score_final": {
+    "code_complete": 95,
+    "sql_schemas": 92,
+    "tests": 70,
+    "docs": 88,
+    "prod_deploy": 40,
+    "security": 80,
+    "global": 78
+  },
+  "modules_by_round": {
+    "R1_R10": ["auth","products","sales","inventory","customers","reports"],
+    "R11_R12": ["tenants","plans","roles","permissions","subscriptions"],
+    "R13": ["secrets","i18n","performance","security","wiring"],
+    "R14": ["mfa","pwa","push","cfdi","loyalty","email","backup","multicurrency","subscriptions","webhooks","zapier","openapi","gdpr","wcag","ai_assistant","barcode","customer_portal","onboarding_v2","monitoring","unit_tests","tax_mx","integrations"],
+    "R15": ["owner_wired","buttons_wired"],
+    "R16": ["browser_auto","email_setup","webhook_verify","cleanup"],
+    "R17": ["appointments","bundles","giftcards","promotions","segments","warehouses","recurring","tips","wallets","reviews","returns_ext","fraud","geofence","kiosk","ocr","ml","qr_payments","sms","telegram","whatsapp","discord","voice","i18n_expanded","audit_viewer"],
+    "R18": ["hr","amazon_marketplace"]
+  },
+  "env_vars_optional": {
+    "payments": ["STRIPE_SECRET_KEY","STRIPE_WEBHOOK_SECRET","SQUARE_ACCESS_TOKEN","SQUARE_LOCATION_ID"],
+    "email": ["SENDGRID_API_KEY","SENDGRID_FROM_EMAIL"],
+    "ai": ["ANTHROPIC_API_KEY"],
+    "push": ["VAPID_PUBLIC_KEY","VAPID_PRIVATE_KEY","VAPID_SUBJECT"],
+    "twilio": ["TWILIO_ACCOUNT_SID","TWILIO_AUTH_TOKEN","TWILIO_PHONE_FROM"],
+    "whatsapp": ["WHATSAPP_TOKEN","WHATSAPP_PHONE_ID"],
+    "telegram": ["TELEGRAM_BOT_TOKEN"],
+    "discord": ["DISCORD_BOT_TOKEN","DISCORD_GUILD_ID"],
+    "marketplace": ["SHOPIFY_API_KEY","SHOPIFY_API_SECRET","MERCADOLIBRE_APP_ID","MERCADOLIBRE_SECRET","AMAZON_SP_REFRESH_TOKEN","AMAZON_LWA_CLIENT_ID","AMAZON_LWA_CLIENT_SECRET"],
+    "storage": ["AWS_S3_BUCKET","AWS_ACCESS_KEY_ID","AWS_SECRET_ACCESS_KEY","AWS_REGION"]
+  },
+  "deploy_steps": [
+    "Aplicar 54 SQL en Supabase (orden alfabetico)",
+    "Configurar env vars opcionales en Vercel",
+    "vercel --prod desde raiz",
+    "Verificar curl /api/health -> version 8.0.0",
+    "Smoke test post-deploy"
+  ],
+  "manual_user_pending": [
+    "Aplicar SQL en Supabase",
+    "Configurar env vars segun modulos",
+    "Deploy vercel --prod",
+    "Cambiar password admin (bcrypt)",
+    "Dominios custom + SSL",
+    "Webhooks externos (Stripe/Shopify/ML)",
+    "Cron jobs Vercel (/api/cron/*)"
+  ],
+  "credentials": {
+    "admin_email": "admin@volvix.test",
+    "admin_password": "Volvix2026!",
+    "tenant_default": "TNT001",
+    "tenant_name": "Abarrotes Don Chucho",
+    "swagger_ui": "/docs (post v8 deploy)",
+    "openapi_json": "/api/openapi.json (post v8 deploy)"
+  },
+  "artifacts": {
+    "report": "R18_FINAL_MASTER.md",
+    "slice": "live_status/slice_215.json"
+  }
+}

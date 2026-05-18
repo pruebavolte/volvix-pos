@@ -1,0 +1,106 @@
+{
+  "slug": "espuela",
+  "brand": "Espuela",
+  "tagline": "El POS hecho para tiendas vaqueras que sí cuidan cada bota",
+  "giro": "botas vaqueras",
+  "giroPlural": "tiendas de botas vaqueras",
+  "vibe": "warmLocal",
+  "palette": {
+    "bg": "#F4ECD8",
+    "surface": "#FFFFFF",
+    "paper": "#ECDFC0",
+    "ink": "#1C140A",
+    "ink2": "#3D2A14",
+    "muted": "#7A5E3A",
+    "line": "#D6C499",
+    "accent": "#8B3A0F",
+    "accent2": "#BF6A2F"
+  },
+  "fonts": {
+    "display": "Playfair Display",
+    "body": "Lora",
+    "script": "Pinyon Script",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas vaqueras · 2026",
+    "h1": "Cada <em>bota</em>,<br>cada <em>piel</em>,<br>cada cliente.",
+    "deck": "El punto de venta hecho para tiendas de botas vaqueras: stock por talla y tipo de piel (avestruz, víbora, res), fichas de cliente con su número, servicios de cambio de tacón y reparación.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?cowboy,boots,leather,western&q=85",
+    "heroAlt": "Botas vaqueras de piel en exhibidor",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?cowboy,boots&q=80", "tag": "Botas clásicas", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ostrich,boots&q=80", "tag": "Avestruz premium", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?snake,boots&q=80", "tag": "Víbora", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?western,boots,women&q=80", "tag": "Botas dama", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?leather,detail,boots&q=80", "tag": "Detalle piel", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cowboy,hat&q=80", "tag": "Sombreros", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?western,store&q=80", "tag": "Tienda vaquera", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?boot,maker,craft&q=80", "tag": "Taller bota", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?ranch,rodeo&q=80", "tag": "Rodeo", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?boot,fitting&q=80", "caption": "Toma de talla y horma vaquera"},
+      {"url": "https://source.unsplash.com/random/800x600/?leather,boot,care&q=80", "caption": "Mantenimiento y cambio de tacón"},
+      {"url": "https://source.unsplash.com/random/800x600/?western,certificate&q=80", "caption": "Certificado de origen de piel"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>número por piel</em>",
+    "deck": "Cada par con su número (22 a 32) y tipo de piel. Botas de avestruz con certificado de origen. Combos con sombrero o cinturón. Servicios de reparación con cita.",
+    "secondary": "En botas vaqueras, una bota de avestruz mal vendida o robada son $8k-15k de pérdida pura.",
+    "data": {
+      "product": "Bota piel res rodeo",
+      "tallas": [25, 26, 27, 28, 29, 30, 31],
+      "stock": [
+        {"color": "Café tostado", "vals": [2, 5, 8, 6, 4, 2, 1]},
+        {"color": "Negro pulido", "vals": [3, 6, 9, 7, 4, 2, 0]},
+        {"color": "Miel rústico", "vals": [1, 4, 7, 5, 3, 1, 0]}
+      ],
+      "lowThreshold": 2
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por número y piel", "d": "Cada par con número y tipo de piel (res, avestruz, víbora, cocodrilo). Sabes qué pieles mueven, cuáles se quedan."},
+    {"ico": "camera", "h": "Certificado de origen", "d": "Cada bota exótica con foto del certificado de origen legal. Cliente lo recibe en WhatsApp. Cero piezas dudosas vendidas."},
+    {"ico": "split", "h": "Combos bota + sombrero", "d": "Arma combo (bota + sombrero + cinturón). Sistema descuenta las 3. Vendedor vende outfit vaquero completo."},
+    {"ico": "calendar", "h": "Reparación con cita", "d": "Cliente trae botas para cambio de tacón o suela. Sistema agenda con taller. Notificación al recoger."},
+    {"ico": "percent", "h": "Comisiones por vendedor", "d": "Define el % por par o combo. Vendedor ve en vivo. Cero peleas al cierre."},
+    {"ico": "truck", "h": "Traspasos entre sucursales", "d": "¿No tienes el 28 en avestruz? Búscalo en otra sucursal. Traspaso con un toque, cliente notificado por WhatsApp."}
+  ],
+  "stats": [
+    {"v": "324", "l": "Pares en stock"},
+    {"v": "18", "l": "Vendidos hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis botas de avestruz son las más caras. <span class=\"hl\">Un par se 'extravió' y me costó $12,000 averiguar qué pasó</span>. Con Espuela cada bota tiene serial y certificado. Cero pérdidas en 7 meses.",
+    "sig": "Don Eulalio M.",
+    "role": "Botas vaqueras en Saltillo, COAH"
+  },
+  "thefts": [
+    {
+      "title": "Botas exóticas 'extraviadas' por empleados",
+      "rob": "Empleado dice 'la bota de avestruz se perdió' y se la lleva o la vende afuera. Pares exóticos son $8k-20k. Es 1-2 al año si no hay control.",
+      "fix": "Cada par exótico con <strong>número de serie único y certificado al ingresar</strong>. Si sale sin venta, alerta inmediata. Cero pérdidas silenciosas."
+    },
+    {
+      "title": "Pieles falsas vendidas como exóticas",
+      "rob": "Empleado mete bota de imitación al inventario y la vende como avestruz auténtica a $10k. Cliente descubre la falsedad meses después.",
+      "fix": "Pieles exóticas <strong>requieren foto del certificado de origen al ingresar</strong>. Sistema bloquea venta sin certificado. Cero piezas falsas como auténticas."
+    },
+    {
+      "title": "Reparaciones cobradas en efectivo aparte",
+      "rob": "Cliente paga cambio de tacón en $600 en efectivo. Empleado del taller lo marca como $200 y se queda con la diferencia.",
+      "fix": "Servicios <strong>se cobran por sistema con SKU especial</strong>. Comisión solo sobre ventas registradas. Cero servicios fuera de caja."
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "slug": "solapa",
+  "brand": "Solapa",
+  "tagline": "El POS hecho para tiendas de caballero que sí cuidan la talla",
+  "giro": "tienda de ropa masculina",
+  "giroPlural": "tiendas de ropa masculina",
+  "vibe": "editorial",
+  "palette": {
+    "bg": "#F2EFE9",
+    "surface": "#FFFFFF",
+    "paper": "#EAE5DC",
+    "ink": "#0E1014",
+    "ink2": "#262A33",
+    "muted": "#5C6271",
+    "line": "#CFCABC",
+    "accent": "#1F3A5F",
+    "accent2": "#3D5A80"
+  },
+  "fonts": {
+    "display": "Cormorant Garamond",
+    "body": "Inter",
+    "script": "Pinyon Script",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tiendas de caballero · 2026",
+    "h1": "Cada <em>camisa</em>,<br>cada <em>cuello</em>,<br>en su talla.",
+    "deck": "El punto de venta hecho para tiendas que viven de la talla exacta: stock por cuello y manga, fichas de cliente con sus medidas, ajustes y entallados conectados al ticket.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el catálogo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?menswear,suit,shirt&q=85",
+    "heroAlt": "Camisas de vestir colgadas en tienda de caballero",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?men,shirt,fashion&q=80", "tag": "Camisas vestir", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?suit,men&q=80", "tag": "Trajes sastre", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?polo,men&q=80", "tag": "Polos clásicos", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?menswear,pants&q=80", "tag": "Pantalones", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?blazer,men&q=80", "tag": "Sacos sport", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tie,necktie&q=80", "tag": "Corbatas seda", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?menswear,shop&q=80", "tag": "Tienda", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cuff,detail&q=80", "tag": "Detalle puño", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?tailor,measure&q=80", "tag": "Sastrería", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?tailor,measuring&q=80", "caption": "Toma de medidas registrada en su ficha"},
+      {"url": "https://source.unsplash.com/random/800x600/?menswear,sale&q=80", "caption": "Vendedor consulta talla en sistema"},
+      {"url": "https://source.unsplash.com/random/800x600/?suit,fitting&q=80", "caption": "Entallado con timestamp y foto"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu stock, <em>por cuello y manga</em>, ahora mismo",
+    "deck": "Cada camisa con su cuello (14-18) y manga (32-36) reales. Si la talla del cliente no está, el sistema sugiere alternativa o reserva próxima reposición.",
+    "secondary": "En tiendas de caballero, decir 'no tengo tu talla' cuando sí está en bodega pierde la venta para siempre.",
+    "data": {
+      "product": "Camisa vestir popelina",
+      "tallas": ["14", "14.5", "15", "15.5", "16", "16.5", "17"],
+      "stock": [
+        {"color": "Blanco", "vals": [3, 5, 8, 6, 4, 2, 1]},
+        {"color": "Azul cielo", "vals": [2, 4, 6, 5, 3, 1, 0]},
+        {"color": "Rayas finas", "vals": [1, 3, 5, 4, 2, 1, 0]}
+      ],
+      "lowThreshold": 2
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Stock por cuello y manga", "d": "Cada camisa con su talla real. Sabes qué cuellos vuelan, cuáles se quedan dormidos por temporada."},
+    {"ico": "edit", "h": "Ficha con medidas del cliente", "d": "Su cuello, manga, cintura, cadera. Cuando entra, vendedor ya sabe qué le queda. Cero 'pruebe esta, a ver'."},
+    {"ico": "percent", "h": "Comisiones por vendedor", "d": "Define el % por pieza o por traje completo. Vendedor ve en vivo. Cero peleas al cierre de quincena."},
+    {"ico": "camera", "h": "Devoluciones con foto", "d": "El sistema obliga foto del puño y la etiqueta. Si la camisa fue usada, alerta al gerente. Bloquea cambios después de 10 días."},
+    {"ico": "calendar", "h": "Ajustes y entallados con cita", "d": "Cliente pide entallado, sistema agenda con sastre. Notificación al recoger. Cero prendas olvidadas en sastrería."},
+    {"ico": "truck", "h": "Traspasos entre sucursales", "d": "¿No tienes el cuello 16.5? El sistema lo busca en otra sucursal. Traspaso con un toque, cliente notificado por WhatsApp."}
+  ],
+  "stats": [
+    {"v": "528", "l": "Prendas en stock"},
+    {"v": "34", "l": "Vendidas hoy"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Antes mi vendedor le decía 'no hay' al cliente cuando sí teníamos en bodega. <span class=\"hl\">Perdíamos 4 de cada 10 ventas</span>. Con Solapa el sistema le grita la talla exacta. Subimos 60% el ticket.",
+    "sig": "Carlos H.",
+    "role": "Tienda de caballero en Guadalajara, JAL"
+  },
+  "thefts": [
+    {
+      "title": "Camisa 'cambiada' por una de mayor valor",
+      "rob": "Cliente lleva camisa de $400, regresa diciendo 'no me quedó' y se lleva una de $900. Vendedor cobra los $500 de diferencia en efectivo y se los queda.",
+      "fix": "Cambios requieren <strong>ticket original escaneado</strong>. Diferencia se cobra por sistema. Reporte diario: cambios sin diferencia registrada = cero."
+    },
+    {
+      "title": "Trajes 'a la medida' que nunca se entallaron",
+      "rob": "Cliente paga $5,000 por traje con entalle. Vendedor cobra, no manda con sastre, cliente regresa, ya no aparece su pedido. Vendedor se quedó con la lana.",
+      "fix": "Entalles van con <strong>cita agendada al sastre y notificación al cliente</strong>. Si no se cumple, alerta al gerente. Cero pedidos perdidos en sastrería."
+    },
+    {
+      "title": "Corbatas y accesorios que 'no inventariaron'",
+      "rob": "Empleado pasa accesorios chicos (corbatas, mancuernillas) por fuera. Una corbata Hermès son $3,000-5,000. Sin SKU, no hay rastro.",
+      "fix": "Todo accesorio con <strong>SKU obligatorio y comisión solo sobre ventas registradas</strong>. Si no captura, no gana. Auditoría diaria de SKUs vs tickets."
+    }
+  ]
+}

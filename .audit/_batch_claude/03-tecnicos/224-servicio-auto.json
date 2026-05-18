@@ -1,0 +1,108 @@
+{
+  "slug": "servicio-auto",
+  "brand": "Servicio Auto",
+  "tagline": "El sistema para servicios automotrices completos que cobran cada chamba",
+  "giro": "servicios automotrices",
+  "giroPlural": "centros de servicios automotrices",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#16191D",
+    "surface": "#1F232A",
+    "paper": "#272C34",
+    "ink": "#F0F2F5",
+    "ink2": "#CACFD4",
+    "muted": "#7A828A",
+    "line": "#2E343C",
+    "accent": "#E67E22",
+    "accent2": "#FF9A40"
+  },
+  "fonts": {
+    "display": "Barlow Condensed",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para servicios automotrices · 2026",
+    "h1": "Cada <em>servicio</em>,<br>cada <em>auto</em>,<br>en orden.",
+    "deck": "El POS hecho para centros de servicio que ofrecen afinación, frenos, suspensión, electricidad. Múltiples bahías, varios técnicos, una sola orden por auto.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver bahías ocupadas",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?car-service,garage,mechanic&q=80",
+    "heroAlt": "Centro de servicio automotriz con varios autos",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?car-repair,bay&q=80", "tag": "Bahía servicio", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?car,lift&q=80", "tag": "Auto en rampa", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mechanic,tools&q=80", "tag": "Técnico", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?oil-change,car&q=80", "tag": "Cambio aceite", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?brakes,disc&q=80", "tag": "Frenos", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tires,balance&q=80", "tag": "Balanceo", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?garage,workshop&q=80", "tag": "Nave completa", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?alignment,car&q=80", "tag": "Alineación", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?reception,car&q=80", "tag": "Recepción", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?reception,client&q=80", "caption": "Asesor entrega orden firmada al cliente"},
+      {"url": "https://source.unsplash.com/random/800x600/?mechanic,tablet&q=80", "caption": "Técnico actualiza estado en tablet"},
+      {"url": "https://source.unsplash.com/random/800x600/?phone,car&q=80", "caption": "Cliente ve avance en su celular"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Agenda · servicios · en vivo",
+    "title": "Tus bahías, <em>servicio por servicio</em>",
+    "deck": "Cada bahía con su agenda. Cambio de aceite 25 min, frenos 1 hr, suspensión 2 hrs. Cliente reserva y llega a su hora. Cero esperar 2 horas en sala.",
+    "secondary": "Centros chicos hacen 'pásele y vemos'. Con agenda real cliente entra a la hora exacta.",
+    "data": {
+      "service": "Servicio frenos delanteros completo",
+      "duration": "1 hr",
+      "slots": [
+        {"hora": "09:00", "mecanico": "Bahía 1", "estado": "ocupado", "auto": "Civic 2020"},
+        {"hora": "10:00", "mecanico": "Bahía 1", "estado": "libre"},
+        {"hora": "11:00", "mecanico": "Bahía 1", "estado": "ocupado", "auto": "Mazda 3"},
+        {"hora": "09:00", "mecanico": "Bahía 2", "estado": "ocupado", "auto": "RAV4 2019"},
+        {"hora": "10:30", "mecanico": "Bahía 2", "estado": "libre"},
+        {"hora": "12:00", "mecanico": "Bahía 2", "estado": "ocupado", "auto": "CX-5"}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Multi-bahía agendada", "d": "5 bahías, 5 técnicos, agenda real. Cliente elige hora, técnico ya tiene la orden cuando llega."},
+    {"ico": "edit", "h": "Orden con checklist", "d": "Cada servicio con sus pasos. Técnico marca cada uno. Foto donde aplique. Cero 'no le hicieron nada'."},
+    {"ico": "monitor", "h": "Status en vivo para cliente", "d": "Cliente ve: 'En diagnóstico, en reparación, en pruebas, listo'. Cero llamadas '¿cuándo está?'"},
+    {"ico": "barcode", "h": "Refacciones controladas", "d": "Cada filtro, balata y bujía escaneada al usarse. Inventario al día. Pedidos automáticos."},
+    {"ico": "camera", "h": "Foto del servicio", "d": "Cada servicio termina con foto del antes y después. Va al WhatsApp del cliente. Cero dudas."},
+    {"ico": "percent", "h": "Comisión técnico", "d": "Cada técnico ve sus servicios cerrados del mes. Bono por satisfacción 5 estrellas."}
+  ],
+  "stats": [
+    {"v": "32", "l": "Servicios hoy"},
+    {"v": "5", "l": "Bahías activas"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis bahías estaban <span class=\"hl\">vacías 30% del día porque no había orden</span>. Cliente llegaba sin cita, nadie sabía qué hacer. Con Servicio Auto subimos a 85% ocupación. Mismas bahías, doble facturación.",
+    "sig": "Sr. Arturo C.",
+    "role": "Servicios Automotrices El Arturo, Cuernavaca, MOR"
+  },
+  "thefts": [
+    {
+      "title": "Servicios 'completos' a medias",
+      "rob": "Servicio mayor incluye 18 puntos. Técnico hace 12 visibles, los 6 que requieren elevarse no. Cobran completo, hacen 65%.",
+      "fix": "Checklist con <strong>foto obligatoria de cada paso</strong>. Sin foto del filtro de cabina nuevo, no cierra la orden."
+    },
+    {
+      "title": "Aceite barato vendido como Premium",
+      "rob": "Cliente paga Mobil 1 ($720) pero técnico le pone Quaker State ($340). Diferencia se lleva al cierre.",
+      "fix": "Bote de aceite con <strong>foto del envase sellado</strong> al iniciar servicio. Cliente ve qué se le puso. Cero cambiazos."
+    },
+    {
+      "title": "Diagnóstico inflado para vender suspensión completa",
+      "rob": "Auto solo necesitaba un tornillo apretado. Le dicen al cliente 'suspensión completa $12,000'. Diferencia $11,500 se reparte.",
+      "fix": "Diagnóstico con <strong>video del problema real</strong>. Cliente decide con evidencia. Si era un tornillo, queda registro."
+    }
+  ]
+}

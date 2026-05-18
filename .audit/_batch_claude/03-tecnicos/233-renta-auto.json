@@ -1,0 +1,106 @@
+{
+  "slug": "renta-auto",
+  "brand": "Renta Auto",
+  "tagline": "El sistema para rentadoras que entregan, recogen y cobran sin sorpresas",
+  "giro": "renta de autos",
+  "giroPlural": "rentadoras de autos",
+  "vibe": "luxury",
+  "palette": {
+    "bg": "#0B0B10",
+    "surface": "#15151C",
+    "paper": "#1D1D26",
+    "ink": "#F2F2F8",
+    "ink2": "#CACAD2",
+    "muted": "#7A7A85",
+    "line": "#27272F",
+    "accent": "#2980B9",
+    "accent2": "#46A2DA"
+  },
+  "fonts": {
+    "display": "Manrope",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para rentadoras de autos · 2026",
+    "h1": "Cada <em>unidad</em>,<br>cada <em>renta</em>,<br>controlada.",
+    "deck": "El POS hecho para rentadoras. Inventario por unidad, depósitos en garantía, fotos antes-después, kilometraje firmado. Cliente paga lo justo, tú cobras todo.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver flota disponible",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?rental-cars,fleet&q=80",
+    "heroAlt": "Flota de autos de renta en patio",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?rental-fleet,parking&q=80", "tag": "Flota completa", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?sedan,white&q=80", "tag": "Sedán económico", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?suv,silver&q=80", "tag": "SUV familiar", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?compact,car&q=80", "tag": "Compacto", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pickup,truck&q=80", "tag": "Pickup", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?premium-car,bmw&q=80", "tag": "Premium", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?counter,rental&q=80", "tag": "Mostrador", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?key-handover,car&q=80", "tag": "Entrega de llaves", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?airport,rental&q=80", "tag": "Mostrador aeropuerto", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?inspection,car&q=80", "caption": "Inspección con 18 fotos firmadas"},
+      {"url": "https://source.unsplash.com/random/800x600/?credit-card,deposit&q=80", "caption": "Depósito en garantía con tarjeta"},
+      {"url": "https://source.unsplash.com/random/800x600/?gps,car&q=80", "caption": "GPS en cada unidad para tracking"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Inventario en vivo",
+    "title": "Tu flota, <em>unidad por unidad</em>",
+    "deck": "Cada auto con su placa, kilometraje, estado, disponibilidad. Cliente reserva en línea, sistema asigna unidad disponible. Cero overbooking.",
+    "secondary": "Rentadora que promete y no tiene auto disponible pierde cliente para siempre.",
+    "data": {
+      "product": "Flota disponible por segmento",
+      "tallas": ["Económico", "Compacto", "Sedán", "SUV chica", "SUV grande", "Pickup", "Premium", "Eléctrico"],
+      "stock": [
+        {"color": "Disponibles ahora", "vals": [12, 8, 14, 6, 4, 3, 2, 1]},
+        {"color": "Rentadas", "vals": [18, 22, 15, 12, 8, 7, 4, 2]},
+        {"color": "En servicio", "vals": [2, 3, 1, 2, 1, 1, 0, 0]}
+      ],
+      "lowThreshold": 3
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Reserva en línea", "d": "Cliente reserva por web. Sistema asigna placa específica. Cero overbooking ni 'no tenemos esa categoría'."},
+    {"ico": "camera", "h": "Inspección 360", "d": "18 fotos del auto al entregar. Cliente firma en tablet. Mismo proceso al regresar. Daños nuevos = cobro justo."},
+    {"ico": "edit", "h": "Depósito en garantía", "d": "Tarjeta con $5,000-15,000 retenidos. Si regresa limpio, se libera. Si hay daño, se cobra del depósito."},
+    {"ico": "monitor", "h": "GPS en cada unidad", "d": "Sabes dónde está cada auto. Si sale del país sin permiso, alerta. Si se queda 'perdido', lo encuentras."},
+    {"ico": "barcode", "h": "Combustible registrado", "d": "Foto del tanque al salir y regresar. Si regresa con menos, se cobra. Cero pleitos de '¿con cuánto la di?'"},
+    {"ico": "percent", "h": "Ingresos por unidad", "d": "Sabes cuál unidad rinde más, cuál se renta menos. Decides qué comprar y qué vender."}
+  ],
+  "stats": [
+    {"v": "78", "l": "Unidades en flota"},
+    {"v": "62%", "l": "Ocupación promedio"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis empleados rentaban autos <span class=\"hl\">por fuera del sistema con efectivo</span>. Auto salía como 'en servicio', regresaba con $1,500 en su bolsa. Pasaba 5-8 veces al mes. Con Renta Auto el GPS detecta movimiento sin contrato. Cero rentas fantasma.",
+    "sig": "Don Sergio H.",
+    "role": "Rentadora El Sergio, Cancún, Q.R."
+  },
+  "thefts": [
+    {
+      "title": "Rentas fantasma con efectivo",
+      "rob": "Empleado renta auto 3 días al amigo, lo marca como 'en servicio'. Cobra $1,500 efectivo, se lo queda. Pasa 5-8 veces al mes.",
+      "fix": "GPS detecta <strong>movimiento del auto sin contrato activo</strong>. Alerta inmediata. Cero rentas no registradas."
+    },
+    {
+      "title": "Daños no cobrados al cliente correcto",
+      "rob": "Auto regresa rayado pero empleado no documenta. Próximo cliente recibe el rayón y reclama. Tú pagas reparación que era de otro.",
+      "fix": "Inspección con <strong>18 fotos firmadas a la entrega y regreso</strong>. Daño nuevo se cobra a quien lo causó. Cero pérdidas."
+    },
+    {
+      "title": "Combustible no cobrado",
+      "rob": "Cliente regresa con tanque a la mitad cuando recibió lleno. Empleado dice 'estaba así'. Cliente no paga, tú llenas $400-700.",
+      "fix": "Foto del odómetro y <strong>tanque a la entrega y regreso</strong>. Diferencia se cobra automático del depósito. Sin discusiones."
+    }
+  ]
+}

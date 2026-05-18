@@ -1,0 +1,104 @@
+{
+  "slug": "canasto",
+  "brand": "Canasto",
+  "tagline": "El sistema para taquerías de canasta donde cada bicicleta cierra la cuenta clara",
+  "giro": "taquería de canasta",
+  "giroPlural": "taquerías de canasta",
+  "vibe": "warmLocal",
+  "palette": {
+    "bg": "#F7EFE0",
+    "surface": "#FFFFFF",
+    "paper": "#EFE2C8",
+    "ink": "#2B1A0A",
+    "ink2": "#4A2F18",
+    "muted": "#7A5A38",
+    "line": "#D8C49B",
+    "accent": "#B85C2C",
+    "accent2": "#E0894F"
+  },
+  "fonts": {
+    "display": "Fraunces",
+    "body": "Inter",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para taquerías de canasta mexicanas · 2026",
+    "h1": "Cada <em>canasta</em>,<br>cada <em>ruta</em>,<br>cobrada.",
+    "deck": "El POS hecho para que cada bicicletero salga con su carga contada, regrese con su cuenta cuadrada, y los chicharrones no se les 'olviden' por el camino.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver el control de ruta",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?tacos,canasta,mexicano&q=85",
+    "heroAlt": "Canasta de tacos sudados con tela",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?tacos,sudados&q=80", "tag": "Tacos sudados", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bicicleta,tacos&q=80", "tag": "Bicicleta repartidora", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?chicharron,prensado&q=80", "tag": "Chicharrón prensado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?frijoles,refritos&q=80", "tag": "Frijoles refritos", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?papa,guisada&q=80", "tag": "Papa con chorizo", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?adobo,carne&q=80", "tag": "Adobo casero", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?cocina,mexicana,casera&q=80", "tag": "Cocina al alba", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?tortilla,maiz&q=80", "tag": "Tortilla blandita", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?calle,puesto&q=80", "tag": "Esquina del barrio", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?bicicleta,delivery&q=80", "caption": "Bicicletero sale con su carga"},
+      {"url": "https://source.unsplash.com/random/800x600/?canasta,mimbre&q=80", "caption": "Canasta de mimbre con tela"},
+      {"url": "https://source.unsplash.com/random/800x600/?cliente,calle,mexicano&q=80", "caption": "Cliente fiel de la esquina"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · ruta · en vivo",
+    "title": "Tus rutas, <em>canasta por canasta</em>, sin perderse uno",
+    "deck": "El bicicletero sale con 80 tacos contados. Regresa con efectivo, sobras y tickets. El sistema cuadra cada ruta sin pelearse al cierre.",
+    "secondary": "En las taquerías de canasta, los tacos 'comidos en el camino' son $200-400 diarios por bicicletero.",
+    "data": {
+      "orders": [
+        {"table": "RUTA-1", "name": "Don Toño (oficinas)", "state": "urgent", "items": ["30 papa", "25 chicharrón", "25 frijol"], "waitMin": 12},
+        {"table": "RUTA-2", "name": "Lupe (mercado)", "state": "prep", "items": ["40 chicharrón", "20 frijol", "20 papa"], "waitMin": 8},
+        {"table": "RUTA-3", "name": "Memo (escuela)", "state": "queue", "items": ["50 papa", "30 frijol"], "waitMin": 5},
+        {"table": "MOSTRADOR", "name": "Doña Carmen", "state": "ready", "items": ["6 surtidos", "1 agua"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "truck", "h": "Control de salida por bicicletero", "d": "Cada repartidor sale con su carga firmada digital. Lleva 80 tacos: 30 papa, 25 chicharrón, 25 frijol. Regresa, cuadra. Cero 'no me acuerdo'."},
+    {"ico": "grid", "h": "Ruta por zona y horario", "d": "Don Toño va al cluster de oficinas a las 8 am. Lupe al mercado a las 9. El sistema sabe quién va a dónde y a qué hora."},
+    {"ico": "percent", "h": "Comisión por ruta entregada", "d": "Bicicletero cobra por taco vendido, no por hora. Sistema calcula al cierre. Cero pelea con el adelanto."},
+    {"ico": "calendar", "h": "Pronóstico de masa por día", "d": "Lunes vendiste 220 tacos, jueves 380. El sistema sugiere cuánto guisar mañana. Cero sobras a la basura."},
+    {"ico": "archive", "h": "Control de guisados por kilo", "d": "Sabes cuántos tacos salen de un kilo de papa, de chicharrón, de frijol. Si la cocinera cambia receta, lo notas en rendimiento."},
+    {"ico": "edit", "h": "Lista de clientes fijos por ruta", "d": "La señora del puesto 12 pide 8 papa todos los días. Si un día no aparece, el sistema avisa al bicicletero."}
+  ],
+  "stats": [
+    {"v": "480", "l": "Tacos repartidos hoy"},
+    {"v": "4", "l": "Rutas activas"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis bicicleteros decían que <span class=\"hl\">'no se vendieron' 20 tacos al día</span>, pero a la basura no iban. Con Canasto cada ruta sale contada y regresa contada. Recuperé $9 mil mensuales que se 'comían en el camino'.",
+    "sig": "Doña Rosa M.",
+    "role": "Tacos de Canasta Doña Rosa, Tláhuac, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Tacos 'comidos en el camino'",
+      "rob": "Bicicletero sale con 80 tacos, regresa diciendo 'vendí 60, los otros 20 no se vendieron'. En realidad él y su cuate se comieron 15. Son $150-300 diarios por persona.",
+      "fix": "Cada salida con <strong>conteo firmado digital</strong>. Sobras se entregan al regreso. Diferencia entre venta y carga no debe pasar de 3%. Si pasa, alerta."
+    },
+    {
+      "title": "Cliente fijo que paga semanal pero no se registra",
+      "rob": "Don Toño paga $400 cada viernes por sus tacos de la semana. Bicicletero cobra en efectivo y no marca día por día. Se queda $80 sueltos.",
+      "fix": "Cada cliente con su <strong>cuenta diaria en sistema</strong>. Pago semanal cuadra contra los días registrados. Cero 'fiados' que no llegaron a caja."
+    },
+    {
+      "title": "Sobras 'que se echaron a perder'",
+      "rob": "Cocinera reporta que sobraron 30 tacos y 'se echaron a perder'. En realidad los vendió aparte a vecinos a $5 cada uno. $150 diarios.",
+      "fix": "Sobras se <strong>fotografían y registran al cierre</strong>. Si la merma sube de 5%, el sistema marca alerta. Cocinera firma su reporte."
+    }
+  ]
+}

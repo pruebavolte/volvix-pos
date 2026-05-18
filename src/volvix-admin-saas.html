@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volvix Admin SaaS — Super Admin Panel</title>
+<!-- B37 Security hardening: auth-gate + role guard (superadmin only) -->
+<script src="/auth-gate.js"></script>
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    if (!t) return; // auth-gate handles redirect
+    var p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    var role = (p.role || '').toLowerCase();
+    if (role !== 'superadmin') {
+      window.location.replace('/volvix-launcher.html?denied=' + encodeURIComponent(location.pathname));
+    }
+  } catch(e){}
+})();
+</script>
+<style>
+:root{
+  /* R29: caen a Volvix theme vars cuando theme wiring las setea */
+  --bg: var(--vlx-bg, #0a0e1a);
+  --bg2:#111827;
+  --card: var(--vlx-surface, #1a2235);
+  --card2:#222d44;
+  --border: var(--vlx-border, #2a3653);
+  --text: var(--vlx-text, #e6edf7);
+  --muted: var(--vlx-text-2, #8b97b3);
+  --primary:#6366f1;--primary2:#8b5cf6;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;--info:#06b6d4;
+  --grad:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
+}
+[data-vlx-theme="light"] {
+  --bg2:#f3f4f6;
+  --card2:#f9fafb;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+
+/* Sidebar */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.logo h1{font-size:18px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:800}
+.logo span{font-size:11px;color:var(--muted);letter-spacing:1px}
+.nav-section{padding:8px 16px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-top:12px}
+.nav a{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--muted);text-decoration:none;font-size:13px;border-left:3px solid transparent;transition:all .15s}
+.nav a:hover{background:var(--card);color:var(--text)}
+.nav a.active{background:var(--card);color:var(--text);border-left-color:var(--primary)}
+.nav a .ic{width:18px;text-align:center}
+.nav a .badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px}
+
+/* Main */
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:10}
+.search{flex:1;max-width:480px;position:relative}
+.search input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:9px 14px 9px 36px;border-radius:8px;font-size:13px;outline:none}
+.search input:focus{border-color:var(--primary)}
+.search::before{content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12px}
+.tb-actions{display:flex;gap:10px;align-items:center}
+.icon-btn{background:var(--card);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:14px;position:relative}
+.icon-btn .dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--danger);border-radius:50%}
+.user{display:flex;align-items:center;gap:10px;padding:4px 10px 4px 4px;background:var(--card);border-radius:24px;border:1px solid var(--border)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.user-info{font-size:12px}
+.user-info .role{color:var(--muted);font-size:10px}
+
+/* Content */
+.content{padding:28px;flex:1}
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+.page-head h2{font-size:24px;font-weight:700;margin-bottom:4px}
+.page-head p{color:var(--muted);font-size:13px}
+.btn{padding:9px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn-primary{background:var(--grad);color:#fff}
+.btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+
+/* KPI Grid */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
+.kpi.green::before{background:var(--success)}
+.kpi.orange::before{background:var(--warn)}
+.kpi.red::before{background:var(--danger)}
+.kpi.cyan::before{background:var(--info)}
+.kpi-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.kpi-value{font-size:28px;font-weight:700;margin-bottom:4px}
+.kpi-trend{font-size:12px;display:flex;align-items:center;gap:6px}
+.kpi-trend.up{color:var(--success)}
+.kpi-trend.down{color:var(--danger)}
+.kpi-sub{color:var(--muted);font-size:11px;margin-top:8px}
+
+/* Two-column rows */
+.row{display:grid;gap:18px;margin-bottom:24px}
+.row-2{grid-template-columns:2fr 1fr}
+.row-3{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:1100px){.row-2,.row-3{grid-template-columns:1fr}}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.card-h h3{font-size:15px;font-weight:600}
+.card-h .more{color:var(--muted);font-size:18px;cursor:pointer}
+
+/* Chart placeholder (CSS bars) */
+.chart{height:220px;display:flex;align-items:flex-end;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)}
+.bar{flex:1;background:var(--grad);border-radius:6px 6px 0 0;position:relative;min-height:8px;transition:opacity .15s}
+.bar:hover{opacity:.8}
+.bar span{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);white-space:nowrap}
+.chart-x{display:flex;gap:8px;padding-top:8px;color:var(--muted);font-size:10px}
+.chart-x div{flex:1;text-align:center}
+
+/* Donut (pure css) */
+.donut{width:160px;height:160px;border-radius:50%;background:conic-gradient(var(--primary) 0 45%,var(--primary2) 45% 70%,var(--info) 70% 88%,var(--warn) 88% 100%);position:relative;margin:0 auto}
+.donut::after{content:"";position:absolute;inset:22px;background:var(--card);border-radius:50%}
+.donut-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1}
+.donut-c b{font-size:22px}
+.donut-c span{font-size:10px;color:var(--muted)}
+.legend{margin-top:16px}
+.legend div{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px solid var(--border)}
+.legend div:last-child{border:none}
+.legend .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:8px;vertical-align:middle}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);font-weight:500}
+td{padding:12px;border-bottom:1px solid var(--border)}
+tr:last-child td{border:none}
+tr:hover td{background:var(--card2)}
+.tag{display:inline-block;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.tag.ok{background:rgba(16,185,129,.15);color:var(--success)}
+.tag.warn{background:rgba(245,158,11,.15);color:var(--warn)}
+.tag.err{background:rgba(239,68,68,.15);color:var(--danger)}
+.tag.info{background:rgba(6,182,212,.15);color:var(--info)}
+.tag.purple{background:rgba(139,92,246,.15);color:var(--primary2)}
+.t-mini{font-size:11px;color:var(--muted)}
+.tcell{display:flex;align-items:center;gap:10px}
+.t-avatar{width:32px;height:32px;border-radius:8px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0}
+
+/* Health bars */
+.health-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.health-row:last-child{border:none}
+.health-row .lbl{flex:0 0 130px;font-size:13px}
+.health-row .progress{flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.health-row .progress > div{height:100%;background:var(--success);border-radius:4px}
+.health-row .v{flex:0 0 70px;text-align:right;font-size:12px;color:var(--muted)}
+
+/* Activity feed */
+.feed-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.feed-item:last-child{border:none}
+.feed-ic{width:32px;height:32px;border-radius:8px;background:var(--card2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.feed-c{flex:1;font-size:13px}
+.feed-c b{color:var(--text)}
+.feed-c .meta{color:var(--muted);font-size:11px;margin-top:2px}
+
+/* Deploys */
+.deploy{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+.deploy .stat{width:8px;height:8px;border-radius:50%}
+.deploy .stat.ok{background:var(--success);box-shadow:0 0 8px var(--success)}
+.deploy .stat.run{background:var(--info);box-shadow:0 0 8px var(--info);animation:pulse 1.2s infinite}
+.deploy .stat.err{background:var(--danger)}
+@keyframes pulse{50%{opacity:.4}}
+.deploy b{font-size:13px}
+.deploy .meta{color:var(--muted);font-size:11px}
+.deploy .right{margin-left:auto;text-align:right;font-size:11px;color:var(--muted)}
+
+/* Tickets */
+.ticket{padding:12px;background:var(--card2);border-radius:8px;border-left:3px solid var(--info);margin-bottom:10px}
+.ticket.urgent{border-left-color:var(--danger)}
+.ticket.high{border-left-color:var(--warn)}
+.ticket-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ticket-h b{font-size:13px}
+.ticket p{color:var(--muted);font-size:12px}
+.ticket .meta{margin-top:8px;display:flex;gap:8px;align-items:center;font-size:11px;color:var(--muted)}
+
+/* Footer */
+.footer{padding:18px 28px;border-top:1px solid var(--border);color:var(--muted);font-size:12px;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <h1>VOLVIX</h1>
+      <span>SUPER ADMIN SAAS</span>
+    </div>
+    <div class="nav-section">Principal</div>
+    <nav class="nav">
+      <a href="#" class="active"><span class="ic">📊</span>Dashboard</a>
+      <a href="#"><span class="ic">🏢</span>Tenants<span class="badge" data-kpi="tenants-badge">—</span></a>
+      <a href="#"><span class="ic">👥</span>Usuarios</a>
+      <a href="#"><span class="ic">💳</span>Billing Global</a>
+      <a href="#"><span class="ic">📈</span>Analytics</a>
+    </nav>
+    <div class="nav-section">Operaciones</div>
+    <nav class="nav">
+      <a href="#"><span class="ic">🚀</span>Deploys</a>
+      <a href="#"><span class="ic">🛟</span>Soporte<span class="badge">23</span></a>
+      <a href="#"><span class="ic">⚡</span>System Health</a>
+      <a href="#"><span class="ic">🔔</span>Alertas<span class="badge">5</span></a>
+      <a href="#"><span class="ic">🗄️</span>Base de Datos</a>
+      <a href="#sec-merge-branches" data-action="goto-merge-branches"><span class="ic">🔀</span>Fusionar sucursales</a>
+    </nav>
+    <div class="nav-section">Configuración</div>
+    <nav class="nav">
+      <a href="#"><span class="ic">🎨</span>Planes &amp; Precios</a>
+      <a href="#"><span class="ic">🔐</span>Seguridad</a>
+      <a href="#"><span class="ic">🧩</span>Integraciones</a>
+      <a href="#"><span class="ic">📜</span>Audit Logs</a>
+      <a href="#"><span class="ic">⚙️</span>Ajustes</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="search"><input placeholder="Buscar tenants, usuarios, transacciones..."></div>
+      <div class="tb-actions">
+        <button class="icon-btn" title="Paleta de comandos (Ctrl+K)" data-action="command-palette"><span>⌘</span></button>
+        <button class="icon-btn" title="Notificaciones" data-action="open-notifications">🔔<span class="dot"></span></button>
+        <button class="icon-btn" title="Cambiar tema" data-action="toggle-theme">🌙</button>
+        <div class="user">
+          <div class="avatar" id="adm-avatar">—</div>
+          <div class="user-info">
+            <div id="adm-name">—</div>
+            <div class="role" id="adm-role">—</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <div class="page-head">
+        <div>
+          <h2>Dashboard Global</h2>
+          <p>Panorama multi-tenant en tiempo real · última actualización hace 2 min</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" data-action="export-dashboard">📥 Exportar</button>
+          <button class="btn btn-ghost" data-action="period-picker" data-period="30d">📅 Últimos 30 días</button>
+          <button class="btn btn-primary" data-action="new-tenant">+ Nuevo Tenant</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-label">MRR (Recurrente Mensual)</div>
+          <div class="kpi-value" data-kpi="mrr">—</div>
+          <div class="kpi-trend" data-kpi-trend="mrr"></div>
+          <div class="kpi-sub" data-kpi-sub="mrr"></div>
+        </div>
+        <div class="kpi green">
+          <div class="kpi-label">ARR (Recurrente Anual)</div>
+          <div class="kpi-value" data-kpi="arr">—</div>
+          <div class="kpi-trend" data-kpi-trend="arr"></div>
+          <div class="kpi-sub" data-kpi-sub="arr"></div>
+        </div>
+        <div class="kpi cyan">
+          <div class="kpi-label">Tenants Activos</div>
+          <div class="kpi-value" data-kpi="tenants">—</div>
+          <div class="kpi-trend" data-kpi-trend="tenants"></div>
+          <div class="kpi-sub" data-kpi-sub="tenants"></div>
+        </div>
+        <div class="kpi orange">
+          <div class="kpi-label">Churn Rate</div>
+          <div class="kpi-value" data-kpi="churn">—</div>
+          <div class="kpi-trend" data-kpi-trend="churn"></div>
+          <div class="kpi-sub" data-kpi-sub="churn"></div>
+        </div>
+        <div class="kpi red">
+          <div class="kpi-label">Incidentes Abiertos</div>
+          <div class="kpi-value" data-kpi="incidents">—</div>
+          <div class="kpi-trend" data-kpi-trend="incidents"></div>
+          <div class="kpi-sub" data-kpi-sub="incidents"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">NPS Score</div>
+          <div class="kpi-value" data-kpi="nps">—</div>
+          <div class="kpi-trend" data-kpi-trend="nps"></div>
+          <div class="kpi-sub" data-kpi-sub="nps"></div>
+        </div>
+      </div>
+
+      <!-- Row: Revenue chart + Plan distribution -->
+      <div class="row row-2">
+        <div class="card">
+          <div class="card-h">
+            <div>
+              <h3>Crecimiento de Ingresos · MRR</h3>
+              <div class="t-mini">Últimos 12 meses · USD</div>
+            </div>
+            <div class="btn-row" data-group="mrr-mode">
+              <button class="btn btn-ghost active" style="padding:6px 12px;font-size:11px" data-action="chart-mode" data-mode="mrr">MRR</button>
+              <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="chart-mode" data-mode="arr">ARR</button>
+              <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="chart-mode" data-mode="netnew">Net New</button>
+            </div>
+          </div>
+          <div class="chart" id="adm-mrr-chart">
+            <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px 10px;font-size:12px">Cargando…</div>
+          </div>
+          <div class="chart-x" id="adm-mrr-x"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Distribución por Plan</h3><span class="more">⋯</span></div>
+          <div style="position:relative">
+            <div class="donut" id="adm-plan-donut" style="background:conic-gradient(var(--muted) 0 100%)"></div>
+            <div class="donut-c" style="top:0;height:160px"><b id="adm-plan-total">—</b><span>tenants</span></div>
+          </div>
+          <div class="legend" id="adm-plan-legend">
+            <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:6px;font-size:12px">Sin datos de planes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row: System Health + Deploys -->
+      <div class="row row-2">
+        <div class="card">
+          <div class="card-h">
+            <h3>System Health · Infraestructura</h3>
+            <span class="tag ok">● Todos los servicios operativos</span>
+          </div>
+          <div class="health-row"><div class="lbl">API Gateway</div><div class="progress"><div style="width:99%"></div></div><div class="v">99.98%</div></div>
+          <div class="health-row"><div class="lbl">Auth Service</div><div class="progress"><div style="width:100%"></div></div><div class="v">100%</div></div>
+          <div class="health-row"><div class="lbl">PostgreSQL</div><div class="progress"><div style="width:97%;background:var(--warn)"></div></div><div class="v">97.2%</div></div>
+          <div class="health-row"><div class="lbl">Redis Cache</div><div class="progress"><div style="width:100%"></div></div><div class="v">100%</div></div>
+          <div class="health-row"><div class="lbl">CDN (Cloudflare)</div><div class="progress"><div style="width:99%"></div></div><div class="v">99.9%</div></div>
+          <div class="health-row"><div class="lbl">Email (SendGrid)</div><div class="progress"><div style="width:98%"></div></div><div class="v">98.4%</div></div>
+          <div class="health-row"><div class="lbl">Storage S3</div><div class="progress"><div style="width:100%"></div></div><div class="v">100%</div></div>
+          <div class="health-row"><div class="lbl">Workers Queue</div><div class="progress"><div style="width:94%;background:var(--warn)"></div></div><div class="v">94.1%</div></div>
+          <div style="display:flex;gap:18px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)">
+            <span>⚡ Latencia P95: <b style="color:var(--text)">142ms</b></span>
+            <span>📊 Req/min: <b style="color:var(--text)">8.4k</b></span>
+            <span>💾 DB conex: <b style="color:var(--text)">324/500</b></span>
+            <span>🔥 CPU avg: <b style="color:var(--text)">38%</b></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Deploys Recientes</h3><button class="btn btn-primary" style="padding:6px 12px;font-size:11px" data-action="new-deploy">+ Deploy</button></div>
+          <div class="deploy">
+            <div class="stat ok"></div>
+            <div><b>v4.12.3</b> → producción<br><span class="meta">main · #a8f2c1 · feat: nuevo billing dashboard</span></div>
+            <div class="right">hace 14 min<br><span class="tag ok">success</span></div>
+          </div>
+          <div class="deploy">
+            <div class="stat run"></div>
+            <div><b>v4.12.4-rc1</b> → staging<br><span class="meta">develop · #b3e991 · fix: webhook retry logic</span></div>
+            <div class="right">en curso · 2:34<br><span class="tag info">building</span></div>
+          </div>
+          <div class="deploy">
+            <div class="stat ok"></div>
+            <div><b>v4.12.2</b> → producción<br><span class="meta">main · #c1d847 · perf: query optimization</span></div>
+            <div class="right">hace 6h<br><span class="tag ok">success</span></div>
+          </div>
+          <div class="deploy">
+            <div class="stat err"></div>
+            <div><b>v4.12.1</b> → staging<br><span class="meta">hotfix · #f4a233 · revert payment provider</span></div>
+            <div class="right">hace 9h<br><span class="tag err">failed</span></div>
+          </div>
+          <div class="deploy">
+            <div class="stat ok"></div>
+            <div><b>v4.12.0</b> → producción<br><span class="meta">release · #91bc55 · release: minor v4.12</span></div>
+            <div class="right">hace 1d<br><span class="tag ok">success</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tenants Table -->
+      <div class="card" style="margin-bottom:24px">
+        <div class="card-h">
+          <div>
+            <h3>Top Tenants por Ingresos</h3>
+            <div class="t-mini">Mostrando 8 de 847 · ordenado por MRR</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="filter-tenants">Filtros</button>
+            <button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="view-all-tenants">Ver todos</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Tenant</th><th>Plan</th><th>Usuarios</th><th>MRR</th><th>Estado</th><th>Región</th><th>Última actividad</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="adm-tenants-tbody">
+            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Cargando tenants…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Row: Activity feed + Support tickets + Billing summary -->
+      <div class="row row-3">
+        <div class="card">
+          <div class="card-h"><h3>Actividad Global</h3><span class="more">⋯</span></div>
+          <div id="adm-feed">
+            <div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Cargando actividad…</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Tickets de Soporte</h3><span class="tag" id="adm-tickets-badge">—</span></div>
+          <div id="adm-tickets-list">
+            <div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Sin tickets registrados</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Billing Resumen</h3><span class="more">⋯</span></div>
+          <div style="padding:14px;background:var(--card2);border-radius:8px;margin-bottom:12px">
+            <div class="t-mini">Cobrado este mes</div>
+            <div style="font-size:24px;font-weight:700;margin:4px 0" data-bill="charged_month">—</div>
+            <div style="font-size:11px;color:var(--success)" data-bill="charged_count">—</div>
+          </div>
+          <div style="padding:14px;background:var(--card2);border-radius:8px;margin-bottom:12px">
+            <div class="t-mini">Pendiente / fallido</div>
+            <div style="font-size:24px;font-weight:700;margin:4px 0;color:var(--warn)" data-bill="pending_amount">—</div>
+            <div style="font-size:11px;color:var(--muted)" data-bill="pending_count">—</div>
+          </div>
+          <div style="padding:14px;background:var(--card2);border-radius:8px;margin-bottom:12px">
+            <div class="t-mini">Reembolsos</div>
+            <div style="font-size:24px;font-weight:700;margin:4px 0" data-bill="refunds_amount">—</div>
+            <div style="font-size:11px;color:var(--muted)" data-bill="refunds_count">—</div>
+          </div>
+          <table style="margin-top:8px" id="adm-payments-table">
+            <tbody>
+              <tr><td colspan="2" style="padding:14px;text-align:center;color:var(--muted);font-size:12px">Sin datos de gateways</td></tr>
+            </tbody>
+          </table>
+          <button class="btn btn-primary" style="width:100%;margin-top:12px" data-action="open-billing">Ver Billing completo →</button>
+        </div>
+      </div>
+
+      <!-- Row: Geo + Plans pricing -->
+      <div class="row row-2">
+        <div class="card">
+          <div class="card-h"><h3>Distribución Geográfica</h3><span class="more">⋯</span></div>
+          <table>
+            <thead><tr><th>Región</th><th>Tenants</th><th>MRR</th><th>Crecimiento</th><th>Latencia</th></tr></thead>
+            <tbody>
+              <tr><td>🇺🇸 US-East</td><td>312</td><td>$108k</td><td><span class="tag ok">+14%</span></td><td>98ms</td></tr>
+              <tr><td>🇺🇸 US-West</td><td>184</td><td>$62k</td><td><span class="tag ok">+9%</span></td><td>112ms</td></tr>
+              <tr><td>🇪🇺 EU-West</td><td>156</td><td>$54k</td><td><span class="tag ok">+22%</span></td><td>134ms</td></tr>
+              <tr><td>🌎 LatAm</td><td>121</td><td>$38k</td><td><span class="tag ok">+31%</span></td><td>178ms</td></tr>
+              <tr><td>🌏 APAC</td><td>74</td><td>$22k</td><td><span class="tag warn">+4%</span></td><td>224ms</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Planes &amp; Conversión</h3><button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="edit-plans">Editar</button></div>
+          <table>
+            <thead><tr><th>Plan</th><th>Precio</th><th>Tenants</th><th>Conv. Trial→Paid</th></tr></thead>
+            <tbody>
+              <tr><td><b>Starter</b><div class="t-mini">$29 / mo</div></td><td>$29</td><td>381</td><td><span class="tag ok">68%</span></td></tr>
+              <tr><td><b>Pro</b><div class="t-mini">$99 / mo</div></td><td>$99</td><td>212</td><td><span class="tag ok">54%</span></td></tr>
+              <tr><td><b>Business</b><div class="t-mini">$299 / mo</div></td><td>$299</td><td>152</td><td><span class="tag warn">38%</span></td></tr>
+              <tr><td><b>Enterprise</b><div class="t-mini">custom</div></td><td>$1.5k+</td><td>102</td><td><span class="tag info">sales</span></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:14px;padding:12px;background:var(--card2);border-radius:8px;font-size:12px;color:var(--muted)">
+            💡 <b style="color:var(--text)">Insight:</b> conversión Pro→Business cayó 6% este mes. Revisar onboarding del plan Business.
+          </div>
+        </div>
+      </div>
+
+      <!-- Row: Security + API usage + Feature flags -->
+      <div class="row row-3">
+        <div class="card">
+          <div class="card-h"><h3>Seguridad &amp; Auditoría</h3><span class="tag ok">SOC2 ✓</span></div>
+          <div class="health-row"><div class="lbl">2FA habilitado</div><div class="progress"><div style="width:87%"></div></div><div class="v">87%</div></div>
+          <div class="health-row"><div class="lbl">SSO configurado</div><div class="progress"><div style="width:42%;background:var(--warn)"></div></div><div class="v">42%</div></div>
+          <div class="health-row"><div class="lbl">Backups OK</div><div class="progress"><div style="width:100%"></div></div><div class="v">100%</div></div>
+          <div class="health-row"><div class="lbl">Encriptación TLS</div><div class="progress"><div style="width:100%"></div></div><div class="v">A+</div></div>
+          <div style="margin-top:14px;padding:12px;background:var(--card2);border-radius:8px">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Eventos críticos 24h</div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0">
+              <span>🔒 Logins bloqueados</span><b>147</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0">
+              <span>⚠️ Tokens expirados</span><b>32</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0">
+              <span>🚫 IPs bloqueadas</span><b>18</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0">
+              <span>📋 Cambios de permisos</span><b>54</b>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Uso de API</h3><span class="more">⋯</span></div>
+          <div style="text-align:center;padding:14px 0">
+            <div style="font-size:30px;font-weight:700">12.4M</div>
+            <div class="t-mini">requests procesados (24h)</div>
+          </div>
+          <div class="chart" style="height:120px">
+            <div class="bar" style="height:42%"></div>
+            <div class="bar" style="height:58%"></div>
+            <div class="bar" style="height:74%"></div>
+            <div class="bar" style="height:88%"></div>
+            <div class="bar" style="height:96%"></div>
+            <div class="bar" style="height:82%"></div>
+            <div class="bar" style="height:64%"></div>
+            <div class="bar" style="height:48%"></div>
+          </div>
+          <div class="chart-x">
+            <div>0h</div><div>3h</div><div>6h</div><div>9h</div><div>12h</div><div>15h</div><div>18h</div><div>21h</div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px;font-size:11px;color:var(--muted)">
+            <span>2xx <b style="color:var(--success)">98.2%</b></span>
+            <span>4xx <b style="color:var(--warn)">1.4%</b></span>
+            <span>5xx <b style="color:var(--danger)">0.4%</b></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Feature Flags</h3><button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" data-action="new-flag">+ Nueva</button></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div><b style="font-size:13px">new-billing-ui</b><div class="t-mini">100% rollout</div></div>
+            <span class="tag ok">ON</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div><b style="font-size:13px">ai-assistant-v2</b><div class="t-mini">25% rollout · beta</div></div>
+            <span class="tag info">PARTIAL</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div><b style="font-size:13px">webhook-retry-v3</b><div class="t-mini">Enterprise only</div></div>
+            <span class="tag purple">SCOPED</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div><b style="font-size:13px">dark-mode-mobile</b><div class="t-mini">staging only</div></div>
+            <span class="tag warn">DEV</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div><b style="font-size:13px">legacy-export</b><div class="t-mini">deprecated</div></div>
+            <span class="tag err">OFF</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+            <div><b style="font-size:13px">multi-region-db</b><div class="t-mini">internal · 5 tenants</div></div>
+            <span class="tag info">CANARY</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row: Cohorts + Top users -->
+      <div class="row row-2">
+        <div class="card">
+          <div class="card-h"><h3>Retención por Cohorte</h3><span class="t-mini">Tenants registrados por mes</span></div>
+          <table>
+            <thead><tr><th>Cohorte</th><th>M0</th><th>M1</th><th>M2</th><th>M3</th><th>M6</th><th>M12</th></tr></thead>
+            <tbody id="adm-cohort-tbody">
+              <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Sin datos de cohortes</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:12px;font-size:11px;color:var(--muted)" id="adm-cohort-note"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Top Power Users</h3><span class="more">⋯</span></div>
+          <table>
+            <thead><tr><th>Usuario</th><th>Tenant</th><th>Sesiones</th><th>API calls</th></tr></thead>
+            <tbody id="adm-poweruser-tbody">
+              <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px">Sin datos de power users</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="card" style="margin-bottom:24px">
+        <div class="card-h"><h3>Acciones Rápidas</h3><span class="t-mini">Operaciones de Super Admin</span></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="new-tenant">🏢<br><b>Crear Tenant</b><br><span class="t-mini">Provisión manual</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="bulk-email">📨<br><b>Email Masivo</b><br><span class="t-mini">A todos los admins</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="apply-credit">💸<br><b>Aplicar Crédito</b><br><span class="t-mini">Compensación</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="trigger-deploy">🚀<br><b>Trigger Deploy</b><br><span class="t-mini">CI/CD pipeline</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="restart-workers">🔄<br><b>Restart Workers</b><br><span class="t-mini">Queue maintenance</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="generate-report">📊<br><b>Generar Reporte</b><br><span class="t-mini">Mensual ejecutivo</span></button>
+          <button class="btn btn-ghost" style="padding:14px;text-align:left" data-action="maintenance-mode">🛟<br><b>Modo Mantenimiento</b><br><span class="t-mini">Banner global</span></button>
+          <button class="btn btn-danger" style="padding:14px;text-align:left" data-action="kill-switch">🚨<br><b>Kill Switch</b><br><span style="font-size:11px;opacity:.85">Emergencia P0</span></button>
+        </div>
+      </div>
+
+      <!-- ======================== FIX-N4-3: FUSIÓN DE SUCURSALES ======================== -->
+      <div class="card" id="sec-merge-branches" style="margin-bottom:24px;border:1px solid var(--danger)">
+        <div class="card-h">
+          <div>
+            <h3>🔀 Fusionar Sucursales (consolidación)</h3>
+            <div class="t-mini">Solo superadmin · operación irreversible que mueve productos, ventas y usuarios de una sucursal origen a una destino.</div>
+          </div>
+          <span class="tag err">SUPERADMIN ONLY</span>
+        </div>
+        <div style="padding:8px 0">
+          <div style="background:rgba(239,68,68,.08);border-left:3px solid var(--danger);padding:12px;border-radius:6px;margin-bottom:16px;font-size:12px;color:var(--text)">
+            <b>⚠️ Antes de fusionar:</b> verifica que no haya cortes de caja abiertos en la sucursal origen y que su inventario haya sido auditado. Esta operación NO se puede deshacer; usa cierre histórico si solo quieres deshabilitar ventas.
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:14px;align-items:end;margin-bottom:14px">
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Sucursal origen (se va)</label>
+              <select id="merge-from" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px">
+                <option value="">Cargando sucursales…</option>
+              </select>
+            </div>
+            <div style="text-align:center;font-size:24px;color:var(--muted);padding-bottom:6px">→</div>
+            <div>
+              <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Sucursal destino (conserva)</label>
+              <select id="merge-into" style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px">
+                <option value="">Cargando sucursales…</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Preview cargado dinámicamente -->
+          <div id="merge-preview" style="display:none;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px">
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Impacto estimado</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+              <div>
+                <div style="font-size:22px;font-weight:700" data-merge-stat="products">—</div>
+                <div style="font-size:11px;color:var(--muted)">productos a mover</div>
+              </div>
+              <div>
+                <div style="font-size:22px;font-weight:700" data-merge-stat="sales">—</div>
+                <div style="font-size:11px;color:var(--muted)">ventas históricas a re-asignar</div>
+              </div>
+              <div>
+                <div style="font-size:22px;font-weight:700" data-merge-stat="users">—</div>
+                <div style="font-size:11px;color:var(--muted)">usuarios afectados</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:14px">
+            <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Razón / justificación (mín. 30 caracteres) <span style="color:var(--danger)">*</span></label>
+            <textarea id="merge-reason" rows="3" placeholder="Ej.: La sucursal Centro cierra por término de contrato de arrendamiento. Su inventario ya se trasladó físicamente a Sucursal Sur y los empleados fueron re-asignados. Auditoría de caja completada el 2026-04-15."
+              style="width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;resize:vertical"></textarea>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px"><span id="merge-reason-count">0</span> / 30 chars mínimos</div>
+          </div>
+
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;margin-bottom:16px;padding:10px;background:var(--card2);border-radius:8px">
+            <input type="checkbox" id="merge-confirm" style="margin-top:3px;cursor:pointer">
+            <span>Sí, entiendo que esta operación <b style="color:var(--danger)">es IRREVERSIBLE</b>. Los datos de la sucursal origen se transferirán a la destino y la sucursal origen quedará marcada como "fusionada" sin posibilidad de restauración.</span>
+          </label>
+
+          <div id="merge-error" style="display:none;background:rgba(239,68,68,.12);color:var(--danger);padding:10px;border-radius:6px;font-size:12px;margin-bottom:12px"></div>
+          <div id="merge-success" style="display:none;background:rgba(16,185,129,.12);color:var(--success);padding:10px;border-radius:6px;font-size:12px;margin-bottom:12px"></div>
+
+          <div style="display:flex;justify-content:flex-end;gap:10px">
+            <button class="btn btn-ghost" id="merge-cancel" type="button">Cancelar</button>
+            <button class="btn btn-danger" id="merge-submit" type="button" disabled>🔀 Fusionar sucursales (irreversible)</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <div>Volvix SaaS Admin · © 2026 Grupo Volvix</div>
+      <div>Status: <span style="color:var(--success)">● Todos los sistemas operativos</span></div>
+    </footer>
+
+  </div>
+</div>
+<script>
+// R28: cablear KPIs a /api/owner/dashboard + /api/me
+(async function loadAdminSaas(){
+  function tk(){ return localStorage.getItem('volvix_token')||localStorage.getItem('volvixAuthToken')||''; }
+  function setText(sel, v){ var e=document.querySelector(sel); if(e) e.textContent=(v==null||v===''?'—':String(v)); }
+  function setKpi(name, value, trend, sub){
+    var v=document.querySelector('[data-kpi="'+name+'"]'); if(v) v.textContent=(value==null||value===''?'—':value);
+    var t=document.querySelector('[data-kpi-trend="'+name+'"]'); if(t) t.textContent=trend||'';
+    var s=document.querySelector('[data-kpi-sub="'+name+'"]'); if(s) s.textContent=sub||'';
+  }
+  function fmt$(n){ return '$'+Number(n||0).toLocaleString('es-MX'); }
+  function ini(s){ return (s||'').split(' ').slice(0,2).map(x=>(x[0]||'').toUpperCase()).join('') || '—'; }
+  var t=tk(); if(!t) return;
+  var headers={ 'Authorization':'Bearer '+t };
+  // /api/me para topbar usuario
+  try{
+    var rm = await fetch('/api/me',{ headers });
+    if (rm.ok){
+      var me = await rm.json();
+      var u = me.user || me;
+      setText('#adm-name', u.full_name || u.email || '—');
+      setText('#adm-role', u.role || '—');
+      setText('#adm-avatar', ini(u.full_name || u.email || ''));
+    }
+  }catch(e){}
+  // /api/owner/dashboard para KPIs
+  try{
+    var rd = await fetch('/api/owner/dashboard',{ headers });
+    if (rd.ok){
+      var d = await rd.json();
+      var m = d.metrics || d || {};
+      var tenants = m.companies || m.tenants || 0;
+      var users = m.users || 0;
+      var revenue = m.total_revenue || m.revenue || 0;
+      setKpi('mrr', fmt$(revenue), '', 'Ingresos del periodo');
+      setKpi('arr', fmt$(revenue*12), '', 'Anualizado (estimado)');
+      setKpi('tenants', tenants, '', users + ' usuarios totales');
+      setKpi('churn', '—', '', '');
+      setKpi('incidents', '—', '', '');
+      setKpi('nps', '—', '', '');
+      var tb = document.querySelector('[data-kpi="tenants-badge"]'); if(tb) tb.textContent = tenants;
+      // Donut total
+      var pt = document.getElementById('adm-plan-total'); if(pt) pt.textContent = tenants;
+    }
+  }catch(e){ console.warn('[admin-saas] dashboard fail', e); }
+
+  // R29: cablear gráfica MRR a /api/reports/sales/daily (12 meses no, pero usamos lo disponible)
+  try {
+    var rb = await fetch('/api/reports/sales/daily?days=12', { headers });
+    var chart = document.getElementById('adm-mrr-chart');
+    var xaxis = document.getElementById('adm-mrr-x');
+    if (chart) chart.innerHTML = '';
+    if (xaxis) xaxis.innerHTML = '';
+    if (rb.ok) {
+      var jb = await rb.json();
+      var arr = (jb && (jb.items || jb.daily || jb.data)) || [];
+      if (!arr.length) {
+        if (chart) chart.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px 10px;font-size:12px">Sin datos del periodo</div>';
+      } else {
+        var maxV = Math.max.apply(null, arr.map(function(x){ return Number(x.total||x.sales||0); })) || 1;
+        arr.forEach(function(x){
+          var v = Number(x.total || x.sales || 0);
+          var h = Math.max(2, Math.round(v / maxV * 96));
+          var bar = document.createElement('div');
+          bar.className = 'bar';
+          bar.style.height = h + '%';
+          bar.innerHTML = '<span>$' + (v >= 1000 ? Math.round(v/1000)+'k' : v.toFixed(0)) + '</span>';
+          if (chart) chart.appendChild(bar);
+          if (xaxis) {
+            var lbl = document.createElement('div');
+            try { var d2 = new Date(x.date || x.day); lbl.textContent = d2.getDate() + '/' + (d2.getMonth()+1); }
+            catch(e2){ lbl.textContent = ''; }
+            xaxis.appendChild(lbl);
+          }
+        });
+      }
+    } else {
+      if (chart) chart.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:30px 10px;font-size:12px">Endpoint no disponible</div>';
+    }
+  } catch(e){ console.warn('[admin-saas] mrr chart fail', e); }
+
+  // B2: cablear tabla tenants a /api/owner/tenants
+  try {
+    var rt = await fetch('/api/owner/tenants', { headers });
+    var tbody = document.getElementById('adm-tenants-tbody');
+    if (rt.ok && tbody) {
+      var tenants = await rt.json();
+      if (!Array.isArray(tenants) || !tenants.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">Sin tenants registrados</td></tr>';
+      } else {
+        var planBadge = function(plan){
+          var p = (plan||'').toLowerCase();
+          if (p === 'enterprise') return '<span class="tag purple">Enterprise</span>';
+          if (p === 'business') return '<span class="tag info">Business</span>';
+          if (p === 'pro') return '<span class="tag" style="background:rgba(99,102,241,.15);color:var(--primary)">Pro</span>';
+          if (p === 'trial') return '<span class="tag warn">Trial</span>';
+          return '<span class="tag">' + (plan || '—') + '</span>';
+        };
+        var initials = function(name){
+          return (name||'').split(' ').slice(0,2).map(function(w){return (w[0]||'').toUpperCase();}).join('') || '—';
+        };
+        tbody.innerHTML = tenants.map(function(t){
+          var st = t.is_active === false ? '<span class="tag err">Inactivo</span>' : '<span class="tag ok">Activo</span>';
+          return '<tr>' +
+            '<td><div class="tcell"><div class="t-avatar">' + initials(t.name) + '</div><div><b>' + (t.name || '—') + '</b><div class="t-mini">' + (t.subdomain || t.id || '—') + '</div></div></div></td>' +
+            '<td>' + planBadge(t.plan) + '</td>' +
+            '<td>' + (t.users_count != null ? t.users_count : '—') + '</td>' +
+            '<td><b>' + (t.mrr != null ? '$'+Number(t.mrr).toLocaleString('es-MX') : '—') + '</b></td>' +
+            '<td>' + st + '</td>' +
+            '<td>' + (t.region || '—') + '</td>' +
+            '<td class="t-mini">' + (t.last_activity || '—') + '</td>' +
+            '<td><span class="more" style="cursor:pointer">⋯</span></td>' +
+          '</tr>';
+        }).join('');
+      }
+    }
+  } catch(e){ console.warn('[admin-saas] tenants fail', e); }
+
+  // B2/B27: cablear feed actividad a /api/audit-log con _semantic enriquecido
+  try {
+    var rf = await fetch('/api/audit-log?limit=8', { headers });
+    var feed = document.getElementById('adm-feed');
+    if (feed) {
+      if (rf.ok) {
+        var jf = await rf.json();
+        var events = (jf && (jf.items || jf)) || [];
+        if (!Array.isArray(events) || !events.length) {
+          feed.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Sin actividad registrada</div>';
+        } else {
+          var icon = function(action, semantic) {
+            var s = (semantic || action || '').toLowerCase();
+            if (s.indexOf('login') >= 0) return '🔐';
+            if (s.indexOf('logout') >= 0) return '🚪';
+            if (s.indexOf('sale') >= 0) return '💰';
+            if (s.indexOf('product') >= 0) return '📦';
+            if (s.indexOf('customer') >= 0) return '👤';
+            if (s.indexOf('vendor') >= 0) return '🏭';
+            if (s.indexOf('tenant') >= 0) return '🏢';
+            if (s.indexOf('deploy') >= 0) return '🚀';
+            if (s.indexOf('delete') >= 0) return '🗑️';
+            return '📌';
+          };
+          var label = function(e) {
+            var sem = e.after && e.after._semantic ? e.after._semantic : null;
+            if (sem) return sem.replace(/[._]/g, ' ');
+            return (e.action || 'evento') + ' ' + (e.resource || '');
+          };
+          feed.innerHTML = events.slice(0,6).map(function(e){
+            var sem = e.after && e.after._semantic;
+            return '<div class="feed-item">'
+              + '<div class="feed-ic">' + icon(e.action, sem) + '</div>'
+              + '<div class="feed-c">'
+              + '<b>' + label(e) + '</b>'
+              + '<div class="meta">'
+              + (e.user_id ? (e.user_id.length > 12 ? e.user_id.slice(0,8) + '… · ' : e.user_id + ' · ') : '')
+              + (e.ts ? new Date(e.ts).toLocaleString('es-MX') : '')
+              + '</div>'
+              + '</div></div>';
+          }).join('');
+        }
+      } else {
+        feed.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Endpoint audit-log no disponible</div>';
+      }
+    }
+  } catch(e){}
+
+  // R29: cablear distribución por plan a /api/billing/plans + /api/owner/seats si existen
+  try {
+    var rp = await fetch('/api/billing/plans', { headers });
+    var legend = document.getElementById('adm-plan-legend');
+    var donut = document.getElementById('adm-plan-donut');
+    if (rp.ok && legend) {
+      var jp = await rp.json();
+      var plans = (jp && (jp.plans || jp.items || jp)) || [];
+      if (!Array.isArray(plans) || !plans.length) {
+        legend.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:6px;font-size:12px">Sin datos de planes</div>';
+      } else {
+        var totalCount = plans.reduce(function(a,p){return a + (Number(p.count||0));}, 0);
+        legend.innerHTML = plans.map(function(p,i){
+          var pct = totalCount ? Math.round((Number(p.count||0)/totalCount)*100) : 0;
+          var color = ['var(--primary)','var(--primary2)','var(--info)','var(--warn)'][i % 4];
+          return '<div><span><span class="sw" style="background:'+color+'"></span>'+(p.name||'Plan')+'</span><b>'+(p.count||0)+' · '+pct+'%</b></div>';
+        }).join('');
+        // Donut conic-gradient
+        var stops = [], acc = 0;
+        plans.forEach(function(p,i){
+          var color = ['var(--primary)','var(--primary2)','var(--info)','var(--warn)'][i % 4];
+          var pct = totalCount ? (Number(p.count||0)/totalCount)*100 : 0;
+          stops.push(color + ' ' + acc + '% ' + (acc+pct) + '%');
+          acc += pct;
+        });
+        if (donut && stops.length) donut.style.background = 'conic-gradient(' + stops.join(',') + ')';
+      }
+    }
+  } catch(e){ console.warn('[admin-saas] plans fail', e); }
+
+  // ============== FIX-N4-3: FUSIÓN DE SUCURSALES ==============
+  try {
+    var selFrom = document.getElementById('merge-from');
+    var selInto = document.getElementById('merge-into');
+    var preview = document.getElementById('merge-preview');
+    var reasonEl = document.getElementById('merge-reason');
+    var reasonCount = document.getElementById('merge-reason-count');
+    var confirmCb = document.getElementById('merge-confirm');
+    var btnSubmit = document.getElementById('merge-submit');
+    var btnCancel = document.getElementById('merge-cancel');
+    var errBox = document.getElementById('merge-error');
+    var okBox = document.getElementById('merge-success');
+    var branchesCache = [];
+
+    if (!selFrom || !selInto) return;
+
+    // Cargar sucursales del tenant actual (selector necesita /api/branches)
+    var rb = await fetch('/api/branches', { headers, credentials: 'include' });
+    if (rb.ok) {
+      var jb = await rb.json();
+      branchesCache = (jb && (jb.items || jb.branches || jb)) || [];
+      if (!Array.isArray(branchesCache) || !branchesCache.length) {
+        selFrom.innerHTML = '<option value="">— Sin sucursales registradas —</option>';
+        selInto.innerHTML = '<option value="">— Sin sucursales registradas —</option>';
+      } else {
+        var opts = '<option value="">— Selecciona —</option>' + branchesCache.map(function(b){
+          var label = (b.name || b.id || '').toString().replace(/[<>]/g,'');
+          var st = b.status && b.status !== 'active' ? ' (' + b.status + ')' : '';
+          return '<option value="' + b.id + '">' + label + st + '</option>';
+        }).join('');
+        selFrom.innerHTML = opts;
+        selInto.innerHTML = opts;
+      }
+    } else {
+      selFrom.innerHTML = '<option value="">Endpoint /api/branches no disponible</option>';
+      selInto.innerHTML = '<option value="">Endpoint /api/branches no disponible</option>';
+    }
+
+    function showError(msg){ errBox.textContent = msg; errBox.style.display='block'; okBox.style.display='none'; }
+    function showOk(msg){ okBox.textContent = msg; okBox.style.display='block'; errBox.style.display='none'; }
+    function clearMsg(){ errBox.style.display='none'; okBox.style.display='none'; }
+
+    function updateSubmitState(){
+      var f = selFrom.value, i = selInto.value, r = (reasonEl.value||'').trim();
+      var ok = f && i && f !== i && r.length >= 30 && confirmCb.checked;
+      btnSubmit.disabled = !ok;
+    }
+
+    async function loadPreview(){
+      var f = selFrom.value, i = selInto.value;
+      if (!f || !i || f === i) {
+        preview.style.display = 'none';
+        return;
+      }
+      preview.style.display = 'block';
+      // intenta endpoint preview si existe
+      try {
+        var pr = await fetch('/api/branches/merge/preview?from=' + encodeURIComponent(f) + '&into=' + encodeURIComponent(i), { headers, credentials: 'include' });
+        if (pr.ok) {
+          var pj = await pr.json();
+          document.querySelector('[data-merge-stat="products"]').textContent = (pj.products_count != null ? pj.products_count : '—');
+          document.querySelector('[data-merge-stat="sales"]').textContent = (pj.sales_count != null ? pj.sales_count : '—');
+          document.querySelector('[data-merge-stat="users"]').textContent = (pj.users_count != null ? pj.users_count : '—');
+          return;
+        }
+      } catch(_) {}
+      // fallback: contadores locales si /api/branches expone counts
+      var src = branchesCache.find(function(b){ return b.id === f; }) || {};
+      document.querySelector('[data-merge-stat="products"]').textContent = src.products_count != null ? src.products_count : '? (preview no disponible)';
+      document.querySelector('[data-merge-stat="sales"]').textContent = src.sales_count != null ? src.sales_count : '? (preview no disponible)';
+      document.querySelector('[data-merge-stat="users"]').textContent = src.users_count != null ? src.users_count : '? (preview no disponible)';
+    }
+
+    selFrom.addEventListener('change', function(){ clearMsg(); loadPreview(); updateSubmitState(); });
+    selInto.addEventListener('change', function(){ clearMsg(); loadPreview(); updateSubmitState(); });
+    reasonEl.addEventListener('input', function(){
+      var n = (reasonEl.value||'').trim().length;
+      reasonCount.textContent = n;
+      reasonCount.style.color = n >= 30 ? 'var(--success)' : 'var(--muted)';
+      updateSubmitState();
+    });
+    confirmCb.addEventListener('change', updateSubmitState);
+    btnCancel.addEventListener('click', function(){
+      selFrom.value=''; selInto.value=''; reasonEl.value=''; reasonCount.textContent='0';
+      confirmCb.checked=false; preview.style.display='none'; clearMsg(); updateSubmitState();
+    });
+    btnSubmit.addEventListener('click', async function(){
+      clearMsg();
+      var f = selFrom.value, i = selInto.value, r = (reasonEl.value||'').trim();
+      if (!f || !i || f === i) { showError('Selecciona dos sucursales distintas.'); return; }
+      if (r.length < 30) { showError('La razón debe tener al menos 30 caracteres.'); return; }
+      if (!confirmCb.checked) { showError('Debes confirmar que entiendes que es irreversible.'); return; }
+
+      btnSubmit.disabled = true;
+      var prevTxt = btnSubmit.textContent;
+      btnSubmit.textContent = '⏳ Fusionando…';
+      try {
+        var resp = await fetch('/api/branches/merge', {
+          method: 'POST',
+          headers: Object.assign({'Content-Type':'application/json','Idempotency-Key':'merge-'+Date.now()}, headers),
+          credentials: 'include',
+          body: JSON.stringify({ from: f, into: i, reason: r })
+        });
+        if (resp.status === 404 || resp.status === 405) {
+          showError('Endpoint /api/branches/merge próximamente. Crea ticket de soporte adjuntando este texto: "Solicitud de fusión sucursal origen=' + f + ' destino=' + i + ' tenant_id=desde sesión actual. Razón: ' + r + '". Ver runbook docs/branch-merge-runbook.md para alternativa SQL manual.');
+          return;
+        }
+        if (!resp.ok) {
+          var t = await resp.text();
+          showError('Error del servidor (' + resp.status + '): ' + (t || 'desconocido'));
+          return;
+        }
+        showOk('✅ Sucursales fusionadas exitosamente. Recargando lista…');
+        setTimeout(function(){ location.reload(); }, 1800);
+      } catch(e) {
+        showError('Error de red: ' + (e && e.message || 'desconocido'));
+      } finally {
+        btnSubmit.textContent = prevTxt;
+        updateSubmitState();
+      }
+    });
+
+    // nav anchor
+    var navMerge = document.querySelector('[data-action="goto-merge-branches"]');
+    if (navMerge) navMerge.addEventListener('click', function(ev){
+      ev.preventDefault();
+      var sec = document.getElementById('sec-merge-branches');
+      if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  } catch(e){ console.warn('[admin-saas] merge UI fail', e); }
+})();
+</script>
+  <script defer src="auth-helper.js"></script>
+<link rel="stylesheet" href="volvix-modals.css">
+<script defer src="volvix-modals.js"></script>
+  <script defer src="volvix-theme-wiring.js"></script>
+<script defer src="volvix-i18n-wiring.js"></script>
+<script defer src="volvix-admin-helpers.js"></script>
+<script defer src="volvix-admin-saas-actions.js"></script>
+</body>
+</html>

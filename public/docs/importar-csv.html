@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Importar productos desde CSV — Centro de Ayuda Volvix</title>
+<meta name="description" content="Carga masiva de catálogo usando archivos CSV o Excel.">
+<meta name="theme-color" content="#6366f1">
+<link rel="stylesheet" href="_article-style.css">
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../docs.html" class="nav-logo"><span class="nav-logo-mark">V</span> Volvix Ayuda</a>
+    <a href="../multipos_suite_v3.html" style="color:#cbd5e1;font-size:14px;font-weight:600">Abrir POS →</a>
+  </div>
+</nav>
+<main class="container">
+  <div class="crumb">
+    <a href="../volvix-hub-landing.html">Inicio</a> / <a href="../docs.html">Ayuda</a> / <a href="../docs.html?cat=productos">Productos</a>
+  </div>
+  <article>
+    <span class="cat-tag">Productos</span>
+    <h1>Importar productos desde CSV</h1>
+    <p class="lead">Carga masiva de catálogo usando archivos CSV o Excel.</p>
+    
+<h2>Formato del archivo</h2>
+<p>El CSV debe tener encabezados en la primera fila. Las columnas obligatorias son:</p>
+<pre><code>nombre,sku,precio,categoria,iva,stock
+Coca Cola 600ml,COCA600,18.50,Bebidas,16,120
+Sabritas Original,SAB001,15.00,Botanas,16,85</code></pre>
+
+<h2>Pasos para importar</h2>
+<ol class="steps">
+  <li>Ve a <strong>Catálogo → Productos → Importar</strong>.</li>
+  <li>Descarga la plantilla de ejemplo.</li>
+  <li>Llena la plantilla con tus productos.</li>
+  <li>Sube el archivo CSV (UTF-8).</li>
+  <li>Revisa la vista previa: el sistema marcará errores en rojo.</li>
+  <li>Confirma con <strong>Importar todo</strong>.</li>
+</ol>
+
+<div class="warn"><strong>Importante:</strong> Si un SKU ya existe, el producto se <strong>actualiza</strong> en lugar de duplicarse.</div>
+
+<h2>Errores frecuentes</h2>
+<ul>
+  <li><strong>"Encoding inválido":</strong> Guarda el CSV como UTF-8 desde Excel (Archivo → Guardar como → CSV UTF-8).</li>
+  <li><strong>"Categoría no existe":</strong> Crea la categoría primero o usa una existente.</li>
+</ul>
+
+    <div class="next">
+      <a href="../docs.html">← Volver al centro de ayuda</a>
+      <a href="mailto:soporte@volvix.com">¿Necesitas más ayuda? Contáctanos →</a>
+    </div>
+  </article>
+</main>
+<footer>© 2026 Volvix POS · <a href="../docs.html" style="color:#818cf8">Centro de ayuda</a></footer>
+</body>
+</html>

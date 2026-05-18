@@ -1,0 +1,104 @@
+{
+  "slug": "tutoria",
+  "brand": "Tutoria",
+  "tagline": "El sistema para tutorías escolares que sí saben qué tema reforzó cada alumno",
+  "giro": "tutorías escolares",
+  "giroPlural": "centros de tutorías",
+  "vibe": "warmCozy",
+  "palette": {
+    "bg": "#FCF8EE",
+    "surface": "#FFFFFF",
+    "paper": "#F3EBD5",
+    "ink": "#2C2114",
+    "ink2": "#503D26",
+    "muted": "#8A7456",
+    "line": "#DDD0B0",
+    "accent": "#D97706",
+    "accent2": "#F4B33E"
+  },
+  "fonts": {
+    "display": "Merriweather",
+    "body": "Nunito",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para tutorías escolares · 2026",
+    "h1": "Cada <em>tema</em>,<br>cada <em>sesión</em>,<br>en su bitácora.",
+    "deck": "El POS hecho para centros de tutorías donde cada alumno necesita reforzar una materia distinta, los tutores trabajan por hora y los papás quieren ver progreso real.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver agenda hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?tutoring,student,books,study&q=85",
+    "heroAlt": "Sesión de tutoría",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?tutoring,table,kid&q=80", "tag": "Tutoría 1-a-1", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?math,homework&q=80", "tag": "Tareas de mate", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?spanish,study&q=80", "tag": "Español", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?science,kid,study&q=80", "tag": "Ciencias", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?history,books,study&q=80", "tag": "Historia", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?english,tutoring&q=80", "tag": "Inglés", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?tutor,explaining&q=80", "tag": "Tutor explica", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?student,success&q=80", "tag": "Aprobado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?study,group,kids&q=80", "tag": "Grupo de estudio", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?parent,booking,phone&q=80", "caption": "Papá reserva tutoría"},
+      {"url": "https://source.unsplash.com/random/800x600/?tutor,laptop,notes&q=80", "caption": "Tutor registra tema visto"},
+      {"url": "https://source.unsplash.com/random/800x600/?student,grades,improved&q=80", "caption": "Calificación subió"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Sesiones · hoy · en vivo",
+    "title": "Tu agenda, <em>alumno por alumno</em>",
+    "deck": "Cada alumno con su tutor asignado, su materia y temas pendientes de la escuela. Papá reserva sesión, tutor llega preparado. Cero tutorías 'a ver qué traes hoy'.",
+    "secondary": "En tutorías, no saber el tema previo es perder media sesión. Tutoria pre-cargа el contexto.",
+    "data": {
+      "barberos": [{"name": "Mtra. Lucia", "role": "Matemáticas"}, {"name": "Mtro. Daniel", "role": "Español"}, {"name": "Mtra. Sofía", "role": "Inglés"}],
+      "slots": ["14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"],
+      "taken": [0, 1, 2, 3, 5, 6],
+      "active": 32,
+      "total": 56,
+      "next": "18:00"
+    }
+  },
+  "features": [
+    {"ico": "calendar", "h": "Reserva 1-a-1 con tutor específico", "d": "Papá reserva con la tutora de mate de su hijo. Si no está, sugiere otra del mismo nivel. Cero cambios sorpresa."},
+    {"ico": "edit", "h": "Bitácora de temas por sesión", "d": "Tutor registra 'hoy: ecuaciones lineales, tarea revisada, dudas resueltas'. Papá lo ve al instante."},
+    {"ico": "monitor", "h": "Conexión con escuela del alumno", "d": "Papá sube examen o tarea de escuela. Sistema asigna tutor con experiencia en ese contenido escolar."},
+    {"ico": "bookmark", "h": "Bolsa de horas prepagada", "d": "Papá compra paquete de 10, 20 o 40 horas. Sistema descuenta cada sesión. Recordatorio cuando le quedan pocas."},
+    {"ico": "camera", "h": "Foto del avance de la tarea", "d": "Tutor toma foto del cuaderno al final. Papá ve que sí trabajaron. Cero tutorías 'jugó al celular toda la hora'."},
+    {"ico": "percent", "h": "Comisión a tutor por hora real", "d": "Tutor cobra solo por hora trabajada con foto y registro. Si alumno cancela tarde, también cobra (política clara)."}
+  ],
+  "stats": [
+    {"v": "84", "l": "Alumnos activos"},
+    {"v": "18", "l": "Tutores en plantilla"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Papás me reclamaban <span class=\"hl\">no saber qué hacía mi tutor con su hijo</span> en la hora. Con Tutoria registramos cada tema con foto. Cero quejas, 40% más renovaciones.",
+    "sig": "Mtra. Rocío P.",
+    "role": "Centro Tutoria, Pachuca, HGO"
+  },
+  "thefts": [
+    {
+      "title": "Tutor cobra hora completa por sesión corta",
+      "rob": "Tutor llega 20 min tarde y se va 15 min antes. Cobra hora completa de $400. Si pasa con 5 alumnos × 4 veces al mes: $8,000 perdidos al mes.",
+      "fix": "Sistema requiere <strong>QR de inicio + QR de cierre</strong>. Cobra solo el tiempo real registrado. Padre ve duración exacta."
+    },
+    {
+      "title": "Bolsa de horas vencida sin reembolso",
+      "rob": "Papá compra 20 horas, usa 12 y olvida las 8 restantes. Encargada cierra el saldo y se reparte la diferencia con el tutor. Son $1,600 que no le devuelven al papá.",
+      "fix": "Bolsa de horas con <strong>vencimiento claro + recordatorios automáticos + saldo visible al papá</strong>. Cero saldos 'desaparecidos'."
+    },
+    {
+      "title": "Tutorías 'fantasma' que no se dieron pero se cobraron",
+      "rob": "Recepcionista marca tutoría como dada pero alumno nunca llegó. Cobra al padre y reparte con tutor. Son $400 por sesión × 6 al mes: $2,400 mensual.",
+      "fix": "Sesión requiere <strong>QR del alumno al entrar + foto del cuaderno trabajado</strong>. Sin evidencia, no se cobra al padre."
+    }
+  ]
+}

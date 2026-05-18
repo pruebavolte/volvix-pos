@@ -1,0 +1,50 @@
+{
+  "slice": 113,
+  "idx_range": [2260, 2280],
+  "title": "R17 Appointments / Reservaciones",
+  "verticals": ["salon", "spa", "dental", "gym", "mecanica", "barberia"],
+  "status": "done",
+  "timestamp": "2026-04-26",
+  "deliverables": {
+    "sql": {
+      "path": "db/R17_APPOINTMENTS.sql",
+      "tables": ["services", "appointments", "staff_availability", "appointment_blocks"],
+      "views": ["v_agenda_today"],
+      "rls": true,
+      "indexes": 9
+    },
+    "api": {
+      "path": "api/index.js",
+      "inserted_before_line": 5910,
+      "store": "_APPT_STORE (in-memory Map)",
+      "endpoints": [
+        "GET /api/services",
+        "POST /api/services",
+        "PATCH /api/services/:id",
+        "DELETE /api/services/:id",
+        "GET /api/appointments",
+        "POST /api/appointments",
+        "PATCH /api/appointments/:id",
+        "POST /api/appointments/:id/confirm",
+        "POST /api/appointments/:id/cancel",
+        "POST /api/appointments/:id/complete",
+        "POST /api/appointments/:id/no-show",
+        "GET /api/availability"
+      ],
+      "validation": ["slot_taken (409)", "staff_blocked (409)", "invalid_range (400)"]
+    },
+    "client": {
+      "path": "volvix-appointments-wiring.js",
+      "exports": "window.AppointmentsAPI",
+      "version": "R17.1",
+      "features": ["week-grid custom (no deps)", "drag&drop reschedule", "color-by-status", "toolbar prev/today/next"]
+    },
+    "report": "R17_APPOINTMENTS.md"
+  },
+  "appointment_status_enum": ["booked", "confirmed", "canceled", "completed", "no_show"],
+  "default_business_hours": "09:00-18:00",
+  "slot_grid_minutes": 15,
+  "next_slice_hint": "Migrar in-memory store a Postgres + recordatorios SMS/email + waitlist auto-promote",
+  "files_touched": 4,
+  "loc_added_estimate": 540
+}

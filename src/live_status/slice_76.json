@@ -1,0 +1,50 @@
+{
+  "slice": 76,
+  "idx_range": [1860, 1880],
+  "task": "Web Push real test + VAPID setup",
+  "ts": "2026-04-26",
+  "status": "implemented_pending_vapid_env",
+  "files_modified": [
+    "api/index.js",
+    "tests/generate-vapid.js"
+  ],
+  "files_unchanged_already_ok": [
+    "sw.js"
+  ],
+  "changes": {
+    "api/index.js": [
+      "GET /api/push/vapid-public-key: ahora responde ok:false, key:null cuando VAPID_PUBLIC_KEY env no esta configurada (antes ok:true,key:null)",
+      "DELETE /api/push/subscribe agregado (alias REST de unsubscribe; lee endpoint de query string o body)",
+      "GET /api/push/subscriptions agregado, admin-only (roles admin/owner/superadmin); soporta filtros tenant_id, user_id, limit"
+    ],
+    "tests/generate-vapid.js": [
+      "Generador VAPID nativo (crypto.generateKeyPairSync EC P-256) sin dependencias",
+      "Convierte a base64url uncompressed point format (0x04||X||Y, 65B publica, 32B privada)",
+      "Modos de salida: humano (default), --json, --env (KEY=value)",
+      "Verificado: emite VAPID_PUBLIC_KEY que comienza con BE... (prefijo 0x04)"
+    ]
+  },
+  "sw_js_audit": {
+    "push_listener_present": true,
+    "linea": 311,
+    "showNotification_call": true,
+    "notificationclick_present": true,
+    "linea_click": 332,
+    "comportamiento": "abre/foca window con event.notification.data.url; fallback /; usa icon /icon-192.png y badge /badge-72.png",
+    "veredicto": "ya cumple spec, no requiere cambios"
+  },
+  "endpoints_finales": [
+    "GET    /api/push/vapid-public-key  (publico)",
+    "POST   /api/push/subscribe         (auth)",
+    "POST   /api/push/unsubscribe       (auth)",
+    "DELETE /api/push/subscribe         (auth) NEW",
+    "GET    /api/push/subscriptions     (admin) NEW",
+    "POST   /api/push/send              (admin)"
+  ],
+  "verificacion_local_pendiente": {
+    "comando": "node tests/generate-vapid.js --env >> .env.local",
+    "luego": "vercel env add VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / VAPID_SUBJECT",
+    "smoke": "curl https://app/api/push/vapid-public-key -> ok:true,key:BE..."
+  },
+  "next_action": "supervisor pega keys generadas en Vercel env y verifica vapid-public-key responde ok:true"
+}

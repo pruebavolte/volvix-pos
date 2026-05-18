@@ -1,0 +1,50 @@
+{
+  "slice": 41,
+  "idx_range": "1120-1160",
+  "scope": "CUSTOMER PORTAL OTP — deep test",
+  "target": "https://volvix-pos.vercel.app",
+  "timestamp": "2026-04-26",
+  "verdict": "FAIL_CRITICAL",
+  "summary": "Production deployment exposes only insecure stubs. Source file api/customer-portal.js contains the correct hardened implementation, but it is NOT registered/deployed. Live endpoints are dummies that accept any input.",
+  "request": {
+    "T1_valid_email":         { "expected": "200 (no enumera)",      "actual": "200 {ok:true,sent:true,ttl:300}", "pass": true },
+    "T2_invalid_format":      { "expected": "400",                   "actual": "200 {ok:true,sent:true,ttl:300}", "pass": false },
+    "T3_empty_email":         { "expected": "400",                   "actual": "200 {ok:true,sent:true,ttl:300}", "pass": false },
+    "T4_no_sendgrid":         { "expected": "200 fallback",          "actual": "200 (no se puede verificar email side-effect)", "pass": "unknown" },
+    "T5_rate_limit_5per15m":  { "expected": "429 tras 5 reqs",       "actual": "7/7 = 200 (sin rate-limit observable)", "pass": false },
+    "T6_no_otp_in_response":  { "expected": "código NO retorna",     "actual": "OK, body solo {ok,sent,ttl}", "pass": true }
+  },
+  "verify": {
+    "T1_valid":            { "expected": "200 con token role:customer", "actual": "200 {ok,verified,token=UUID-no-JWT}", "pass": "stub" },
+    "T2_wrong_otp":        { "expected": "401",                         "actual": "200 verified=true (ANY otp acepta)", "pass": false },
+    "T3_expired":          { "expected": "401",                         "actual": "no probable, stub no valida",         "pass": false },
+    "T4_consumed":         { "expected": "401",                         "actual": "no se consume, reusable",              "pass": false },
+    "T5_max_5_intentos":   { "expected": "bloqueo",                    "actual": "no aplica, todo pasa",                "pass": false },
+    "T6_jwt_role_customer":{ "expected": "JWT con role=customer",      "actual": "token NO es JWT, es UUID plano",       "pass": false }
+  },
+  "customer_endpoints_with_token": {
+    "GET_me":               { "expected": "200 perfil",  "actual": "401 unauthorized", "pass": false },
+    "GET_orders":           { "expected": "200 lista",   "actual": "401 unauthorized", "pass": false },
+    "GET_loyalty":          { "expected": "200 puntos",  "actual": "401 unauthorized", "pass": false },
+    "GET_payment_methods":  { "expected": "200 metodos", "actual": "401 unauthorized", "pass": false },
+    "POST_appointments":    { "expected": "200 ok",      "actual": "no probado (token no aceptado)", "pass": false },
+    "POST_password":        { "expected": "200 ok",      "actual": "no probado (token no aceptado)", "pass": false }
+  },
+  "cross_role_boundary": {
+    "GET_owner_dashboard":  { "expected": "403", "actual": "401 unauthorized", "pass": "indirect_pass" },
+    "POST_products":        { "expected": "403", "actual": "401 unauthorized", "pass": "indirect_pass" },
+    "DELETE_products_1":    { "expected": "403", "actual": "401 unauthorized", "pass": "indirect_pass" }
+  },
+  "issues_critical": [
+    "VERIFY acepta cualquier OTP (000000, 999999, vacío, abcdef) — bypass total de autenticación",
+    "REQUEST no valida formato de email (acepta '', 'no-es-email')",
+    "Sin rate-limiting en request (7/7 pasaron sin 429)",
+    "Token emitido es UUID plano, no JWT firmado con role:customer",
+    "Token UUID no es aceptado por endpoints /api/customer/* (todos 401) — auth roto",
+    "Implementación correcta existe en api/customer-portal.js pero NO está desplegada en producción"
+  ],
+  "fallback_graceful": {
+    "tables_check": "no determinable desde fuera; código fuente tiene fallback in-memory para customer_otps; portal_customers crea on-demand. La implementación CORRECTA es graceful, pero el deploy actual es un stub aún más permisivo."
+  },
+  "recommendation": "BLOQUEAR release. Registrar customer-portal.js en api/index.js handlers ANTES de exponer el portal. El stub actual es un agujero de auth abierto."
+}

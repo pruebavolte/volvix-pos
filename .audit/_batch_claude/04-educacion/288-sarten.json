@@ -1,0 +1,104 @@
+{
+  "slug": "sarten",
+  "brand": "Sarten",
+  "tagline": "El sistema para escuelas de cocina que sí controlan insumos, recetas y certificados",
+  "giro": "escuela de cocina",
+  "giroPlural": "escuelas de cocina",
+  "vibe": "artisan",
+  "palette": {
+    "bg": "#F8F1E5",
+    "surface": "#FFFFFF",
+    "paper": "#F0E4CD",
+    "ink": "#2A1A0F",
+    "ink2": "#4E3520",
+    "muted": "#8A6E50",
+    "line": "#DCC8A0",
+    "accent": "#B23A1F",
+    "accent2": "#E8A845"
+  },
+  "fonts": {
+    "display": "Yeseva One",
+    "body": "Lora",
+    "script": "Caveat",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para escuelas de cocina · 2026",
+    "h1": "Cada <em>receta</em>,<br>cada <em>insumo</em>,<br>en su lugar.",
+    "deck": "El POS hecho para escuelas de cocina donde cada clase necesita ingredientes precisos, los alumnos cocinan, los chefs evalúan emplatado y los papás quieren ver el plato terminado.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver clases hoy",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?cooking,school,chef,students&q=85",
+    "heroAlt": "Escuela de cocina con alumnos",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?cooking,class&q=80", "tag": "Aula-cocina", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?chef,knife,skills&q=80", "tag": "Cortes básicos", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?pastry,baking&q=80", "tag": "Repostería", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mexican,food,class&q=80", "tag": "Cocina mexicana", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?italian,cooking&q=80", "tag": "Cocina italiana", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?asian,cooking&q=80", "tag": "Cocina asiática", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?plated,dish&q=80", "tag": "Emplatado", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?wine,pairing&q=80", "tag": "Maridaje", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?chef,certification&q=80", "tag": "Certificación", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?student,apron,arriving&q=80", "caption": "Alumno entra con mandil"},
+      {"url": "https://source.unsplash.com/random/800x600/?chef,evaluating,plate&q=80", "caption": "Chef evalúa plato"},
+      {"url": "https://source.unsplash.com/random/800x600/?ingredients,kitchen&q=80", "caption": "Insumos del día"}
+    ]
+  },
+  "liveDemo": {
+    "type": "booking",
+    "eyebrow": "Clases · hoy · en vivo",
+    "title": "Tus aulas-cocina, <em>receta por receta</em>",
+    "deck": "Cada aula-cocina con su chef, su receta del día y la lista de insumos necesarios. Sistema pre-cargа cantidad de comensales y pide insumos a almacén con anticipación.",
+    "secondary": "En escuelas de cocina, sin insumos no hay clase. Sarten coordina compra y receta.",
+    "data": {
+      "barberos": [{"name": "Chef Bruno", "role": "Cocina internacional"}, {"name": "Chef Itzel", "role": "Repostería"}, {"name": "Chef Rita", "role": "Cocina mexicana"}],
+      "slots": ["10:00", "11:30", "14:00", "16:00", "17:30", "19:00"],
+      "taken": [0, 1, 2, 3, 5],
+      "active": 42,
+      "total": 60,
+      "next": "16:00"
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Módulos por especialidad", "d": "Panadería 80h, repostería 60h, cocina mexicana 120h. Sistema cuenta horas para certificación final."},
+    {"ico": "calendar", "h": "Calendario de recetas y insumos", "d": "Cada clase con receta y lista de insumos. Sistema avisa a almacén con 24h. Cero clases sin ingredientes."},
+    {"ico": "bookmark", "h": "Pago por módulo o diplomado", "d": "Alumno paga módulo único o diplomado completo. Tarjeta, OXXO o transferencia. Recordatorios automáticos."},
+    {"ico": "barcode", "h": "Inventario de insumos perecederos", "d": "Sistema lleva caducidades de carnes, lácteos, especias. Cero clases con insumos vencidos."},
+    {"ico": "camera", "h": "Foto del plato final por alumno", "d": "Chef toma foto del emplatado de cada alumno. Padre lo recibe en WhatsApp. Cero papás preguntando '¿qué cocinó?'."},
+    {"ico": "edit", "h": "Certificación con folio único", "d": "Al completar diplomado y aprobar examen práctico, sistema emite certificado con folio. Alumno lo usa en CV."}
+  ],
+  "stats": [
+    {"v": "164", "l": "Alumnos activos"},
+    {"v": "12", "l": "Módulos ofertados"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mi almacén <span class=\"hl\">se quedaba sin ingredientes</span> el día de clase. Con Sarten el sistema avisa con 24h. Cero clases canceladas por falta de tomates en 6 meses.",
+    "sig": "Chef Yolanda M.",
+    "role": "Escuela Sarten, Oaxaca, OAX"
+  },
+  "thefts": [
+    {
+      "title": "Insumos premium reemplazados por básicos",
+      "rob": "Cobras módulo de pasta italiana con harina 00 importada. Encargado compra harina nacional y se queda con la diferencia. Si pasa cada clase: $1,500 mensual.",
+      "fix": "Insumos premium con <strong>factura del proveedor oficial + entrada a almacén con foto</strong>. Inventario rastreado por SKU."
+    },
+    {
+      "title": "Insumos de clase 'sobrantes' que se llevan a casa",
+      "rob": "Después de clase, encargado se lleva el sobrante (filetes, mariscos, lácteos premium). Son $300-600 por clase × 12 al mes: $7,200 mensual.",
+      "fix": "Sobrantes con <strong>política clara: a beneficencia o desecho controlado</strong>. Cero 'me lo llevo'. Auditoría semanal."
+    },
+    {
+      "title": "Certificación con folio falsificado",
+      "rob": "Coordinador imprime certificados extra para 'amigos' que no cursaron. Los venden por $2,000 cada uno. Cuando el chef falla en trabajo real, mancha tu marca.",
+      "fix": "Certificación <strong>bloqueada por sistema hasta cumplir horas + examen práctico + folio único en BD</strong>. Verificable online."
+    }
+  ]
+}

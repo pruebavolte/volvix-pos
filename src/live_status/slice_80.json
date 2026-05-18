@@ -1,0 +1,23 @@
+{
+  "slice": 80,
+  "range": "1980-2000",
+  "topic": "4xx_standardize",
+  "ts": "2026-04-26",
+  "status": "already_compliant",
+  "file": "api/index.js",
+  "helpers_verified": {
+    "sendError": "line 388 — soporta payload {code,message,field,hint,resource,id}",
+    "sendValidation": "line 406 — 400 validation_failed con field+hint",
+    "send401": "line 414 — 401 unauthorized",
+    "send403": "line 420 — 403 forbidden con need_role[]+have_role",
+    "send404": "line 429 — 404 not_found con resource+id",
+    "send409": "line 437 — 409 conflict con conflicting_field",
+    "send422": "line 444 — 422 unprocessable",
+    "send429": "line 451 — 429 rate_limit con retry_after_ms + header Retry-After (RFC 6585)"
+  },
+  "rfc_6585_compliant": true,
+  "schema": {"error": "code_machine", "message": "Human", "field": "opt", "hint": "opt"},
+  "modified": false,
+  "deploy_required": false,
+  "notes": "Helpers ya implementan la spec R15. No se requiere edicion ni redeploy."
+}

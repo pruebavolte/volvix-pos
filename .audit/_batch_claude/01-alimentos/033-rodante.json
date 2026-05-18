@@ -1,0 +1,104 @@
+{
+  "slug": "rodante",
+  "brand": "Rodante",
+  "tagline": "El sistema para food trucks donde cada ruta cuadra y los ingredientes no se 'pierden' del carro",
+  "giro": "food truck",
+  "giroPlural": "food trucks",
+  "vibe": "industrial",
+  "palette": {
+    "bg": "#1A1A1A",
+    "surface": "#2A2A2A",
+    "paper": "#3A3A3A",
+    "ink": "#F0F0F0",
+    "ink2": "#C0C0C0",
+    "muted": "#808080",
+    "line": "#4A4A4A",
+    "accent": "#FF6B35",
+    "accent2": "#FFE94E"
+  },
+  "fonts": {
+    "display": "Anton",
+    "body": "Inter",
+    "script": "Permanent Marker",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para food trucks mexicanos · 2026",
+    "h1": "Cada <em>ruta</em>,<br>cada <em>orden</em>,<br>móvil.",
+    "deck": "El POS hecho para que el food truck venda sin conexión, cada ingrediente cuadre al regreso, y los eventos privados se facturen con todo el control.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?food,truck,street&q=85",
+    "heroAlt": "Food truck colorido en evento nocturno",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?food,truck,colorful&q=80", "tag": "Truck en evento", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?gourmet,burger&q=80", "tag": "Burger gourmet móvil", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?fish,tacos&q=80", "tag": "Tacos de pescado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?asian,fusion&q=80", "tag": "Fusión asiática", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?street,food&q=80", "tag": "Comida callejera", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?craft,fries&q=80", "tag": "Papas artesanales", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?festival,food&q=80", "tag": "Festival nocturno", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?cooking,truck&q=80", "tag": "Cocinando dentro", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?queue,foodtruck&q=80", "tag": "Fila del truck", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?cook,foodtruck&q=80", "caption": "Cocinero en truck móvil"},
+      {"url": "https://source.unsplash.com/random/800x600/?customer,truck&q=80", "caption": "Cliente paga con QR"},
+      {"url": "https://source.unsplash.com/random/800x600/?event,private&q=80", "caption": "Truck en evento privado"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Truck · evento · en vivo",
+    "title": "Tu truck, <em>orden por orden</em>, sin conexión",
+    "deck": "Sistema offline robusto. Cada orden se guarda local. Al volver a wifi, sube todo a la nube. Cero ventas perdidas en eventos sin señal.",
+    "secondary": "En los food trucks, una orden 'no marcada' por mal wifi son $80-180 perdidos cada vez.",
+    "data": {
+      "orders": [
+        {"table": "TURNO-15", "name": "Festival cliente", "state": "urgent", "items": ["1 burger Angus", "1 papas trufa", "1 cerveza"], "waitMin": 8},
+        {"table": "TURNO-16", "name": "Pareja", "state": "prep", "items": ["2 fish tacos", "2 michelada artesanal"], "waitMin": 6},
+        {"table": "TURNO-17", "name": "Grupo amigos", "state": "queue", "items": ["4 burgers clásica", "2 papas", "4 sodas"], "waitMin": 4},
+        {"table": "EVENTO-PRIVADO", "name": "Boda Ramírez 80 pax", "state": "ready", "items": ["Buffet móvil 3 platillos"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "monitor", "h": "Modo offline robusto", "d": "Sin wifi, sin problema. Sistema guarda órdenes local. Cuando regresa conexión, sube todo. Cero ventas perdidas en eventos."},
+    {"ico": "archive", "h": "Inventario móvil al truck", "d": "Truck carga 60 burgers, 80 tacos, 12 kg papas. Sistema cuadra al regreso. Cero ingredientes 'desaparecidos'."},
+    {"ico": "barcode", "h": "Cobro por QR rápido", "d": "Cliente paga desde celular: SPEI, tarjeta, efectivo. Sistema lo recibe en pantalla. Cero filas eternas."},
+    {"ico": "truck", "h": "Eventos privados con facturación", "d": "Boda 80 pax, buffet móvil. Sistema factura adelanto + diferencia. Cero pagos olvidados."},
+    {"ico": "calendar", "h": "Agenda de rutas semanal", "d": "Lunes parque, jueves festival, sábado bodas. Sistema organiza ingredientes a cargar por evento."},
+    {"ico": "percent", "h": "Costo real por evento", "d": "Festival: gasolina + ingredientes + permisos = $X. Vendiste $Y. Margen real visible. Cero eventos pérdidosos sin saberlo."}
+  ],
+  "stats": [
+    {"v": "412", "l": "Órdenes en festival"},
+    {"v": "100", "l": "% offline funcional", "suffix": "%"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "En festivales <span class=\"hl\">perdíamos órdenes porque no había wifi</span>. Con Rodante todo trabaja offline. En la última feria vendimos 400 órdenes sin perder ninguna. Mi cocinero ya no se estresa.",
+    "sig": "Don Andrés C.",
+    "role": "Food Truck El Rodante, Festivales CDMX y EdoMex"
+  },
+  "thefts": [
+    {
+      "title": "Órdenes 'no marcadas' por mal wifi",
+      "rob": "Cocinero dice 'no se marcó en sistema porque falló wifi' y cobra en efectivo. Se queda con $80-180 cada vez. 5-8 órdenes por evento.",
+      "fix": "Sistema offline obligatorio. <strong>Cada orden se graba local con timestamp</strong>. Al volver wifi sube. Cero ventas 'fantasma' sin registrar."
+    },
+    {
+      "title": "Ingredientes 'derretidos' del refri del truck",
+      "rob": "Empleado reporta carne 'mala' o queso 'derretido' al regresar y se lo lleva. En realidad está bien. $200-500 por evento.",
+      "fix": "Inventario <strong>conteo a la salida y al regreso firmado digital</strong>. Mermas requieren foto. Auditoría post-evento."
+    },
+    {
+      "title": "Eventos privados con 'extras' no facturados",
+      "rob": "Boda paga 80 servicios, asistieron 95. Cocinero le dice al cliente '15 extras, $100 c/u' y cobra en efectivo. Empresa no se entera. $1,500 por evento.",
+      "fix": "Eventos con <strong>conteo digital de servicios servidos</strong>. Cliente firma cierre digital. Extras se facturan obligatorio."
+    }
+  ]
+}

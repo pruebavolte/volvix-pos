@@ -1,0 +1,43 @@
+{
+  "slice": 106,
+  "range": "2120-2140",
+  "topic": "R17_telegram_admin_bot",
+  "ts": "2026-04-26",
+  "status": "implemented",
+  "files_created": [
+    "api/index.js (seccion R17 insertada antes de MAIN HANDLER)",
+    "db/R17_TELEGRAM.sql",
+    "scripts/setup-telegram.js",
+    "R17_TELEGRAM.md"
+  ],
+  "endpoint": {
+    "path": "POST /api/telegram/webhook",
+    "auth": "none (Telegram callback)",
+    "fallback_503": "si falta TELEGRAM_BOT_TOKEN devuelve service_unavailable"
+  },
+  "commands": [
+    "/start -> devuelve chat_id, registra en telegram_alerts type=start",
+    "/sales today -> suma totales pos_sales del tenant del admin (hoy)",
+    "/inventory low -> pos_products stock<5 (top 20)",
+    "/alert <msg> -> broadcast a todos los telegram_admins mismo tenant",
+    "/dashboard -> MRR/ARR/subs activas desde pos_subscriptions"
+  ],
+  "tables": {
+    "telegram_admins": "chat_id PK, user_id->pos_users, tenant_id, linked_at; RLS service_role only",
+    "telegram_alerts": "id, type, sent_to_chat, body, ts; auditoria mensajes salientes"
+  },
+  "helpers": {
+    "sendTelegramMessage": "https.request a api.telegram.org/bot<token>/sendMessage, parse_mode Markdown",
+    "logTelegramAlert": "POST /telegram_alerts via supabaseRequest, swallow errors",
+    "handleTelegramCommand": "fire-and-forget tras ack 200 a Telegram"
+  },
+  "security": [
+    "token solo en process.env, no en repo",
+    "chat_id debe existir en telegram_admins antes de comandos sensibles",
+    "RLS solo service_role en ambas tablas"
+  ],
+  "setup_steps": "BotFather -> Vercel env -> redeploy -> node scripts/setup-telegram.js -> ejecutar SQL -> insert manual primer admin",
+  "smoke_test": "curl POST webhook con message.text=/start debe responder {ok:true}",
+  "deploy_required": true,
+  "env_required": ["TELEGRAM_BOT_TOKEN"]
+}

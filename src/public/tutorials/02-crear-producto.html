@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tutorial 02 — Crear producto | Volvix POS</title>
+<link rel="stylesheet" href="_shared.css"></head>
+<body><div class="tutorial-container" id="container">
+<h1>Tutorial 02 — Crear un producto</h1>
+<div class="subtitle">Inventario → Nuevo producto → Llenar formulario → Guardar</div>
+<div class="stage">
+  <div class="step step-1"><h2>Paso 1 · Abrir Inventario</h2>
+    <div class="mock">
+      <h3>📦 Menú principal</h3>
+      <div class="grid">
+        <div class="card">Ventas</div>
+        <div class="card hot">Inventario</div>
+        <div class="card">Reportes</div>
+        <div class="card">Clientes</div>
+        <div class="card">Promos</div>
+        <div class="card">Ajustes</div>
+      </div>
+      <div class="cursor" style="left:48%;top:30%">👆</div>
+    </div>
+  </div>
+  <div class="step step-2"><h2>Paso 2 · Pulsar "Nuevo producto"</h2>
+    <div class="mock">
+      <h3>📦 Inventario (24 productos)</h3>
+      <button class="btn btn-blue">+ Nuevo producto</button>
+      <div style="margin-top:10px"><div class="row"><span>Latte</span><span>$45 · Stock 30</span></div>
+      <div class="row"><span>Pan</span><span>$15 · Stock 50</span></div>
+      <div class="row"><span>Jugo</span><span>$25 · Stock 12</span></div></div>
+      <div class="cursor" style="left:22%;top:25%">👆</div>
+    </div>
+  </div>
+  <div class="step step-3"><h2>Paso 3 · Llenar nombre, precio y stock</h2>
+    <div class="mock">
+      <h3>Nuevo producto</h3>
+      <form><label>Nombre<input value="Café americano"></label>
+        <label>Precio<input value="35.00"></label>
+        <label>Stock inicial<input value="100"></label>
+        <label>Categoría<select><option>Bebidas</option></select></label></form>
+      <div class="cursor" style="left:50%;top:42%">👆</div>
+    </div>
+  </div>
+  <div class="step step-4"><h2>Paso 4 · Guardar</h2>
+    <div class="mock">
+      <h3>Nuevo producto · listo para guardar</h3>
+      <div class="banner banner-warn">Verifica los datos antes de guardar</div>
+      <div class="row"><span>Nombre:</span><b>Café americano</b></div>
+      <div class="row"><span>Precio:</span><b>$35.00</b></div>
+      <div class="row"><span>Stock:</span><b>100</b></div>
+      <button class="btn">💾 Guardar producto</button>
+      <div class="cursor" style="left:24%;top:78%">👆</div>
+    </div>
+  </div>
+  <div class="step step-5"><h2>Paso 5 · ¡Producto creado! ✓</h2>
+    <div class="mock">
+      <div class="banner banner-ok">✅ Café americano agregado al catálogo</div>
+      <div class="grid">
+        <div class="card hot">☕ Café americano<br>$35</div>
+        <div class="card">Latte<br>$45</div>
+        <div class="card">Pan<br>$15</div>
+      </div>
+      <p style="font-size:.8rem;color:#475569;margin-top:14px">Ya puedes venderlo desde el POS.</p>
+    </div>
+  </div>
+</div>
+<div class="progress"><div class="progress-bar"></div></div>
+<div class="caption">Reproduciendo en bucle (25s).</div>
+<div class="controls">
+<button onclick="document.getElementById('container').classList.toggle('paused')">⏯️ Pausar/Reanudar</button>
+<button onclick="location.reload()">🔄 Reiniciar</button>
+</div></div></body></html>

@@ -1,0 +1,104 @@
+{
+  "slug": "bibim",
+  "brand": "Bibim",
+  "tagline": "El sistema para cocinas coreanas donde el bulgogi se pesa al gramo y el kimchi rinde lo justo",
+  "giro": "cocina coreana",
+  "giroPlural": "cocinas coreanas",
+  "vibe": "vibrant",
+  "palette": {
+    "bg": "#1A0F0F",
+    "surface": "#2C1818",
+    "paper": "#3C2222",
+    "ink": "#FFE8D0",
+    "ink2": "#F0C088",
+    "muted": "#A87858",
+    "line": "#553030",
+    "accent": "#D32F2F",
+    "accent2": "#FFA000"
+  },
+  "fonts": {
+    "display": "Black Han Sans",
+    "body": "Inter",
+    "script": "Nanum Pen Script",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para cocinas coreanas en México · 2026",
+    "h1": "Cada <em>bibimbap</em>,<br>cada <em>banchan</em>,<br>servido.",
+    "deck": "El POS hecho para que el bulgogi se cobre al gramo, los banchan no se 'olviden' de la mesa, y la parrilla coreana no se queme por descuido.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?korean,bbq,bibimbap&q=85",
+    "heroAlt": "Bibimbap en olla de piedra caliente",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?bibimbap,korean&q=80", "tag": "Bibimbap clásico", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?bulgogi,bbq&q=80", "tag": "Bulgogi a la parrilla", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?kimchi,fermented&q=80", "tag": "Kimchi casero", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?banchan,sides&q=80", "tag": "Banchan variados", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?kbbq,grill&q=80", "tag": "Parrilla coreana", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?soju,bottle&q=80", "tag": "Soju y cerveza", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?korean,restaurant&q=80", "tag": "Salón con parrillas", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ramyun,spicy&q=80", "tag": "Ramyun picante", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?kpop,dining&q=80", "tag": "Ambiente moderno", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?chef,korean&q=80", "caption": "Chef cocina bulgogi"},
+      {"url": "https://source.unsplash.com/random/800x600/?grill,table&q=80", "caption": "Parrilla integrada en la mesa"},
+      {"url": "https://source.unsplash.com/random/800x600/?customer,kbbq&q=80", "caption": "Familia disfruta parrillada"}
+    ]
+  },
+  "liveDemo": {
+    "type": "kds",
+    "eyebrow": "Cocina · parrilla · en vivo",
+    "title": "Tu cocina, <em>plato por plato</em>, sin perderse",
+    "deck": "Cada orden con proteína y banchan. KDS muestra: bulgogi 300g, set 6 banchan. Cocinero ve todo. Cero banchan olvidados en la barra.",
+    "secondary": "En las cocinas coreanas, banchan olvidados son la queja #1 del cliente — '¿y mi kimchi?'",
+    "data": {
+      "orders": [
+        {"table": "M05", "name": "Sra. Park", "state": "urgent", "items": ["Bibimbap dolsot", "Bulgogi 300g", "Banchan set 6 pz", "Soju"], "waitMin": 13},
+        {"table": "M02", "name": "Familia Kim", "state": "prep", "items": ["KBBQ familiar 800g", "Banchan x2", "4 sodas"], "waitMin": 9},
+        {"table": "M07", "name": "Pareja jóvenes", "state": "queue", "items": ["1 ramyun picante", "1 mandu", "Cerveza Cass"], "waitMin": 5},
+        {"table": "M01", "name": "Don Ricardo", "state": "ready", "items": ["1 japchae", "Banchan 3 pz", "Té verde"], "waitMin": 0}
+      ]
+    }
+  },
+  "features": [
+    {"ico": "barcode", "h": "Báscula para bulgogi y kalbi", "d": "Cada porción pesada al servir. 300g bulgogi = $X. Sistema verifica. Cero cortes 'generosos' que se cuelan."},
+    {"ico": "grid", "h": "Banchan obligatorios por orden", "d": "Cada plato fuerte sale con set de banchan visible. Mesero ve si faltan en KDS. Cero quejas por kimchi olvidado."},
+    {"ico": "archive", "h": "Inventario de proteína marinada", "d": "Bulgogi: 8 kg. Kalbi: 6 kg. Pork belly: 5 kg. Cuando baja, alerta. Cero promesas que no se cumplen."},
+    {"ico": "monitor", "h": "Parrilla de mesa con temporizador", "d": "Cliente cocina, mesero ve en KDS el tiempo. Si pasa de 5 min sin voltear, alerta al mesero para asistir."},
+    {"ico": "percent", "h": "Costo por gramaje real", "d": "Bulgogi $180/kg, vendes 300g a $180. Sabes margen exacto. Cero precios al ojo en menú coreano premium."},
+    {"ico": "split", "h": "Cuenta dividida estilo coreano", "d": "Mesa de 6 comparte parrilla. Sistema divide por igual, por pareja o por persona. Cero matemáticas al cierre."}
+  ],
+  "stats": [
+    {"v": "62", "l": "Bibimbaps servidos hoy"},
+    {"v": "11", "l": "Kg de bulgogi"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis clientes <span class=\"hl\">se quejaban de que faltaban banchan</span> y mi mesero decía 'ya los puse'. Con Bibim, el sistema obliga 6 banchan por orden. Las quejas bajaron 80%. Subió la propina.",
+    "sig": "Sra. Min-jung L.",
+    "role": "Restaurante Hanok, Zona Rosa, CDMX"
+  },
+  "thefts": [
+    {
+      "title": "Bulgogi 'porción extra' a clientes amigos",
+      "rob": "Cocinero pone 400g cuando la receta es 300g. A clientes consentidos. 5-8 mesas por turno = $300-500 al día en proteína premium regalada.",
+      "fix": "Proteína se <strong>pesa con báscula al servir</strong>. Sistema bloquea si excede gramaje sin código de gerente. Cero cortes al cariño."
+    },
+    {
+      "title": "Banchan 'cortesía' que se llevan a casa",
+      "rob": "Empleado prepara banchan extra 'porque sobraron' y se los lleva en tupper. 1-2 kg de kimchi por semana = $400-600.",
+      "fix": "Banchan con <strong>inventario diario obligatorio</strong>. Sistema cuadra producción vs servido vs sobrante. Sobras se fotografían al cierre."
+    },
+    {
+      "title": "Soju 'evaporado' de la barra",
+      "rob": "Barman sirve 100ml al cliente y guarda 50ml por botella para él. Reporta como 'evaporación'. 3-4 botellas por semana = $800-1,200.",
+      "fix": "Botellas de soju con <strong>código QR único</strong> y nivel monitoreado. Sistema cuadra ml servidos vs vendidos. Diferencias requieren foto."
+    }
+  ]
+}

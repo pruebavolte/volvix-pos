@@ -1,0 +1,54 @@
+{
+  "id": "gimnasio-first-sale",
+  "title": "Tu primera membresia en gimnasio",
+  "industry": "gimnasio",
+  "duration_min": 5,
+  "modules_required": ["pos", "memberships", "subscriptions"],
+  "roles": ["owner", "cashier", "trainer", "manager"],
+  "demo_catalog_ref": "R12a",
+  "steps": [
+    {
+      "id": "step1",
+      "title": "Tus planes y servicios",
+      "text": "Membresia Mensual $850, Trimestral $2295 (10% off), Semestral $4250 (16% off), Anual $7650 (25% off), Pase Diario $120, Acceso Estudiante Mensual $650, Personal Trainer 1hr $480, Paquete 10 Trainers $4250, Clase Spinning Drop-in $90, Clase Yoga Drop-in $80, Membresia Familiar (4) $2850/mes. Productos: Botella 1L $180, Toalla Logo $250, Proteina Whey 1kg $890, Creatina 300g $385, Guantes Levant $285.",
+      "image": "/tutorials/01-primera-venta.html",
+      "action": "next"
+    },
+    {
+      "id": "step2",
+      "title": "Crea ficha del cliente",
+      "text": "Cliente nuevo. Click 'Cliente nuevo'. Captura nombre, telefono, email, fecha nacimiento, contacto emergencia.",
+      "highlight_selector": "#btn-new-customer",
+      "action": "wait_for_customer_create"
+    },
+    {
+      "id": "step3",
+      "title": "Vende membresia trimestral",
+      "text": "Busca 'trimestral'. Selecciona Plan Trimestral $2295. Define fecha inicio: hoy. Vencimiento se calcula automatico.",
+      "highlight_selector": "#search-input",
+      "action": "wait_for_membership_select"
+    },
+    {
+      "id": "step4",
+      "title": "Adicional: proteina whey",
+      "text": "Cliente quiere Proteina Whey $890. Suma al ticket. Total: $3185.",
+      "highlight_selector": ".search-result-item",
+      "action": "wait_for_multiple_items",
+      "expected_items": 2
+    },
+    {
+      "id": "step5",
+      "title": "Cobra y genera huella/credencial",
+      "text": "Cliente paga con tarjeta $3185. Despues genera credencial QR/huella para entrada al gym.",
+      "highlight_selector": "#btn-cobrar",
+      "action": "wait_for_payment"
+    },
+    {
+      "id": "step6",
+      "title": "Membresia activa!",
+      "text": "Cliente puede entrar desde hoy hasta dentro de 90 dias. Ve a 'Membresias' para ver todos los socios activos.",
+      "action": "complete",
+      "next_link": "/membresias"
+    }
+  ]
+}

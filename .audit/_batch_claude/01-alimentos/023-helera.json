@@ -1,0 +1,106 @@
+{
+  "slug": "helera",
+  "brand": "Helera",
+  "tagline": "El sistema para paleterías donde las paletas no se 'derriten' en el freezer del personal",
+  "giro": "paletería",
+  "giroPlural": "paleterías",
+  "vibe": "playful",
+  "palette": {
+    "bg": "#E8F4FA",
+    "surface": "#FFFFFF",
+    "paper": "#D2E8F2",
+    "ink": "#0F2A40",
+    "ink2": "#1F4565",
+    "muted": "#557090",
+    "line": "#A8C5DC",
+    "accent": "#E91E63",
+    "accent2": "#FFC107"
+  },
+  "fonts": {
+    "display": "Quicksand",
+    "body": "Inter",
+    "script": "Pacifico",
+    "mono": "JetBrains Mono"
+  },
+  "hero": {
+    "eyebrow": "El sistema para paleterías mexicanas · 2026",
+    "h1": "Cada <em>paleta</em>,<br>cada <em>sabor</em>,<br>cobrada.",
+    "deck": "El POS hecho para que ninguna paleta se 'derrita' camino al personal, los sabores premium no se vendan al precio de agua, y los carritos repartidores cuadren al regresar.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver KDS en vivo",
+    "metaLine": "$0 inicial · sin tarjeta · setup en 5 min"
+  },
+  "images": {
+    "hero": "https://source.unsplash.com/random/1200x1600/?popsicle,paleta,colorful&q=85",
+    "heroAlt": "Paletas de hielo de colores",
+    "showcase": [
+      {"url": "https://source.unsplash.com/random/1200x900/?popsicles,fruit&q=80", "tag": "Paletas de agua", "size": "lg"},
+      {"url": "https://source.unsplash.com/random/900x1200/?ice,cream,cone&q=80", "tag": "Nieve de garrafa", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?chamoy,paleta&q=80", "tag": "Paleta enchamoyada", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?lime,popsicle&q=80", "tag": "Paleta de limón", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/900x1200/?strawberry,ice&q=80", "tag": "Paleta de fresa", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?mango,popsicle&q=80", "tag": "Mango enchilado", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?paleteria,michoacana&q=80", "tag": "Mostrador clásico", "size": "md"},
+      {"url": "https://source.unsplash.com/random/900x1200/?coconut,popsicle&q=80", "tag": "Paleta de coco", "size": "sm"},
+      {"url": "https://source.unsplash.com/random/1200x900/?ice,cream,kids&q=80", "tag": "Tarde de niños", "size": "md"}
+    ],
+    "context": [
+      {"url": "https://source.unsplash.com/random/800x600/?freezer,popsicles&q=80", "caption": "Freezer con sabores variados"},
+      {"url": "https://source.unsplash.com/random/800x600/?cart,paletas&q=80", "caption": "Carrito sale a repartir"},
+      {"url": "https://source.unsplash.com/random/800x600/?kids,popsicle&q=80", "caption": "Niños eligen sabor"}
+    ]
+  },
+  "liveDemo": {
+    "type": "stock",
+    "eyebrow": "Freezer · paletas · en vivo",
+    "title": "Tu freezer, <em>paleta por paleta</em>, sin perderse",
+    "deck": "Cada sabor con stock visible. Limón: 80 piezas. Fresa: 45. Mango: 32. Cuando llega a 10, alerta. Cero clientes desilusionados.",
+    "secondary": "En las paleterías, paletas 'derretidas' que se las lleva el empleado son $200-400 al día.",
+    "data": {
+      "product": "Paletas de agua premium",
+      "tallas": ["Limón", "Fresa", "Mango", "Coco", "Tamarindo", "Sandía"],
+      "stock": [
+        {"color": "Agua", "vals": [80, 45, 32, 28, 15, 22]},
+        {"color": "Leche", "vals": [25, 38, 18, 42, 8, 12]},
+        {"color": "Premium chamoy", "vals": [12, 20, 14, 5, 18, 8]}
+      ],
+      "lowThreshold": 10
+    }
+  },
+  "features": [
+    {"ico": "archive", "h": "Inventario por sabor y tipo", "d": "Limón agua: 80. Fresa leche: 38. Mango chamoy: 14. Cuando baja, alerta. Cero clientes que llegan y 'ya no hay'."},
+    {"ico": "monitor", "h": "Pantalla de sabores disponibles", "d": "Caja y mostrador ven el mismo stock. Cero promesas de sabores que ya no hay. Cero clientes que se van enojados."},
+    {"ico": "truck", "h": "Carritos repartidores con conteo", "d": "Cada carrito sale con 60 paletas contadas, regresa con sobras. Sistema cuadra. Cero paletas 'que se cayeron'."},
+    {"ico": "percent", "h": "Margen por sabor real", "d": "Agua de limón costo $4, vendes $15. Premium chamoy costo $12, vendes $35. Sabes cuál empujar más."},
+    {"ico": "barcode", "h": "Cobro rápido por tipo", "d": "Toca el sabor, cobra. 3 segundos. Cero filas largas en tardes de calor. Cero confusión de precios."},
+    {"ico": "calendar", "h": "Producción según el clima", "d": "Día caluroso: produces 200 más. Frío: produces menos. Sistema te avisa con el pronóstico. Cero paletas tiradas."}
+  ],
+  "stats": [
+    {"v": "428", "l": "Paletas vendidas hoy"},
+    {"v": "6", "l": "Carritos repartidores"},
+    {"v": "5", "l": "Min de setup", "suffix": "min"},
+    {"v": "0", "l": "Costo inicial", "prefix": "$"}
+  ],
+  "quote": {
+    "text": "Mis bicicleteros decían que <span class=\"hl\">'se derritieron' 20 paletas al día</span> en el calor. Con Helera cada carrito sale contado y regresa contado. Las paletas 'derretidas' eran las que se comían. Cortado, ahorré $7 mil al mes.",
+    "sig": "Don Salvador C.",
+    "role": "Paletería La Michoacana del Centro, Tepatitlán, Jalisco"
+  },
+  "thefts": [
+    {
+      "title": "Paletas 'derretidas' que se llevan",
+      "rob": "Empleado reporta 15-20 paletas 'derretidas' por turno. Se las lleva a casa o se las come. $200-400 al día.",
+      "fix": "Paletas merma con <strong>foto antes de tirar obligatoria</strong>. Si pasan de 3% al día, alerta. Auditoría semanal compara con merma estándar."
+    },
+    {
+      "title": "Premium cobrada como agua simple",
+      "rob": "Empleado sirve paleta chamoy premium ($35) y cobra como agua ($15). Diferencia se queda en cajón sin marcar. $200-300 al turno.",
+      "fix": "Paletas <strong>identificadas por categoría en sistema</strong>. Cobro automático por código. Cero 'cobré normal' al ojo."
+    },
+    {
+      "title": "Carrito repartidor con sobras 'incompletas'",
+      "rob": "Bicicletero regresa con 12 paletas sobrantes cuando llevó 60. Vendió 40. Las 8 'restantes' se las quedó. $120-200 cada vez.",
+      "fix": "Carritos con <strong>conteo digital firmado de salida</strong>. Sobras firmadas al regreso. Diferencia entre vendido y sobras + carga inicial debe ser cero."
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tutorial 07 — Diseñar etiqueta | Volvix POS</title>
+<link rel="stylesheet" href="_shared.css"></head>
+<body><div class="tutorial-container" id="container">
+<h1>Tutorial 07 — Diseñar etiqueta de producto</h1>
+<div class="subtitle">Abrir designer → Arrastrar campos → Imprimir</div>
+<div class="stage">
+  <div class="step step-1"><h2>Paso 1 · Abre el diseñador de etiquetas</h2>
+    <div class="mock"><h3>🏷️ Etiquetas</h3>
+      <div class="grid"><div class="card">Imprimir lote</div><div class="card hot">+ Nueva plantilla</div><div class="card">Mis plantillas</div></div>
+      <div class="cursor" style="left:50%;top:35%">👆</div>
+    </div></div>
+  <div class="step step-2"><h2>Paso 2 · Elige tamaño y arrastra campos</h2>
+    <div class="mock"><h3>Designer · 50x30mm</h3>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <div style="background:#f1f5f9;padding:8px;border-radius:6px;flex:1">
+          <div style="font-size:.7rem;color:#475569">CAMPOS</div>
+          <div class="card" style="margin-top:4px">📝 Nombre</div>
+          <div class="card" style="margin-top:4px">💰 Precio</div>
+          <div class="card hot" style="margin-top:4px">📊 Código de barras</div>
+        </div>
+        <div style="background:#fff;border:2px dashed #94a3b8;padding:14px;flex:1;text-align:center">
+          <div style="font-size:.85rem">Latte ☕</div>
+          <div style="font-size:.85rem;font-weight:bold">$45.00</div>
+          <div style="font-size:1.4rem;margin-top:6px">‖‖‖‖‖‖‖</div>
+        </div>
+      </div>
+    </div></div>
+  <div class="step step-3"><h2>Paso 3 · Ajusta tipografía y bordes</h2>
+    <div class="mock"><h3>Estilo</h3>
+      <form>
+        <label>Tipografía<select><option>Sans Serif</option></select></label>
+        <label>Tamaño<select><option>10pt</option></select></label>
+        <label>Borde<select><option>Sólido 1px</option></select></label>
+      </form>
+      <div class="banner banner-ok" style="margin-top:6px">Vista previa actualizada en tiempo real</div>
+    </div></div>
+  <div class="step step-4"><h2>Paso 4 · Guarda la plantilla</h2>
+    <div class="mock"><h3>Guardar plantilla</h3>
+      <form><label>Nombre<input value="Etiqueta café 50x30"></label></form>
+      <button class="btn">💾 Guardar plantilla</button>
+      <div class="cursor" style="left:24%;top:60%">👆</div>
+    </div></div>
+  <div class="step step-5"><h2>Paso 5 · Imprimir 100 etiquetas ✓</h2>
+    <div class="mock">
+      <div class="banner banner-ok">✅ Plantilla guardada</div>
+      <h3>Imprimir lote</h3>
+      <form><label>Producto<select><option>Latte</option></select></label>
+      <label>Cantidad<input value="100"></label></form>
+      <button class="btn btn-blue">🖨️ Imprimir 100</button>
+    </div></div>
+</div>
+<div class="progress"><div class="progress-bar"></div></div>
+<div class="caption">Reproduciendo en bucle (25s).</div>
+<div class="controls">
+<button onclick="document.getElementById('container').classList.toggle('paused')">⏯️ Pausar/Reanudar</button>
+<button onclick="location.reload()">🔄 Reiniciar</button>
+</div></div></body></html>
