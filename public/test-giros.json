@@ -1,458 +1,5410 @@
 {
-  "_meta": "500 giros típicos del SMB mexicano para validación del router. Cada uno incluye 'q' (lo que escribiría el usuario), 'expected' (marca premium ideal), y 'category' (clasificación).",
+  "_meta": "1000 giros del SMB mexicano generados 2026-05-18T05:31:16.730Z. Combina 453 base + extras DENUE/SAT + variantes + nichos.",
   "casos": [
-    {"q":"bolsas","category":"retail-bolsas","expected_brand":"asa"},
-    {"q":"bolsos de mujer","category":"retail-bolsas","expected_brand":"asa"},
-    {"q":"carteras","category":"retail-bolsas","expected_brand":"asa"},
-    {"q":"cartera de hombre","category":"retail-bolsas","expected_brand":"asa"},
-    {"q":"monederos","category":"retail-bolsas","expected_brand":"asa"},
-    {"q":"mochilas","category":"retail-mochilas","expected_brand":"mochila"},
-    {"q":"maletas de viaje","category":"retail-mochilas","expected_brand":"mochila"},
-    {"q":"backpack","category":"retail-mochilas","expected_brand":"mochila"},
-    {"q":"tienda de zapatos","category":"retail-calzado","expected_brand":"pareo"},
-    {"q":"zapateria","category":"retail-calzado","expected_brand":"pareo"},
-    {"q":"zapatos de dama","category":"retail-calzado","expected_brand":"tacon"},
-    {"q":"tacones","category":"retail-calzado","expected_brand":"tacon"},
-    {"q":"zapatos de hombre","category":"retail-calzado","expected_brand":"oxford"},
-    {"q":"zapatos de vestir","category":"retail-calzado","expected_brand":"oxford"},
-    {"q":"tenis","category":"retail-calzado","expected_brand":"pareo"},
-    {"q":"tenis deportivos","category":"retail-calzado","expected_brand":"pareo"},
-    {"q":"sandalias","category":"retail-calzado","expected_brand":"pareo"},
-    {"q":"huaraches","category":"retail-calzado","expected_brand":"pareo"},
-    {"q":"botas","category":"retail-calzado","expected_brand":"pareo"},
-    {"q":"botas vaqueras","category":"retail-calzado","expected_brand":"pareo"},
-    {"q":"tienda de ropa","category":"retail-ropa","expected_brand":"pareo"},
-    {"q":"boutique","category":"retail-ropa","expected_brand":"pareo"},
-    {"q":"ropa de mujer","category":"retail-ropa","expected_brand":"pareo"},
-    {"q":"ropa de hombre","category":"retail-ropa","expected_brand":"pareo"},
-    {"q":"ropa de bebe","category":"retail-ropa","expected_brand":"mochila"},
-    {"q":"ropa infantil","category":"retail-ropa","expected_brand":"mochila"},
-    {"q":"ropa para niños","category":"retail-ropa","expected_brand":"mochila"},
-    {"q":"uniformes escolares","category":"retail-ropa","expected_brand":"mochila"},
-    {"q":"ropa deportiva","category":"retail-ropa","expected_brand":"pareo"},
-    {"q":"ropa interior","category":"retail-ropa","expected_brand":"seda"},
-    {"q":"lenceria fina","category":"retail-ropa","expected_brand":"seda"},
-    {"q":"trajes de baño","category":"retail-ropa","expected_brand":"pareo"},
-    {"q":"sombreros","category":"retail-ropa","expected_brand":"pareo"},
-    {"q":"gorras","category":"retail-ropa","expected_brand":"pareo"},
-    {"q":"corbatas","category":"retail-ropa","expected_brand":"pareo"},
-    {"q":"cinturones","category":"retail-ropa","expected_brand":"pareo"},
-    {"q":"lentes de sol","category":"retail-ropa","expected_brand":"armazon"},
-    {"q":"relojeria","category":"retail-joyeria","expected_brand":"tictac"},
-    {"q":"relojes premium","category":"retail-joyeria","expected_brand":"tictac"},
-    {"q":"joyeria","category":"retail-joyeria","expected_brand":"quilate"},
-    {"q":"joyeria fina","category":"retail-joyeria","expected_brand":"quilate"},
-    {"q":"bisuteria","category":"retail-joyeria","expected_brand":"quilate"},
-    {"q":"perfumes","category":"retail-belleza","expected_brand":"esencia"},
-    {"q":"perfumeria","category":"retail-belleza","expected_brand":"esencia"},
-    {"q":"cosmeticos","category":"retail-belleza","expected_brand":"esencia"},
-    {"q":"maquillaje","category":"retail-belleza","expected_brand":"esencia"},
-    {"q":"productos de belleza","category":"retail-belleza","expected_brand":"esencia"},
-    {"q":"taqueria","category":"comida","expected_brand":"comandero"},
-    {"q":"tacos al pastor","category":"comida","expected_brand":"comandero"},
-    {"q":"tortilleria","category":"comida","expected_brand":"tortilla"},
-    {"q":"tortillas","category":"comida","expected_brand":"tortilla"},
-    {"q":"panaderia","category":"comida","expected_brand":"espuma"},
-    {"q":"pasteleria","category":"comida","expected_brand":"horno"},
-    {"q":"reposteria","category":"comida","expected_brand":"horno"},
-    {"q":"dulceria","category":"comida","expected_brand":"caramelo"},
-    {"q":"tienda de dulces","category":"comida","expected_brand":"caramelo"},
-    {"q":"cafeteria","category":"comida","expected_brand":"espuma"},
-    {"q":"cafe","category":"comida","expected_brand":"espuma"},
-    {"q":"restaurante mexicano","category":"comida","expected_brand":"comandero"},
-    {"q":"comida china","category":"comida","expected_brand":"wokito"},
-    {"q":"comida japonesa","category":"comida","expected_brand":"kappa"},
-    {"q":"sushi","category":"comida","expected_brand":"kappa"},
-    {"q":"comida italiana","category":"comida","expected_brand":"trattoria"},
-    {"q":"pizzeria","category":"comida","expected_brand":"comandero"},
-    {"q":"pizza","category":"comida","expected_brand":"comandero"},
-    {"q":"hamburguesas","category":"comida","expected_brand":"grilla"},
-    {"q":"hot dogs","category":"comida","expected_brand":"comandero"},
-    {"q":"cocina economica","category":"comida","expected_brand":"comedor"},
-    {"q":"fonda","category":"comida","expected_brand":"comedor"},
-    {"q":"mariscos","category":"comida","expected_brand":"marea"},
-    {"q":"pescaderia","category":"comida","expected_brand":"escama"},
-    {"q":"pollo asado","category":"comida","expected_brand":"brasa"},
-    {"q":"pollo rostizado","category":"comida","expected_brand":"brasa"},
-    {"q":"carnitas","category":"comida","expected_brand":"comandero"},
-    {"q":"birria","category":"comida","expected_brand":"comandero"},
-    {"q":"barbacoa","category":"comida","expected_brand":"hornito"},
-    {"q":"menudo","category":"comida","expected_brand":"consome"},
-    {"q":"pozole","category":"comida","expected_brand":"consome"},
-    {"q":"tamales","category":"comida","expected_brand":"comandero"},
-    {"q":"atole y tamales","category":"comida","expected_brand":"comandero"},
-    {"q":"nieve","category":"comida","expected_brand":"nieve"},
-    {"q":"helados","category":"comida","expected_brand":"nieve"},
-    {"q":"paletas heladas","category":"comida","expected_brand":"nieve"},
-    {"q":"raspados","category":"comida","expected_brand":"nieve"},
-    {"q":"aguas frescas","category":"comida","expected_brand":"limonero"},
-    {"q":"jugos naturales","category":"comida","expected_brand":"limonero"},
-    {"q":"licuados","category":"comida","expected_brand":"limonero"},
-    {"q":"smoothies","category":"comida","expected_brand":"limonero"},
-    {"q":"juice bar","category":"comida","expected_brand":"limonero"},
-    {"q":"frutas","category":"comida","expected_brand":"tendito"},
-    {"q":"fruteria","category":"comida","expected_brand":"tendito"},
-    {"q":"verduleria","category":"comida","expected_brand":"tendito"},
-    {"q":"carniceria","category":"comida","expected_brand":"corte"},
-    {"q":"pollería","category":"comida","expected_brand":"tendito"},
-    {"q":"abarrotes","category":"comida","expected_brand":"tendito"},
-    {"q":"tiendita de la esquina","category":"comida","expected_brand":"tendito"},
-    {"q":"minisuper","category":"comida","expected_brand":"tendito"},
-    {"q":"barberia","category":"servicios","expected_brand":"navaja"},
-    {"q":"barber shop","category":"servicios","expected_brand":"navaja"},
-    {"q":"estetica","category":"servicios","expected_brand":"brillo"},
-    {"q":"salon de belleza","category":"servicios","expected_brand":"brillo"},
-    {"q":"peluqueria","category":"servicios","expected_brand":"brillo"},
-    {"q":"spa","category":"servicios","expected_brand":"brillo"},
-    {"q":"salon de uñas","category":"servicios","expected_brand":"brillo"},
-    {"q":"uñas acrilicas","category":"servicios","expected_brand":"brillo"},
-    {"q":"manicure","category":"servicios","expected_brand":"brillo"},
-    {"q":"pedicure","category":"servicios","expected_brand":"brillo"},
-    {"q":"depilacion","category":"servicios","expected_brand":"brillo"},
-    {"q":"depilacion laser","category":"servicios","expected_brand":"brillo"},
-    {"q":"masajes","category":"servicios","expected_brand":"brillo"},
-    {"q":"masajes relajantes","category":"servicios","expected_brand":"brillo"},
-    {"q":"tatuajes","category":"servicios","expected_brand":"brillo"},
-    {"q":"estudio de tatuajes","category":"servicios","expected_brand":"brillo"},
-    {"q":"piercing","category":"servicios","expected_brand":"brillo"},
-    {"q":"lavanderia","category":"servicios","expected_brand":"burbuja"},
-    {"q":"tintoreria","category":"servicios","expected_brand":"burbuja"},
-    {"q":"lavado autoservicio","category":"servicios","expected_brand":"burbuja"},
-    {"q":"carwash","category":"servicios","expected_brand":"burbuja"},
-    {"q":"detailing automotriz","category":"servicios","expected_brand":"pulido"},
-    {"q":"polarizado","category":"servicios","expected_brand":"pulido"},
-    {"q":"reparacion de zapatos","category":"servicios","expected_brand":"pareo"},
-    {"q":"cerrajeria","category":"servicios","expected_brand":"llaves"},
-    {"q":"copias de llaves","category":"servicios","expected_brand":"llaves"},
-    {"q":"fumigacion","category":"servicios","expected_brand":"pulgon"},
-    {"q":"control de plagas","category":"servicios","expected_brand":"pulgon"},
-    {"q":"fotografia eventos","category":"servicios","expected_brand":"flash"},
-    {"q":"estudio fotografico","category":"servicios","expected_brand":"flash"},
-    {"q":"videografia","category":"servicios","expected_brand":"flash"},
-    {"q":"catering","category":"servicios","expected_brand":"tarima"},
-    {"q":"servicio de banquetes","category":"servicios","expected_brand":"tarima"},
-    {"q":"organizacion de eventos","category":"servicios","expected_brand":"tarima"},
-    {"q":"renta de mesas y sillas","category":"servicios","expected_brand":"tarima"},
-    {"q":"renta de audio","category":"servicios","expected_brand":"tarima"},
-    {"q":"dj","category":"servicios","expected_brand":"tarima"},
-    {"q":"mariachi","category":"servicios","expected_brand":"tarima"},
-    {"q":"renta de inflables","category":"servicios","expected_brand":"tarima"},
-    {"q":"florista","category":"servicios","expected_brand":"petalo"},
-    {"q":"floreria","category":"servicios","expected_brand":"petalo"},
-    {"q":"arreglos florales","category":"servicios","expected_brand":"petalo"},
-    {"q":"taller mecanico","category":"talleres","expected_brand":"refacciona"},
-    {"q":"mecanico","category":"talleres","expected_brand":"refacciona"},
-    {"q":"taller automotriz","category":"talleres","expected_brand":"refacciona"},
-    {"q":"hojalateria y pintura","category":"talleres","expected_brand":"latonero"},
-    {"q":"vulcanizadora","category":"talleres","expected_brand":"refacciona"},
-    {"q":"llanteria","category":"talleres","expected_brand":"refacciona"},
-    {"q":"venta de llantas","category":"talleres","expected_brand":"refacciona"},
-    {"q":"taller de motos","category":"talleres","expected_brand":"escape"},
-    {"q":"reparacion motos","category":"talleres","expected_brand":"escape"},
-    {"q":"taller de bicicletas","category":"talleres","expected_brand":"refacciona"},
-    {"q":"carpinteria","category":"talleres","expected_brand":"viruta"},
-    {"q":"muebles a medida","category":"talleres","expected_brand":"viruta"},
-    {"q":"herreria","category":"talleres","expected_brand":"chispa"},
-    {"q":"soldadura","category":"talleres","expected_brand":"chispa"},
-    {"q":"plomeria","category":"talleres","expected_brand":"tueria"},
-    {"q":"reparacion de tuberias","category":"talleres","expected_brand":"tueria"},
-    {"q":"electricidad","category":"talleres","expected_brand":"watt"},
-    {"q":"instalaciones electricas","category":"talleres","expected_brand":"watt"},
-    {"q":"albañileria","category":"talleres","expected_brand":"cemento"},
-    {"q":"construccion","category":"talleres","expected_brand":"cemento"},
-    {"q":"pintura de casas","category":"talleres","expected_brand":"brocha"},
-    {"q":"impermeabilizacion","category":"talleres","expected_brand":"impermo"},
-    {"q":"jardineria","category":"talleres","expected_brand":"sembradio"},
-    {"q":"poda de arboles","category":"talleres","expected_brand":"sembradio"},
-    {"q":"limpieza de oficinas","category":"servicios","expected_brand":"trapeador"},
-    {"q":"servicio de limpieza","category":"servicios","expected_brand":"trapeador"},
-    {"q":"mudanzas","category":"servicios","expected_brand":"caja-mud"},
-    {"q":"fletes","category":"servicios","expected_brand":"caja-mud"},
-    {"q":"paqueteria","category":"servicios","expected_brand":"paquete"},
-    {"q":"mensajeria","category":"servicios","expected_brand":"paquete"},
-    {"q":"farmacia","category":"salud","expected_brand":"receta"},
-    {"q":"farmacia de medicamentos","category":"salud","expected_brand":"receta"},
-    {"q":"botica","category":"salud","expected_brand":"receta"},
-    {"q":"clinica medica","category":"salud","expected_brand":"pulso"},
-    {"q":"consultorio medico","category":"salud","expected_brand":"pulso"},
-    {"q":"dentista","category":"salud","expected_brand":"pulso"},
-    {"q":"clinica dental","category":"salud","expected_brand":"pulso"},
-    {"q":"ortodoncista","category":"salud","expected_brand":"pulso"},
-    {"q":"odontologo","category":"salud","expected_brand":"pulso"},
-    {"q":"veterinaria","category":"salud","expected_brand":"pata"},
-    {"q":"consultorio veterinario","category":"salud","expected_brand":"pata"},
-    {"q":"optica","category":"salud","expected_brand":"armazon"},
-    {"q":"venta de lentes","category":"salud","expected_brand":"armazon"},
-    {"q":"laboratorio clinico","category":"salud","expected_brand":"pulso"},
-    {"q":"analisis clinicos","category":"salud","expected_brand":"pulso"},
-    {"q":"fisioterapia","category":"salud","expected_brand":"pulso"},
-    {"q":"rehabilitacion fisica","category":"salud","expected_brand":"pulso"},
-    {"q":"nutricion","category":"salud","expected_brand":"pulso"},
-    {"q":"nutriologa","category":"salud","expected_brand":"pulso"},
-    {"q":"psicologia","category":"salud","expected_brand":"pulso"},
-    {"q":"psicologo","category":"salud","expected_brand":"pulso"},
-    {"q":"quiropractico","category":"salud","expected_brand":"pulso"},
-    {"q":"acupuntura","category":"salud","expected_brand":"pulso"},
-    {"q":"medicina alternativa","category":"salud","expected_brand":"pulso"},
-    {"q":"dermatologia","category":"salud","expected_brand":"pulso"},
-    {"q":"ginecologia","category":"salud","expected_brand":"pulso"},
-    {"q":"pediatria","category":"salud","expected_brand":"pulso"},
-    {"q":"cardiologia","category":"salud","expected_brand":"pulso"},
-    {"q":"tienda de celulares","category":"tech","expected_brand":"movil"},
-    {"q":"venta de celulares","category":"tech","expected_brand":"movil"},
-    {"q":"reparacion celulares","category":"tech","expected_brand":"repara-cel"},
-    {"q":"reparacion computadoras","category":"tech","expected_brand":"repara-pc"},
-    {"q":"reparacion laptops","category":"tech","expected_brand":"repara-pc"},
-    {"q":"reparacion tv","category":"tech","expected_brand":"repara-tv"},
-    {"q":"venta de computadoras","category":"tech","expected_brand":"torre"},
-    {"q":"computadoras","category":"tech","expected_brand":"torre"},
-    {"q":"accesorios celular","category":"tech","expected_brand":"funda"},
-    {"q":"fundas para celular","category":"tech","expected_brand":"funda"},
-    {"q":"servicio tecnico","category":"tech","expected_brand":"repara-cel"},
-    {"q":"cyber cafe","category":"tech","expected_brand":"tendito"},
-    {"q":"internet en casa","category":"tech","expected_brand":"folio"},
-    {"q":"desarrollo web","category":"tech","expected_brand":"folio"},
-    {"q":"marketing digital","category":"tech","expected_brand":"folio"},
-    {"q":"agencia digital","category":"tech","expected_brand":"folio"},
-    {"q":"consultoria IT","category":"tech","expected_brand":"folio"},
-    {"q":"escuela primaria","category":"edu","expected_brand":"bloque"},
-    {"q":"colegio","category":"edu","expected_brand":"bloque"},
-    {"q":"secundaria privada","category":"edu","expected_brand":"bloque"},
-    {"q":"preparatoria","category":"edu","expected_brand":"bloque"},
-    {"q":"universidad","category":"edu","expected_brand":"bloque"},
-    {"q":"kinder","category":"edu","expected_brand":"gateo"},
-    {"q":"guarderia","category":"edu","expected_brand":"gateo"},
-    {"q":"estancia infantil","category":"edu","expected_brand":"gateo"},
-    {"q":"clases de ingles","category":"edu","expected_brand":"bloque"},
-    {"q":"academia de musica","category":"edu","expected_brand":"bloque"},
-    {"q":"clases particulares","category":"edu","expected_brand":"bloque"},
-    {"q":"despacho contable","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"contador publico","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"despacho juridico","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"abogado","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"notaria","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"arquitectos","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"ingenieria civil","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"consultoria empresarial","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"recursos humanos","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"servicios funerarios","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"funeraria","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"agencia inmobiliaria","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"venta de casas","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"renta departamentos","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"agencia de viajes","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"gimnasio","category":"deporte","expected_brand":"repe"},
-    {"q":"gym","category":"deporte","expected_brand":"repe"},
-    {"q":"crossfit","category":"deporte","expected_brand":"forja"},
-    {"q":"yoga","category":"deporte","expected_brand":"forja"},
-    {"q":"pilates","category":"deporte","expected_brand":"forja"},
-    {"q":"spinning","category":"deporte","expected_brand":"forja"},
-    {"q":"box","category":"deporte","expected_brand":"forja"},
-    {"q":"academia de boxeo","category":"deporte","expected_brand":"forja"},
-    {"q":"artes marciales","category":"deporte","expected_brand":"forja"},
-    {"q":"karate","category":"deporte","expected_brand":"forja"},
-    {"q":"taekwondo","category":"deporte","expected_brand":"forja"},
-    {"q":"danza","category":"deporte","expected_brand":"forja"},
-    {"q":"academia de baile","category":"deporte","expected_brand":"forja"},
-    {"q":"zumba","category":"deporte","expected_brand":"forja"},
-    {"q":"natacion","category":"deporte","expected_brand":"forja"},
-    {"q":"alberca","category":"deporte","expected_brand":"forja"},
-    {"q":"futbol","category":"deporte","expected_brand":"forja"},
-    {"q":"cancha de futbol","category":"deporte","expected_brand":"tarima"},
-    {"q":"bar","category":"entretenimiento","expected_brand":"tarima"},
-    {"q":"cantina","category":"entretenimiento","expected_brand":"tarima"},
-    {"q":"antro","category":"entretenimiento","expected_brand":"tarima"},
-    {"q":"discoteca","category":"entretenimiento","expected_brand":"tarima"},
-    {"q":"karaoke","category":"entretenimiento","expected_brand":"tarima"},
-    {"q":"billar","category":"entretenimiento","expected_brand":"tarima"},
-    {"q":"sala de billar","category":"entretenimiento","expected_brand":"tarima"},
-    {"q":"arcade","category":"entretenimiento","expected_brand":"tarima"},
-    {"q":"sala de eventos","category":"entretenimiento","expected_brand":"tarima"},
-    {"q":"salon para eventos","category":"entretenimiento","expected_brand":"tarima"},
-    {"q":"hostal","category":"hospedaje","expected_brand":"folio"},
-    {"q":"hotel boutique","category":"hospedaje","expected_brand":"folio"},
-    {"q":"renta vacacional","category":"hospedaje","expected_brand":"folio"},
-    {"q":"airbnb manager","category":"hospedaje","expected_brand":"folio"},
-    {"q":"agencia de seguros","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"seguros de auto","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"financiera","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"casa de empeño","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"prestamos personales","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"tienda de mascotas","category":"mascotas","expected_brand":"pata"},
-    {"q":"pet shop","category":"mascotas","expected_brand":"pata"},
-    {"q":"alimento para perros","category":"mascotas","expected_brand":"pata"},
-    {"q":"peluqueria canina","category":"mascotas","expected_brand":"pata"},
-    {"q":"estetica canina","category":"mascotas","expected_brand":"pata"},
-    {"q":"hotel para mascotas","category":"mascotas","expected_brand":"pata"},
-    {"q":"adiestramiento perros","category":"mascotas","expected_brand":"pata"},
-    {"q":"papeleria","category":"retail-oficina","expected_brand":"bloque"},
-    {"q":"papeleria escolar","category":"retail-oficina","expected_brand":"bloque"},
-    {"q":"copias e impresiones","category":"retail-oficina","expected_brand":"bloque"},
-    {"q":"imprenta","category":"retail-oficina","expected_brand":"tinta"},
-    {"q":"impresion digital","category":"retail-oficina","expected_brand":"tinta"},
-    {"q":"impresion gran formato","category":"retail-oficina","expected_brand":"tinta"},
-    {"q":"impresion de playeras","category":"retail-oficina","expected_brand":"tinta"},
-    {"q":"vinilo cortado","category":"retail-oficina","expected_brand":"tinta"},
-    {"q":"rotulacion","category":"retail-oficina","expected_brand":"tinta"},
-    {"q":"libreria","category":"retail-oficina","expected_brand":"bloque"},
-    {"q":"venta de libros","category":"retail-oficina","expected_brand":"bloque"},
-    {"q":"papeleria mayorista","category":"retail-oficina","expected_brand":"bloque"},
-    {"q":"mueblería","category":"hogar","expected_brand":"mueble"},
-    {"q":"tienda de muebles","category":"hogar","expected_brand":"mueble"},
-    {"q":"muebles modernos","category":"hogar","expected_brand":"mueble"},
-    {"q":"muebles de oficina","category":"hogar","expected_brand":"escritorio"},
-    {"q":"colchoneria","category":"hogar","expected_brand":"almohada"},
-    {"q":"tienda de colchones","category":"hogar","expected_brand":"almohada"},
-    {"q":"sabanas","category":"hogar","expected_brand":"almohada"},
-    {"q":"blanqueria","category":"hogar","expected_brand":"almohada"},
-    {"q":"edredones","category":"hogar","expected_brand":"almohada"},
-    {"q":"cortinas","category":"hogar","expected_brand":"almohada"},
-    {"q":"toallas","category":"hogar","expected_brand":"almohada"},
-    {"q":"cocinas integrales","category":"hogar","expected_brand":"alacena"},
-    {"q":"closets a medida","category":"hogar","expected_brand":"colgador"},
-    {"q":"electrodomesticos","category":"hogar","expected_brand":"linea-b"},
-    {"q":"linea blanca","category":"hogar","expected_brand":"linea-b"},
-    {"q":"refrigeradores","category":"hogar","expected_brand":"linea-b"},
-    {"q":"televisores","category":"hogar","expected_brand":"linea-b"},
-    {"q":"venta de televisores","category":"hogar","expected_brand":"linea-b"},
-    {"q":"climas","category":"hogar","expected_brand":"linea-b"},
-    {"q":"aires acondicionados","category":"hogar","expected_brand":"linea-b"},
-    {"q":"recamaras","category":"hogar","expected_brand":"mueble"},
-    {"q":"salas","category":"hogar","expected_brand":"mueble"},
-    {"q":"comedores","category":"hogar","expected_brand":"mueble"},
-    {"q":"decoracion","category":"hogar","expected_brand":"ramillete"},
-    {"q":"decoracion del hogar","category":"hogar","expected_brand":"ramillete"},
-    {"q":"articulos decorativos","category":"hogar","expected_brand":"ramillete"},
-    {"q":"regalos","category":"hogar","expected_brand":"ramillete"},
-    {"q":"detalles para regalo","category":"hogar","expected_brand":"ramillete"},
-    {"q":"jugueteria","category":"retail-juguetes","expected_brand":"trompito"},
-    {"q":"tienda de juguetes","category":"retail-juguetes","expected_brand":"trompito"},
-    {"q":"juguetes para niños","category":"retail-juguetes","expected_brand":"trompito"},
-    {"q":"globos","category":"eventos","expected_brand":"helio"},
-    {"q":"decoracion para fiestas","category":"eventos","expected_brand":"helio"},
-    {"q":"decoracion de eventos","category":"eventos","expected_brand":"helio"},
-    {"q":"globos y decoracion","category":"eventos","expected_brand":"helio"},
-    {"q":"piñatas","category":"eventos","expected_brand":"helio"},
-    {"q":"tienda de fiestas","category":"eventos","expected_brand":"helio"},
-    {"q":"ferreteria","category":"retail-ferre","expected_brand":"tendito"},
-    {"q":"tlapaleria","category":"retail-ferre","expected_brand":"tendito"},
-    {"q":"materiales de construccion","category":"retail-ferre","expected_brand":"cemento"},
-    {"q":"venta de cemento","category":"retail-ferre","expected_brand":"cemento"},
-    {"q":"venta de varilla","category":"retail-ferre","expected_brand":"cemento"},
-    {"q":"vidrieria","category":"retail-ferre","expected_brand":"tendito"},
-    {"q":"venta de vidrios","category":"retail-ferre","expected_brand":"tendito"},
-    {"q":"mercería","category":"retail-textil","expected_brand":"tendito"},
-    {"q":"tienda de telas","category":"retail-textil","expected_brand":"tendito"},
-    {"q":"hilos y botones","category":"retail-textil","expected_brand":"tendito"},
-    {"q":"taller de costura","category":"servicios","expected_brand":"folio"},
-    {"q":"sastreria","category":"servicios","expected_brand":"folio"},
-    {"q":"costurera","category":"servicios","expected_brand":"folio"},
-    {"q":"arreglo de ropa","category":"servicios","expected_brand":"folio"},
-    {"q":"taller de bordado","category":"servicios","expected_brand":"folio"},
-    {"q":"despensa","category":"retail-mayoreo","expected_brand":"despensa"},
-    {"q":"abarrotes premium","category":"retail-mayoreo","expected_brand":"despensa"},
-    {"q":"importadora","category":"retail-mayoreo","expected_brand":"folio"},
-    {"q":"distribuidora","category":"retail-mayoreo","expected_brand":"folio"},
-    {"q":"mayoreo y menudeo","category":"retail-mayoreo","expected_brand":"despensa"},
-    {"q":"vinos y licores","category":"comida-bebida","expected_brand":"tarima"},
-    {"q":"licoreria","category":"comida-bebida","expected_brand":"tarima"},
-    {"q":"venta de cervezas","category":"comida-bebida","expected_brand":"tarima"},
-    {"q":"tienda de vinos","category":"comida-bebida","expected_brand":"tarima"},
-    {"q":"servicio funerario familiar","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"funeraria","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"cementerio","category":"servicios-pro","expected_brand":"folio"},
-    {"q":"renta de cuatrimotos","category":"servicios","expected_brand":"tarima"},
-    {"q":"renta de motos","category":"servicios","expected_brand":"tarima"},
-    {"q":"renta de bicicletas","category":"servicios","expected_brand":"tarima"},
-    {"q":"renta de autos","category":"servicios","expected_brand":"folio"},
-    {"q":"agencia automotriz","category":"servicios","expected_brand":"folio"},
-    {"q":"venta de autos usados","category":"servicios","expected_brand":"folio"},
-    {"q":"compra venta de autos","category":"servicios","expected_brand":"folio"},
-    {"q":"gasolinera","category":"servicios","expected_brand":"folio"},
-    {"q":"venta de gas","category":"servicios","expected_brand":"folio"},
-    {"q":"distribuidora de gas","category":"servicios","expected_brand":"folio"},
-    {"q":"taller de tapiceria","category":"servicios","expected_brand":"tapizado"},
-    {"q":"tapiceria de muebles","category":"servicios","expected_brand":"tapizado"},
-    {"q":"lavado de muebles","category":"servicios","expected_brand":"tapizado"},
-    {"q":"lavado de colchones","category":"servicios","expected_brand":"tapizado"},
-    {"q":"lavado de alfombras","category":"servicios","expected_brand":"tapizado"},
-    {"q":"tienda de electrodomesticos","category":"hogar","expected_brand":"linea-b"},
-    {"q":"reparacion linea blanca","category":"servicios","expected_brand":"repara-cel"},
-    {"q":"servicio refrigeradores","category":"servicios","expected_brand":"repara-cel"},
-    {"q":"climas comerciales","category":"servicios","expected_brand":"linea-b"},
-    {"q":"reparacion de aires","category":"servicios","expected_brand":"repara-cel"},
-    {"q":"venta de aires acondicionados","category":"hogar","expected_brand":"linea-b"},
-    {"q":"instalacion de aires","category":"servicios","expected_brand":"watt"},
-    {"q":"plomero domestico","category":"talleres","expected_brand":"tueria"},
-    {"q":"taller de soldadura","category":"talleres","expected_brand":"chispa"},
-    {"q":"taller de aluminio","category":"talleres","expected_brand":"chispa"},
-    {"q":"herreria artistica","category":"talleres","expected_brand":"chispa"},
-    {"q":"venta de aluminio","category":"talleres","expected_brand":"chispa"},
-    {"q":"taller de cancelería","category":"talleres","expected_brand":"chispa"},
-    {"q":"agua purificada","category":"comida-bebida","expected_brand":"tendito"},
-    {"q":"venta de agua","category":"comida-bebida","expected_brand":"tendito"},
-    {"q":"garrafones de agua","category":"comida-bebida","expected_brand":"tendito"},
-    {"q":"sushi bar","category":"comida","expected_brand":"kappa"},
-    {"q":"ramen","category":"comida","expected_brand":"kappa"},
-    {"q":"comida coreana","category":"comida","expected_brand":"bibim"},
-    {"q":"comida tailandesa","category":"comida","expected_brand":"wokito"},
-    {"q":"comida vegetariana","category":"comida","expected_brand":"comedor"},
-    {"q":"comida vegana","category":"comida","expected_brand":"comedor"},
-    {"q":"comida saludable","category":"comida","expected_brand":"comedor"},
-    {"q":"food truck","category":"comida","expected_brand":"comandero"},
-    {"q":"restaurante fine dining","category":"comida","expected_brand":"trattoria"},
-    {"q":"bistro","category":"comida","expected_brand":"trattoria"},
-    {"q":"tapas bar","category":"comida","expected_brand":"tasca"},
-    {"q":"asados","category":"comida","expected_brand":"asado"},
-    {"q":"steak house","category":"comida","expected_brand":"asado"},
-    {"q":"parrillada","category":"comida","expected_brand":"asado"},
-    {"q":"buffet","category":"comida","expected_brand":"comedor"},
-    {"q":"cocina casera","category":"comida","expected_brand":"comedor"},
-    {"q":"velada romantica","category":"comida","expected_brand":"velada"},
-    {"q":"restaurante elegante","category":"comida","expected_brand":"trattoria"},
-    {"q":"tienda online","category":"ecommerce","expected_brand":"folio"},
-    {"q":"ecommerce","category":"ecommerce","expected_brand":"folio"},
-    {"q":"venta por internet","category":"ecommerce","expected_brand":"folio"},
-    {"q":"dropshipping","category":"ecommerce","expected_brand":"folio"},
-    {"q":"clases de natacion","category":"deporte","expected_brand":"forja"},
-    {"q":"escuela de futbol","category":"deporte","expected_brand":"forja"},
-    {"q":"academia de tenis","category":"deporte","expected_brand":"forja"},
-    {"q":"cancha de squash","category":"deporte","expected_brand":"forja"},
-    {"q":"sex shop","category":"adultos","expected_brand":"discreto"},
-    {"q":"sexshop","category":"adultos","expected_brand":"discreto"},
-    {"q":"tienda erotica","category":"adultos","expected_brand":"discreto"},
-    {"q":"productos para adultos","category":"adultos","expected_brand":"discreto"},
-    {"q":"lenceria intima","category":"adultos","expected_brand":"discreto"},
-    {"q":"fabrica de hielo","category":"industria","expected_brand":"folio"},
-    {"q":"taller de joyeria","category":"servicios","expected_brand":"quilate"},
-    {"q":"reparacion de joyas","category":"servicios","expected_brand":"quilate"},
-    {"q":"compra venta de oro","category":"servicios","expected_brand":"quilate"},
-    {"q":"galeria de arte","category":"arte","expected_brand":"folio"},
-    {"q":"estudio de arte","category":"arte","expected_brand":"folio"},
-    {"q":"escuela de pintura","category":"arte","expected_brand":"bloque"},
-    {"q":"escuela de musica","category":"arte","expected_brand":"bloque"},
-    {"q":"estudio de grabacion","category":"arte","expected_brand":"folio"},
-    {"q":"venta de instrumentos musicales","category":"arte","expected_brand":"folio"},
-    {"q":"tienda de discos","category":"arte","expected_brand":"tendito"},
-    {"q":"vinilos","category":"arte","expected_brand":"tendito"},
-    {"q":"cines","category":"entretenimiento","expected_brand":"folio"},
-    {"q":"teatros","category":"entretenimiento","expected_brand":"folio"},
-    {"q":"escuelas de actuacion","category":"arte","expected_brand":"bloque"},
-    {"q":"locutorio","category":"servicios","expected_brand":"tendito"},
-    {"q":"cabinas telefonicas","category":"servicios","expected_brand":"tendito"},
-    {"q":"recargas de tiempo aire","category":"servicios","expected_brand":"tendito"},
-    {"q":"recargas electronicas","category":"servicios","expected_brand":"tendito"},
-    {"q":"pagos de servicios","category":"servicios","expected_brand":"tendito"},
-    {"q":"casas de cambio","category":"servicios","expected_brand":"folio"},
-    {"q":"taqueria de carnitas","category":"comida","expected_brand":"comandero"},
-    {"q":"birrería","category":"comida","expected_brand":"comandero"},
-    {"q":"taqueria de barbacoa","category":"comida","expected_brand":"hornito"},
-    {"q":"cenaduria","category":"comida","expected_brand":"comedor"},
-    {"q":"antojitos mexicanos","category":"comida","expected_brand":"comandero"},
-    {"q":"gorditas","category":"comida","expected_brand":"comandero"},
-    {"q":"quesadillas","category":"comida","expected_brand":"comandero"},
-    {"q":"sopes","category":"comida","expected_brand":"comandero"},
-    {"q":"tlayudas","category":"comida","expected_brand":"comandero"},
-    {"q":"chilaquiles","category":"comida","expected_brand":"comandero"}
+    {
+      "q": "bolsas",
+      "category": "retail-bolsas",
+      "expected_brand": "asa"
+    },
+    {
+      "q": "bolsos de mujer",
+      "category": "retail-bolsas",
+      "expected_brand": "asa"
+    },
+    {
+      "q": "carteras",
+      "category": "retail-bolsas",
+      "expected_brand": "asa"
+    },
+    {
+      "q": "cartera de hombre",
+      "category": "retail-bolsas",
+      "expected_brand": "asa"
+    },
+    {
+      "q": "monederos",
+      "category": "retail-bolsas",
+      "expected_brand": "asa"
+    },
+    {
+      "q": "mochilas",
+      "category": "retail-mochilas",
+      "expected_brand": "mochila"
+    },
+    {
+      "q": "maletas de viaje",
+      "category": "retail-mochilas",
+      "expected_brand": "mochila"
+    },
+    {
+      "q": "backpack",
+      "category": "retail-mochilas",
+      "expected_brand": "mochila"
+    },
+    {
+      "q": "tienda de zapatos",
+      "category": "retail-calzado",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "zapateria",
+      "category": "retail-calzado",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "zapatos de dama",
+      "category": "retail-calzado",
+      "expected_brand": "tacon"
+    },
+    {
+      "q": "tacones",
+      "category": "retail-calzado",
+      "expected_brand": "tacon"
+    },
+    {
+      "q": "zapatos de hombre",
+      "category": "retail-calzado",
+      "expected_brand": "oxford"
+    },
+    {
+      "q": "zapatos de vestir",
+      "category": "retail-calzado",
+      "expected_brand": "oxford"
+    },
+    {
+      "q": "tenis",
+      "category": "retail-calzado",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "tenis deportivos",
+      "category": "retail-calzado",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "sandalias",
+      "category": "retail-calzado",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "huaraches",
+      "category": "retail-calzado",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "botas",
+      "category": "retail-calzado",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "botas vaqueras",
+      "category": "retail-calzado",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "tienda de ropa",
+      "category": "retail-ropa",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "boutique",
+      "category": "retail-ropa",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "ropa de mujer",
+      "category": "retail-ropa",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "ropa de hombre",
+      "category": "retail-ropa",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "ropa de bebe",
+      "category": "retail-ropa",
+      "expected_brand": "mochila"
+    },
+    {
+      "q": "ropa infantil",
+      "category": "retail-ropa",
+      "expected_brand": "mochila"
+    },
+    {
+      "q": "ropa para niños",
+      "category": "retail-ropa",
+      "expected_brand": "mochila"
+    },
+    {
+      "q": "uniformes escolares",
+      "category": "retail-ropa",
+      "expected_brand": "mochila"
+    },
+    {
+      "q": "ropa deportiva",
+      "category": "retail-ropa",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "ropa interior",
+      "category": "retail-ropa",
+      "expected_brand": "seda"
+    },
+    {
+      "q": "lenceria fina",
+      "category": "retail-ropa",
+      "expected_brand": "seda"
+    },
+    {
+      "q": "trajes de baño",
+      "category": "retail-ropa",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "sombreros",
+      "category": "retail-ropa",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "gorras",
+      "category": "retail-ropa",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "corbatas",
+      "category": "retail-ropa",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "cinturones",
+      "category": "retail-ropa",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "lentes de sol",
+      "category": "retail-ropa",
+      "expected_brand": "armazon"
+    },
+    {
+      "q": "relojeria",
+      "category": "retail-joyeria",
+      "expected_brand": "tictac"
+    },
+    {
+      "q": "relojes premium",
+      "category": "retail-joyeria",
+      "expected_brand": "tictac"
+    },
+    {
+      "q": "joyeria",
+      "category": "retail-joyeria",
+      "expected_brand": "quilate"
+    },
+    {
+      "q": "joyeria fina",
+      "category": "retail-joyeria",
+      "expected_brand": "quilate"
+    },
+    {
+      "q": "bisuteria",
+      "category": "retail-joyeria",
+      "expected_brand": "quilate"
+    },
+    {
+      "q": "perfumes",
+      "category": "retail-belleza",
+      "expected_brand": "esencia"
+    },
+    {
+      "q": "perfumeria",
+      "category": "retail-belleza",
+      "expected_brand": "esencia"
+    },
+    {
+      "q": "cosmeticos",
+      "category": "retail-belleza",
+      "expected_brand": "esencia"
+    },
+    {
+      "q": "maquillaje",
+      "category": "retail-belleza",
+      "expected_brand": "esencia"
+    },
+    {
+      "q": "productos de belleza",
+      "category": "retail-belleza",
+      "expected_brand": "esencia"
+    },
+    {
+      "q": "taqueria",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "tacos al pastor",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "tortilleria",
+      "category": "comida",
+      "expected_brand": "tortilla"
+    },
+    {
+      "q": "tortillas",
+      "category": "comida",
+      "expected_brand": "tortilla"
+    },
+    {
+      "q": "panaderia",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "pasteleria",
+      "category": "comida",
+      "expected_brand": "horno"
+    },
+    {
+      "q": "reposteria",
+      "category": "comida",
+      "expected_brand": "horno"
+    },
+    {
+      "q": "dulceria",
+      "category": "comida",
+      "expected_brand": "caramelo"
+    },
+    {
+      "q": "tienda de dulces",
+      "category": "comida",
+      "expected_brand": "caramelo"
+    },
+    {
+      "q": "cafeteria",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "cafe",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "restaurante mexicano",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "comida china",
+      "category": "comida",
+      "expected_brand": "wokito"
+    },
+    {
+      "q": "comida japonesa",
+      "category": "comida",
+      "expected_brand": "kappa"
+    },
+    {
+      "q": "sushi",
+      "category": "comida",
+      "expected_brand": "kappa"
+    },
+    {
+      "q": "comida italiana",
+      "category": "comida",
+      "expected_brand": "trattoria"
+    },
+    {
+      "q": "pizzeria",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "pizza",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "hamburguesas",
+      "category": "comida",
+      "expected_brand": "grilla"
+    },
+    {
+      "q": "hot dogs",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "cocina economica",
+      "category": "comida",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "fonda",
+      "category": "comida",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "mariscos",
+      "category": "comida",
+      "expected_brand": "marea"
+    },
+    {
+      "q": "pescaderia",
+      "category": "comida",
+      "expected_brand": "escama"
+    },
+    {
+      "q": "pollo asado",
+      "category": "comida",
+      "expected_brand": "brasa"
+    },
+    {
+      "q": "pollo rostizado",
+      "category": "comida",
+      "expected_brand": "brasa"
+    },
+    {
+      "q": "carnitas",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "birria",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "barbacoa",
+      "category": "comida",
+      "expected_brand": "hornito"
+    },
+    {
+      "q": "menudo",
+      "category": "comida",
+      "expected_brand": "consome"
+    },
+    {
+      "q": "pozole",
+      "category": "comida",
+      "expected_brand": "consome"
+    },
+    {
+      "q": "tamales",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "atole y tamales",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "nieve",
+      "category": "comida",
+      "expected_brand": "nieve"
+    },
+    {
+      "q": "helados",
+      "category": "comida",
+      "expected_brand": "nieve"
+    },
+    {
+      "q": "paletas heladas",
+      "category": "comida",
+      "expected_brand": "nieve"
+    },
+    {
+      "q": "raspados",
+      "category": "comida",
+      "expected_brand": "nieve"
+    },
+    {
+      "q": "aguas frescas",
+      "category": "comida",
+      "expected_brand": "limonero"
+    },
+    {
+      "q": "jugos naturales",
+      "category": "comida",
+      "expected_brand": "limonero"
+    },
+    {
+      "q": "licuados",
+      "category": "comida",
+      "expected_brand": "limonero"
+    },
+    {
+      "q": "smoothies",
+      "category": "comida",
+      "expected_brand": "limonero"
+    },
+    {
+      "q": "juice bar",
+      "category": "comida",
+      "expected_brand": "limonero"
+    },
+    {
+      "q": "frutas",
+      "category": "comida",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "fruteria",
+      "category": "comida",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "verduleria",
+      "category": "comida",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "carniceria",
+      "category": "comida",
+      "expected_brand": "corte"
+    },
+    {
+      "q": "pollería",
+      "category": "comida",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "abarrotes",
+      "category": "comida",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "tiendita de la esquina",
+      "category": "comida",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "minisuper",
+      "category": "comida",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "barberia",
+      "category": "servicios",
+      "expected_brand": "navaja"
+    },
+    {
+      "q": "barber shop",
+      "category": "servicios",
+      "expected_brand": "navaja"
+    },
+    {
+      "q": "estetica",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "salon de belleza",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "peluqueria",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "spa",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "salon de uñas",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "uñas acrilicas",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "manicure",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "pedicure",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "depilacion",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "depilacion laser",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "masajes",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "masajes relajantes",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "tatuajes",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "estudio de tatuajes",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "piercing",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "lavanderia",
+      "category": "servicios",
+      "expected_brand": "burbuja"
+    },
+    {
+      "q": "tintoreria",
+      "category": "servicios",
+      "expected_brand": "burbuja"
+    },
+    {
+      "q": "lavado autoservicio",
+      "category": "servicios",
+      "expected_brand": "burbuja"
+    },
+    {
+      "q": "carwash",
+      "category": "servicios",
+      "expected_brand": "burbuja"
+    },
+    {
+      "q": "detailing automotriz",
+      "category": "servicios",
+      "expected_brand": "pulido"
+    },
+    {
+      "q": "polarizado",
+      "category": "servicios",
+      "expected_brand": "pulido"
+    },
+    {
+      "q": "reparacion de zapatos",
+      "category": "servicios",
+      "expected_brand": "pareo"
+    },
+    {
+      "q": "cerrajeria",
+      "category": "servicios",
+      "expected_brand": "llaves"
+    },
+    {
+      "q": "copias de llaves",
+      "category": "servicios",
+      "expected_brand": "llaves"
+    },
+    {
+      "q": "fumigacion",
+      "category": "servicios",
+      "expected_brand": "pulgon"
+    },
+    {
+      "q": "control de plagas",
+      "category": "servicios",
+      "expected_brand": "pulgon"
+    },
+    {
+      "q": "fotografia eventos",
+      "category": "servicios",
+      "expected_brand": "flash"
+    },
+    {
+      "q": "estudio fotografico",
+      "category": "servicios",
+      "expected_brand": "flash"
+    },
+    {
+      "q": "videografia",
+      "category": "servicios",
+      "expected_brand": "flash"
+    },
+    {
+      "q": "catering",
+      "category": "servicios",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "servicio de banquetes",
+      "category": "servicios",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "organizacion de eventos",
+      "category": "servicios",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de mesas y sillas",
+      "category": "servicios",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de audio",
+      "category": "servicios",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "dj",
+      "category": "servicios",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "mariachi",
+      "category": "servicios",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de inflables",
+      "category": "servicios",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "florista",
+      "category": "servicios",
+      "expected_brand": "petalo"
+    },
+    {
+      "q": "floreria",
+      "category": "servicios",
+      "expected_brand": "petalo"
+    },
+    {
+      "q": "arreglos florales",
+      "category": "servicios",
+      "expected_brand": "petalo"
+    },
+    {
+      "q": "taller mecanico",
+      "category": "talleres",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "mecanico",
+      "category": "talleres",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "taller automotriz",
+      "category": "talleres",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "hojalateria y pintura",
+      "category": "talleres",
+      "expected_brand": "latonero"
+    },
+    {
+      "q": "vulcanizadora",
+      "category": "talleres",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "llanteria",
+      "category": "talleres",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "venta de llantas",
+      "category": "talleres",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "taller de motos",
+      "category": "talleres",
+      "expected_brand": "escape"
+    },
+    {
+      "q": "reparacion motos",
+      "category": "talleres",
+      "expected_brand": "escape"
+    },
+    {
+      "q": "taller de bicicletas",
+      "category": "talleres",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "carpinteria",
+      "category": "talleres",
+      "expected_brand": "viruta"
+    },
+    {
+      "q": "muebles a medida",
+      "category": "talleres",
+      "expected_brand": "viruta"
+    },
+    {
+      "q": "herreria",
+      "category": "talleres",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "soldadura",
+      "category": "talleres",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "plomeria",
+      "category": "talleres",
+      "expected_brand": "tueria"
+    },
+    {
+      "q": "reparacion de tuberias",
+      "category": "talleres",
+      "expected_brand": "tueria"
+    },
+    {
+      "q": "electricidad",
+      "category": "talleres",
+      "expected_brand": "watt"
+    },
+    {
+      "q": "instalaciones electricas",
+      "category": "talleres",
+      "expected_brand": "watt"
+    },
+    {
+      "q": "albañileria",
+      "category": "talleres",
+      "expected_brand": "cemento"
+    },
+    {
+      "q": "construccion",
+      "category": "talleres",
+      "expected_brand": "cemento"
+    },
+    {
+      "q": "pintura de casas",
+      "category": "talleres",
+      "expected_brand": "brocha"
+    },
+    {
+      "q": "impermeabilizacion",
+      "category": "talleres",
+      "expected_brand": "impermo"
+    },
+    {
+      "q": "jardineria",
+      "category": "talleres",
+      "expected_brand": "sembradio"
+    },
+    {
+      "q": "poda de arboles",
+      "category": "talleres",
+      "expected_brand": "sembradio"
+    },
+    {
+      "q": "limpieza de oficinas",
+      "category": "servicios",
+      "expected_brand": "trapeador"
+    },
+    {
+      "q": "servicio de limpieza",
+      "category": "servicios",
+      "expected_brand": "trapeador"
+    },
+    {
+      "q": "mudanzas",
+      "category": "servicios",
+      "expected_brand": "caja-mud"
+    },
+    {
+      "q": "fletes",
+      "category": "servicios",
+      "expected_brand": "caja-mud"
+    },
+    {
+      "q": "paqueteria",
+      "category": "servicios",
+      "expected_brand": "paquete"
+    },
+    {
+      "q": "mensajeria",
+      "category": "servicios",
+      "expected_brand": "paquete"
+    },
+    {
+      "q": "farmacia",
+      "category": "salud",
+      "expected_brand": "receta"
+    },
+    {
+      "q": "farmacia de medicamentos",
+      "category": "salud",
+      "expected_brand": "receta"
+    },
+    {
+      "q": "botica",
+      "category": "salud",
+      "expected_brand": "receta"
+    },
+    {
+      "q": "clinica medica",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "consultorio medico",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "dentista",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "clinica dental",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "ortodoncista",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "odontologo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "veterinaria",
+      "category": "salud",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "consultorio veterinario",
+      "category": "salud",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "optica",
+      "category": "salud",
+      "expected_brand": "armazon"
+    },
+    {
+      "q": "venta de lentes",
+      "category": "salud",
+      "expected_brand": "armazon"
+    },
+    {
+      "q": "laboratorio clinico",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "analisis clinicos",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "fisioterapia",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "rehabilitacion fisica",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "nutricion",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "nutriologa",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "psicologia",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "psicologo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "quiropractico",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "acupuntura",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "medicina alternativa",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "dermatologia",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "ginecologia",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "pediatria",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "cardiologia",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "tienda de celulares",
+      "category": "tech",
+      "expected_brand": "movil"
+    },
+    {
+      "q": "venta de celulares",
+      "category": "tech",
+      "expected_brand": "movil"
+    },
+    {
+      "q": "reparacion celulares",
+      "category": "tech",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "reparacion computadoras",
+      "category": "tech",
+      "expected_brand": "repara-pc"
+    },
+    {
+      "q": "reparacion laptops",
+      "category": "tech",
+      "expected_brand": "repara-pc"
+    },
+    {
+      "q": "reparacion tv",
+      "category": "tech",
+      "expected_brand": "repara-tv"
+    },
+    {
+      "q": "venta de computadoras",
+      "category": "tech",
+      "expected_brand": "torre"
+    },
+    {
+      "q": "computadoras",
+      "category": "tech",
+      "expected_brand": "torre"
+    },
+    {
+      "q": "accesorios celular",
+      "category": "tech",
+      "expected_brand": "funda"
+    },
+    {
+      "q": "fundas para celular",
+      "category": "tech",
+      "expected_brand": "funda"
+    },
+    {
+      "q": "servicio tecnico",
+      "category": "tech",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "cyber cafe",
+      "category": "tech",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "internet en casa",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "desarrollo web",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "marketing digital",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia digital",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "consultoria IT",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "escuela primaria",
+      "category": "edu",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "colegio",
+      "category": "edu",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "secundaria privada",
+      "category": "edu",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "preparatoria",
+      "category": "edu",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "universidad",
+      "category": "edu",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "kinder",
+      "category": "edu",
+      "expected_brand": "gateo"
+    },
+    {
+      "q": "guarderia",
+      "category": "edu",
+      "expected_brand": "gateo"
+    },
+    {
+      "q": "estancia infantil",
+      "category": "edu",
+      "expected_brand": "gateo"
+    },
+    {
+      "q": "clases de ingles",
+      "category": "edu",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "academia de musica",
+      "category": "edu",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "clases particulares",
+      "category": "edu",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "despacho contable",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "contador publico",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "despacho juridico",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "abogado",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "notaria",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "arquitectos",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "ingenieria civil",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "consultoria empresarial",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "recursos humanos",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "servicios funerarios",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "funeraria",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia inmobiliaria",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de casas",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta departamentos",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia de viajes",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "gimnasio",
+      "category": "deporte",
+      "expected_brand": "repe"
+    },
+    {
+      "q": "gym",
+      "category": "deporte",
+      "expected_brand": "repe"
+    },
+    {
+      "q": "crossfit",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "yoga",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "pilates",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "spinning",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "box",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "academia de boxeo",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "artes marciales",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "karate",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "taekwondo",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "danza",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "academia de baile",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "zumba",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "natacion",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "alberca",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "futbol",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "cancha de futbol",
+      "category": "deporte",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "bar",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "cantina",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "antro",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "discoteca",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "karaoke",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "billar",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "sala de billar",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "arcade",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "sala de eventos",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "salon para eventos",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "hostal",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "hotel boutique",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta vacacional",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "airbnb manager",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia de seguros",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "seguros de auto",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "financiera",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "casa de empeño",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "prestamos personales",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "tienda de mascotas",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "pet shop",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "alimento para perros",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "peluqueria canina",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "estetica canina",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "hotel para mascotas",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "adiestramiento perros",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "papeleria",
+      "category": "retail-oficina",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "papeleria escolar",
+      "category": "retail-oficina",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "copias e impresiones",
+      "category": "retail-oficina",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "imprenta",
+      "category": "retail-oficina",
+      "expected_brand": "tinta"
+    },
+    {
+      "q": "impresion digital",
+      "category": "retail-oficina",
+      "expected_brand": "tinta"
+    },
+    {
+      "q": "impresion gran formato",
+      "category": "retail-oficina",
+      "expected_brand": "tinta"
+    },
+    {
+      "q": "impresion de playeras",
+      "category": "retail-oficina",
+      "expected_brand": "tinta"
+    },
+    {
+      "q": "vinilo cortado",
+      "category": "retail-oficina",
+      "expected_brand": "tinta"
+    },
+    {
+      "q": "rotulacion",
+      "category": "retail-oficina",
+      "expected_brand": "tinta"
+    },
+    {
+      "q": "libreria",
+      "category": "retail-oficina",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "venta de libros",
+      "category": "retail-oficina",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "papeleria mayorista",
+      "category": "retail-oficina",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "mueblería",
+      "category": "hogar",
+      "expected_brand": "mueble"
+    },
+    {
+      "q": "tienda de muebles",
+      "category": "hogar",
+      "expected_brand": "mueble"
+    },
+    {
+      "q": "muebles modernos",
+      "category": "hogar",
+      "expected_brand": "mueble"
+    },
+    {
+      "q": "muebles de oficina",
+      "category": "hogar",
+      "expected_brand": "escritorio"
+    },
+    {
+      "q": "colchoneria",
+      "category": "hogar",
+      "expected_brand": "almohada"
+    },
+    {
+      "q": "tienda de colchones",
+      "category": "hogar",
+      "expected_brand": "almohada"
+    },
+    {
+      "q": "sabanas",
+      "category": "hogar",
+      "expected_brand": "almohada"
+    },
+    {
+      "q": "blanqueria",
+      "category": "hogar",
+      "expected_brand": "almohada"
+    },
+    {
+      "q": "edredones",
+      "category": "hogar",
+      "expected_brand": "almohada"
+    },
+    {
+      "q": "cortinas",
+      "category": "hogar",
+      "expected_brand": "almohada"
+    },
+    {
+      "q": "toallas",
+      "category": "hogar",
+      "expected_brand": "almohada"
+    },
+    {
+      "q": "cocinas integrales",
+      "category": "hogar",
+      "expected_brand": "alacena"
+    },
+    {
+      "q": "closets a medida",
+      "category": "hogar",
+      "expected_brand": "colgador"
+    },
+    {
+      "q": "electrodomesticos",
+      "category": "hogar",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "linea blanca",
+      "category": "hogar",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "refrigeradores",
+      "category": "hogar",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "televisores",
+      "category": "hogar",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "venta de televisores",
+      "category": "hogar",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "climas",
+      "category": "hogar",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "aires acondicionados",
+      "category": "hogar",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "recamaras",
+      "category": "hogar",
+      "expected_brand": "mueble"
+    },
+    {
+      "q": "salas",
+      "category": "hogar",
+      "expected_brand": "mueble"
+    },
+    {
+      "q": "comedores",
+      "category": "hogar",
+      "expected_brand": "mueble"
+    },
+    {
+      "q": "decoracion",
+      "category": "hogar",
+      "expected_brand": "ramillete"
+    },
+    {
+      "q": "decoracion del hogar",
+      "category": "hogar",
+      "expected_brand": "ramillete"
+    },
+    {
+      "q": "articulos decorativos",
+      "category": "hogar",
+      "expected_brand": "ramillete"
+    },
+    {
+      "q": "regalos",
+      "category": "hogar",
+      "expected_brand": "ramillete"
+    },
+    {
+      "q": "detalles para regalo",
+      "category": "hogar",
+      "expected_brand": "ramillete"
+    },
+    {
+      "q": "jugueteria",
+      "category": "retail-juguetes",
+      "expected_brand": "trompito"
+    },
+    {
+      "q": "tienda de juguetes",
+      "category": "retail-juguetes",
+      "expected_brand": "trompito"
+    },
+    {
+      "q": "juguetes para niños",
+      "category": "retail-juguetes",
+      "expected_brand": "trompito"
+    },
+    {
+      "q": "globos",
+      "category": "eventos",
+      "expected_brand": "helio"
+    },
+    {
+      "q": "decoracion para fiestas",
+      "category": "eventos",
+      "expected_brand": "helio"
+    },
+    {
+      "q": "decoracion de eventos",
+      "category": "eventos",
+      "expected_brand": "helio"
+    },
+    {
+      "q": "globos y decoracion",
+      "category": "eventos",
+      "expected_brand": "helio"
+    },
+    {
+      "q": "piñatas",
+      "category": "eventos",
+      "expected_brand": "helio"
+    },
+    {
+      "q": "tienda de fiestas",
+      "category": "eventos",
+      "expected_brand": "helio"
+    },
+    {
+      "q": "ferreteria",
+      "category": "retail-ferre",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "tlapaleria",
+      "category": "retail-ferre",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "materiales de construccion",
+      "category": "retail-ferre",
+      "expected_brand": "cemento"
+    },
+    {
+      "q": "venta de cemento",
+      "category": "retail-ferre",
+      "expected_brand": "cemento"
+    },
+    {
+      "q": "venta de varilla",
+      "category": "retail-ferre",
+      "expected_brand": "cemento"
+    },
+    {
+      "q": "vidrieria",
+      "category": "retail-ferre",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "venta de vidrios",
+      "category": "retail-ferre",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "mercería",
+      "category": "retail-textil",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "tienda de telas",
+      "category": "retail-textil",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "hilos y botones",
+      "category": "retail-textil",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "taller de costura",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "sastreria",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "costurera",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "arreglo de ropa",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "taller de bordado",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "despensa",
+      "category": "retail-mayoreo",
+      "expected_brand": "despensa"
+    },
+    {
+      "q": "abarrotes premium",
+      "category": "retail-mayoreo",
+      "expected_brand": "despensa"
+    },
+    {
+      "q": "importadora",
+      "category": "retail-mayoreo",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "distribuidora",
+      "category": "retail-mayoreo",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "mayoreo y menudeo",
+      "category": "retail-mayoreo",
+      "expected_brand": "despensa"
+    },
+    {
+      "q": "vinos y licores",
+      "category": "comida-bebida",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "licoreria",
+      "category": "comida-bebida",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "venta de cervezas",
+      "category": "comida-bebida",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "tienda de vinos",
+      "category": "comida-bebida",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "servicio funerario familiar",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "cementerio",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta de cuatrimotos",
+      "category": "servicios",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de motos",
+      "category": "servicios",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de bicicletas",
+      "category": "servicios",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de autos",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia automotriz",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de autos usados",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "compra venta de autos",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "gasolinera",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de gas",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "distribuidora de gas",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "taller de tapiceria",
+      "category": "servicios",
+      "expected_brand": "tapizado"
+    },
+    {
+      "q": "tapiceria de muebles",
+      "category": "servicios",
+      "expected_brand": "tapizado"
+    },
+    {
+      "q": "lavado de muebles",
+      "category": "servicios",
+      "expected_brand": "tapizado"
+    },
+    {
+      "q": "lavado de colchones",
+      "category": "servicios",
+      "expected_brand": "tapizado"
+    },
+    {
+      "q": "lavado de alfombras",
+      "category": "servicios",
+      "expected_brand": "tapizado"
+    },
+    {
+      "q": "tienda de electrodomesticos",
+      "category": "hogar",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "reparacion linea blanca",
+      "category": "servicios",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "servicio refrigeradores",
+      "category": "servicios",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "climas comerciales",
+      "category": "servicios",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "reparacion de aires",
+      "category": "servicios",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "venta de aires acondicionados",
+      "category": "hogar",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "instalacion de aires",
+      "category": "servicios",
+      "expected_brand": "watt"
+    },
+    {
+      "q": "plomero domestico",
+      "category": "talleres",
+      "expected_brand": "tueria"
+    },
+    {
+      "q": "taller de soldadura",
+      "category": "talleres",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "taller de aluminio",
+      "category": "talleres",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "herreria artistica",
+      "category": "talleres",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "venta de aluminio",
+      "category": "talleres",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "taller de cancelería",
+      "category": "talleres",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "agua purificada",
+      "category": "comida-bebida",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "venta de agua",
+      "category": "comida-bebida",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "garrafones de agua",
+      "category": "comida-bebida",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "sushi bar",
+      "category": "comida",
+      "expected_brand": "kappa"
+    },
+    {
+      "q": "ramen",
+      "category": "comida",
+      "expected_brand": "kappa"
+    },
+    {
+      "q": "comida coreana",
+      "category": "comida",
+      "expected_brand": "bibim"
+    },
+    {
+      "q": "comida tailandesa",
+      "category": "comida",
+      "expected_brand": "wokito"
+    },
+    {
+      "q": "comida vegetariana",
+      "category": "comida",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "comida vegana",
+      "category": "comida",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "comida saludable",
+      "category": "comida",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "food truck",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "restaurante fine dining",
+      "category": "comida",
+      "expected_brand": "trattoria"
+    },
+    {
+      "q": "bistro",
+      "category": "comida",
+      "expected_brand": "trattoria"
+    },
+    {
+      "q": "tapas bar",
+      "category": "comida",
+      "expected_brand": "tasca"
+    },
+    {
+      "q": "asados",
+      "category": "comida",
+      "expected_brand": "asado"
+    },
+    {
+      "q": "steak house",
+      "category": "comida",
+      "expected_brand": "asado"
+    },
+    {
+      "q": "parrillada",
+      "category": "comida",
+      "expected_brand": "asado"
+    },
+    {
+      "q": "buffet",
+      "category": "comida",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "cocina casera",
+      "category": "comida",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "velada romantica",
+      "category": "comida",
+      "expected_brand": "velada"
+    },
+    {
+      "q": "restaurante elegante",
+      "category": "comida",
+      "expected_brand": "trattoria"
+    },
+    {
+      "q": "tienda online",
+      "category": "ecommerce",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "ecommerce",
+      "category": "ecommerce",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta por internet",
+      "category": "ecommerce",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "dropshipping",
+      "category": "ecommerce",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "clases de natacion",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "escuela de futbol",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "academia de tenis",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "cancha de squash",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "sex shop",
+      "category": "adultos",
+      "expected_brand": "discreto"
+    },
+    {
+      "q": "sexshop",
+      "category": "adultos",
+      "expected_brand": "discreto"
+    },
+    {
+      "q": "tienda erotica",
+      "category": "adultos",
+      "expected_brand": "discreto"
+    },
+    {
+      "q": "productos para adultos",
+      "category": "adultos",
+      "expected_brand": "discreto"
+    },
+    {
+      "q": "lenceria intima",
+      "category": "adultos",
+      "expected_brand": "discreto"
+    },
+    {
+      "q": "fabrica de hielo",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "taller de joyeria",
+      "category": "servicios",
+      "expected_brand": "quilate"
+    },
+    {
+      "q": "reparacion de joyas",
+      "category": "servicios",
+      "expected_brand": "quilate"
+    },
+    {
+      "q": "compra venta de oro",
+      "category": "servicios",
+      "expected_brand": "quilate"
+    },
+    {
+      "q": "galeria de arte",
+      "category": "arte",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "estudio de arte",
+      "category": "arte",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "escuela de pintura",
+      "category": "arte",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "escuela de musica",
+      "category": "arte",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "estudio de grabacion",
+      "category": "arte",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de instrumentos musicales",
+      "category": "arte",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "tienda de discos",
+      "category": "arte",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "vinilos",
+      "category": "arte",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "cines",
+      "category": "entretenimiento",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "teatros",
+      "category": "entretenimiento",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "escuelas de actuacion",
+      "category": "arte",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "locutorio",
+      "category": "servicios",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "cabinas telefonicas",
+      "category": "servicios",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "recargas de tiempo aire",
+      "category": "servicios",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "recargas electronicas",
+      "category": "servicios",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "pagos de servicios",
+      "category": "servicios",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "casas de cambio",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "taqueria de carnitas",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "birrería",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "taqueria de barbacoa",
+      "category": "comida",
+      "expected_brand": "hornito"
+    },
+    {
+      "q": "cenaduria",
+      "category": "comida",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "antojitos mexicanos",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "gorditas",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "quesadillas",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "sopes",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "tlayudas",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "chilaquiles",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "cocina yucateca",
+      "category": "comida-regional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "comida oaxaqueña",
+      "category": "comida-regional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "comida poblana",
+      "category": "comida-regional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "comida potosina",
+      "category": "comida-regional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "comida del norte",
+      "category": "comida-regional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "cabrito",
+      "category": "comida-regional",
+      "expected_brand": "asado"
+    },
+    {
+      "q": "machaca",
+      "category": "comida-regional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "discada",
+      "category": "comida-regional",
+      "expected_brand": "asado"
+    },
+    {
+      "q": "arrachera",
+      "category": "comida-regional",
+      "expected_brand": "asado"
+    },
+    {
+      "q": "parrilla argentina",
+      "category": "comida-regional",
+      "expected_brand": "asado"
+    },
+    {
+      "q": "cortes finos",
+      "category": "comida-regional",
+      "expected_brand": "asado"
+    },
+    {
+      "q": "mole oaxaqueño",
+      "category": "comida-regional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "mole poblano",
+      "category": "comida-regional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "cochinita pibil",
+      "category": "comida-regional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "tikinxic",
+      "category": "comida-regional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "salbutes",
+      "category": "comida-regional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "panuchos",
+      "category": "comida-regional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "marquesitas",
+      "category": "comida-postre",
+      "expected_brand": "nieve"
+    },
+    {
+      "q": "churreria",
+      "category": "comida-postre",
+      "expected_brand": "horno"
+    },
+    {
+      "q": "churros",
+      "category": "comida-postre",
+      "expected_brand": "horno"
+    },
+    {
+      "q": "waffles",
+      "category": "comida-postre",
+      "expected_brand": "horno"
+    },
+    {
+      "q": "crepas",
+      "category": "comida-postre",
+      "expected_brand": "horno"
+    },
+    {
+      "q": "donas",
+      "category": "comida-postre",
+      "expected_brand": "horno"
+    },
+    {
+      "q": "cupcakes",
+      "category": "comida-postre",
+      "expected_brand": "merengue"
+    },
+    {
+      "q": "cheesecakes",
+      "category": "comida-postre",
+      "expected_brand": "merengue"
+    },
+    {
+      "q": "gelatinas",
+      "category": "comida-postre",
+      "expected_brand": "merengue"
+    },
+    {
+      "q": "nieve de garrafa",
+      "category": "comida-postre",
+      "expected_brand": "nieve"
+    },
+    {
+      "q": "rolls de canela",
+      "category": "comida-postre",
+      "expected_brand": "horno"
+    },
+    {
+      "q": "boba tea",
+      "category": "comida-bebida",
+      "expected_brand": "limonero"
+    },
+    {
+      "q": "bubble tea",
+      "category": "comida-bebida",
+      "expected_brand": "limonero"
+    },
+    {
+      "q": "te chai",
+      "category": "comida-bebida",
+      "expected_brand": "limonero"
+    },
+    {
+      "q": "micheladas",
+      "category": "comida-bebida",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "cerveza artesanal",
+      "category": "comida-bebida",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "mezcaleria",
+      "category": "comida-bebida",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "pulqueria",
+      "category": "comida-bebida",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "cantina tradicional",
+      "category": "comida-bebida",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "tequileria",
+      "category": "comida-bebida",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "restaurante de mariscos",
+      "category": "comida-mariscos",
+      "expected_brand": "marea"
+    },
+    {
+      "q": "tacos de pescado",
+      "category": "comida-mariscos",
+      "expected_brand": "marea"
+    },
+    {
+      "q": "ostionería",
+      "category": "comida-mariscos",
+      "expected_brand": "marea"
+    },
+    {
+      "q": "coctel de camarones",
+      "category": "comida-mariscos",
+      "expected_brand": "marea"
+    },
+    {
+      "q": "aguachile",
+      "category": "comida-mariscos",
+      "expected_brand": "marea"
+    },
+    {
+      "q": "comida fitness",
+      "category": "comida-saludable",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "ensaladeria",
+      "category": "comida-saludable",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "acai bowls",
+      "category": "comida-saludable",
+      "expected_brand": "limonero"
+    },
+    {
+      "q": "poke bowls",
+      "category": "comida-saludable",
+      "expected_brand": "kappa"
+    },
+    {
+      "q": "comida thai",
+      "category": "comida-asiatica",
+      "expected_brand": "wokito"
+    },
+    {
+      "q": "comida india",
+      "category": "comida-asiatica",
+      "expected_brand": "wokito"
+    },
+    {
+      "q": "comida arabe",
+      "category": "comida-internacional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "shawarma",
+      "category": "comida-internacional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "comida libanesa",
+      "category": "comida-internacional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "comida turca",
+      "category": "comida-internacional",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "comida espanola",
+      "category": "comida-internacional",
+      "expected_brand": "tasca"
+    },
+    {
+      "q": "comida francesa",
+      "category": "comida-internacional",
+      "expected_brand": "trattoria"
+    },
+    {
+      "q": "cremeria",
+      "category": "comida-lacteos",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "quesos artesanales",
+      "category": "comida-lacteos",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "embutidos",
+      "category": "comida-carne",
+      "expected_brand": "corte"
+    },
+    {
+      "q": "salchichoneria",
+      "category": "comida-carne",
+      "expected_brand": "corte"
+    },
+    {
+      "q": "jamoneria",
+      "category": "comida-carne",
+      "expected_brand": "corte"
+    },
+    {
+      "q": "rosticeria",
+      "category": "comida-carne",
+      "expected_brand": "brasa"
+    },
+    {
+      "q": "pollo frito",
+      "category": "comida-carne",
+      "expected_brand": "brasa"
+    },
+    {
+      "q": "centro de uñas",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "salón de cejas",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "ceja diseño",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "microblading",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "extension de pestañas",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "lash bar",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "salón premium",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "estética masculina",
+      "category": "belleza",
+      "expected_brand": "navaja"
+    },
+    {
+      "q": "barber lounge",
+      "category": "belleza",
+      "expected_brand": "navaja"
+    },
+    {
+      "q": "centro de bronceado",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "spray tan",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "centro estético",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "drenaje linfático",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "reductivos",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "centro depilación",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "waxing",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "sugaring",
+      "category": "belleza",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "salón de barbería",
+      "category": "belleza",
+      "expected_brand": "navaja"
+    },
+    {
+      "q": "rapados",
+      "category": "belleza",
+      "expected_brand": "navaja"
+    },
+    {
+      "q": "cortes premium",
+      "category": "belleza",
+      "expected_brand": "navaja"
+    },
+    {
+      "q": "clínica de dolor",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "acupuntor",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "terapeuta",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "psiquiatra",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "endocrinólogo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "urólogo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "cardiólogo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "neurólogo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "traumatólogo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "ortopedista",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "oftalmólogo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "otorrinolaringólogo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "ginecólogo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "obstetra",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "pediatra",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "internista",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "geriatra",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "oncólogo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "hematólogo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "hospital privado",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "clínica privada",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "consultorio compartido",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "centro de salud",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "policlínica",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "ambulancia privada",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "servicios médicos a domicilio",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "estudio de diseño",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia de branding",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "copywriter",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "community manager",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "social media",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia seo",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia sem",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "programador freelance",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia desarrollo software",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "app developer",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "traductor",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "servicios de traducción",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "intérprete",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "notaría pública",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "corredor público",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "mediador",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "perito valuador",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "valuación de inmuebles",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "administrador de fincas",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "property manager",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "administración condominios",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "gestoría",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "tramitología",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "gestoría vehicular",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "trámites placas",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "emplacamiento",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "gestoría licencias",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "curso de conducir",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "autoescuela",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "escuela de manejo",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "servicios contables",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "outsourcing contable",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "nóminas externas",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia de reclutamiento",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "headhunter",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "recursos humanos externos",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "coach ejecutivo",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "life coach",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "health coach",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "taller de electrónica",
+      "category": "talleres",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "reparación de electrónicos",
+      "category": "talleres",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "reparación de consolas",
+      "category": "talleres",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "reparación playstation",
+      "category": "talleres",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "reparación xbox",
+      "category": "talleres",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "reparación nintendo",
+      "category": "talleres",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "mod controles",
+      "category": "talleres",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "recarga de cartuchos",
+      "category": "talleres",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "recarga de tinta",
+      "category": "talleres",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "recarga de tóner",
+      "category": "talleres",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "venta de impresoras",
+      "category": "talleres",
+      "expected_brand": "torre"
+    },
+    {
+      "q": "servicio impresoras",
+      "category": "talleres",
+      "expected_brand": "repara-cel"
+    },
+    {
+      "q": "mantenimiento de pc",
+      "category": "talleres",
+      "expected_brand": "repara-pc"
+    },
+    {
+      "q": "formateo de pc",
+      "category": "talleres",
+      "expected_brand": "repara-pc"
+    },
+    {
+      "q": "recuperación de datos",
+      "category": "talleres",
+      "expected_brand": "repara-pc"
+    },
+    {
+      "q": "venta de partes pc",
+      "category": "talleres",
+      "expected_brand": "torre"
+    },
+    {
+      "q": "ensamble de pcs gamer",
+      "category": "talleres",
+      "expected_brand": "torre"
+    },
+    {
+      "q": "gaming pc",
+      "category": "talleres",
+      "expected_brand": "torre"
+    },
+    {
+      "q": "venta de monitores",
+      "category": "talleres",
+      "expected_brand": "torre"
+    },
+    {
+      "q": "tienda gamer",
+      "category": "talleres",
+      "expected_brand": "torre"
+    },
+    {
+      "q": "venta de accesorios gaming",
+      "category": "talleres",
+      "expected_brand": "torre"
+    },
+    {
+      "q": "venta de teclados mecánicos",
+      "category": "talleres",
+      "expected_brand": "torre"
+    },
+    {
+      "q": "silla gamer",
+      "category": "talleres",
+      "expected_brand": "escritorio"
+    },
+    {
+      "q": "venta de sillas gaming",
+      "category": "talleres",
+      "expected_brand": "escritorio"
+    },
+    {
+      "q": "acabados",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "tarima de madera",
+      "category": "construccion",
+      "expected_brand": "viruta"
+    },
+    {
+      "q": "piso laminado",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "piso vinílico",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de pisos",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de azulejos",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "marmolería",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de mármol",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de granito",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "cantera",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "cantería",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "herrería ornamental",
+      "category": "construccion",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "rejas y portones",
+      "category": "construccion",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "canceleria de aluminio",
+      "category": "construccion",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "ventanas de aluminio",
+      "category": "construccion",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "protecciones de aluminio",
+      "category": "construccion",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "domos",
+      "category": "construccion",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "plafones",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "tablaroca",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "drywall",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "acústicos",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "aislamiento térmico",
+      "category": "construccion",
+      "expected_brand": "impermo"
+    },
+    {
+      "q": "aislamiento acústico",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de impermeabilizantes",
+      "category": "construccion",
+      "expected_brand": "impermo"
+    },
+    {
+      "q": "venta de pintura",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "comex",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de pinturas decorativas",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de yeso",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de cemento blanco",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de mortero",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de pegamentos",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de boquilla",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "plomería residencial",
+      "category": "construccion",
+      "expected_brand": "tueria"
+    },
+    {
+      "q": "plomería comercial",
+      "category": "construccion",
+      "expected_brand": "tueria"
+    },
+    {
+      "q": "destapado de drenajes",
+      "category": "construccion",
+      "expected_brand": "tueria"
+    },
+    {
+      "q": "servicio de bombeo",
+      "category": "construccion",
+      "expected_brand": "tueria"
+    },
+    {
+      "q": "fontanería",
+      "category": "construccion",
+      "expected_brand": "tueria"
+    },
+    {
+      "q": "mantenimiento residencial",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "reparaciones domésticas",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "handyman",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "servicio mil usos",
+      "category": "construccion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia volkswagen",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia honda",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia ford",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia toyota",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia nissan",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia chevrolet",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "concesionaria de autos",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "multiagencia automotriz",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta camiones",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de tráileres",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "transporte de carga",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia de viajes terrestres",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "empresa de autobuses",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "transporte ejecutivo",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "servicio uber",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "servicio didi",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "taxi",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "empresa de taxis",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "servicio de chófer",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "conductor designado",
+      "category": "auto",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "servicio de grúas",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "grúas de plataforma",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "auxilio vial",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "venta de baterías auto",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "venta de batería",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "cambio de aceite",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "servicio de alineación",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "balanceo de llantas",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "servicio mecánico premium",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "reparación de frenos",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "servicio eléctrico automotriz",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "venta de stereos",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "instalación de stereos",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "accesorios para auto",
+      "category": "auto",
+      "expected_brand": "refacciona"
+    },
+    {
+      "q": "polarizado de cristales",
+      "category": "auto",
+      "expected_brand": "pulido"
+    },
+    {
+      "q": "tintado de vidrios",
+      "category": "auto",
+      "expected_brand": "pulido"
+    },
+    {
+      "q": "recubrimiento cerámico",
+      "category": "auto",
+      "expected_brand": "pulido"
+    },
+    {
+      "q": "ppf",
+      "category": "auto",
+      "expected_brand": "pulido"
+    },
+    {
+      "q": "escuela bilingüe",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "escuela trilingüe",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "preescolar bilingüe",
+      "category": "educacion",
+      "expected_brand": "gateo"
+    },
+    {
+      "q": "centro de idiomas",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "clases de francés",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "clases de alemán",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "clases de italiano",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "clases de chino mandarín",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "clases de japonés",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "conservatorio",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "escuela de baile",
+      "category": "educacion",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "escuela de danza clásica",
+      "category": "educacion",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "ballet",
+      "category": "educacion",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "danza folclórica",
+      "category": "educacion",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "escuela de música",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "clases de piano",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "clases de guitarra",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "clases de batería",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "canto",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "clases de canto",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "escuela de arte",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "talleres de pintura",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "talleres de cerámica",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "talleres de escultura",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "escuela de dibujo",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "escuela de moda",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "diseño de modas",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "patronaje",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "confección textil",
+      "category": "educacion",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "escuela de gastronomía",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "clases de cocina",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "barista training",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "sommelier",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "instituto técnico",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "carrera técnica",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "certificaciones",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "cursos en línea",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "plataforma educativa",
+      "category": "educacion",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "guardería canina",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "daycare perros",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "paseador de perros",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "dog walker",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "entrenamiento de perros",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "adiestramiento",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "centro canino",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "centro felino",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "hotel canino",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "venta de perros",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "venta de gatos",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "criadero de perros",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "criadero de gatos",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "venta de aves",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "venta de peces",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "acuario tienda",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "acuariofilia",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "venta de tortugas",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "venta de reptiles",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "exóticos venta",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "cirugía veterinaria",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "clínica veterinaria 24h",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "oncología veterinaria",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "venta de alimento balanceado",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "alimento premium para perro",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "alimento premium para gato",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "accesorios para mascotas",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "venta de transportadoras",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "venta de jaulas",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "venta de correas",
+      "category": "mascotas",
+      "expected_brand": "pata"
+    },
+    {
+      "q": "planeador de bodas",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "organizador de bodas",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "wedding planner premium",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "planeador xv años",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "organizador eventos sociales",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "fiestas corporativas",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "eventos empresariales",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "convenciones",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "expos",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "ferias comerciales",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de carpas",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de jardín para eventos",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "terraza para eventos",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "hacienda para bodas",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "quinta para eventos",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "salón de fiestas premium",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "banquetes corporativos",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "mesero para eventos",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "servicio de bartenders",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "cantante para eventos",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "banda musical",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "banda versátil",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "grupo musical",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "trovador",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "serenata",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "mariachi premium",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "mariachi 5 elementos",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "cuarteto de cuerdas",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "violinista",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "saxofonista",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "dj wedding",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "dj fiestas",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "dj corporativo",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de pista de baile",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta iluminación",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de mobiliario",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de tablones",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de manteles",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta vajillas",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de cristalería",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de cubiertos",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta carpa para boda",
+      "category": "eventos",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "streaming services",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de software",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "licencias de software",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta antivirus",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "hosting web",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "dominios web",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "certificados ssl",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "servidor dedicado",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "cloud computing",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de gadgets",
+      "category": "tech",
+      "expected_brand": "movil"
+    },
+    {
+      "q": "gadget store",
+      "category": "tech",
+      "expected_brand": "movil"
+    },
+    {
+      "q": "venta de drones",
+      "category": "tech",
+      "expected_brand": "movil"
+    },
+    {
+      "q": "venta de cámaras",
+      "category": "tech",
+      "expected_brand": "movil"
+    },
+    {
+      "q": "venta de gopro",
+      "category": "tech",
+      "expected_brand": "movil"
+    },
+    {
+      "q": "venta de audífonos",
+      "category": "tech",
+      "expected_brand": "funda"
+    },
+    {
+      "q": "venta de bocinas bluetooth",
+      "category": "tech",
+      "expected_brand": "funda"
+    },
+    {
+      "q": "venta de smartwatch",
+      "category": "tech",
+      "expected_brand": "tictac"
+    },
+    {
+      "q": "venta de wearables",
+      "category": "tech",
+      "expected_brand": "tictac"
+    },
+    {
+      "q": "venta de smart home",
+      "category": "tech",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "domótica",
+      "category": "tech",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "casa inteligente",
+      "category": "tech",
+      "expected_brand": "linea-b"
+    },
+    {
+      "q": "venta de alarmas",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "cámaras de seguridad",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "cctv",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de routers",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de switches",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "cableado estructurado",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "fibra óptica",
+      "category": "tech",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "vape shop",
+      "category": "retail-vape",
+      "expected_brand": "discreto"
+    },
+    {
+      "q": "tienda de cigarros electrónicos",
+      "category": "retail-vape",
+      "expected_brand": "discreto"
+    },
+    {
+      "q": "tabaquería",
+      "category": "retail-vape",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "tienda de habanos",
+      "category": "retail-vape",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "humidor",
+      "category": "retail-vape",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "tienda esotérica",
+      "category": "retail-esoterico",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "santería",
+      "category": "retail-esoterico",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "tarot reading",
+      "category": "retail-esoterico",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "lectura de cartas",
+      "category": "retail-esoterico",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "vidente",
+      "category": "retail-esoterico",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "astrólogo",
+      "category": "retail-esoterico",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "quiromántica",
+      "category": "retail-esoterico",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "tienda de cristales",
+      "category": "retail-esoterico",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "venta de inciensos",
+      "category": "retail-esoterico",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "venta de veladoras",
+      "category": "retail-esoterico",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "velería",
+      "category": "retail-esoterico",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "imágenes religiosas",
+      "category": "retail-esoterico",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "venta de rosarios",
+      "category": "retail-esoterico",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "articulos religiosos",
+      "category": "retail-esoterico",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "fabrica de muebles",
+      "category": "industria",
+      "expected_brand": "viruta"
+    },
+    {
+      "q": "mueblería industrial",
+      "category": "industria",
+      "expected_brand": "viruta"
+    },
+    {
+      "q": "fábrica de ropa",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "maquila textil",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "fábrica de alimentos",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "empacadora",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "procesadora",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "fábrica de plásticos",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "extrusora",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "fábrica de empaques",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de cajas de cartón",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "fabricante de etiquetas",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "printing industry",
+      "category": "industria",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "fundidora",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "herrería industrial",
+      "category": "industria",
+      "expected_brand": "chispa"
+    },
+    {
+      "q": "maquinados",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "tornos cnc",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "fábrica de tornillos",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de pernos",
+      "category": "industria",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "barbería",
+      "category": "servicios",
+      "expected_brand": "navaja"
+    },
+    {
+      "q": "estética",
+      "category": "servicios",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "cafetería",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "panadería",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "pastelería",
+      "category": "comida",
+      "expected_brand": "merengue"
+    },
+    {
+      "q": "repostería",
+      "category": "comida",
+      "expected_brand": "merengue"
+    },
+    {
+      "q": "heladería",
+      "category": "comida",
+      "expected_brand": "nieve"
+    },
+    {
+      "q": "paletería",
+      "category": "comida",
+      "expected_brand": "nieve"
+    },
+    {
+      "q": "nevería",
+      "category": "comida",
+      "expected_brand": "nieve"
+    },
+    {
+      "q": "rotisería",
+      "category": "comida",
+      "expected_brand": "brasa"
+    },
+    {
+      "q": "polleria",
+      "category": "comida",
+      "expected_brand": "brasa"
+    },
+    {
+      "q": "rosticería",
+      "category": "comida",
+      "expected_brand": "brasa"
+    },
+    {
+      "q": "tortillería",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "fonda casera",
+      "category": "comida",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "comedor industrial",
+      "category": "comida",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "restaurante familiar",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "restaurant gourmet",
+      "category": "comida",
+      "expected_brand": "trattoria"
+    },
+    {
+      "q": "fine dining",
+      "category": "comida",
+      "expected_brand": "trattoria"
+    },
+    {
+      "q": "locutorio internet",
+      "category": "servicios",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "cibercafé",
+      "category": "servicios",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "internet cafe",
+      "category": "servicios",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "café internet",
+      "category": "servicios",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "centro de copiado",
+      "category": "servicios",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "copy center",
+      "category": "servicios",
+      "expected_brand": "bloque"
+    },
+    {
+      "q": "centro de cobranza",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia de cobranzas",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "empresa de seguridad",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "vigilancia privada",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "guardia de seguridad",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "seguridad patrimonial",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "monitoreo de alarmas",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "call center",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "contact center",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "servicio al cliente",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "atención al cliente",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "help desk",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "servicio técnico telefónico",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia de modelos",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "agencia de talentos",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "casting",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "productora",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "productora cinematográfica",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "estudio cinematográfico",
+      "category": "servicios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta de oficinas",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "oficinas virtuales",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "coworking",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "espacio compartido",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta de bodegas",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "mini bodegas",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "self storage",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de naves industriales",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta de salones",
+      "category": "renta",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de aulas",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta de cine privado",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta de equipo audiovisual",
+      "category": "renta",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de proyectores",
+      "category": "renta",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de pantallas",
+      "category": "renta",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de bocinas",
+      "category": "renta",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de generadores",
+      "category": "renta",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "renta de andamios",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta de polipasto",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta de maquinaria pesada",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta de retroexcavadora",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta de montacargas",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "renta de patines hidráulicos",
+      "category": "renta",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "mensajería local",
+      "category": "envios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "envíos mismo día",
+      "category": "envios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "paquetería express",
+      "category": "envios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "shipping company",
+      "category": "envios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "logística empresarial",
+      "category": "envios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "transportes nacionales",
+      "category": "envios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "transportes locales",
+      "category": "envios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "fletes intermunicipales",
+      "category": "envios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "mudanzas locales",
+      "category": "envios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "mudanzas internacionales",
+      "category": "envios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "empaque para mudanzas",
+      "category": "envios",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de extensiones",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "extensiones de cabello",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "pelucas",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "venta de pelucas",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "venta de pestañas",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "venta de uñas postizas",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "venta de gel para uñas",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "supplies para uñas",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "venta de tintes",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "venta de productos para cabello",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "venta de planchas",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "venta de secadoras",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "venta de tijeras profesionales",
+      "category": "belleza-retail",
+      "expected_brand": "brillo"
+    },
+    {
+      "q": "traduccion certificada",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "traductor jurado",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "traducción técnica",
+      "category": "servicios-pro",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "nutrólogo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "nutriólogo deportivo",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "fitness coach",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "personal trainer",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "entrenador personal",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "training online",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "entrenamiento funcional",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "rehabilitación deportiva",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "fisioterapia deportiva",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "medicina deportiva",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "preparador físico",
+      "category": "deporte",
+      "expected_brand": "forja"
+    },
+    {
+      "q": "nutrición deportiva",
+      "category": "salud",
+      "expected_brand": "pulso"
+    },
+    {
+      "q": "suplementos",
+      "category": "retail",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "proteínas",
+      "category": "retail",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "nutrición deportiva tienda",
+      "category": "retail",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "suplementos para gym",
+      "category": "retail",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "preworkout",
+      "category": "retail",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "vitaminas",
+      "category": "retail",
+      "expected_brand": "receta"
+    },
+    {
+      "q": "naturista",
+      "category": "retail",
+      "expected_brand": "receta"
+    },
+    {
+      "q": "tienda naturista",
+      "category": "retail",
+      "expected_brand": "receta"
+    },
+    {
+      "q": "herbolaria",
+      "category": "retail",
+      "expected_brand": "receta"
+    },
+    {
+      "q": "productos orgánicos",
+      "category": "retail",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "orgánicos tienda",
+      "category": "retail",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "comida orgánica",
+      "category": "retail",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "gourmet store",
+      "category": "retail",
+      "expected_brand": "despensa"
+    },
+    {
+      "q": "delicatessen",
+      "category": "retail",
+      "expected_brand": "despensa"
+    },
+    {
+      "q": "tienda gourmet",
+      "category": "retail",
+      "expected_brand": "despensa"
+    },
+    {
+      "q": "quesos importados",
+      "category": "retail",
+      "expected_brand": "despensa"
+    },
+    {
+      "q": "vinos importados",
+      "category": "retail",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "cigarros premium",
+      "category": "retail",
+      "expected_brand": "tendito"
+    },
+    {
+      "q": "venta de chocolates artesanales",
+      "category": "retail",
+      "expected_brand": "caramelo"
+    },
+    {
+      "q": "chocolatería",
+      "category": "retail",
+      "expected_brand": "caramelo"
+    },
+    {
+      "q": "venta de chocolates",
+      "category": "retail",
+      "expected_brand": "caramelo"
+    },
+    {
+      "q": "venta de chocolate fino",
+      "category": "retail",
+      "expected_brand": "caramelo"
+    },
+    {
+      "q": "servicio de aseo",
+      "category": "servicios",
+      "expected_brand": "trapeador"
+    },
+    {
+      "q": "cleaning service",
+      "category": "servicios",
+      "expected_brand": "trapeador"
+    },
+    {
+      "q": "servicio de limpieza residencial",
+      "category": "servicios",
+      "expected_brand": "trapeador"
+    },
+    {
+      "q": "servicio de limpieza profunda",
+      "category": "servicios",
+      "expected_brand": "trapeador"
+    },
+    {
+      "q": "limpieza post obra",
+      "category": "servicios",
+      "expected_brand": "trapeador"
+    },
+    {
+      "q": "limpieza de vidrios",
+      "category": "servicios",
+      "expected_brand": "trapeador"
+    },
+    {
+      "q": "limpieza de fachadas",
+      "category": "servicios",
+      "expected_brand": "trapeador"
+    },
+    {
+      "q": "servicio de pulidos",
+      "category": "servicios",
+      "expected_brand": "tapizado"
+    },
+    {
+      "q": "lavado a domicilio",
+      "category": "servicios",
+      "expected_brand": "burbuja"
+    },
+    {
+      "q": "lavandería express",
+      "category": "servicios",
+      "expected_brand": "burbuja"
+    },
+    {
+      "q": "lavado y planchado",
+      "category": "servicios",
+      "expected_brand": "burbuja"
+    },
+    {
+      "q": "planchaduria",
+      "category": "servicios",
+      "expected_brand": "burbuja"
+    },
+    {
+      "q": "planchado a domicilio",
+      "category": "servicios",
+      "expected_brand": "burbuja"
+    },
+    {
+      "q": "lavandería autoservicio",
+      "category": "servicios",
+      "expected_brand": "burbuja"
+    },
+    {
+      "q": "servicio funerario premium",
+      "category": "servicios-funer",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "cremación",
+      "category": "servicios-funer",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "venta de ataúdes",
+      "category": "servicios-funer",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "servicios fúnebres",
+      "category": "servicios-funer",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "crematorio",
+      "category": "servicios-funer",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "preventa funeraria",
+      "category": "servicios-funer",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "plan funerario",
+      "category": "servicios-funer",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "table dance",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "cabaret",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "centro botanero",
+      "category": "entretenimiento",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "bar botanero",
+      "category": "entretenimiento",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "after",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "after hours",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "rooftop",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "terraza con bar",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "speakeasy",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "bar clandestino",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "lounge bar",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "gastrobar",
+      "category": "entretenimiento",
+      "expected_brand": "trattoria"
+    },
+    {
+      "q": "wine bar",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "cervecería artesanal",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "brewpub",
+      "category": "entretenimiento",
+      "expected_brand": "tarima"
+    },
+    {
+      "q": "restobar",
+      "category": "entretenimiento",
+      "expected_brand": "trattoria"
+    },
+    {
+      "q": "hotel de paso",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "motel",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "hotel ejecutivo",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "hotel familiar",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "hostal económico",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "posada",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "casa de huéspedes",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "bnb",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "cabañas renta",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "villa renta",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "resort",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "hotel todo incluido",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "glamping",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "camping",
+      "category": "hospedaje",
+      "expected_brand": "folio"
+    },
+    {
+      "q": "lonchería",
+      "category": "comida",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "itacate",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "kitchenettes",
+      "category": "comida",
+      "expected_brand": "comedor"
+    },
+    {
+      "q": "ghost kitchen",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "dark kitchen",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "cocinas en la nube",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "delivery solo",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "comida para llevar",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "take away",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "delivery exclusivo",
+      "category": "comida",
+      "expected_brand": "comandero"
+    },
+    {
+      "q": "merienda café",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "café especializado",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "café de especialidad",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "third wave coffee",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "café tostado en casa",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "café gourmet",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "venta de café en grano",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "venta de granos café",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "venta de café molido",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "suministros para café",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "venta de tés especiales",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "casa de té",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "teteria",
+      "category": "comida",
+      "expected_brand": "espuma"
+    },
+    {
+      "q": "venta de chocolatería",
+      "category": "comida",
+      "expected_brand": "caramelo"
+    },
+    {
+      "q": "venta de bombones",
+      "category": "comida",
+      "expected_brand": "caramelo"
+    },
+    {
+      "q": "mesa de postres",
+      "category": "comida",
+      "expected_brand": "merengue"
+    },
+    {
+      "q": "postres especiales",
+      "category": "comida",
+      "expected_brand": "merengue"
+    }
   ]
 }
