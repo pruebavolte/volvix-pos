@@ -1,16 +1,15 @@
 {
-  "version": "1.0.379",
+  "version": "1.0.380",
   "major": 1,
   "minor": 0,
-  "patch": 379,
+  "patch": 380,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-18T14:45:00.000Z",
-  "built_at": "2026-05-18T14:45:00.000Z",
+  "date": "2026-05-18T14:55:00.000Z",
+  "built_at": "2026-05-18T14:55:00.000Z",
   "changelog": [
-    "V9.6.2 FIX 'ropa de bebé': el regex 'bebe' genérico capturaba TODO lo que contenía 'bebe' (incluso 'ropa de bebe') antes de mi nueva regla. Restringido a productos específicos: pañales literales, alimentos/leche/biberones/cunas/chupones/carritos. Ahora 'ropa de bebé' SÍ va a /mochila.html.",
-    "V9.6.1: ropa de bebé regex sin acento",
-    "V9.6: 18 bugs stress test 100",
-    "V9.5.x: stress tests previos"
+    "V9.6.3 BACKEND vinatería: 5 mappings backend (vinatería/vinos/licorería/mezcal/cerveza → /tarima.html). Estos eran landings planas viejas que el backend servía. Stress test 100 ahora: 0 críticos en frontend + 0 backend landings planos en alcohol.",
+    "V9.6.2: regex pañales restringido (no captura 'ropa de bebe')",
+    "V9.6: 18 bugs adicionales del stress test 100"
   ]
 }

@@ -301,6 +301,11 @@ async function searchGiros(ctx, req, res, parsedUrl) {
       '/landing-trajes-de-bano.html': '/pareo.html',
       '/landing-regalos.html': '/ramillete.html',
       '/landing-venta-de-regalos.html': '/ramillete.html',
+      '/landing-vinateria.html': '/tarima.html',
+      '/landing-vinos.html': '/tarima.html',
+      '/landing-licoreria.html': '/tarima.html',
+      '/landing-mezcal.html': '/tarima.html',
+      '/landing-cerveza.html': '/tarima.html',
     };
     if (PLAIN_TO_PREMIUM[hit.landing]) {
       hit.landing = PLAIN_TO_PREMIUM[hit.landing];
