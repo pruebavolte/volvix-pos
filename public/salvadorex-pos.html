@@ -13025,15 +13025,32 @@
       ${p.description_long ? `<div style="background:#f7f9fb;padding:8px 10px;border-radius:4px;font-size:11.5px;line-height:1.45;color:#444;margin-bottom:10px">${p.description_long}</div>` : ''}
       ${techRows ? `<div style="margin-bottom:10px"><div style="font-weight:600;font-size:11.5px;color:#2D5F8F;margin-bottom:3px">📋 Ficha técnica</div>${techRows}</div>` : ''}
       <button onclick="addQuickPick('${safeCode}')" style="width:100%;padding:10px;background:#2D5F8F;color:#fff;border:0;border-radius:5px;font-size:12.5px;font-weight:600;cursor:pointer">+ Agregar al ticket</button>`;
-    // V10.4.2 — Forzar display de imágenes post-render. Algún wiring (CSP/applyGiroConfig)
-    // estaba inyectando display:none !important en imágenes recién creadas.
-    requestAnimationFrame(() => {
-      target.querySelectorAll('img').forEach(img => {
-        img.style.setProperty('display', 'block', 'important');
-        img.style.setProperty('visibility', 'visible', 'important');
-        img.style.setProperty('opacity', '1', 'important');
+    // V10.4.3 — MutationObserver que mantiene las imágenes visibles aunque
+    // algún wiring trate de ocultarlas con display:none!important.
+    const forceVis = (img) => {
+      img.style.setProperty('display', 'block', 'important');
+      img.style.setProperty('visibility', 'visible', 'important');
+      img.style.setProperty('opacity', '1', 'important');
+    };
+    const allImgs = target.querySelectorAll('img');
+    allImgs.forEach(forceVis);
+    // Re-aplicar 3 veces con delay (catch race condition con feature-flag observers)
+    [50, 150, 500].forEach(ms => setTimeout(() => allImgs.forEach(forceVis), ms));
+    // MutationObserver permanente: si alguien cambia style attribute, re-forzar
+    if (!window.__vlxImgObserver) {
+      window.__vlxImgObserver = new MutationObserver((muts) => {
+        muts.forEach(m => {
+          if (m.target && m.target.tagName === 'IMG' &&
+              (m.target.id === 'vlx-pane-main-img' || m.target.closest('#vlx-product-pane-body'))) {
+            const cs = getComputedStyle(m.target);
+            if (cs.display === 'none' || cs.visibility === 'hidden') {
+              forceVis(m.target);
+            }
+          }
+        });
       });
-    });
+      window.__vlxImgObserver.observe(target, { attributes: true, subtree: true, attributeFilter: ['style','class'] });
+    }
   }
   window.showProductSidebar = showProductSidebar;
 
