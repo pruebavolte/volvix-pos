@@ -279,6 +279,8 @@ async function searchGiros(ctx, req, res, parsedUrl) {
       '/landing-vape.html': '/discreto.html',
       '/landing-lenceria.html': '/discreto.html',
       '/landing-libreria-papeleria.html': '/tendito.html',
+      '/landing-taller-mecanico.html': '/refacciona.html',
+      '/landing-miscelanea.html': '/tendito.html',
     };
     if (PLAIN_TO_PREMIUM[hit.landing]) {
       hit.landing = PLAIN_TO_PREMIUM[hit.landing];

@@ -910,11 +910,23 @@
     if (!b.liveDemo) return '';
     const ld = b.liveDemo;
     let widget = '';
-    if (ld.type === 'stock')   widget = renderStockWidget(ld.data);
-    if (ld.type === 'kds')     widget = renderKdsWidget(ld.data);
-    if (ld.type === 'booking') widget = renderBookingWidget(ld.data);
-    if (ld.type === 'expiry')  widget = renderExpiryWidget(ld.data);
-    if (ld.type === 'fiado')   widget = renderFiadoWidget(ld.data);
+    try { // V9.0.7 try-catch widgets
+
+      if (ld.type === 'stock')   widget = renderStockWidget(ld.data);
+
+      if (ld.type === 'kds')     widget = renderKdsWidget(ld.data);
+
+      if (ld.type === 'booking') widget = renderBookingWidget(ld.data);
+
+      if (ld.type === 'expiry')  widget = renderExpiryWidget(ld.data);
+
+      if (ld.type === 'fiado')   widget = renderFiadoWidget(ld.data);
+
+    } catch (_e) {
+
+      widget = '<div class="v-widget"><div class="v-widget-bar">Demo en vivo</div><div style="padding:24px;color:#888">Vista previa del modulo</div></div>';
+
+    }
 
     return `<section class="v-livedemo" id="demo">
       <div class="container v-livedemo-grid">
