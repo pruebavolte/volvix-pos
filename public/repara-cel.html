@@ -1469,6 +1469,9 @@
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('b') || params.get('brand');
   if (slug && BRANDS[slug]) {
+    // V9.0 defensive: ocultar picker INMEDIATAMENTE (antes incluso del CSS load)
+    var _picker = document.getElementById('picker');
+    if (_picker) _picker.style.display = 'none';
     renderBrand(BRANDS[slug]);
   } else {
     renderPicker();

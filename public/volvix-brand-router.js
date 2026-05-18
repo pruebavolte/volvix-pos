@@ -3113,6 +3113,28 @@
     var q = norm(query);
     if (!q || q.length < 3) return null; // escape: query muy corta → no redirigir
 
+    // ═══════════════════════════════════════════════════════════════
+    // V9.0 HARD EXCEPTIONS (pre-pitch fix) — bloquear matches incorrectos
+    // que el partial-match del resolve() puede generar
+    // ═══════════════════════════════════════════════════════════════
+
+    // RENTAS / ALQUILERES — NO debe ir a "pareo" (zapaterías) ni a ropa
+    // Si la query contiene "renta" o "alquila" + cualquier producto, usar TARIMA (eventos)
+    if (/^(renta|alquil)/.test(q) || /\s(renta|alquila|alquiler)\s/.test(q))
+      return '/tarima.html'; // tarima cubre rentas de eventos, mobiliario, etc.
+
+    // BEBÉ / INFANTIL básico — NO debe ir a "espuma" (cafetería) por match parcial "pan-"
+    if (/panal|panales|pañal|bebe|bebes|recien nacido|infantil basico|maternal/.test(q))
+      return '/tendito.html'; // tendito = tienda barrio genérica, cubre tienda bebés
+
+    // SEXSHOP — confirmar que va a discreto (ya está en aliases pero defensivo)
+    if (/sexshop|sex shop|tienda erotica|productos intimos|adultos solamente/.test(q))
+      return '/discreto.html';
+
+    // PAPELERÍA — NO debe ir a "espuma" por match accidental
+    if (/papeleria|papeler|ofitec|art escolar|utiles escolares/.test(q))
+      return '/bloque.html';
+
     // SALUD Y BIENESTAR → pulso
     if (/salud|medic|clinic|dental|dentist|optic|fisio|nutri|psico|pediatr|gineco|dermato|audi|podo|consulto/.test(q))
       return '/pulso.html';

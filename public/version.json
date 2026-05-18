@@ -1,17 +1,18 @@
 {
-  "version": "1.0.360",
+  "version": "1.0.361",
   "major": 1,
   "minor": 0,
-  "patch": 360,
+  "patch": 361,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-18T06:35:00.000Z",
-  "built_at": "2026-05-18T06:35:00.000Z",
+  "date": "2026-05-18T09:15:00.000Z",
+  "built_at": "2026-05-18T09:15:00.000Z",
   "changelog": [
-    "V8.9 BUG CRITICAL: detectado vía Puppeteer real que backend api/giros.js mapeaba 'antro'→/landing-disco.html y 'librería'→/landing-libreria.html (templates planos viejos). El frontend vlxBrandRouter NO podía interceptar porque searchGiro() llama PRIMERO al backend. Fix: agregada tabla PLAIN_TO_PREMIUM en searchGiros() que remap 30 landings planas a sus marcas premium correspondientes (disco→tarima, libreria→bloque, cantina→tarima, hotel→folio, joyeria→quilate, zapateria→pareo, etc.). Ahora ningún flujo del marketplace puede caer al template plano viejo.",
+    "V9.0 PRE-PITCH FIX (urgente para pitch HOY): (1) HARD_EXCEPTIONS en volvix-brand-router.js fallback para bloquear matches incorrectos: 'renta de trajes' YA NO va a pareo → ahora va a /tarima.html (eventos/mobiliario), 'pañales/bebé' YA NO va a espuma → ahora va a /tendito.html, 'sexshop' va a /discreto.html (confirmado), 'papelería' va a /bloque.html. (2) Refuerzo defensivo en 206 HTMLs de marca: agregado JS que oculta #picker INMEDIATAMENTE antes del render para evitar flash visual del h1 'Motor de marcas Volvix' que se reportó.",
+    "V8.9 BUG CRITICAL: backend api/giros.js servía templates planos.",
     "V8.8.1 ROUND 2: 'neveria' → /nieve.html",
-    "V8.8 ROUND 1: validación masiva 1081 giros, +280 aliases SMB MX, fix papeleria/colegio landing planos",
-    "V8.7.x: aliases con keys normalizadas + BUG critical pareo/comandero/refacciona en VLX_BRANDS",
+    "V8.8 ROUND 1: validación masiva 1081 giros",
+    "V8.7.x: pareo/comandero/refacciona en VLX_BRANDS",
     "V8.6, V8.5.1, V8.5, V8.4.1, V8.4, V8.3, V8.2, V8.1, V8, V7, V6: fases anteriores"
   ]
 }
