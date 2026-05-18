@@ -1468,6 +1468,70 @@ async function saveProductImage(ctx, req, res) {
   }
 }
 
+// ---------- config endpoint (giros_terminologias) ----------
+// GET /api/giros/config?giro=<slug>
+// Devuelve la fila de giros_terminologias para el slug pedido.
+// Si no existe, devuelve el default. Si tenant_id está en req (auth), prioriza override per-tenant.
+async function configGiro(ctx, req, res, parsedUrl) {
+  const slug = String((parsedUrl && parsedUrl.query && parsedUrl.query.giro) || '').toLowerCase().trim();
+  if (!slug) return err(ctx, res, 400, 'BAD_REQUEST', 'Falta parametro ?giro=<slug>');
+
+  if (!ctx || typeof ctx.supabaseRequest !== 'function') {
+    return err(ctx, res, 503, 'NO_DB', 'Supabase no disponible');
+  }
+
+  // 1) Intentar override per-tenant si auth presente
+  let tenantId = null;
+  try {
+    if (typeof ctx.getAuthUser === 'function') {
+      const user = await ctx.getAuthUser(req);
+      if (user && user.tenant_id) tenantId = user.tenant_id;
+    }
+  } catch (_e) { /* no auth, sigue */ }
+
+  const slugEnc = encodeURIComponent(slug);
+  const sel = 'giro_slug,giro_name,terminologias,modulos_activos,modulos_inactivos,campos_visibles,scian_code,version,tenant_id,active';
+
+  let rows = [];
+  try {
+    if (tenantId) {
+      // buscar override per-tenant primero
+      const pathTenant = '/giros_terminologias?giro_slug=eq.' + slugEnc + '&tenant_id=eq.' + encodeURIComponent(tenantId) + '&select=' + sel;
+      rows = await ctx.supabaseRequest('GET', pathTenant) || [];
+    }
+    if (!rows.length) {
+      // fallback: template global (tenant_id IS NULL)
+      const pathGlobal = '/giros_terminologias?giro_slug=eq.' + slugEnc + '&tenant_id=is.null&select=' + sel;
+      rows = await ctx.supabaseRequest('GET', pathGlobal) || [];
+    }
+    if (!rows.length) {
+      // ultimo fallback: default
+      const pathDefault = '/giros_terminologias?giro_slug=eq.default&tenant_id=is.null&select=' + sel;
+      rows = await ctx.supabaseRequest('GET', pathDefault) || [];
+    }
+  } catch (e) {
+    return err(ctx, res, 500, 'DB_ERROR', 'Error consultando giros_terminologias',
+      { detail: ctx.IS_PROD ? undefined : String(e.message) });
+  }
+
+  if (!rows.length) return err(ctx, res, 404, 'NOT_FOUND', 'Sin config para giro=' + slug);
+
+  const row = rows[0];
+  return send(ctx, res, 200, {
+    giro_slug: row.giro_slug,
+    giro_name: row.giro_name || null,
+    terminologias: row.terminologias || {},
+    modulos_activos: row.modulos_activos || [],
+    modulos_inactivos: row.modulos_inactivos || [],
+    campos_visibles: row.campos_visibles || {},
+    scian_code: row.scian_code || null,
+    version: row.version || 1,
+    tenant_override: row.tenant_id != null,
+    source: row.tenant_id ? 'tenant' : (row.giro_slug === 'default' ? 'default' : 'global'),
+    cached_at: new Date().toISOString()
+  });
+}
+
 // ---------- dispatcher ----------
 function matchExistsPath(pathname) {
   const m = /^\/api\/giros\/([a-z0-9-]+)\/exists$/i.exec(pathname);
@@ -1485,6 +1549,7 @@ module.exports = async function handleGiros(req, res, parsedUrl, ctx) {
     if (method === 'GET'  && pathname === '/api/giros')               { await listGiros(ctx, req, res); return true; }
     if (method === 'GET'  && pathname === '/api/giros/search')        { await searchGiros(ctx, req, res, parsedUrl); return true; }
     if (method === 'GET'  && pathname === '/api/giros/autocomplete')  { await autocompleteGiros(ctx, req, res, parsedUrl); return true; }
+    if (method === 'GET'  && pathname === '/api/giros/config')        { await configGiro(ctx, req, res, parsedUrl); return true; }
     if (method === 'POST' && pathname === '/api/giros/generate')      { await generateGiro(ctx, req, res); return true; }
     if (method === 'POST' && pathname === '/api/giros/resync-images')  { await resyncImages(ctx, req, res); return true; }
     if (method === 'POST' && pathname === '/api/giros/save-image')     { await saveProductImage(ctx, req, res); return true; }
