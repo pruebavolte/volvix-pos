@@ -1,22 +1,22 @@
 {
-  "version": "1.0.353",
+  "version": "1.0.354",
   "major": 1,
   "minor": 0,
-  "patch": 353,
+  "patch": 354,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-17T23:55:00.000Z",
-  "built_at": "2026-05-17T23:55:00.000Z",
+  "date": "2026-05-18T00:15:00.000Z",
+  "built_at": "2026-05-18T00:15:00.000Z",
   "changelog": [
-    "V8.5.1 PATCH: 3 mini-bugs detectados al probar V8.5: (1) 'optica' apuntaba a /pulso.html (clínica médica) en vez de /armazon.html (ópticas con armazones) - corregido. (2) 'peluqueria canina' caía en /brillo.html (estética humana) por orden de regex - mascotas ahora se evalúa ANTES que belleza. (3) 'vulcanizadora' caía al default tendito - agregado 'vulcaniz|hojalater|pintura auto' al regex de talleres.",
-    "V8.5 PATCH: fallback ampliado masivamente. Antes 'sabanas/blanqueria/edredones/cortinas/toallas' caía a /tendito.html. Ahora va a /almohada.html. +20 aliases textil hogar + 12 categorías nuevas en fallback regex.",
-    "V8.4.1 PATCH: regex de fallback ampliado para servicios profesionales (juridico/gestor/tramites/impuestos).",
-    "V8.4 HOTFIX: fallback router para giros no mapeados - YA NO sirve landing-{slug}.html plano.",
-    "V8.3 NUEVA MARCA: Discreto - Sexshop/Boutique íntima premium #217.",
+    "V8.6: aliases simples para 'bolsas' → /asa.html (marca premium para bolsas/carteras). Antes 'bolsas' caía mal porque el alias matching parcial encontraba algo de zapatos. Agregados: bolsas, bolsa, bolsos, bolso, cartera, carteras, monedero, monederos, tienda de bolsas, fabrica de bolsas, venta de bolsas. Empieza fase de validación masiva 500 giros con test JSON.",
+    "V8.5.1 PATCH: 3 mini-bugs (optica/peluqueria canina/vulcanizadora).",
+    "V8.5 PATCH: fallback ampliado para sabanas + 12 categorías.",
+    "V8.4.1 PATCH: regex juridico/gestor/tramites.",
+    "V8.4 HOTFIX: fallback router contra template plano.",
+    "V8.3: nueva marca Discreto #217.",
     "V8.2 FIX motor reload-loop",
     "V8.1 FIX router aliases V6",
     "V8 motor-v3 ZIP integrado",
-    "V7 motor: 200 marcas premium auto-generadas",
-    "V6 motor v3: 6 marcas premium nuevas"
+    "V7 motor: 200 marcas premium auto-generadas"
   ]
 }
