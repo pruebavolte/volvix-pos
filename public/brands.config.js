@@ -116,14 +116,14 @@ const BRAND_COMANDERO = {
 
   hero: {
     eyebrow:'Sistema POS para restaurantes mexicanos',
-    h1:'Sírvelo <em>caliente</em>.<br>Cobra <em>rápido</em>.',
-    deck:'El sistema que reemplaza los papelitos, los gritos y los platillos olvidados. Comandera digital, KDS, división de cuenta y propinas para que tu cocina no pare ni un segundo.',
+    h1:'Ninguna comanda perdida. Ningún taco regalado.',
+    deck:'El POS para taquerías, restaurantes y cocinas mexicanas donde las comandas en papelito ya no se pierden, los empleados no regalan platillos a sus amigos y al final del día sabes EXACTAMENTE qué platillo te deja más lana.',
     ctaPrimary:'Empezar gratis', ctaSecondary:'Ver cocina en vivo',
     metaLine:'$0 inicial · setup en 5 min · funciona offline',
   },
 
   images: {
-    hero:'https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=1200&h=1600&fit=crop&q=85',
+    hero:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=1200&h=1600&fit=crop&q=85',
     heroAlt:'Tacos al pastor mexicanos',
     showcase:[
       {url:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=1200&h=900&fit=crop&q=80',tag:'Pizza artesanal',size:'lg'},
@@ -182,24 +182,24 @@ const BRAND_COMANDERO = {
   },
 
   thefts: [
-    {title:'Comanda fantasma',
-     rob:'Mesera no captura la orden, cocina la prepara igual, cliente paga en efectivo, mesera se queda con todo. En un restaurante de 30 mesas son $4,000 a $8,000 al mes mínimo.',
-     fix:'Cocina solo prepara <strong>lo que está en el KDS</strong>. Si no está en el sistema, no sale del calor. Cero excepciones.'},
-    {title:'Cancelaciones tras el cobro',
-     rob:'Mesera cobra al cliente, después "cancela" el ticket diciendo que se equivocó, y se queda con el dinero.',
-     fix:'Cancelar requiere <strong>PIN del gerente + razón escrita</strong>. Reporte semanal de cancelaciones por mesero.'},
-    {title:'Cortesías sin autorización',
-     rob:'"Eran amigos de mi prima", "se quejó del platillo y le regalé el postre". Empleados regalan comida para hacer amigos.',
-     fix:'Cortesías exigen <strong>PIN del gerente + motivo + foto del cliente</strong>. Reporte mensual por mesero.'},
-    {title:'Cocina dice "ya casi sale" y nunca sale',
-     rob:'Cliente lleva 20 min esperando, mesera dice "ya viene", cocina dice "ya casi". Cliente se enoja, se va sin pagar el postre, no vuelve. Pierdes el ticket completo + un cliente.',
-     fix:'KDS con <strong>cronómetro por platillo</strong>. Si pasa de 12 min, alerta visual. Mesera ve el tiempo real, no la mentira de la cocina.'},
-    {title:'Propinas chuecas — el de la barra siempre se queda más',
-     rob:'Pool de propinas que "se reparte equitativo" pero el que recibe el efectivo se queda con su tajada antes de partir. Meseros nuevos terminan ganando menos que el de la barra que cobra.',
-     fix:'Pool digital con <strong>reglas que tú defines</strong>: 60% meseros / 20% cocina / 20% barra (o lo que decidas). Reparto automático al cierre, sin discusión.'},
-    {title:'Reservaciones por WhatsApp que se traslapan',
-     rob:'Reservan mesa 8pm el sábado por WhatsApp. Llega el cliente, está ocupada porque otro reservó antes. Pierdes al cliente nuevo + al que regresaba.',
-     fix:'Mesas en sistema en <strong>tiempo real</strong>. Reservación por WhatsApp asigna mesa automáticamente. Si está ocupada, ofrece próxima disponible.'},
+    {title:'📝 Las comandas en papelito se pierden',
+     rob:'Mesa 4 pidió hace 20 minutos y la cocina no sabe. El papelito se cayó al piso, el mesero se distrajo.',
+     fix:'Comandero manda la orden directo a la pantalla de cocina (KDS) en 2 segundos.'},
+    {title:'🔥 Cocina no sabe qué hacer primero',
+     rob:'Llegan 8 órdenes al mismo tiempo. ¿Cuál salió primero? ¿Cuál es de la mesa de 12 personas?',
+     fix:'Comandero ordena por prioridad y tiempo. La cocina nunca se atrasa.'},
+    {title:'🌮 Los empleados regalan comida a sus amigos',
+     rob:'El sobrino llega y \'tres tacos pa llevar, tío\'. Sin ticket, sin registro. Al final del día tu cuenta no cuadra.',
+     fix:'Comandero exige PIN para cortesías. Si no, todo pasa por el POS.'},
+    {title:'📊 No sabes qué platillo es el más rentable',
+     rob:'Vendes mucho de tacos al pastor, pero ¿cuánto te queda libre? ¿Cuesta más la salsa que cobras por el plato?',
+     fix:'Comandero te dice qué platillo te deja más dinero, no qué se vende más.'},
+    {title:'🥬 La merma de ingredientes te come la utilidad',
+     rob:'La carne que sobró ayer ya no sirve. La lechuga se marchitó. Tiras $400 a la basura.',
+     fix:'Comandero predice cuánto preparar según tu venta histórica. Menos basura, más utilidad.'},
+    {title:'🛵 Las apps de delivery se llevan el 30%',
+     rob:'UberEats, DiDi, Rappi te cobran $30 por cada $100 que vendes.',
+     fix:'Comandero conecta directo a las apps y te muestra cuál te deja más. Y propone que tu cliente pida directo, sin comisión.'}
   ],
 };
 
@@ -218,8 +218,8 @@ const BRAND_NAVAJA = {
 
   hero: {
     eyebrow:'El sistema para barberías mexicanas · 2026',
-    h1:'Cada <em>corte</em>,<br>cobrado.<br>Cada <em>propina</em>,<br>repartida.',
-    deck:'Navaja es el punto de venta hecho para barberías serias. Agenda por barbero, comisiones automáticas, propinas digitales y control de productos — para que nada se cobre por fuera.',
+    h1:'Cada propina llega completa. Cada barbero cobra lo justo.',
+    deck:'El POS para barberías mexicanas donde los barberos no se chingan las propinas, los WhatsApps de cita no se pierden y al cierre del día sabes exactamente cuánto le toca a cada quien.',
     ctaPrimary:'Empezar gratis', ctaSecondary:'Ver agenda en vivo',
     metaLine:'$0 inicial · setup en 5 min · 100% offline',
   },
@@ -284,24 +284,24 @@ const BRAND_NAVAJA = {
   },
 
   thefts: [
-    {title:'Cliente paga directo al barbero',
-     rob:'Cliente conocido le paga al barbero en la mano. No pasa por caja. Tú no te enteras. En barberías chicas: $1,500 a $4,000 al mes por barbero.',
-     fix:'Comisiones se pagan <strong>solo sobre tickets registrados</strong>. Si no captura, gana 0%. Reporte: corte registrado vs cita confirmada.'},
-    {title:'Productos que "se gastan"',
-     rob:'Cera, pomada, gel premium. El barbero "se llevó la muestra" o "se la regalé al cliente". En realidad la vendió afuera por la mitad.',
-     fix:'Inventario obligatorio <strong>al inicio y al cierre del turno</strong>. Si falta producto, alguien firma. Comparativo semanal por barbero.'},
-    {title:'Citas que sí se atendieron, "no llegaron"',
-     rob:'El cliente llegó, le cortaron, pero el barbero dice "no llegó" porque ya cobró en efectivo. La cita aparece como ausente.',
-     fix:'Cita confirmada se marca <strong>al iniciar el servicio con foto del cliente en el sillón</strong>. Si se inició, se cobró.'},
-    {title:'Comisiones que nunca cuadran al cierre',
-     rob:'Al final del día siempre hay discusión: "yo atendí 12", "no, fueron 8". Sin sistema, queda en la palabra del barbero contra la tuya. Y siempre pierdes tú.',
-     fix:'Cierre diario con <strong>desglose automático por barbero</strong>. Cada quien ve sus cortes, sus propinas, su comisión. Sin discusiones, sin pizarrón con gises.'},
-    {title:'WhatsApps de citas que se pierden',
-     rob:'Cliente manda "¿hay cita el sábado a las 11?" entre los mensajes del grupo familiar y los de la chamba. Para cuando lo ves, ya pasó. Pierdes 3-5 citas por semana así.',
-     fix:'WhatsApp Business <strong>integrado al POS</strong>. Cada solicitud entra al sistema, se asigna a barbero, se confirma automáticamente. Recordatorio 1 hora antes.'},
-    {title:'El que llega tarde y deja esperando',
-     rob:'Pancho llegó 40 min tarde, 3 clientes se fueron sin cortarse. Pierdes $600 en ese rato. Pero al fin de semana le pagas igual porque no tienes evidencia.',
-     fix:'Check-in obligatorio <strong>con QR al entrar</strong>. Si llega tarde, queda registrado. Reporte de puntualidad por barbero al cierre de quincena.'},
+    {title:'💸 Las propinas se desaparecen',
+     rob:'Pancho cobró $400 y dijo que solo le dieron $30 de propina. ¿Cómo sabes la verdad?',
+     fix:'Con Navaja, la propina se registra al cobrar. Punto.'},
+    {title:'📱 Los WhatsApps de citas se pierden',
+     rob:'Te llegan 40 mensajes diarios entre familia, proveedores y clientes. Las citas se mezclan, se confirman, se cancelan.',
+     fix:'Navaja organiza la agenda automáticamente desde WhatsApp.'},
+    {title:'✂️ Repartir comisiones es un dolor de cabeza',
+     rob:'Al cierre del día sacas calculadora: ¿70/30? ¿40/60? Y siempre alguien reclama.',
+     fix:'Navaja te da el corte por barbero, con su esquema personalizado. Cero discusiones.'},
+    {title:'👤 Cuando no estás, regalan cortes a sus carnales',
+     rob:'El compa llega, \'mi primo nomás un retoque\', y nunca pasa por caja.',
+     fix:'Navaja exige PIN gerente para descuentos. Si no, todo pasa por el POS.'},
+    {title:'🧴 Los productos en repisa no se venden o se pierden',
+     rob:'Pomadas, lociones, ceras: están ahí y nadie las ofrece. O peor, se las llevan sin registrar.',
+     fix:'Navaja sugiere venderlas al cobrar el corte. Inventario actualizado en vivo.'},
+    {title:'👑 No sabes quién es tu mejor cliente',
+     rob:'Pancho viene cada 15 días desde hace 2 años. Te debería estar atendiendo como rey.',
+     fix:'Navaja te avisa: \'Llegó Pancho. Cliente VIP. Última visita: corte + barba + tinte.\''}
   ],
 };
 
@@ -320,8 +320,8 @@ const BRAND_RECETA = {
 
   hero: {
     eyebrow:'Sistema POS para farmacias mexicanas',
-    h1:'Cada <em>lote</em>.<br>Cada <em>caducidad</em>.<br>Bajo control.',
-    deck:'Receta es el punto de venta hecho para farmacias. Control por lote, alertas de caducidad, recetas digitales y sustitutos sugeridos. Nada se vence en tu anaquel sin que lo sepas.',
+    h1:'Cada lote rastreado. Cada caducidad alertada. COFEPRIS sin sustos.',
+    deck:'El POS para farmacias mexicanas donde los lotes se controlan, las caducidades no te explotan, los medicamentos controlados están en orden con COFEPRIS y los consultorios anexos cobran al instante.',
     ctaPrimary:'Empezar gratis', ctaSecondary:'Ver demo',
     metaLine:'$0 inicial · setup en 5 min · COFEPRIS-friendly',
   },
@@ -387,24 +387,24 @@ const BRAND_RECETA = {
   },
 
   thefts: [
-    {title:'Medicamentos vencidos sin alerta',
-     rob:'Productos caros vencen en el anaquel sin que nadie note. Una farmacia chica pierde $8,000 a $15,000 al año en vencimientos invisibles.',
-     fix:'<strong>Alerta automática 90 / 60 / 30 días antes</strong> de caducidad. El sistema mueve a promoción solo. Cero pérdidas por descuido.'},
-    {title:'"Mermas" sin justificar',
-     rob:'Empleado registra medicamento como "merma" o "se rompió" y se lo lleva. Sin trazabilidad por lote, no puedes probar nada.',
-     fix:'<strong>Cada unidad rastreada por lote</strong>. Toda merma exige foto + autorización del gerente.'},
-    {title:'Venta "por fuera" de mostrador',
-     rob:'Despachador cobra en efectivo, no registra la venta, se queda con el dinero. El stock baja "por arte de magia".',
-     fix:'Inventario auditado <strong>al cierre de cada turno</strong>. Diferencia stock físico vs sistema dispara alerta.'},
-    {title:'COFEPRIS llega y no tengo el libro al día',
-     rob:'Te avisan visita en 48 horas. Pasas la noche cuadrando entradas/salidas a mano. Si te falta un movimiento, multa de $15,000+ y suspensión temporal.',
-     fix:'Libro de control <strong>se genera automático</strong>. Cada venta de medicamento controlado queda asentada al instante. Lista para COFEPRIS con 1 click.'},
-    {title:'Tarifas IMSS/INFONAVIT desactualizadas',
-     rob:'El descuento de INFONAVIT cambió de 30% a 25% pero tú sigues aplicando el viejo. Cliente paga menos, tú pierdes el diferencial. Al mes son $3,000-8,000 perdidos.',
-     fix:'Tarifas oficiales <strong>actualizadas automáticamente</strong> en el sistema. IMSS, INFONAVIT, ISSSTE. Sistema aplica el descuento vigente, sin error humano.'},
-    {title:'Cliente regular y no sé su tratamiento',
-     rob:'Don Pedro pide su pastilla de presión cada mes. ¿Cuándo fue la última vez? ¿Cuál era la dosis exacta? No recuerdas, le preguntas, queda mal contigo.',
-     fix:'Expediente del cliente <strong>con histórico completo</strong>. Buscas "Don Pedro" y ves: enalapril 10mg, última compra 18 oct, alergia a penicilina. Atención premium sin esfuerzo.'},
+    {title:'💊 Lotes y caducidades imposibles de rastrear',
+     rob:'¿Cuál Aspirina vencía primero? ¿La del lote A o la del B?',
+     fix:'Receta te avisa CADA día qué se vence en 30, 60 y 90 días para ofrecer descuento antes de tirar el medicamento.'},
+    {title:'🚨 COFEPRIS te puede multar en cualquier momento',
+     rob:'Vendiste un Clonazepam sin receta porque no leíste bien. Multa de $50,000.',
+     fix:'Receta te bloquea la venta si el medicamento es controlado y exige escaneo de receta + ID del cliente.'},
+    {title:'💉 El mismo medicamento tiene 30 presentaciones distintas',
+     rob:'Paracetamol: 500mg, 1g, jarabe niño, jarabe adulto, supositorio, ampolleta, genérico, marca...',
+     fix:'Receta auto-completa con foto del empaque al teclear. Cero confusiones.'},
+    {title:'↩️ Las devoluciones son un dolor (medicamento abierto)',
+     rob:'Cliente regresa con caja abierta. ¿Lo aceptas? ¿Lo rechazas?',
+     fix:'Receta tiene política configurada por tipo de producto. Decisión clara en 2 segundos.'},
+    {title:'⚕️ El consultorio anexo es un caos administrativo',
+     rob:'Llega el doctor, atiende 12 pacientes al día. ¿Cuánto cobraste? ¿Cuánto le toca? ¿Las recetas del doctor pasaron por la farmacia?',
+     fix:'Receta integra consulta + farmacia en una sola caja.'},
+    {title:'📉 Las farmacias de cerca te ponen precios bajos',
+     rob:'Similares cruzando la calle, Farmacia del Ahorro a 2 cuadras. ¿Te conviene bajar precio?',
+     fix:'Receta monitorea precios de la competencia y te alerta dónde puedes ganar margen.'}
   ],
 };
 
@@ -423,8 +423,8 @@ const BRAND_TENDITO = {
 
   hero: {
     eyebrow:'El sistema para tiendas de abarrotes mexicanas',
-    h1:'Tu <em>tiendita</em>.<br>Más rápida.<br>Más <em>al día</em>.',
-    deck:'Tendito es el punto de venta hecho para abarrotes, fruterías y minisúpers mexicanos. Báscula, fiado, recargas, recibos por WhatsApp — pensado para la tienda de la esquina.',
+    h1:'Los fiados que sí cobras. Los productos que sí están en stock.',
+    deck:'El POS para la tiendita de la esquina, abarrotes, miscelánea y minisúper donde el fiado deja de ser un cuaderno, el cambio no se acaba y sabes qué producto te deja más dinero al fin del mes.',
     ctaPrimary:'Empezar gratis', ctaSecondary:'Ver demo',
     metaLine:'$0 inicial · funciona en cualquier impresora · gratis para tiendas chicas',
   },
@@ -493,24 +493,24 @@ const BRAND_TENDITO = {
   },
 
   thefts: [
-    {title:'Caja con menos de lo cobrado',
-     rob:'Empleado cobra $200 al cliente, registra $150 en el sistema, se queda con $50. Sin conciliación diaria, no lo detectas hasta que faltan miles.',
-     fix:'<strong>Corte de caja obligatorio al cierre</strong>. Diferencia entre cobrado y registrado dispara alerta. Reporte por empleado.'},
-    {title:'Fiados inventados que nunca cobran',
-     rob:'Empleado dice "fulano se llevó esto a fiado", pero fulano no existe o nunca pagó. La mercancía se la llevó el empleado.',
-     fix:'Fiados exigen <strong>foto del cliente + firma digital</strong>. Cliente recibe SMS confirmando el monto.'},
-    {title:'Recargas vendidas afuera del sistema',
-     rob:'Empleado vende tiempo aire con su propio crédito y se queda la comisión. La tienda no se entera.',
-     fix:'Recargas se hacen <strong>desde el sistema con tu saldo</strong>. Sin sistema, no hay recarga.'},
-    {title:'Doña Lola me debe $400 desde hace 2 semanas',
-     rob:'Vendes fiado para no perder al cliente. Pasa el tiempo, se acumulan deudas, no te animas a cobrar porque "vas a perder al cliente". Al final pierdes la lana Y al cliente.',
-     fix:'Lista de fiados con <strong>foto + WhatsApp automático</strong>. "Hola Doña Lola, su saldo es $400 al 15 de noviembre". Sin que tú tengas que llamar, sin pena.'},
-    {title:'Sobrino que "ayuda" y se lleva del cajón',
-     rob:'El sobrino, primo, hijo del compa, "ayuda en la tarde" pero se lleva $20, $50 del cajón. Sin contar mercancía. Al mes son $1,500 que no encuentras.',
-     fix:'Cada movimiento del cajón <strong>asociado a una venta</strong>. Sin venta, no se abre. Diferencia entre cobrado y mercancía vendida = alerta inmediata.'},
-    {title:'Stock que se acaba sin avisar',
-     rob:'El refresco grande se acabó hace 3 días. El cliente entra, no encuentra, se va a la competencia. No sabes cuánto pierdes en clientes que no regresan.',
-     fix:'Stock mínimo con <strong>alerta WhatsApp el día antes</strong>. Sistema dice "Coca-Cola 600ml: quedan 3 unidades, pide ya". Cero ventas perdidas por desabasto.'},
+    {title:'📓 El cuaderno de fiados es un desastre',
+     rob:'Don Memo te debe desde hace 3 meses. ¿Cuánto? Ni te acuerdas. El cuaderno se mojó, se perdió una hoja.',
+     fix:'Tendito te lleva los fiados por cliente, manda recordatorio por WhatsApp.'},
+    {title:'🏷️ Los precios se olvidan',
+     rob:'¿Cuánto cuesta el atún sin código? ¿La galleta suelta? Cada empleado dice un precio distinto.',
+     fix:'Tendito muestra el precio fijo al escanear o al teclear el producto. Sin discusiones.'},
+    {title:'⏰ Las caducidades te explotan en la cara',
+     rob:'Encuentras una hilera de Maruchan vencida desde hace 2 meses. Pierdes $300 + el cliente que se enojó.',
+     fix:'Tendito te avisa qué se vence en 30 días para vender a precio especial.'},
+    {title:'👀 El empleado saca productos sin pagar',
+     rob:'La sobrina llega, agarra unas papitas y unos dulces, dice \'al rato pago\'. Nunca paga. Al final del mes tu inventario no cuadra.',
+     fix:'Tendito audita cada salida con cámara + POS.'},
+    {title:'📱 Recargas de celular, luz, internet sin control',
+     rob:'Vendes recargas Telcel, AT&T, pagos de luz, agua, internet. Cada empresa te da un saldo distinto. Te confundes.',
+     fix:'Tendito te integra TODOS los saldos en una sola pantalla.'},
+    {title:'📦 No sabes qué te conviene comprar al mayoreo',
+     rob:'Compras 24 cocas pero solo se venden 8 al mes. Mientras tanto se acaba la sopa.',
+     fix:'Tendito te dice qué pedir según tu venta real. Compras lo que SE VENDE, no lo que crees.'}
   ],
 };
 
@@ -11599,14 +11599,14 @@ const BRAND_CORTE = {
   fonts: {display: 'Cormorant Garamond', body: 'Inter', script: 'Italianno', mono: 'JetBrains Mono'},
   hero: {
     eyebrow: 'El sistema para carnicerías premium · 2026',
-    h1: 'Cada <em>corte</em>,<br>cada <em>gramo</em>,<br>premium.',
-    deck: 'El POS hecho para que el ribeye Angus se cobre por su precio, los cortes finos no se \'cambien\' por baratos al empacar, y los clientes premium tengan su carne apartada.',
+    h1: 'Cada gramo cobrado. Cada corte sin merma sorpresa.',
+    deck: 'El POS para carnicerías mexicanas donde la báscula manda, los cortes finos no se \'cambian\' por baratos, la merma se controla diario y el mayoreo a restaurantes se factura sin pelearse con el cliente.',
     ctaPrimary: 'Empezar gratis',
     ctaSecondary: 'Ver inventario corte',
     metaLine: '$0 inicial · sin tarjeta · setup en 5 min'
   },
   images: {
-    hero: 'https://source.unsplash.com/random/1200x1600/?butcher,premium,beef&q=85',
+    hero: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=1200&h=1600&fit=crop&q=85',
     heroAlt: 'Ribeye Angus en mostrador refrigerado',
     showcase: [
       {
@@ -11728,36 +11728,24 @@ const BRAND_CORTE = {
     role: 'Carnicería Premium Corte, San Pedro Garza, NL'
   },
   thefts: [
-    {
-      title: 'Cortes premium \'cambiados\' por nacionales',
-      rob: 'Carnicero corta res nacional ($240/kg) y empaca como Angus USA ($720/kg). Cliente paga premium, recibe básico. $480 por kg cambiado.',
-      fix: 'Cada corte <strong>con código de origen escaneado al cortar</strong>. Sistema verifica que coincida con orden y precio. Cero cambios al empacar.'
-    },
-    {
-      title: 'Kg \'cobrados de más\' al cliente premium',
-      rob: 'Carnicero pesa 850g pero cobra 1 kg. Diferencia se queda en aparte para reventa. $80-150 por cliente. 20 clientes = $1,600-3,000.',
-      fix: 'Báscula <strong>conectada al sistema obligatorio</strong>. Cliente ve pantalla con peso exacto. Cero pesos \'redondeados\'.'
-    },
-    {
-      title: 'Dry aged \'fingido\' sin tiempo real',
-      rob: 'Carnicero vende ribeye normal como dry aged 45 días. Cliente paga premium ($1,200 vs $700/kg). Cero rastreo real.',
-      fix: 'Dry aged con <strong>foto y fecha entrada al refri obligatorio</strong>. Sistema cuenta días. Cliente ve certificado al comprar. Cero fraude.'
-    },
-    {
-      title: 'El sirloin del lunes se me echó a perder',
-      rob: 'Llega viernes y el sirloin del lunes sigue ahí. Ya tiene mal color. Lo tiras o vendes en $80 lo que costaba $400. Una carnicería chica pierde $5,000-12,000 al mes así.',
-      fix: 'Caducidad por corte <strong>con alerta 24h antes</strong>. Sistema te dice: "Sirloin lote LB-2840, vendelo HOY al -30% antes que se vaya a basura". Sin pérdida silenciosa.'
-    },
-    {
-      title: 'Empleado nuevo dice precios "al tanteo"',
-      rob: 'El nuevo no se acuerda del precio del filete, le calcula "más o menos". Al cierre la caja queda $400 abajo. Tú pierdes, él no se da cuenta.',
-      fix: 'Precios por corte <strong>fijos en sistema</strong>. El empleado solo pesa la pieza, sistema calcula el precio exacto. Cero "tanteos", cero descuadres.'
-    },
-    {
-      title: 'Fiados que no recuerdas a quién les diste',
-      rob: 'Doña María te pide "le llevo dos kilos, mañana le pago". Mañana no llega. ¿Quién era Doña María? ¿Tenía bolsa azul o roja? El fiado se evapora.',
-      fix: 'Fiado <strong>con foto del cliente + WhatsApp</strong>. Sistema recuerda por ti: "Doña María, fiado $480, fecha 15 nov, foto adjunta". Cobranza dignificada.'
-    }
+    {title:'🥩 El ribeye que se quedó del lunes se echó a perder',
+     rob:'Pierdes $800 cada semana. Más al mes son $3,200.',
+     fix:'Corte predice cuánto pedir según tu venta real, te alerta qué cortes mover en oferta antes de que se echen.'},
+    {title:'⚖️ El empleado nuevo cobra al tanteo',
+     rob:'El primo agarró $200 de filete y le dijo al cliente \'$130\'. Pérdida directa de $70.',
+     fix:'Corte conecta báscula al POS: precio exacto por gramo, sin posibilidad de error humano.'},
+    {title:'🔄 Los clientes quieren cambiar el corte después de pesarlo',
+     rob:'Pesó el sirloin, ya no le late, quiere arrachera. ¿Le devuelves al primero?',
+     fix:'Corte registra cada modificación, tu caja siempre cuadra al final del día.'},
+    {title:'🏪 Mayoreo a restaurantes vs menudeo a clientes — caos',
+     rob:'El Restaurante La Buena Onda te compra 20 kilos a un precio. El cliente normal compra 1 kilo a otro precio. ¿Cuánto le facturaste a cada quien?',
+     fix:'Corte tiene precios escalonados automáticos.'},
+    {title:'📋 Los fiados de los clientes regulares',
+     rob:'Doña Lupe lleva todos los viernes y paga el lunes. ¿Cuánto debe esta semana?',
+     fix:'Corte lleva el control por cliente, manda recordatorio el lunes en la mañana por WhatsApp.'},
+    {title:'💰 Compras al mayorista sin saber qué tanto te deja',
+     rob:'Compraste 50 kilos de pollo a $80. ¿A cómo lo vendes para ganar 35%?',
+     fix:'Corte calcula precio sugerido por costo + margen, te dice qué cortes son los más rentables.'}
   ]
 };
 
