@@ -3094,7 +3094,9 @@
     // ═══════════════════════════════════════════════════════════════
     if (/^(renta|alquil)/.test(n) || / (renta|alquila|alquiler) /.test(' '+n+' '))
       return VLX_BRANDS.tarima || { brand:'Tarima', url:'tarima.html' };
-    if (/^panales$|^panal$|^pañales$|^pañal$|panal de|pañal de|bebe|recien nacido/.test(n))
+    // V9.6.2: regex más restrictivo para no capturar "ropa de bebe" → tendito
+    // Solo captura: pañales literal | productos de bebé genéricos (alimento, leche, biberones, etc.)
+    if (/^panales?$|^pañales?$|panal de|pañal de|alimento(s)? (de |para )?bebe|leche para bebe|biberon|chupone(s)?|carrito(s)? para bebe|cuna(s)? para bebe/.test(n))
       return VLX_BRANDS.tendito || { brand:'Tendito', url:'tendito.html' };
     if (/^sexshop$|^sex shop$|tienda erotica|productos intimos/.test(n))
       return VLX_BRANDS.discreto || { brand:'Discreto', url:'discreto.html' };

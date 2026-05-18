@@ -1,15 +1,16 @@
 {
-  "version": "1.0.378",
+  "version": "1.0.379",
   "major": 1,
   "minor": 0,
-  "patch": 378,
+  "patch": 379,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-18T14:35:00.000Z",
-  "built_at": "2026-05-18T14:35:00.000Z",
+  "date": "2026-05-18T14:45:00.000Z",
+  "built_at": "2026-05-18T14:45:00.000Z",
   "changelog": [
-    "V9.6.1 FIX: 'ropa de bebé' último crítico arreglado. norm() quita el acento → 'bebe'. Regex expandido para ropa infantil/niño/recién nacido → /mochila.html. Stress test 100: 0 críticos.",
-    "V9.6: 18 bugs (13 críticos + 5 categóricos)",
-    "V9.5.x: stress tests anteriores"
+    "V9.6.2 FIX 'ropa de bebé': el regex 'bebe' genérico capturaba TODO lo que contenía 'bebe' (incluso 'ropa de bebe') antes de mi nueva regla. Restringido a productos específicos: pañales literales, alimentos/leche/biberones/cunas/chupones/carritos. Ahora 'ropa de bebé' SÍ va a /mochila.html.",
+    "V9.6.1: ropa de bebé regex sin acento",
+    "V9.6: 18 bugs stress test 100",
+    "V9.5.x: stress tests previos"
   ]
 }
