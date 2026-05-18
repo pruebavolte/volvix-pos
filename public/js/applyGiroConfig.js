@@ -233,15 +233,18 @@
     }
   }
 
-  function fieldVisibleForGiro(field, giroSlug, activeModules, inactiveModules) {
-    // Filtro 1: módulo activo
+  function fieldVisibleForGiro(field, giroSlug, activeModules, inactiveModules, categoriaGiro) {
+    // Filtro 1: módulo NO debe estar explícitamente INACTIVO (whitelist abierta).
     const mod = field.module || 'base';
     if (mod !== 'base' && inactiveModules.has(mod)) return false;
-    if (mod !== 'base' && activeModules.size > 0 && !activeModules.has(mod)) return false;
-    // Filtro 2: giros incluye este giro O wildcard
+    // Filtro 2: giros del campo (en catálogo) — match contra:
+    //   a) wildcard '*'
+    //   b) el slug de la marca (navaja, receta, etc.)
+    //   c) la categoria_giro mapeada (barberia, farmacia, etc.)
     const giros = field.giros || ['*'];
     if (giros.indexOf('*') >= 0) return true;
     if (giros.indexOf(giroSlug) >= 0) return true;
+    if (categoriaGiro && giros.indexOf(categoriaGiro) >= 0) return true;
     return false;
   }
 
@@ -333,6 +336,7 @@
     const giroCfg = resolveGiroConfig(terminologias, giroSlug);
     const activeModules = new Set((giroCfg && giroCfg.modulos_activos) || []);
     const inactiveModules = new Set((giroCfg && giroCfg.modulos_inactivos) || []);
+    const categoriaGiro = giroCfg && giroCfg.categoria_giro; // marca→giro genérico
     activeModules.add('base'); // base siempre activo
 
     const modal = catalog.modals[modalName];
@@ -343,7 +347,7 @@
 
     for (const sectionTitle of Object.keys(sections)) {
       const fields = sections[sectionTitle];
-      const visibleFields = fields.filter(f => fieldVisibleForGiro(f, giroSlug, activeModules, inactiveModules));
+      const visibleFields = fields.filter(f => fieldVisibleForGiro(f, giroSlug, activeModules, inactiveModules, categoriaGiro));
       total += fields.length;
       visible += visibleFields.length;
       if (visibleFields.length === 0) continue;

@@ -6,7 +6,6 @@
     "total_giros": 30,
     "remaining_187": "Se infieren con razonamiento del Claude Code en runtime usando la marca premium destino del router."
   },
-
   "default": {
     "terminologias": {
       "cliente": "cliente",
@@ -22,10 +21,22 @@
       "mesa": "mesa",
       "pedido": "pedido"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "permissions"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "permissions"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events"
+    ]
   },
-
   "restaurante": {
     "terminologias": {
       "cliente": "comensal",
@@ -39,10 +50,28 @@
       "ticket": "comanda",
       "mesa": "mesa"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "kitchen", "recipes", "modifiers", "delivery", "commissions"],
-    "modulos_inactivos": ["medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "kitchen",
+      "recipes",
+      "modifiers",
+      "delivery",
+      "commissions"
+    ],
+    "modulos_inactivos": [
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials"
+    ],
+    "categoria_giro": "restaurante"
   },
-
   "cafeteria": {
     "terminologias": {
       "cliente": "cliente",
@@ -52,10 +81,27 @@
       "empleado": "barista",
       "ticket": "orden"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "kitchen", "recipes", "modifiers", "loyalty"],
-    "modulos_inactivos": ["medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "kitchen",
+      "recipes",
+      "modifiers",
+      "loyalty"
+    ],
+    "modulos_inactivos": [
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials"
+    ],
+    "categoria_giro": "cafeteria"
   },
-
   "taqueria": {
     "terminologias": {
       "cliente": "cliente",
@@ -63,10 +109,27 @@
       "venta": "orden",
       "empleado": "taquero"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "kitchen", "modifiers"],
-    "modulos_inactivos": ["medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "marketplace", "ecommerce"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "kitchen",
+      "modifiers"
+    ],
+    "modulos_inactivos": [
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "marketplace",
+      "ecommerce"
+    ],
+    "categoria_giro": "taqueria"
   },
-
   "navaja": {
     "terminologias": {
       "cliente": "cliente",
@@ -78,10 +141,29 @@
       "vendedor": "barbero",
       "ticket": "ticket"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "appointments", "commissions", "services", "loyalty"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "recipes"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "appointments",
+      "commissions",
+      "services",
+      "loyalty"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "recipes"
+    ],
+    "categoria_giro": "barberia"
   },
-
   "brillo": {
     "terminologias": {
       "cliente": "cliente",
@@ -90,10 +172,29 @@
       "empleado": "estilista",
       "ticket": "servicio"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "appointments", "commissions", "services", "loyalty"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "recipes"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "appointments",
+      "commissions",
+      "services",
+      "loyalty"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "recipes"
+    ],
+    "categoria_giro": "estetica"
   },
-
   "receta": {
     "terminologias": {
       "cliente": "paciente",
@@ -104,10 +205,28 @@
       "empleado": "despachador",
       "ticket": "receta"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "lots", "medical", "sat", "permissions"],
-    "modulos_inactivos": ["kitchen", "automotive", "rentals", "hotel", "gym", "events", "appointments", "kits", "warranties"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "lots",
+      "medical",
+      "sat",
+      "permissions"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "appointments",
+      "kits",
+      "warranties"
+    ],
+    "categoria_giro": "farmacia"
   },
-
   "pulso": {
     "terminologias": {
       "cliente": "paciente",
@@ -118,10 +237,30 @@
       "empleado": "doctor",
       "ticket": "expediente"
     },
-    "modulos_activos": ["core", "appointments", "medical", "services", "permissions", "taxes"],
-    "modulos_inactivos": ["kitchen", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "kits", "recipes", "marketplace", "ecommerce"]
+    "modulos_activos": [
+      "core",
+      "appointments",
+      "medical",
+      "services",
+      "permissions",
+      "taxes"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "kits",
+      "recipes",
+      "marketplace",
+      "ecommerce"
+    ],
+    "categoria_giro": "medico"
   },
-
   "pata": {
     "terminologias": {
       "cliente": "tutor",
@@ -131,10 +270,25 @@
       "empleado": "doctor",
       "ticket": "expediente"
     },
-    "modulos_activos": ["core", "appointments", "medical", "services", "inventory", "taxes"],
-    "modulos_inactivos": ["kitchen", "automotive", "rentals", "hotel", "gym", "events", "warranties"]
+    "modulos_activos": [
+      "core",
+      "appointments",
+      "medical",
+      "services",
+      "inventory",
+      "taxes"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties"
+    ],
+    "categoria_giro": "veterinaria"
   },
-
   "tendito": {
     "terminologias": {
       "cliente": "cliente",
@@ -143,10 +297,28 @@
       "empleado": "cajero",
       "ticket": "ticket"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "loyalty"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "recipes", "marketplace", "appointments"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "loyalty"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "recipes",
+      "marketplace",
+      "appointments"
+    ],
+    "categoria_giro": "abarrotes"
   },
-
   "folio": {
     "terminologias": {
       "cliente": "cliente",
@@ -157,10 +329,31 @@
       "empleado": "ejecutivo",
       "ticket": "orden de servicio"
     },
-    "modulos_activos": ["core", "taxes", "appointments", "services", "permissions", "sat"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "inventory", "kits", "recipes", "warranties", "serials", "lots"]
+    "modulos_activos": [
+      "core",
+      "taxes",
+      "appointments",
+      "services",
+      "permissions",
+      "sat"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "inventory",
+      "kits",
+      "recipes",
+      "warranties",
+      "serials",
+      "lots"
+    ],
+    "categoria_giro": "hotel"
   },
-
   "forja": {
     "terminologias": {
       "cliente": "miembro",
@@ -171,10 +364,29 @@
       "empleado": "instructor",
       "ticket": "acceso"
     },
-    "modulos_activos": ["core", "gym", "subscriptions", "appointments", "loyalty", "taxes"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "events", "warranties", "serials", "lots", "kits", "recipes"]
+    "modulos_activos": [
+      "core",
+      "gym",
+      "subscriptions",
+      "appointments",
+      "loyalty",
+      "taxes"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "events",
+      "warranties",
+      "serials",
+      "lots",
+      "kits",
+      "recipes"
+    ],
+    "categoria_giro": "taller"
   },
-
   "tarima": {
     "terminologias": {
       "cliente": "cliente",
@@ -183,10 +395,28 @@
       "empleado": "mesero",
       "ticket": "ticket"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "events", "modifiers", "appointments"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "warranties", "serials", "lots", "recipes"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "events",
+      "modifiers",
+      "appointments"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "warranties",
+      "serials",
+      "lots",
+      "recipes"
+    ],
+    "categoria_giro": "bar"
   },
-
   "refacciona": {
     "terminologias": {
       "cliente": "cliente",
@@ -197,10 +427,31 @@
       "empleado": "mecánico",
       "ticket": "orden de servicio"
     },
-    "modulos_activos": ["core", "inventory", "automotive", "appointments", "services", "taxes", "serials", "warranties"],
-    "modulos_inactivos": ["kitchen", "medical", "rentals", "hotel", "gym", "events", "lots", "recipes", "kits", "marketplace", "ecommerce"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "automotive",
+      "appointments",
+      "services",
+      "taxes",
+      "serials",
+      "warranties"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "lots",
+      "recipes",
+      "kits",
+      "marketplace",
+      "ecommerce"
+    ],
+    "categoria_giro": "refaccionaria"
   },
-
   "pareo": {
     "terminologias": {
       "cliente": "cliente",
@@ -210,10 +461,30 @@
       "empleado": "vendedor",
       "ticket": "ticket"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "variants", "loyalty", "marketplace", "ecommerce"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "lots", "recipes"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "variants",
+      "loyalty",
+      "marketplace",
+      "ecommerce"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "lots",
+      "recipes"
+    ],
+    "categoria_giro": "ropa"
   },
-
   "bloque": {
     "terminologias": {
       "cliente": "alumno",
@@ -224,10 +495,28 @@
       "empleado": "instructor",
       "ticket": "matrícula"
     },
-    "modulos_activos": ["core", "education", "appointments", "subscriptions", "taxes"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "kits", "recipes"]
+    "modulos_activos": [
+      "core",
+      "education",
+      "appointments",
+      "subscriptions",
+      "taxes"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "kits",
+      "recipes"
+    ],
+    "categoria_giro": "construccion"
   },
-
   "gateo": {
     "terminologias": {
       "cliente": "tutor",
@@ -237,10 +526,28 @@
       "empleado": "educadora",
       "ticket": "expediente"
     },
-    "modulos_activos": ["core", "education", "appointments", "subscriptions", "taxes", "medical"],
-    "modulos_inactivos": ["kitchen", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "kits", "recipes"]
+    "modulos_activos": [
+      "core",
+      "education",
+      "appointments",
+      "subscriptions",
+      "taxes",
+      "medical"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "kits",
+      "recipes"
+    ],
+    "categoria_giro": "guarderia"
   },
-
   "burbuja": {
     "terminologias": {
       "cliente": "cliente",
@@ -249,10 +556,29 @@
       "empleado": "operador",
       "ticket": "orden"
     },
-    "modulos_activos": ["core", "services", "appointments", "taxes"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "lots", "recipes", "kits", "inventory"]
+    "modulos_activos": [
+      "core",
+      "services",
+      "appointments",
+      "taxes"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "lots",
+      "recipes",
+      "kits",
+      "inventory"
+    ],
+    "categoria_giro": "lavanderia"
   },
-
   "almohada": {
     "terminologias": {
       "cliente": "cliente",
@@ -261,10 +587,30 @@
       "empleado": "vendedor",
       "ticket": "ticket"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "warranties", "marketplace", "ecommerce", "variants"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "serials", "lots", "recipes", "appointments"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "warranties",
+      "marketplace",
+      "ecommerce",
+      "variants"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "serials",
+      "lots",
+      "recipes",
+      "appointments"
+    ],
+    "categoria_giro": "muebleria"
   },
-
   "quilate": {
     "terminologias": {
       "cliente": "cliente",
@@ -274,10 +620,28 @@
       "empleado": "joyero",
       "ticket": "ticket"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "warranties", "serials", "permissions", "appointments"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "recipes", "kits"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "warranties",
+      "serials",
+      "permissions",
+      "appointments"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "recipes",
+      "kits"
+    ],
+    "categoria_giro": "joyeria"
   },
-
   "tictac": {
     "terminologias": {
       "cliente": "cliente",
@@ -287,10 +651,26 @@
       "empleado": "asesor",
       "ticket": "ticket"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "warranties", "serials", "permissions"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "recipes"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "warranties",
+      "serials",
+      "permissions"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "recipes"
+    ],
+    "categoria_giro": "relojeria"
   },
-
   "armazon": {
     "terminologias": {
       "cliente": "cliente",
@@ -300,10 +680,28 @@
       "empleado": "optometrista",
       "ticket": "expediente"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "appointments", "medical", "warranties"],
-    "modulos_inactivos": ["kitchen", "automotive", "rentals", "hotel", "gym", "events", "serials", "lots", "kits", "recipes"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "appointments",
+      "medical",
+      "warranties"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "serials",
+      "lots",
+      "kits",
+      "recipes"
+    ],
+    "categoria_giro": "optica"
   },
-
   "mochila": {
     "terminologias": {
       "cliente": "cliente",
@@ -312,10 +710,29 @@
       "empleado": "vendedor",
       "ticket": "ticket"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "variants", "marketplace", "ecommerce"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "lots", "recipes"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "variants",
+      "marketplace",
+      "ecommerce"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "lots",
+      "recipes"
+    ],
+    "categoria_giro": "bebes"
   },
-
   "asa": {
     "terminologias": {
       "cliente": "cliente",
@@ -325,10 +742,29 @@
       "empleado": "vendedor",
       "ticket": "ticket"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "variants", "marketplace", "ecommerce"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "lots", "recipes"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "variants",
+      "marketplace",
+      "ecommerce"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "lots",
+      "recipes"
+    ],
+    "categoria_giro": "bolsas"
   },
-
   "discreto": {
     "terminologias": {
       "cliente": "cliente",
@@ -337,10 +773,31 @@
       "empleado": "asesor",
       "ticket": "ticket"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "delivery", "ecommerce", "loyalty", "permissions"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "lots", "recipes", "appointments"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "delivery",
+      "ecommerce",
+      "loyalty",
+      "permissions"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "lots",
+      "recipes",
+      "appointments"
+    ],
+    "categoria_giro": "sexshop"
   },
-
   "comedor": {
     "terminologias": {
       "cliente": "comensal",
@@ -349,10 +806,28 @@
       "empleado": "cocinera",
       "ticket": "comanda"
     },
-    "modulos_activos": ["core", "kitchen", "recipes", "modifiers", "taxes", "inventory"],
-    "modulos_inactivos": ["medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "marketplace", "ecommerce"]
+    "modulos_activos": [
+      "core",
+      "kitchen",
+      "recipes",
+      "modifiers",
+      "taxes",
+      "inventory"
+    ],
+    "modulos_inactivos": [
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "marketplace",
+      "ecommerce"
+    ],
+    "categoria_giro": "fonda"
   },
-
   "consome": {
     "terminologias": {
       "cliente": "comensal",
@@ -361,10 +836,25 @@
       "empleado": "cocinero",
       "ticket": "orden"
     },
-    "modulos_activos": ["core", "kitchen", "modifiers", "taxes", "inventory"],
-    "modulos_inactivos": ["medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials"]
+    "modulos_activos": [
+      "core",
+      "kitchen",
+      "modifiers",
+      "taxes",
+      "inventory"
+    ],
+    "modulos_inactivos": [
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials"
+    ],
+    "categoria_giro": "sopas"
   },
-
   "nieve": {
     "terminologias": {
       "cliente": "cliente",
@@ -374,10 +864,27 @@
       "empleado": "heladero",
       "ticket": "orden"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "modifiers", "loyalty"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials", "recipes"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "modifiers",
+      "loyalty"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials",
+      "recipes"
+    ],
+    "categoria_giro": "helados"
   },
-
   "merengue": {
     "terminologias": {
       "cliente": "cliente",
@@ -387,10 +894,27 @@
       "empleado": "repostero",
       "ticket": "pedido"
     },
-    "modulos_activos": ["core", "inventory", "taxes", "recipes", "appointments", "loyalty"],
-    "modulos_inactivos": ["kitchen", "medical", "automotive", "rentals", "hotel", "gym", "events", "warranties", "serials"]
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "recipes",
+      "appointments",
+      "loyalty"
+    ],
+    "modulos_inactivos": [
+      "kitchen",
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials"
+    ],
+    "categoria_giro": "reposteria"
   },
-
   "_inferencia_automatica": {
     "_description": "Para los 187 giros restantes (no incluidos arriba), aplicar inferencia por categoría:",
     "alimentos_*": {
@@ -438,5 +962,40 @@
       "terminologias_base": "default",
       "modulos_base": "tendito"
     }
+  },
+  "comandero": {
+    "terminologias": {
+      "cliente": "comensal",
+      "clientes": "comensales",
+      "producto": "platillo",
+      "productos": "platillos",
+      "venta": "comanda",
+      "ventas": "comandas",
+      "empleado": "mesero",
+      "vendedor": "mesero",
+      "ticket": "comanda",
+      "mesa": "mesa"
+    },
+    "modulos_activos": [
+      "core",
+      "inventory",
+      "taxes",
+      "kitchen",
+      "recipes",
+      "modifiers",
+      "delivery",
+      "commissions"
+    ],
+    "modulos_inactivos": [
+      "medical",
+      "automotive",
+      "rentals",
+      "hotel",
+      "gym",
+      "events",
+      "warranties",
+      "serials"
+    ],
+    "categoria_giro": "restaurante"
   }
 }
