@@ -281,6 +281,26 @@ async function searchGiros(ctx, req, res, parsedUrl) {
       '/landing-libreria-papeleria.html': '/tendito.html',
       '/landing-taller-mecanico.html': '/refacciona.html',
       '/landing-miscelanea.html': '/tendito.html',
+      // V9.5 additions
+      '/landing-paqueteria.html': '/folio.html',
+      '/landing-envios.html': '/folio.html',
+      '/landing-mudanzas.html': '/folio.html',
+      '/landing-fletes.html': '/folio.html',
+      '/landing-cabanas.html': '/folio.html',
+      '/landing-cabañas.html': '/folio.html',
+      '/landing-acuario.html': '/pata.html',
+      '/landing-cevicheria.html': '/marea.html',
+      '/landing-persianas.html': '/almohada.html',
+      '/landing-alfombras.html': '/almohada.html',
+      '/landing-fiestas-infantiles.html': '/tarima.html',
+      '/landing-fiesta-infantil.html': '/tarima.html',
+      '/landing-paginas-web.html': '/folio.html',
+      '/landing-pagina-web.html': '/folio.html',
+      '/landing-cyber-cafe.html': '/folio.html',
+      '/landing-traje-de-bano.html': '/pareo.html',
+      '/landing-trajes-de-bano.html': '/pareo.html',
+      '/landing-regalos.html': '/ramillete.html',
+      '/landing-venta-de-regalos.html': '/ramillete.html',
     };
     if (PLAIN_TO_PREMIUM[hit.landing]) {
       hit.landing = PLAIN_TO_PREMIUM[hit.landing];

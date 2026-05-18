@@ -3157,6 +3157,54 @@
     if (/mascarilla(s)?|guante(s)? industrial|equipo de seguridad|epp\b|botas? industrial|casco industrial/.test(n))
       return VLX_BRANDS.folio || { brand:'Folio', url:'folio.html' };
 
+    // ═══════════════════════════════════════════════════════════════
+    // V9.5 STRESS TEST FIXES — 15 bugs adicionales detectados
+    // ═══════════════════════════════════════════════════════════════
+
+    // TEXTIL HOGAR — persianas, alfombras → /almohada.html (textil de cama/hogar)
+    if (/\bpersianas?\b|\balfombras?\b|tapete(s)? hogar|venta de tapetes/.test(n))
+      return VLX_BRANDS.almohada || { brand:'Almohada', url:'almohada.html' };
+
+    // ACUARIOS / PECES — son mascotas → /pata.html
+    if (/\bacuari[ao]s?\b|peces|venta de peces|tortugas? mascota/.test(n))
+      return VLX_BRANDS.pata || { brand:'Pata', url:'pata.html' };
+
+    // BELLEZA EXTENSIONES — lash lift, microblading → /brillo.html
+    if (/lash lift|lash bar|extensiones de pestaña|microblad|micropigment/.test(n))
+      return VLX_BRANDS.brillo || { brand:'Brillo', url:'brillo.html' };
+
+    // ESTÉTICA CANINA — específicamente para mascotas (override del partial match)
+    if (/estetica canina|estética canina|peluqueria canina|peluquería canina|spa canino|baño y corte canin/.test(n))
+      return VLX_BRANDS.pata || { brand:'Pata', url:'pata.html' };
+
+    // EVENTOS — fiestas infantiles, mesas y sillas → /tarima.html
+    if (/fiestas? infantil|mesas y sillas|sillas y mesas|mobiliario para evento|salon de fiesta/.test(n))
+      return VLX_BRANDS.tarima || { brand:'Tarima', url:'tarima.html' };
+
+    // CEVICHERÍA → marea (mariscos), no limonero
+    if (/cevicher(i|í)a|venta de ceviche|ostioner(i|í)a/.test(n))
+      return VLX_BRANDS.marea || { brand:'Marea', url:'marea.html' };
+
+    // SERVICIOS DIGITALES — páginas web, envíos, software, agencia → /folio.html
+    if (/p(a|á)ginas? web|desarrollo web|venta de software|agencia digital|env(i|í)os a domicilio|paqueter(i|í)a|mensajer(i|í)a|cyber caf(e|é)|caf(e|é) internet/.test(n))
+      return VLX_BRANDS.folio || { brand:'Folio', url:'folio.html' };
+
+    // HOSPEDAJE — hotel, cabañas, hostal, motel → /folio.html
+    if (/^hotel(es)?$|^motel(es)?$|^hostal(es)?$|^cabañas?$|^cabaña$|airbnb|posada|casa de huesped|renta vacacional/.test(n))
+      return VLX_BRANDS.folio || { brand:'Folio', url:'folio.html' };
+
+    // TRAJE DE BAÑO / ROPA PLAYA → /pareo.html (retail moda/playa)
+    if (/traje(s)? de baño|trajes de baño|bikini|short(s)? de playa|sandalia(s)? playa/.test(n))
+      return VLX_BRANDS.pareo || { brand:'Pareo', url:'pareo.html' };
+
+    // MUDANZAS / FLETES → /folio.html (NO forja que es gym)
+    if (/^mudanza(s)?$|servicio de mudanzas|^flete(s)?$|servicio de fletes/.test(n))
+      return VLX_BRANDS.folio || { brand:'Folio', url:'folio.html' };
+
+    // REGALOS / DECORACIÓN → /ramillete.html (floristería/regalos)
+    if (/venta de regalos|tienda de regalos|detalles de regalo|arreglos para regalo|canasta de regalo/.test(n))
+      return VLX_BRANDS.ramillete || { brand:'Ramillete', url:'ramillete.html' };
+
     // 1. Exact match en alias
     if (VLX_ALIASES[n] && VLX_BRANDS[VLX_ALIASES[n]]) {
       return VLX_BRANDS[VLX_ALIASES[n]];
