@@ -3186,15 +3186,18 @@
       return VLX_BRANDS.marea || { brand:'Marea', url:'marea.html' };
 
     // SERVICIOS DIGITALES — páginas web, envíos, software, agencia → /folio.html
-    if (/p(a|á)ginas? web|desarrollo web|venta de software|agencia digital|env(i|í)os a domicilio|paqueter(i|í)a|mensajer(i|í)a|cyber caf(e|é)|caf(e|é) internet/.test(n))
+    // V9.5.1: norm() quita acentos → usar versiones sin acentos en regex
+    if (/paginas? web|desarrollo web|venta de software|agencia digital|^envios?$|envios? a|paqueteria|mensajeria|cyber cafe|cafe internet/.test(n))
       return VLX_BRANDS.folio || { brand:'Folio', url:'folio.html' };
 
     // HOSPEDAJE — hotel, cabañas, hostal, motel → /folio.html
-    if (/^hotel(es)?$|^motel(es)?$|^hostal(es)?$|^cabañas?$|^cabaña$|airbnb|posada|casa de huesped|renta vacacional/.test(n))
+    // V9.5.1: cabañas → cabanas tras norm()
+    if (/^hotel(es)?$|^motel(es)?$|^hostal(es)?$|^cabanas?$|airbnb|posada|casa de huesped|renta vacacional/.test(n))
       return VLX_BRANDS.folio || { brand:'Folio', url:'folio.html' };
 
     // TRAJE DE BAÑO / ROPA PLAYA → /pareo.html (retail moda/playa)
-    if (/traje(s)? de baño|trajes de baño|bikini|short(s)? de playa|sandalia(s)? playa/.test(n))
+    // V9.5.1: baño → bano tras norm()
+    if (/traje(s)? de bano|bikini|short(s)? de playa|sandalia(s)? playa/.test(n))
       return VLX_BRANDS.pareo || { brand:'Pareo', url:'pareo.html' };
 
     // MUDANZAS / FLETES → /folio.html (NO forja que es gym)
