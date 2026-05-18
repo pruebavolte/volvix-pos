@@ -1,7 +1,33 @@
 # 🚀 HANDOFF — Próxima sesión empieza AQUÍ
 
 > **Para Claude/IA que retoma este proyecto**: lee este documento PRIMERO. Tiene todo el contexto comprimido.
-> **ÚLTIMA ACTUALIZACIÓN**: 2026-05-18 V8.7.2 (217 marcas premium · 100% de 453 giros SMB caen en landing premium relevante · 0 al template plano · 0 al fallback genérico erróneo)
+> **ÚLTIMA ACTUALIZACIÓN**: 2026-05-18 V8.8.1 — VALIDACIÓN MASIVA 1081 GIROS COMPLETADA · 100% PASS · 0 template plano · 0 tendito incorrecto · ver `.audit/REPORTE-FINAL-2026-05-18.md`
+
+---
+
+## 🆕 V8.8 → V8.8.1 — SPRINT AUTÓNOMO 1081 GIROS (madrugada 2026-05-18)
+
+El usuario me pidió ejecutar TAREA GIGANTE AUTÓNOMA validando 1000+ giros del SMB mexicano mientras dormía. Ejecutada con 7 decisiones autónomas documentadas en `.audit/decisiones-tomadas.md`.
+
+**Resultado final:**
+- **1081/1081 giros aterrizan en landing premium relevante (100%)**
+- 943 exact match con marca ideal (87%)
+- 138 acceptable (van a marca premium de misma categoría, diferente nombre)
+- 0 al template plano `landing-{slug}.html`
+- 0 al fallback genérico /tendito.html (cuando había marca específica)
+- 105 destinos únicos, todos HTTP 200 OK
+
+**Bug crítico encontrado y arreglado:**
+- `papeleria`, `colegio`, `escuela` en VLX_BRANDS apuntaban a `landing-papeleria.html` / `landing-colegio.html` (template plano viejo). Corregido a `bloque.html`.
+
+**Sprint completo:**
+- `0a6df42` 1.0.357 — expandir test list a 1081 giros
+- `187e29c` 1.0.358 — round 1: +280 aliases SMB + fix bug papeleria/colegio
+- `160d61d` 1.0.359 — round 2: neveria → nieve (final)
+
+Ver reporte completo en `.audit/REPORTE-FINAL-2026-05-18.md` con todas mis decisiones autónomas para que el usuario las revise.
+
+---
 
 ---
 
