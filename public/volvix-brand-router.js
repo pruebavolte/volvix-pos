@@ -3121,6 +3121,15 @@
     // V9.9.3 — Carbón, leña, combustibles para asar → tendito (consumo abarrotes)
     if (/\bcarb[oó]n\b|le[nñ]a (para|de) asar|brique?tas?|combustibles? (para )?(asar|parrilla|carne)/.test(n))
       return VLX_BRANDS.tendito || { brand:'Tendito', url:'tendito.html' };
+    // V9.9.4 — Pollo en todas sus formas (guisar/rostizar/asar/preparar) → brasa
+    if (/\bpollo(s)?\b|pollos? (para|al|en|de) (guisar|asar|rostizar|preparar|rosticer|brasa|comal)|asadero (de )?pollo/.test(n))
+      return VLX_BRANDS.brasa || { brand:'Brasa', url:'brasa.html' };
+    // V9.9.4 — Productos médicos / naturistas / suplementos / diabéticos → receta (farmacia)
+    if (/productos? (para|de) diab[eé]ticos?|productos? naturistas?|suplementos? alimenticios?|vitaminas? y minerales?|productos? hom[eo]op[aá]ticos?|herbolar(ia|io)|productos? naturales? medicinales?/.test(n))
+      return VLX_BRANDS.receta || { brand:'Receta', url:'receta.html' };
+    // V9.9.4 — Estudio fotográfico / fotografía profesional → brillo (estética/imagen) si no hay marca foto
+    if (/estudio (fotogr[aá]fico|de fotograf[ií]a)|fotograf[ií]a (profesional|de )?(bebe|boda|evento|familia)|sesi[oó]n (de )?fotos?/.test(n))
+      return VLX_BRANDS.brillo || { brand:'Brillo', url:'brillo.html' };
 
     if (/^(renta|alquil)/.test(n) || / (renta|alquila|alquiler) /.test(' '+n+' '))
       return VLX_BRANDS.tarima || { brand:'Tarima', url:'tarima.html' };
