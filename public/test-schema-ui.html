@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Volvix — Test Schema-Driven UI</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 24px; }
+  h1 { color: #7c3aed; }
+  .demo { padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; margin: 12px 0; }
+  .demo[data-vlx-hidden-reason] { background: #fee; border-color: #f00; }
+  pre { background: #f9fafb; padding: 12px; border-radius: 8px; overflow:auto; }
+  button { padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 4px; }
+</style>
+<script src="/js/applyGiroConfig.js"></script>
+<script src="/js/vlxPanelDrawer.js"></script>
+</head>
+<body>
+  <h1>🧪 Test Schema-Driven UI</h1>
+  <p>Página standalone para validar applyGiroConfig.js sin auth-gate.</p>
+
+  <div>
+    <h2>Probar con un giro:</h2>
+    <button onclick="applyGiroConfig('navaja')">Barbería (navaja)</button>
+    <button onclick="applyGiroConfig('pulso')">Clínica (pulso)</button>
+    <button onclick="applyGiroConfig('comandero')">Restaurante (comandero)</button>
+    <button onclick="applyGiroConfig('forja')">Gimnasio (forja)</button>
+    <button onclick="applyGiroConfig('discreto')">Sexshop (discreto)</button>
+    <button onclick="resetGiroConfig()">Reset</button>
+  </div>
+
+  <h2>Elementos con data-module/data-giros para testing:</h2>
+
+  <div class="demo" data-module="core">
+    <strong>data-module="core"</strong> — Siempre visible (es módulo core)
+  </div>
+
+  <div class="demo" data-module="kitchen">
+    <strong>data-module="kitchen"</strong> — Solo visible si el giro tiene kitchen activo (restaurante, cafetería, etc.)
+  </div>
+
+  <div class="demo" data-module="medical">
+    <strong>data-module="medical"</strong> — Solo visible si el giro tiene medical activo (pulso, pata)
+  </div>
+
+  <div class="demo" data-module="gym">
+    <strong>data-module="gym"</strong> — Solo visible para gimnasios (forja)
+  </div>
+
+  <div class="demo" data-giros="navaja,brillo">
+    <strong>data-giros="navaja,brillo"</strong> — Solo visible para barbería/estética
+  </div>
+
+  <div class="demo" data-giros="pulso,receta,pata">
+    <strong>data-giros="pulso,receta,pata"</strong> — Solo visible para salud/veterinaria/farmacia
+  </div>
+
+  <h2>Reemplazo de terminologías:</h2>
+
+  <div class="demo">
+    Texto fijo: <span data-i18n="cliente">cliente</span> · <span data-i18n="producto">producto</span> · <span data-i18n="empleado">empleado</span> · <span data-i18n="venta">venta</span>
+  </div>
+
+  <input type="text" data-i18n-placeholder="cliente" placeholder="cliente" style="padding:8px;width:300px">
+
+  <h2>Output state:</h2>
+  <pre id="state">Selecciona un giro arriba...</pre>
+
+  <script>
+    window.addEventListener('vlx:giro-applied', function(ev) {
+      const out = {
+        giroSlug: ev.detail.giroSlug,
+        hidden: ev.detail.result.hidden,
+        replaced: ev.detail.result.replaced,
+        activeGiro: document.body.getAttribute('data-vlx-active-giro')
+      };
+      document.getElementById('state').textContent = JSON.stringify(out, null, 2);
+    });
+  </script>
+</body>
+</html>
