@@ -3588,6 +3588,115 @@
     background: var(--pv-bg);
     padding: 14px 0;
   }
+  /* V10.15: cuando nav=giros, el split-list se expande a full-width y muestra
+     la tabla maestra horizontal con scroll. Las otras columnas se ocultan via
+     setActiveNav hidden attribute. */
+  #screen-permisos.permv14[data-active-nav="giros"] .permv14-split-list[data-permv14-pane="modules"] {
+    width: 100% !important;
+    max-width: none !important;
+    flex: 1 1 auto !important;
+    min-width: 0;
+  }
+  #screen-permisos.permv14[data-active-nav="giros"] .permv14-modules-list {
+    overflow: visible;
+  }
+  /* tabla maestra cuando está en sidebar expandido */
+  .vlx-giros-table-wrap {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: calc(100vh - 220px);
+    border: 1px solid var(--pv-border);
+    border-radius: 8px;
+    background: var(--pv-bg-paper);
+    margin: 8px;
+  }
+  .vlx-giros-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12px;
+    min-width: 1500px;
+    background: var(--pv-bg-paper);
+  }
+  .vlx-giros-table th {
+    position: sticky;
+    top: 0;
+    background: var(--pv-bg-paper);
+    z-index: 2;
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--pv-border);
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--pv-text-dim);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .vlx-giros-table th.col-giro,
+  .vlx-giros-table td.col-giro {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--pv-bg-paper);
+    box-shadow: 2px 0 4px -2px rgba(0,0,0,0.06);
+  }
+  .vlx-giros-table tr.is-selected td.col-giro,
+  .vlx-giros-table tr.is-selected td {
+    background: var(--pv-accent-soft) !important;
+  }
+  .vlx-giros-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--pv-border);
+    vertical-align: top;
+    color: var(--pv-text);
+    background: var(--pv-bg-paper);
+  }
+  .vlx-giros-table tr {
+    cursor: pointer;
+  }
+  .vlx-giros-table tr:hover td {
+    background: var(--pv-surface);
+  }
+  .vlx-giros-table th.col-sistema { background: #ede9fe; color: #5b21b6; }
+  .vlx-giros-table th.col-cliente { background: #dbeafe; color: #1e40af; }
+  .vlx-giros-table th.col-proveedor { background: #fef3c7; color: #92400e; }
+  .vlx-giros-table .cell-link {
+    font-size: 11px;
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .vlx-giros-table .cell-link a {
+    color: var(--pv-accent);
+    text-decoration: none;
+  }
+  .vlx-giros-table .cell-link a:hover { text-decoration: underline; }
+  .vlx-giros-table .badge-scrape {
+    display: inline-block;
+    background: #d1fae5;
+    color: #065f46;
+    font-size: 8px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-left: 4px;
+    font-weight: 700;
+    vertical-align: middle;
+  }
+  .vlx-giros-table .cell-name {
+    font-weight: 600;
+    min-width: 140px;
+  }
+  .vlx-giros-table .cell-que-vende {
+    font-size: 11px;
+    color: var(--pv-text);
+    min-width: 200px;
+    max-width: 280px;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
   #screen-permisos.permv14 .permv14-split-list-search { padding: 0 10px 10px; }
   #screen-permisos.permv14 .permv14-search { position: relative; }
   #screen-permisos.permv14 .permv14-search input {
@@ -6046,12 +6155,20 @@
     });
     // V10.11: actualizar placeholder del buscador según el nav
     updateSearchPlaceholder(navKey);
+    // V10.15: marker en el screen para activar layout-giros-tabla (CSS)
+    try {
+      const scr = document.getElementById('screen-permisos');
+      if (scr) scr.setAttribute('data-active-nav', navKey);
+    } catch(_){}
     // Mostrar/ocultar columnas según pane
-    // 'modules' y 'giros' comparten el mismo grid 3-cols (lista | config | preview)
+    // V10.15: en modo GIROS, ocultamos config-pane y preview-pane porque el
+    // split-list se expande a full-width como tabla. En modo MODULES sigue
+    // mostrando los 3 paneles.
     const usesGrid3Cols = (navKey === 'modules' || navKey === 'giros');
+    const isGirosTable  = (navKey === 'giros');
     $$('.permv14-split-list').forEach(el => el.hidden = !usesGrid3Cols);
-    $$('.permv14-config-pane').forEach(el => el.hidden = !usesGrid3Cols);
-    $$('.permv14-preview-pane').forEach(el => el.hidden = !usesGrid3Cols);
+    $$('.permv14-config-pane').forEach(el => el.hidden = !usesGrid3Cols || isGirosTable);
+    $$('.permv14-preview-pane').forEach(el => el.hidden = !usesGrid3Cols || isGirosTable);
     // Side-panes específicos (override/hierarchy/audit/settings)
     $$('.permv14-side-pane').forEach(el => {
       el.hidden = (el.dataset.permv14Pane !== navKey);
@@ -6212,71 +6329,161 @@
         if (v14.selectedGiro) break;
       }
     }
-    const search = ($('#permv14-mod-search') && $('#permv14-mod-search').value || '').toLowerCase();
+    const search = ($('#permv14-mod-search') && $('#permv14-mod-search').value || '').toLowerCase().trim();
+
+    // V10.15: cargar dataset de ecosistema (con cache) — proveedores, clientes, sistemas por giro
+    let eco = null;
+    try {
+      if (typeof loadEcosystem === 'function') eco = await loadEcosystem();
+    } catch(_) {}
+    const ecoBySlug = {};
+    const ecoByName = {};
+    if (eco && Array.isArray(eco.giros)) {
+      eco.giros.forEach(g => {
+        ecoBySlug[g.slug] = g;
+        if (g.name) ecoByName[g.name.toLowerCase()] = g;
+      });
+    }
+    function findEcoFor(slug, label) {
+      if (ecoBySlug[slug]) return ecoBySlug[slug];
+      const nm = String(label||'').replace(/^\S+\s+/, '').toLowerCase();
+      if (ecoByName[nm]) return ecoByName[nm];
+      // fuzzy: si el slug contiene un slug del eco
+      for (const k of Object.keys(ecoBySlug)) {
+        if (slug.includes(k) || k.includes(slug)) return ecoBySlug[k];
+      }
+      return null;
+    }
+    function urlHost(u) {
+      if (!u) return '';
+      return String(u).replace(/^https?:\/\//,'').replace(/\/.*$/,'').replace(/^www\./,'');
+    }
+    function cellLink(u, label, scrapeable) {
+      if (!u) return '<td class="cell-link" style="color:var(--pv-text-dim)">—</td>';
+      const safe = escapeAttr(u);
+      const host_ = urlHost(u);
+      const badge = scrapeable ? '<span class="badge-scrape" title="Scrapeable">⚡</span>' : '';
+      return '<td class="cell-link" title="' + safe + (label?' — '+escapeAttr(label):'') + '">'
+        + '<a href="' + safe + '" target="_blank" rel="noopener noreferrer">' + escapeText(host_) + ' ↗</a>'
+        + badge
+        + '</td>';
+    }
+
+    // V10.15: filtro avanzado que matchea contra TODOS los campos del eco
+    function matchSearch(slug, label, ecoRow) {
+      if (!search) return true;
+      const lower = label.toLowerCase();
+      if (lower.includes(search) || slug.toLowerCase().includes(search)) return true;
+      const giroBd = (v14.catalogs.giros || []).find(g => g && g.slug === slug);
+      const overrides = giroBd && giroBd.moduleNameOverrides;
+      if (overrides && Object.values(overrides).some(n => String(n||'').toLowerCase().includes(search))) return true;
+      if (ecoRow) {
+        const blob = (ecoRow.que_vende || '') + ' ' +
+                     (ecoRow.competidores_sector||[]).map(c=>c.sistema+' '+(c.url||'')).join(' ') + ' ' +
+                     (ecoRow.cadena_valor?.clientes_finales||[]).map(c=>c.nombre+' '+(c.url||'')).join(' ') + ' ' +
+                     (ecoRow.cadena_valor?.proveedores||[]).map(c=>c.nombre+' '+(c.url||'')).join(' ');
+        if (blob.toLowerCase().includes(search)) return true;
+      }
+      return false;
+    }
+
+    // Recopilar todos los giros visibles agrupados por categoría
     const usedSlugs = new Set();
-    let html = '';
+    const groupedVisible = [];
     Object.entries(GIRO_CATEGORIES).forEach(([catKey, cat]) => {
       const visible = cat.items.filter(slug => {
         if (usedSlugs.has(slug) || !PROFILES[slug]) return false;
         const label = LABELS[slug] || slug;
-        if (!search) return true;
-        if (label.toLowerCase().includes(search) || slug.toLowerCase().includes(search)) return true;
-        // 2026-05-09 fix(M3): match contra moduleNameOverrides (renombres custom por giro)
-        const giroBd = (v14.catalogs.giros || []).find(g => g && g.slug === slug);
-        const overrides = giroBd && giroBd.moduleNameOverrides;
-        if (overrides && Object.values(overrides).some(n => String(n||'').toLowerCase().includes(search))) return true;
-        return false;
+        const ecoRow = findEcoFor(slug, label);
+        return matchSearch(slug, label, ecoRow);
       });
       if (!visible.length) return;
-      html += '<div class="permv14-split-group-label">' + cat.label + '</div>';
-      visible.forEach(slug => {
-        usedSlugs.add(slug);
-        const label = LABELS[slug] || slug;
-        // V10.14: detectar si la primera "palabra" es emoji real (no "Jugos", "Pa", etc).
-        // Si NO es emoji, usar default 🎯 + label completo como texto.
-        const m_raw = label.match(/^(\S+)\s+(.+)$/);
-        const m = (m_raw && _isEmojiLike(m_raw[1])) ? m_raw : [null, '🎯', label];
-        const tenantCount = counts[slug] || 0;
-        const sel = (v14.selectedGiro === slug) ? ' selected' : '';
-        const countBadge = tenantCount > 0
-          ? '<span class="permv14-list-item-state" title="' + tenantCount + ' tenant(s) usando este giro" style="background:var(--pv-active);color:white;font-family:var(--pv-font-mono);font-size:9px;font-weight:600;padding:1px 5px;border-radius:8px;width:auto;height:auto;line-height:1;">' + tenantCount + '</span>'
-          : '';
-        html += '<div class="permv14-list-item' + sel + '" data-permv14-giro="' + escapeAttr(slug) + '">'
-              + '<span class="permv14-list-item-icon">' + m[1] + '</span>'
-              + escapeText(m[2])
-              + countBadge
-              + '</div>';
-      });
+      visible.forEach(s => usedSlugs.add(s));
+      groupedVisible.push({ catLabel: cat.label, slugs: visible });
     });
-    // 2026-05-09: agregar giros que existen en BD pero NO están en GIRO_CATEGORIES
-    // (los nuevos creados via "+ Nuevo Giro"). Sección "🆕 Nuevos / Custom".
-    const bdOnlyGiros = (v14.catalogs.giros || []).filter(g =>
-      g && g.slug && !usedSlugs.has(g.slug) && (!search || (g.name||'').toLowerCase().includes(search) || g.slug.toLowerCase().includes(search))
-    );
+    // bdOnly: nuevos custom
+    const bdOnlyGiros = (v14.catalogs.giros || []).filter(g => {
+      if (!g || !g.slug || usedSlugs.has(g.slug)) return false;
+      const label = g.name || g.slug;
+      const ecoRow = findEcoFor(g.slug, label);
+      return matchSearch(g.slug, label, ecoRow);
+    });
     if (bdOnlyGiros.length) {
-      html += '<div class="permv14-split-group-label">🆕 Nuevos / Custom</div>';
-      bdOnlyGiros.forEach(g => {
-        usedSlugs.add(g.slug);
-        const label = g.name || g.slug;
-        // V10.14: igual fix — solo split si primera palabra es emoji real
-        const m_raw = label.match(/^(\S+)\s+(.+)$/);
-        const m = (m_raw && _isEmojiLike(m_raw[1])) ? m_raw : [null, '🆕', label];
-        const tenantCount = counts[g.slug] || 0;
-        const sel = (v14.selectedGiro === g.slug) ? ' selected' : '';
-        const countBadge = tenantCount > 0
-          ? '<span class="permv14-list-item-state" style="background:var(--pv-active);color:white;font-family:var(--pv-font-mono);font-size:9px;font-weight:600;padding:1px 5px;border-radius:8px;width:auto;height:auto;line-height:1;">' + tenantCount + '</span>'
-          : '';
-        html += '<div class="permv14-list-item' + sel + '" data-permv14-giro="' + escapeAttr(g.slug) + '">'
-              + '<span class="permv14-list-item-icon">' + m[1] + '</span>'
-              + escapeText(m[2])
-              + countBadge
-              + '</div>';
-      });
+      groupedVisible.push({ catLabel: '🆕 Nuevos / Custom', slugs: bdOnlyGiros.map(g=>g.slug) });
+      bdOnlyGiros.forEach(g => usedSlugs.add(g.slug));
     }
-    wrap.innerHTML = html || '<div class="permv14-empty-row">Sin giros.</div>';
-    $$('.permv14-list-item[data-permv14-giro]', wrap).forEach(el => {
-      el.addEventListener('click', async () => {
-        const nextSlug = el.dataset.permv14Giro;
+
+    // V10.15: construir TABLA HORIZONTAL con scroll en lugar de lista vertical
+    let html = '';
+    if (!groupedVisible.length) {
+      html = '<div class="permv14-empty-row" style="padding:20px;text-align:center;color:var(--pv-text-dim)">Sin giros que coincidan con "<strong>' + escapeText(search) + '</strong>".</div>';
+    } else {
+      const totalVisible = groupedVisible.reduce((s,g)=>s+g.slugs.length, 0);
+      html = '<div class="vlx-giros-table-wrap">' +
+        '<table class="vlx-giros-table">' +
+          '<thead><tr>' +
+            '<th class="col-giro">Giro de Negocio</th>' +
+            '<th>¿Qué vende?</th>' +
+            '<th class="col-sistema">Sistema 1 (URL)</th>' +
+            '<th class="col-sistema">Sistema 2 (URL)</th>' +
+            '<th class="col-sistema">Sistema 3 (URL)</th>' +
+            '<th class="col-cliente">Cliente Final 1 (URL)</th>' +
+            '<th class="col-cliente">Cliente Final 2 (URL)</th>' +
+            '<th class="col-cliente">Cliente Final 3 (URL)</th>' +
+            '<th class="col-proveedor">Proveedor 1 (URL)</th>' +
+            '<th class="col-proveedor">Proveedor 2 (URL)</th>' +
+            '<th class="col-proveedor">Proveedor 3 (URL)</th>' +
+            '<th style="width:60px">Tenants</th>' +
+          '</tr></thead>' +
+          '<tbody>';
+      groupedVisible.forEach(group => {
+        html += '<tr class="vlx-giros-group-label"><td colspan="12" style="background:var(--pv-surface);font-family:var(--pv-font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--pv-text-dim);padding:6px 14px;border-bottom:1px solid var(--pv-border)">' + escapeText(group.catLabel) + ' · ' + group.slugs.length + '</td></tr>';
+        group.slugs.forEach(slug => {
+          const label = LABELS[slug] || (v14.catalogs.giros||[]).find(g=>g.slug===slug)?.name || slug;
+          const ecoRow = findEcoFor(slug, label);
+          const tenantCount = counts[slug] || 0;
+          const sel = (v14.selectedGiro === slug) ? 'is-selected' : '';
+          // Icon
+          const m_raw = label.match(/^(\S+)\s+(.+)$/);
+          const m = (m_raw && _isEmojiLike(m_raw[1])) ? m_raw : [null, '🎯', label];
+          const giroDisplay = '<span style="font-size:14px;margin-right:6px">' + m[1] + '</span>' + escapeText(m[2]);
+          // Eco data
+          const queVende = ecoRow?.que_vende || '<span style="color:var(--pv-text-dim);font-style:italic">—</span>';
+          const sis = ecoRow?.competidores_sector || [];
+          const cfs = ecoRow?.cadena_valor?.clientes_finales || [];
+          const provs = ecoRow?.cadena_valor?.proveedores || [];
+          // tenants badge
+          const tenantsBadge = tenantCount > 0
+            ? '<span style="background:#10b981;color:#fff;font-family:var(--pv-font-mono);font-size:9px;font-weight:600;padding:2px 7px;border-radius:8px">' + tenantCount + '</span>'
+            : '<span style="color:var(--pv-text-dim);font-size:11px">—</span>';
+
+          html += '<tr class="' + sel + '" data-permv14-giro="' + escapeAttr(slug) + '">' +
+            '<td class="col-giro cell-name">' + giroDisplay + '</td>' +
+            '<td class="cell-que-vende">' + (typeof queVende === 'string' && queVende.startsWith('<') ? queVende : escapeText(queVende)) + '</td>' +
+            cellLink(sis[0]?.url, sis[0]?.sistema, false) +
+            cellLink(sis[1]?.url, sis[1]?.sistema, false) +
+            cellLink(sis[2]?.url, sis[2]?.sistema, false) +
+            cellLink(cfs[0]?.url, cfs[0]?.nombre, cfs[0]?.scrapeable) +
+            cellLink(cfs[1]?.url, cfs[1]?.nombre, cfs[1]?.scrapeable) +
+            cellLink(cfs[2]?.url, cfs[2]?.nombre, cfs[2]?.scrapeable) +
+            cellLink(provs[0]?.url, provs[0]?.nombre, false) +
+            cellLink(provs[1]?.url, provs[1]?.nombre, false) +
+            cellLink(provs[2]?.url, provs[2]?.nombre, false) +
+            '<td style="text-align:center">' + tenantsBadge + '</td>' +
+          '</tr>';
+        });
+      });
+      html += '</tbody></table></div>' +
+        '<div style="padding:6px 14px;font-size:10px;color:var(--pv-text-dim);background:var(--pv-bg-paper);border-top:1px solid var(--pv-border)">📊 ' + totalVisible + ' giros · ⚡ = scrapeable via /api/products/search-public · Click en una fila para seleccionar</div>';
+    }
+
+    wrap.innerHTML = html;
+    // Wire click en filas para selección
+    wrap.querySelectorAll('tr[data-permv14-giro]').forEach(tr => {
+      tr.addEventListener('click', async (ev) => {
+        // ignorar clicks en links de URLs
+        if (ev.target.tagName === 'A') return;
+        const nextSlug = tr.dataset.permv14Giro;
         const currentSlug = v14.selectedGiro;
         // 2026-05-09 fix(H1): warning si hay cambios sin guardar antes de cambiar de giro
         if (currentSlug && currentSlug !== nextSlug && v14.giroIsDirty && v14.giroIsDirty[currentSlug]) {
