@@ -574,6 +574,326 @@
         {"generico": "Producto", "este_giro": "Material / Herramienta"},
         {"generico": "Cliente", "este_giro": "Cliente final / Contratista"}
       ]
+    },
+    {
+      "slug": "pizzeria",
+      "name": "Pizzería",
+      "que_vende": "Pizzas, pastas, bebidas, postres italianos",
+      "tipo_operacion": "Take-away + delivery + mesa",
+      "regulacion": "COFEPRIS, CFDI 4.0",
+      "cadena_valor": {
+        "proveedores": [
+          {"nombre": "Sysco", "url": "https://www.sysco.com/", "tipo": "distribuidor"},
+          {"nombre": "Saputo (queso mozzarella)", "url": "https://www.saputo.com/", "tipo": "fabricante"},
+          {"nombre": "Roma Food", "url": "https://www.romafood.com/", "tipo": "ingredientes italianos"}
+        ],
+        "clientes_finales": [
+          {"nombre": "Domino's Pizza", "url": "https://www.dominos.com/", "scrapeable": true},
+          {"nombre": "Pizza Hut", "url": "https://www.pizzahut.com/", "scrapeable": true},
+          {"nombre": "Papa John's", "url": "https://www.papajohns.com/", "scrapeable": true}
+        ]
+      },
+      "competidores_sector": [
+        {"sistema": "Slice", "url": "https://slicelife.com/", "pais": "🇺🇸 USA", "enfoque": "Pizzerías independientes", "modelo_cobro": "SaaS", "precio_base": "$0 + comisión", "precio_tipico": "+2.99% por orden online", "fortaleza": "Marketplace de pizzas + integración orders", "debilidad": "Solo USA, depende de comisión"},
+        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes + pizzerías", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "KDS robusto, drivers delivery", "debilidad": "Caro, HW obligatorio"},
+        {"sistema": "Square for Restaurants", "url": "https://squareup.com/us/en/point-of-sale/restaurants", "pais": "🌎 Global", "enfoque": "QSR + pizzerías", "modelo_cobro": "Freemium+comisión", "precio_base": "$0", "precio_tipico": "$60/mes + 2.6%", "fortaleza": "Gratis base, HW integrado", "debilidad": "Comisión por venta"}
+      ],
+      "funcionalidades_criticas": [
+        {"id": "PZ1", "feature": "Pizza builder (tamaños + ingredientes)", "porque": "Cada pizza es customizada por el cliente", "prioridad": "🔴 Crítica"},
+        {"id": "PZ2", "feature": "Tiempo de cocción y KDS por horno", "porque": "Pizzas tardan ~15min, organizar por horno", "prioridad": "🔴 Crítica"},
+        {"id": 11, "feature": "Integración delivery (Uber/Rappi/DiDi)", "porque": "60%+ ventas son delivery", "prioridad": "🔴 Alta"}
+      ],
+      "problemas_evitar": [
+        {"area": "Builder", "problema": "POS sin pizza builder obliga a notas manuales", "afecta": "POS retail genéricos"},
+        {"area": "Delivery", "problema": "Sin integración aggregators → pedidos perdidos", "afecta": "TODOS sin hub omnicanal"}
+      ],
+      "terminologia": [
+        {"generico": "Producto", "este_giro": "Pizza / Pasta / Bebida"},
+        {"generico": "Categoría", "este_giro": "Tamaño/Tipo (Personal/Mediana/Grande/Familiar)"},
+        {"generico": "Mesa", "este_giro": "Mesa / Para llevar / Delivery"}
+      ]
+    },
+    {
+      "slug": "taqueria",
+      "name": "Taquería",
+      "que_vende": "Tacos, quesadillas, gringas, bebidas, antojitos mexicanos",
+      "tipo_operacion": "Mostrador + mesa + para llevar",
+      "regulacion": "COFEPRIS, salubridad municipal, CFDI 4.0",
+      "cadena_valor": {
+        "proveedores": [
+          {"nombre": "Tortillería La Esperanza", "url": "https://www.tortilleria.com.mx/", "tipo": "tortillas"},
+          {"nombre": "Sigma Alimentos", "url": "https://www.sigma-alimentos.com/", "tipo": "carnes"},
+          {"nombre": "Bachoco", "url": "https://www.bachoco.com.mx/", "tipo": "pollo"}
+        ],
+        "clientes_finales": [
+          {"nombre": "Taco Bell", "url": "https://www.tacobell.com/", "scrapeable": true},
+          {"nombre": "Chipotle", "url": "https://www.chipotle.com/", "scrapeable": true},
+          {"nombre": "Tacos El Caminero", "url": "https://www.elcaminero.com.mx/", "scrapeable": true}
+        ]
+      },
+      "competidores_sector": [
+        {"sistema": "SoftRestaurant", "url": "https://national-soft.com/softrestaurant/", "pais": "🇲🇽 MX", "enfoque": "Restaurantes MX", "modelo_cobro": "Licencia+mantto", "precio_base": "$6,000-15,000 MXN", "precio_tipico": "+$300-800/mes", "fortaleza": "Estándar restaurantes MX", "debilidad": "Legacy, no cloud"},
+        {"sistema": "Parrot", "url": "https://parrotsoftware.io/", "pais": "🇲🇽 MX", "enfoque": "Restaurantes SaaS MX", "modelo_cobro": "SaaS", "precio_base": "$400/mes MXN", "precio_tipico": "$500-1500/mes MXN", "fortaleza": "MX-first, KDS, mesas", "debilidad": "Hardware propio"},
+        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes enterprise", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "Mapa mesas + KDS", "debilidad": "Caro"}
+      ],
+      "funcionalidades_criticas": [
+        {"id": "TQ1", "feature": "Modificadores (con/sin cebolla, salsa, queso, guacamole)", "porque": "Cada taco se customiza al momento", "prioridad": "🔴 Crítica"},
+        {"id": "TQ2", "feature": "Venta rápida (1-2 clics) para mostrador", "porque": "Filas en hora pico de la noche", "prioridad": "🔴 Crítica"},
+        {"id": 8, "feature": "CFDI 4.0 nativo", "porque": "Cumplimiento MX desde la venta", "prioridad": "🔴 Crítica MX"}
+      ],
+      "problemas_evitar": [
+        {"area": "Velocidad", "problema": "POS lentos en hora pico → filas frustradas", "afecta": "Sistemas legacy"}
+      ],
+      "terminologia": [
+        {"generico": "Producto", "este_giro": "Taco / Antojito / Bebida"},
+        {"generico": "Empleado", "este_giro": "Taquero / Mesero"}
+      ]
+    },
+    {
+      "slug": "heladeria",
+      "name": "Heladería",
+      "que_vende": "Helados, nieves, paletas, postres congelados",
+      "tipo_operacion": "Mostrador, por bola / por kg / paletas",
+      "regulacion": "COFEPRIS, cadena de frío",
+      "cadena_valor": {
+        "proveedores": [
+          {"nombre": "Nestlé Helados", "url": "https://www.nestle.com/", "tipo": "fabricante"},
+          {"nombre": "Sigma Helados", "url": "https://www.sigma-alimentos.com/", "tipo": "distribuidor"},
+          {"nombre": "Dairy Forall", "url": "https://www.dairyforall.com/", "tipo": "ingredientes lácteos"}
+        ],
+        "clientes_finales": [
+          {"nombre": "Dairy Queen", "url": "https://www.dairyqueen.com/", "scrapeable": true},
+          {"nombre": "Baskin-Robbins", "url": "https://www.baskinrobbins.com/", "scrapeable": true},
+          {"nombre": "Ben & Jerry's", "url": "https://www.benjerry.com/", "scrapeable": true}
+        ]
+      },
+      "competidores_sector": [
+        {"sistema": "NCR Counterpoint", "url": "https://www.ncr.com/restaurants/aloha-pos", "pais": "🌎 Global", "enfoque": "Retail + food specialty", "modelo_cobro": "Licencia enterprise", "precio_base": "Custom", "precio_tipico": "$300+/mes/terminal", "fortaleza": "Robusto multi-sucursal", "debilidad": "Caro, complejo"},
+        {"sistema": "Retail Pro", "url": "https://www.retailpro.com/", "pais": "🌎 Global", "enfoque": "Retail especializado", "modelo_cobro": "Licencia enterprise", "precio_base": "Custom", "precio_tipico": "$300+/mes", "fortaleza": "Multi-tienda", "debilidad": "Caro"},
+        {"sistema": "LS Central", "url": "https://www.lsretail.com/", "pais": "🇮🇸 ISL/Global", "enfoque": "Retail food", "modelo_cobro": "SaaS+licencia", "precio_base": "Custom", "precio_tipico": "$500+/mes", "fortaleza": "Sobre Dynamics, robusto", "debilidad": "Requiere Microsoft stack"}
+      ],
+      "funcionalidades_criticas": [
+        {"id": "HE1", "feature": "Venta por bola + por kg + por unidad", "porque": "Helado por bola, paletas por unidad", "prioridad": "🔴 Crítica"},
+        {"id": "HE2", "feature": "Modificadores (toppings, sabores combo)", "porque": "Combinaciones infinitas", "prioridad": "🔴 Alta"}
+      ],
+      "problemas_evitar": [
+        {"area": "Cadena de frío", "problema": "Sin alertas de mermas por congelador apagado", "afecta": "Sistemas sin IoT"}
+      ],
+      "terminologia": [
+        {"generico": "Producto", "este_giro": "Sabor / Paleta / Postre"},
+        {"generico": "Empleado", "este_giro": "Heladero"}
+      ]
+    },
+    {
+      "slug": "pasteleria",
+      "name": "Pastelería",
+      "que_vende": "Pasteles, postres finos, panes dulces de autor",
+      "tipo_operacion": "Mostrador + pedidos especiales + producción",
+      "regulacion": "COFEPRIS, fecha caducidad",
+      "cadena_valor": {
+        "proveedores": [
+          {"nombre": "Dawn Foods", "url": "https://www.dawnfoods.com/", "tipo": "ingredientes/equipo"},
+          {"nombre": "Callebaut", "url": "https://www.callebaut.com/", "tipo": "chocolate fino"},
+          {"nombre": "Bakery Solutions", "url": "https://www.bakerysolutions.com/", "tipo": "ingredientes"}
+        ],
+        "clientes_finales": [
+          {"nombre": "El Globo", "url": "https://www.elglobo.com.mx/", "scrapeable": true},
+          {"nombre": "Cinnabon", "url": "https://www.cinnabon.com/", "scrapeable": true},
+          {"nombre": "Pastelería Ideal", "url": "https://www.pasteleriaideal.com.mx/", "scrapeable": true}
+        ]
+      },
+      "competidores_sector": [
+        {"sistema": "Cybake", "url": "https://www.cybake.com/", "pais": "🇬🇧 UK", "enfoque": "Pastelería+panadería", "modelo_cobro": "SaaS", "precio_base": "$199/mes", "precio_tipico": "$199-499/mes", "fortaleza": "Recetas + producción", "debilidad": "Inglés"},
+        {"sistema": "FlexiBake", "url": "https://www.flexibake.com/", "pais": "🇺🇸 USA", "enfoque": "Pastelería pro", "modelo_cobro": "SaaS", "precio_base": "$249/mes", "precio_tipico": "$249-599/mes", "fortaleza": "Escalado recetas", "debilidad": "Caro"},
+        {"sistema": "FoodMan", "url": "https://www.foodman.io/", "pais": "🌎 Global", "enfoque": "Food production", "modelo_cobro": "SaaS", "precio_base": "$50/mes", "precio_tipico": "$50-200/mes", "fortaleza": "Pricing accesible", "debilidad": "Menos features"}
+      ],
+      "funcionalidades_criticas": [
+        {"id": "PA1", "feature": "Pedidos especiales (pasteles personalizados)", "porque": "Reserva con anticipo, fecha entrega, detalles cliente", "prioridad": "🔴 Crítica"},
+        {"id": "PA2", "feature": "Pago a cuenta de pedido (anticipo)", "porque": "Cliente paga 50% al ordenar, resto al recoger", "prioridad": "🔴 Alta"}
+      ],
+      "problemas_evitar": [
+        {"area": "Pedidos", "problema": "Sin tracking de pedidos especiales → entregas tarde", "afecta": "POS retail genéricos"}
+      ],
+      "terminologia": [
+        {"generico": "Producto", "este_giro": "Pastel / Postre / Pieza"},
+        {"generico": "Venta", "este_giro": "Pedido / Orden"}
+      ]
+    },
+    {
+      "slug": "jugos_naturales",
+      "name": "Jugos naturales",
+      "que_vende": "Jugos, smoothies, aguas frescas, bowls de fruta",
+      "tipo_operacion": "Mostrador rápido + take-away",
+      "regulacion": "COFEPRIS, manejo de frutas",
+      "cadena_valor": {
+        "proveedores": [
+          {"nombre": "Central de Abasto CDMX", "url": "https://ficeda.com.mx/", "tipo": "fruta mayoreo"},
+          {"nombre": "Driscoll's", "url": "https://www.driscolls.com/", "tipo": "berries"},
+          {"nombre": "Frutas Selectas de México", "url": "https://www.frutas.com.mx/", "tipo": "distribuidor"}
+        ],
+        "clientes_finales": [
+          {"nombre": "Jamba Juice", "url": "https://www.jamba.com/", "scrapeable": true},
+          {"nombre": "Smoothie King", "url": "https://www.smoothieking.com/", "scrapeable": true},
+          {"nombre": "Boost Juice", "url": "https://www.boostjuice.com/", "scrapeable": true}
+        ]
+      },
+      "competidores_sector": [
+        {"sistema": "Square for Restaurants", "url": "https://squareup.com/us/en/point-of-sale/restaurants", "pais": "🌎 Global", "enfoque": "QSR/Café", "modelo_cobro": "Freemium+comisión", "precio_base": "$0", "precio_tipico": "$60/mes+2.6%", "fortaleza": "HW integrado", "debilidad": "Comisión"},
+        {"sistema": "Lavu", "url": "https://lavu.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes pequeños", "modelo_cobro": "SaaS", "precio_base": "$59/mes", "precio_tipico": "$59-329/mes", "fortaleza": "Configurable", "debilidad": "Curva aprendizaje"},
+        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "Robusto", "debilidad": "Caro"}
+      ],
+      "funcionalidades_criticas": [
+        {"id": "JN1", "feature": "Builder de jugos (frutas + extras)", "porque": "Combos infinitos de fruta + chía + proteína", "prioridad": "🔴 Crítica"},
+        {"id": "JN2", "feature": "Tamaños (chico/mediano/grande)", "porque": "Mismo jugo 3 precios", "prioridad": "🔴 Crítica"}
+      ],
+      "problemas_evitar": [
+        {"area": "Builder", "problema": "POS sin builder customizado → cajero teclea todo manual", "afecta": "Sistemas genéricos"}
+      ],
+      "terminologia": [
+        {"generico": "Producto", "este_giro": "Jugo / Smoothie / Bowl"},
+        {"generico": "Empleado", "este_giro": "Juiciero / Bartender"}
+      ]
+    },
+    {
+      "slug": "jugos_frescos",
+      "name": "Jugos Frescos",
+      "que_vende": "Jugos prensados en frío, aguas frescas, infusiones",
+      "tipo_operacion": "Take-away + delivery + suscripciones",
+      "regulacion": "COFEPRIS, pasteurización HPP",
+      "cadena_valor": {
+        "proveedores": [
+          {"nombre": "Central de Abasto", "url": "https://ficeda.com.mx/", "tipo": "fruta mayoreo"},
+          {"nombre": "Productores orgánicos MX", "url": "https://www.organico.org.mx/", "tipo": "fruta orgánica"},
+          {"nombre": "HPP Technologies", "url": "https://www.hpp-international.com/", "tipo": "pasteurización"}
+        ],
+        "clientes_finales": [
+          {"nombre": "Pressed Juicery", "url": "https://www.pressedjuicery.com/", "scrapeable": true},
+          {"nombre": "Suja Juice", "url": "https://www.sujaorganic.com/", "scrapeable": true},
+          {"nombre": "Daily Harvest", "url": "https://www.daily-harvest.com/", "scrapeable": true}
+        ]
+      },
+      "competidores_sector": [
+        {"sistema": "Square Online", "url": "https://squareup.com/us/en/online-store", "pais": "🌎 Global", "enfoque": "E-commerce + retail", "modelo_cobro": "Freemium+comisión", "precio_base": "$0", "precio_tipico": "$29/mes + comisión", "fortaleza": "Subscriptions", "debilidad": "Comisión"},
+        {"sistema": "Shopify POS", "url": "https://www.shopify.com/pos", "pais": "🇨🇦 CAN/Global", "enfoque": "Retail omnicanal", "modelo_cobro": "SaaS+comisión", "precio_base": "$19/mes", "precio_tipico": "$89/mes Pro+%", "fortaleza": "E-commerce robusto", "debilidad": "Sin CFDI, comisión"},
+        {"sistema": "Lightspeed Retail", "url": "https://www.lightspeedhq.com/retail/", "pais": "🇨🇦 CAN/Global", "enfoque": "Retail moderno", "modelo_cobro": "SaaS", "precio_base": "$89/mes", "precio_tipico": "$89-289/mes", "fortaleza": "Catálogo rico", "debilidad": "Sin CFDI nativo"}
+      ],
+      "funcionalidades_criticas": [
+        {"id": "JF1", "feature": "Suscripciones (entrega semanal)", "porque": "Modelo de negocio recurrente", "prioridad": "🔴 Crítica"},
+        {"id": "JF2", "feature": "Caducidad corta (3-5 días)", "porque": "Jugos frescos se vencen rápido", "prioridad": "🔴 Alta"}
+      ],
+      "problemas_evitar": [
+        {"area": "Suscripciones", "problema": "POS retail no maneja recurrencia", "afecta": "SICAR, Eleventa"}
+      ],
+      "terminologia": [
+        {"generico": "Producto", "este_giro": "Botella / Jugo prensado"},
+        {"generico": "Venta", "este_giro": "Orden / Suscripción"}
+      ]
+    },
+    {
+      "slug": "marisqueria",
+      "name": "Marisquería",
+      "que_vende": "Mariscos frescos, ceviches, cocteles, pescados",
+      "tipo_operacion": "Mesa + para llevar, alta volatilidad de precios",
+      "regulacion": "COFEPRIS, SENASICA, cadena de frío",
+      "cadena_valor": {
+        "proveedores": [
+          {"nombre": "Sysco Mariscos", "url": "https://www.sysco.com/", "tipo": "distribuidor"},
+          {"nombre": "Pacific Seafood", "url": "https://www.pacseafood.com/", "tipo": "pescados"},
+          {"nombre": "Mariscos del Mar", "url": "https://www.mariscosdelmar.com.mx/", "tipo": "distribuidor MX"}
+        ],
+        "clientes_finales": [
+          {"nombre": "Red Lobster", "url": "https://www.redlobster.com/", "scrapeable": true},
+          {"nombre": "Mariscos El Sarandeado", "url": "https://www.elsarandeado.mx/", "scrapeable": true},
+          {"nombre": "Cazuelas Bigos", "url": "https://www.cazuelasbigos.com.mx/", "scrapeable": true}
+        ]
+      },
+      "competidores_sector": [
+        {"sistema": "SoftRestaurant", "url": "https://national-soft.com/softrestaurant/", "pais": "🇲🇽 MX", "enfoque": "Restaurantes MX", "modelo_cobro": "Licencia+mantto", "precio_base": "$6K-15K MXN", "precio_tipico": "+$300-800/mes", "fortaleza": "Estándar MX", "debilidad": "Legacy"},
+        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "Mapa mesas", "debilidad": "Caro"},
+        {"sistema": "Lavu", "url": "https://lavu.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes medianos", "modelo_cobro": "SaaS", "precio_base": "$59/mes", "precio_tipico": "$59-329/mes", "fortaleza": "Configurable", "debilidad": "Inglés"}
+      ],
+      "funcionalidades_criticas": [
+        {"id": "MA1", "feature": "Precios variables por kilo (mercado del día)", "porque": "Camarón vale distinto cada día", "prioridad": "🔴 Crítica"},
+        {"id": "MA2", "feature": "Venta por kg / por pieza / por porción", "porque": "Pescado por kg, taco de camarón por unidad", "prioridad": "🔴 Crítica"}
+      ],
+      "problemas_evitar": [
+        {"area": "Precios", "problema": "POS con precio fijo obliga a actualizar manual cada mañana", "afecta": "Sistemas genéricos"}
+      ],
+      "terminologia": [
+        {"generico": "Producto", "este_giro": "Marisco / Platillo / Coctel"},
+        {"generico": "Empleado", "este_giro": "Mesero / Cocinero / Limpiador"}
+      ]
+    },
+    {
+      "slug": "sushi",
+      "name": "Sushi",
+      "que_vende": "Sushi, sashimi, rolls, tempura, comida japonesa",
+      "tipo_operacion": "Mesa + take-away + delivery, prep alta",
+      "regulacion": "COFEPRIS, manejo de pescado crudo, cadena frío",
+      "cadena_valor": {
+        "proveedores": [
+          {"nombre": "Pacific Seafood", "url": "https://www.pacseafood.com/", "tipo": "pescado"},
+          {"nombre": "True World Foods", "url": "https://www.trueworldfoods.com/", "tipo": "distribuidor japonés"},
+          {"nombre": "JFC International", "url": "https://www.jfc.com/", "tipo": "ingredientes asiáticos"}
+        ],
+        "clientes_finales": [
+          {"nombre": "Sushi Itto", "url": "https://www.sushiitto.com.mx/", "scrapeable": true},
+          {"nombre": "Sushi Roll", "url": "https://www.sushiroll.com.mx/", "scrapeable": true},
+          {"nombre": "Sushiko", "url": "https://www.sushiko.com.mx/", "scrapeable": true}
+        ]
+      },
+      "competidores_sector": [
+        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "KDS por estación", "debilidad": "Caro"},
+        {"sistema": "TouchBistro", "url": "https://www.touchbistro.com/", "pais": "🇨🇦 CAN", "enfoque": "Restaurantes medianos", "modelo_cobro": "SaaS", "precio_base": "$69/mes", "precio_tipico": "$69-399/mes", "fortaleza": "iPad-first", "debilidad": "Solo iPad"},
+        {"sistema": "Parrot", "url": "https://parrotsoftware.io/", "pais": "🇲🇽 MX", "enfoque": "Restaurantes SaaS MX", "modelo_cobro": "SaaS", "precio_base": "$400/mes MXN", "precio_tipico": "$500-1500/mes MXN", "fortaleza": "KDS, MX-first", "debilidad": "Hardware propio"}
+      ],
+      "funcionalidades_criticas": [
+        {"id": "SU1", "feature": "Catálogo con fotos de cada roll", "porque": "Cliente elige por imagen, son cientos de combinaciones", "prioridad": "🔴 Crítica"},
+        {"id": "SU2", "feature": "Combos de 3-5 rolls (pricing dinámico)", "porque": "Promos combo más baratas que individual", "prioridad": "🔴 Alta"}
+      ],
+      "problemas_evitar": [
+        {"area": "Combos", "problema": "POS sin combos → todo se cobra individual y la promo se pierde", "afecta": "Sistemas básicos"}
+      ],
+      "terminologia": [
+        {"generico": "Producto", "este_giro": "Roll / Pieza / Combo"},
+        {"generico": "Empleado", "este_giro": "Sushi chef / Mesero"}
+      ]
+    },
+    {
+      "slug": "hamburguesas",
+      "name": "Hamburguesas",
+      "que_vende": "Hamburguesas, papas, malteadas, hot dogs",
+      "tipo_operacion": "QSR rápido + delivery + drive-thru",
+      "regulacion": "COFEPRIS, CFDI 4.0",
+      "cadena_valor": {
+        "proveedores": [
+          {"nombre": "Sigma Alimentos", "url": "https://www.sigma-alimentos.com/", "tipo": "carne"},
+          {"nombre": "Bimbo (pan)", "url": "https://www.grupobimbo.com/", "tipo": "pan"},
+          {"nombre": "Lamb Weston (papas)", "url": "https://www.lambweston.com/", "tipo": "papas congeladas"}
+        ],
+        "clientes_finales": [
+          {"nombre": "McDonald's", "url": "https://www.mcdonalds.com/", "scrapeable": true},
+          {"nombre": "Burger King", "url": "https://www.bk.com/", "scrapeable": true},
+          {"nombre": "Carl's Jr", "url": "https://www.carlsjr.com/", "scrapeable": true}
+        ]
+      },
+      "competidores_sector": [
+        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "QSR + restaurantes", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "Drive-thru, KDS", "debilidad": "Caro"},
+        {"sistema": "Revel Systems", "url": "https://revelsystems.com/", "pais": "🇺🇸 USA", "enfoque": "QSR iPad", "modelo_cobro": "SaaS", "precio_base": "$99/mes", "precio_tipico": "$99-299/mes", "fortaleza": "iPad-first, robusto", "debilidad": "Solo iPad"},
+        {"sistema": "Square for Restaurants", "url": "https://squareup.com/us/en/point-of-sale/restaurants", "pais": "🌎 Global", "enfoque": "QSR", "modelo_cobro": "Freemium+comisión", "precio_base": "$0", "precio_tipico": "$60/mes+2.6%", "fortaleza": "HW integrado", "debilidad": "Comisión"}
+      ],
+      "funcionalidades_criticas": [
+        {"id": "HB1", "feature": "Builder customizable (extra queso, sin pepinillo)", "porque": "Cada burger es customizada", "prioridad": "🔴 Crítica"},
+        {"id": "HB2", "feature": "Combos (burger + papas + bebida)", "porque": "60% ventas son combos", "prioridad": "🔴 Crítica"},
+        {"id": "HB3", "feature": "Drive-thru con KDS visible", "porque": "Hot order desde el carro", "prioridad": "🔴 Alta"}
+      ],
+      "problemas_evitar": [
+        {"area": "Builder", "problema": "Sin builder rápido → cajero teclea cada modificación manual", "afecta": "POS retail genéricos"}
+      ],
+      "terminologia": [
+        {"generico": "Producto", "este_giro": "Hamburguesa / Combo / Bebida"},
+        {"generico": "Empleado", "este_giro": "Cocinero / Cajero / Drive-thru"}
+      ]
     }
   ]
 }

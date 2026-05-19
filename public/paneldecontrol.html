@@ -6551,6 +6551,9 @@
           delete v14.giroIsDirty[currentSlug];
         }
         v14.selectedGiro = nextSlug;
+        // V10.21: salir del drill-down de botones si lo había. Al cambiar de giro,
+        // el preview debe SIEMPRE mostrar la vista POS completa, no el button list.
+        v14.selectedGiroMod = null;
         // V10.18: activar layout 2-filas (tabla arriba + config+preview abajo)
         if (typeof _setGiroSelectedAttr === 'function') _setGiroSelectedAttr(true);
         renderGirosList();
