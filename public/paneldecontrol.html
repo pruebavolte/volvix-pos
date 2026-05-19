@@ -7366,10 +7366,45 @@
     const overrides = (v14.giroFeatureOverrides && v14.giroFeatureOverrides[slug]) || {};
 
     if (!buttonKeys.length) {
-      body.innerHTML = '<div style="padding:14px;">' +
-        '<p style="font-size:11px;color:var(--pv-text-dim);margin:0 0 8px;">Botones / componentes que el módulo expondrá. Toggle individual aplica al hacer ⚡ Aplicar.</p>' +
-        '<div class="permv14-empty-row" style="padding:14px;text-align:center;color:var(--pv-text-dim);font-size:12px;">— Este módulo no tiene botones configurables —</div>' +
-      '</div>';
+      // V10.24: en lugar de "no tiene botones", mostrar componentes genéricos
+      // (Ver, Nuevo, Editar, Eliminar, Exportar, Buscar) para que el panel no
+      // se vea vacío y el usuario pueda toggleor las acciones.
+      const GENERIC_ACTIONS = [
+        { key: mod + '.list',   icon: '📊', label: 'Ver listado' },
+        { key: mod + '.create', icon: '➕', label: 'Crear / Nuevo' },
+        { key: mod + '.edit',   icon: '✏️', label: 'Editar' },
+        { key: mod + '.delete', icon: '🗑️', label: 'Eliminar' },
+        { key: mod + '.export', icon: '📤', label: 'Exportar (CSV / PDF)' },
+        { key: mod + '.search', icon: '🔎', label: 'Buscar / Filtrar' },
+      ];
+      body.innerHTML = '<div style="padding:10px 14px;background:var(--pv-bg-paper);border-bottom:1px solid var(--pv-border);">' +
+          '<p style="font-size:11px;color:var(--pv-text-dim);margin:0;">Acciones genéricas del módulo. Toggle individual aplica al hacer ⚡ Aplicar.</p>' +
+        '</div>' +
+        '<div class="permv14-perm-table" style="padding:6px 0;">' +
+          GENERIC_ACTIONS.map(a => {
+            const state = overrides[a.key] === false ? 'hidden' : 'enabled';
+            return '<div class="permv14-perm-row" style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-bottom:1px solid var(--pv-border);">' +
+              '<div class="permv14-perm-icon" style="font-size:14px;flex:0 0 auto;">' + a.icon + '</div>' +
+              '<div class="permv14-perm-name" style="flex:1 1 auto;font-size:12px;color:var(--pv-text);min-width:0;overflow:hidden;text-overflow:ellipsis;">' + escapeText(a.label) + '</div>' +
+              '<select class="permv14-state-select s-' + (state==='enabled'?'on':'hi') + '" data-comp-key="' + escapeAttr(a.key) + '" style="flex:0 0 auto;font-size:10px;padding:2px 6px;">' +
+                '<option value="enabled"' + (state==='enabled'?' selected':'') + '>✓ ACTIVO</option>' +
+                '<option value="hidden"' + (state==='hidden'?' selected':'') + '>🙈 OCULTO</option>' +
+              '</select>' +
+            '</div>';
+          }).join('') +
+        '</div>';
+      // wire selects (igual que abajo)
+      body.querySelectorAll('[data-comp-key]').forEach(sel => {
+        sel.addEventListener('change', () => {
+          v14.giroFeatureOverrides = v14.giroFeatureOverrides || {};
+          v14.giroFeatureOverrides[slug] = v14.giroFeatureOverrides[slug] || {};
+          v14.giroFeatureOverrides[slug][sel.dataset.compKey] = sel.value === 'enabled';
+          v14.giroIsDirty = v14.giroIsDirty || {}; v14.giroIsDirty[slug] = true;
+          try { updateGlobalDirtyBadge && updateGlobalDirtyBadge(); } catch(_){}
+          sel.classList.remove('s-on','s-hi');
+          sel.classList.add(sel.value === 'enabled' ? 's-on' : 's-hi');
+        });
+      });
       return;
     }
 
@@ -7418,6 +7453,134 @@
       };
     }
   }
+
+  // V10.24: mockup builder por módulo. Construye HTML específico para cada
+  // módulo (Dashboard, Corte, Inventario, etc.) o un placeholder genérico
+  // bonito para módulos sin mockup propio.
+  function _buildModuleMockup(mod, modName, modIcon, giroName, slug, terms) {
+    const banner =
+      '<h2 style="margin:0 0 4px;font-family:var(--pv-font-display);font-size:20px;color:#0a0a0a;">' + escapeText(modName) + ' <em style="color:#e07845;font-weight:400;font-style:italic">· vista cliente</em></h2>' +
+      '<p style="margin:0 0 14px;font-size:12px;color:#666">Así verá este módulo el dueño y los cajeros del tenant <strong>' + escapeText(giroName) + '</strong>.</p>' +
+      '<div style="background:linear-gradient(180deg,#e07845,#c66134);color:#fff;text-align:center;padding:7px;font-size:11px;font-weight:700;letter-spacing:0.5px;border-radius:6px 6px 0 0;">VISTA PREVIA · CÓMO LO VE EL CLIENTE</div>';
+    const wrap = (inner) => '<div style="font-family:Inter,system-ui,sans-serif">' + banner +
+      '<div style="background:#fff;border:1px solid #e5e7eb;border-top:0;border-radius:0 0 8px 8px;padding:18px;min-height:360px;">' + inner + '</div></div>';
+
+    // Mockups específicos:
+    if (mod === 'dashboard') {
+      return wrap(
+        '<div style="margin-bottom:16px;font-size:13px;color:#0a0a0a;font-weight:600">📊 Resumen del día</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">' +
+          [
+            {label:'Ventas hoy', val:'$1,847.50', delta:'+12% vs ayer', color:'#16a34a'},
+            {label:'Tickets',    val:'47',         delta:'avg $39.30',   color:'#0a0a0a'},
+            {label:'Productos vendidos', val:'132', delta:'15 únicos',   color:'#0a0a0a'},
+            {label:'Hora pico',  val:'14:00–15:00', delta:'12 tickets',  color:'#e07845'},
+          ].map(k => '<div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;padding:12px;"><div style="font-size:10px;color:#666;text-transform:uppercase;letter-spacing:0.5px">' + k.label + '</div><div style="font-family:var(--pv-font-display);font-size:22px;font-weight:600;color:' + k.color + ';margin-top:4px">' + k.val + '</div><div style="font-size:10px;color:#666;margin-top:2px">' + k.delta + '</div></div>').join('') +
+        '</div>' +
+        '<div style="margin-top:14px;background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;padding:12px"><div style="font-size:11px;color:#666;margin-bottom:8px">📈 Ventas por hora</div><div style="display:flex;gap:3px;align-items:flex-end;height:60px">' +
+          [12,18,24,31,28,42,55,38,29,18,15,22].map((h,i) => '<div style="flex:1;background:linear-gradient(180deg,#2D5F8F,#1E4065);height:' + h + 'px;border-radius:2px 2px 0 0;" title="' + (8+i) + 'hrs"></div>').join('') +
+        '</div></div>'
+      );
+    }
+    if (mod === 'apertura') {
+      return wrap(
+        '<div style="max-width:380px;margin:0 auto"><div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:11px;margin-bottom:14px;font-size:12px;color:#92400e">⚠️ La caja está <strong>cerrada</strong>. Para empezar a vender debes hacer apertura.</div>' +
+        '<label style="display:block;font-size:11px;color:#0a0a0a;font-weight:600;margin-bottom:4px">Fondo de caja inicial</label>' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-size:18px;color:#16a34a;font-weight:700">$</span><input disabled value="500.00" style="flex:1;padding:8px 10px;border:2px solid #e5e7eb;border-radius:6px;font-size:14px;font-family:monospace"></div>' +
+        '<label style="display:block;font-size:11px;color:#0a0a0a;font-weight:600;margin-bottom:4px">Cajero responsable</label>' +
+        '<select disabled style="width:100%;padding:8px 10px;border:2px solid #e5e7eb;border-radius:6px;font-size:13px;margin-bottom:14px"><option>👤 María González</option></select>' +
+        '<button disabled style="width:100%;background:linear-gradient(180deg,#10b981,#059669);color:#fff;border:0;border-radius:6px;padding:11px;font-weight:700;font-size:13px;cursor:not-allowed">✓ Abrir caja</button></div>'
+      );
+    }
+    if (mod === 'corte') {
+      return wrap(
+        '<div style="font-size:13px;color:#0a0a0a;font-weight:600;margin-bottom:14px">💼 Corte de Caja — turno 14:00–22:00</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+          [
+            {l:'Efectivo en caja',   v:'$3,847.50', s:'47 tickets'},
+            {l:'Tarjeta',            v:'$1,290.00', s:'12 transacciones'},
+            {l:'Transferencia',      v:'$450.00',   s:'3 movimientos'},
+            {l:'Total esperado',     v:'$5,587.50', s:'sin propinas'},
+          ].map(k => '<div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:6px;padding:10px"><div style="font-size:10px;color:#666">' + k.l + '</div><div style="font-family:var(--pv-font-display);font-size:18px;font-weight:600;color:#0a0a0a">' + k.v + '</div><div style="font-size:9px;color:#888">' + k.s + '</div></div>').join('') +
+        '</div>' +
+        '<div style="margin-top:14px;background:#dcfce7;border:1px solid #16a34a;border-radius:8px;padding:11px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:11px;color:#065f46;font-weight:600">Diferencia</div><div style="font-family:var(--pv-font-display);font-size:20px;color:#16a34a;font-weight:700">+$0.00</div></div><div style="font-size:14px;color:#065f46;font-weight:600">✓ Cuadrada</div></div>' +
+        '<button disabled style="margin-top:14px;width:100%;background:#0a0a0a;color:#fff;border:0;border-radius:6px;padding:10px;font-weight:700;font-size:13px;cursor:not-allowed">🔒 Cerrar caja e imprimir Z</button>'
+      );
+    }
+    if (mod === 'inventario') {
+      return wrap(
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><input disabled placeholder="🔎 Buscar producto..." style="flex:1;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px"><button disabled style="background:#10b981;color:#fff;border:0;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:not-allowed">+ Nuevo</button></div>' +
+        '<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#f3f4f6"><th style="text-align:left;padding:7px 10px;font-weight:600">Producto</th><th style="text-align:right;padding:7px 10px;font-weight:600">Precio</th><th style="text-align:right;padding:7px 10px;font-weight:600">Stock</th><th style="padding:7px 10px;font-weight:600">Estado</th></tr></thead><tbody>' +
+          [
+            {n:'Producto demo A', p:'$45.00', s:24, ok:true},
+            {n:'Producto demo B', p:'$120.00', s:8, ok:true},
+            {n:'Producto demo C', p:'$15.50', s:2, ok:false},
+            {n:'Producto demo D', p:'$78.00', s:15, ok:true},
+            {n:'Producto demo E', p:'$210.00', s:0, ok:false},
+          ].map(r => '<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:7px 10px">' + r.n + '</td><td style="padding:7px 10px;text-align:right;font-family:monospace">' + r.p + '</td><td style="padding:7px 10px;text-align:right;font-family:monospace">' + r.s + '</td><td style="padding:7px 10px;text-align:center"><span style="background:' + (r.ok?'#dcfce7':'#fef3c7') + ';color:' + (r.ok?'#065f46':'#92400e') + ';padding:2px 8px;border-radius:99px;font-size:9px;font-weight:600">' + (r.ok?'OK':'BAJO') + '</span></td></tr>').join('') +
+        '</tbody></table>'
+      );
+    }
+    if (mod === 'clientes') {
+      const clientTerm = terms.cliente || 'Clientes';
+      return wrap(
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><input disabled placeholder="🔎 Buscar ' + escapeAttr(clientTerm).toLowerCase() + '..." style="flex:1;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px"><button disabled style="background:#10b981;color:#fff;border:0;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:not-allowed">+ Nuevo</button></div>' +
+        [
+          {n:'María González',  e:'+52 55 1234 5678', t:'7 compras', d:'$3,420 total'},
+          {n:'Carlos Rivera',   e:'+52 55 2345 6789', t:'12 compras', d:'$8,150 total'},
+          {n:'Ana Martínez',    e:'+52 55 3456 7890', t:'3 compras', d:'$450 total'},
+          {n:'Juan López',      e:'+52 55 4567 8901', t:'24 compras', d:'$15,200 total'},
+        ].map(c => '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fafafa;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:6px"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2D5F8F,#1E4065);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">' + c.n.split(' ').map(w=>w[0]).slice(0,2).join('') + '</div><div style="flex:1"><div style="font-weight:600;font-size:12px">' + c.n + '</div><div style="font-size:10px;color:#666">' + c.e + '</div></div><div style="text-align:right"><div style="font-size:10px;color:#666">' + c.t + '</div><div style="font-size:11px;font-weight:600;color:#16a34a">' + c.d + '</div></div></div>').join('')
+      );
+    }
+    if (mod === 'reportes') {
+      return wrap(
+        '<div style="font-size:13px;color:#0a0a0a;font-weight:600;margin-bottom:12px">📈 Reportes disponibles</div>' +
+        [
+          {ic:'📊', t:'Ventas por día', d:'Resumen 30 días — total/promedio/máximo'},
+          {ic:'📦', t:'Productos top', d:'Ranking más vendidos del mes'},
+          {ic:'👥', t:'Clientes frecuentes', d:'Quién compra y cuánto gasta'},
+          {ic:'💰', t:'Utilidad bruta', d:'Margen por producto/categoría'},
+          {ic:'⏰', t:'Horas pico', d:'Cuándo se vende más en la semana'},
+        ].map(r => '<div style="display:flex;align-items:center;gap:11px;padding:11px;background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:6px;cursor:pointer"><div style="font-size:22px">' + r.ic + '</div><div style="flex:1"><div style="font-weight:600;font-size:13px;color:#0a0a0a">' + r.t + '</div><div style="font-size:11px;color:#666">' + r.d + '</div></div><div style="font-size:13px;color:#9ca3af">→</div></div>').join('')
+      );
+    }
+    if (mod === 'menu' || mod === 'carta') {
+      return wrap(
+        '<div style="font-size:13px;color:#0a0a0a;font-weight:600;margin-bottom:12px">🍴 ' + escapeText(modName) + ' del giro <em>' + escapeText(giroName) + '</em></div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+          [
+            {n:'Categoría A', c:8, ej:'8 productos'},
+            {n:'Categoría B', c:5, ej:'5 productos'},
+            {n:'Categoría C', c:12, ej:'12 productos'},
+            {n:'Bebidas',     c:6, ej:'6 productos'},
+          ].map(k => '<div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;padding:11px"><div style="font-size:13px;font-weight:600">' + k.n + '</div><div style="font-size:10px;color:#666;margin-top:3px">' + k.ej + '</div></div>').join('') +
+        '</div><div style="margin-top:14px;padding:10px;background:#dbeafe;border-radius:6px;font-size:11px;color:#1e40af">💡 Editar productos en el módulo <strong>Inventario</strong> o usar <strong>Departamentos</strong> para reordenar categorías.</div>'
+      );
+    }
+    if (mod === 'usuarios') {
+      return wrap(
+        '<div style="font-size:13px;color:#0a0a0a;font-weight:600;margin-bottom:12px">👤 Usuarios del tenant</div>' +
+        [
+          {n:'Admin', e:'admin@miempresa.com', r:'Owner', c:'#7c3aed'},
+          {n:'María Cajera', e:'maria@miempresa.com', r:'Cajero', c:'#2D5F8F'},
+          {n:'Juan Mesero', e:'juan@miempresa.com', r:'Mesero', c:'#e07845'},
+        ].map(u => '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fafafa;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:6px"><div style="width:32px;height:32px;border-radius:50%;background:' + u.c + ';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">' + u.n.split(' ').map(w=>w[0]).slice(0,2).join('') + '</div><div style="flex:1"><div style="font-weight:600;font-size:12px">' + u.n + '</div><div style="font-size:10px;color:#666">' + u.e + '</div></div><span style="background:' + u.c + ';color:#fff;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:600">' + u.r + '</span></div>').join('') +
+        '<button disabled style="margin-top:10px;width:100%;background:#fff;border:1.5px dashed #d1d5db;border-radius:6px;padding:10px;font-size:12px;color:#666;cursor:not-allowed">+ Invitar usuario</button>'
+      );
+    }
+
+    // ─── Genérico para módulos sin mockup propio ───
+    return wrap(
+      '<div style="text-align:center;padding:40px 20px"><div style="font-size:72px;margin-bottom:14px">' + _modIconSafe(modIcon) + '</div>' +
+      '<h3 style="margin:0 0 6px;font-family:var(--pv-font-display);font-size:18px;color:#0a0a0a">' + escapeText(modName) + '</h3>' +
+      '<p style="margin:0 0 20px;font-size:12px;color:#666;max-width:380px;margin-left:auto;margin-right:auto;line-height:1.5">Vista para gestionar <em>' + escapeText(String(modName).toLowerCase()) + '</em> en el giro <strong>' + escapeText(giroName) + '</strong>. Botones/secciones específicas configurables en el panel de Componentes (columna 4).</p>' +
+      '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;max-width:420px;margin:0 auto">' +
+        ['📊 Ver listado','+ Nuevo','✏️ Editar','🗑️ Eliminar','📤 Exportar','🔎 Buscar'].map(a => '<button disabled style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:7px 12px;font-size:11px;font-weight:600;color:#374151;cursor:not-allowed">' + a + '</button>').join('') +
+      '</div></div>'
+    );
+  }
+  function _modIconSafe(s) { return (s && _isEmojiLike && _isEmojiLike(s)) ? s : '📦'; }
 
   function renderGiroPreview() {
     try { if (typeof loadAllCatalogs === 'function') loadAllCatalogs(); } catch(_){}
@@ -7794,10 +7957,24 @@
       return;
     }
 
+    // ─── V10.24: mockups específicos por módulo ───
+    // Si el usuario seleccionó un módulo en col 3, mostrar su mockup específico.
+    // Si no, mostrar POS UI por default ('pos'). Cada módulo tiene un mockup
+    // distinto (Dashboard, Corte, Inventario, etc.) para que el preview cambie
+    // al hacer click en distintos módulos.
+    const _selectedMod = v14.selectedGiroMod || 'pos';
+    const _modLbl = MOD_LABELS_LOCAL[_selectedMod] || _selectedMod;
+    const _mm = String(_modLbl).match(/^(\S+)\s+(.+)$/) || [null, '📦', _modLbl];
+    const _modIcon = _mm[1];
+    const _modName = _mm[2];
+    if (_selectedMod !== 'pos' && desktopEl) {
+      const moduleMockup = _buildModuleMockup(_selectedMod, _modName, _modIcon, giroName, slug, terms);
+      desktopEl.innerHTML = moduleMockup;
+      if (mobileEl) mobileEl.innerHTML = '<div class="permv14-empty-row" style="padding:14px;color:var(--pv-text-dim);font-size:12px;">Vista móvil sólo para Punto de Venta.</div>';
+      return;
+    }
+
     // ─── V10.23: Modo default = mockup REAL del POS de Punto de Venta ───
-    // Antes mostraba cards de módulos (preset preview). El usuario pidió el preview
-    // real del POS con banner VENTA, F-keys, Ticket vacío, $0.00, sidebar PEDIDOS
-    // DE PLATAFORMAS (Tu aplicación / Uber Eats / Didi Food / Rappi).
     const giroNameClean = String(giroName || '').replace(/^\S+\s+/, '');
     const desktopHtml = ''
       + '<div style="font-family:Inter,system-ui,sans-serif;">'
