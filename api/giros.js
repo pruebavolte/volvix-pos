@@ -1059,10 +1059,26 @@ async function _wikipediaInner(query) {
   } catch (_) { return null; }
 }
 
+// V10.16: nueva fuente — usa /api/products/search-public (V10.10) que combina
+// DummyJSON + OpenFoodFacts + Wikimedia Commons + Mercado Libre (con token).
+// Estas APIs SÍ responden desde Vercel datacenter (las otras de scraping fallan).
+async function tryProductsSearchPublic(query) {
+  try {
+    const mod = require('./products-search-public');
+    const r = await mod.searchPublic({ q: query, giro: null, limit: 3 });
+    const top = (r.results || [])[0];
+    return top && top.image ? top.image : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 // Cadena de PERFECCIÓN máxima posible (con telemetría):
 async function searchProductImageMulti(query) {
   if (!query || typeof query !== 'string') return null;
+  // V10.16: search-public PRIMERO (más confiable desde Vercel: DummyJSON + OFF + Wikimedia)
   const sources = [
+    ['search_public', tryProductsSearchPublic],
     ['google_cse', tryGoogleCustomSearch],
     ['off',        tryOpenFoodFacts],
     ['pexels',     tryPexelsImage],
@@ -1370,6 +1386,34 @@ async function generateGiro(ctx, req, res) {
 
   // Forzar slug servidor-side (no confiar en el del LLM si no coincide)
   parsed.slug = slug;
+
+  // V10.16: enriquecer productos con image_url ANTES de devolver al frontend.
+  // Antes esto pasaba SOLO en persistGeneratedGiro (background, post-response),
+  // entonces el primer usuario veía letras coloridas (firstLetter fallback).
+  // Ahora corremos searchProductImageMulti en paralelo (timeout 8s total)
+  // para devolver imágenes reales en el primer request.
+  try {
+    if (Array.isArray(parsed.productos_detectados) && parsed.productos_detectados.length > 0) {
+      const ENRICH_TIMEOUT_MS = 8000;
+      const enrichPromise = Promise.all(parsed.productos_detectados.map(async (p) => {
+        if (!p || !p.name) return p;
+        if (p.image_url) return p; // ya tiene (improbable del LLM)
+        const kw = String(p.search_keywords_en || '').trim();
+        const query = kw.length >= 2 ? kw : (p.category ? `${p.name} ${p.category}` : p.name);
+        try {
+          const url = await searchProductImageMulti(query);
+          if (url) p.image_url = url;
+        } catch (_) {}
+        return p;
+      }));
+      // Race: enrichment vs timeout. Si timeout, devolvemos sin URLs pero el
+      // persist async todavía las pondrá en BD para el próximo cache hit.
+      await Promise.race([
+        enrichPromise,
+        new Promise(r => setTimeout(r, ENRICH_TIMEOUT_MS))
+      ]);
+    }
+  } catch (e) { /* swallow */ }
 
   // 5) Persistir best-effort (no aborta el response si falla)
   let persistResult = { ok: false };
