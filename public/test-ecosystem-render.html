@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Test render — Tabla Maestra de Giros (V10.13)</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+  :root {
+    --pv-bg-paper: #fafaf9;
+    --pv-surface: #f3f3f2;
+    --pv-border: #e0deda;
+    --pv-text: #1c1917;
+    --pv-text-dim: #57534e;
+    --pv-accent: #2D5F8F;
+    --pv-accent-soft: #dbeafe;
+    --pv-font-display: 'Fraunces', Georgia, serif;
+    --pv-font-body: 'Geist', system-ui, sans-serif;
+    --pv-font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#f5f5f4;color:var(--pv-text);font-family:var(--pv-font-body),system-ui,sans-serif;}
+  header.top{padding:18px 24px;background:#fff;border-bottom:1px solid var(--pv-border);}
+  header.top h1{margin:0;font-family:var(--pv-font-display);font-size:18px;}
+  header.top .meta{font-size:12px;color:var(--pv-text-dim);margin-top:4px;}
+  header.top .meta a{color:var(--pv-accent);text-decoration:none}
+  .layout{display:flex;min-height:calc(100vh - 70px);}
+  .sidebar{width:200px;background:var(--pv-bg-paper);border-right:1px solid var(--pv-border);overflow-y:auto;}
+  .sidebar .search{padding:10px;border-bottom:1px solid var(--pv-border);}
+  .sidebar .search input{width:100%;padding:7px 10px 7px 28px;border:1px solid var(--pv-border);border-radius:6px;font-size:12px;background:#fff;}
+  .sidebar .search-wrap{position:relative}
+  .sidebar .search-wrap::before{content:"⌕";position:absolute;left:19px;top:50%;transform:translateY(-50%);font-size:13px;opacity:.5;}
+  .pane{flex:1;overflow:auto;padding:0;}
+  /* Replica EXACTA de los estilos V10.13 */
+  .permv14-list-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px; cursor: pointer;
+    border-left: 2px solid transparent;
+    font-size: 13px; color: var(--pv-text);
+    line-height: 1.25;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: none;
+    white-space: normal;
+  }
+  .permv14-list-item:hover{background:var(--pv-surface)}
+  .permv14-list-item.selected{background:var(--pv-bg-paper);border-left-color:var(--pv-accent)}
+  .permv14-list-item .permv14-list-item-icon{flex:0 0 auto;line-height:1.25}
+  .permv14-list-item > :not(.permv14-list-item-icon):not(.permv14-list-item-state){flex:1 1 auto;min-width:0}
+  .permv14-list-item .permv14-list-item-state{flex:0 0 auto;margin-left:auto;background:#10b981;color:#fff;font-family:var(--pv-font-mono);font-size:9px;font-weight:600;padding:1px 5px;border-radius:8px;}
+  .group-label{font-family:var(--pv-font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--pv-text-dim);padding:12px 14px 4px;}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>🧪 Test render — Tabla Maestra de Giros (V10.13)</h1>
+  <div class="meta">
+    Página pública sin auth para validar visualmente el render del ecosistema.
+    Origen real: <a href="/paneldecontrol.html" target="_blank">/paneldecontrol.html</a> ·
+    Dataset: <a href="/data/giros-ecosystem.json" target="_blank">/data/giros-ecosystem.json</a>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="search">
+      <div class="search-wrap">
+        <input id="search" type="text" placeholder="Buscar giro de negocio…">
+      </div>
+    </div>
+    <div id="giros-list"></div>
+  </aside>
+  <main class="pane" id="pane">
+    <div style="padding:30px;color:#999">Cargando dataset…</div>
+  </main>
+</div>
+
+<script>
+function escapeText(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]);}
+function escapeAttr(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);}
+
+const _ecoCSS = {
+  section: 'margin:16px 14px;border:1px solid var(--pv-border);border-radius:10px;background:var(--pv-bg-paper);overflow:hidden;',
+  head:    'padding:10px 14px;background:var(--pv-surface);border-bottom:1px solid var(--pv-border);display:flex;align-items:center;justify-content:space-between;gap:10px;',
+  h3:      'margin:0;font-size:13px;font-family:var(--pv-font-display);color:var(--pv-text);',
+  sub:     'font-size:11px;color:var(--pv-text-dim);font-family:var(--pv-font-mono);',
+  table:   'width:100%;border-collapse:collapse;font-size:12px;',
+  th:      'padding:8px 10px;background:var(--pv-bg-paper);border-bottom:1px solid var(--pv-border);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--pv-text-dim);font-weight:600;',
+  td:      'padding:9px 10px;border-bottom:1px solid var(--pv-border);vertical-align:top;color:var(--pv-text);word-break:break-word;',
+};
+
+let DATA = null;
+let SELECTED = null;
+
+async function init() {
+  const r = await fetch('/data/giros-ecosystem.json?v=' + Date.now());
+  DATA = await r.json();
+  SELECTED = DATA.giros[0]?.slug;
+  renderSidebar();
+  renderPane();
+  document.getElementById('search').addEventListener('input', () => { renderSidebar(); renderPane(); });
+}
+
+function getSearch(){return document.getElementById('search').value.toLowerCase().trim();}
+
+function renderSidebar() {
+  const search = getSearch();
+  const list = document.getElementById('giros-list');
+  const giros = DATA.giros.filter(g => !search ||
+    g.name.toLowerCase().includes(search) ||
+    (g.que_vende||'').toLowerCase().includes(search) ||
+    (g.competidores_sector||[]).some(c=>c.sistema.toLowerCase().includes(search))
+  );
+  list.innerHTML = '<div class="group-label">' + giros.length + ' GIROS</div>' +
+    giros.map(g => '<div class="permv14-list-item' + (g.slug===SELECTED?' selected':'') + '" data-slug="' + escapeAttr(g.slug) + '">' +
+      '<span class="permv14-list-item-icon">🎯</span>' +
+      escapeText(g.name) +
+      '<span class="permv14-list-item-state">v1</span>' +
+    '</div>').join('');
+  list.querySelectorAll('[data-slug]').forEach(el => el.addEventListener('click', () => {
+    SELECTED = el.dataset.slug;
+    renderSidebar();
+    renderPane();
+  }));
+}
+
+function linkCell(u, label, scrapeable) {
+  if (!u) return '<td style="' + _ecoCSS.td + ';font-size:10px;color:var(--pv-text-dim)">—</td>';
+  const safe = escapeAttr(u);
+  const host_ = String(u).replace(/^https?:\/\//,'').replace(/\/.*$/,'').replace(/^www\./, '');
+  const badge = scrapeable ? '<span style="background:#d1fae5;color:#065f46;font-size:8px;padding:0 3px;border-radius:2px;margin-left:3px;font-weight:700;vertical-align:middle">⚡</span>' : '';
+  return '<td style="' + _ecoCSS.td + ';font-size:10px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + safe + (label?' — '+escapeAttr(label):'') + '"><a href="' + safe + '" target="_blank" rel="noopener" style="color:var(--pv-accent);text-decoration:none">' + escapeText(host_) + ' ↗</a>' + badge + '</td>';
+}
+
+function renderPane() {
+  const slug = SELECTED;
+  const search = getSearch();
+  const row = DATA.giros.find(g=>g.slug===slug);
+  const allGiros = DATA.giros;
+  const filteredGiros = !search ? allGiros : allGiros.filter(g => {
+    const blob = (g.name+' '+g.que_vende+' '+(g.competidores_sector||[]).map(c=>c.sistema).join(' ')+' '+(g.cadena_valor?.clientes_finales||[]).map(c=>c.nombre).join(' ')).toLowerCase();
+    return blob.includes(search);
+  });
+
+  const sections = [];
+
+  // TABLA MAESTRA
+  sections.push(
+    '<section style="' + _ecoCSS.section + '">' +
+      '<header style="' + _ecoCSS.head + '">' +
+        '<div><h3 style="' + _ecoCSS.h3 + '">📊 Tabla Maestra de Giros' + (search ? ' · <span style="font-weight:400;font-size:11px;color:var(--pv-accent)">filtro: "' + escapeText(search) + '" → ' + filteredGiros.length + '/' + allGiros.length + '</span>' : '') + '</h3>' +
+        '<div style="' + _ecoCSS.sub + ';margin-top:2px">' + filteredGiros.length + ' giros · Click en una fila para ver detalle abajo</div></div>' +
+      '</header>' +
+      '<div style="overflow-x:auto;max-height:340px;overflow-y:auto"><table style="' + _ecoCSS.table + ';min-width:1400px">' +
+        '<thead style="position:sticky;top:0;z-index:2"><tr>' +
+          '<th style="' + _ecoCSS.th + ';min-width:140px;position:sticky;left:0;background:var(--pv-bg-paper);z-index:3">Giro</th>' +
+          '<th style="' + _ecoCSS.th + ';min-width:180px">¿Qué vende?</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#ede9fe">Sistema 1</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#ede9fe">Sistema 2</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#ede9fe">Sistema 3</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#dbeafe">Cliente Final 1</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#dbeafe">Cliente Final 2</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#dbeafe">Cliente Final 3</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#fef3c7">Proveedor 1</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#fef3c7">Proveedor 2</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#fef3c7">Proveedor 3</th>' +
+        '</tr></thead>' +
+        '<tbody>' +
+          filteredGiros.map(g => {
+            const cv = g.cadena_valor || {};
+            const provs = cv.proveedores || [];
+            const cfs   = cv.clientes_finales || [];
+            const sis   = g.competidores_sector || [];
+            const sel = (g.slug === slug) ? 'background:var(--pv-accent-soft);' : '';
+            return '<tr data-master-giro="' + escapeAttr(g.slug) + '" style="cursor:pointer;' + sel + '">' +
+              '<td style="' + _ecoCSS.td + ';font-weight:600;position:sticky;left:0;background:' + (g.slug===slug?'var(--pv-accent-soft)':'var(--pv-bg-paper)') + ';z-index:1">' + escapeText(g.name) + '</td>' +
+              '<td style="' + _ecoCSS.td + ';font-size:11px">' + escapeText(g.que_vende || '') + '</td>' +
+              linkCell(sis[0]?.url, sis[0]?.sistema, false) +
+              linkCell(sis[1]?.url, sis[1]?.sistema, false) +
+              linkCell(sis[2]?.url, sis[2]?.sistema, false) +
+              linkCell(cfs[0]?.url, cfs[0]?.nombre, cfs[0]?.scrapeable) +
+              linkCell(cfs[1]?.url, cfs[1]?.nombre, cfs[1]?.scrapeable) +
+              linkCell(cfs[2]?.url, cfs[2]?.nombre, cfs[2]?.scrapeable) +
+              linkCell(provs[0]?.url, provs[0]?.nombre, false) +
+              linkCell(provs[1]?.url, provs[1]?.nombre, false) +
+              linkCell(provs[2]?.url, provs[2]?.nombre, false) +
+            '</tr>';
+          }).join('') +
+        '</tbody>' +
+      '</table></div>' +
+      '<div style="padding:6px 14px;font-size:10px;color:var(--pv-text-dim);background:var(--pv-bg-paper);border-top:1px solid var(--pv-border)">⚡ = scrapeable</div>' +
+    '</section>'
+  );
+
+  // DETALLE DEL GIRO SELECCIONADO
+  if (row) {
+    sections.push('<section style="' + _ecoCSS.section + ';background:linear-gradient(135deg,var(--pv-accent-soft) 0%,var(--pv-surface) 100%)"><div style="padding:14px 18px"><h2 style="margin:0 0 4px;font-family:var(--pv-font-display);font-size:18px">🌐 Detalle: ' + escapeText(row.name) + '</h2><p style="margin:0;font-size:12px;color:var(--pv-text-dim)">' + escapeText(row.que_vende||'') + ' · ' + escapeText(row.tipo_operacion||'') + ' · <strong>Regulación:</strong> ' + escapeText(row.regulacion||'') + '</p></div></section>');
+
+    // Funcionalidades
+    const feats = row.funcionalidades_criticas || [];
+    if (feats.length) {
+      sections.push('<section style="' + _ecoCSS.section + '"><header style="' + _ecoCSS.head + '"><div><h3 style="' + _ecoCSS.h3 + '">🎯 Funcionalidades críticas (' + feats.length + ')</h3></div></header><div style="overflow-x:auto"><table style="' + _ecoCSS.table + '"><thead><tr><th style="' + _ecoCSS.th + '">#</th><th style="' + _ecoCSS.th + '">Feature</th><th style="' + _ecoCSS.th + '">Para qué</th><th style="' + _ecoCSS.th + '">Prioridad</th></tr></thead><tbody>' +
+        feats.map(f => '<tr><td style="' + _ecoCSS.td + ';font-family:var(--pv-font-mono);font-size:11px">' + escapeText(String(f.id||'')) + '</td><td style="' + _ecoCSS.td + ';font-weight:600">' + escapeText(f.feature||'') + '</td><td style="' + _ecoCSS.td + ';font-size:11px;color:var(--pv-text-dim)">' + escapeText(f.porque||'') + '</td><td style="' + _ecoCSS.td + ';font-size:11px">' + escapeText(f.prioridad||'') + '</td></tr>').join('') +
+      '</tbody></table></div></section>');
+    }
+  }
+
+  document.getElementById('pane').innerHTML = sections.join('');
+}
+
+init();
+</script>
+</body>
+</html>
