@@ -7093,68 +7093,10 @@
     const sectionTitle = (icon, title, sub) =>
       '<header style="' + _ecoCSS.head + '"><div><h3 style="' + _ecoCSS.h3 + '">' + icon + ' ' + escapeText(title) + '</h3>' + (sub ? '<div style="' + _ecoCSS.sub + ';margin-top:2px">' + escapeText(sub) + '</div>' : '') + '</div></header>';
 
-    // ───────── TABLA MAESTRA (V10.13) ─────────
-    // Vista de TODOS los giros como filas, con 11 columnas (lo que el usuario pidió en su markdown).
-    // Aplicar filtro del search input para reducir filas si hay texto.
-    const allGiros = data.giros || [];
-    const searchFilter = ((document.getElementById('permv14-mod-search')||{}).value || '').toLowerCase().trim();
-    const filteredGiros = !searchFilter ? allGiros : allGiros.filter(g => {
-      const blob = (g.name+' '+g.que_vende+' '+(g.competidores_sector||[]).map(c=>c.sistema).join(' ')+' '+(g.cadena_valor?.clientes_finales||[]).map(c=>c.nombre).join(' ')).toLowerCase();
-      return blob.includes(searchFilter);
-    });
-    const linkCell = (u, label, scrapeable) => {
-      if (!u) return '<td style="' + _ecoCSS.td + ';font-size:10px;color:var(--pv-text-dim)">—</td>';
-      const safe = escapeAttr(u);
-      const host_ = String(u).replace(/^https?:\/\//,'').replace(/\/.*$/,'').replace(/^www\./, '');
-      const badge = scrapeable ? '<span style="background:#d1fae5;color:#065f46;font-size:8px;padding:0 3px;border-radius:2px;margin-left:3px;font-weight:700;vertical-align:middle">⚡</span>' : '';
-      return '<td style="' + _ecoCSS.td + ';font-size:10px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + safe + (label?' — '+escapeAttr(label):'') + '"><a href="' + safe + '" target="_blank" rel="noopener" style="color:var(--pv-accent);text-decoration:none">' + escapeText(host_) + ' ↗</a>' + badge + '</td>';
-    };
-    sections.push(
-      '<section style="' + _ecoCSS.section + '">' +
-        '<header style="' + _ecoCSS.head + '">' +
-          '<div><h3 style="' + _ecoCSS.h3 + '">📊 Tabla Maestra de Giros' + (searchFilter ? ' · <span style="font-weight:400;font-size:11px;color:var(--pv-accent)">filtro: "' + escapeText(searchFilter) + '" → ' + filteredGiros.length + '/' + allGiros.length + '</span>' : '') + '</h3>' +
-          '<div style="' + _ecoCSS.sub + ';margin-top:2px">' + filteredGiros.length + ' giros · Click en una fila para ver detalle abajo</div></div>' +
-        '</header>' +
-        '<div style="overflow-x:auto;overflow-y:auto;max-height:340px"><table style="' + _ecoCSS.table + ';min-width:1400px;border-collapse:separate;border-spacing:0">' +
-          '<thead><tr>' +
-            '<th style="' + _ecoCSS.th + ';min-width:140px;position:sticky;left:0;top:0;background:var(--pv-bg-paper);z-index:3">Giro</th>' +
-            '<th style="' + _ecoCSS.th + ';min-width:180px;position:sticky;top:0;z-index:2;background:var(--pv-bg-paper)">¿Qué vende?</th>' +
-            '<th style="' + _ecoCSS.th + ';background:#ede9fe;position:sticky;top:0;z-index:2">Sistema 1</th>' +
-            '<th style="' + _ecoCSS.th + ';background:#ede9fe;position:sticky;top:0;z-index:2">Sistema 2</th>' +
-            '<th style="' + _ecoCSS.th + ';background:#ede9fe;position:sticky;top:0;z-index:2">Sistema 3</th>' +
-            '<th style="' + _ecoCSS.th + ';background:#dbeafe;position:sticky;top:0;z-index:2">Cliente Final 1</th>' +
-            '<th style="' + _ecoCSS.th + ';background:#dbeafe;position:sticky;top:0;z-index:2">Cliente Final 2</th>' +
-            '<th style="' + _ecoCSS.th + ';background:#dbeafe;position:sticky;top:0;z-index:2">Cliente Final 3</th>' +
-            '<th style="' + _ecoCSS.th + ';background:#fef3c7;position:sticky;top:0;z-index:2">Proveedor 1</th>' +
-            '<th style="' + _ecoCSS.th + ';background:#fef3c7;position:sticky;top:0;z-index:2">Proveedor 2</th>' +
-            '<th style="' + _ecoCSS.th + ';background:#fef3c7;position:sticky;top:0;z-index:2">Proveedor 3</th>' +
-          '</tr></thead>' +
-          '<tbody>' +
-            filteredGiros.map(g => {
-              const cv = g.cadena_valor || {};
-              const provs = cv.proveedores || [];
-              const cfs   = cv.clientes_finales || [];
-              const sis   = g.competidores_sector || [];
-              const sel = (g.slug === slug) ? 'background:var(--pv-accent-soft);' : '';
-              return '<tr data-master-giro="' + escapeAttr(g.slug) + '" style="cursor:pointer;' + sel + '">' +
-                '<td style="' + _ecoCSS.td + ';font-weight:600;position:sticky;left:0;background:' + (g.slug===slug?'var(--pv-accent-soft)':'var(--pv-bg-paper)') + ';z-index:1">' + escapeText(g.name) + '</td>' +
-                '<td style="' + _ecoCSS.td + ';font-size:11px">' + escapeText(g.que_vende || '') + '</td>' +
-                linkCell(sis[0]?.sistema && (sis[0].url || ''), sis[0]?.sistema || '', false) +
-                linkCell(sis[1]?.sistema && (sis[1].url || ''), sis[1]?.sistema || '', false) +
-                linkCell(sis[2]?.sistema && (sis[2].url || ''), sis[2]?.sistema || '', false) +
-                linkCell(cfs[0]?.url, cfs[0]?.nombre, cfs[0]?.scrapeable) +
-                linkCell(cfs[1]?.url, cfs[1]?.nombre, cfs[1]?.scrapeable) +
-                linkCell(cfs[2]?.url, cfs[2]?.nombre, cfs[2]?.scrapeable) +
-                linkCell(provs[0]?.url, provs[0]?.nombre, false) +
-                linkCell(provs[1]?.url, provs[1]?.nombre, false) +
-                linkCell(provs[2]?.url, provs[2]?.nombre, false) +
-              '</tr>';
-            }).join('') +
-          '</tbody>' +
-        '</table></div>' +
-        '<div style="padding:6px 14px;font-size:10px;color:var(--pv-text-dim);background:var(--pv-bg-paper);border-top:1px solid var(--pv-border)">⚡ = scrapeable via /api/products/search-public · Sistemas usan URL ficticia (mostrar nombre); todas las URLs reales van a otros tabs</div>' +
-      '</section>'
-    );
+    // V10.20: ELIMINADA la Tabla Maestra de aquí — ya está en el sidebar como tabla principal.
+    // Antes (V10.13) se renderizaba aquí también, causando duplicación visual + datos
+    // mezclados entre "Restaurante" (selección actual) y "Sex Shop" (primera fila de tabla
+    // duplicada). Ahora este config-pane SOLO muestra detalles del giro seleccionado.
 
     // ───────── 0. HEADER PRINCIPAL ─────────
     sections.push(
