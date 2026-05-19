@@ -1,13 +1,14 @@
 {
-  "version": "1.0.407",
+  "version": "1.0.408",
   "major": 1,
   "minor": 0,
-  "patch": 407,
+  "patch": 408,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-18T23:30:00.000Z",
-  "built_at": "2026-05-18T23:30:00.000Z",
+  "date": "2026-05-19T00:00:00.000Z",
+  "built_at": "2026-05-19T00:00:00.000Z",
   "changelog": [
+    "V10.11 PANEL-ECOSYSTEM: módulo giros del paneldecontrol.html ahora muestra tabla 'Ecosistema del Giro' con 9 columnas: ¿Qué vende? + Proveedores 1-3 + Clientes Finales 1-3 (scrapeables, botón 🔍 conecta a /api/products/search-public para extraer imágenes/precios) + Sistemas Especializados 1-3. Dataset en /data/giros-ecosystem.json con 26 giros iniciales (Sex Shop, Restaurante, Veterinaria, Dentista, Hotel, etc.). Fix CSS empalme de nombres largos ('Tienda de Electrónica' ya no se traslapa). Buscador del panel con placeholder dinámico según nav activo (modules→'Buscar módulo…', giros→'Buscar giro de negocio…', users→'Buscar usuario por email…', audit→…).",
     "V10.10 SEARCH-PUBLIC: nuevo endpoint GET /api/products/search-public?q=... combina DummyJSON + OpenFoodFacts + Wikimedia Commons en paralelo (sin keys), opcional Mercado Libre con MERCADOLIBRE_TOKEN. Devuelve hasta 24 resultados con name/brand/price/image_url/source. Diccionario ES→EN para mejorar hits en catálogos inglés (calcetines→socks, leche→milk, etc). Cache memoria 10 min. Reemplaza imágenes genéricas de loremflickr con imágenes reales para autocompletar productos en el POS y poblar landings.",
     "V10.9 SYSTEM-MAP: nuevo mapa vivo POS↔Panel disponible en /system-map/ — scripts/system-map/scan-pos-panel.js extrae con regex modales (13 POS / 0 Panel), funciones (321 / 67), botones (577 / 64), endpoints /api/ consumidos (45 / 64), 899 rutas backend declaradas y 79 tablas Supabase. Viewer HTML + JSON crudo + Markdown sirven en public/system-map/. _meta.sha1 detecta drift automáticamente.",
     "V10.0 CRÍTICO: 870 botones 'Empezar gratis' en 218 landings premium → ANTES href='#cta' (anchor que no redirigía) → AHORA href='/registro.html?giro=<slug>'. El usuario reportó que botones Ver Demo / Empezar gratis / Acceder no funcionaban — el Acceder y Ver Demo sí iban (login.html y #galeria respectivamente), pero Empezar gratis estaba completamente roto.",

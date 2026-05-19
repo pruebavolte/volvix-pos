@@ -1,0 +1,224 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "generated_at": "2026-05-19T00:00:00.000Z",
+    "schema": [
+      "slug", "name", "que_vende",
+      "proveedores [3] (URLs)",
+      "clientes_finales [3] (URLs scrapeables)",
+      "sistemas [3] (POS/ERP/CRM especializados)"
+    ],
+    "notes": "Las URLs de clientes_finales se eligen porque permiten extracción de imágenes/nombres/precios sin login obligatorio. Para sistemas[] se buscan los más representativos del giro a nivel mundial.",
+    "future_columns": ["fabricantes[3]", "distribuidores[3]", "mayoristas[3]", "marketplaces[3]", "categorias_detectadas[]", "productos_detectados[]"]
+  },
+  "giros": [
+    {
+      "slug": "sex_shop",
+      "name": "Sex Shop",
+      "que_vende": "Juguetes sexuales, lencería, lubricantes",
+      "proveedores": ["https://www.pipedreamproducts.com/", "https://www.calexotics.com/", "https://www.docjohnson.com/"],
+      "clientes_finales": ["https://www.tiendavenus.com/", "https://cake-sexshop.com/", "https://www.sexshopmexico.com.mx/"],
+      "sistemas": ["XStore", "Retail Pro", "Lightspeed Retail"]
+    },
+    {
+      "slug": "restaurante",
+      "name": "Restaurante",
+      "que_vende": "Comida y bebidas preparadas",
+      "proveedores": ["https://www.sysco.com/", "https://www.usfoods.com/", "https://www.performancefoodservice.com/"],
+      "clientes_finales": ["https://www.mcdonalds.com/", "https://www.bk.com/", "https://www.dominos.com/"],
+      "sistemas": ["Toast POS", "TouchBistro", "Lavu"]
+    },
+    {
+      "slug": "veterinaria",
+      "name": "Veterinaria",
+      "que_vende": "Servicios médicos para mascotas",
+      "proveedores": ["https://www.covetrus.com/", "https://www.mwi.com/", "https://www.pattersonvet.com/"],
+      "clientes_finales": ["https://www.vca.com/", "https://www.banfield.com/", "https://www.petco.com/vetco"],
+      "sistemas": ["eVetPractice", "Provet Cloud", "Covetrus Pulse"]
+    },
+    {
+      "slug": "dentista",
+      "name": "Dentista",
+      "que_vende": "Tratamientos dentales",
+      "proveedores": ["https://www.pattersondental.com/", "https://www.henryschein.com/", "https://www.benco.com/"],
+      "clientes_finales": ["https://www.dentalia.com/", "https://www.sonria.com.mx/", "https://www.dentegra.com.mx/"],
+      "sistemas": ["Dentrix", "Open Dental", "Curve Dental"]
+    },
+    {
+      "slug": "hotel",
+      "name": "Hotel",
+      "que_vende": "Hospedaje y alojamiento",
+      "proveedores": ["https://www.ecolab.com/", "https://www.guestsupply.com/", "https://www.americast.com/"],
+      "clientes_finales": ["https://www.marriott.com/", "https://www.hilton.com/", "https://www.ihg.com/holidayinn"],
+      "sistemas": ["Oracle OPERA", "Cloudbeds", "Little Hotelier"]
+    },
+    {
+      "slug": "refaccionaria",
+      "name": "Refaccionaria",
+      "que_vende": "Refacciones automotrices",
+      "proveedores": ["https://www.dormanproducts.com/", "https://www.acdelco.com/", "https://www.motorcraft.com/"],
+      "clientes_finales": ["https://www.autozone.com/", "https://www.oreillyauto.com/", "https://www.napaonline.com/"],
+      "sistemas": ["Epicor Automotive", "MechanicDesk", "Shop-Ware"]
+    },
+    {
+      "slug": "farmacia",
+      "name": "Farmacia",
+      "que_vende": "Medicamentos y salud",
+      "proveedores": ["https://www.mckesson.com/", "https://www.cardinalhealth.com/", "https://www.amerisourcebergen.com/"],
+      "clientes_finales": ["https://www.farmaciasguadalajara.com/", "https://www.fahorro.com/", "https://www.cvs.com/"],
+      "sistemas": ["PrimeRx", "Rx30", "Liberty Software"]
+    },
+    {
+      "slug": "optica",
+      "name": "Óptica",
+      "que_vende": "Lentes y exámenes visuales",
+      "proveedores": ["https://www.essilor.com/", "https://www.hoyavision.com/", "https://www.zeiss.com/vision-care"],
+      "clientes_finales": ["https://www.devlyn.com.mx/", "https://www.lux.mx/", "https://www.lenscrafters.com/"],
+      "sistemas": ["OfficeMate", "Crystal PM", "EyePegasus"]
+    },
+    {
+      "slug": "gimnasio",
+      "name": "Gimnasio",
+      "que_vende": "Membresías y entrenamiento",
+      "proveedores": ["https://www.lifefitness.com/", "https://www.matrixfitness.com/", "https://www.technogym.com/"],
+      "clientes_finales": ["https://www.smartfit.com.mx/", "https://www.anytimefitness.com/", "https://www.planetfitness.com/"],
+      "sistemas": ["Mindbody", "ABC Glofox", "GymMaster"]
+    },
+    {
+      "slug": "spa",
+      "name": "Spa",
+      "que_vende": "Tratamientos corporales y relajación",
+      "proveedores": ["https://www.universalcompanies.com/", "https://www.spatrade.com/", "https://www.spaandequipment.com/"],
+      "clientes_finales": ["https://www.handandstone.com/", "https://www.massageenvy.com/", "https://www.marriott.com/spa"],
+      "sistemas": ["Meevo", "Mangomint", "Booker"]
+    },
+    {
+      "slug": "salon_belleza",
+      "name": "Salón de Belleza",
+      "que_vende": "Corte, peinado y estética",
+      "proveedores": ["https://www.sallybeauty.com/", "https://www.cosmoprofbeauty.com/", "https://www.saloncentric.com/"],
+      "clientes_finales": ["https://www.toniandguy.com/", "https://www.supercuts.com/", "https://www.fantasticsams.com/"],
+      "sistemas": ["Vagaro", "Rosy Salon", "Phorest"]
+    },
+    {
+      "slug": "lavanderia",
+      "name": "Lavandería",
+      "que_vende": "Lavado y planchado",
+      "proveedores": ["https://www.unipresscorp.com/", "https://www.maytagcommerciallaundry.com/", "https://www.alliancelaundry.com/"],
+      "clientes_finales": ["https://www.laundryheap.com/", "https://www.tidecleaners.com/", "https://www.laundromatresource.com/"],
+      "sistemas": ["CleanCloud", "SMRT Systems", "StarchUp"]
+    },
+    {
+      "slug": "taller_mecanico",
+      "name": "Taller Mecánico",
+      "que_vende": "Reparación automotriz",
+      "proveedores": ["https://www.snapon.com/", "https://www.matcotools.com/", "https://www.cornwelltools.com/"],
+      "clientes_finales": ["https://www.midas.com/", "https://www.meineke.com/", "https://www.jiffylube.com/"],
+      "sistemas": ["Shopmonkey", "Tekmetric", "AutoLeap"]
+    },
+    {
+      "slug": "ferreteria",
+      "name": "Ferretería",
+      "que_vende": "Herramientas y materiales",
+      "proveedores": ["https://www.stanleyblackanddecker.com/", "https://www.milwaukeetool.com/", "https://www.makita.com/"],
+      "clientes_finales": ["https://www.homedepot.com/", "https://www.lowes.com/", "https://www.acehardware.com/"],
+      "sistemas": ["Spruce", "Epicor Eagle", "Paladin POS"]
+    },
+    {
+      "slug": "joyeria",
+      "name": "Joyería",
+      "que_vende": "Joyas y accesorios",
+      "proveedores": ["https://www.stuller.com/", "https://www.riogrande.com/", "https://www.firemountaingems.com/"],
+      "clientes_finales": ["https://www.tiffany.com/", "https://www.cartier.com/", "https://us.pandora.net/"],
+      "sistemas": ["The Edge", "JewelMate", "Jewel360"]
+    },
+    {
+      "slug": "floreria",
+      "name": "Florería",
+      "que_vende": "Flores y arreglos florales",
+      "proveedores": ["https://www.mayesh.com/", "https://www.jetfreshflowers.com/", "https://www.florabundance.com/"],
+      "clientes_finales": ["https://www.1800flowers.com/", "https://www.ftd.com/", "https://www.teleflora.com/"],
+      "sistemas": ["Floranext", "BloomNation", "Details Flowers"]
+    },
+    {
+      "slug": "escuela",
+      "name": "Escuela",
+      "que_vende": "Educación y cursos",
+      "proveedores": ["https://www.pearson.com/", "https://www.scholastic.com/", "https://www.mhhe.com/"],
+      "clientes_finales": ["https://www.kumon.com/", "https://www.berlitz.com/", "https://www.harmonhall.com/"],
+      "sistemas": ["Blackbaud SIS", "PowerSchool", "FACTS SIS"]
+    },
+    {
+      "slug": "inmobiliaria",
+      "name": "Inmobiliaria",
+      "que_vende": "Venta y renta de inmuebles",
+      "proveedores": ["https://www.realtor.com/data/", "https://www.zillow.com/data/", "https://www.corelogic.com/"],
+      "clientes_finales": ["https://www.kw.com/", "https://www.century21.com/", "https://www.remax.com/"],
+      "sistemas": ["Propertybase", "BoomTown", "kvCORE"]
+    },
+    {
+      "slug": "agencia_viajes",
+      "name": "Agencia de Viajes",
+      "que_vende": "Reservaciones y turismo",
+      "proveedores": ["https://www.amadeus.com/", "https://www.sabre.com/", "https://www.travelport.com/"],
+      "clientes_finales": ["https://www.expedia.com/", "https://www.despegar.com.mx/", "https://www.bestday.com.mx/"],
+      "sistemas": ["TravelWorks", "Travefy", "Tourwriter"]
+    },
+    {
+      "slug": "tienda_mascotas",
+      "name": "Tienda de Mascotas",
+      "que_vende": "Productos para mascotas",
+      "proveedores": ["https://www.nestlepurina.com/", "https://www.hillspet.com/", "https://www.royalcanin.com/"],
+      "clientes_finales": ["https://www.petco.com/", "https://www.petsmart.com/", "https://www.maskota.com.mx/"],
+      "sistemas": ["Pawfinity", "Gingr", "KennelBooker"]
+    },
+    {
+      "slug": "panaderia",
+      "name": "Panadería",
+      "que_vende": "Pan, pasteles y repostería",
+      "proveedores": ["https://www.bakerysolutions.com/", "https://www.dawnfoods.com/", "https://www.puratos.com/"],
+      "clientes_finales": ["https://www.panera.com/", "https://www.cinnabon.com/", "https://www.elglobo.com.mx/"],
+      "sistemas": ["Cybake", "FlexiBake", "FoodMan"]
+    },
+    {
+      "slug": "cafeteria",
+      "name": "Cafetería",
+      "que_vende": "Café y bebidas calientes",
+      "proveedores": ["https://www.cafeimports.com/", "https://www.sweetmarias.com/", "https://www.atlascoffee.com/"],
+      "clientes_finales": ["https://www.starbucks.com/", "https://www.timhortons.com.mx/", "https://www.thecoffeebean.com/"],
+      "sistemas": ["Square for Restaurants", "Lightspeed Restaurant", "Revel Systems"]
+    },
+    {
+      "slug": "heladeria",
+      "name": "Heladería",
+      "que_vende": "Helados y postres fríos",
+      "proveedores": ["https://www.unilever.com/", "https://www.nestle.com/", "https://www.dairyforall.com/"],
+      "clientes_finales": ["https://www.dairyqueen.com/", "https://www.baskinrobbins.com/", "https://www.benjerry.com/"],
+      "sistemas": ["NCR Counterpoint", "Retail Pro", "LS Central"]
+    },
+    {
+      "slug": "papeleria",
+      "name": "Papelería",
+      "que_vende": "Útiles escolares y oficina",
+      "proveedores": ["https://www.acco.com/", "https://www.bicworld.com/", "https://www.pentel.com/"],
+      "clientes_finales": ["https://www.officedepot.com.mx/", "https://www.staples.com/", "https://www.lumen.com.mx/"],
+      "sistemas": ["Retail Edge", "Lightspeed Retail", "Erply"]
+    },
+    {
+      "slug": "tienda_electronica",
+      "name": "Tienda de Electrónica",
+      "que_vende": "Equipos electrónicos",
+      "proveedores": ["https://www.dandh.com/", "https://www.ingrammicro.com/", "https://www.synnex.com/"],
+      "clientes_finales": ["https://www.bestbuy.com/", "https://www.radioshack.com.mx/", "https://www.newegg.com/"],
+      "sistemas": ["Retail Pro", "Vend", "Lightspeed Retail"]
+    },
+    {
+      "slug": "casa_empeno",
+      "name": "Casa de Empeño",
+      "que_vende": "Préstamos con garantía",
+      "proveedores": ["https://www.napei.com/", "https://www.collateralequipment.com/", "https://www.gemoro.com/"],
+      "clientes_finales": ["https://firstcash.com/", "https://www.cashamerica.com/", "https://www.prendamex.com.mx/"],
+      "sistemas": ["PawnMaster", "Bravo Pawn Systems", "PawnSnap"]
+    }
+  ]
+}

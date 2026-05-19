@@ -3609,10 +3609,23 @@
     padding: 12px 14px 4px;
   }
   #screen-permisos.permv14 .permv14-list-item {
-    display: flex; align-items: center; gap: 9px;
-    padding: 6px 14px; cursor: pointer;
+    /* V10.11 fix empalme: permitir wrap a nueva línea cuando el nombre del giro es largo
+       (ej. "Tienda de Electrónica", "Casa de Empeño"). align-items:flex-start hace que
+       el icono se mantenga arriba mientras el texto baja. */
+    display: flex; align-items: flex-start; gap: 9px;
+    padding: 7px 14px; cursor: pointer;
     border-left: 2px solid transparent;
     font-size: 13px; color: var(--pv-text);
+    line-height: 1.3;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    min-height: 0;
+  }
+  #screen-permisos.permv14 .permv14-list-item .permv14-list-item-icon {
+    flex: 0 0 auto; line-height: 1.3;
+  }
+  #screen-permisos.permv14 .permv14-list-item .permv14-list-item-state {
+    flex: 0 0 auto; margin-left: auto; align-self: center;
   }
   #screen-permisos.permv14 .permv14-list-item:hover { background: var(--pv-surface); }
   #screen-permisos.permv14 .permv14-list-item.selected {
@@ -5995,11 +6008,31 @@
   }
 
   // ─── SIDEBAR navegación ───
+  // V10.11: placeholder dinámico del buscador según el nav activo.
+  // Cambia "Buscar módulo…" → "Buscar giro…" → "Buscar usuario…" etc.
+  const SEARCH_PLACEHOLDERS = {
+    modules:  'Buscar módulo…',
+    giros:    'Buscar giro de negocio…',
+    users:    'Buscar usuario por email o nombre…',
+    audit:    'Buscar evento de auditoría…',
+    features: 'Buscar feature flag…',
+    versions: 'Buscar versión / changelog…',
+    settings: 'Buscar configuración…',
+  };
+  function updateSearchPlaceholder(navKey) {
+    try {
+      const input = document.getElementById('permv14-mod-search');
+      if (input) input.placeholder = SEARCH_PLACEHOLDERS[navKey] || 'Buscar…';
+    } catch (_) {}
+  }
+
   function setActiveNav(navKey) {
     v14.selectedNav = navKey;
     $$('.permv14-nav-icon').forEach(el => {
       el.classList.toggle('active', el.dataset.permv14Nav === navKey);
     });
+    // V10.11: actualizar placeholder del buscador según el nav
+    updateSearchPlaceholder(navKey);
     // Mostrar/ocultar columnas según pane
     // 'modules' y 'giros' comparten el mismo grid 3-cols (lista | config | preview)
     const usesGrid3Cols = (navKey === 'modules' || navKey === 'giros');
@@ -6689,6 +6722,136 @@
     }
     // 2026-05-09 fix(M8): refrescar badge global al final del render de detalle
     try { updateGlobalDirtyBadge(); } catch(_) {}
+    // V10.11: inyectar sección "Ecosistema del Giro" — proveedores, clientes finales, sistemas
+    try { renderGiroEcosystem(slug); } catch (e) { try { console.warn('[ecosystem] fail:', e); } catch(_){} }
+  }
+
+  // ─── ECOSISTEMA DEL GIRO (V10.11) ───
+  // Dataset: /data/giros-ecosystem.json
+  // Por cada giro muestra una tabla con:
+  //   - qué vende
+  //   - 3 proveedores (URLs)
+  //   - 3 clientes finales (URLs scrapeables para extraer imágenes/precios)
+  //   - 3 sistemas POS/ERP/CRM especializados
+  let _ecosystemCache = null;
+  async function loadEcosystem() {
+    if (_ecosystemCache) return _ecosystemCache;
+    try {
+      const r = await fetch('/data/giros-ecosystem.json', { cache: 'force-cache' });
+      if (!r.ok) return null;
+      _ecosystemCache = await r.json();
+      return _ecosystemCache;
+    } catch (_) { return null; }
+  }
+  function ecosystemRowFor(slug, dataset) {
+    if (!dataset || !Array.isArray(dataset.giros)) return null;
+    const giros = dataset.giros;
+    // match exacto por slug, luego por name (case-insensitive), luego por sustring
+    return giros.find(g => g.slug === slug)
+        || giros.find(g => (g.name || '').toLowerCase() === String(slug).replace(/_/g,' ').toLowerCase())
+        || giros.find(g => slug && (g.slug.includes(slug) || slug.includes(g.slug)));
+  }
+  async function renderGiroEcosystem(slug) {
+    if (!slug) return;
+    const pane = document.querySelector('.permv14-config-pane[data-permv14-pane="modules"]');
+    if (!pane) return;
+    // host idempotente
+    let host = document.getElementById('permv14-giro-ecosystem');
+    if (!host) {
+      host = document.createElement('section');
+      host.id = 'permv14-giro-ecosystem';
+      host.style.cssText = 'margin:16px 14px;border:1px solid var(--pv-border);border-radius:8px;background:var(--pv-bg-paper);overflow:hidden;';
+      pane.appendChild(host);
+    }
+    host.innerHTML = '<div style="padding:14px;color:var(--pv-text-dim);font-size:12px;">Cargando ecosistema…</div>';
+    const data = await loadEcosystem();
+    const row = ecosystemRowFor(slug, data);
+    if (!row) {
+      host.innerHTML = '<div style="padding:14px;color:var(--pv-text-dim);font-size:12px;">📊 Ecosistema sin datos para <code>' + escapeText(slug) + '</code>. Edítalo en <code>/data/giros-ecosystem.json</code> y vuelve a deployar.</div>';
+      return;
+    }
+    const link = (u) => {
+      if (!u) return '<span style="color:var(--pv-text-dim)">—</span>';
+      const safe = escapeAttr(u);
+      const host_ = String(u).replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+      return '<a href="' + safe + '" target="_blank" rel="noopener noreferrer" style="color:var(--pv-accent);text-decoration:none;font-size:11px;word-break:break-all;">' + escapeText(host_) + ' ↗</a>';
+    };
+    const tag = (t) => '<code style="background:var(--pv-surface);padding:2px 7px;border-radius:4px;font-size:11px;color:var(--pv-text);">' + escapeText(t) + '</code>';
+    const proveedores = row.proveedores || [];
+    const clientes    = row.clientes_finales || [];
+    const sistemas    = row.sistemas || [];
+    const scrapeBtn = (u) => {
+      if (!u) return '';
+      const q = encodeURIComponent(String(row.que_vende || row.name || '').slice(0, 60));
+      return ' <button data-ecosystem-scrape="' + escapeAttr(u) + '" data-ecosystem-query="' + q + '" style="margin-left:4px;background:transparent;color:var(--pv-text-dim);border:1px solid var(--pv-border);border-radius:4px;padding:1px 6px;font-size:10px;cursor:pointer;" title="Extraer imágenes/precios">🔍</button>';
+    };
+
+    host.innerHTML =
+      '<header style="padding:12px 14px;background:var(--pv-surface);border-bottom:1px solid var(--pv-border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">' +
+        '<div>' +
+          '<h3 style="margin:0;font-size:13px;font-family:var(--pv-font-display);color:var(--pv-text);">🌐 Ecosistema del Giro</h3>' +
+          '<div style="font-size:11px;color:var(--pv-text-dim);margin-top:2px;">' + escapeText(row.name) + ' · ' + escapeText(row.que_vende || '') + '</div>' +
+        '</div>' +
+        '<div style="font-size:10px;color:var(--pv-text-dim);font-family:var(--pv-font-mono);">cadena: proveedor → ' + escapeText(row.name) + ' → cliente final · software</div>' +
+      '</header>' +
+      '<div style="overflow-x:auto;">' +
+        '<table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;">' +
+          '<colgroup>' +
+            '<col style="width:140px"><col><col><col><col><col><col><col><col><col>' +
+          '</colgroup>' +
+          '<thead><tr style="background:var(--pv-bg-paper);">' +
+            '<th style="padding:8px;border-bottom:1px solid var(--pv-border);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--pv-text-dim);">Giro</th>' +
+            '<th style="padding:8px;border-bottom:1px solid var(--pv-border);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--pv-text-dim);">¿Qué vende?</th>' +
+            '<th colspan="3" style="padding:8px;border-bottom:1px solid var(--pv-border);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--pv-text-dim);">Proveedores</th>' +
+            '<th colspan="3" style="padding:8px;border-bottom:1px solid var(--pv-border);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--pv-text-dim);">Clientes finales (scrapeables)</th>' +
+            '<th colspan="2" style="padding:8px;border-bottom:1px solid var(--pv-border);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--pv-text-dim);">Sistemas especializados</th>' +
+          '</tr></thead>' +
+          '<tbody><tr>' +
+            '<td style="padding:10px 8px;vertical-align:top;font-weight:600;color:var(--pv-text);border-bottom:1px solid var(--pv-border);word-break:break-word;">' + escapeText(row.name) + '</td>' +
+            '<td style="padding:10px 8px;vertical-align:top;color:var(--pv-text);border-bottom:1px solid var(--pv-border);word-break:break-word;font-size:11px;">' + escapeText(row.que_vende || '') + '</td>' +
+            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + link(proveedores[0]) + '</td>' +
+            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + link(proveedores[1]) + '</td>' +
+            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + link(proveedores[2]) + '</td>' +
+            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + link(clientes[0]) + scrapeBtn(clientes[0]) + '</td>' +
+            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + link(clientes[1]) + scrapeBtn(clientes[1]) + '</td>' +
+            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + link(clientes[2]) + scrapeBtn(clientes[2]) + '</td>' +
+            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + (sistemas[0] ? tag(sistemas[0]) : '—') + ' ' + (sistemas[1] ? tag(sistemas[1]) : '') + '</td>' +
+            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + (sistemas[2] ? tag(sistemas[2]) : '—') + '</td>' +
+          '</tr></tbody>' +
+        '</table>' +
+      '</div>' +
+      '<div style="padding:8px 14px;font-size:10px;color:var(--pv-text-dim);background:var(--pv-bg-paper);border-top:1px solid var(--pv-border);">💡 Click 🔍 para extraer imágenes/precios reales via /api/products/search-public (V10.10).</div>';
+
+    // Wire scrape buttons
+    host.querySelectorAll('button[data-ecosystem-scrape]').forEach(btn => {
+      btn.addEventListener('click', async (ev) => {
+        const url = btn.getAttribute('data-ecosystem-scrape');
+        const q   = btn.getAttribute('data-ecosystem-query');
+        btn.disabled = true; btn.textContent = '⏳';
+        try {
+          const r = await fetch('/api/products/search-public?q=' + q + '&limit=8');
+          const j = await r.json();
+          // mostrar modal simple con galería
+          const dlg = document.createElement('div');
+          dlg.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+          const inner = document.createElement('div');
+          inner.style.cssText = 'background:#fff;border-radius:10px;max-width:900px;max-height:90vh;overflow:auto;padding:20px;';
+          inner.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><h3 style="margin:0">📦 Sugerencias para ' + escapeText(decodeURIComponent(q)) + ' <small style="color:#666;font-weight:400">· ref: ' + escapeText(url) + '</small></h3><button style="background:#000;color:#fff;border:0;padding:6px 14px;border-radius:6px;cursor:pointer">✕ Cerrar</button></div>' +
+            '<div style="font-size:11px;color:#666;margin-bottom:10px">sources: ' + escapeText((j.sources_tried||[]).join(' ')) + ' · ' + (j.results||[]).length + ' resultados · ' + (j.ms||0) + 'ms</div>' +
+            '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;">' +
+              (j.results||[]).map(p => '<div style="border:1px solid #e5e5e5;border-radius:6px;overflow:hidden;background:#fafafa;"><div style="aspect-ratio:1;background:#eee;display:flex;align-items:center;justify-content:center;"><img src="' + escapeAttr(p.image) + '" style="max-width:100%;max-height:100%;object-fit:cover" loading="lazy" onerror="this.style.display=\'none\'"></div><div style="padding:8px;font-size:11px;"><div style="font-weight:600;line-height:1.3;margin-bottom:4px;max-height:2.6em;overflow:hidden">' + escapeText(p.name||'').slice(0,60) + '</div><div style="color:#666">' + (p.price ? '$' + p.price + ' ' + (p.currency||'') : '') + ' · ' + escapeText(p.source||'') + '</div></div></div>').join('') +
+            '</div>';
+          dlg.appendChild(inner);
+          inner.querySelector('button').addEventListener('click', () => dlg.remove());
+          dlg.addEventListener('click', e => { if (e.target === dlg) dlg.remove(); });
+          document.body.appendChild(dlg);
+        } catch (e) {
+          alert('Error: ' + (e && e.message || e));
+        } finally {
+          btn.disabled = false; btn.textContent = '🔍';
+        }
+      });
+    });
   }
 
   // ─── COL 4: preview del POS con el preset del giro ───
