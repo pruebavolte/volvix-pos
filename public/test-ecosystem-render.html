@@ -151,19 +151,19 @@ function renderPane() {
         '<div><h3 style="' + _ecoCSS.h3 + '">📊 Tabla Maestra de Giros' + (search ? ' · <span style="font-weight:400;font-size:11px;color:var(--pv-accent)">filtro: "' + escapeText(search) + '" → ' + filteredGiros.length + '/' + allGiros.length + '</span>' : '') + '</h3>' +
         '<div style="' + _ecoCSS.sub + ';margin-top:2px">' + filteredGiros.length + ' giros · Click en una fila para ver detalle abajo</div></div>' +
       '</header>' +
-      '<div style="overflow-x:auto;max-height:340px;overflow-y:auto"><table style="' + _ecoCSS.table + ';min-width:1400px">' +
-        '<thead style="position:sticky;top:0;z-index:2"><tr>' +
-          '<th style="' + _ecoCSS.th + ';min-width:140px;position:sticky;left:0;background:var(--pv-bg-paper);z-index:3">Giro</th>' +
-          '<th style="' + _ecoCSS.th + ';min-width:180px">¿Qué vende?</th>' +
-          '<th style="' + _ecoCSS.th + ';background:#ede9fe">Sistema 1</th>' +
-          '<th style="' + _ecoCSS.th + ';background:#ede9fe">Sistema 2</th>' +
-          '<th style="' + _ecoCSS.th + ';background:#ede9fe">Sistema 3</th>' +
-          '<th style="' + _ecoCSS.th + ';background:#dbeafe">Cliente Final 1</th>' +
-          '<th style="' + _ecoCSS.th + ';background:#dbeafe">Cliente Final 2</th>' +
-          '<th style="' + _ecoCSS.th + ';background:#dbeafe">Cliente Final 3</th>' +
-          '<th style="' + _ecoCSS.th + ';background:#fef3c7">Proveedor 1</th>' +
-          '<th style="' + _ecoCSS.th + ';background:#fef3c7">Proveedor 2</th>' +
-          '<th style="' + _ecoCSS.th + ';background:#fef3c7">Proveedor 3</th>' +
+      '<div style="overflow-x:auto;overflow-y:auto;max-height:340px"><table style="' + _ecoCSS.table + ';min-width:1400px;border-collapse:separate;border-spacing:0">' +
+        '<thead><tr>' +
+          '<th style="' + _ecoCSS.th + ';min-width:140px;position:sticky;left:0;top:0;background:var(--pv-bg-paper);z-index:3">Giro</th>' +
+          '<th style="' + _ecoCSS.th + ';min-width:180px;position:sticky;top:0;z-index:2;background:var(--pv-bg-paper)">¿Qué vende?</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#ede9fe;position:sticky;top:0;z-index:2">Sistema 1</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#ede9fe;position:sticky;top:0;z-index:2">Sistema 2</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#ede9fe;position:sticky;top:0;z-index:2">Sistema 3</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#dbeafe;position:sticky;top:0;z-index:2">Cliente Final 1</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#dbeafe;position:sticky;top:0;z-index:2">Cliente Final 2</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#dbeafe;position:sticky;top:0;z-index:2">Cliente Final 3</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#fef3c7;position:sticky;top:0;z-index:2">Proveedor 1</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#fef3c7;position:sticky;top:0;z-index:2">Proveedor 2</th>' +
+          '<th style="' + _ecoCSS.th + ';background:#fef3c7;position:sticky;top:0;z-index:2">Proveedor 3</th>' +
         '</tr></thead>' +
         '<tbody>' +
           filteredGiros.map(g => {
