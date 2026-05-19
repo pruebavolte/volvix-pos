@@ -6073,6 +6073,21 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
     } catch (err) { sendError(res, err); }
   };
 
+  // ============ /api/products/search-public ============
+  // V10.10: búsqueda multi-fuente (DummyJSON + OpenFoodFacts + Wikimedia + opcional ML)
+  // para autocompletar productos con imágenes REALES en el POS y landings.
+  // Sin API keys requeridas para las 3 primeras fuentes. Cache 10 min en memoria.
+  try {
+    const psp = require('./products-search-public');
+    handlers['GET /api/products/search-public'] = psp.createHandler({
+      sendJSON,
+      sendError,
+      parseQuery: (u) => (url.parse(u, true).query || {}),
+    });
+  } catch (e) {
+    try { console.error('[products-search-public] load failed:', e && e.message); } catch (_) {}
+  }
+
   // ============ DEVOLUCIONES ============
   handlers['GET /api/devoluciones'] = requireAuth(async (req, res) => {
     try {
