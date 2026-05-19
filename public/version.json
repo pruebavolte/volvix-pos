@@ -1,13 +1,14 @@
 {
-  "version": "1.0.410",
+  "version": "1.0.411",
   "major": 1,
   "minor": 0,
-  "patch": 410,
+  "patch": 411,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-19T02:30:00.000Z",
-  "built_at": "2026-05-19T02:30:00.000Z",
+  "date": "2026-05-19T03:00:00.000Z",
+  "built_at": "2026-05-19T03:00:00.000Z",
   "changelog": [
+    "V10.14 PANEL-FIX-RAIZ: bug raíz del empalme 'Ju/go/s Frescos' encontrado. La regex /^(\\S+)\\s+(.+)$/ tomaba la PRIMERA palabra como icon emoji sin verificar — para giros sin emoji al inicio (ej. 'Jugos Frescos') metía 'Jugos' al <span class=permv14-list-item-icon> de ancho restringido y se partía letra por letra. Fix doble: (1) helper _isEmojiLike() acepta el split SOLO si la primera palabra es emoji real (sin ASCII a-zA-Z0-9, ≤6 chars), si no usa default 🎯 + label completo como texto. (2) CSS safety net: el span del icon ahora tiene max-width:24px + overflow:hidden + white-space:nowrap para truncar en vez de partir si algo se cuela. Borrada página /test-ecosystem-render.html (era workaround innecesario, todo el trabajo va en paneldecontrol.html directo).",
     "V10.13 PANEL-FIXES: (1) FIX CSS empalme: overflow-wrap:anywhere (V10.11) rompía 'Paneles'→'Pa/ne/le/s' letra-por-letra; ahora overflow-wrap:break-word respeta palabras. (2) FIX buscador en módulo Giros: ahora filtra giros, no módulos (el listener llamaba siempre renderModulesList; ahora consulta v14.selectedNav). (3) Tabla del ecosistema reposicionada AL INICIO del detail-pane (insertBefore en vez de appendChild). (4) NUEVA tabla maestra al tope con 11 columnas estilo CSV del documento del usuario: Giro|¿Qué vende?|Sistema 1-3|Cliente Final 1-3|Proveedor 1-3, sticky header, sticky primera columna, max-height 340px con scroll vertical, filtro live con el search. (5) Dataset v2.1.0 con 15 giros (agregados hotel, optica, gimnasio, salon_belleza, taller_mecanico) y URLs en TODOS los competidores_sector.",
     "V10.12 PANEL-ECOSYSTEM v2: dataset enriquecido estilo investigación maestra + render multi-tabla. 10 giros con datos profundos (restaurante, abarrotes, barbería, farmacia, panadería, veterinaria, sex_shop, dentista, cafetería, ferretería). Cada giro ahora con 5 secciones tipo dashboard: (1) Header con tipo_operacion + regulacion · (2) Cadena de valor: tabla proveedor→giro→cliente final con badges scrapeable · (3) Competidores del sector: tabla con sistema/país/enfoque/modelo cobro/precio base/precio típico/fortaleza✓/debilidad✗ (3-5 competidores por giro) · (4) Funcionalidades críticas: tabla con id/feature/porqué/prioridad · (5) Problemas a evitar: tabla con área/problema/sistemas que lo sufren · (6) Terminología: cómo se llaman las cosas en este giro. Botón 🔍 en cada URL extrae imágenes via /api/products/search-public.",
     "V10.11 PANEL-ECOSYSTEM: módulo giros del paneldecontrol.html ahora muestra tabla 'Ecosistema del Giro' con 9 columnas: ¿Qué vende? + Proveedores 1-3 + Clientes Finales 1-3 (scrapeables, botón 🔍 conecta a /api/products/search-public para extraer imágenes/precios) + Sistemas Especializados 1-3. Dataset en /data/giros-ecosystem.json con 26 giros iniciales (Sex Shop, Restaurante, Veterinaria, Dentista, Hotel, etc.). Fix CSS empalme de nombres largos ('Tienda de Electrónica' ya no se traslapa). Buscador del panel con placeholder dinámico según nav activo (modules→'Buscar módulo…', giros→'Buscar giro de negocio…', users→'Buscar usuario por email…', audit→…).",

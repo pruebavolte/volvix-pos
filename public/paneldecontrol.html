@@ -3624,7 +3624,14 @@
     min-height: 0;
   }
   #screen-permisos.permv14 .permv14-list-item .permv14-list-item-icon {
+    /* V10.14: safety net — si algo no-emoji se cuela en el span del icon (ej.
+       "Jugos" para giros sin emoji al inicio), TRUNCAR en vez de partir letras. */
     flex: 0 0 auto; line-height: 1.25;
+    max-width: 24px;
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: nowrap;
+    font-size: 14px;
   }
   /* el texto del giro puede ocupar el espacio restante y wrappear */
   #screen-permisos.permv14 .permv14-list-item > :not(.permv14-list-item-icon):not(.permv14-list-item-state) {
@@ -6114,6 +6121,20 @@
   }
 
   // ─── COL 2: lista vertical de giros agrupada por categoría ───
+  // V10.14: helper para detectar si un string parece emoji real (no palabra).
+  // Usado para evitar que la regex /^(\S+)\s+(.+)$/ tome la primera palabra
+  // como "icon" cuando el label del giro NO tiene emoji al inicio (ej. "Jugos Frescos"
+  // antes producía icon="Jugos" + texto="Frescos" → "Jugos" se rompía letra-por-letra).
+  function _isEmojiLike(s) {
+    if (!s || typeof s !== 'string') return false;
+    if (s.length > 6) return false;
+    // si contiene letras ASCII a-z A-Z o dígitos → no es emoji
+    if (/[a-zA-Z0-9]/.test(s)) return false;
+    // si todo son chars ASCII o whitespace → no es emoji
+    if (/^[\x00-\x7F\s]+$/.test(s)) return false;
+    return true;
+  }
+
   async function renderGirosList() {
     const wrap = $('#permv14-modules-list');
     if (!wrap) return;
@@ -6211,7 +6232,10 @@
       visible.forEach(slug => {
         usedSlugs.add(slug);
         const label = LABELS[slug] || slug;
-        const m = label.match(/^(\S+)\s+(.+)$/) || [null, '🎯', label];
+        // V10.14: detectar si la primera "palabra" es emoji real (no "Jugos", "Pa", etc).
+        // Si NO es emoji, usar default 🎯 + label completo como texto.
+        const m_raw = label.match(/^(\S+)\s+(.+)$/);
+        const m = (m_raw && _isEmojiLike(m_raw[1])) ? m_raw : [null, '🎯', label];
         const tenantCount = counts[slug] || 0;
         const sel = (v14.selectedGiro === slug) ? ' selected' : '';
         const countBadge = tenantCount > 0
@@ -6234,7 +6258,9 @@
       bdOnlyGiros.forEach(g => {
         usedSlugs.add(g.slug);
         const label = g.name || g.slug;
-        const m = label.match(/^(\S+)\s+(.+)$/) || [null, '🆕', label];
+        // V10.14: igual fix — solo split si primera palabra es emoji real
+        const m_raw = label.match(/^(\S+)\s+(.+)$/);
+        const m = (m_raw && _isEmojiLike(m_raw[1])) ? m_raw : [null, '🆕', label];
         const tenantCount = counts[g.slug] || 0;
         const sel = (v14.selectedGiro === g.slug) ? ' selected' : '';
         const countBadge = tenantCount > 0
