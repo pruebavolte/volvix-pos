@@ -3609,20 +3609,26 @@
     padding: 12px 14px 4px;
   }
   #screen-permisos.permv14 .permv14-list-item {
-    /* V10.11 fix empalme: permitir wrap a nueva línea cuando el nombre del giro es largo
-       (ej. "Tienda de Electrónica", "Casa de Empeño"). align-items:flex-start hace que
-       el icono se mantenga arriba mientras el texto baja. */
-    display: flex; align-items: flex-start; gap: 9px;
-    padding: 7px 14px; cursor: pointer;
+    /* V10.13: wrap por palabra completa, NO letra-por-letra.
+       overflow-wrap:anywhere (V10.11) era demasiado agresivo y partía "Paneles" → "Pa/ne/les".
+       break-word solo rompe palabras si no hay otra opción (en práctica casi nunca con nombres de giros). */
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px; cursor: pointer;
     border-left: 2px solid transparent;
     font-size: 13px; color: var(--pv-text);
-    line-height: 1.3;
-    word-break: break-word;
-    overflow-wrap: anywhere;
+    line-height: 1.25;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: none;
+    white-space: normal;
     min-height: 0;
   }
   #screen-permisos.permv14 .permv14-list-item .permv14-list-item-icon {
-    flex: 0 0 auto; line-height: 1.3;
+    flex: 0 0 auto; line-height: 1.25;
+  }
+  /* el texto del giro puede ocupar el espacio restante y wrappear */
+  #screen-permisos.permv14 .permv14-list-item > :not(.permv14-list-item-icon):not(.permv14-list-item-state) {
+    flex: 1 1 auto; min-width: 0;
   }
   #screen-permisos.permv14 .permv14-list-item .permv14-list-item-state {
     flex: 0 0 auto; margin-left: auto; align-self: center;
@@ -6783,7 +6789,13 @@
     if (!host) {
       host = document.createElement('div');
       host.id = 'permv14-giro-ecosystem';
-      pane.appendChild(host);
+      // V10.13: INSERTAR AL INICIO del config-pane (no appendChild que pone al final)
+      // para que la tabla del ecosistema sea lo PRIMERO que se vea al entrar a Giros.
+      if (pane.firstChild) pane.insertBefore(host, pane.firstChild);
+      else pane.appendChild(host);
+    } else {
+      // si ya existe pero no está al inicio, moverlo
+      if (pane.firstChild !== host) pane.insertBefore(host, pane.firstChild);
     }
     host.innerHTML = '<div style="margin:14px;padding:14px;color:var(--pv-text-dim);font-size:12px;">⏳ Cargando ecosistema del giro…</div>';
     const data = await loadEcosystem();
@@ -6796,6 +6808,69 @@
     const sections = [];
     const sectionTitle = (icon, title, sub) =>
       '<header style="' + _ecoCSS.head + '"><div><h3 style="' + _ecoCSS.h3 + '">' + icon + ' ' + escapeText(title) + '</h3>' + (sub ? '<div style="' + _ecoCSS.sub + ';margin-top:2px">' + escapeText(sub) + '</div>' : '') + '</div></header>';
+
+    // ───────── TABLA MAESTRA (V10.13) ─────────
+    // Vista de TODOS los giros como filas, con 11 columnas (lo que el usuario pidió en su markdown).
+    // Aplicar filtro del search input para reducir filas si hay texto.
+    const allGiros = data.giros || [];
+    const searchFilter = ((document.getElementById('permv14-mod-search')||{}).value || '').toLowerCase().trim();
+    const filteredGiros = !searchFilter ? allGiros : allGiros.filter(g => {
+      const blob = (g.name+' '+g.que_vende+' '+(g.competidores_sector||[]).map(c=>c.sistema).join(' ')+' '+(g.cadena_valor?.clientes_finales||[]).map(c=>c.nombre).join(' ')).toLowerCase();
+      return blob.includes(searchFilter);
+    });
+    const linkCell = (u, label, scrapeable) => {
+      if (!u) return '<td style="' + _ecoCSS.td + ';font-size:10px;color:var(--pv-text-dim)">—</td>';
+      const safe = escapeAttr(u);
+      const host_ = String(u).replace(/^https?:\/\//,'').replace(/\/.*$/,'').replace(/^www\./, '');
+      const badge = scrapeable ? '<span style="background:#d1fae5;color:#065f46;font-size:8px;padding:0 3px;border-radius:2px;margin-left:3px;font-weight:700;vertical-align:middle">⚡</span>' : '';
+      return '<td style="' + _ecoCSS.td + ';font-size:10px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + safe + (label?' — '+escapeAttr(label):'') + '"><a href="' + safe + '" target="_blank" rel="noopener" style="color:var(--pv-accent);text-decoration:none">' + escapeText(host_) + ' ↗</a>' + badge + '</td>';
+    };
+    sections.push(
+      '<section style="' + _ecoCSS.section + '">' +
+        '<header style="' + _ecoCSS.head + '">' +
+          '<div><h3 style="' + _ecoCSS.h3 + '">📊 Tabla Maestra de Giros' + (searchFilter ? ' · <span style="font-weight:400;font-size:11px;color:var(--pv-accent)">filtro: "' + escapeText(searchFilter) + '" → ' + filteredGiros.length + '/' + allGiros.length + '</span>' : '') + '</h3>' +
+          '<div style="' + _ecoCSS.sub + ';margin-top:2px">' + filteredGiros.length + ' giros · Click en una fila para ver detalle abajo</div></div>' +
+        '</header>' +
+        '<div style="overflow-x:auto;max-height:340px;overflow-y:auto"><table style="' + _ecoCSS.table + ';min-width:1400px">' +
+          '<thead style="position:sticky;top:0;z-index:2"><tr>' +
+            '<th style="' + _ecoCSS.th + ';min-width:140px;position:sticky;left:0;background:var(--pv-bg-paper);z-index:3">Giro</th>' +
+            '<th style="' + _ecoCSS.th + ';min-width:180px">¿Qué vende?</th>' +
+            '<th style="' + _ecoCSS.th + ';background:#ede9fe">Sistema 1</th>' +
+            '<th style="' + _ecoCSS.th + ';background:#ede9fe">Sistema 2</th>' +
+            '<th style="' + _ecoCSS.th + ';background:#ede9fe">Sistema 3</th>' +
+            '<th style="' + _ecoCSS.th + ';background:#dbeafe">Cliente Final 1</th>' +
+            '<th style="' + _ecoCSS.th + ';background:#dbeafe">Cliente Final 2</th>' +
+            '<th style="' + _ecoCSS.th + ';background:#dbeafe">Cliente Final 3</th>' +
+            '<th style="' + _ecoCSS.th + ';background:#fef3c7">Proveedor 1</th>' +
+            '<th style="' + _ecoCSS.th + ';background:#fef3c7">Proveedor 2</th>' +
+            '<th style="' + _ecoCSS.th + ';background:#fef3c7">Proveedor 3</th>' +
+          '</tr></thead>' +
+          '<tbody>' +
+            filteredGiros.map(g => {
+              const cv = g.cadena_valor || {};
+              const provs = cv.proveedores || [];
+              const cfs   = cv.clientes_finales || [];
+              const sis   = g.competidores_sector || [];
+              const sel = (g.slug === slug) ? 'background:var(--pv-accent-soft);' : '';
+              return '<tr data-master-giro="' + escapeAttr(g.slug) + '" style="cursor:pointer;' + sel + '">' +
+                '<td style="' + _ecoCSS.td + ';font-weight:600;position:sticky;left:0;background:' + (g.slug===slug?'var(--pv-accent-soft)':'var(--pv-bg-paper)') + ';z-index:1">' + escapeText(g.name) + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px">' + escapeText(g.que_vende || '') + '</td>' +
+                linkCell(sis[0]?.sistema && (sis[0].url || ''), sis[0]?.sistema || '', false) +
+                linkCell(sis[1]?.sistema && (sis[1].url || ''), sis[1]?.sistema || '', false) +
+                linkCell(sis[2]?.sistema && (sis[2].url || ''), sis[2]?.sistema || '', false) +
+                linkCell(cfs[0]?.url, cfs[0]?.nombre, cfs[0]?.scrapeable) +
+                linkCell(cfs[1]?.url, cfs[1]?.nombre, cfs[1]?.scrapeable) +
+                linkCell(cfs[2]?.url, cfs[2]?.nombre, cfs[2]?.scrapeable) +
+                linkCell(provs[0]?.url, provs[0]?.nombre, false) +
+                linkCell(provs[1]?.url, provs[1]?.nombre, false) +
+                linkCell(provs[2]?.url, provs[2]?.nombre, false) +
+              '</tr>';
+            }).join('') +
+          '</tbody>' +
+        '</table></div>' +
+        '<div style="padding:6px 14px;font-size:10px;color:var(--pv-text-dim);background:var(--pv-bg-paper);border-top:1px solid var(--pv-border)">⚡ = scrapeable via /api/products/search-public · Sistemas usan URL ficticia (mostrar nombre); todas las URLs reales van a otros tabs</div>' +
+      '</section>'
+    );
 
     // ───────── 0. HEADER PRINCIPAL ─────────
     sections.push(
@@ -7619,9 +7694,23 @@
   }
 
   // ─── SEARCH ───
+  // V10.13 FIX: el buscador debe filtrar según el nav activo (módulos vs giros vs usuarios).
+  // Antes siempre llamaba renderModulesList → el filtro no funcionaba en el módulo Giros.
   function wireSearch() {
     const inp = $('#permv14-mod-search');
-    if (inp) inp.addEventListener('input', () => renderModulesList());
+    if (!inp) return;
+    inp.addEventListener('input', () => {
+      const nav = (v14 && v14.selectedNav) || 'modules';
+      try {
+        if (nav === 'giros') {
+          renderGirosList();
+        } else if (nav === 'users' && typeof renderUsersUnified === 'function') {
+          renderUsersUnified();
+        } else {
+          renderModulesList();
+        }
+      } catch (e) { try { console.warn('[search] handler fail:', e); } catch(_){} }
+    });
   }
 
   // ─── TOOLTIP COUNT del sidebar ───
