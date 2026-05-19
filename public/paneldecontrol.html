@@ -4142,15 +4142,20 @@
     padding: 5px 8px;
     font-family: var(--pv-font-body); font-size: 12px; font-weight: 500;
     color: var(--pv-text); width: 100%;
-    cursor: text; transition: all 0.12s ease;
+    cursor: pointer; transition: all 0.12s ease;
+    /* V10.27: por default no editable. Doble-click lo activa via JS. */
+    pointer-events: none;
   }
+  /* permitir hover visual del padre (.permv14-perm-row) */
   #screen-permisos.permv14 .permv14-perm-name-input:hover {
     background: var(--pv-bg); border-color: var(--pv-border);
   }
-  #screen-permisos.permv14 .permv14-perm-name-input:focus {
+  #screen-permisos.permv14 .permv14-perm-name-input.is-editing {
+    pointer-events: auto; cursor: text;
     background: var(--pv-bg-paper); border-color: var(--pv-accent);
-    box-shadow: 0 0 0 2px var(--pv-accent-soft); outline: none;
+    box-shadow: 0 0 0 2px var(--pv-accent-soft);
   }
+  #screen-permisos.permv14 .permv14-perm-name-input.is-editing:focus { outline: none; }
 
   #screen-permisos.permv14 .permv14-state-select {
     width: 100%;
@@ -6505,68 +6510,111 @@
       bdOnlyGiros.forEach(g => usedSlugs.add(g.slug));
     }
 
-    // V10.15: construir TABLA HORIZONTAL con scroll en lugar de lista vertical
+    // V10.27: TABLA EXPANDIDA — todo el ecosistema EN LA MISMA FILA del giro.
+    // Por cada sistema (×3): URL · País · Modelo · Precio Base · Precio Típico · Fortaleza · Debilidad
+    // + Cliente×3 · Proveedor×3 · Problemas · Terminología · Tenants
+    // Total: ~33 columnas por giro. Scroll horizontal obligatorio.
     let html = '';
+    const sysHeader = (n) =>
+      '<th class="col-sistema" style="background:#ede9fe">Sistema '+n+' (URL)</th>' +
+      '<th class="col-sistema" style="background:#ede9fe">País '+n+'</th>' +
+      '<th class="col-sistema" style="background:#ede9fe">Modelo '+n+'</th>' +
+      '<th class="col-sistema" style="background:#ede9fe">Precio base '+n+'</th>' +
+      '<th class="col-sistema" style="background:#ede9fe">Precio típico '+n+'</th>' +
+      '<th class="col-sistema" style="background:#dcfce7">✓ Fortaleza '+n+'</th>' +
+      '<th class="col-sistema" style="background:#fee2e2">✗ Debilidad '+n+'</th>';
+    const cell = (v) => '<td style="font-size:10px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + escapeAttr(String(v||'')) + '">' + (v ? escapeText(v) : '<span style="color:var(--pv-text-dim)">—</span>') + '</td>';
+    const cellSys = (s, idx) => {
+      if (!s) return '<td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>';
+      const u = s.url;
+      const safe = escapeAttr(u||'');
+      const host_ = String(u||'').replace(/^https?:\/\//,'').replace(/\/.*$/,'').replace(/^www\./,'');
+      const linkCell = u
+        ? '<td class="cell-link" title="' + safe + ' — ' + escapeAttr(s.sistema||'') + '"><strong style="font-size:11px">' + escapeText(s.sistema||'') + '</strong><br><a href="' + safe + '" target="_blank" rel="noopener" style="font-size:10px;color:var(--pv-accent);text-decoration:none">' + escapeText(host_) + ' ↗</a></td>'
+        : '<td class="cell-link"><strong style="font-size:11px">' + escapeText(s.sistema||'—') + '</strong></td>';
+      return linkCell + cell(s.pais) + cell(s.modelo_cobro) + cell(s.precio_base) + cell(s.precio_tipico) +
+        '<td style="font-size:10px;max-width:180px;background:#f0fdf4;color:#065f46;line-height:1.3;white-space:normal" title="' + escapeAttr(s.fortaleza||'') + '">' + escapeText(s.fortaleza||'—') + '</td>' +
+        '<td style="font-size:10px;max-width:180px;background:#fef2f2;color:#991b1b;line-height:1.3;white-space:normal" title="' + escapeAttr(s.debilidad||'') + '">' + escapeText(s.debilidad||'—') + '</td>';
+    };
     if (!groupedVisible.length) {
       html = '<div class="permv14-empty-row" style="padding:20px;text-align:center;color:var(--pv-text-dim)">Sin giros que coincidan con "<strong>' + escapeText(search) + '</strong>".</div>';
     } else {
       const totalVisible = groupedVisible.reduce((s,g)=>s+g.slugs.length, 0);
       html = '<div class="vlx-giros-table-wrap">' +
-        '<table class="vlx-giros-table">' +
+        '<table class="vlx-giros-table" style="min-width:3400px">' +
           '<thead><tr>' +
-            '<th class="col-giro">Giro de Negocio</th>' +
-            '<th>¿Qué vende?</th>' +
-            '<th class="col-sistema">Sistema 1 (URL)</th>' +
-            '<th class="col-sistema">Sistema 2 (URL)</th>' +
-            '<th class="col-sistema">Sistema 3 (URL)</th>' +
-            '<th class="col-cliente">Cliente Final 1 (URL)</th>' +
-            '<th class="col-cliente">Cliente Final 2 (URL)</th>' +
-            '<th class="col-cliente">Cliente Final 3 (URL)</th>' +
-            '<th class="col-proveedor">Proveedor 1 (URL)</th>' +
-            '<th class="col-proveedor">Proveedor 2 (URL)</th>' +
-            '<th class="col-proveedor">Proveedor 3 (URL)</th>' +
+            '<th class="col-giro" style="min-width:160px">Giro de Negocio</th>' +
+            '<th style="min-width:200px">¿Qué vende?</th>' +
+            sysHeader(1) +
+            sysHeader(2) +
+            sysHeader(3) +
+            '<th class="col-cliente" style="background:#dbeafe">Cliente Final 1</th>' +
+            '<th class="col-cliente" style="background:#dbeafe">Cliente Final 2</th>' +
+            '<th class="col-cliente" style="background:#dbeafe">Cliente Final 3</th>' +
+            '<th class="col-proveedor" style="background:#fef3c7">Proveedor 1</th>' +
+            '<th class="col-proveedor" style="background:#fef3c7">Proveedor 2</th>' +
+            '<th class="col-proveedor" style="background:#fef3c7">Proveedor 3</th>' +
+            '<th style="background:#fef9c3;min-width:200px">🎯 Funcionalidades críticas</th>' +
+            '<th style="background:#fde2e2;min-width:200px">⚠️ Problemas a evitar</th>' +
+            '<th style="background:#e0e7ff;min-width:160px">📖 Terminología</th>' +
+            '<th style="min-width:160px">Regulación</th>' +
             '<th style="width:60px">Tenants</th>' +
           '</tr></thead>' +
           '<tbody>';
+      const COLSPAN = 33; // total columnas para el separador de grupo
       groupedVisible.forEach(group => {
-        html += '<tr class="vlx-giros-group-label"><td colspan="12" style="background:var(--pv-surface);font-family:var(--pv-font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--pv-text-dim);padding:6px 14px;border-bottom:1px solid var(--pv-border)">' + escapeText(group.catLabel) + ' · ' + group.slugs.length + '</td></tr>';
+        html += '<tr class="vlx-giros-group-label"><td colspan="' + COLSPAN + '" style="background:var(--pv-surface);font-family:var(--pv-font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--pv-text-dim);padding:6px 14px;border-bottom:1px solid var(--pv-border);position:sticky;left:0">' + escapeText(group.catLabel) + ' · ' + group.slugs.length + '</td></tr>';
         group.slugs.forEach(slug => {
           const label = LABELS[slug] || (v14.catalogs.giros||[]).find(g=>g.slug===slug)?.name || slug;
           const ecoRow = findEcoFor(slug, label);
           const tenantCount = counts[slug] || 0;
           const sel = (v14.selectedGiro === slug) ? 'is-selected' : '';
-          // Icon
           const m_raw = label.match(/^(\S+)\s+(.+)$/);
           const m = (m_raw && _isEmojiLike(m_raw[1])) ? m_raw : [null, '🎯', label];
           const giroDisplay = '<span style="font-size:14px;margin-right:6px">' + m[1] + '</span>' + escapeText(m[2]);
-          // Eco data
-          const queVende = ecoRow?.que_vende || '<span style="color:var(--pv-text-dim);font-style:italic">—</span>';
+          const queVende = ecoRow?.que_vende || '';
           const sis = ecoRow?.competidores_sector || [];
           const cfs = ecoRow?.cadena_valor?.clientes_finales || [];
           const provs = ecoRow?.cadena_valor?.proveedores || [];
-          // tenants badge
           const tenantsBadge = tenantCount > 0
             ? '<span style="background:#10b981;color:#fff;font-family:var(--pv-font-mono);font-size:9px;font-weight:600;padding:2px 7px;border-radius:8px">' + tenantCount + '</span>'
             : '<span style="color:var(--pv-text-dim);font-size:11px">—</span>';
+          // Funcionalidades críticas
+          const feats = ecoRow?.funcionalidades_criticas || [];
+          const featsHtml = feats.length
+            ? feats.slice(0,3).map(f => '<div style="font-size:10px;margin-bottom:3px"><strong>' + escapeText(f.feature||'') + '</strong><br><span style="color:#666">' + escapeText(f.porque||'') + '</span></div>').join('')
+            : '<span style="color:var(--pv-text-dim)">—</span>';
+          // Problemas
+          const probs = ecoRow?.problemas_evitar || [];
+          const probsHtml = probs.length
+            ? probs.slice(0,2).map(p => '<div style="font-size:10px;margin-bottom:3px"><strong>' + escapeText(p.area||'') + '</strong>: ' + escapeText(p.problema||'') + '</div>').join('')
+            : '<span style="color:var(--pv-text-dim)">—</span>';
+          // Terminología
+          const term = ecoRow?.terminologia || [];
+          const termHtml = term.length
+            ? term.slice(0,4).map(t => '<div style="font-size:10px;margin-bottom:2px"><code style="font-size:9px;color:#666">' + escapeText(t.generico||'') + '</code> → <strong>' + escapeText(t.este_giro||'') + '</strong></div>').join('')
+            : '<span style="color:var(--pv-text-dim)">—</span>';
 
           html += '<tr class="' + sel + '" data-permv14-giro="' + escapeAttr(slug) + '">' +
             '<td class="col-giro cell-name">' + giroDisplay + '</td>' +
-            '<td class="cell-que-vende">' + (typeof queVende === 'string' && queVende.startsWith('<') ? queVende : escapeText(queVende)) + '</td>' +
-            cellLink(sis[0]?.url, sis[0]?.sistema, false) +
-            cellLink(sis[1]?.url, sis[1]?.sistema, false) +
-            cellLink(sis[2]?.url, sis[2]?.sistema, false) +
+            '<td class="cell-que-vende" style="font-size:11px;min-width:200px;white-space:normal;line-height:1.4">' + escapeText(queVende || '—') + '</td>' +
+            cellSys(sis[0], 0) + cellSys(sis[1], 1) + cellSys(sis[2], 2) +
             cellLink(cfs[0]?.url, cfs[0]?.nombre, cfs[0]?.scrapeable) +
             cellLink(cfs[1]?.url, cfs[1]?.nombre, cfs[1]?.scrapeable) +
             cellLink(cfs[2]?.url, cfs[2]?.nombre, cfs[2]?.scrapeable) +
             cellLink(provs[0]?.url, provs[0]?.nombre, false) +
             cellLink(provs[1]?.url, provs[1]?.nombre, false) +
             cellLink(provs[2]?.url, provs[2]?.nombre, false) +
+            '<td style="font-size:10px;max-width:240px;white-space:normal;line-height:1.4;background:#fffceb">' + featsHtml + '</td>' +
+            '<td style="font-size:10px;max-width:240px;white-space:normal;line-height:1.4;background:#fef2f2">' + probsHtml + '</td>' +
+            '<td style="font-size:10px;max-width:200px;white-space:normal;line-height:1.4;background:#f5f3ff">' + termHtml + '</td>' +
+            '<td style="font-size:10px;max-width:180px;white-space:normal;line-height:1.4">' + escapeText(ecoRow?.regulacion || '—') + '</td>' +
             '<td style="text-align:center">' + tenantsBadge + '</td>' +
           '</tr>';
         });
       });
       html += '</tbody></table></div>' +
-        '<div style="padding:6px 14px;font-size:10px;color:var(--pv-text-dim);background:var(--pv-bg-paper);border-top:1px solid var(--pv-border)">📊 ' + totalVisible + ' giros · ⚡ = scrapeable via /api/products/search-public · Click en una fila para seleccionar</div>';
+        '<div style="padding:6px 14px;font-size:10px;color:var(--pv-text-dim);background:var(--pv-bg-paper);border-top:1px solid var(--pv-border)">📊 ' + totalVisible + ' giros · ⚡ scrapeable · ← Scroll horizontal → para ver Funcionalidades / Problemas / Terminología</div>';
     }
 
     wrap.innerHTML = html;
@@ -7061,7 +7109,14 @@
     // 2026-05-09 fix(M8): refrescar badge global al final del render de detalle
     try { updateGlobalDirtyBadge(); } catch(_) {}
     // V10.11: inyectar sección "Ecosistema del Giro" — proveedores, clientes finales, sistemas
-    try { renderGiroEcosystem(slug); } catch (e) { try { console.warn('[ecosystem] fail:', e); } catch(_){} }
+    // V10.27: ya NO llamar renderGiroEcosystem aquí — toda esa info ahora vive
+    // en la tabla maestra expandida (col 2) como columnas adicionales por giro.
+    // try { renderGiroEcosystem(slug); } catch (e) { try { console.warn('[ecosystem] fail:', e); } catch(_){} }
+    // Limpiar host previo si quedó residual de versiones anteriores
+    try {
+      const oldHost = document.getElementById('permv14-giro-ecosystem');
+      if (oldHost) oldHost.remove();
+    } catch(_){}
   }
 
   // ─── ECOSISTEMA DEL GIRO (V10.12 multi-tabla) ───
@@ -7514,7 +7569,7 @@
             const state = overrides[a.key] === false ? 'hidden' : 'enabled';
             return '<div class="permv14-perm-row" style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-bottom:1px solid var(--pv-border);">' +
               '<div class="permv14-perm-icon" style="font-size:14px;flex:0 0 auto;">' + a.icon + '</div>' +
-              '<div class="permv14-perm-name" style="flex:1 1 auto;font-size:12px;color:var(--pv-text);min-width:0;overflow:hidden;text-overflow:ellipsis;">' + escapeText(a.label) + '</div>' +
+              '<input type="text" class="permv14-perm-name-input" data-comp-rename="' + escapeAttr(a.key) + '" value="' + escapeAttr(a.label) + '" title="Doble click para editar nombre" style="flex:1 1 auto;font-size:12px;min-width:0;" />' +
               '<select class="permv14-state-select s-' + (state==='enabled'?'on':'hi') + '" data-comp-key="' + escapeAttr(a.key) + '" style="flex:0 0 auto;font-size:10px;padding:2px 6px;">' +
                 '<option value="enabled"' + (state==='enabled'?' selected':'') + '>✓ ACTIVO</option>' +
                 '<option value="hidden"' + (state==='hidden'?' selected':'') + '>🙈 OCULTO</option>' +
@@ -7532,6 +7587,16 @@
           try { updateGlobalDirtyBadge && updateGlobalDirtyBadge(); } catch(_){}
           sel.classList.remove('s-on','s-hi');
           sel.classList.add(sel.value === 'enabled' ? 's-on' : 's-hi');
+        });
+      });
+      // V10.27: wire rename inputs — guardar el nombre custom del componente para este giro
+      body.querySelectorAll('[data-comp-rename]').forEach(inp => {
+        inp.addEventListener('change', () => {
+          v14.giroComponentRenames = v14.giroComponentRenames || {};
+          v14.giroComponentRenames[slug] = v14.giroComponentRenames[slug] || {};
+          v14.giroComponentRenames[slug][inp.dataset.compRename] = inp.value;
+          v14.giroIsDirty = v14.giroIsDirty || {}; v14.giroIsDirty[slug] = true;
+          try { updateGlobalDirtyBadge && updateGlobalDirtyBadge(); } catch(_){}
         });
       });
       return;
@@ -8447,6 +8512,27 @@
   }
 
   // ─── INIT del v14 ───
+  // V10.27: doble-click activa edición inline del input
+  function wireDoubleClickEdit() {
+    document.addEventListener('dblclick', (ev) => {
+      const inp = ev.target.closest('.permv14-perm-name-input');
+      if (!inp || inp.readOnly) return;
+      inp.classList.add('is-editing');
+      setTimeout(() => { try { inp.focus(); inp.select(); } catch(_){} }, 0);
+    });
+    document.addEventListener('blur', (ev) => {
+      const inp = ev.target.closest && ev.target.closest('.permv14-perm-name-input.is-editing');
+      if (inp) inp.classList.remove('is-editing');
+    }, true);
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Enter' && ev.key !== 'Escape') return;
+      const inp = ev.target.closest && ev.target.closest('.permv14-perm-name-input.is-editing');
+      if (!inp) return;
+      inp.classList.remove('is-editing');
+      inp.blur();
+    });
+  }
+
   function initV14() {
     if (initV14._done) return;
     initV14._done = true;
@@ -8454,6 +8540,7 @@
     wireDetailTabs();
     wireDeviceTabs();
     wireSearch();
+    wireDoubleClickEdit();
     refreshNavCounts();
     // 2026-05-14: Default a 'users' (el caso de uso mas comun del panel).
     // Otros tabs (modules/giros/audit/versions) siguen accesibles via sidebar.

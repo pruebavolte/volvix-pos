@@ -1,13 +1,14 @@
 {
-  "version": "1.0.423",
+  "version": "1.0.424",
   "major": 1,
   "minor": 0,
-  "patch": 423,
+  "patch": 424,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-19T09:00:00.000Z",
-  "built_at": "2026-05-19T09:00:00.000Z",
+  "date": "2026-05-19T10:00:00.000Z",
+  "built_at": "2026-05-19T10:00:00.000Z",
   "changelog": [
+    "V10.27 TABLA-EXPANDIDA + DOBLE-CLICK + RENAME-COMPONENTES: (1) Tabla maestra expandida a ~33 columnas, todo en MISMA FILA por giro: Giro · ¿Qué vende? · 3×[Sistema URL + País + Modelo + Precio base + Precio típico + Fortaleza + Debilidad] + 3×Cliente Final + 3×Proveedor + Funcionalidades críticas + Problemas a evitar + Terminología + Regulación + Tenants. Scroll horizontal obligatorio (min-width 3400px). (2) Eliminada sección Ecosistema separada del config-pane (ya está en la fila). (3) Doble-click activa edición inline de nombres (pointer-events:none por default, .is-editing class lo activa). Click simple ya NO edita (evita ediciones accidentales). Enter/Escape/Blur sale del modo edición. (4) Componentes del módulo ahora editables: cambié span por input.permv14-perm-name-input con data-comp-rename, persistencia en v14.giroComponentRenames[slug][key].",
     "V10.26 +40 ALIASES SUB-VARIANTE + CTA GENERAR-IA: tabla ALIASES expandida masivamente. 60+ sub-variantes ahora mapean a giros padres existentes en JSON: pollo_frito/pollos_asados→polleria, antojitos/tacos_vapor→taqueria, comida_corrida/dark_kitchen/ghost_kitchen/banquetes→restaurante, minisuper/deposito/tienda_china/dulceria/refresqueria/cerveza_artesanal/cremeria/purificadora/regalos/bazar→abarrotes, naturista→farmacia, tienda_mascotas→veterinaria, tlapaleria/carpinteria/herreria/cerrajeria/aluminio/construccion/paneles_solares/vidrieria→ferreteria, electrodomesticos/computacion/celulares/gamer/cctv/sonido/drones/impresion_3d/domotica→electronica, refaccionaria/carwash/llantera/vulcanizadora/agencia_autos→taller_mecanico, casa_empeno→joyeria, motel/agencia_de_viajes/coworking→hotel, escuela/guarderia→gimnasio. Adicional: el fallback 'Sin datos' ahora es un CTA bonito con botón 🤖 Generar con IA que llama /api/giros/generate (V10.16) para crear el giro on-demand.",
     "V10.25 ECOSYSTEM-MATCHING-FIX + 12 GIROS NUEVOS: el usuario detectó que algo no cuadraba — auditoría mostró que 86 de 107 giros del sidebar NO tenían ecosystem (slug mismatch o ausencia). Fix triple: (1) ecosystemRowFor ahora normaliza `-` vs `_` y tiene tabla ALIASES (clinica_dental→dentista, estetica→salon_belleza, etc.) para resolver salon-belleza/taller-mecanico/jugos-naturales que en sidebar usan guión pero en JSON usan underscore. (2) +12 giros nuevos al JSON: fruteria, carniceria, polleria, tortilleria, ropa, zapateria, electronica, papeleria, joyeria, floreria, lavanderia, muebleria. Total: 36 giros con datos completos. (3) Cada giro nuevo con 3 proveedores + 3 clientes finales scrapeables + 3 competidores POS + funcionalidades críticas + problemas + terminología.",
     "V10.24 MOCKUPS-POR-MODULO + COMPONENTES-GENERICOS: el preview ahora cambia al hacer click en distintos módulos. Mockups específicos para: dashboard (4 KPIs cards + barras hora pico), apertura (form fondo+cajero), corte (4 totales + dif cuadrada + cerrar Z), inventario (tabla productos stock OK/BAJO), clientes (cards con avatares + ranking compras), reportes (5 cards de tipo), menu/carta (categorías), usuarios (lista con roles). Genérico para resto: icon grande + descripción del giro + 6 botones acción (Ver/Nuevo/Editar/Eliminar/Exportar/Buscar). Componentes pane ahora muestra acciones genéricas (mod.list/create/edit/delete/export/search) en vez de 'Este módulo no tiene botones configurables'.",
