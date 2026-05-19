@@ -7085,9 +7085,24 @@
   function ecosystemRowFor(slug, dataset) {
     if (!dataset || !Array.isArray(dataset.giros)) return null;
     const giros = dataset.giros;
-    return giros.find(g => g.slug === slug)
-        || giros.find(g => (g.name || '').toLowerCase() === String(slug).replace(/_/g,' ').toLowerCase())
-        || giros.find(g => slug && (g.slug.includes(slug) || slug.includes(g.slug)));
+    // V10.25: matching tolerante a `-` vs `_` y a aliases conocidos.
+    // El sidebar tiene salon-belleza, taller-mecanico, jugos-naturales (guión),
+    // pero el ecosystem JSON usa salon_belleza, taller_mecanico, jugos_naturales (underscore).
+    const norm = (s) => String(s || '').toLowerCase().replace(/[-_]/g, '_');
+    const slugN = norm(slug);
+    const ALIASES = {
+      'clinica_dental': 'dentista',
+      'medico': 'farmacia',
+      'estetica': 'salon_belleza',
+      'nails': 'salon_belleza',
+      'tienda_ropa': 'ropa',
+      'taller_mecanico': 'taller_mecanico',
+    };
+    const targetSlug = ALIASES[slugN] || slugN;
+    return giros.find(g => norm(g.slug) === slugN)
+        || giros.find(g => norm(g.slug) === targetSlug)
+        || giros.find(g => (g.name || '').toLowerCase() === String(slug).replace(/[_-]/g,' ').toLowerCase())
+        || giros.find(g => slugN && (norm(g.slug).includes(slugN) || slugN.includes(norm(g.slug))));
   }
 
   // Helpers de render compartidos
