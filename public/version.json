@@ -1,13 +1,14 @@
 {
-  "version": "1.0.413",
+  "version": "1.0.414",
   "major": 1,
   "minor": 0,
-  "patch": 413,
+  "patch": 414,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-19T04:00:00.000Z",
-  "built_at": "2026-05-19T04:00:00.000Z",
+  "date": "2026-05-19T04:30:00.000Z",
+  "built_at": "2026-05-19T04:30:00.000Z",
   "changelog": [
+    "V10.17 PANEL-GRID-FIX: la tabla de Giros estaba constreñida a 200px porque el padre .permv14-grid es CSS Grid con grid-template-columns:'52px 200px 380px 1fr' FIJOS. width:100% en el hijo no podía vencer al template del padre. Fix: cambiar grid-template-columns a '52px 1fr 0 0' cuando data-active-nav='giros' — col 1 (sidebar íconos) queda en 52px, col 2 (tabla) toma TODO el ancho restante (1fr), col 3 (config-pane) y col 4 (preview-pane) colapsan a 0. Ahora la tabla maestra de 11 columnas con scroll horizontal SÍ se ve completa.",
     "V10.16 IMÁGENES-REALES: arreglar letras coloridas (M/L/S/C) en productos generados. Causa raíz: el LLM devolvía productos SIN image_url, y searchProductImageMulti corría SOLO en persist (background post-response) — el primer usuario veía firstLetter fallback (M=Midea, L=LG…). Fix: (1) En api/giros.js generateGiro, enriquecer image_url DESPUÉS del LLM y ANTES de devolver al frontend, con Promise.all + timeout 8s. (2) Agregar 'search_public' como PRIMERA fuente de searchProductImageMulti (V10.10 endpoint que usa DummyJSON+OFF+Wikimedia — sí funcionan desde Vercel datacenter, las otras de scraping fallan). (3) En marketplace.html, fallback robusto: si img sigue vacío, generar URL loremflickr con keywords del nombre+categoría en vez de mostrar primera letra colorida. Ahora aire acondicionado, calentador solar, impresora 3d, etc. muestran imágenes REALES desde primer request.",
     "V10.15 SIDEBAR→TABLA: el sidebar del módulo Giros ya no es una lista vertical estrecha. Cuando activas Giros, el sidebar se expande a full-width y muestra una TABLA HORIZONTAL con 12 columnas: Giro | ¿Qué vende? | Sistema 1-3 (URL) | Cliente Final 1-3 (URL) | Proveedor 1-3 (URL) | Tenants. Scroll horizontal, primera columna sticky (left:0), header sticky (top:0), filas agrupadas por categoría con label. Las columnas config-pane y preview-pane se ocultan automáticamente en modo Giros. Buscador filtra por giros + URLs + competidores + clientes + proveedores. Click en fila para seleccionar. Click en URL abre en nueva pestaña sin disparar selección. ⚡ = scrapeable. Es exactamente la estructura del documento markdown del usuario.",
     "V10.14 PANEL-FIX-RAIZ: bug raíz del empalme 'Ju/go/s Frescos' encontrado. La regex /^(\\S+)\\s+(.+)$/ tomaba la PRIMERA palabra como icon emoji sin verificar — para giros sin emoji al inicio (ej. 'Jugos Frescos') metía 'Jugos' al <span class=permv14-list-item-icon> de ancho restringido y se partía letra por letra. Fix doble: (1) helper _isEmojiLike() acepta el split SOLO si la primera palabra es emoji real (sin ASCII a-zA-Z0-9, ≤6 chars), si no usa default 🎯 + label completo como texto. (2) CSS safety net: el span del icon ahora tiene max-width:24px + overflow:hidden + white-space:nowrap para truncar en vez de partir si algo se cuela. Borrada página /test-ecosystem-render.html (era workaround innecesario, todo el trabajo va en paneldecontrol.html directo).",

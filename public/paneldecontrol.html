@@ -3537,6 +3537,12 @@
     overflow: hidden;
     min-height: 0;
   }
+  /* V10.17 FIX: cuando nav=giros, colapsar config-pane (col 3) y preview-pane (col 4)
+     a 0px para que split-list (col 2) ocupe TODO el ancho disponible.
+     El width:100% del hijo NO podía sobrescribir el grid-template-columns del padre. */
+  #screen-permisos.permv14[data-active-nav="giros"] .permv14-grid {
+    grid-template-columns: 52px 1fr 0 0;
+  }
 
   /* === COL 1: SIDEBAR (52px) === */
   #screen-permisos.permv14 .permv14-sidebar {
@@ -3588,17 +3594,22 @@
     background: var(--pv-bg);
     padding: 14px 0;
   }
-  /* V10.15: cuando nav=giros, el split-list se expande a full-width y muestra
-     la tabla maestra horizontal con scroll. Las otras columnas se ocultan via
-     setActiveNav hidden attribute. */
+  /* V10.15/V10.17: cuando nav=giros, el split-list ocupa el 1fr de la col 2 expandida.
+     Garantizar overflow correcto para que la tabla pueda scrollear horizontal/vertical. */
   #screen-permisos.permv14[data-active-nav="giros"] .permv14-split-list[data-permv14-pane="modules"] {
-    width: 100% !important;
-    max-width: none !important;
-    flex: 1 1 auto !important;
+    width: auto;
+    max-width: none;
     min-width: 0;
+    overflow: hidden;          /* el wrap interno scrollea */
+    padding: 0;
   }
   #screen-permisos.permv14[data-active-nav="giros"] .permv14-modules-list {
     overflow: visible;
+    padding: 0;
+  }
+  /* el header del search + botón "+ Nuevo Giro" sigue arriba con padding */
+  #screen-permisos.permv14[data-active-nav="giros"] .permv14-split-list-search {
+    padding: 10px 12px !important;
   }
   /* tabla maestra cuando está en sidebar expandido */
   .vlx-giros-table-wrap {
