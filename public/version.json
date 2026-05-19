@@ -1,13 +1,14 @@
 {
-  "version": "1.0.415",
+  "version": "1.0.416",
   "major": 1,
   "minor": 0,
-  "patch": 415,
+  "patch": 416,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-19T05:00:00.000Z",
-  "built_at": "2026-05-19T05:00:00.000Z",
+  "date": "2026-05-19T05:30:00.000Z",
+  "built_at": "2026-05-19T05:30:00.000Z",
   "changelog": [
+    "V10.19 PANEL-LAYOUT-HORIZONTAL: el usuario rechazó V10.18 (2 filas verticales). Vuelvo a layout HORIZONTAL: cuando se selecciona un giro, los 4 paneles aparecen lado a lado [sidebar 52px | tabla minmax(380px,1.2fr) | config 380px | preview 1.2fr]. La tabla mantiene su scroll horizontal interno (barra abajo). NO apila vertical. Removido grid-template-areas (era para 2 filas) y grid-template-rows. Ahora siempre 1 fila con 4 columnas.",
     "V10.18 PANEL-LAYOUT-2-FILAS: cuando se selecciona un giro de la tabla, el layout cambia a 2 filas. Fila superior (38vh): tabla maestra (más compacta con scroll). Fila inferior (resto): config-pane (380px) con módulos preset + botones, y preview-pane (1fr) con preview del POS. Implementado via grid-template-areas: 'sidebar table table' / 'sidebar config preview'. Sin selección: tabla full-width (52px 1fr 0 0). Atributo data-giro-selected en #screen-permisos activa el toggle. Click en fila llama _setGiroSelectedAttr(true) y restaura los paneles que se habían ocultado.",
     "V10.17 PANEL-GRID-FIX: la tabla de Giros estaba constreñida a 200px porque el padre .permv14-grid es CSS Grid con grid-template-columns:'52px 200px 380px 1fr' FIJOS. width:100% en el hijo no podía vencer al template del padre. Fix: cambiar grid-template-columns a '52px 1fr 0 0' cuando data-active-nav='giros' — col 1 (sidebar íconos) queda en 52px, col 2 (tabla) toma TODO el ancho restante (1fr), col 3 (config-pane) y col 4 (preview-pane) colapsan a 0. Ahora la tabla maestra de 11 columnas con scroll horizontal SÍ se ve completa.",
     "V10.16 IMÁGENES-REALES: arreglar letras coloridas (M/L/S/C) en productos generados. Causa raíz: el LLM devolvía productos SIN image_url, y searchProductImageMulti corría SOLO en persist (background post-response) — el primer usuario veía firstLetter fallback (M=Midea, L=LG…). Fix: (1) En api/giros.js generateGiro, enriquecer image_url DESPUÉS del LLM y ANTES de devolver al frontend, con Promise.all + timeout 8s. (2) Agregar 'search_public' como PRIMERA fuente de searchProductImageMulti (V10.10 endpoint que usa DummyJSON+OFF+Wikimedia — sí funcionan desde Vercel datacenter, las otras de scraping fallan). (3) En marketplace.html, fallback robusto: si img sigue vacío, generar URL loremflickr con keywords del nombre+categoría en vez de mostrar primera letra colorida. Ahora aire acondicionado, calentador solar, impresora 3d, etc. muestran imágenes REALES desde primer request.",

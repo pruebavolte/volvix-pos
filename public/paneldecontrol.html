@@ -3537,26 +3537,27 @@
     overflow: hidden;
     min-height: 0;
   }
-  /* V10.17 FIX: cuando nav=giros SIN selección, tabla full-width.
-     V10.18: cuando hay giro seleccionado, layout de 2 filas: tabla arriba,
-     config+preview abajo (vuelve a aparecer lo que estaba antes). */
+  /* V10.17/V10.19 FIX: cuando nav=giros SIN selección, tabla full-width.
+     V10.19: cuando hay giro seleccionado, layout 4 COLUMNAS horizontales:
+     [sidebar | tabla con scroll horizontal | config | preview]
+     NO apilar vertical (eso era V10.18 que el usuario rechazó). */
   #screen-permisos.permv14[data-active-nav="giros"] .permv14-grid {
     grid-template-columns: 52px 1fr 0 0;
   }
   #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid {
-    grid-template-columns: 52px 380px 1fr;
-    grid-template-rows: minmax(220px, 38vh) 1fr;
-    grid-template-areas:
-      "sidebar table table"
-      "sidebar config preview";
+    grid-template-columns: 52px minmax(380px, 1.2fr) 380px 1.2fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: none;
   }
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-sidebar { grid-area: sidebar; }
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-split-list[data-permv14-pane="modules"] { grid-area: table; min-width: 0; }
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-config-pane[data-permv14-pane="modules"] { grid-area: config; min-width: 0; }
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-preview-pane[data-permv14-pane="modules"] { grid-area: preview; min-width: 0; }
-  /* tabla más compacta cuando coexiste con config+preview */
+  /* tabla siempre con scroll horizontal interno (no apilar) */
   #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table-wrap {
-    max-height: calc(38vh - 20px);
+    max-height: calc(100vh - 220px);
+  }
+  /* todos los paneles con min-width:0 para que el grid permita su shrink interno */
+  #screen-permisos.permv14[data-active-nav="giros"] .permv14-split-list[data-permv14-pane="modules"],
+  #screen-permisos.permv14[data-active-nav="giros"] .permv14-config-pane[data-permv14-pane="modules"],
+  #screen-permisos.permv14[data-active-nav="giros"] .permv14-preview-pane[data-permv14-pane="modules"] {
+    min-width: 0;
   }
 
   /* === COL 1: SIDEBAR (52px) === */
