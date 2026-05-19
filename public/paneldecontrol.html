@@ -7085,18 +7085,94 @@
   function ecosystemRowFor(slug, dataset) {
     if (!dataset || !Array.isArray(dataset.giros)) return null;
     const giros = dataset.giros;
-    // V10.25: matching tolerante a `-` vs `_` y a aliases conocidos.
-    // El sidebar tiene salon-belleza, taller-mecanico, jugos-naturales (guión),
-    // pero el ecosystem JSON usa salon_belleza, taller_mecanico, jugos_naturales (underscore).
+    // V10.25/V10.26: matching tolerante a `-` vs `_` y aliases sub-variante → padre.
+    // Resuelve ~40 sub-variantes a sus giros padres del JSON ecosystem.
     const norm = (s) => String(s || '').toLowerCase().replace(/[-_]/g, '_');
     const slugN = norm(slug);
     const ALIASES = {
+      // === HEALTHCARE / MÉDICO ===
       'clinica_dental': 'dentista',
       'medico': 'farmacia',
+      // === BELLEZA / SPA ===
       'estetica': 'salon_belleza',
       'nails': 'salon_belleza',
+      'spa': 'salon_belleza',
+      'cosmeticos': 'salon_belleza',
+      // === ROPA / RETAIL ===
       'tienda_ropa': 'ropa',
-      'taller_mecanico': 'taller_mecanico',
+      'boutique': 'ropa',
+      // === COMIDA / RESTAURANTE ===
+      'pollo_frito': 'polleria',
+      'pollos_asados': 'polleria',
+      'antojitos': 'taqueria',
+      'tacos_vapor': 'taqueria',
+      'comida_corrida': 'restaurante',
+      'dark_kitchen': 'restaurante',
+      'ghost_kitchen': 'restaurante',
+      'banquetes': 'restaurante',
+      // === ABARROTES / TIENDAS ===
+      'minisuper': 'abarrotes',
+      'tienda_conveniencia': 'abarrotes',
+      'deposito': 'abarrotes',
+      'tienda_china': 'abarrotes',
+      'dulceria': 'abarrotes',
+      'refresqueria': 'abarrotes',
+      'cerveza_artesanal': 'abarrotes',
+      'cremeria': 'abarrotes',
+      'naturista': 'farmacia',
+      'purificadora': 'abarrotes',
+      'ecologica': 'abarrotes',
+      'regalos': 'papeleria',
+      'bazar': 'abarrotes',
+      'vape_shop': 'sex_shop',  // discreción + adultos
+      // === MASCOTAS ===
+      'tienda_mascotas': 'veterinaria',
+      // === FERRETERÍA / CONSTRUCCIÓN ===
+      'tlapaleria': 'ferreteria',
+      'carpinteria': 'ferreteria',
+      'herreria': 'ferreteria',
+      'cerrajeria': 'ferreteria',
+      'aluminio': 'ferreteria',
+      'construccion': 'ferreteria',
+      'paneles_solares': 'ferreteria',
+      'vidrieria': 'ferreteria',
+      // === ELECTRÓNICA / TECH ===
+      'electrodomesticos': 'electronica',
+      'computacion': 'electronica',
+      'celulares': 'electronica',
+      'reparacion_celulares': 'taller_mecanico',
+      'gamer': 'electronica',
+      'cctv': 'electronica',
+      'sonido': 'electronica',
+      'drones': 'electronica',
+      'impresion_3d': 'electronica',
+      'domotica': 'electronica',
+      // === AUTOMOTRIZ ===
+      'refaccionaria': 'taller_mecanico',
+      'carwash': 'taller_mecanico',
+      'llantera': 'taller_mecanico',
+      'vulcanizadora': 'taller_mecanico',
+      'agencia_autos': 'taller_mecanico',
+      // === DEPORTES / ROPA ===
+      'deportes': 'ropa',
+      'sabanas_premium': 'ropa',
+      // === SERVICIOS ===
+      'imprenta': 'papeleria',
+      'fotografia': 'papeleria',
+      'escuela': 'gimnasio',
+      'guarderia': 'gimnasio',
+      'motel': 'hotel',
+      'casa_empeno': 'joyeria',
+      'wisp': 'electronica',
+      'coworking': 'hotel',
+      'agencia_de_viajes': 'hotel',
+      // === SOFTWARE / DIGITAL ===
+      'software': 'electronica',
+      'marketing_digital': 'electronica',
+      'hosting_web': 'electronica',
+      'automatizacion': 'electronica',
+      'ia_chatbots': 'electronica',
+      'criptomonedas': 'electronica',
     };
     const targetSlug = ALIASES[slugN] || slugN;
     return giros.find(g => norm(g.slug) === slugN)
@@ -7148,7 +7224,45 @@
     const data = await loadEcosystem();
     const row = ecosystemRowFor(slug, data);
     if (!row) {
-      host.innerHTML = '<div style="margin:14px;padding:14px;color:var(--pv-text-dim);font-size:12px;border:1px dashed var(--pv-border);border-radius:8px;">📊 Sin datos de ecosistema para <code>' + escapeText(slug) + '</code>. Agrégalo en <code>/data/giros-ecosystem.json</code>.</div>';
+      // V10.26: mensaje más útil + botón para generar via IA cuando falta data
+      host.innerHTML =
+        '<div style="margin:14px;padding:18px;border:1px dashed var(--pv-border);border-radius:8px;background:var(--pv-bg-paper);">' +
+          '<div style="font-size:32px;text-align:center;margin-bottom:10px">🌱</div>' +
+          '<h3 style="margin:0 0 6px;text-align:center;font-family:var(--pv-font-display);font-size:15px">Ecosistema aún no cargado</h3>' +
+          '<p style="margin:0 0 14px;text-align:center;font-size:12px;color:var(--pv-text-dim);line-height:1.5">' +
+            'Este giro (<code>' + escapeText(slug) + '</code>) no tiene aún datos manuales en <code>/data/giros-ecosystem.json</code>. ' +
+            'Puedes <strong>generarlos automáticamente</strong> con IA: nombre comercial, proveedores, clientes finales, sistemas POS de la competencia, funcionalidades críticas, etc.' +
+          '</p>' +
+          '<div style="text-align:center">' +
+            '<button id="vlx-gen-eco-ai" data-slug="' + escapeAttr(slug) + '" style="background:linear-gradient(120deg,#7c3aed,#2563eb);color:#fff;border:0;border-radius:6px;padding:9px 18px;font-size:12px;font-weight:600;cursor:pointer;">🤖 Generar con IA (15-30s)</button>' +
+          '</div>' +
+        '</div>';
+      // Wire botón
+      const btn = host.querySelector('#vlx-gen-eco-ai');
+      if (btn) {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true; btn.textContent = '⏳ Llamando IA…';
+          try {
+            const r = await fetch('/api/giros/generate', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: slug.replace(/_/g, ' ') })
+            });
+            const j = await r.json();
+            if (j && (j.payload || j.cached)) {
+              btn.textContent = '✓ Generado — recarga el panel';
+              // forzar reload del JSON cache en memoria
+              _ecosystemCache = null;
+              setTimeout(() => location.reload(), 1500);
+            } else {
+              btn.textContent = '❌ Error: ' + (j.error || 'unknown');
+              btn.disabled = false;
+            }
+          } catch (e) {
+            btn.textContent = '❌ ' + e.message;
+            btn.disabled = false;
+          }
+        });
+      }
       return;
     }
 

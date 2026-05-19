@@ -1,13 +1,14 @@
 {
-  "version": "1.0.422",
+  "version": "1.0.423",
   "major": 1,
   "minor": 0,
-  "patch": 422,
+  "patch": 423,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-19T08:30:00.000Z",
-  "built_at": "2026-05-19T08:30:00.000Z",
+  "date": "2026-05-19T09:00:00.000Z",
+  "built_at": "2026-05-19T09:00:00.000Z",
   "changelog": [
+    "V10.26 +40 ALIASES SUB-VARIANTE + CTA GENERAR-IA: tabla ALIASES expandida masivamente. 60+ sub-variantes ahora mapean a giros padres existentes en JSON: pollo_frito/pollos_asados→polleria, antojitos/tacos_vapor→taqueria, comida_corrida/dark_kitchen/ghost_kitchen/banquetes→restaurante, minisuper/deposito/tienda_china/dulceria/refresqueria/cerveza_artesanal/cremeria/purificadora/regalos/bazar→abarrotes, naturista→farmacia, tienda_mascotas→veterinaria, tlapaleria/carpinteria/herreria/cerrajeria/aluminio/construccion/paneles_solares/vidrieria→ferreteria, electrodomesticos/computacion/celulares/gamer/cctv/sonido/drones/impresion_3d/domotica→electronica, refaccionaria/carwash/llantera/vulcanizadora/agencia_autos→taller_mecanico, casa_empeno→joyeria, motel/agencia_de_viajes/coworking→hotel, escuela/guarderia→gimnasio. Adicional: el fallback 'Sin datos' ahora es un CTA bonito con botón 🤖 Generar con IA que llama /api/giros/generate (V10.16) para crear el giro on-demand.",
     "V10.25 ECOSYSTEM-MATCHING-FIX + 12 GIROS NUEVOS: el usuario detectó que algo no cuadraba — auditoría mostró que 86 de 107 giros del sidebar NO tenían ecosystem (slug mismatch o ausencia). Fix triple: (1) ecosystemRowFor ahora normaliza `-` vs `_` y tiene tabla ALIASES (clinica_dental→dentista, estetica→salon_belleza, etc.) para resolver salon-belleza/taller-mecanico/jugos-naturales que en sidebar usan guión pero en JSON usan underscore. (2) +12 giros nuevos al JSON: fruteria, carniceria, polleria, tortilleria, ropa, zapateria, electronica, papeleria, joyeria, floreria, lavanderia, muebleria. Total: 36 giros con datos completos. (3) Cada giro nuevo con 3 proveedores + 3 clientes finales scrapeables + 3 competidores POS + funcionalidades críticas + problemas + terminología.",
     "V10.24 MOCKUPS-POR-MODULO + COMPONENTES-GENERICOS: el preview ahora cambia al hacer click en distintos módulos. Mockups específicos para: dashboard (4 KPIs cards + barras hora pico), apertura (form fondo+cajero), corte (4 totales + dif cuadrada + cerrar Z), inventario (tabla productos stock OK/BAJO), clientes (cards con avatares + ranking compras), reportes (5 cards de tipo), menu/carta (categorías), usuarios (lista con roles). Genérico para resto: icon grande + descripción del giro + 6 botones acción (Ver/Nuevo/Editar/Eliminar/Exportar/Buscar). Componentes pane ahora muestra acciones genéricas (mod.list/create/edit/delete/export/search) en vez de 'Este módulo no tiene botones configurables'.",
     "V10.23 POS-MOCKUP-PREVIEW: el panel derecho (Vista Previa) ahora muestra el mockup REAL del POS estilo cajero (banner naranja 'VISTA PREVIA - CÓMO LO VE EL CLIENTE', sidebar PEDIDOS DE PLATAFORMAS con Tu aplicación + Uber Eats + Didi Food + Rappi, VENTA — Ticket 1 con input código + ENTER, F-keys INS Varios/CTRL+P/F10/F11 Mayoreo/F7 Entradas, tabla Ticket con columnas Código de Barras/Descripción/Precio Venta/Cant./Importe/Existencia, footer F5 Cambiar/F6 Pendiente/Eliminar, total $0.00, F12 Cobrar verde grande, Cupón, sidebar derecho Producto seleccionado). Antes solo aparecían cards de módulos (preset preview). La lista de módulos sigue accesible en un <details> al final.",
