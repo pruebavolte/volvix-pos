@@ -1,13 +1,14 @@
 {
-  "version": "1.0.418",
+  "version": "1.0.419",
   "major": 1,
   "minor": 0,
-  "patch": 418,
+  "patch": 419,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-19T06:30:00.000Z",
-  "built_at": "2026-05-19T06:30:00.000Z",
+  "date": "2026-05-19T07:00:00.000Z",
+  "built_at": "2026-05-19T07:00:00.000Z",
   "changelog": [
+    "V10.22 PANEL-5-COLUMNAS: el módulo Giros ahora tiene 5 columnas visibles simultáneamente: (52px sidebar íconos) | (tabla giros, 1fr) | (módulos del preset, 340px) | (componentes del módulo, 340px) | (preview POS, 1.2fr). Nuevo elemento HTML .permv14-components-pane después del config-pane, con su propio header + body. Nueva función renderGiroComponentsPane() llena la col 4 con los botones del módulo seleccionado + sus toggles ACTIVO/OCULTO. Al hacer click en una fila de la tabla maestra, auto-selecciona módulo 'pos' para que la col 4 tenga contenido al instante. El preview-pane (col 5) ahora SIEMPRE muestra el POS mockup — el drill-down anterior está deshabilitado (if(false && ...)). Esto es exactamente la estructura del screenshot del usuario: tabla giros + módulos preset + componentes botones + vista cliente POS, todos a la vista al mismo tiempo.",
     "V10.21 PREVIEW-STICKY + 9 GIROS: (1) Click en fila de tabla de giros ahora resetea v14.selectedGiroMod=null para que el panel derecho SIEMPRE muestre el preview completo del POS (no el drill-down de botones del módulo). Antes si habías entrado al drill-down de 'Componentes de Punto de Venta', al cambiar de giro seguías viendo el drill-down. (2) Agregados 9 giros al ecosystem JSON: pizzeria, taqueria, heladeria, pasteleria, jugos_naturales, jugos_frescos, marisqueria, sushi, hamburguesas. Total: 24 giros con datos completos (proveedores, clientes finales scrapeables, competidores sector con URLs, funcionalidades críticas, problemas a evitar, terminología). Resuelve 'Sin datos de ecosistema para pizzeria' del screenshot del usuario.",
     "V10.20 ECOSYSTEM-DEDUPE: eliminada Tabla Maestra duplicada del config-pane. Antes (V10.13) se renderizaba en DOS lugares: (1) sidebar principal como tabla horizontal V10.15, (2) config-pane como sección 'Tabla Maestra de Giros' V10.13. Eso causaba duplicación visual confusa — el usuario veía 'Sex Shop' arriba del config-pane aunque tuviera 'Restaurante' seleccionado, porque la tabla maestra siempre empezaba con la primera fila. Ahora el config-pane SOLO muestra detalles específicos del giro seleccionado: header con regulación, cadena de valor (proveedores+clientes finales del giro), competidores del sector, funcionalidades críticas, problemas a evitar, terminología. La tabla maestra vive UNA SOLA VEZ en el sidebar.",
     "V10.19 PANEL-LAYOUT-HORIZONTAL: el usuario rechazó V10.18 (2 filas verticales). Vuelvo a layout HORIZONTAL: cuando se selecciona un giro, los 4 paneles aparecen lado a lado [sidebar 52px | tabla minmax(380px,1.2fr) | config 380px | preview 1.2fr]. La tabla mantiene su scroll horizontal interno (barra abajo). NO apila vertical. Removido grid-template-areas (era para 2 filas) y grid-template-rows. Ahora siempre 1 fila con 4 columnas.",

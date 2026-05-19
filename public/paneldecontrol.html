@@ -3157,7 +3157,24 @@
             </div>
           </main>
 
-          <!-- COLUMNA 4: VISTA PREVIA (flex 1) — mockup reactivo (lee del cache, NO iframe) -->
+          <!-- V10.22: COLUMNA 4 — COMPONENTES DEL MÓDULO (drill-down siempre visible).
+               Antes el drill-down de botones reemplazaba el preview cuando se hacía click
+               en un módulo. Ahora vive en su propio pane visible siempre que hay giro
+               seleccionado, permitiendo ver simultáneamente: tabla giros + módulos del
+               preset + botones del módulo + preview del POS. -->
+          <main class="permv14-components-pane" data-permv14-pane="modules" hidden>
+            <div class="permv14-detail-bar">
+              <div class="permv14-detail-name">🧩 <em id="permv14-components-label">Componentes</em></div>
+              <button id="permv14-components-back" style="background:transparent;border:1px solid var(--pv-border);color:var(--pv-text-dim);padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;" hidden>← Volver</button>
+            </div>
+            <div class="permv14-config-body" id="permv14-components-body">
+              <div class="permv14-empty-row" style="padding:20px;text-align:center;color:var(--pv-text-dim);">
+                Selecciona un módulo de la columna 3 para ver sus componentes/botones.
+              </div>
+            </div>
+          </main>
+
+          <!-- COLUMNA 5: VISTA PREVIA (flex 1) — mockup reactivo (lee del cache, NO iframe) -->
           <main class="permv14-preview-pane" data-permv14-pane="modules">
             <div class="permv14-preview-toolbar">
               <span class="permv14-preview-label">Vista previa · cómo lo ve el cliente</span>
@@ -3545,9 +3562,35 @@
     grid-template-columns: 52px 1fr 0 0;
   }
   #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid {
-    grid-template-columns: 52px minmax(380px, 1.2fr) 380px 1.2fr;
+    /* V10.22: 5 columnas — sidebar | tabla | módulos | componentes | preview */
+    grid-template-columns: 52px minmax(320px, 1fr) 340px 340px 1.2fr;
     grid-template-rows: 1fr;
     grid-template-areas: none;
+  }
+  /* el components-pane (col 4) tiene su propio estilo */
+  #screen-permisos.permv14 .permv14-components-pane {
+    border-right: 1px solid var(--pv-border);
+    background: var(--pv-bg);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  #screen-permisos.permv14 .permv14-components-pane .permv14-detail-bar {
+    padding: 10px 14px;
+    background: var(--pv-bg-paper);
+    border-bottom: 1px solid var(--pv-border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  #screen-permisos.permv14 .permv14-components-pane #permv14-components-body {
+    padding: 8px 0;
+    flex: 1;
+    overflow-y: auto;
+  }
+  /* solo visible en modo giros con selección */
+  #screen-permisos.permv14:not([data-active-nav="giros"]) .permv14-components-pane,
+  #screen-permisos.permv14[data-active-nav="giros"]:not([data-giro-selected="true"]) .permv14-components-pane {
+    display: none !important;
   }
   /* tabla siempre con scroll horizontal interno (no apilar) */
   #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table-wrap {
@@ -6551,13 +6594,14 @@
           delete v14.giroIsDirty[currentSlug];
         }
         v14.selectedGiro = nextSlug;
-        // V10.21: salir del drill-down de botones si lo había. Al cambiar de giro,
-        // el preview debe SIEMPRE mostrar la vista POS completa, no el button list.
-        v14.selectedGiroMod = null;
-        // V10.18: activar layout 2-filas (tabla arriba + config+preview abajo)
+        // V10.22: auto-seleccionar el módulo POS por default para que el components-pane
+        // tenga contenido inmediatamente (el primer módulo crítico de cualquier giro).
+        v14.selectedGiroMod = 'pos';
+        // V10.18: activar layout (col 5 con paneles desplegados)
         if (typeof _setGiroSelectedAttr === 'function') _setGiroSelectedAttr(true);
         renderGirosList();
         renderGiroDetail();
+        try { renderGiroComponentsPane(); } catch(_) {}
         renderGiroPreview();
       });
     });
@@ -6861,6 +6905,7 @@
           if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'SELECT' || ev.target.tagName === 'OPTION') return;
           v14.selectedGiroMod = el.dataset.giroModRow;
           renderGiroDetail();
+          renderGiroComponentsPane(); // V10.22: actualizar col 4 con los componentes del módulo
           renderGiroPreview();
         });
       });
@@ -7296,6 +7341,84 @@
   // 2026-05-09 SYNC FIX: hidratar BD (kick-off async, no bloquea render — la próxima
   // re-renderización ya verá los 271 giros). El render usa window.INDUSTRY_PROFILES
   // que es el MISMO objeto mutado por loadAllCatalogs.
+  // V10.22: render del nuevo components-pane (col 4) — lista de botones del módulo
+  // seleccionado, con sus toggles individuales. El preview-pane (col 5) se queda
+  // mostrando el POS mockup permanentemente.
+  function renderGiroComponentsPane() {
+    const body = document.getElementById('permv14-components-body');
+    const label = document.getElementById('permv14-components-label');
+    if (!body) return;
+    const slug = v14.selectedGiro;
+    const mod = v14.selectedGiroMod;
+    if (!slug || !mod) {
+      if (label) label.textContent = 'Componentes';
+      body.innerHTML = '<div class="permv14-empty-row" style="padding:20px 14px;text-align:center;color:var(--pv-text-dim);font-size:12px;">Selecciona un módulo en la columna 3 para ver sus botones / componentes.</div>';
+      return;
+    }
+    const MOD_LABELS_LOCAL = (typeof getModuleLabelsFromCatalog === 'function') ? getModuleLabelsFromCatalog() : (window.MOD_LABELS || {});
+    const modLbl = MOD_LABELS_LOCAL[mod] || mod;
+    const mm = String(modLbl).match(/^(\S+)\s+(.+)$/) || [null, '📦', modLbl];
+    if (label) label.innerHTML = mm[1] + ' <strong>' + escapeText(mm[2]) + '</strong>';
+
+    // Filtrar FEAT_LABELS_GIRO por prefijo del módulo (los botones que pertenecen a este mod)
+    const featLabels = (typeof FEAT_LABELS_GIRO === 'object' && FEAT_LABELS_GIRO) || (typeof FEAT_LABELS_GLOBAL === 'object' ? FEAT_LABELS_GLOBAL : {});
+    const buttonKeys = Object.keys(featLabels).filter(k => k.startsWith(mod + '.') || k === mod);
+    const overrides = (v14.giroFeatureOverrides && v14.giroFeatureOverrides[slug]) || {};
+
+    if (!buttonKeys.length) {
+      body.innerHTML = '<div style="padding:14px;">' +
+        '<p style="font-size:11px;color:var(--pv-text-dim);margin:0 0 8px;">Botones / componentes que el módulo expondrá. Toggle individual aplica al hacer ⚡ Aplicar.</p>' +
+        '<div class="permv14-empty-row" style="padding:14px;text-align:center;color:var(--pv-text-dim);font-size:12px;">— Este módulo no tiene botones configurables —</div>' +
+      '</div>';
+      return;
+    }
+
+    body.innerHTML = '<div style="padding:10px 14px;background:var(--pv-bg-paper);border-bottom:1px solid var(--pv-border);">' +
+        '<p style="font-size:11px;color:var(--pv-text-dim);margin:0;">Botones / componentes que el módulo expondrá. Toggle individual aplica al hacer ⚡ Aplicar.</p>' +
+      '</div>' +
+      '<div class="permv14-perm-table" style="padding:6px 0;">' +
+        buttonKeys.map(k => {
+          const lbl = featLabels[k];
+          const x = String(lbl).match(/^(\S+)\s+(.+)$/) || [null, '◆', lbl];
+          const state = overrides[k] === false ? 'hidden' : 'enabled';
+          return '<div class="permv14-perm-row" style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-bottom:1px solid var(--pv-border);">' +
+            '<div class="permv14-perm-icon" style="font-size:14px;flex:0 0 auto;">' + x[1] + '</div>' +
+            '<div class="permv14-perm-name" style="flex:1 1 auto;font-size:12px;color:var(--pv-text);min-width:0;overflow:hidden;text-overflow:ellipsis;">' + escapeText(x[2]) + '</div>' +
+            '<select class="permv14-state-select s-' + (state==='enabled'?'on':'hi') + '" data-comp-key="' + escapeAttr(k) + '" style="flex:0 0 auto;font-size:10px;padding:2px 6px;">' +
+              '<option value="enabled"' + (state==='enabled'?' selected':'') + '>✓ ACTIVO</option>' +
+              '<option value="hidden"' + (state==='hidden'?' selected':'') + '>🙈 OCULTO</option>' +
+            '</select>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+
+    // Wire selects
+    body.querySelectorAll('[data-comp-key]').forEach(sel => {
+      sel.addEventListener('change', () => {
+        v14.giroFeatureOverrides = v14.giroFeatureOverrides || {};
+        v14.giroFeatureOverrides[slug] = v14.giroFeatureOverrides[slug] || {};
+        v14.giroFeatureOverrides[slug][sel.dataset.compKey] = sel.value === 'enabled';
+        v14.giroIsDirty = v14.giroIsDirty || {}; v14.giroIsDirty[slug] = true;
+        try { updateGlobalDirtyBadge && updateGlobalDirtyBadge(); } catch(_){}
+        // refrescar visualmente la clase del select
+        sel.classList.remove('s-on','s-hi');
+        sel.classList.add(sel.value === 'enabled' ? 's-on' : 's-hi');
+      });
+    });
+
+    // wire back button
+    const backBtn = document.getElementById('permv14-components-back');
+    if (backBtn) {
+      backBtn.hidden = false;
+      backBtn.onclick = () => {
+        v14.selectedGiroMod = null;
+        renderGiroDetail();
+        renderGiroComponentsPane();
+        renderGiroPreview();
+      };
+    }
+  }
+
   function renderGiroPreview() {
     try { if (typeof loadAllCatalogs === 'function') loadAllCatalogs(); } catch(_){}
     const PROFILES = window.INDUSTRY_PROFILES || {};
@@ -7356,11 +7479,12 @@
             + '</div>';
         }).join('');
 
-    // ─── 2026-05-09: si hay un módulo seleccionado en col 3 (drill-down),
-    //     col 4 muestra los BOTONES/componentes de ese módulo (en vez del mockup).
-    //     Cada botón es toggleable; el estado se guarda en
-    //     v14.giroFeatureOverrides[slug][featKey] = false (default true).
-    if (v14.selectedGiroMod) {
+    // ─── V10.22: el drill-down de botones se MOVIÓ al components-pane (col 4).
+    //     El preview-pane (col 5) ahora SIEMPRE muestra el POS mockup.
+    //     Esto permite ver simultáneamente: tabla giros + módulos preset +
+    //     botones del módulo + preview del POS, sin que se reemplacen.
+    //     `if (false &&` deshabilita el branch pero conserva el código para reuso futuro.
+    if (false && v14.selectedGiroMod) {
       const mod = v14.selectedGiroMod;
       const modLbl = MOD_LABELS_LOCAL[mod] || mod;
       const mm = modLbl.match(/^(\S+)\s+(.+)$/) || [null, '📦', modLbl];
