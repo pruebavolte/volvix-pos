@@ -7794,13 +7794,81 @@
       return;
     }
 
-    // ─── Modo default: preview mockup ───
+    // ─── V10.23: Modo default = mockup REAL del POS de Punto de Venta ───
+    // Antes mostraba cards de módulos (preset preview). El usuario pidió el preview
+    // real del POS con banner VENTA, F-keys, Ticket vacío, $0.00, sidebar PEDIDOS
+    // DE PLATAFORMAS (Tu aplicación / Uber Eats / Didi Food / Rappi).
+    const giroNameClean = String(giroName || '').replace(/^\S+\s+/, '');
     const desktopHtml = ''
-      + '<div>'
-      +   '<h2 class="permv14-mock-h2">' + escapeText(giroName) + ' <em>· preset preview</em></h2>'
-      +   '<p class="permv14-mock-sub">Así verá el POS un tenant nuevo de este giro tras aplicar el perfil. <strong>Click en un módulo de la columna izquierda</strong> para ver/editar sus componentes.</p>'
-      +   modRows
-      +   offRows
+      + '<div style="font-family:Inter,system-ui,sans-serif;">'
+      +   '<h2 style="margin:0 0 4px;font-family:var(--pv-font-display);font-size:20px;color:#0a0a0a;">Punto de Venta <em style="color:#e07845;font-weight:400;font-style:italic">· vista cliente</em></h2>'
+      +   '<p style="margin:0 0 14px;font-size:12px;color:#666">Así verá este módulo el dueño y los cajeros del tenant.</p>'
+      +   '<div style="background:linear-gradient(180deg,#e07845,#c66134);color:#fff;text-align:center;padding:7px;font-size:11px;font-weight:700;letter-spacing:0.5px;border-radius:6px 6px 0 0;">VISTA PREVIA · CÓMO LO VE EL CLIENTE</div>'
+      +   '<div style="display:grid;grid-template-columns:140px 1fr 130px;background:#f8f9fb;border:1px solid #e5e7eb;border-top:0;border-radius:0 0 8px 8px;overflow:hidden;font-size:11px;">'
+      // ─── Col 1: PEDIDOS DE PLATAFORMAS ───
+      +     '<div style="background:#fff;border-right:1px solid #e5e7eb;padding:10px 8px;">'
+      +       '<div style="font-size:9px;color:#666;font-weight:700;letter-spacing:0.5px;margin-bottom:8px;">🛍️ PEDIDOS DE PLATAFORMAS</div>'
+      +       '<div style="background:#fff7ed;border:1px solid #f59e0b;border-radius:6px;padding:8px;margin-bottom:6px;text-align:center;">'
+      +         '<div style="font-size:18px;margin-bottom:2px;">📱</div>'
+      +         '<div style="font-weight:700;font-size:10px;color:#0a0a0a;">Tu aplicación</div>'
+      +         '<div style="font-size:9px;color:#16a34a;font-weight:600;margin-top:2px;">● Activa</div>'
+      +       '</div>'
+      +       ['Uber Eats', 'Didi Food', 'Rappi'].map(p => '<div style="background:#fafafa;border:1px solid #e5e7eb;border-radius:6px;padding:8px;margin-bottom:6px;text-align:center;opacity:0.55"><div style="font-size:18px;margin-bottom:2px;">📦</div><div style="font-weight:600;font-size:10px;color:#0a0a0a;">'+p+'</div><div style="font-size:8px;color:#666;margin-top:2px;">Próximamente</div></div>').join('')
+      +     '</div>'
+      // ─── Col 2: VENTA — Ticket 1 ───
+      +     '<div style="display:flex;flex-direction:column;background:#fff;border-right:1px solid #e5e7eb;">'
+      +       '<div style="background:linear-gradient(180deg,#2D5F8F,#1E4065);color:#fff;padding:7px 12px;font-size:11px;font-weight:700;letter-spacing:0.3px;">VENTA — Ticket 1</div>'
+      +       '<div style="padding:10px 12px;background:#fff;">'
+      +         '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+      +           '<span style="font-size:10px;font-weight:700;color:#0a0a0a;">Código del Producto:</span>'
+      +           '<input placeholder="‖‖‖‖  Escanear código O escribi" disabled style="flex:1;border:2px solid #fbbf24;border-radius:5px;padding:5px 8px;font-size:10px;font-family:monospace;color:#92400e;background:#fffbeb;">'
+      +           '<button disabled style="background:#fff;border:1px solid #16a34a;color:#16a34a;border-radius:5px;padding:5px 10px;font-size:10px;font-weight:600;cursor:not-allowed;">✓ ENTER — Agregar Producto</button>'
+      +           '<button disabled style="background:#fff;border:1px solid #e5e7eb;border-radius:5px;padding:5px 8px;font-size:11px;cursor:not-allowed;">🔍</button>'
+      +         '</div>'
+      +         '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;">'
+      +           ['🔵 INS Varios', 'CTRL+P Art. Común', '🔎 F10 Buscar', '⭐ F11 Mayoreo', '⭐ F7 Entradas', '⭐ F8'].map(b => '<button disabled style="background:#fff;border:1px solid #d1d5db;border-radius:5px;padding:4px 7px;font-size:9px;font-weight:600;color:#374151;cursor:not-allowed;">'+b+'</button>').join('')
+      +         '</div>'
+      +         '<div style="background:#fff;border:1px solid #d1d5db;border-radius:6px;margin-top:8px;">'
+      +           '<div style="background:#f3f4f6;border-bottom:1px solid #d1d5db;padding:5px 8px;display:flex;align-items:center;gap:5px;font-size:9px;">'
+      +             '<span style="background:#fff;border:1px solid #d1d5db;border-radius:4px;padding:3px 8px;font-weight:600;">📑 Ticket 1</span>'
+      +             '<span style="color:#666;">+ Nuevo</span>'
+      +           '</div>'
+      +           '<table style="width:100%;border-collapse:collapse;font-size:9px;">'
+      +             '<thead><tr><th style="text-align:left;padding:5px 7px;font-weight:600;color:#666;border-bottom:1px solid #e5e7eb;">Código de Barras</th><th style="text-align:left;padding:5px 7px;font-weight:600;color:#666;">Descripción del Producto</th><th style="text-align:left;padding:5px 7px;font-weight:600;color:#666;">Precio Venta</th><th style="padding:5px 7px;font-weight:600;color:#666;">Cant.</th><th style="padding:5px 7px;font-weight:600;color:#666;background:#dcfce7">Importe</th><th style="padding:5px 7px;font-weight:600;color:#666;">Existencia</th></tr></thead>'
+      +             '<tbody><tr><td colspan="6" style="text-align:center;padding:28px 10px;color:#9ca3af;font-style:italic;">🛒  Escanea o escribe el código de un producto para comenzar</td></tr></tbody>'
+      +           '</table>'
+      +         '</div>'
+      +         '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid #e5e7eb;">'
+      +           '<span style="background:#ef4444;color:#fff;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">0</span>'
+      +           '<span style="font-size:9.5px;color:#0a0a0a;font-weight:500;">Productos en la venta actual.</span>'
+      +           '<button disabled style="margin-left:auto;background:#fff;border:1px solid #16a34a;color:#0a0a0a;border-radius:5px;padding:4px 8px;font-size:9px;font-weight:600;cursor:not-allowed;">🟢 F5 - Cambiar</button>'
+      +           '<button disabled style="background:#fff;border:1px solid #fbbf24;color:#0a0a0a;border-radius:5px;padding:4px 8px;font-size:9px;font-weight:600;cursor:not-allowed;">⭐ F6 - Pendiente</button>'
+      +           '<button disabled style="background:#fff;border:1px solid #ef4444;color:#0a0a0a;border-radius:5px;padding:4px 8px;font-size:9px;font-weight:600;cursor:not-allowed;">🔴 Eliminar</button>'
+      +         '</div>'
+      +         '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;">'
+      +           '<button disabled style="background:#fff;border:1px solid #d1d5db;border-radius:5px;padding:5px 10px;font-size:9.5px;font-weight:600;cursor:not-allowed;">👤 Asignar cliente</button>'
+      +           '<button disabled style="background:linear-gradient(180deg,#10b981,#059669);color:#fff;border:0;border-radius:5px;padding:8px 14px;font-size:11px;font-weight:700;cursor:not-allowed;flex:1;">💵 F12 - Cobrar</button>'
+      +           '<span style="margin-left:auto;font-family:var(--pv-font-display);font-size:24px;font-weight:700;color:#1e40af;">$0.00</span>'
+      +         '</div>'
+      +         '<div style="display:flex;align-items:center;gap:6px;margin-top:8px;padding:5px 8px;background:#fef2f2;border-radius:5px;font-size:9.5px;">'
+      +           '<span>🏷️ Cupón:</span><input disabled placeholder="CÓDIGO…" style="flex:1;border:1px solid #d1d5db;border-radius:4px;padding:3px 6px;font-size:9px;">'
+      +           '<button disabled style="background:#fff;border:1px solid #d1d5db;border-radius:4px;padding:3px 8px;font-size:9px;cursor:not-allowed;">Aplicar</button>'
+      +         '</div>'
+      +       '</div>'
+      +     '</div>'
+      // ─── Col 3: Producto seleccionado ───
+      +     '<div style="background:#fff;padding:0;">'
+      +       '<div style="background:linear-gradient(180deg,#0f172a,#1e293b);color:#fff;padding:7px 8px;font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:space-between;">'
+      +         '<span>📦 Producto seleccionado</span><span style="background:#fff;color:#000;width:14px;height:14px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;">≡</span>'
+      +       '</div>'
+      +       '<div style="padding:10px 8px;font-size:9px;color:#666;font-style:italic;line-height:1.4;">Toca un producto del Quick-pick para ver sus imágenes, descripción y ficha técnica.</div>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div style="margin-top:10px;font-size:11px;color:#666;">▶ Ver botones individuales (' + onMods.length + ')</div>'
+      // small legend abajo
+      +   '<details style="margin-top:14px;font-size:11px;color:#888"><summary style="cursor:pointer;color:#666">Ver lista de módulos del preset (' + onMods.length + ' activos · ' + offMods.length + ' excluidos)</summary>'
+      +   '<div style="margin-top:8px">' + modRows + offRows + '</div>'
+      +   '</details>'
       + '</div>';
 
     const mobileHtml = ''
