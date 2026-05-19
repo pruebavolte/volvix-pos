@@ -1,13 +1,14 @@
 {
-  "version": "1.0.408",
+  "version": "1.0.409",
   "major": 1,
   "minor": 0,
-  "patch": 408,
+  "patch": 409,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-19T00:00:00.000Z",
-  "built_at": "2026-05-19T00:00:00.000Z",
+  "date": "2026-05-19T01:30:00.000Z",
+  "built_at": "2026-05-19T01:30:00.000Z",
   "changelog": [
+    "V10.12 PANEL-ECOSYSTEM v2: dataset enriquecido estilo investigación maestra + render multi-tabla. 10 giros con datos profundos (restaurante, abarrotes, barbería, farmacia, panadería, veterinaria, sex_shop, dentista, cafetería, ferretería). Cada giro ahora con 5 secciones tipo dashboard: (1) Header con tipo_operacion + regulacion · (2) Cadena de valor: tabla proveedor→giro→cliente final con badges scrapeable · (3) Competidores del sector: tabla con sistema/país/enfoque/modelo cobro/precio base/precio típico/fortaleza✓/debilidad✗ (3-5 competidores por giro) · (4) Funcionalidades críticas: tabla con id/feature/porqué/prioridad · (5) Problemas a evitar: tabla con área/problema/sistemas que lo sufren · (6) Terminología: cómo se llaman las cosas en este giro. Botón 🔍 en cada URL extrae imágenes via /api/products/search-public.",
     "V10.11 PANEL-ECOSYSTEM: módulo giros del paneldecontrol.html ahora muestra tabla 'Ecosistema del Giro' con 9 columnas: ¿Qué vende? + Proveedores 1-3 + Clientes Finales 1-3 (scrapeables, botón 🔍 conecta a /api/products/search-public para extraer imágenes/precios) + Sistemas Especializados 1-3. Dataset en /data/giros-ecosystem.json con 26 giros iniciales (Sex Shop, Restaurante, Veterinaria, Dentista, Hotel, etc.). Fix CSS empalme de nombres largos ('Tienda de Electrónica' ya no se traslapa). Buscador del panel con placeholder dinámico según nav activo (modules→'Buscar módulo…', giros→'Buscar giro de negocio…', users→'Buscar usuario por email…', audit→…).",
     "V10.10 SEARCH-PUBLIC: nuevo endpoint GET /api/products/search-public?q=... combina DummyJSON + OpenFoodFacts + Wikimedia Commons en paralelo (sin keys), opcional Mercado Libre con MERCADOLIBRE_TOKEN. Devuelve hasta 24 resultados con name/brand/price/image_url/source. Diccionario ES→EN para mejorar hits en catálogos inglés (calcetines→socks, leche→milk, etc). Cache memoria 10 min. Reemplaza imágenes genéricas de loremflickr con imágenes reales para autocompletar productos en el POS y poblar landings.",
     "V10.9 SYSTEM-MAP: nuevo mapa vivo POS↔Panel disponible en /system-map/ — scripts/system-map/scan-pos-panel.js extrae con regex modales (13 POS / 0 Panel), funciones (321 / 67), botones (577 / 64), endpoints /api/ consumidos (45 / 64), 899 rutas backend declaradas y 79 tablas Supabase. Viewer HTML + JSON crudo + Markdown sirven en public/system-map/. _meta.sha1 detecta drift automáticamente.",

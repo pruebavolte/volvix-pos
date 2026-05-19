@@ -6726,18 +6726,19 @@
     try { renderGiroEcosystem(slug); } catch (e) { try { console.warn('[ecosystem] fail:', e); } catch(_){} }
   }
 
-  // ─── ECOSISTEMA DEL GIRO (V10.11) ───
-  // Dataset: /data/giros-ecosystem.json
-  // Por cada giro muestra una tabla con:
-  //   - qué vende
-  //   - 3 proveedores (URLs)
-  //   - 3 clientes finales (URLs scrapeables para extraer imágenes/precios)
-  //   - 3 sistemas POS/ERP/CRM especializados
+  // ─── ECOSISTEMA DEL GIRO (V10.12 multi-tabla) ───
+  // Dataset: /data/giros-ecosystem.json (v2 - estilo investigación maestra)
+  // 5 secciones por giro:
+  //   1) Cadena de valor (proveedores → giro → clientes finales scrapeables)
+  //   2) Competidores del sector (sistemas POS/ERP con país, modelo, precio, fortaleza, debilidad)
+  //   3) Funcionalidades críticas
+  //   4) Problemas a evitar (pain points sector)
+  //   5) Terminología del giro
   let _ecosystemCache = null;
   async function loadEcosystem() {
     if (_ecosystemCache) return _ecosystemCache;
     try {
-      const r = await fetch('/data/giros-ecosystem.json', { cache: 'force-cache' });
+      const r = await fetch('/data/giros-ecosystem.json?v=2', { cache: 'no-store' });
       if (!r.ok) return null;
       _ecosystemCache = await r.json();
       return _ecosystemCache;
@@ -6746,92 +6747,228 @@
   function ecosystemRowFor(slug, dataset) {
     if (!dataset || !Array.isArray(dataset.giros)) return null;
     const giros = dataset.giros;
-    // match exacto por slug, luego por name (case-insensitive), luego por sustring
     return giros.find(g => g.slug === slug)
         || giros.find(g => (g.name || '').toLowerCase() === String(slug).replace(/_/g,' ').toLowerCase())
         || giros.find(g => slug && (g.slug.includes(slug) || slug.includes(g.slug)));
   }
+
+  // Helpers de render compartidos
+  const _ecoCSS = {
+    section: 'margin:16px 14px;border:1px solid var(--pv-border);border-radius:10px;background:var(--pv-bg-paper);overflow:hidden;',
+    head:    'padding:10px 14px;background:var(--pv-surface);border-bottom:1px solid var(--pv-border);display:flex;align-items:center;justify-content:space-between;gap:10px;',
+    h3:      'margin:0;font-size:13px;font-family:var(--pv-font-display);color:var(--pv-text);',
+    sub:     'font-size:11px;color:var(--pv-text-dim);font-family:var(--pv-font-mono);',
+    table:   'width:100%;border-collapse:collapse;font-size:12px;',
+    th:      'padding:8px 10px;background:var(--pv-bg-paper);border-bottom:1px solid var(--pv-border);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--pv-text-dim);font-weight:600;',
+    td:      'padding:9px 10px;border-bottom:1px solid var(--pv-border);vertical-align:top;color:var(--pv-text);word-break:break-word;',
+    tag:     'display:inline-block;background:var(--pv-surface);padding:2px 7px;border-radius:4px;font-size:11px;color:var(--pv-text);margin:1px 2px;',
+  };
+  function ecoLink(u, scrapeable) {
+    if (!u) return '<span style="color:var(--pv-text-dim)">—</span>';
+    const safe = escapeAttr(u);
+    const host_ = String(u).replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+    const badge = scrapeable ? '<span title="Scrapeable" style="background:#d1fae5;color:#065f46;font-size:9px;padding:1px 4px;border-radius:3px;margin-left:4px;font-weight:700">SCRAPE</span>' : '';
+    return '<a href="' + safe + '" target="_blank" rel="noopener noreferrer" style="color:var(--pv-accent);text-decoration:none;font-size:11px;word-break:break-all;">' + escapeText(host_) + ' ↗</a>' + badge;
+  }
+  function ecoScrapeBtn(u, q) {
+    if (!u) return '';
+    return ' <button data-ecosystem-scrape="' + escapeAttr(u) + '" data-ecosystem-query="' + encodeURIComponent(q) + '" style="margin-left:4px;background:transparent;color:var(--pv-text-dim);border:1px solid var(--pv-border);border-radius:4px;padding:1px 6px;font-size:10px;cursor:pointer;" title="Extraer imágenes/precios reales">🔍</button>';
+  }
+
   async function renderGiroEcosystem(slug) {
     if (!slug) return;
     const pane = document.querySelector('.permv14-config-pane[data-permv14-pane="modules"]');
     if (!pane) return;
-    // host idempotente
     let host = document.getElementById('permv14-giro-ecosystem');
     if (!host) {
-      host = document.createElement('section');
+      host = document.createElement('div');
       host.id = 'permv14-giro-ecosystem';
-      host.style.cssText = 'margin:16px 14px;border:1px solid var(--pv-border);border-radius:8px;background:var(--pv-bg-paper);overflow:hidden;';
       pane.appendChild(host);
     }
-    host.innerHTML = '<div style="padding:14px;color:var(--pv-text-dim);font-size:12px;">Cargando ecosistema…</div>';
+    host.innerHTML = '<div style="margin:14px;padding:14px;color:var(--pv-text-dim);font-size:12px;">⏳ Cargando ecosistema del giro…</div>';
     const data = await loadEcosystem();
     const row = ecosystemRowFor(slug, data);
     if (!row) {
-      host.innerHTML = '<div style="padding:14px;color:var(--pv-text-dim);font-size:12px;">📊 Ecosistema sin datos para <code>' + escapeText(slug) + '</code>. Edítalo en <code>/data/giros-ecosystem.json</code> y vuelve a deployar.</div>';
+      host.innerHTML = '<div style="margin:14px;padding:14px;color:var(--pv-text-dim);font-size:12px;border:1px dashed var(--pv-border);border-radius:8px;">📊 Sin datos de ecosistema para <code>' + escapeText(slug) + '</code>. Agrégalo en <code>/data/giros-ecosystem.json</code>.</div>';
       return;
     }
-    const link = (u) => {
-      if (!u) return '<span style="color:var(--pv-text-dim)">—</span>';
-      const safe = escapeAttr(u);
-      const host_ = String(u).replace(/^https?:\/\//,'').replace(/\/.*$/,'');
-      return '<a href="' + safe + '" target="_blank" rel="noopener noreferrer" style="color:var(--pv-accent);text-decoration:none;font-size:11px;word-break:break-all;">' + escapeText(host_) + ' ↗</a>';
-    };
-    const tag = (t) => '<code style="background:var(--pv-surface);padding:2px 7px;border-radius:4px;font-size:11px;color:var(--pv-text);">' + escapeText(t) + '</code>';
-    const proveedores = row.proveedores || [];
-    const clientes    = row.clientes_finales || [];
-    const sistemas    = row.sistemas || [];
-    const scrapeBtn = (u) => {
-      if (!u) return '';
-      const q = encodeURIComponent(String(row.que_vende || row.name || '').slice(0, 60));
-      return ' <button data-ecosystem-scrape="' + escapeAttr(u) + '" data-ecosystem-query="' + q + '" style="margin-left:4px;background:transparent;color:var(--pv-text-dim);border:1px solid var(--pv-border);border-radius:4px;padding:1px 6px;font-size:10px;cursor:pointer;" title="Extraer imágenes/precios">🔍</button>';
-    };
 
-    host.innerHTML =
-      '<header style="padding:12px 14px;background:var(--pv-surface);border-bottom:1px solid var(--pv-border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">' +
-        '<div>' +
-          '<h3 style="margin:0;font-size:13px;font-family:var(--pv-font-display);color:var(--pv-text);">🌐 Ecosistema del Giro</h3>' +
-          '<div style="font-size:11px;color:var(--pv-text-dim);margin-top:2px;">' + escapeText(row.name) + ' · ' + escapeText(row.que_vende || '') + '</div>' +
+    const sections = [];
+    const sectionTitle = (icon, title, sub) =>
+      '<header style="' + _ecoCSS.head + '"><div><h3 style="' + _ecoCSS.h3 + '">' + icon + ' ' + escapeText(title) + '</h3>' + (sub ? '<div style="' + _ecoCSS.sub + ';margin-top:2px">' + escapeText(sub) + '</div>' : '') + '</div></header>';
+
+    // ───────── 0. HEADER PRINCIPAL ─────────
+    sections.push(
+      '<section style="' + _ecoCSS.section + 'background:linear-gradient(135deg,var(--pv-accent-soft) 0%,var(--pv-surface) 100%);">' +
+        '<div style="padding:14px 18px;">' +
+          '<h2 style="margin:0 0 4px;font-family:var(--pv-font-display);font-size:18px;color:var(--pv-text);">🌐 Ecosistema · ' + escapeText(row.name) + '</h2>' +
+          '<p style="margin:0;font-size:12px;color:var(--pv-text-dim);">' + escapeText(row.que_vende || '') + (row.tipo_operacion ? ' · ' + escapeText(row.tipo_operacion) : '') + (row.regulacion ? ' · <strong>Regulación:</strong> ' + escapeText(row.regulacion) : '') + '</p>' +
         '</div>' +
-        '<div style="font-size:10px;color:var(--pv-text-dim);font-family:var(--pv-font-mono);">cadena: proveedor → ' + escapeText(row.name) + ' → cliente final · software</div>' +
-      '</header>' +
-      '<div style="overflow-x:auto;">' +
-        '<table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;">' +
-          '<colgroup>' +
-            '<col style="width:140px"><col><col><col><col><col><col><col><col><col>' +
-          '</colgroup>' +
-          '<thead><tr style="background:var(--pv-bg-paper);">' +
-            '<th style="padding:8px;border-bottom:1px solid var(--pv-border);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--pv-text-dim);">Giro</th>' +
-            '<th style="padding:8px;border-bottom:1px solid var(--pv-border);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--pv-text-dim);">¿Qué vende?</th>' +
-            '<th colspan="3" style="padding:8px;border-bottom:1px solid var(--pv-border);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--pv-text-dim);">Proveedores</th>' +
-            '<th colspan="3" style="padding:8px;border-bottom:1px solid var(--pv-border);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--pv-text-dim);">Clientes finales (scrapeables)</th>' +
-            '<th colspan="2" style="padding:8px;border-bottom:1px solid var(--pv-border);text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--pv-text-dim);">Sistemas especializados</th>' +
-          '</tr></thead>' +
-          '<tbody><tr>' +
-            '<td style="padding:10px 8px;vertical-align:top;font-weight:600;color:var(--pv-text);border-bottom:1px solid var(--pv-border);word-break:break-word;">' + escapeText(row.name) + '</td>' +
-            '<td style="padding:10px 8px;vertical-align:top;color:var(--pv-text);border-bottom:1px solid var(--pv-border);word-break:break-word;font-size:11px;">' + escapeText(row.que_vende || '') + '</td>' +
-            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + link(proveedores[0]) + '</td>' +
-            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + link(proveedores[1]) + '</td>' +
-            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + link(proveedores[2]) + '</td>' +
-            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + link(clientes[0]) + scrapeBtn(clientes[0]) + '</td>' +
-            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + link(clientes[1]) + scrapeBtn(clientes[1]) + '</td>' +
-            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + link(clientes[2]) + scrapeBtn(clientes[2]) + '</td>' +
-            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + (sistemas[0] ? tag(sistemas[0]) : '—') + ' ' + (sistemas[1] ? tag(sistemas[1]) : '') + '</td>' +
-            '<td style="padding:10px 8px;vertical-align:top;border-bottom:1px solid var(--pv-border);">' + (sistemas[2] ? tag(sistemas[2]) : '—') + '</td>' +
-          '</tr></tbody>' +
-        '</table>' +
-      '</div>' +
-      '<div style="padding:8px 14px;font-size:10px;color:var(--pv-text-dim);background:var(--pv-bg-paper);border-top:1px solid var(--pv-border);">💡 Click 🔍 para extraer imágenes/precios reales via /api/products/search-public (V10.10).</div>';
+      '</section>'
+    );
 
-    // Wire scrape buttons
+    // ───────── 1. CADENA DE VALOR ─────────
+    const cv = row.cadena_valor || {};
+    const provs = cv.proveedores || [];
+    const cfs   = cv.clientes_finales || [];
+    if (provs.length || cfs.length) {
+      sections.push(
+        '<section style="' + _ecoCSS.section + '">' +
+          sectionTitle('🔗', 'Cadena de valor', 'proveedor → ' + row.name + ' → cliente final') +
+          '<div style="overflow-x:auto"><table style="' + _ecoCSS.table + '">' +
+            '<thead><tr>' +
+              '<th style="' + _ecoCSS.th + '">Eslabón</th>' +
+              '<th style="' + _ecoCSS.th + '">Nombre</th>' +
+              '<th style="' + _ecoCSS.th + '">Tipo</th>' +
+              '<th style="' + _ecoCSS.th + '">URL</th>' +
+              '<th style="' + _ecoCSS.th + ';width:50px">🔍</th>' +
+            '</tr></thead>' +
+            '<tbody>' +
+              provs.map(p => '<tr>' +
+                '<td style="' + _ecoCSS.td + '"><span style="background:#ede9fe;color:#5b21b6;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700">PROVEEDOR</span></td>' +
+                '<td style="' + _ecoCSS.td + ';font-weight:600">' + escapeText(p.nombre || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px;color:var(--pv-text-dim)">' + escapeText(p.tipo || '—') + '</td>' +
+                '<td style="' + _ecoCSS.td + '">' + ecoLink(p.url, false) + '</td>' +
+                '<td style="' + _ecoCSS.td + '">' + ecoScrapeBtn(p.url, (row.que_vende || row.name)) + '</td>' +
+              '</tr>').join('') +
+              cfs.map(c => '<tr>' +
+                '<td style="' + _ecoCSS.td + '"><span style="background:#dbeafe;color:#1e40af;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700">CLIENTE FINAL</span></td>' +
+                '<td style="' + _ecoCSS.td + ';font-weight:600">' + escapeText(c.nombre || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px;color:var(--pv-text-dim)">' + (c.scrapeable ? '<span style="color:#065f46">✓ scrapeable</span>' : '—') + '</td>' +
+                '<td style="' + _ecoCSS.td + '">' + ecoLink(c.url, c.scrapeable) + '</td>' +
+                '<td style="' + _ecoCSS.td + '">' + ecoScrapeBtn(c.url, (row.que_vende || row.name)) + '</td>' +
+              '</tr>').join('') +
+            '</tbody>' +
+          '</table></div>' +
+        '</section>'
+      );
+    }
+
+    // ───────── 2. COMPETIDORES DEL SECTOR ─────────
+    const comps = row.competidores_sector || [];
+    if (comps.length) {
+      sections.push(
+        '<section style="' + _ecoCSS.section + '">' +
+          sectionTitle('⚔️', 'Competidores del sector', comps.length + ' sistemas POS/ERP especializados') +
+          '<div style="overflow-x:auto"><table style="' + _ecoCSS.table + '">' +
+            '<thead><tr>' +
+              '<th style="' + _ecoCSS.th + '">Sistema</th>' +
+              '<th style="' + _ecoCSS.th + '">País</th>' +
+              '<th style="' + _ecoCSS.th + '">Enfoque</th>' +
+              '<th style="' + _ecoCSS.th + '">Modelo cobro</th>' +
+              '<th style="' + _ecoCSS.th + '">Precio base</th>' +
+              '<th style="' + _ecoCSS.th + '">Precio típico</th>' +
+              '<th style="' + _ecoCSS.th + ';background:#d1fae5;color:#065f46">✓ Fortaleza</th>' +
+              '<th style="' + _ecoCSS.th + ';background:#fee2e2;color:#991b1b">✗ Debilidad</th>' +
+            '</tr></thead>' +
+            '<tbody>' +
+              comps.map(c => '<tr>' +
+                '<td style="' + _ecoCSS.td + ';font-weight:600">' + escapeText(c.sistema || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px">' + escapeText(c.pais || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px">' + escapeText(c.enfoque || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px">' + escapeText(c.modelo_cobro || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px;font-family:var(--pv-font-mono);color:#065f46">' + escapeText(c.precio_base || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px;font-family:var(--pv-font-mono)">' + escapeText(c.precio_tipico || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px;background:#f0fdf4">' + escapeText(c.fortaleza || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px;background:#fef2f2">' + escapeText(c.debilidad || '') + '</td>' +
+              '</tr>').join('') +
+            '</tbody>' +
+          '</table></div>' +
+        '</section>'
+      );
+    }
+
+    // ───────── 3. FUNCIONALIDADES CRÍTICAS ─────────
+    const feats = row.funcionalidades_criticas || [];
+    if (feats.length) {
+      sections.push(
+        '<section style="' + _ecoCSS.section + '">' +
+          sectionTitle('🎯', 'Funcionalidades críticas', 'lo que un POS para este giro DEBE tener') +
+          '<div style="overflow-x:auto"><table style="' + _ecoCSS.table + '">' +
+            '<thead><tr>' +
+              '<th style="' + _ecoCSS.th + ';width:50px">#</th>' +
+              '<th style="' + _ecoCSS.th + '">Funcionalidad</th>' +
+              '<th style="' + _ecoCSS.th + '">Para qué sirve</th>' +
+              '<th style="' + _ecoCSS.th + ';width:140px">Prioridad</th>' +
+            '</tr></thead>' +
+            '<tbody>' +
+              feats.map(f => '<tr>' +
+                '<td style="' + _ecoCSS.td + ';font-family:var(--pv-font-mono);font-size:11px;color:var(--pv-text-dim)">' + escapeText(String(f.id || '')) + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-weight:600">' + escapeText(f.feature || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px;color:var(--pv-text-dim)">' + escapeText(f.porque || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px;font-weight:600">' + escapeText(f.prioridad || '') + '</td>' +
+              '</tr>').join('') +
+            '</tbody>' +
+          '</table></div>' +
+        '</section>'
+      );
+    }
+
+    // ───────── 4. PROBLEMAS A EVITAR ─────────
+    const probs = row.problemas_evitar || [];
+    if (probs.length) {
+      sections.push(
+        '<section style="' + _ecoCSS.section + '">' +
+          sectionTitle('⚠️', 'Problemas a evitar', 'pain points recurrentes del sector') +
+          '<div style="overflow-x:auto"><table style="' + _ecoCSS.table + '">' +
+            '<thead><tr>' +
+              '<th style="' + _ecoCSS.th + '">Área</th>' +
+              '<th style="' + _ecoCSS.th + '">Problema</th>' +
+              '<th style="' + _ecoCSS.th + '">Sistemas que lo sufren</th>' +
+            '</tr></thead>' +
+            '<tbody>' +
+              probs.map(p => '<tr>' +
+                '<td style="' + _ecoCSS.td + ';font-weight:600;font-size:11px">' + escapeText(p.area || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px">' + escapeText(p.problema || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px;color:#991b1b">' + escapeText(p.afecta || '') + '</td>' +
+              '</tr>').join('') +
+            '</tbody>' +
+          '</table></div>' +
+        '</section>'
+      );
+    }
+
+    // ───────── 5. TERMINOLOGÍA ─────────
+    const term = row.terminologia || [];
+    if (term.length) {
+      sections.push(
+        '<section style="' + _ecoCSS.section + '">' +
+          sectionTitle('📖', 'Terminología del giro', 'cómo se llaman las cosas en este sector') +
+          '<div style="overflow-x:auto"><table style="' + _ecoCSS.table + '">' +
+            '<thead><tr>' +
+              '<th style="' + _ecoCSS.th + '">Genérico (POS estándar)</th>' +
+              '<th style="' + _ecoCSS.th + '">En este giro</th>' +
+            '</tr></thead>' +
+            '<tbody>' +
+              term.map(t => '<tr>' +
+                '<td style="' + _ecoCSS.td + ';font-size:11px;font-family:var(--pv-font-mono);color:var(--pv-text-dim)">' + escapeText(t.generico || '') + '</td>' +
+                '<td style="' + _ecoCSS.td + ';font-weight:600">→ ' + escapeText(t.este_giro || '') + '</td>' +
+              '</tr>').join('') +
+            '</tbody>' +
+          '</table></div>' +
+        '</section>'
+      );
+    }
+
+    // Footer con CTA
+    sections.push(
+      '<div style="margin:8px 14px 20px;padding:10px 14px;background:var(--pv-surface);border-radius:6px;font-size:11px;color:var(--pv-text-dim);">' +
+        '💡 Click 🔍 en cualquier URL para extraer imágenes/precios reales via <code>/api/products/search-public</code> (V10.10). ' +
+        'Dataset editable en <code>/data/giros-ecosystem.json</code>.' +
+      '</div>'
+    );
+
+    host.innerHTML = sections.join('');
+
+    // Wire scrape buttons (igual que antes)
     host.querySelectorAll('button[data-ecosystem-scrape]').forEach(btn => {
-      btn.addEventListener('click', async (ev) => {
+      btn.addEventListener('click', async () => {
         const url = btn.getAttribute('data-ecosystem-scrape');
         const q   = btn.getAttribute('data-ecosystem-query');
         btn.disabled = true; btn.textContent = '⏳';
         try {
           const r = await fetch('/api/products/search-public?q=' + q + '&limit=8');
           const j = await r.json();
-          // mostrar modal simple con galería
           const dlg = document.createElement('div');
           dlg.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
           const inner = document.createElement('div');
@@ -6845,11 +6982,8 @@
           inner.querySelector('button').addEventListener('click', () => dlg.remove());
           dlg.addEventListener('click', e => { if (e.target === dlg) dlg.remove(); });
           document.body.appendChild(dlg);
-        } catch (e) {
-          alert('Error: ' + (e && e.message || e));
-        } finally {
-          btn.disabled = false; btn.textContent = '🔍';
-        }
+        } catch (e) { alert('Error: ' + (e && e.message || e)); }
+        finally { btn.disabled = false; btn.textContent = '🔍'; }
       });
     });
   }
