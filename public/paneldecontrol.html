@@ -6625,10 +6625,11 @@
             '<th style="background:#e0e7ff;min-width:160px">📖 Terminología</th>' +
             '<th style="min-width:160px">Regulación</th>' +
             '<th style="width:60px">Tenants</th>' +
+            '<th style="background:#f0fdf4;min-width:200px">🌐 Landing pública</th>' +
             prodHeaders +
           '</tr></thead>' +
           '<tbody>';
-      const COLSPAN = 33 + 20; // 33 columnas previas + 20 nuevas (Producto/Imagen × 10)
+      const COLSPAN = 34 + 20; // 34 columnas previas (+1 landing) + 20 nuevas (Producto/Imagen × 10)
       groupedVisible.forEach(group => {
         html += '<tr class="vlx-giros-group-label"><td colspan="' + COLSPAN + '" style="background:var(--pv-surface);font-family:var(--pv-font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--pv-text-dim);padding:6px 14px;border-bottom:1px solid var(--pv-border);position:sticky;left:0">' + escapeText(group.catLabel) + ' · ' + group.slugs.length + '</td></tr>';
         group.slugs.forEach(slug => {
@@ -6698,6 +6699,18 @@
             '<td style="font-size:10px;max-width:200px;white-space:normal;line-height:1.4;background:#f5f3ff">' + termHtml + '</td>' +
             '<td style="font-size:10px;max-width:180px;white-space:normal;line-height:1.4">' + escapeText(ecoRow?.regulacion || '—') + '</td>' +
             '<td style="text-align:center">' + tenantsBadge + '</td>' +
+            (function() {
+              const landingUrl = ecoRow?.landing_url;
+              if (!landingUrl) {
+                return '<td style="background:#f9fafb;color:var(--pv-text-dim);font-size:10px;text-align:center;font-style:italic">sin landing</td>';
+              }
+              const safe = escapeAttr(landingUrl);
+              const host = String(landingUrl).replace(/^https?:\/\//,'').replace(/^www\./,'');
+              return '<td style="background:#f0fdf4;font-size:10px;padding:6px;line-height:1.3;word-break:break-all">' +
+                '<a href="' + safe + '" target="_blank" rel="noopener" style="color:#16a34a;text-decoration:none;font-weight:600">🌐 Ver landing</a><br>' +
+                '<span style="font-size:9px;color:#6b7280">' + escapeText(host.slice(0, 50)) + '</span>' +
+                '</td>';
+            })() +
             productCells +
           '</tr>';
         });

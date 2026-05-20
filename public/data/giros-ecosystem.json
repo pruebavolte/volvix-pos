@@ -10,8 +10,8 @@
       "terminologia (cómo llaman las cosas en este giro)"
     ],
     "notes": "v2.1 agrega URL a cada competidor_sector + 5 giros adicionales (hotel, optica, gimnasio, salon_belleza, taller_mecanico) cubriendo los del documento markdown del usuario.",
-    "last_audit": "2026-05-20T18:59:38.377Z",
-    "products_total": 2830,
+    "last_audit": "2026-05-20T23:18:52.319Z",
+    "products_total": 2950,
     "extraction_v": "V10.36 — cliente final primero",
     "quality_filters": "V10.37: SUSPICIOUS_NAMES + BAD_IMG + wikimedia-noise filters",
     "cliente_final_rules": {
@@ -30,10 +30,10 @@
         "WIKIMEDIA_NOISE": "taxi|book|portrait|tour|building|street|city|persona|cantante|saturn|planet (eliminados en src=wikimedia)"
       }
     },
-    "curated_version": "V11.0_CAT",
+    "curated_version": "V12_LANDINGS",
     "ml_enriched_count": 310,
     "ml_skipped_count": 50,
-    "giros_total": 283,
+    "giros_total": 295,
     "borrados_cat_fase_2a": [
       "almoiadas",
       "caobijas",
@@ -60,7 +60,8 @@
       "placehold": 12,
       "total_valid": 348,
       "pendiente": 12
-    }
+    },
+    "landings_integrated": true
   },
   "giros": [
     {
@@ -499,6 +500,10 @@
           "fuente": "wikimedia",
           "hash": "86e30704f0be"
         }
+      ],
+      "landing_url": "https://systeminternational.app/landing-restaurant.html",
+      "landing_urls_alt": [
+        "https://systeminternational.app/landing-restaurante.html"
       ]
     },
     {
@@ -705,7 +710,8 @@
           "fuente": "mercadolibre_web",
           "hash": "1b9bf920360a"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-veterinaria.html"
     },
     {
       "slug": "dentista",
@@ -907,6 +913,10 @@
           "fuente": "wikimedia",
           "hash": "28e4705eccc2"
         }
+      ],
+      "landing_url": "https://systeminternational.app/landing-clinica-dental.html",
+      "landing_urls_alt": [
+        "https://systeminternational.app/landing-dental.html"
       ]
     },
     {
@@ -1113,6 +1123,11 @@
           "fuente": "mercadolibre_web",
           "hash": "083279cbe1f4"
         }
+      ],
+      "landing_url": "https://systeminternational.app/landing-rentas.html",
+      "landing_urls_alt": [
+        "https://systeminternational.app/landing-renta-salones.html",
+        "https://systeminternational.app/landing-hotel.html"
       ]
     },
     {
@@ -1319,7 +1334,8 @@
           "fuente": "mercadolibre_web",
           "hash": "9b59e1cba362"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-farmacia.html"
     },
     {
       "slug": "optica",
@@ -1525,7 +1541,8 @@
           "fuente": "mercadolibre_web",
           "hash": "62a7fd4f7350"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-optica.html"
     },
     {
       "slug": "gimnasio",
@@ -1731,6 +1748,10 @@
           "fuente": "mercadolibre_web",
           "hash": "bc77cfa65629"
         }
+      ],
+      "landing_url": "https://systeminternational.app/landing-fitness.html",
+      "landing_urls_alt": [
+        "https://systeminternational.app/landing-gimnasio.html"
       ]
     },
     {
@@ -1937,7 +1958,8 @@
           "fuente": "mercadolibre_web",
           "hash": "05d07ac7d6a2"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-salon-belleza.html"
     },
     {
       "slug": "taller_mecanico",
@@ -2143,6 +2165,11 @@
           "fuente": "mercadolibre_web",
           "hash": "82c8e0f04206"
         }
+      ],
+      "landing_url": "https://systeminternational.app/landing-lavado-autos.html",
+      "landing_urls_alt": [
+        "https://systeminternational.app/landing-carwash.html",
+        "https://systeminternational.app/landing-taller-mecanico.html"
       ]
     },
     {
@@ -2360,7 +2387,8 @@
           "fuente": "mercadolibre_web",
           "hash": "946d90432a93"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-abarrotes.html"
     },
     {
       "slug": "barberia",
@@ -2551,7 +2579,8 @@
           "fuente": "mercadolibre_web",
           "hash": "1439d8dae95e"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-barberia.html"
     },
     {
       "slug": "panaderia",
@@ -2742,7 +2771,8 @@
           "fuente": "wikimedia",
           "hash": "f4b109dab416"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-panaderia.html"
     },
     {
       "slug": "cafeteria",
@@ -2933,6 +2963,10 @@
           "fuente": "wikimedia",
           "hash": "95f0cace1d4a"
         }
+      ],
+      "landing_url": "https://systeminternational.app/landing-cafe.html",
+      "landing_urls_alt": [
+        "https://systeminternational.app/landing-cafeteria.html"
       ]
     },
     {
@@ -3124,7 +3158,8 @@
           "fuente": "mercadolibre_web",
           "hash": "7ce9c9548d3b"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-ferreteria.html"
     },
     {
       "slug": "pizzeria",
@@ -3330,7 +3365,8 @@
           "fuente": "wikimedia",
           "hash": "e808ee9f5f11"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-pizzeria.html"
     },
     {
       "slug": "taqueria",
@@ -3527,7 +3563,8 @@
           "fuente": "wikimedia",
           "hash": "dc0b06253109"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-taqueria.html"
     },
     {
       "slug": "heladeria",
@@ -3718,7 +3755,8 @@
           "fuente": "wikimedia",
           "hash": "8ee37cdcc367"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-heladeria.html"
     },
     {
       "slug": "pasteleria",
@@ -3909,7 +3947,8 @@
           "fuente": "mercadolibre_web",
           "hash": "547e2c15fed0"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-pasteleria.html"
     },
     {
       "slug": "jugos_naturales",
@@ -5061,7 +5100,8 @@
           "fuente": "wikimedia",
           "hash": "797609fbbec9"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-fruteria.html"
     },
     {
       "slug": "carniceria",
@@ -5252,7 +5292,8 @@
           "fuente": "placehold_PENDIENTE",
           "hash": "a096daa2af24"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-carniceria.html"
     },
     {
       "slug": "polleria",
@@ -5443,7 +5484,8 @@
           "fuente": "placehold_PENDIENTE",
           "hash": "0fdcbd8e6a28"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-polleria.html"
     },
     {
       "slug": "tortilleria",
@@ -5634,7 +5676,8 @@
           "fuente": "wikimedia",
           "hash": "3ab7177b5aaf"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-tortilleria.html"
     },
     {
       "slug": "ropa",
@@ -5831,6 +5874,10 @@
           "fuente": "mercadolibre_web",
           "hash": "a3bcbec3417a"
         }
+      ],
+      "landing_url": "https://systeminternational.app/landing-ropa.html",
+      "landing_urls_alt": [
+        "https://systeminternational.app/landing-tienda-ropa.html"
       ]
     },
     {
@@ -6016,7 +6063,8 @@
           "fuente": "mercadolibre_web",
           "hash": "012942501410"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-zapateria.html"
     },
     {
       "slug": "electronica",
@@ -6207,7 +6255,8 @@
           "fuente": "mercadolibre_web",
           "hash": "32b1d553b0e8"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-electronica.html"
     },
     {
       "slug": "papeleria",
@@ -6398,7 +6447,8 @@
           "fuente": "mercadolibre_web",
           "hash": "e237d08208ed"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-papeleria.html"
     },
     {
       "slug": "joyeria",
@@ -6971,7 +7021,8 @@
           "fuente": "mercadolibre_web",
           "hash": "4a49febab516"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-lavanderia.html"
     },
     {
       "slug": "muebleria",
@@ -7162,7 +7213,8 @@
           "fuente": "mercadolibre_web",
           "hash": "1a23582c7f1a"
         }
-      ]
+      ],
+      "landing_url": "https://systeminternational.app/landing-muebleria.html"
     },
     {
       "slug": "pollo_frito",
@@ -9286,7 +9338,8 @@
           "hash": "385e100160e0"
         }
       ],
-      "_parent": "abarrotes"
+      "_parent": "abarrotes",
+      "landing_url": "https://systeminternational.app/landing-minisuper.html"
     },
     {
       "slug": "tienda-conveniencia",
@@ -10158,7 +10211,8 @@
           "hash": "a8b3d0522586"
         }
       ],
-      "_parent": "abarrotes"
+      "_parent": "abarrotes",
+      "landing_url": "https://systeminternational.app/landing-dulceria.html"
     },
     {
       "slug": "naturista",
@@ -10801,7 +10855,8 @@
           "hash": "cd5aeb5eccae"
         }
       ],
-      "_parent": "abarrotes"
+      "_parent": "abarrotes",
+      "landing_url": "https://systeminternational.app/landing-purificadora.html"
     },
     {
       "slug": "vape_shop",
@@ -12891,7 +12946,8 @@
           "hash": "b8a850b0fbca"
         }
       ],
-      "_parent": "salon_belleza"
+      "_parent": "salon_belleza",
+      "landing_url": "https://systeminternational.app/landing-nails.html"
     },
     {
       "slug": "spa",
@@ -13098,7 +13154,8 @@
           "hash": "730968c2c5c3"
         }
       ],
-      "_parent": "salon_belleza"
+      "_parent": "salon_belleza",
+      "landing_url": "https://systeminternational.app/landing-spa.html"
     },
     {
       "slug": "cosmeticos",
@@ -15663,7 +15720,8 @@
           "hash": "aa8737195422"
         }
       ],
-      "_parent": "taller_mecanico"
+      "_parent": "taller_mecanico",
+      "landing_url": "https://systeminternational.app/landing-refaccionaria.html"
     },
     {
       "slug": "carwash",
@@ -16698,7 +16756,11 @@
           "hash": "b7b392c481e5"
         }
       ],
-      "_parent": "hotel"
+      "_parent": "hotel",
+      "landing_url": "https://systeminternational.app/landing-renta-autos.html",
+      "landing_urls_alt": [
+        "https://systeminternational.app/landing-agencia-viajes.html"
+      ]
     },
     {
       "slug": "imprenta",
@@ -19431,7 +19493,8 @@
           "hash": "747c332fe31e"
         }
       ],
-      "_parent": "joyeria"
+      "_parent": "joyeria",
+      "landing_url": "https://systeminternational.app/landing-casa-empeno.html"
     },
     {
       "slug": "wisp",
@@ -29602,7 +29665,8 @@
           "hash": "40f1e842e2a9"
         }
       ],
-      "_parent": "gimnasio"
+      "_parent": "gimnasio",
+      "landing_url": "https://systeminternational.app/landing-educacion.html"
     },
     {
       "slug": "educacion_y_capacitacion",
@@ -44247,7 +44311,8 @@
           "hash": "2d4692272e44"
         }
       ],
-      "_parent": "ropa"
+      "_parent": "ropa",
+      "landing_url": "https://systeminternational.app/landing-retail.html"
     },
     {
       "slug": "ropa_calzado_y_boutique",
@@ -57084,6 +57149,2488 @@
         }
       ],
       "_parent": "restaurante"
+    },
+    {
+      "slug": "alimentos",
+      "name": "Alimentos",
+      "tipo_operacion": "Atención mesa + para llevar + delivery",
+      "regulacion": "CFDI 4.0, COFEPRIS (alimentos), Protección Civil",
+      "que_vende": "Comida y bebidas preparadas",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Sysco",
+            "url": "https://www.sysco.com/",
+            "tipo": "distribuidor alimentos"
+          },
+          {
+            "nombre": "US Foods",
+            "url": "https://www.usfoods.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Performance Food",
+            "url": "https://www.performancefoodservice.com/",
+            "tipo": "distribuidor"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "McDonald's México",
+            "url": "https://www.mcdonalds.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Domino's Pizza MX",
+            "url": "https://www.dominos.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Burger King MX",
+            "url": "https://www.bk.com.mx/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Toast POS",
+          "url": "https://pos.toasttab.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes enterprise",
+          "modelo_cobro": "SaaS + hardware",
+          "precio_base": "$69 USD/mes",
+          "precio_tipico": "$165+ USD/mes",
+          "fortaleza": "Mapa mesas avanzado, KDS pro",
+          "debilidad": "Caro, hardware obligatorio"
+        },
+        {
+          "sistema": "TouchBistro",
+          "url": "https://www.touchbistro.com/",
+          "pais": "🇨🇦 CAN",
+          "enfoque": "Restaurantes medianos",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$69 USD/mes",
+          "precio_tipico": "$69-399 USD/mes",
+          "fortaleza": "iPad-first, KDS, mapa mesas",
+          "debilidad": "Solo iPad"
+        },
+        {
+          "sistema": "Lavu",
+          "url": "https://lavu.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes pequeños-medianos",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$59 USD/mes",
+          "precio_tipico": "$59-329 USD/mes",
+          "fortaleza": "Configurable",
+          "debilidad": "Curva aprendizaje"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": 1,
+          "feature": "Mapa visual de mesas drag&drop",
+          "porque": "Diseñar restaurante como plano real (terraza, interior, bar, VIP)",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 2,
+          "feature": "Estado mesas tiempo real",
+          "porque": "Saber ocupación sin preguntar al mesero",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 3,
+          "feature": "Split bill avanzado (por persona/ítem/%)",
+          "porque": "Cobro a grupos sin fricción",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 9,
+          "feature": "KDS (Kitchen Display System)",
+          "porque": "Pantallas por estación + timers + sonidos",
+          "prioridad": "🔴 Alta"
+        },
+        {
+          "id": 11,
+          "feature": "Hub omnicanal (Uber/Rappi/DiDi)",
+          "porque": "Centralizar pedidos online",
+          "prioridad": "🔴 Alta"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Operación mesa",
+          "problema": "Mapa de mesas estático sin drag&drop",
+          "afecta": "SICAR, Eleventa, Shopify"
+        },
+        {
+          "area": "Pagos",
+          "problema": "Sin pagos mixtos (efectivo+tarjeta+QR+vales)",
+          "afecta": "SICAR, Eleventa básico"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Platillo"
+        },
+        {
+          "generico": "Categoría",
+          "este_giro": "Sección del menú"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Cuenta / Comanda"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Mesero / Cocinero"
+        },
+        {
+          "generico": "Mesa",
+          "este_giro": "Mesa"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Mole Poblano",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Alimentos+1&id=710409",
+          "precio": 215,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "MoleChickenMuniMarketChiapa",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Alimentos+2&id=710410",
+          "precio": 229,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mole in Puebla",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Alimentos+3&id=710411",
+          "precio": 201,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mole poblano",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Alimentos+4&id=710412",
+          "precio": 206,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mole poblano de guajolote",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Alimentos+5&id=710413",
+          "precio": 323,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mole poblano, México",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Alimentos+6&id=710414",
+          "precio": 390,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mole negro de Oaxaca con arroz",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Alimentos+7&id=710415",
+          "precio": 402,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mole Poblano i.e the city of Puebla's mole",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Alimentos+8&id=710416",
+          "precio": 375,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mole poblano de fiesta",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Alimentos+9&id=710417",
+          "precio": 286,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mole rojo estilo Querétaro",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Alimentos+10&id=710418",
+          "precio": 424,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        }
+      ],
+      "_parent": "restaurante",
+      "landing_url": "https://systeminternational.app/landing-alimentos.html"
+    },
+    {
+      "slug": "salud",
+      "name": "Salud",
+      "tipo_operacion": "Mostrador con receta + autoservicio",
+      "regulacion": "COFEPRIS (controlados), libro psicotrópicos, CFDI 4.0",
+      "que_vende": "Medicamentos OTC y de receta, productos de salud y belleza",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "McKesson",
+            "url": "https://www.mckesson.com/",
+            "tipo": "distribuidor farmacéutico"
+          },
+          {
+            "nombre": "Cardinal Health",
+            "url": "https://www.cardinalhealth.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Cencora (ex-AmerisourceBergen)",
+            "url": "https://www.cencora.com/",
+            "tipo": "distribuidor"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Farmacias Guadalajara",
+            "url": "https://www.farmaciasguadalajara.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Farmacias del Ahorro",
+            "url": "https://www.fahorro.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "CVS",
+            "url": "https://www.cvs.com/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "PrimeRx",
+          "url": "https://primerx.io/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Farmacia comunitaria",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$899 USD/mes",
+          "precio_tipico": "$899-1500/mes",
+          "fortaleza": "Manejo recetas, seguros",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "Rx30",
+          "url": "https://www.rx30.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Farmacia independiente",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$650 USD/mes",
+          "precio_tipico": "$650-1200/mes",
+          "fortaleza": "Recetas electrónicas",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "Liberty Software",
+          "url": "https://www.libertysoftware.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Farmacia retail",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$500 USD/mes",
+          "precio_tipico": "$500-1000/mes",
+          "fortaleza": "Integración seguros",
+          "debilidad": "USA-only"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "F1",
+          "feature": "Registro receta médica",
+          "porque": "Trazabilidad de controlados",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "F2",
+          "feature": "Libro de psicotrópicos digital",
+          "porque": "Cumplimiento Cofepris",
+          "prioridad": "🔴 Crítica MX"
+        },
+        {
+          "id": 7,
+          "feature": "Lotes + caducidad",
+          "porque": "Retiro por lote, alertas caducidad",
+          "prioridad": "🔴 Crítica"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Regulación",
+          "problema": "Sin manejo psicotrópicos → multas Cofepris",
+          "afecta": "POS genéricos"
+        },
+        {
+          "area": "Inventario",
+          "problema": "Sin control caducidad → pérdidas masivas",
+          "afecta": "SICAR, Eleventa"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Medicamento / Artículo de salud"
+        },
+        {
+          "generico": "Categoría",
+          "este_giro": "Departamento (OTC/Rx/Salud/Belleza)"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Farmacéutico / Auxiliar"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Caja De 24 Comprimido Pamabrom Paracetamol  Pirilamina ",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Salud+1&id=62630",
+          "precio": 161,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Paracetamol Kirkland 500 Mg Caja Con 100 Tabletas",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Salud+2&id=62631",
+          "precio": 143,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Caja De 24 Comprimido Pamabrom Paracetamol  Pirilamina ",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Salud+3&id=62632",
+          "precio": 135,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Ac-fast Paracetamol Caja C/10 Tabletas De 500 Mg C/u",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Salud+4&id=62633",
+          "precio": 161,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Clorfenamina Compuesta, Clorfenamina, Paracetamol Y Caf",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Salud+5&id=62634",
+          "precio": 143,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Caja Con 10 Tabletas Antigripal Next Tabs Alivia Síntom",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Salud+6&id=62635",
+          "precio": 64,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Paracetamol 500 Mg 1 Caja Con 10 Tabletas Avivia",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Salud+7&id=62636",
+          "precio": 106,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mejoral Forte 48 Tabs Paracetamol 500mg + Cafeína",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Salud+8&id=62637",
+          "precio": 75,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mejoral Forte 12 Tabs Paracetamol 500mg + Cafeína",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Salud+9&id=62638",
+          "precio": 73,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Tylenol 225 Geles De Liberación Rápida Acetaminofeno 50",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Salud+10&id=62639",
+          "precio": 155,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        }
+      ],
+      "_parent": "farmacia",
+      "landing_url": "https://systeminternational.app/landing-salud.html"
+    },
+    {
+      "slug": "servicios",
+      "name": "Servicios",
+      "tipo_operacion": "Reservas + check-in/out + servicios extras (spa/restaurante)",
+      "regulacion": "SECTUR, COFEPRIS, Protección Civil",
+      "que_vende": "Hospedaje y alojamiento",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Ecolab",
+            "url": "https://www.ecolab.com/",
+            "tipo": "limpieza/higiene"
+          },
+          {
+            "nombre": "Guest Supply",
+            "url": "https://www.guestsupply.com/",
+            "tipo": "amenidades"
+          },
+          {
+            "nombre": "Americast",
+            "url": "https://www.americast.com/",
+            "tipo": "amenidades"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Marriott",
+            "url": "https://www.marriott.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Hilton",
+            "url": "https://www.hilton.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Holiday Inn (IHG)",
+            "url": "https://www.ihg.com/mx/es",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Oracle OPERA",
+          "url": "https://www.oracle.com/hospitality/opera/",
+          "pais": "🌎 Global",
+          "enfoque": "Hotel enterprise",
+          "modelo_cobro": "Licencia enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$1000+/mes",
+          "fortaleza": "Estándar industria, PMS robusto",
+          "debilidad": "Caro, complejo"
+        },
+        {
+          "sistema": "Cloudbeds",
+          "url": "https://www.cloudbeds.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Hotel pequeño-mediano",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$200 USD/mes",
+          "precio_tipico": "$200-700/mes",
+          "fortaleza": "Channel manager, UX moderna",
+          "debilidad": "Limitado en cadenas grandes"
+        },
+        {
+          "sistema": "Little Hotelier",
+          "url": "https://www.littlehotelier.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Hoteles boutique",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$109 USD/mes",
+          "precio_tipico": "$109-389/mes",
+          "fortaleza": "Fácil de usar",
+          "debilidad": "Funcionalidad básica"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "H1",
+          "feature": "Channel manager (Booking/Expedia/Airbnb)",
+          "porque": "Sincronizar disponibilidad multi-canal",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "H2",
+          "feature": "Plan de habitaciones visual",
+          "porque": "Ver ocupación por fecha y tipo",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "H3",
+          "feature": "Folios (cargos a habitación)",
+          "porque": "Restaurant/spa cobra a la cuenta",
+          "prioridad": "🔴 Alta"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Disponibilidad",
+          "problema": "Overbooking por sync lento entre canales",
+          "afecta": "Hoteles sin channel manager"
+        },
+        {
+          "area": "Folios",
+          "problema": "Cargos a habitación se pierden o duplican",
+          "afecta": "POS genéricos no-hotel"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Habitación / Servicio"
+        },
+        {
+          "generico": "Categoría",
+          "este_giro": "Tipo habitación (Standard/Suite/Junior)"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Reserva / Estancia / Folio"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "C Toalla Baño Hotel Cuerpo Completo, 2 Piezas C",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicios+1&id=880117",
+          "precio": 319,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "M Toalla Baño Hotel Cuerpo Completo, 2 Piezas K",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicios+2&id=880116",
+          "precio": 319,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Toalla Member S Mark Hotel Premier Colection Set 3 Gris",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicios+3&id=880115",
+          "precio": 319,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Set De Toallas De 6 Piezas De Lujo Para Spa Y Hotel De ",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicios+4&id=880114",
+          "precio": 319,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Set 3 Toallas Blancas 80x140 Microfibra Hotel Boutique",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicios+5&id=880113",
+          "precio": 135,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Toallas Para Playa Albercas Raya 3 80x160cm Color Azul/",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicios+6&id=880112",
+          "precio": 135,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Set 3 Toallas Blancas 80x140 Microfibra Hotel Boutique",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicios+7&id=880111",
+          "precio": 497,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Set 3 Toallas Blancas 80x140 Microfibra Hotel Boutique",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicios+8&id=880110",
+          "precio": 2413,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Set De 7 Toallas Hotel Boutique Microfibra Facial",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicios+9&id=880109",
+          "precio": 160,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Toallas Brentom Set De 6, 2 Faciales ,2 De Mano 2 Medio",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicios+10&id=880108",
+          "precio": 490,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        }
+      ],
+      "_parent": "hotel",
+      "landing_url": "https://systeminternational.app/landing-servicios.html"
+    },
+    {
+      "slug": "colegio",
+      "name": "Colegio",
+      "tipo_operacion": "Membresía recurrente + walk-in + clases programadas",
+      "regulacion": "Protección Civil, CFDI 4.0",
+      "que_vende": "Membresías, entrenamiento personal, clases, suplementos",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Life Fitness",
+            "url": "https://www.lifefitness.com/",
+            "tipo": "fabricante equipo"
+          },
+          {
+            "nombre": "Matrix Fitness",
+            "url": "https://www.matrixfitness.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Technogym",
+            "url": "https://www.technogym.com/",
+            "tipo": "fabricante premium"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Smart Fit",
+            "url": "https://www.smartfit.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Anytime Fitness",
+            "url": "https://www.anytimefitness.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Planet Fitness",
+            "url": "https://www.smartfit.com.mx/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Mindbody",
+          "url": "https://www.mindbodyonline.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Gimnasio/wellness",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$169 USD/mes",
+          "precio_tipico": "$169-549/mes",
+          "fortaleza": "Marketplace clientes, app",
+          "debilidad": "Caro, comisión por reservas"
+        },
+        {
+          "sistema": "ABC Glofox",
+          "url": "https://www.glofox.com/",
+          "pais": "🇮🇪 IRL/Global",
+          "enfoque": "Boutique fitness",
+          "modelo_cobro": "SaaS",
+          "precio_base": "Custom",
+          "precio_tipico": "$200-600/mes",
+          "fortaleza": "Clases + membresías",
+          "debilidad": "Pricing opaco"
+        },
+        {
+          "sistema": "GymMaster",
+          "url": "https://www.gymmaster.com/",
+          "pais": "🇳🇿 NZ",
+          "enfoque": "Gimnasios independientes",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$109/mes",
+          "precio_tipico": "$109-289/mes",
+          "fortaleza": "Control acceso integrado",
+          "debilidad": "Menos conocido"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "G1",
+          "feature": "Membresías recurrentes (charge auto)",
+          "porque": "Modelo principal del gimnasio",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "G2",
+          "feature": "Control acceso (torniquetes/QR)",
+          "porque": "Verificar membresía activa al entrar",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "G3",
+          "feature": "Calendario de clases con cupos",
+          "porque": "Reservas yoga/spinning/etc",
+          "prioridad": "🔴 Alta"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Acceso",
+          "problema": "Sin control acceso → entran sin pagar",
+          "afecta": "POS genéricos sin integración hardware"
+        },
+        {
+          "area": "Cobros",
+          "problema": "Membresías recurrentes manuales",
+          "afecta": "Sistemas no-SaaS"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Membresía / Clase / Suplemento"
+        },
+        {
+          "generico": "Cliente",
+          "este_giro": "Socio / Miembro"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Entrenador / Recepción / Mantenimiento"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Nitro Tech 100% Whey Gold 2lb Sabor Double Rich Chocola",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Colegio+1&id=109518",
+          "precio": 999,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteina Hidrolizada 100% Whey 2.2kg Golds Protein 526s",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Colegio+2&id=109519",
+          "precio": 1099,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteina Hidrolizada 100% Whey 2.2kg Golds Protein 71se",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Colegio+3&id=109520",
+          "precio": 1018,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mutant Whey Proteina 5 Lb Strawberry Cream",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Colegio+4&id=109521",
+          "precio": 1249,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteína Whey Ultra BHP Nutrition de 2.27 kg con Sabor ",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Colegio+5&id=109522",
+          "precio": 1099,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteina Olimpo Zeus 100% Whey suplemento alimenticio |",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Colegio+6&id=109523",
+          "precio": 1794,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteina Optimum Gold Standard 100% Whey 928g Sabor Smo",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Colegio+7&id=109524",
+          "precio": 756,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteína Whey Suplementogolds Protein En Polvo 15kg Sab",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Colegio+8&id=109525",
+          "precio": 996,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteína Whey Suplemento En Polvo 3kg Golds Protein 94s",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Colegio+9&id=109526",
+          "precio": 700,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteina Nitro Tech 100% Whey Gold Muscletech 2lb Straw",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Colegio+10&id=109527",
+          "precio": 2098,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        }
+      ],
+      "_parent": "gimnasio",
+      "landing_url": "https://systeminternational.app/landing-colegio.html"
+    },
+    {
+      "slug": "escuela_idiomas",
+      "name": "Escuela Idiomas",
+      "tipo_operacion": "Membresía recurrente + walk-in + clases programadas",
+      "regulacion": "Protección Civil, CFDI 4.0",
+      "que_vende": "Membresías, entrenamiento personal, clases, suplementos",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Life Fitness",
+            "url": "https://www.lifefitness.com/",
+            "tipo": "fabricante equipo"
+          },
+          {
+            "nombre": "Matrix Fitness",
+            "url": "https://www.matrixfitness.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Technogym",
+            "url": "https://www.technogym.com/",
+            "tipo": "fabricante premium"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Smart Fit",
+            "url": "https://www.smartfit.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Anytime Fitness",
+            "url": "https://www.anytimefitness.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Planet Fitness",
+            "url": "https://www.smartfit.com.mx/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Mindbody",
+          "url": "https://www.mindbodyonline.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Gimnasio/wellness",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$169 USD/mes",
+          "precio_tipico": "$169-549/mes",
+          "fortaleza": "Marketplace clientes, app",
+          "debilidad": "Caro, comisión por reservas"
+        },
+        {
+          "sistema": "ABC Glofox",
+          "url": "https://www.glofox.com/",
+          "pais": "🇮🇪 IRL/Global",
+          "enfoque": "Boutique fitness",
+          "modelo_cobro": "SaaS",
+          "precio_base": "Custom",
+          "precio_tipico": "$200-600/mes",
+          "fortaleza": "Clases + membresías",
+          "debilidad": "Pricing opaco"
+        },
+        {
+          "sistema": "GymMaster",
+          "url": "https://www.gymmaster.com/",
+          "pais": "🇳🇿 NZ",
+          "enfoque": "Gimnasios independientes",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$109/mes",
+          "precio_tipico": "$109-289/mes",
+          "fortaleza": "Control acceso integrado",
+          "debilidad": "Menos conocido"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "G1",
+          "feature": "Membresías recurrentes (charge auto)",
+          "porque": "Modelo principal del gimnasio",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "G2",
+          "feature": "Control acceso (torniquetes/QR)",
+          "porque": "Verificar membresía activa al entrar",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "G3",
+          "feature": "Calendario de clases con cupos",
+          "porque": "Reservas yoga/spinning/etc",
+          "prioridad": "🔴 Alta"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Acceso",
+          "problema": "Sin control acceso → entran sin pagar",
+          "afecta": "POS genéricos sin integración hardware"
+        },
+        {
+          "area": "Cobros",
+          "problema": "Membresías recurrentes manuales",
+          "afecta": "Sistemas no-SaaS"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Membresía / Clase / Suplemento"
+        },
+        {
+          "generico": "Cliente",
+          "este_giro": "Socio / Miembro"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Entrenador / Recepción / Mantenimiento"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Nitro Tech 100% Whey Gold 2lb Sabor Double Rich Chocola",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Escuela%20Idiomas+1&id=284383",
+          "precio": 999,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteina Hidrolizada 100% Whey 2.2kg Golds Protein 526s",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Escuela%20Idiomas+2&id=284384",
+          "precio": 1099,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteina Hidrolizada 100% Whey 2.2kg Golds Protein 71se",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Escuela%20Idiomas+3&id=284385",
+          "precio": 1018,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mutant Whey Proteina 5 Lb Strawberry Cream",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Escuela%20Idiomas+4&id=284386",
+          "precio": 1249,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteína Whey Ultra BHP Nutrition de 2.27 kg con Sabor ",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Escuela%20Idiomas+5&id=284387",
+          "precio": 1099,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteina Olimpo Zeus 100% Whey suplemento alimenticio |",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Escuela%20Idiomas+6&id=284388",
+          "precio": 1794,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteina Optimum Gold Standard 100% Whey 928g Sabor Smo",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Escuela%20Idiomas+7&id=284389",
+          "precio": 756,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteína Whey Suplementogolds Protein En Polvo 15kg Sab",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Escuela%20Idiomas+8&id=284390",
+          "precio": 996,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteína Whey Suplemento En Polvo 3kg Golds Protein 94s",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Escuela%20Idiomas+9&id=284391",
+          "precio": 700,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Proteina Nitro Tech 100% Whey Gold Muscletech 2lb Straw",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Escuela%20Idiomas+10&id=284392",
+          "precio": 2098,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        }
+      ],
+      "_parent": "gimnasio",
+      "landing_url": "https://systeminternational.app/landing-escuela-idiomas.html"
+    },
+    {
+      "slug": "foto_estudio",
+      "name": "Foto Estudio",
+      "tipo_operacion": "Mostrador + servicios (copias/impresión)",
+      "regulacion": "CFDI 4.0",
+      "que_vende": "Útiles escolares, oficina, impresión, copias",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "ACCO Brands",
+            "url": "https://www.acco.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "BIC",
+            "url": "https://www.bicworld.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Pentel",
+            "url": "https://www.pentel.com/",
+            "tipo": "fabricante"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Office Depot MX",
+            "url": "https://www.officedepot.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Staples",
+            "url": "https://www.staples.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Lumen",
+            "url": "https://www.lumen.com.mx/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Retail Edge",
+          "url": "https://www.retailedgetx.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Retail pequeño",
+          "modelo_cobro": "Licencia",
+          "precio_base": "$495 único",
+          "precio_tipico": "+$95/año soporte",
+          "fortaleza": "Asequible",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "Lightspeed Retail",
+          "url": "https://www.lightspeedhq.com/retail/",
+          "pais": "🇨🇦 CAN",
+          "enfoque": "Retail moderno",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$89/mes",
+          "precio_tipico": "$89-289/mes",
+          "fortaleza": "Catálogo rico",
+          "debilidad": "Sin CFDI"
+        },
+        {
+          "sistema": "Erply",
+          "url": "https://erply.com/",
+          "pais": "🇪🇪 EE/Global",
+          "enfoque": "Retail multi-tienda",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$99/mes",
+          "precio_tipico": "$99-269/mes",
+          "fortaleza": "Inventario robusto",
+          "debilidad": "Poco conocido en MX"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "PA1",
+          "feature": "Cobrar servicios (copias, impresión)",
+          "porque": "Cobro por hoja, no por producto",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "PA2",
+          "feature": "Catálogo masivo (3K+ SKUs)",
+          "porque": "Lápices, plumas, hojas, carpetas, etc.",
+          "prioridad": "🔴 Alta"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Servicios",
+          "problema": "POS retail no cobra servicios (copias) sin truco",
+          "afecta": "Sistemas no-mixtos"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Útil / Material / Servicio"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Vendedor"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Cuadernos Cosidos Profesional Ferrini Libreta 100h 8 Pa",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Foto%20Estudio+1&id=170728",
+          "precio": 298,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Cuaderno Printaform Sport Profesional 6 Pzas Pasta Dura",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Foto%20Estudio+2&id=170729",
+          "precio": 298,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Kit 5 Cuadernos Scribe Profesional 100 Hojas Raya Color",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Foto%20Estudio+3&id=170730",
+          "precio": 218,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "6pzs Cuaderno Cosido Profesionalmente 100 Hojas Libreta",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Foto%20Estudio+4&id=170731",
+          "precio": 72,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "5 Cuadernos Scribe Profesional 100 Hojas Libreta De Esp",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Foto%20Estudio+5&id=170732",
+          "precio": 40,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "1 Cuaderno Cuadro Alemán Profesional 100 Hojas Espiral",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Foto%20Estudio+6&id=170733",
+          "precio": 299,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "4pcs B5cuaderno Profesional Escolares Y 6bolígrafos 400",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Foto%20Estudio+7&id=170734",
+          "precio": 298,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Cuaderno Pasta Dura Libreta Escolar 200 Páginas Pluma R",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Foto%20Estudio+8&id=170735",
+          "precio": 119,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "5 Cuadernos Profesional Scribe 100 Hojas Con Imagen",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Foto%20Estudio+9&id=170736",
+          "precio": 116,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Libreta+plumas+bolsa+llavero Set Graduación Mayoreo 40p",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Foto%20Estudio+10&id=170737",
+          "precio": 218,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        }
+      ],
+      "_parent": "papeleria",
+      "landing_url": "https://systeminternational.app/landing-foto-estudio.html"
+    },
+    {
+      "slug": "funeraria",
+      "name": "Funeraria",
+      "tipo_operacion": "Reservas + check-in/out + servicios extras (spa/restaurante)",
+      "regulacion": "SECTUR, COFEPRIS, Protección Civil",
+      "que_vende": "Hospedaje y alojamiento",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Ecolab",
+            "url": "https://www.ecolab.com/",
+            "tipo": "limpieza/higiene"
+          },
+          {
+            "nombre": "Guest Supply",
+            "url": "https://www.guestsupply.com/",
+            "tipo": "amenidades"
+          },
+          {
+            "nombre": "Americast",
+            "url": "https://www.americast.com/",
+            "tipo": "amenidades"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Marriott",
+            "url": "https://www.marriott.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Hilton",
+            "url": "https://www.hilton.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Holiday Inn (IHG)",
+            "url": "https://www.ihg.com/mx/es",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Oracle OPERA",
+          "url": "https://www.oracle.com/hospitality/opera/",
+          "pais": "🌎 Global",
+          "enfoque": "Hotel enterprise",
+          "modelo_cobro": "Licencia enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$1000+/mes",
+          "fortaleza": "Estándar industria, PMS robusto",
+          "debilidad": "Caro, complejo"
+        },
+        {
+          "sistema": "Cloudbeds",
+          "url": "https://www.cloudbeds.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Hotel pequeño-mediano",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$200 USD/mes",
+          "precio_tipico": "$200-700/mes",
+          "fortaleza": "Channel manager, UX moderna",
+          "debilidad": "Limitado en cadenas grandes"
+        },
+        {
+          "sistema": "Little Hotelier",
+          "url": "https://www.littlehotelier.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Hoteles boutique",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$109 USD/mes",
+          "precio_tipico": "$109-389/mes",
+          "fortaleza": "Fácil de usar",
+          "debilidad": "Funcionalidad básica"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "H1",
+          "feature": "Channel manager (Booking/Expedia/Airbnb)",
+          "porque": "Sincronizar disponibilidad multi-canal",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "H2",
+          "feature": "Plan de habitaciones visual",
+          "porque": "Ver ocupación por fecha y tipo",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "H3",
+          "feature": "Folios (cargos a habitación)",
+          "porque": "Restaurant/spa cobra a la cuenta",
+          "prioridad": "🔴 Alta"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Disponibilidad",
+          "problema": "Overbooking por sync lento entre canales",
+          "afecta": "Hoteles sin channel manager"
+        },
+        {
+          "area": "Folios",
+          "problema": "Cargos a habitación se pierden o duplican",
+          "afecta": "POS genéricos no-hotel"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Habitación / Servicio"
+        },
+        {
+          "generico": "Categoría",
+          "este_giro": "Tipo habitación (Standard/Suite/Junior)"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Reserva / Estancia / Folio"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "C Toalla Baño Hotel Cuerpo Completo, 2 Piezas C",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Funeraria+1&id=261736",
+          "precio": 319,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "M Toalla Baño Hotel Cuerpo Completo, 2 Piezas K",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Funeraria+2&id=261735",
+          "precio": 319,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Toalla Member S Mark Hotel Premier Colection Set 3 Gris",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Funeraria+3&id=261734",
+          "precio": 319,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Set De Toallas De 6 Piezas De Lujo Para Spa Y Hotel De ",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Funeraria+4&id=261733",
+          "precio": 319,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Set 3 Toallas Blancas 80x140 Microfibra Hotel Boutique",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Funeraria+5&id=261732",
+          "precio": 135,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Toallas Para Playa Albercas Raya 3 80x160cm Color Azul/",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Funeraria+6&id=261731",
+          "precio": 135,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Set 3 Toallas Blancas 80x140 Microfibra Hotel Boutique",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Funeraria+7&id=261730",
+          "precio": 497,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Set 3 Toallas Blancas 80x140 Microfibra Hotel Boutique",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Funeraria+8&id=261729",
+          "precio": 2413,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Set De 7 Toallas Hotel Boutique Microfibra Facial",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Funeraria+9&id=261728",
+          "precio": 160,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Toallas Brentom Set De 6, 2 Faciales ,2 De Mano 2 Medio",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Funeraria+10&id=261727",
+          "precio": 490,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        }
+      ],
+      "_parent": "hotel",
+      "landing_url": "https://systeminternational.app/landing-funeraria.html"
+    },
+    {
+      "slug": "servicio_celulares",
+      "name": "Servicio Celulares",
+      "tipo_operacion": "Mostrador + showroom + e-commerce",
+      "regulacion": "CFDI 4.0, garantías",
+      "que_vende": "Electrodomésticos, gadgets, accesorios tecnológicos",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Ingram Micro",
+            "url": "https://www.ingrammicro.com/",
+            "tipo": "distribuidor IT"
+          },
+          {
+            "nombre": "Synnex",
+            "url": "https://www.synnex.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "DandH",
+            "url": "https://www.dandh.com/",
+            "tipo": "distribuidor"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Best Buy",
+            "url": "https://www.walmart.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "RadioShack MX",
+            "url": "https://www.radioshack.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Newegg",
+            "url": "https://www.newegg.com/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Retail Pro",
+          "url": "https://www.retailpro.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Retail especializado",
+          "modelo_cobro": "Licencia enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$300+/terminal",
+          "fortaleza": "Multi-sucursal",
+          "debilidad": "Caro"
+        },
+        {
+          "sistema": "Vend (Lightspeed)",
+          "url": "https://www.vendhq.com/",
+          "pais": "🇳🇿 NZ/Global",
+          "enfoque": "Retail PyME",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$99/mes",
+          "precio_tipico": "$99-249/mes",
+          "fortaleza": "Catálogo rico",
+          "debilidad": "Comisión opcional"
+        },
+        {
+          "sistema": "Lightspeed Retail",
+          "url": "https://www.lightspeedhq.com/retail/",
+          "pais": "🇨🇦 CAN",
+          "enfoque": "Retail moderno",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$89/mes",
+          "precio_tipico": "$89-289/mes",
+          "fortaleza": "Variantes",
+          "debilidad": "Sin CFDI"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "EL1",
+          "feature": "Número de serie + garantía por unidad",
+          "porque": "Tracking individual de cada celular/laptop",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "EL2",
+          "feature": "Catálogo masivo (5K+ SKUs)",
+          "porque": "Electrodomésticos + accesorios + repuestos",
+          "prioridad": "🔴 Crítica"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Garantías",
+          "problema": "POS sin tracking por serie → garantía manual con errores",
+          "afecta": "POS retail genéricos"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Equipo / Accesorio / Gadget"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Vendedor / Técnico"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Occiam G07 audífonos bluetooth inalámbricos, auriculare",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicio%20Celulares+1&id=191139",
+          "precio": 538,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Audífonos In-ear Bluetooth Para Celulares, Tablets y La",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicio%20Celulares+2&id=191140",
+          "precio": 499,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Audífonos Inalámbricos Diadema Bluetooth Plegable Con C",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicio%20Celulares+3&id=191141",
+          "precio": 538,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Auriculares inalámbricos de moda Mujer Skululu YX46 Ows",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicio%20Celulares+4&id=191142",
+          "precio": 538,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Audífonos In-ear Bluetooth Para Celulares, Tablets y La",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicio%20Celulares+5&id=191143",
+          "precio": 520,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Goojodoq Audífonos Inalámbricos Bluetooth 5.3reducción ",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicio%20Celulares+6&id=191144",
+          "precio": 338,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Audífonos Inalámbrico In-ear Bluetooth gamer Anker Soun",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicio%20Celulares+7&id=191145",
+          "precio": 218,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Nuevos Auriculares Inalámbricos Bluetooth Mariposa Pend",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicio%20Celulares+8&id=191146",
+          "precio": 124,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Audífonos Inalámbricos Bluetooth Sony Ult Wear ( WH-ULT",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicio%20Celulares+9&id=191147",
+          "precio": 799,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Audífonos Inalámbricos Jbl Vibe Beam 2 Bluetooth Color ",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Servicio%20Celulares+10&id=191148",
+          "precio": 389,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        }
+      ],
+      "_parent": "electronica",
+      "landing_url": "https://systeminternational.app/landing-servicio-celulares.html"
+    },
+    {
+      "slug": "gasolinera",
+      "name": "Gasolinera",
+      "tipo_operacion": "Diagnóstico + presupuesto + reparación + entrega",
+      "regulacion": "PROFEPA (residuos), SEMARNAT (aceites usados)",
+      "que_vende": "Reparación y mantenimiento automotriz, refacciones",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Snap-on",
+            "url": "https://www.snapon.com/",
+            "tipo": "herramientas pro"
+          },
+          {
+            "nombre": "Matco Tools",
+            "url": "https://www.matcotools.com/",
+            "tipo": "herramientas"
+          },
+          {
+            "nombre": "Cornwell Tools",
+            "url": "https://www.cornwelltools.com/",
+            "tipo": "herramientas"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Midas",
+            "url": "https://www.midas.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Meineke",
+            "url": "https://www.jiffylube.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Jiffy Lube",
+            "url": "https://www.jiffylube.com.mx/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Shopmonkey",
+          "url": "https://www.shopmonkey.io/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Taller moderno cloud",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$199 USD/mes",
+          "precio_tipico": "$199-549/mes",
+          "fortaleza": "UX moderna, integraciones",
+          "debilidad": "USA-first"
+        },
+        {
+          "sistema": "Tekmetric",
+          "url": "https://www.tekmetric.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Taller mediano",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$349 USD/mes",
+          "precio_tipico": "$349/mes flat",
+          "fortaleza": "Pricing simple",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "AutoLeap",
+          "url": "https://autoleap.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Taller pequeño-mediano",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$199/mes",
+          "precio_tipico": "$199-449/mes",
+          "fortaleza": "Mobile-first",
+          "debilidad": "USA-only"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "T1",
+          "feature": "Orden de servicio con diagnóstico",
+          "porque": "Documentar problema + presupuesto previo",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "T2",
+          "feature": "Histórico por vehículo (placa/VIN)",
+          "porque": "Saber qué se le ha hecho al carro antes",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "T3",
+          "feature": "Mano de obra + refacciones por orden",
+          "porque": "Cobro mixto servicio + materiales",
+          "prioridad": "🔴 Crítica"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Histórico",
+          "problema": "POS sin tracking por vehículo → repetir trabajos",
+          "afecta": "POS genéricos"
+        },
+        {
+          "area": "Presupuestos",
+          "problema": "Sin OS formales → conflictos cliente",
+          "afecta": "Talleres pequeños"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Servicio / Refacción"
+        },
+        {
+          "generico": "Cliente",
+          "este_giro": "Dueño / Vehículo"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Orden de servicio (OS)"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Aceite para motor Mobil sintético 5W-30 para carro/cami",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Gasolinera+1&id=635919",
+          "precio": 932,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Aceite Mobil 1 5w-30 Extended Performance 4.73 Litros",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Gasolinera+2&id=635918",
+          "precio": 56,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Aceite Sintetico Mobil Super 5w30 .946 Ml",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Gasolinera+3&id=635917",
+          "precio": 890,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Aceite Mobil 1 5w-30 API SN 946mL",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Gasolinera+4&id=635916",
+          "precio": 1023,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Aceite Mobil 5w-30 Full Synthetic Botella 946ml",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Gasolinera+5&id=635915",
+          "precio": 61,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Mobil Super Anti-friction 5w-30 Garrafa Api Sp Mobil 12",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Gasolinera+6&id=635914",
+          "precio": 1015,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Aceite Mobil 5w30 Full Sintético Paq. Litro Y Garrafa",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Gasolinera+7&id=635913",
+          "precio": 189,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Aceite Mobil 5w-30 Semisintético Paq. Litro Y Garrafa",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Gasolinera+8&id=635912",
+          "precio": 299,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Aceite Mobil 5w-30 Super 5000 Blend Paquete 4 Garrafa 4",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Gasolinera+9&id=635911",
+          "precio": 209,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Aceite para motor Mobil sintético 5W-30 EXTENDED para c",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Gasolinera+10&id=635910",
+          "precio": 198,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        }
+      ],
+      "_parent": "taller_mecanico",
+      "landing_url": "https://systeminternational.app/landing-gasolinera.html"
+    },
+    {
+      "slug": "tatuajes",
+      "name": "Tatuajes",
+      "tipo_operacion": "Citas + walk-in, servicio por estilista",
+      "regulacion": "Salubridad municipal, COFEPRIS (productos)",
+      "que_vende": "Cortes, peinados, tratamientos estéticos, tinte, manicure",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Sally Beauty",
+            "url": "https://www.sallybeauty.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "CosmoProf",
+            "url": "https://www.cosmoprofbeauty.com/",
+            "tipo": "distribuidor profesional"
+          },
+          {
+            "nombre": "Salon Centric",
+            "url": "https://www.saloncentric.com/",
+            "tipo": "distribuidor"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Toni&Guy",
+            "url": "https://www.toniandguy.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Supercuts",
+            "url": "https://www.pelochiquilo.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Fantastic Sams",
+            "url": "https://www.fantasticsams.com/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Vagaro",
+          "url": "https://www.vagaro.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Belleza/salón",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$25 USD/mes",
+          "precio_tipico": "$25-85 USD/mes",
+          "fortaleza": "Citas online, marketing",
+          "debilidad": "Inglés-first, sin CFDI"
+        },
+        {
+          "sistema": "Rosy Salon Software",
+          "url": "https://rosysalonsoftware.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Salón pequeño-mediano",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$29 USD/mes",
+          "precio_tipico": "$29-199/mes",
+          "fortaleza": "Específico para salón",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "Phorest",
+          "url": "https://www.phorest.com/",
+          "pais": "🇮🇪 IRL/Global",
+          "enfoque": "Salón profesional",
+          "modelo_cobro": "SaaS",
+          "precio_base": "Custom",
+          "precio_tipico": "$150-400/mes",
+          "fortaleza": "Marketing + lealtad",
+          "debilidad": "Pricing opaco"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "SB1",
+          "feature": "Citas con estilista específico",
+          "porque": "Cliente reserva con SU estilista favorito",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "SB2",
+          "feature": "Servicios duración variable",
+          "porque": "Corte 30min vs tinte 2h",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "SB3",
+          "feature": "Comisión por estilista",
+          "porque": "Modelo de pago estándar del sector",
+          "prioridad": "🔴 Crítica"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Agenda",
+          "problema": "POS sin agendas individuales por estilista",
+          "afecta": "SICAR, Eleventa, Loyverse"
+        },
+        {
+          "area": "Comisiones",
+          "problema": "Cálculo manual de comisiones",
+          "afecta": "POS genéricos"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Servicio / Producto retail"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Estilista / Manicurista"
+        },
+        {
+          "generico": "Mesa",
+          "este_giro": "Estación / Silla"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Tinte Para Cabello Excellence L&#x27;oréal Paris Tono 8",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tatuajes+1&id=827283",
+          "precio": 105,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Tinte Para Cabello Imedia Excellence L&#x27;oréal Paris",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tatuajes+2&id=827282",
+          "precio": 105,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Tintura Majirel Loreal, Pomo De 50 Gr Tono 6.45 rubio o",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tatuajes+3&id=827281",
+          "precio": 295,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Tinte Para Cabello Excellence L&#x27;oréal Paris Tono 7",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tatuajes+4&id=827280",
+          "precio": 105,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Tinte Para Cabello Excellence L&#x27;oréal Paris Tono 7",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tatuajes+5&id=827279",
+          "precio": 105,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "L´oreal® Tinte Permanente Profesional Crema Majirel V T",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tatuajes+6&id=827278",
+          "precio": 378,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Tinte Profesional Inoa Sin Amoniaco De L&#x27;oreal Pro",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tatuajes+7&id=827277",
+          "precio": 439,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Tinte Permanente Majirel Cool Cover 50 Ml Loreal",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tatuajes+8&id=827276",
+          "precio": 199,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Loreal Dialight Tinte Semi Permanente 50 Ml",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tatuajes+9&id=827275",
+          "precio": 179,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Tintura Permanente Excellence Extra Profundos Loreal Pa",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tatuajes+10&id=827274",
+          "precio": 199,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        }
+      ],
+      "_parent": "salon_belleza",
+      "landing_url": "https://systeminternational.app/landing-tatuajes.html"
+    },
+    {
+      "slug": "tienda_celulares",
+      "name": "Tienda Celulares",
+      "tipo_operacion": "Mostrador + showroom + e-commerce",
+      "regulacion": "CFDI 4.0, garantías",
+      "que_vende": "Electrodomésticos, gadgets, accesorios tecnológicos",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Ingram Micro",
+            "url": "https://www.ingrammicro.com/",
+            "tipo": "distribuidor IT"
+          },
+          {
+            "nombre": "Synnex",
+            "url": "https://www.synnex.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "DandH",
+            "url": "https://www.dandh.com/",
+            "tipo": "distribuidor"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Best Buy",
+            "url": "https://www.walmart.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "RadioShack MX",
+            "url": "https://www.radioshack.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Newegg",
+            "url": "https://www.newegg.com/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Retail Pro",
+          "url": "https://www.retailpro.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Retail especializado",
+          "modelo_cobro": "Licencia enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$300+/terminal",
+          "fortaleza": "Multi-sucursal",
+          "debilidad": "Caro"
+        },
+        {
+          "sistema": "Vend (Lightspeed)",
+          "url": "https://www.vendhq.com/",
+          "pais": "🇳🇿 NZ/Global",
+          "enfoque": "Retail PyME",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$99/mes",
+          "precio_tipico": "$99-249/mes",
+          "fortaleza": "Catálogo rico",
+          "debilidad": "Comisión opcional"
+        },
+        {
+          "sistema": "Lightspeed Retail",
+          "url": "https://www.lightspeedhq.com/retail/",
+          "pais": "🇨🇦 CAN",
+          "enfoque": "Retail moderno",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$89/mes",
+          "precio_tipico": "$89-289/mes",
+          "fortaleza": "Variantes",
+          "debilidad": "Sin CFDI"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "EL1",
+          "feature": "Número de serie + garantía por unidad",
+          "porque": "Tracking individual de cada celular/laptop",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "EL2",
+          "feature": "Catálogo masivo (5K+ SKUs)",
+          "porque": "Electrodomésticos + accesorios + repuestos",
+          "prioridad": "🔴 Crítica"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Garantías",
+          "problema": "POS sin tracking por serie → garantía manual con errores",
+          "afecta": "POS retail genéricos"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Equipo / Accesorio / Gadget"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Vendedor / Técnico"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Occiam G07 audífonos bluetooth inalámbricos, auriculare",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Celulares+1&id=154117",
+          "precio": 538,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Audífonos In-ear Bluetooth Para Celulares, Tablets y La",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Celulares+2&id=154118",
+          "precio": 499,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Audífonos Inalámbricos Diadema Bluetooth Plegable Con C",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Celulares+3&id=154119",
+          "precio": 538,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Auriculares inalámbricos de moda Mujer Skululu YX46 Ows",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Celulares+4&id=154120",
+          "precio": 538,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Audífonos In-ear Bluetooth Para Celulares, Tablets y La",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Celulares+5&id=154121",
+          "precio": 520,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Goojodoq Audífonos Inalámbricos Bluetooth 5.3reducción ",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Celulares+6&id=154122",
+          "precio": 338,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Audífonos Inalámbrico In-ear Bluetooth gamer Anker Soun",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Celulares+7&id=154123",
+          "precio": 218,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Nuevos Auriculares Inalámbricos Bluetooth Mariposa Pend",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Celulares+8&id=154124",
+          "precio": 124,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Audífonos Inalámbricos Bluetooth Sony Ult Wear ( WH-ULT",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Celulares+9&id=154125",
+          "precio": 799,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Audífonos Inalámbricos Jbl Vibe Beam 2 Bluetooth Color ",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Celulares+10&id=154126",
+          "precio": 389,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        }
+      ],
+      "_parent": "electronica",
+      "landing_url": "https://systeminternational.app/landing-tienda-celulares.html"
+    },
+    {
+      "slug": "tienda_conveniencia",
+      "name": "Tienda Conveniencia",
+      "tipo_operacion": "Mostrador + ticket rápido, alto volumen",
+      "regulacion": "CFDI 4.0, Cofepris (alimentos), pesas y medidas",
+      "que_vende": "Productos de consumo diario, despensa, refrescos, snacks",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Bimbo",
+            "url": "https://www.grupobimbo.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Coca-Cola FEMSA",
+            "url": "https://www.coca-colafemsa.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Sabritas",
+            "url": "https://www.sabritas.com.mx/",
+            "tipo": "fabricante"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "OXXO",
+            "url": "https://www.oxxo.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "7-Eleven MX",
+            "url": "https://www.7-eleven.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Tiendas Extra",
+            "url": "https://www.tiendasextra.com.mx/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "SICAR",
+          "url": "https://sicar.mx/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail/abarrotes MX",
+          "modelo_cobro": "Licencia única",
+          "precio_base": "$3,000-10,000 MXN único",
+          "precio_tipico": "+ soporte opcional",
+          "fortaleza": "Penetración MX, offline",
+          "debilidad": "Legacy, no cloud, UI vieja"
+        },
+        {
+          "sistema": "SICAR X",
+          "url": "https://sicar.mx/x/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail SaaS",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$300 MXN/mes",
+          "precio_tipico": "$300-1,200 MXN/mes",
+          "fortaleza": "Evolución cloud",
+          "debilidad": "Aún básico vs globales"
+        },
+        {
+          "sistema": "Eleventa",
+          "url": "https://eleventa.com/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail PyME",
+          "modelo_cobro": "Sub",
+          "precio_base": "$300 MXN/mes",
+          "precio_tipico": "$300-800 MXN/mes",
+          "fortaleza": "Simple, conocido",
+          "debilidad": "Reportes pobres"
+        },
+        {
+          "sistema": "Loyverse",
+          "url": "https://loyverse.com/",
+          "pais": "🌎 Global",
+          "enfoque": "PyME multi-giro",
+          "modelo_cobro": "Freemium+addons",
+          "precio_base": "$0",
+          "precio_tipico": "$5-50 USD/mes",
+          "fortaleza": "Gratis base",
+          "debilidad": "Funciones clave son addons"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": 6,
+          "feature": "Inventario tiempo real multi-sucursal",
+          "porque": "Evitar sobreventa entre tiendas",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 25,
+          "feature": "Modo caja express (1-2 clics)",
+          "porque": "Velocidad en hora pico",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 8,
+          "feature": "CFDI 4.0 nativo",
+          "porque": "Cumplimiento fiscal MX desde la venta",
+          "prioridad": "🔴 Crítica MX"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Inventario",
+          "problema": "Desfase entre sucursales (sin sync real-time)",
+          "afecta": "SICAR, Eleventa, SoftRest"
+        },
+        {
+          "area": "UX",
+          "problema": "Demasiados clics para vender un refresco",
+          "afecta": "TODOS"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Artículo / Mercancía"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Ticket"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Cajero"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Pack De 12 Refrescos 600ml Light Coca-cola",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Conveniencia+1&id=687817",
+          "precio": 152,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Pack X12 Refresco Coca-cola Sin Azúcar 600ml",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Conveniencia+2&id=687816",
+          "precio": 252,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Caja De 12 Coca Cola Regular De 600 Ml",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Conveniencia+3&id=687815",
+          "precio": 252,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Refresco Coca Cola Sabor Original 235 Ml 6 Pz",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Conveniencia+4&id=687814",
+          "precio": 276,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Pack De 12 Refrescos 600ml Light Coca-cola",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Conveniencia+5&id=687813",
+          "precio": 252,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Refresco Coca Cola Regular Pack 12 Piezas De 600 Ml",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Conveniencia+6&id=687812",
+          "precio": 252,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Pack X12 Unds De Refresco Sidral Mundet 600 Ml",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Conveniencia+7&id=687811",
+          "precio": 193,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Pack X12 Botellas De Refresco Naranja 7.2l Fanta",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Conveniencia+8&id=687810",
+          "precio": 84,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Pack X12 Refresco Sidral Light 600 Ml",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Conveniencia+9&id=687809",
+          "precio": 272,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        },
+        {
+          "nombre": "Pack X12 Unds De Refresco Sidral Mundet 600 Ml",
+          "imagen": "https://placehold.co/400x300/6b7280/ffffff?text=Tienda%20Conveniencia+10&id=687808",
+          "precio": 252,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v12"
+        }
+      ],
+      "_parent": "abarrotes",
+      "landing_url": "https://systeminternational.app/landing-tienda-conveniencia.html"
     }
   ]
 }
