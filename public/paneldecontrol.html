@@ -6441,11 +6441,70 @@
         if (g.name) ecoByName[g.name.toLowerCase()] = g;
       });
     }
+    // V10.43: ALIASES sub-variante → giro padre. DEBE coincidir con la tabla en ecosystemRowFor.
+    // Sin estos aliases, giros como Estética, Nails, Spa, Cosméticos, Tienda Mascotas, Minisúper,
+    // Tlapalería, Refaccionaria, etc. aparecen con — en TODAS las columnas porque no existen
+    // como slug directo en ecosystem JSON.
+    const ECO_ALIASES_TABLE = {
+      // Healthcare/médico
+      'clinica_dental': 'dentista', 'clinica-dental': 'dentista', 'medico': 'farmacia',
+      // Belleza/spa
+      'estetica': 'salon_belleza', 'nails': 'salon_belleza', 'spa': 'salon_belleza',
+      'cosmeticos': 'salon_belleza', 'salon-belleza': 'salon_belleza',
+      // Ropa/retail
+      'tienda_ropa': 'ropa', 'tienda-ropa': 'ropa', 'boutique': 'ropa',
+      // Comida/restaurante
+      'pollo_frito': 'polleria', 'pollos_asados': 'polleria',
+      'antojitos': 'taqueria', 'tacos_vapor': 'taqueria',
+      'comida_corrida': 'restaurante', 'dark_kitchen': 'restaurante',
+      'ghost_kitchen': 'restaurante', 'banquetes': 'restaurante',
+      'jugos-naturales': 'jugos_naturales',
+      // Abarrotes/tiendas
+      'minisuper': 'abarrotes', 'tienda_conveniencia': 'abarrotes', 'tienda-conveniencia': 'abarrotes',
+      'deposito': 'abarrotes', 'tienda_china': 'abarrotes', 'dulceria': 'abarrotes',
+      'refresqueria': 'abarrotes', 'cerveza_artesanal': 'abarrotes', 'cremeria': 'abarrotes',
+      'naturista': 'farmacia', 'purificadora': 'abarrotes', 'ecologica': 'abarrotes',
+      'regalos': 'papeleria', 'bazar': 'abarrotes', 'vape_shop': 'sex_shop',
+      // Mascotas
+      'tienda_mascotas': 'veterinaria',
+      // Ferretería/construcción
+      'tlapaleria': 'ferreteria', 'carpinteria': 'ferreteria', 'herreria': 'ferreteria',
+      'cerrajeria': 'ferreteria', 'aluminio': 'ferreteria', 'construccion': 'ferreteria',
+      'paneles_solares': 'ferreteria', 'vidrieria': 'ferreteria',
+      // Electrónica/tech
+      'electrodomesticos': 'electronica', 'computacion': 'electronica',
+      'celulares': 'electronica', 'reparacion_celulares': 'taller_mecanico',
+      'gamer': 'electronica', 'cctv': 'electronica', 'sonido': 'electronica',
+      'drones': 'electronica', 'impresion_3d': 'electronica', 'domotica': 'electronica',
+      // Automotriz
+      'refaccionaria': 'taller_mecanico', 'taller-mecanico': 'taller_mecanico',
+      'carwash': 'taller_mecanico', 'llantera': 'taller_mecanico',
+      'vulcanizadora': 'taller_mecanico', 'agencia_autos': 'taller_mecanico',
+      // Deportes/ropa
+      'deportes': 'ropa', 'sabanas_premium': 'ropa',
+      // Servicios
+      'imprenta': 'papeleria', 'fotografia': 'papeleria',
+      'escuela': 'gimnasio', 'guarderia': 'gimnasio',
+      'motel': 'hotel', 'casa_empeno': 'joyeria',
+      'wisp': 'electronica', 'coworking': 'hotel', 'agencia_de_viajes': 'hotel',
+      // Software/digital
+      'software': 'electronica', 'marketing_digital': 'electronica',
+      'hosting_web': 'electronica', 'automatizacion': 'electronica',
+      'ia_chatbots': 'electronica', 'criptomonedas': 'electronica',
+    };
     function findEcoFor(slug, label) {
+      // 1) Match directo
       if (ecoBySlug[slug]) return ecoBySlug[slug];
+      // 2) Normalizar guión vs underscore
+      const slugNorm = String(slug||'').replace(/-/g, '_');
+      if (ecoBySlug[slugNorm]) return ecoBySlug[slugNorm];
+      // 3) Alias sub-variante → padre
+      const aliasTarget = ECO_ALIASES_TABLE[slug] || ECO_ALIASES_TABLE[slugNorm];
+      if (aliasTarget && ecoBySlug[aliasTarget]) return ecoBySlug[aliasTarget];
+      // 4) Match por nombre
       const nm = String(label||'').replace(/^\S+\s+/, '').toLowerCase();
       if (ecoByName[nm]) return ecoByName[nm];
-      // fuzzy: si el slug contiene un slug del eco
+      // 5) Fuzzy: incluye
       for (const k of Object.keys(ecoBySlug)) {
         if (slug.includes(k) || k.includes(slug)) return ecoBySlug[k];
       }
