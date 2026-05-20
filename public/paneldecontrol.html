@@ -7964,6 +7964,71 @@
         '</div><div style="margin-top:14px;padding:10px;background:#dbeafe;border-radius:6px;font-size:11px;color:#1e40af">💡 Editar productos en el módulo <strong>Inventario</strong> o usar <strong>Departamentos</strong> para reordenar categorías.</div>'
       );
     }
+    if (mod === 'aplicacion') {
+      // V10.30: mockup PWA del tenant — frame de teléfono con secciones del giro
+      const giroSlug = String(slug || '').toLowerCase();
+      const itemExamples = {
+        veterinaria:  { icon:'🐶', name:'Firulais', sub:'Pastor alemán · 4 años', tag:'Mascotas' },
+        farmacia:     { icon:'💊', name:'Receta #4521', sub:'Ibuprofeno 600mg', tag:'Recetas' },
+        restaurante:  { icon:'🍽', name:'Mesa para 4', sub:'Sábado 8:00 PM', tag:'Reservas' },
+        taqueria:     { icon:'🌮', name:'Pedido #128', sub:'4 tacos al pastor', tag:'Pedidos' },
+        pizzeria:     { icon:'🍕', name:'Pizza Hawaiana', sub:'Familiar · $189', tag:'Menú' },
+        barberia:     { icon:'✂️', name:'Carlos López', sub:'Próximo corte: 5 abr', tag:'Citas' },
+        salon_belleza:{ icon:'💇', name:'Lucía Martínez', sub:'Tinte + corte', tag:'Citas' },
+        spa:          { icon:'🧖', name:'Ana Pérez', sub:'Membresía Gold', tag:'Clientes' },
+        gimnasio:     { icon:'💪', name:'Plan PRO', sub:'Vence 30 abr · 12 visitas', tag:'Membresías' },
+        dentista:     { icon:'🦷', name:'María González', sub:'Última visita: 2024-12', tag:'Pacientes' },
+        hotel:        { icon:'🏨', name:'Suite 204', sub:'Check-out: hoy 12:00', tag:'Habitaciones' },
+        floreria:     { icon:'💐', name:'Ramo aniversario', sub:'Entrega 14 feb 10am', tag:'Pedidos' },
+      };
+      const e = itemExamples[giroSlug] || itemExamples[norm(giroSlug)] || { icon:'📦', name:'Item de ejemplo', sub:'Detalle del item', tag:'Catálogo' };
+      const norm2 = (s) => String(s||'').toLowerCase().replace(/[-_]/g,'_');
+      const item = itemExamples[norm2(giroSlug)] || e;
+      const giroNameClean = String(giroName).replace(/^\S+\s+/, '');
+      const tenantInitials = giroNameClean.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+      return wrap(
+        '<div style="display:flex;gap:24px;align-items:flex-start;justify-content:center">' +
+        '<div style="width:280px;height:520px;background:#0a0a0a;border-radius:38px;padding:8px;box-shadow:0 12px 32px rgba(0,0,0,0.25)">' +
+          '<div style="background:#fafafa;height:100%;border-radius:30px;overflow:hidden;position:relative;display:flex;flex-direction:column">' +
+            // header verde
+            '<div style="background:#10b981;padding:14px 16px;color:#fff;display:flex;align-items:center;gap:10px">' +
+              '<div style="width:32px;height:32px;background:rgba(255,255,255,.25);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">' + escapeText(tenantInitials.slice(0,2)) + '</div>' +
+              '<div><div style="font-weight:700;font-size:13px">' + escapeText(giroNameClean) + '</div><div style="font-size:11px;opacity:.9">Hola 👋</div></div>' +
+            '</div>' +
+            // main list
+            '<div style="padding:14px 16px;flex:1;overflow:auto">' +
+              '<div style="font-family:Georgia,serif;font-size:18px;font-weight:600;letter-spacing:-.02em">Tus ' + escapeText(item.tag.toLowerCase()) + '</div>' +
+              '<div style="font-size:11px;color:#92400e;margin-top:2px">Toca para ver el detalle</div>' +
+              '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:11px 13px;margin-top:10px;display:flex;align-items:center;gap:10px">' +
+                '<div style="width:34px;height:34px;background:#d1fae5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px">' + item.icon + '</div>' +
+                '<div style="flex:1"><div style="font-weight:600;font-size:13px">' + escapeText(item.name) + '</div><div style="font-size:11px;color:#64748b">' + escapeText(item.sub) + '</div></div>' +
+                '<div style="color:#9ca3af">›</div>' +
+              '</div>' +
+              '<div style="margin-top:10px;border:1.5px dashed #d1d5db;border-radius:10px;padding:11px;text-align:center;font-size:12px;color:#64748b">+ Agregar ' + escapeText(item.tag.toLowerCase().replace(/s$/,'')) + '</div>' +
+              // promo banner
+              '<div style="margin-top:14px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;padding:11px">' +
+                '<div style="font-size:11px;font-weight:700;color:#92400e;letter-spacing:.04em">📰 NOTICIA</div>' +
+                '<div style="font-size:12px;margin-top:4px;color:#78350f">Promo del mes — 20% en servicios premium</div>' +
+              '</div>' +
+            '</div>' +
+            // bottom nav
+            '<div style="background:#fff;border-top:1px solid #e5e7eb;display:flex;justify-content:space-around;padding:9px 0 14px">' +
+              [['🏠','Inicio',true],['🕐','Historial',false],['📅','Citas',false],['🛒','Pedir',false]].map(t => '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;' + (t[2]?'background:#d1fae5;color:#065f46;border-radius:18px;margin:0 8px;padding:4px 0':'') + '"><div style="font-size:18px">' + t[0] + '</div><div style="font-size:9.5px;font-weight:600;' + (t[2]?'color:#065f46':'color:#64748b') + '">' + t[1] + '</div></div>').join('') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        // info al lado
+        '<div style="max-width:260px;padding-top:20px">' +
+          '<h3 style="margin:0 0 8px;font-family:var(--pv-font-display);font-size:16px">📱 Mini-app del cliente</h3>' +
+          '<p style="font-size:12px;color:#666;line-height:1.5">Cada tenant recibe su propia PWA (Progressive Web App) personalizada para el giro <strong>' + escapeText(giroNameClean) + '</strong>. Los clientes finales pueden ver sus <em>' + escapeText(item.tag.toLowerCase()) + '</em>, agendar/comprar/reservar, y recibir notificaciones push.</p>' +
+          '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px">' +
+            ['Activable por tenant','Marca propia','Sin descarga (PWA)','iOS + Android','Push notif'].map(t => '<span style="background:#dbeafe;color:#1e40af;font-size:10px;font-weight:600;padding:3px 8px;border-radius:99px">' + t + '</span>').join('') +
+          '</div>' +
+        '</div>' +
+        '</div>'
+      );
+    }
+    function norm(s) { return String(s||'').toLowerCase().replace(/[-_]/g,'_'); }
     if (mod === 'usuarios') {
       return wrap(
         '<div style="font-size:13px;color:#0a0a0a;font-weight:600;margin-bottom:12px">👤 Usuarios del tenant</div>' +
@@ -8363,12 +8428,20 @@
       return;
     }
 
-    // ─── V10.24: mockups específicos por módulo ───
-    // Si el usuario seleccionó un módulo en col 3, mostrar su mockup específico.
-    // Si no, mostrar POS UI por default ('pos'). Cada módulo tiene un mockup
-    // distinto (Dashboard, Corte, Inventario, etc.) para que el preview cambie
-    // al hacer click en distintos módulos.
-    const _selectedMod = v14.selectedGiroMod || 'pos';
+    // ─── V10.24/V10.30: mockups específicos por módulo ───
+    // V10.30 FIX: validar que selectedGiroMod sea un MÓDULO real (top-level),
+    // no un sub-componente con punto (ej. 'app.section_news', 'pos.cobrar').
+    // Si es sub-componente, mapear al módulo padre (alias) o caer a 'pos'.
+    const MOD_PREFIX_ALIAS = { 'app': 'aplicacion' };
+    let _selectedMod = v14.selectedGiroMod || 'pos';
+    if (_selectedMod && _selectedMod.includes('.')) {
+      const prefix = _selectedMod.split('.')[0];
+      _selectedMod = MOD_PREFIX_ALIAS[prefix] || prefix;
+    }
+    // Si tras el mapeo sigue sin ser un módulo conocido, default a 'pos'
+    if (!MOD_LABELS_LOCAL[_selectedMod]) {
+      _selectedMod = 'pos';
+    }
     const _modLbl = MOD_LABELS_LOCAL[_selectedMod] || _selectedMod;
     const _mm = String(_modLbl).match(/^(\S+)\s+(.+)$/) || [null, '📦', _modLbl];
     const _modIcon = _mm[1];
