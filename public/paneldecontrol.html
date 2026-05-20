@@ -6540,8 +6540,15 @@
       html = '<div class="permv14-empty-row" style="padding:20px;text-align:center;color:var(--pv-text-dim)">Sin giros que coincidan con "<strong>' + escapeText(search) + '</strong>".</div>';
     } else {
       const totalVisible = groupedVisible.reduce((s,g)=>s+g.slugs.length, 0);
+      // V10.34: agregar 20 columnas más (Producto 1..10 + Imagen 1..10) en la misma fila
+      let prodHeaders = '';
+      for (let i = 1; i <= 10; i++) {
+        prodHeaders +=
+          '<th class="col-producto" style="background:#d1fae5;min-width:130px">📦 Producto ' + i + '</th>' +
+          '<th class="col-producto" style="background:#d1fae5;min-width:80px">🖼️ Imagen ' + i + '</th>';
+      }
       html = '<div class="vlx-giros-table-wrap">' +
-        '<table class="vlx-giros-table" style="min-width:3400px">' +
+        '<table class="vlx-giros-table" style="min-width:5800px">' +
           '<thead><tr>' +
             '<th class="col-giro" style="min-width:160px">Giro de Negocio</th>' +
             '<th style="min-width:200px">¿Qué vende?</th>' +
@@ -6559,9 +6566,10 @@
             '<th style="background:#e0e7ff;min-width:160px">📖 Terminología</th>' +
             '<th style="min-width:160px">Regulación</th>' +
             '<th style="width:60px">Tenants</th>' +
+            prodHeaders +
           '</tr></thead>' +
           '<tbody>';
-      const COLSPAN = 33; // total columnas para el separador de grupo
+      const COLSPAN = 33 + 20; // 33 columnas previas + 20 nuevas (Producto/Imagen × 10)
       groupedVisible.forEach(group => {
         html += '<tr class="vlx-giros-group-label"><td colspan="' + COLSPAN + '" style="background:var(--pv-surface);font-family:var(--pv-font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--pv-text-dim);padding:6px 14px;border-bottom:1px solid var(--pv-border);position:sticky;left:0">' + escapeText(group.catLabel) + ' · ' + group.slugs.length + '</td></tr>';
         group.slugs.forEach(slug => {
@@ -6595,6 +6603,27 @@
             ? term.slice(0,4).map(t => '<div style="font-size:10px;margin-bottom:2px"><code style="font-size:9px;color:#666">' + escapeText(t.generico||'') + '</code> → <strong>' + escapeText(t.este_giro||'') + '</strong></div>').join('')
             : '<span style="color:var(--pv-text-dim)">—</span>';
 
+          // V10.34: celdas de productos plantilla (10 productos × 2 cols = Producto+Imagen)
+          const productos = ecoRow?.productos_plantilla || [];
+          let productCells = '';
+          for (let pi = 0; pi < 10; pi++) {
+            const p = productos[pi];
+            if (p && p.nombre) {
+              const img = String(p.imagen || '').replace(/^http:/, 'https:');
+              const priceStr = p.precio ? '$' + p.precio + ' ' + (p.moneda || '') : '';
+              productCells +=
+                '<td style="font-size:10px;max-width:130px;background:#f0fdf4;line-height:1.3;padding:6px;white-space:normal;word-break:break-word">' +
+                  '<div style="font-weight:600;margin-bottom:2px;max-height:2.6em;overflow:hidden">' + escapeText(p.nombre.slice(0,40)) + '</div>' +
+                  (priceStr ? '<div style="color:#16a34a;font-size:10px;font-weight:600">' + escapeText(priceStr) + '</div>' : '') +
+                '</td>' +
+                '<td style="font-size:10px;max-width:80px;background:#f0fdf4;padding:4px;text-align:center">' +
+                  (img ? '<img src="' + escapeAttr(img) + '" style="width:50px;height:50px;object-fit:cover;border-radius:4px;display:block;margin:0 auto" loading="lazy" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'inline\'"><span style="display:none;font-size:24px">📦</span>' : '<span style="font-size:24px;color:#9ca3af">📦</span>') +
+                '</td>';
+            } else {
+              productCells += '<td style="background:#f9fafb;color:var(--pv-text-dim);font-size:10px;text-align:center">—</td>' +
+                              '<td style="background:#f9fafb;color:var(--pv-text-dim);font-size:10px;text-align:center">—</td>';
+            }
+          }
           html += '<tr class="' + sel + '" data-permv14-giro="' + escapeAttr(slug) + '">' +
             '<td class="col-giro cell-name">' + giroDisplay + '</td>' +
             '<td class="cell-que-vende" style="font-size:11px;min-width:200px;white-space:normal;line-height:1.4">' + escapeText(queVende || '—') + '</td>' +
@@ -6610,6 +6639,7 @@
             '<td style="font-size:10px;max-width:200px;white-space:normal;line-height:1.4;background:#f5f3ff">' + termHtml + '</td>' +
             '<td style="font-size:10px;max-width:180px;white-space:normal;line-height:1.4">' + escapeText(ecoRow?.regulacion || '—') + '</td>' +
             '<td style="text-align:center">' + tenantsBadge + '</td>' +
+            productCells +
           '</tr>';
         });
       });
