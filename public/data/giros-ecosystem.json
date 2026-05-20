@@ -20,35 +20,126 @@
       "regulacion": "Mayoría de edad, COFEPRIS, discreción del paquete",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Pipedream Products", "url": "https://www.pipedreamproducts.com/", "tipo": "fabricante"},
-          {"nombre": "CalExotics", "url": "https://www.calexotics.com/", "tipo": "fabricante"},
-          {"nombre": "Doc Johnson", "url": "https://www.docjohnson.com/", "tipo": "fabricante"}
+          {
+            "nombre": "Pipedream Products",
+            "url": "https://www.pipedreamproducts.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "CalExotics",
+            "url": "https://www.calexotics.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Doc Johnson",
+            "url": "https://www.docjohnson.com/",
+            "tipo": "fabricante"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Tienda Venus MX", "url": "https://www.tiendavenus.com/", "scrapeable": true},
-          {"nombre": "Cake Sex Shop", "url": "https://cake-sexshop.com/", "scrapeable": true},
-          {"nombre": "Sex Shop México", "url": "https://www.sexshopmexico.com.mx/", "scrapeable": true}
+          {
+            "nombre": "Tienda Venus MX",
+            "url": "https://www.tiendavenus.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Cake Sex Shop",
+            "url": "https://cake-sexshop.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Sex Shop México",
+            "url": "https://www.sexshopmexico.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Retail Pro", "url": "https://www.retailpro.com/", "pais": "🌎 Global", "enfoque": "Retail especializado multi-sucursal", "modelo_cobro": "Licencia enterprise", "precio_base": "Custom", "precio_tipico": "$300+/terminal/mes", "fortaleza": "Multi-sucursal robusto, variantes", "debilidad": "Caro, complejo de implementar"},
-        {"sistema": "Lightspeed Retail", "url": "https://www.lightspeedhq.com/retail/", "pais": "🇨🇦 CAN/Global", "enfoque": "Retail moderno", "modelo_cobro": "SaaS", "precio_base": "$89 USD/mes", "precio_tipico": "$89-289 USD/mes", "fortaleza": "Catálogo rico, variantes, e-commerce", "debilidad": "Sin CFDI nativo"},
-        {"sistema": "XStore POS", "url": "https://www.xstorepos.com/", "pais": "🌎 Global", "enfoque": "Adult/specialty retail", "modelo_cobro": "Licencia + plugins", "precio_base": "$59 USD único", "precio_tipico": "+plugins+hosting", "fortaleza": "Personalizable", "debilidad": "Requiere setup técnico"}
+        {
+          "sistema": "Retail Pro",
+          "url": "https://www.retailpro.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Retail especializado multi-sucursal",
+          "modelo_cobro": "Licencia enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$300+/terminal/mes",
+          "fortaleza": "Multi-sucursal robusto, variantes",
+          "debilidad": "Caro, complejo de implementar"
+        },
+        {
+          "sistema": "Lightspeed Retail",
+          "url": "https://www.lightspeedhq.com/retail/",
+          "pais": "🇨🇦 CAN/Global",
+          "enfoque": "Retail moderno",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$89 USD/mes",
+          "precio_tipico": "$89-289 USD/mes",
+          "fortaleza": "Catálogo rico, variantes, e-commerce",
+          "debilidad": "Sin CFDI nativo"
+        },
+        {
+          "sistema": "XStore POS",
+          "url": "https://www.xstorepos.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Adult/specialty retail",
+          "modelo_cobro": "Licencia + plugins",
+          "precio_base": "$59 USD único",
+          "precio_tipico": "+plugins+hosting",
+          "fortaleza": "Personalizable",
+          "debilidad": "Requiere setup técnico"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "S1", "feature": "Envío en empaque discreto", "porque": "Privacidad del cliente (sin marca visible)", "prioridad": "🔴 Crítica"},
-        {"id": "S2", "feature": "Verificación de edad antes de compra", "porque": "Requisito legal", "prioridad": "🔴 Crítica"},
-        {"id": 7, "feature": "Variantes (color/tamaño/material)", "porque": "Inventario fino por SKU", "prioridad": "🔴 Alta"},
-        {"id": 12, "feature": "E-commerce integrado con catálogo NSFW", "porque": "60%+ ventas son online", "prioridad": "🔴 Crítica"}
+        {
+          "id": "S1",
+          "feature": "Envío en empaque discreto",
+          "porque": "Privacidad del cliente (sin marca visible)",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "S2",
+          "feature": "Verificación de edad antes de compra",
+          "porque": "Requisito legal",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 7,
+          "feature": "Variantes (color/tamaño/material)",
+          "porque": "Inventario fino por SKU",
+          "prioridad": "🔴 Alta"
+        },
+        {
+          "id": 12,
+          "feature": "E-commerce integrado con catálogo NSFW",
+          "porque": "60%+ ventas son online",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Discreción", "problema": "Sistemas que muestran descripción explícita en el ticket impreso", "afecta": "TODOS si no se configura"},
-        {"area": "Edad", "problema": "Sin verificación de edad → riesgo legal", "afecta": "Sistemas básicos"}
+        {
+          "area": "Discreción",
+          "problema": "Sistemas que muestran descripción explícita en el ticket impreso",
+          "afecta": "TODOS si no se configura"
+        },
+        {
+          "area": "Edad",
+          "problema": "Sin verificación de edad → riesgo legal",
+          "afecta": "Sistemas básicos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Artículo / Toy"},
-        {"generico": "Categoría", "este_giro": "Sección (Toys/Lencería/Wellness/Bondage)"},
-        {"generico": "Cliente", "este_giro": "Cliente (con discreción obligatoria)"}
+        {
+          "generico": "Producto",
+          "este_giro": "Artículo / Toy"
+        },
+        {
+          "generico": "Categoría",
+          "este_giro": "Sección (Toys/Lencería/Wellness/Bondage)"
+        },
+        {
+          "generico": "Cliente",
+          "este_giro": "Cliente (con discreción obligatoria)"
+        }
       ]
     },
     {
@@ -59,38 +150,140 @@
       "regulacion": "CFDI 4.0, COFEPRIS (alimentos), Protección Civil",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Sysco", "url": "https://www.sysco.com/", "tipo": "distribuidor alimentos"},
-          {"nombre": "US Foods", "url": "https://www.usfoods.com/", "tipo": "distribuidor"},
-          {"nombre": "Performance Food", "url": "https://www.performancefoodservice.com/", "tipo": "distribuidor"}
+          {
+            "nombre": "Sysco",
+            "url": "https://www.sysco.com/",
+            "tipo": "distribuidor alimentos"
+          },
+          {
+            "nombre": "US Foods",
+            "url": "https://www.usfoods.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Performance Food",
+            "url": "https://www.performancefoodservice.com/",
+            "tipo": "distribuidor"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "McDonald's", "url": "https://www.mcdonalds.com/", "scrapeable": true},
-          {"nombre": "Burger King", "url": "https://www.bk.com/", "scrapeable": true},
-          {"nombre": "Domino's", "url": "https://www.dominos.com/", "scrapeable": true}
+          {
+            "nombre": "McDonald's México",
+            "url": "https://www.mcdonalds.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Domino's Pizza MX",
+            "url": "https://www.dominos.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Burger King MX",
+            "url": "https://www.bk.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes enterprise", "modelo_cobro": "SaaS + hardware", "precio_base": "$69 USD/mes", "precio_tipico": "$165+ USD/mes", "fortaleza": "Mapa mesas avanzado, KDS pro", "debilidad": "Caro, hardware obligatorio"},
-        {"sistema": "TouchBistro", "url": "https://www.touchbistro.com/", "pais": "🇨🇦 CAN", "enfoque": "Restaurantes medianos", "modelo_cobro": "SaaS", "precio_base": "$69 USD/mes", "precio_tipico": "$69-399 USD/mes", "fortaleza": "iPad-first, KDS, mapa mesas", "debilidad": "Solo iPad"},
-        {"sistema": "Lavu", "url": "https://lavu.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes pequeños-medianos", "modelo_cobro": "SaaS", "precio_base": "$59 USD/mes", "precio_tipico": "$59-329 USD/mes", "fortaleza": "Configurable", "debilidad": "Curva aprendizaje"}
+        {
+          "sistema": "Toast POS",
+          "url": "https://pos.toasttab.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes enterprise",
+          "modelo_cobro": "SaaS + hardware",
+          "precio_base": "$69 USD/mes",
+          "precio_tipico": "$165+ USD/mes",
+          "fortaleza": "Mapa mesas avanzado, KDS pro",
+          "debilidad": "Caro, hardware obligatorio"
+        },
+        {
+          "sistema": "TouchBistro",
+          "url": "https://www.touchbistro.com/",
+          "pais": "🇨🇦 CAN",
+          "enfoque": "Restaurantes medianos",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$69 USD/mes",
+          "precio_tipico": "$69-399 USD/mes",
+          "fortaleza": "iPad-first, KDS, mapa mesas",
+          "debilidad": "Solo iPad"
+        },
+        {
+          "sistema": "Lavu",
+          "url": "https://lavu.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes pequeños-medianos",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$59 USD/mes",
+          "precio_tipico": "$59-329 USD/mes",
+          "fortaleza": "Configurable",
+          "debilidad": "Curva aprendizaje"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": 1, "feature": "Mapa visual de mesas drag&drop", "porque": "Diseñar restaurante como plano real (terraza, interior, bar, VIP)", "prioridad": "🔴 Crítica"},
-        {"id": 2, "feature": "Estado mesas tiempo real", "porque": "Saber ocupación sin preguntar al mesero", "prioridad": "🔴 Crítica"},
-        {"id": 3, "feature": "Split bill avanzado (por persona/ítem/%)", "porque": "Cobro a grupos sin fricción", "prioridad": "🔴 Crítica"},
-        {"id": 9, "feature": "KDS (Kitchen Display System)", "porque": "Pantallas por estación + timers + sonidos", "prioridad": "🔴 Alta"},
-        {"id": 11, "feature": "Hub omnicanal (Uber/Rappi/DiDi)", "porque": "Centralizar pedidos online", "prioridad": "🔴 Alta"}
+        {
+          "id": 1,
+          "feature": "Mapa visual de mesas drag&drop",
+          "porque": "Diseñar restaurante como plano real (terraza, interior, bar, VIP)",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 2,
+          "feature": "Estado mesas tiempo real",
+          "porque": "Saber ocupación sin preguntar al mesero",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 3,
+          "feature": "Split bill avanzado (por persona/ítem/%)",
+          "porque": "Cobro a grupos sin fricción",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 9,
+          "feature": "KDS (Kitchen Display System)",
+          "porque": "Pantallas por estación + timers + sonidos",
+          "prioridad": "🔴 Alta"
+        },
+        {
+          "id": 11,
+          "feature": "Hub omnicanal (Uber/Rappi/DiDi)",
+          "porque": "Centralizar pedidos online",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Operación mesa", "problema": "Mapa de mesas estático sin drag&drop", "afecta": "SICAR, Eleventa, Shopify"},
-        {"area": "Pagos", "problema": "Sin pagos mixtos (efectivo+tarjeta+QR+vales)", "afecta": "SICAR, Eleventa básico"}
+        {
+          "area": "Operación mesa",
+          "problema": "Mapa de mesas estático sin drag&drop",
+          "afecta": "SICAR, Eleventa, Shopify"
+        },
+        {
+          "area": "Pagos",
+          "problema": "Sin pagos mixtos (efectivo+tarjeta+QR+vales)",
+          "afecta": "SICAR, Eleventa básico"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Platillo"},
-        {"generico": "Categoría", "este_giro": "Sección del menú"},
-        {"generico": "Venta", "este_giro": "Cuenta / Comanda"},
-        {"generico": "Empleado", "este_giro": "Mesero / Cocinero"},
-        {"generico": "Mesa", "este_giro": "Mesa"}
+        {
+          "generico": "Producto",
+          "este_giro": "Platillo"
+        },
+        {
+          "generico": "Categoría",
+          "este_giro": "Sección del menú"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Cuenta / Comanda"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Mesero / Cocinero"
+        },
+        {
+          "generico": "Mesa",
+          "este_giro": "Mesa"
+        }
       ]
     },
     {
@@ -101,34 +294,120 @@
       "regulacion": "SADER/SENASICA, Cofepris (controlados)",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Covetrus", "url": "https://www.covetrus.com/", "tipo": "distribuidor"},
-          {"nombre": "MWI Animal Health", "url": "https://www.mwi.com/", "tipo": "distribuidor"},
-          {"nombre": "Patterson Veterinary", "url": "https://www.pattersonvet.com/", "tipo": "distribuidor"}
+          {
+            "nombre": "Covetrus",
+            "url": "https://www.covetrus.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "MWI Animal Health",
+            "url": "https://www.mwi.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Patterson Veterinary",
+            "url": "https://www.pattersonvet.com/",
+            "tipo": "distribuidor"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "VCA Hospitals", "url": "https://www.vca.com/", "scrapeable": true},
-          {"nombre": "Banfield Pet Hospital", "url": "https://www.banfield.com/", "scrapeable": true},
-          {"nombre": "Petco Vetco", "url": "https://www.petco.com/vetco", "scrapeable": true}
+          {
+            "nombre": "VCA Hospitals",
+            "url": "https://www.vca.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Banfield Pet Hospital",
+            "url": "https://www.banfield.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Petco Vetco",
+            "url": "https://www.petco.com.mx",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "eVetPractice", "url": "https://evetpractice.com/", "pais": "🇺🇸 USA", "enfoque": "Veterinaria pequeña-mediana", "modelo_cobro": "SaaS", "precio_base": "$199 USD/mes", "precio_tipico": "$199-499 USD/mes", "fortaleza": "Expediente clínico + facturación", "debilidad": "USA-only"},
-        {"sistema": "Provet Cloud", "url": "https://www.provet.cloud/", "pais": "🇫🇮 FIN/Global", "enfoque": "Veterinaria moderna", "modelo_cobro": "SaaS", "precio_base": "€80/mes", "precio_tipico": "€80-200/mes", "fortaleza": "Cloud-native, UX moderna", "debilidad": "Recién entrando a LATAM"},
-        {"sistema": "Covetrus Pulse", "url": "https://covetrus.com/pulse/", "pais": "🇺🇸 USA", "enfoque": "Veterinaria multi-sucursal", "modelo_cobro": "SaaS enterprise", "precio_base": "Custom", "precio_tipico": "$500+ USD/mes", "fortaleza": "Integración Covetrus supply", "debilidad": "Caro, complejo"}
+        {
+          "sistema": "eVetPractice",
+          "url": "https://evetpractice.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Veterinaria pequeña-mediana",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$199 USD/mes",
+          "precio_tipico": "$199-499 USD/mes",
+          "fortaleza": "Expediente clínico + facturación",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "Provet Cloud",
+          "url": "https://www.provet.cloud/",
+          "pais": "🇫🇮 FIN/Global",
+          "enfoque": "Veterinaria moderna",
+          "modelo_cobro": "SaaS",
+          "precio_base": "€80/mes",
+          "precio_tipico": "€80-200/mes",
+          "fortaleza": "Cloud-native, UX moderna",
+          "debilidad": "Recién entrando a LATAM"
+        },
+        {
+          "sistema": "Covetrus Pulse",
+          "url": "https://covetrus.com/pulse/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Veterinaria multi-sucursal",
+          "modelo_cobro": "SaaS enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$500+ USD/mes",
+          "fortaleza": "Integración Covetrus supply",
+          "debilidad": "Caro, complejo"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "V1", "feature": "Expediente clínico por mascota", "porque": "Historial vacunas, alergias, cirugías", "prioridad": "🔴 Crítica"},
-        {"id": "V2", "feature": "Recordatorios automáticos (vacunación)", "porque": "Retención cliente + salud preventiva", "prioridad": "🔴 Crítica"},
-        {"id": "V3", "feature": "Catálogo multi-mascota por dueño", "porque": "Un dueño puede tener varias mascotas", "prioridad": "🔴 Alta"}
+        {
+          "id": "V1",
+          "feature": "Expediente clínico por mascota",
+          "porque": "Historial vacunas, alergias, cirugías",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "V2",
+          "feature": "Recordatorios automáticos (vacunación)",
+          "porque": "Retención cliente + salud preventiva",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "V3",
+          "feature": "Catálogo multi-mascota por dueño",
+          "porque": "Un dueño puede tener varias mascotas",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Expediente", "problema": "POS genéricos no manejan datos de mascota (especie/raza/peso)", "afecta": "SICAR, Eleventa"},
-        {"area": "Recordatorios", "problema": "Vacunación olvidada por falta de alertas", "afecta": "Sistemas sin CRM"}
+        {
+          "area": "Expediente",
+          "problema": "POS genéricos no manejan datos de mascota (especie/raza/peso)",
+          "afecta": "SICAR, Eleventa"
+        },
+        {
+          "area": "Recordatorios",
+          "problema": "Vacunación olvidada por falta de alertas",
+          "afecta": "Sistemas sin CRM"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Servicio / Medicamento / Alimento"},
-        {"generico": "Cliente", "este_giro": "Dueño / Mascota"},
-        {"generico": "Empleado", "este_giro": "Médico veterinario"}
+        {
+          "generico": "Producto",
+          "este_giro": "Servicio / Medicamento / Alimento"
+        },
+        {
+          "generico": "Cliente",
+          "este_giro": "Dueño / Mascota"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Médico veterinario"
+        }
       ]
     },
     {
@@ -139,33 +418,116 @@
       "regulacion": "Cédula profesional, NOM-013-SSA",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Patterson Dental", "url": "https://www.pattersondental.com/", "tipo": "distribuidor"},
-          {"nombre": "Henry Schein", "url": "https://www.henryschein.com/", "tipo": "distribuidor"},
-          {"nombre": "Benco Dental", "url": "https://www.benco.com/", "tipo": "distribuidor"}
+          {
+            "nombre": "Patterson Dental",
+            "url": "https://www.pattersondental.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Henry Schein",
+            "url": "https://www.henryschein.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Benco Dental",
+            "url": "https://www.benco.com/",
+            "tipo": "distribuidor"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Dentalia", "url": "https://www.dentalia.com/", "scrapeable": true},
-          {"nombre": "Sonría", "url": "https://www.sonria.com.mx/", "scrapeable": true},
-          {"nombre": "Dentegra", "url": "https://www.dentegra.com.mx/", "scrapeable": true}
+          {
+            "nombre": "Dentalia",
+            "url": "https://www.dentalia.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Sonría",
+            "url": "https://www.sonria.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Dentegra",
+            "url": "https://www.dentegra.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Dentrix", "url": "https://www.dentrix.com/", "pais": "🇺🇸 USA", "enfoque": "Consultorio dental", "modelo_cobro": "Licencia+SaaS", "precio_base": "$8,000 USD único", "precio_tipico": "+$200/mes", "fortaleza": "Estándar USA, expediente", "debilidad": "Caro, USA-first"},
-        {"sistema": "Open Dental", "url": "https://www.opendental.com/", "pais": "🇺🇸 USA", "enfoque": "Consultorio open-source", "modelo_cobro": "Subscription", "precio_base": "$179/mes", "precio_tipico": "$179-500/mes", "fortaleza": "Open source, customizable", "debilidad": "Requiere técnico"},
-        {"sistema": "Curve Dental", "url": "https://www.curvedental.com/", "pais": "🇺🇸 USA", "enfoque": "Consultorio cloud moderno", "modelo_cobro": "SaaS", "precio_base": "$395 USD/mes", "precio_tipico": "$395-700 USD/mes", "fortaleza": "Cloud-native, UX moderna", "debilidad": "USA-only"}
+        {
+          "sistema": "Dentrix",
+          "url": "https://www.dentrix.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Consultorio dental",
+          "modelo_cobro": "Licencia+SaaS",
+          "precio_base": "$8,000 USD único",
+          "precio_tipico": "+$200/mes",
+          "fortaleza": "Estándar USA, expediente",
+          "debilidad": "Caro, USA-first"
+        },
+        {
+          "sistema": "Open Dental",
+          "url": "https://www.opendental.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Consultorio open-source",
+          "modelo_cobro": "Subscription",
+          "precio_base": "$179/mes",
+          "precio_tipico": "$179-500/mes",
+          "fortaleza": "Open source, customizable",
+          "debilidad": "Requiere técnico"
+        },
+        {
+          "sistema": "Curve Dental",
+          "url": "https://www.curvedental.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Consultorio cloud moderno",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$395 USD/mes",
+          "precio_tipico": "$395-700 USD/mes",
+          "fortaleza": "Cloud-native, UX moderna",
+          "debilidad": "USA-only"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "D1", "feature": "Odontograma digital", "porque": "Marcar piezas con tratamiento por diente", "prioridad": "🔴 Crítica"},
-        {"id": "D2", "feature": "Plan de tratamiento multi-cita", "porque": "Ortodoncia/endodoncia requieren múltiples citas", "prioridad": "🔴 Crítica"},
-        {"id": "D3", "feature": "Pagos parciales / planes de pago", "porque": "Tratamientos caros se pagan mensual", "prioridad": "🔴 Alta"}
+        {
+          "id": "D1",
+          "feature": "Odontograma digital",
+          "porque": "Marcar piezas con tratamiento por diente",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "D2",
+          "feature": "Plan de tratamiento multi-cita",
+          "porque": "Ortodoncia/endodoncia requieren múltiples citas",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "D3",
+          "feature": "Pagos parciales / planes de pago",
+          "porque": "Tratamientos caros se pagan mensual",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Expediente", "problema": "POS genéricos no tienen odontograma", "afecta": "Sistemas no-dentales"},
-        {"area": "Pagos", "problema": "Sin gestión de planes de pago multimes", "afecta": "POS retail genéricos"}
+        {
+          "area": "Expediente",
+          "problema": "POS genéricos no tienen odontograma",
+          "afecta": "Sistemas no-dentales"
+        },
+        {
+          "area": "Pagos",
+          "problema": "Sin gestión de planes de pago multimes",
+          "afecta": "POS retail genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Tratamiento / Procedimiento"},
-        {"generico": "Empleado", "este_giro": "Doctor / Asistente / Higienista"}
+        {
+          "generico": "Producto",
+          "este_giro": "Tratamiento / Procedimiento"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Doctor / Asistente / Higienista"
+        }
       ]
     },
     {
@@ -176,34 +538,120 @@
       "regulacion": "SECTUR, COFEPRIS, Protección Civil",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Ecolab", "url": "https://www.ecolab.com/", "tipo": "limpieza/higiene"},
-          {"nombre": "Guest Supply", "url": "https://www.guestsupply.com/", "tipo": "amenidades"},
-          {"nombre": "Americast", "url": "https://www.americast.com/", "tipo": "amenidades"}
+          {
+            "nombre": "Ecolab",
+            "url": "https://www.ecolab.com/",
+            "tipo": "limpieza/higiene"
+          },
+          {
+            "nombre": "Guest Supply",
+            "url": "https://www.guestsupply.com/",
+            "tipo": "amenidades"
+          },
+          {
+            "nombre": "Americast",
+            "url": "https://www.americast.com/",
+            "tipo": "amenidades"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Marriott", "url": "https://www.marriott.com/", "scrapeable": true},
-          {"nombre": "Hilton", "url": "https://www.hilton.com/", "scrapeable": true},
-          {"nombre": "Holiday Inn (IHG)", "url": "https://www.ihg.com/holidayinn", "scrapeable": true}
+          {
+            "nombre": "Marriott",
+            "url": "https://www.marriott.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Hilton",
+            "url": "https://www.hilton.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Holiday Inn (IHG)",
+            "url": "https://www.ihg.com/mx/es",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Oracle OPERA", "url": "https://www.oracle.com/hospitality/opera/", "pais": "🌎 Global", "enfoque": "Hotel enterprise", "modelo_cobro": "Licencia enterprise", "precio_base": "Custom", "precio_tipico": "$1000+/mes", "fortaleza": "Estándar industria, PMS robusto", "debilidad": "Caro, complejo"},
-        {"sistema": "Cloudbeds", "url": "https://www.cloudbeds.com/", "pais": "🌎 Global", "enfoque": "Hotel pequeño-mediano", "modelo_cobro": "SaaS", "precio_base": "$200 USD/mes", "precio_tipico": "$200-700/mes", "fortaleza": "Channel manager, UX moderna", "debilidad": "Limitado en cadenas grandes"},
-        {"sistema": "Little Hotelier", "url": "https://www.littlehotelier.com/", "pais": "🌎 Global", "enfoque": "Hoteles boutique", "modelo_cobro": "SaaS", "precio_base": "$109 USD/mes", "precio_tipico": "$109-389/mes", "fortaleza": "Fácil de usar", "debilidad": "Funcionalidad básica"}
+        {
+          "sistema": "Oracle OPERA",
+          "url": "https://www.oracle.com/hospitality/opera/",
+          "pais": "🌎 Global",
+          "enfoque": "Hotel enterprise",
+          "modelo_cobro": "Licencia enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$1000+/mes",
+          "fortaleza": "Estándar industria, PMS robusto",
+          "debilidad": "Caro, complejo"
+        },
+        {
+          "sistema": "Cloudbeds",
+          "url": "https://www.cloudbeds.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Hotel pequeño-mediano",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$200 USD/mes",
+          "precio_tipico": "$200-700/mes",
+          "fortaleza": "Channel manager, UX moderna",
+          "debilidad": "Limitado en cadenas grandes"
+        },
+        {
+          "sistema": "Little Hotelier",
+          "url": "https://www.littlehotelier.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Hoteles boutique",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$109 USD/mes",
+          "precio_tipico": "$109-389/mes",
+          "fortaleza": "Fácil de usar",
+          "debilidad": "Funcionalidad básica"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "H1", "feature": "Channel manager (Booking/Expedia/Airbnb)", "porque": "Sincronizar disponibilidad multi-canal", "prioridad": "🔴 Crítica"},
-        {"id": "H2", "feature": "Plan de habitaciones visual", "porque": "Ver ocupación por fecha y tipo", "prioridad": "🔴 Crítica"},
-        {"id": "H3", "feature": "Folios (cargos a habitación)", "porque": "Restaurant/spa cobra a la cuenta", "prioridad": "🔴 Alta"}
+        {
+          "id": "H1",
+          "feature": "Channel manager (Booking/Expedia/Airbnb)",
+          "porque": "Sincronizar disponibilidad multi-canal",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "H2",
+          "feature": "Plan de habitaciones visual",
+          "porque": "Ver ocupación por fecha y tipo",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "H3",
+          "feature": "Folios (cargos a habitación)",
+          "porque": "Restaurant/spa cobra a la cuenta",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Disponibilidad", "problema": "Overbooking por sync lento entre canales", "afecta": "Hoteles sin channel manager"},
-        {"area": "Folios", "problema": "Cargos a habitación se pierden o duplican", "afecta": "POS genéricos no-hotel"}
+        {
+          "area": "Disponibilidad",
+          "problema": "Overbooking por sync lento entre canales",
+          "afecta": "Hoteles sin channel manager"
+        },
+        {
+          "area": "Folios",
+          "problema": "Cargos a habitación se pierden o duplican",
+          "afecta": "POS genéricos no-hotel"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Habitación / Servicio"},
-        {"generico": "Categoría", "este_giro": "Tipo habitación (Standard/Suite/Junior)"},
-        {"generico": "Venta", "este_giro": "Reserva / Estancia / Folio"}
+        {
+          "generico": "Producto",
+          "este_giro": "Habitación / Servicio"
+        },
+        {
+          "generico": "Categoría",
+          "este_giro": "Tipo habitación (Standard/Suite/Junior)"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Reserva / Estancia / Folio"
+        }
       ]
     },
     {
@@ -214,34 +662,120 @@
       "regulacion": "COFEPRIS (controlados), libro psicotrópicos, CFDI 4.0",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "McKesson", "url": "https://www.mckesson.com/", "tipo": "distribuidor farmacéutico"},
-          {"nombre": "Cardinal Health", "url": "https://www.cardinalhealth.com/", "tipo": "distribuidor"},
-          {"nombre": "Cencora (ex-AmerisourceBergen)", "url": "https://www.cencora.com/", "tipo": "distribuidor"}
+          {
+            "nombre": "McKesson",
+            "url": "https://www.mckesson.com/",
+            "tipo": "distribuidor farmacéutico"
+          },
+          {
+            "nombre": "Cardinal Health",
+            "url": "https://www.cardinalhealth.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Cencora (ex-AmerisourceBergen)",
+            "url": "https://www.cencora.com/",
+            "tipo": "distribuidor"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Farmacias Guadalajara", "url": "https://www.farmaciasguadalajara.com/", "scrapeable": true},
-          {"nombre": "Farmacias del Ahorro", "url": "https://www.fahorro.com/", "scrapeable": true},
-          {"nombre": "CVS", "url": "https://www.cvs.com/", "scrapeable": true}
+          {
+            "nombre": "Farmacias Guadalajara",
+            "url": "https://www.farmaciasguadalajara.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Farmacias del Ahorro",
+            "url": "https://www.fahorro.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "CVS",
+            "url": "https://www.cvs.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "PrimeRx", "url": "https://primerx.io/", "pais": "🇺🇸 USA", "enfoque": "Farmacia comunitaria", "modelo_cobro": "SaaS", "precio_base": "$899 USD/mes", "precio_tipico": "$899-1500/mes", "fortaleza": "Manejo recetas, seguros", "debilidad": "USA-only"},
-        {"sistema": "Rx30", "url": "https://www.rx30.com/", "pais": "🇺🇸 USA", "enfoque": "Farmacia independiente", "modelo_cobro": "SaaS", "precio_base": "$650 USD/mes", "precio_tipico": "$650-1200/mes", "fortaleza": "Recetas electrónicas", "debilidad": "USA-only"},
-        {"sistema": "Liberty Software", "url": "https://www.libertysoftware.com/", "pais": "🇺🇸 USA", "enfoque": "Farmacia retail", "modelo_cobro": "SaaS", "precio_base": "$500 USD/mes", "precio_tipico": "$500-1000/mes", "fortaleza": "Integración seguros", "debilidad": "USA-only"}
+        {
+          "sistema": "PrimeRx",
+          "url": "https://primerx.io/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Farmacia comunitaria",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$899 USD/mes",
+          "precio_tipico": "$899-1500/mes",
+          "fortaleza": "Manejo recetas, seguros",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "Rx30",
+          "url": "https://www.rx30.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Farmacia independiente",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$650 USD/mes",
+          "precio_tipico": "$650-1200/mes",
+          "fortaleza": "Recetas electrónicas",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "Liberty Software",
+          "url": "https://www.libertysoftware.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Farmacia retail",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$500 USD/mes",
+          "precio_tipico": "$500-1000/mes",
+          "fortaleza": "Integración seguros",
+          "debilidad": "USA-only"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "F1", "feature": "Registro receta médica", "porque": "Trazabilidad de controlados", "prioridad": "🔴 Crítica"},
-        {"id": "F2", "feature": "Libro de psicotrópicos digital", "porque": "Cumplimiento Cofepris", "prioridad": "🔴 Crítica MX"},
-        {"id": 7, "feature": "Lotes + caducidad", "porque": "Retiro por lote, alertas caducidad", "prioridad": "🔴 Crítica"}
+        {
+          "id": "F1",
+          "feature": "Registro receta médica",
+          "porque": "Trazabilidad de controlados",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "F2",
+          "feature": "Libro de psicotrópicos digital",
+          "porque": "Cumplimiento Cofepris",
+          "prioridad": "🔴 Crítica MX"
+        },
+        {
+          "id": 7,
+          "feature": "Lotes + caducidad",
+          "porque": "Retiro por lote, alertas caducidad",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Regulación", "problema": "Sin manejo psicotrópicos → multas Cofepris", "afecta": "POS genéricos"},
-        {"area": "Inventario", "problema": "Sin control caducidad → pérdidas masivas", "afecta": "SICAR, Eleventa"}
+        {
+          "area": "Regulación",
+          "problema": "Sin manejo psicotrópicos → multas Cofepris",
+          "afecta": "POS genéricos"
+        },
+        {
+          "area": "Inventario",
+          "problema": "Sin control caducidad → pérdidas masivas",
+          "afecta": "SICAR, Eleventa"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Medicamento / Artículo de salud"},
-        {"generico": "Categoría", "este_giro": "Departamento (OTC/Rx/Salud/Belleza)"},
-        {"generico": "Empleado", "este_giro": "Farmacéutico / Auxiliar"}
+        {
+          "generico": "Producto",
+          "este_giro": "Medicamento / Artículo de salud"
+        },
+        {
+          "generico": "Categoría",
+          "este_giro": "Departamento (OTC/Rx/Salud/Belleza)"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Farmacéutico / Auxiliar"
+        }
       ]
     },
     {
@@ -252,34 +786,120 @@
       "regulacion": "COFEPRIS (lentes graduados), cédula optometrista",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Essilor", "url": "https://www.essilor.com/", "tipo": "fabricante lentes"},
-          {"nombre": "Hoya Vision", "url": "https://www.hoyavision.com/", "tipo": "fabricante lentes"},
-          {"nombre": "Zeiss Vision Care", "url": "https://www.zeiss.com/vision-care", "tipo": "fabricante"}
+          {
+            "nombre": "Essilor",
+            "url": "https://www.essilor.com/",
+            "tipo": "fabricante lentes"
+          },
+          {
+            "nombre": "Hoya Vision",
+            "url": "https://www.hoyavision.com/",
+            "tipo": "fabricante lentes"
+          },
+          {
+            "nombre": "Zeiss Vision Care",
+            "url": "https://www.zeiss.com/vision-care",
+            "tipo": "fabricante"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Devlyn", "url": "https://www.devlyn.com.mx/", "scrapeable": true},
-          {"nombre": "Lux MX", "url": "https://www.lux.mx/", "scrapeable": true},
-          {"nombre": "LensCrafters", "url": "https://www.lenscrafters.com/", "scrapeable": true}
+          {
+            "nombre": "Devlyn",
+            "url": "https://www.devlyn.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Lux MX",
+            "url": "https://www.lux.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "LensCrafters",
+            "url": "https://www.lenscrafters.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "OfficeMate", "url": "https://www.officemate.com/", "pais": "🇺🇸 USA", "enfoque": "Óptica USA estándar", "modelo_cobro": "Licencia+SaaS", "precio_base": "$3,000 USD único", "precio_tipico": "+$150/mes", "fortaleza": "Estándar industria USA", "debilidad": "USA-only, no CFDI"},
-        {"sistema": "Crystal PM", "url": "https://www.crystalpm.com/", "pais": "🇺🇸 USA", "enfoque": "Óptica independiente", "modelo_cobro": "SaaS", "precio_base": "$249/mes", "precio_tipico": "$249-499/mes", "fortaleza": "Recetas + facturación seguros", "debilidad": "USA-only"},
-        {"sistema": "EyePegasus", "url": "https://www.eyepegasus.com/", "pais": "🇺🇸 USA", "enfoque": "Óptica moderna cloud", "modelo_cobro": "SaaS", "precio_base": "$149/mes", "precio_tipico": "$149-399/mes", "fortaleza": "Cloud, UX moderna", "debilidad": "USA-only"}
+        {
+          "sistema": "OfficeMate",
+          "url": "https://www.officemate.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Óptica USA estándar",
+          "modelo_cobro": "Licencia+SaaS",
+          "precio_base": "$3,000 USD único",
+          "precio_tipico": "+$150/mes",
+          "fortaleza": "Estándar industria USA",
+          "debilidad": "USA-only, no CFDI"
+        },
+        {
+          "sistema": "Crystal PM",
+          "url": "https://www.crystalpm.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Óptica independiente",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$249/mes",
+          "precio_tipico": "$249-499/mes",
+          "fortaleza": "Recetas + facturación seguros",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "EyePegasus",
+          "url": "https://www.eyepegasus.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Óptica moderna cloud",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$149/mes",
+          "precio_tipico": "$149-399/mes",
+          "fortaleza": "Cloud, UX moderna",
+          "debilidad": "USA-only"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "O1", "feature": "Captura graduación (esfera/cilindro/eje)", "porque": "Cada lente es único por OD/OI del cliente", "prioridad": "🔴 Crítica"},
-        {"id": "O2", "feature": "Orden de laboratorio (montaje)", "porque": "Trackear el armazón en laboratorio", "prioridad": "🔴 Crítica"},
-        {"id": "O3", "feature": "Multi-precio por tratamiento (antirreflejo/transitions)", "porque": "El armazón base se modifica con extras", "prioridad": "🔴 Alta"}
+        {
+          "id": "O1",
+          "feature": "Captura graduación (esfera/cilindro/eje)",
+          "porque": "Cada lente es único por OD/OI del cliente",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "O2",
+          "feature": "Orden de laboratorio (montaje)",
+          "porque": "Trackear el armazón en laboratorio",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "O3",
+          "feature": "Multi-precio por tratamiento (antirreflejo/transitions)",
+          "porque": "El armazón base se modifica con extras",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Receta", "problema": "POS sin captura graduación obliga a notas manuales", "afecta": "SICAR, Eleventa, Loyverse"},
-        {"area": "Montaje", "problema": "Sin tracking de orden de laboratorio → entregas tarde", "afecta": "POS genéricos"}
+        {
+          "area": "Receta",
+          "problema": "POS sin captura graduación obliga a notas manuales",
+          "afecta": "SICAR, Eleventa, Loyverse"
+        },
+        {
+          "area": "Montaje",
+          "problema": "Sin tracking de orden de laboratorio → entregas tarde",
+          "afecta": "POS genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Armazón / Lente / Accesorio"},
-        {"generico": "Venta", "este_giro": "Orden / Receta"},
-        {"generico": "Empleado", "este_giro": "Optometrista / Vendedor / Técnico laboratorio"}
+        {
+          "generico": "Producto",
+          "este_giro": "Armazón / Lente / Accesorio"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Orden / Receta"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Optometrista / Vendedor / Técnico laboratorio"
+        }
       ]
     },
     {
@@ -290,34 +910,120 @@
       "regulacion": "Protección Civil, CFDI 4.0",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Life Fitness", "url": "https://www.lifefitness.com/", "tipo": "fabricante equipo"},
-          {"nombre": "Matrix Fitness", "url": "https://www.matrixfitness.com/", "tipo": "fabricante"},
-          {"nombre": "Technogym", "url": "https://www.technogym.com/", "tipo": "fabricante premium"}
+          {
+            "nombre": "Life Fitness",
+            "url": "https://www.lifefitness.com/",
+            "tipo": "fabricante equipo"
+          },
+          {
+            "nombre": "Matrix Fitness",
+            "url": "https://www.matrixfitness.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Technogym",
+            "url": "https://www.technogym.com/",
+            "tipo": "fabricante premium"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Smart Fit", "url": "https://www.smartfit.com.mx/", "scrapeable": true},
-          {"nombre": "Anytime Fitness", "url": "https://www.anytimefitness.com/", "scrapeable": true},
-          {"nombre": "Planet Fitness", "url": "https://www.planetfitness.com/", "scrapeable": true}
+          {
+            "nombre": "Smart Fit",
+            "url": "https://www.smartfit.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Anytime Fitness",
+            "url": "https://www.anytimefitness.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Planet Fitness",
+            "url": "https://www.smartfit.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Mindbody", "url": "https://www.mindbodyonline.com/", "pais": "🌎 Global", "enfoque": "Gimnasio/wellness", "modelo_cobro": "SaaS", "precio_base": "$169 USD/mes", "precio_tipico": "$169-549/mes", "fortaleza": "Marketplace clientes, app", "debilidad": "Caro, comisión por reservas"},
-        {"sistema": "ABC Glofox", "url": "https://www.glofox.com/", "pais": "🇮🇪 IRL/Global", "enfoque": "Boutique fitness", "modelo_cobro": "SaaS", "precio_base": "Custom", "precio_tipico": "$200-600/mes", "fortaleza": "Clases + membresías", "debilidad": "Pricing opaco"},
-        {"sistema": "GymMaster", "url": "https://www.gymmaster.com/", "pais": "🇳🇿 NZ", "enfoque": "Gimnasios independientes", "modelo_cobro": "SaaS", "precio_base": "$109/mes", "precio_tipico": "$109-289/mes", "fortaleza": "Control acceso integrado", "debilidad": "Menos conocido"}
+        {
+          "sistema": "Mindbody",
+          "url": "https://www.mindbodyonline.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Gimnasio/wellness",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$169 USD/mes",
+          "precio_tipico": "$169-549/mes",
+          "fortaleza": "Marketplace clientes, app",
+          "debilidad": "Caro, comisión por reservas"
+        },
+        {
+          "sistema": "ABC Glofox",
+          "url": "https://www.glofox.com/",
+          "pais": "🇮🇪 IRL/Global",
+          "enfoque": "Boutique fitness",
+          "modelo_cobro": "SaaS",
+          "precio_base": "Custom",
+          "precio_tipico": "$200-600/mes",
+          "fortaleza": "Clases + membresías",
+          "debilidad": "Pricing opaco"
+        },
+        {
+          "sistema": "GymMaster",
+          "url": "https://www.gymmaster.com/",
+          "pais": "🇳🇿 NZ",
+          "enfoque": "Gimnasios independientes",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$109/mes",
+          "precio_tipico": "$109-289/mes",
+          "fortaleza": "Control acceso integrado",
+          "debilidad": "Menos conocido"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "G1", "feature": "Membresías recurrentes (charge auto)", "porque": "Modelo principal del gimnasio", "prioridad": "🔴 Crítica"},
-        {"id": "G2", "feature": "Control acceso (torniquetes/QR)", "porque": "Verificar membresía activa al entrar", "prioridad": "🔴 Crítica"},
-        {"id": "G3", "feature": "Calendario de clases con cupos", "porque": "Reservas yoga/spinning/etc", "prioridad": "🔴 Alta"}
+        {
+          "id": "G1",
+          "feature": "Membresías recurrentes (charge auto)",
+          "porque": "Modelo principal del gimnasio",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "G2",
+          "feature": "Control acceso (torniquetes/QR)",
+          "porque": "Verificar membresía activa al entrar",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "G3",
+          "feature": "Calendario de clases con cupos",
+          "porque": "Reservas yoga/spinning/etc",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Acceso", "problema": "Sin control acceso → entran sin pagar", "afecta": "POS genéricos sin integración hardware"},
-        {"area": "Cobros", "problema": "Membresías recurrentes manuales", "afecta": "Sistemas no-SaaS"}
+        {
+          "area": "Acceso",
+          "problema": "Sin control acceso → entran sin pagar",
+          "afecta": "POS genéricos sin integración hardware"
+        },
+        {
+          "area": "Cobros",
+          "problema": "Membresías recurrentes manuales",
+          "afecta": "Sistemas no-SaaS"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Membresía / Clase / Suplemento"},
-        {"generico": "Cliente", "este_giro": "Socio / Miembro"},
-        {"generico": "Empleado", "este_giro": "Entrenador / Recepción / Mantenimiento"}
+        {
+          "generico": "Producto",
+          "este_giro": "Membresía / Clase / Suplemento"
+        },
+        {
+          "generico": "Cliente",
+          "este_giro": "Socio / Miembro"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Entrenador / Recepción / Mantenimiento"
+        }
       ]
     },
     {
@@ -328,34 +1034,120 @@
       "regulacion": "Salubridad municipal, COFEPRIS (productos)",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Sally Beauty", "url": "https://www.sallybeauty.com/", "tipo": "distribuidor"},
-          {"nombre": "CosmoProf", "url": "https://www.cosmoprofbeauty.com/", "tipo": "distribuidor profesional"},
-          {"nombre": "Salon Centric", "url": "https://www.saloncentric.com/", "tipo": "distribuidor"}
+          {
+            "nombre": "Sally Beauty",
+            "url": "https://www.sallybeauty.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "CosmoProf",
+            "url": "https://www.cosmoprofbeauty.com/",
+            "tipo": "distribuidor profesional"
+          },
+          {
+            "nombre": "Salon Centric",
+            "url": "https://www.saloncentric.com/",
+            "tipo": "distribuidor"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Toni&Guy", "url": "https://www.toniandguy.com/", "scrapeable": true},
-          {"nombre": "Supercuts", "url": "https://www.supercuts.com/", "scrapeable": true},
-          {"nombre": "Fantastic Sams", "url": "https://www.fantasticsams.com/", "scrapeable": true}
+          {
+            "nombre": "Toni&Guy",
+            "url": "https://www.toniandguy.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Supercuts",
+            "url": "https://www.pelochiquilo.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Fantastic Sams",
+            "url": "https://www.fantasticsams.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Vagaro", "url": "https://www.vagaro.com/", "pais": "🇺🇸 USA", "enfoque": "Belleza/salón", "modelo_cobro": "SaaS", "precio_base": "$25 USD/mes", "precio_tipico": "$25-85 USD/mes", "fortaleza": "Citas online, marketing", "debilidad": "Inglés-first, sin CFDI"},
-        {"sistema": "Rosy Salon Software", "url": "https://rosysalonsoftware.com/", "pais": "🇺🇸 USA", "enfoque": "Salón pequeño-mediano", "modelo_cobro": "SaaS", "precio_base": "$29 USD/mes", "precio_tipico": "$29-199/mes", "fortaleza": "Específico para salón", "debilidad": "USA-only"},
-        {"sistema": "Phorest", "url": "https://www.phorest.com/", "pais": "🇮🇪 IRL/Global", "enfoque": "Salón profesional", "modelo_cobro": "SaaS", "precio_base": "Custom", "precio_tipico": "$150-400/mes", "fortaleza": "Marketing + lealtad", "debilidad": "Pricing opaco"}
+        {
+          "sistema": "Vagaro",
+          "url": "https://www.vagaro.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Belleza/salón",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$25 USD/mes",
+          "precio_tipico": "$25-85 USD/mes",
+          "fortaleza": "Citas online, marketing",
+          "debilidad": "Inglés-first, sin CFDI"
+        },
+        {
+          "sistema": "Rosy Salon Software",
+          "url": "https://rosysalonsoftware.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Salón pequeño-mediano",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$29 USD/mes",
+          "precio_tipico": "$29-199/mes",
+          "fortaleza": "Específico para salón",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "Phorest",
+          "url": "https://www.phorest.com/",
+          "pais": "🇮🇪 IRL/Global",
+          "enfoque": "Salón profesional",
+          "modelo_cobro": "SaaS",
+          "precio_base": "Custom",
+          "precio_tipico": "$150-400/mes",
+          "fortaleza": "Marketing + lealtad",
+          "debilidad": "Pricing opaco"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "SB1", "feature": "Citas con estilista específico", "porque": "Cliente reserva con SU estilista favorito", "prioridad": "🔴 Crítica"},
-        {"id": "SB2", "feature": "Servicios duración variable", "porque": "Corte 30min vs tinte 2h", "prioridad": "🔴 Crítica"},
-        {"id": "SB3", "feature": "Comisión por estilista", "porque": "Modelo de pago estándar del sector", "prioridad": "🔴 Crítica"}
+        {
+          "id": "SB1",
+          "feature": "Citas con estilista específico",
+          "porque": "Cliente reserva con SU estilista favorito",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "SB2",
+          "feature": "Servicios duración variable",
+          "porque": "Corte 30min vs tinte 2h",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "SB3",
+          "feature": "Comisión por estilista",
+          "porque": "Modelo de pago estándar del sector",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Agenda", "problema": "POS sin agendas individuales por estilista", "afecta": "SICAR, Eleventa, Loyverse"},
-        {"area": "Comisiones", "problema": "Cálculo manual de comisiones", "afecta": "POS genéricos"}
+        {
+          "area": "Agenda",
+          "problema": "POS sin agendas individuales por estilista",
+          "afecta": "SICAR, Eleventa, Loyverse"
+        },
+        {
+          "area": "Comisiones",
+          "problema": "Cálculo manual de comisiones",
+          "afecta": "POS genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Servicio / Producto retail"},
-        {"generico": "Empleado", "este_giro": "Estilista / Manicurista"},
-        {"generico": "Mesa", "este_giro": "Estación / Silla"}
+        {
+          "generico": "Producto",
+          "este_giro": "Servicio / Producto retail"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Estilista / Manicurista"
+        },
+        {
+          "generico": "Mesa",
+          "este_giro": "Estación / Silla"
+        }
       ]
     },
     {
@@ -366,34 +1158,120 @@
       "regulacion": "PROFEPA (residuos), SEMARNAT (aceites usados)",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Snap-on", "url": "https://www.snapon.com/", "tipo": "herramientas pro"},
-          {"nombre": "Matco Tools", "url": "https://www.matcotools.com/", "tipo": "herramientas"},
-          {"nombre": "Cornwell Tools", "url": "https://www.cornwelltools.com/", "tipo": "herramientas"}
+          {
+            "nombre": "Snap-on",
+            "url": "https://www.snapon.com/",
+            "tipo": "herramientas pro"
+          },
+          {
+            "nombre": "Matco Tools",
+            "url": "https://www.matcotools.com/",
+            "tipo": "herramientas"
+          },
+          {
+            "nombre": "Cornwell Tools",
+            "url": "https://www.cornwelltools.com/",
+            "tipo": "herramientas"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Midas", "url": "https://www.midas.com/", "scrapeable": true},
-          {"nombre": "Meineke", "url": "https://www.meineke.com/", "scrapeable": true},
-          {"nombre": "Jiffy Lube", "url": "https://www.jiffylube.com/", "scrapeable": true}
+          {
+            "nombre": "Midas",
+            "url": "https://www.midas.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Meineke",
+            "url": "https://www.jiffylube.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Jiffy Lube",
+            "url": "https://www.jiffylube.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Shopmonkey", "url": "https://www.shopmonkey.io/", "pais": "🇺🇸 USA", "enfoque": "Taller moderno cloud", "modelo_cobro": "SaaS", "precio_base": "$199 USD/mes", "precio_tipico": "$199-549/mes", "fortaleza": "UX moderna, integraciones", "debilidad": "USA-first"},
-        {"sistema": "Tekmetric", "url": "https://www.tekmetric.com/", "pais": "🇺🇸 USA", "enfoque": "Taller mediano", "modelo_cobro": "SaaS", "precio_base": "$349 USD/mes", "precio_tipico": "$349/mes flat", "fortaleza": "Pricing simple", "debilidad": "USA-only"},
-        {"sistema": "AutoLeap", "url": "https://autoleap.com/", "pais": "🇺🇸 USA", "enfoque": "Taller pequeño-mediano", "modelo_cobro": "SaaS", "precio_base": "$199/mes", "precio_tipico": "$199-449/mes", "fortaleza": "Mobile-first", "debilidad": "USA-only"}
+        {
+          "sistema": "Shopmonkey",
+          "url": "https://www.shopmonkey.io/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Taller moderno cloud",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$199 USD/mes",
+          "precio_tipico": "$199-549/mes",
+          "fortaleza": "UX moderna, integraciones",
+          "debilidad": "USA-first"
+        },
+        {
+          "sistema": "Tekmetric",
+          "url": "https://www.tekmetric.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Taller mediano",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$349 USD/mes",
+          "precio_tipico": "$349/mes flat",
+          "fortaleza": "Pricing simple",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "AutoLeap",
+          "url": "https://autoleap.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Taller pequeño-mediano",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$199/mes",
+          "precio_tipico": "$199-449/mes",
+          "fortaleza": "Mobile-first",
+          "debilidad": "USA-only"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "T1", "feature": "Orden de servicio con diagnóstico", "porque": "Documentar problema + presupuesto previo", "prioridad": "🔴 Crítica"},
-        {"id": "T2", "feature": "Histórico por vehículo (placa/VIN)", "porque": "Saber qué se le ha hecho al carro antes", "prioridad": "🔴 Crítica"},
-        {"id": "T3", "feature": "Mano de obra + refacciones por orden", "porque": "Cobro mixto servicio + materiales", "prioridad": "🔴 Crítica"}
+        {
+          "id": "T1",
+          "feature": "Orden de servicio con diagnóstico",
+          "porque": "Documentar problema + presupuesto previo",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "T2",
+          "feature": "Histórico por vehículo (placa/VIN)",
+          "porque": "Saber qué se le ha hecho al carro antes",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "T3",
+          "feature": "Mano de obra + refacciones por orden",
+          "porque": "Cobro mixto servicio + materiales",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Histórico", "problema": "POS sin tracking por vehículo → repetir trabajos", "afecta": "POS genéricos"},
-        {"area": "Presupuestos", "problema": "Sin OS formales → conflictos cliente", "afecta": "Talleres pequeños"}
+        {
+          "area": "Histórico",
+          "problema": "POS sin tracking por vehículo → repetir trabajos",
+          "afecta": "POS genéricos"
+        },
+        {
+          "area": "Presupuestos",
+          "problema": "Sin OS formales → conflictos cliente",
+          "afecta": "Talleres pequeños"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Servicio / Refacción"},
-        {"generico": "Cliente", "este_giro": "Dueño / Vehículo"},
-        {"generico": "Venta", "este_giro": "Orden de servicio (OS)"}
+        {
+          "generico": "Producto",
+          "este_giro": "Servicio / Refacción"
+        },
+        {
+          "generico": "Cliente",
+          "este_giro": "Dueño / Vehículo"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Orden de servicio (OS)"
+        }
       ]
     },
     {
@@ -404,35 +1282,131 @@
       "regulacion": "CFDI 4.0, Cofepris (alimentos), pesas y medidas",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Bimbo", "url": "https://www.grupobimbo.com/", "tipo": "fabricante"},
-          {"nombre": "Coca-Cola FEMSA", "url": "https://www.coca-colafemsa.com/", "tipo": "distribuidor"},
-          {"nombre": "Sabritas", "url": "https://www.sabritas.com.mx/", "tipo": "fabricante"}
+          {
+            "nombre": "Bimbo",
+            "url": "https://www.grupobimbo.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Coca-Cola FEMSA",
+            "url": "https://www.coca-colafemsa.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Sabritas",
+            "url": "https://www.sabritas.com.mx/",
+            "tipo": "fabricante"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "OXXO", "url": "https://www.oxxo.com/", "scrapeable": true},
-          {"nombre": "7-Eleven MX", "url": "https://www.7-eleven.com.mx/", "scrapeable": true},
-          {"nombre": "Tiendas Extra", "url": "https://www.tiendasextra.com.mx/", "scrapeable": true}
+          {
+            "nombre": "OXXO",
+            "url": "https://www.oxxo.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "7-Eleven MX",
+            "url": "https://www.7-eleven.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Tiendas Extra",
+            "url": "https://www.tiendasextra.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "SICAR", "url": "https://sicar.mx/", "pais": "🇲🇽 MX", "enfoque": "Retail/abarrotes MX", "modelo_cobro": "Licencia única", "precio_base": "$3,000-10,000 MXN único", "precio_tipico": "+ soporte opcional", "fortaleza": "Penetración MX, offline", "debilidad": "Legacy, no cloud, UI vieja"},
-        {"sistema": "SICAR X", "url": "https://sicar.mx/x/", "pais": "🇲🇽 MX", "enfoque": "Retail SaaS", "modelo_cobro": "SaaS", "precio_base": "$300 MXN/mes", "precio_tipico": "$300-1,200 MXN/mes", "fortaleza": "Evolución cloud", "debilidad": "Aún básico vs globales"},
-        {"sistema": "Eleventa", "url": "https://eleventa.com/", "pais": "🇲🇽 MX", "enfoque": "Retail PyME", "modelo_cobro": "Sub", "precio_base": "$300 MXN/mes", "precio_tipico": "$300-800 MXN/mes", "fortaleza": "Simple, conocido", "debilidad": "Reportes pobres"},
-        {"sistema": "Loyverse", "url": "https://loyverse.com/", "pais": "🌎 Global", "enfoque": "PyME multi-giro", "modelo_cobro": "Freemium+addons", "precio_base": "$0", "precio_tipico": "$5-50 USD/mes", "fortaleza": "Gratis base", "debilidad": "Funciones clave son addons"}
+        {
+          "sistema": "SICAR",
+          "url": "https://sicar.mx/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail/abarrotes MX",
+          "modelo_cobro": "Licencia única",
+          "precio_base": "$3,000-10,000 MXN único",
+          "precio_tipico": "+ soporte opcional",
+          "fortaleza": "Penetración MX, offline",
+          "debilidad": "Legacy, no cloud, UI vieja"
+        },
+        {
+          "sistema": "SICAR X",
+          "url": "https://sicar.mx/x/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail SaaS",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$300 MXN/mes",
+          "precio_tipico": "$300-1,200 MXN/mes",
+          "fortaleza": "Evolución cloud",
+          "debilidad": "Aún básico vs globales"
+        },
+        {
+          "sistema": "Eleventa",
+          "url": "https://eleventa.com/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail PyME",
+          "modelo_cobro": "Sub",
+          "precio_base": "$300 MXN/mes",
+          "precio_tipico": "$300-800 MXN/mes",
+          "fortaleza": "Simple, conocido",
+          "debilidad": "Reportes pobres"
+        },
+        {
+          "sistema": "Loyverse",
+          "url": "https://loyverse.com/",
+          "pais": "🌎 Global",
+          "enfoque": "PyME multi-giro",
+          "modelo_cobro": "Freemium+addons",
+          "precio_base": "$0",
+          "precio_tipico": "$5-50 USD/mes",
+          "fortaleza": "Gratis base",
+          "debilidad": "Funciones clave son addons"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": 6, "feature": "Inventario tiempo real multi-sucursal", "porque": "Evitar sobreventa entre tiendas", "prioridad": "🔴 Crítica"},
-        {"id": 25, "feature": "Modo caja express (1-2 clics)", "porque": "Velocidad en hora pico", "prioridad": "🔴 Crítica"},
-        {"id": 8, "feature": "CFDI 4.0 nativo", "porque": "Cumplimiento fiscal MX desde la venta", "prioridad": "🔴 Crítica MX"}
+        {
+          "id": 6,
+          "feature": "Inventario tiempo real multi-sucursal",
+          "porque": "Evitar sobreventa entre tiendas",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 25,
+          "feature": "Modo caja express (1-2 clics)",
+          "porque": "Velocidad en hora pico",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 8,
+          "feature": "CFDI 4.0 nativo",
+          "porque": "Cumplimiento fiscal MX desde la venta",
+          "prioridad": "🔴 Crítica MX"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Inventario", "problema": "Desfase entre sucursales (sin sync real-time)", "afecta": "SICAR, Eleventa, SoftRest"},
-        {"area": "UX", "problema": "Demasiados clics para vender un refresco", "afecta": "TODOS"}
+        {
+          "area": "Inventario",
+          "problema": "Desfase entre sucursales (sin sync real-time)",
+          "afecta": "SICAR, Eleventa, SoftRest"
+        },
+        {
+          "area": "UX",
+          "problema": "Demasiados clics para vender un refresco",
+          "afecta": "TODOS"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Artículo / Mercancía"},
-        {"generico": "Venta", "este_giro": "Ticket"},
-        {"generico": "Empleado", "este_giro": "Cajero"}
+        {
+          "generico": "Producto",
+          "este_giro": "Artículo / Mercancía"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Ticket"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Cajero"
+        }
       ]
     },
     {
@@ -443,31 +1417,105 @@
       "regulacion": "Salubridad municipal",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Wahl Clipper", "url": "https://www.wahl.com/", "tipo": "fabricante máquinas"},
-          {"nombre": "Andis Company", "url": "https://www.andis.com/", "tipo": "fabricante"},
-          {"nombre": "Sally Beauty", "url": "https://www.sallybeauty.com/", "tipo": "distribuidor"}
+          {
+            "nombre": "Wahl Clipper",
+            "url": "https://www.wahl.com/",
+            "tipo": "fabricante máquinas"
+          },
+          {
+            "nombre": "Andis Company",
+            "url": "https://www.andis.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Sally Beauty",
+            "url": "https://www.sallybeauty.com/",
+            "tipo": "distribuidor"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Sport Clips", "url": "https://www.sportclips.com/", "scrapeable": true},
-          {"nombre": "Great Clips", "url": "https://www.greatclips.com/", "scrapeable": true},
-          {"nombre": "Floyd's 99", "url": "https://www.floydsbarbershop.com/", "scrapeable": true}
+          {
+            "nombre": "Sport Clips",
+            "url": "https://www.sportclips.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Great Clips",
+            "url": "https://www.greatclips.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Floyd's 99",
+            "url": "https://www.floydsbarbershop.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Booksy", "url": "https://booksy.com/", "pais": "🇵🇱 POL/Global", "enfoque": "Barbería/salón", "modelo_cobro": "SaaS", "precio_base": "$29.99/mes", "precio_tipico": "$29.99-79.99/mes", "fortaleza": "Marketplace clientes", "debilidad": "Comisión por reservas"},
-        {"sistema": "Square Appointments", "url": "https://squareup.com/us/en/appointments", "pais": "🌎 Global", "enfoque": "Citas multi-giro", "modelo_cobro": "Freemium", "precio_base": "$0", "precio_tipico": "+2.6% por venta", "fortaleza": "Gratis base", "debilidad": "Limitado en LATAM"},
-        {"sistema": "Vagaro", "url": "https://www.vagaro.com/", "pais": "🇺🇸 USA", "enfoque": "Belleza/barbería", "modelo_cobro": "SaaS", "precio_base": "$25/mes", "precio_tipico": "$25-85/mes", "fortaleza": "Citas online", "debilidad": "Inglés-first"}
+        {
+          "sistema": "Booksy",
+          "url": "https://booksy.com/",
+          "pais": "🇵🇱 POL/Global",
+          "enfoque": "Barbería/salón",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$29.99/mes",
+          "precio_tipico": "$29.99-79.99/mes",
+          "fortaleza": "Marketplace clientes",
+          "debilidad": "Comisión por reservas"
+        },
+        {
+          "sistema": "Square Appointments",
+          "url": "https://squareup.com/us/en/appointments",
+          "pais": "🌎 Global",
+          "enfoque": "Citas multi-giro",
+          "modelo_cobro": "Freemium",
+          "precio_base": "$0",
+          "precio_tipico": "+2.6% por venta",
+          "fortaleza": "Gratis base",
+          "debilidad": "Limitado en LATAM"
+        },
+        {
+          "sistema": "Vagaro",
+          "url": "https://www.vagaro.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Belleza/barbería",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$25/mes",
+          "precio_tipico": "$25-85/mes",
+          "fortaleza": "Citas online",
+          "debilidad": "Inglés-first"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "B1", "feature": "Citas por barbero", "porque": "Cliente reserva con SU barbero", "prioridad": "🔴 Crítica"},
-        {"id": "B2", "feature": "Comisión por barbero", "porque": "Modelo de pago estándar", "prioridad": "🔴 Crítica"}
+        {
+          "id": "B1",
+          "feature": "Citas por barbero",
+          "porque": "Cliente reserva con SU barbero",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "B2",
+          "feature": "Comisión por barbero",
+          "porque": "Modelo de pago estándar",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Agenda", "problema": "Sistemas no consideran tiempo del barbero específico", "afecta": "POS genéricos"}
+        {
+          "area": "Agenda",
+          "problema": "Sistemas no consideran tiempo del barbero específico",
+          "afecta": "POS genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Servicio"},
-        {"generico": "Empleado", "este_giro": "Barbero"}
+        {
+          "generico": "Producto",
+          "este_giro": "Servicio"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Barbero"
+        }
       ]
     },
     {
@@ -478,31 +1526,105 @@
       "regulacion": "COFEPRIS, Salubridad",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Bakery Solutions", "url": "https://www.bakerysolutions.com/", "tipo": "ingredientes"},
-          {"nombre": "Dawn Foods", "url": "https://www.dawnfoods.com/", "tipo": "ingredientes/equipo"},
-          {"nombre": "Puratos", "url": "https://www.puratos.com/", "tipo": "ingredientes profesionales"}
+          {
+            "nombre": "Bakery Solutions",
+            "url": "https://www.bakerysolutions.com/",
+            "tipo": "ingredientes"
+          },
+          {
+            "nombre": "Dawn Foods",
+            "url": "https://www.dawnfoods.com/",
+            "tipo": "ingredientes/equipo"
+          },
+          {
+            "nombre": "Puratos",
+            "url": "https://www.puratos.com/",
+            "tipo": "ingredientes profesionales"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Panera Bread", "url": "https://www.panera.com/", "scrapeable": true},
-          {"nombre": "Cinnabon", "url": "https://www.cinnabon.com/", "scrapeable": true},
-          {"nombre": "El Globo", "url": "https://www.elglobo.com.mx/", "scrapeable": true}
+          {
+            "nombre": "Panera Bread",
+            "url": "https://www.panera.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Cinnabon",
+            "url": "https://www.cinnabon.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "El Globo",
+            "url": "https://www.elglobo.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Cybake", "url": "https://www.cybake.com/", "pais": "🇬🇧 UK", "enfoque": "Panadería industrial+retail", "modelo_cobro": "SaaS", "precio_base": "$199/mes", "precio_tipico": "$199-499/mes", "fortaleza": "Recetas + producción", "debilidad": "Inglés"},
-        {"sistema": "FlexiBake", "url": "https://www.flexibake.com/", "pais": "🇺🇸 USA", "enfoque": "Panadería+pastelería", "modelo_cobro": "SaaS", "precio_base": "$249/mes", "precio_tipico": "$249-599/mes", "fortaleza": "Escalado recetas", "debilidad": "Caro"},
-        {"sistema": "Square for Restaurants", "url": "https://squareup.com/us/en/point-of-sale/restaurants", "pais": "🌎 Global", "enfoque": "Food multi-giro", "modelo_cobro": "Freemium+comisión", "precio_base": "$0", "precio_tipico": "$60/mes + 2.6%", "fortaleza": "Gratis, HW integrado", "debilidad": "No panadería-first"}
+        {
+          "sistema": "Cybake",
+          "url": "https://www.cybake.com/",
+          "pais": "🇬🇧 UK",
+          "enfoque": "Panadería industrial+retail",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$199/mes",
+          "precio_tipico": "$199-499/mes",
+          "fortaleza": "Recetas + producción",
+          "debilidad": "Inglés"
+        },
+        {
+          "sistema": "FlexiBake",
+          "url": "https://www.flexibake.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Panadería+pastelería",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$249/mes",
+          "precio_tipico": "$249-599/mes",
+          "fortaleza": "Escalado recetas",
+          "debilidad": "Caro"
+        },
+        {
+          "sistema": "Square for Restaurants",
+          "url": "https://squareup.com/us/en/point-of-sale/restaurants",
+          "pais": "🌎 Global",
+          "enfoque": "Food multi-giro",
+          "modelo_cobro": "Freemium+comisión",
+          "precio_base": "$0",
+          "precio_tipico": "$60/mes + 2.6%",
+          "fortaleza": "Gratis, HW integrado",
+          "debilidad": "No panadería-first"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "P1", "feature": "Producción diaria (recetas con escalado)", "porque": "Calcular insumos por producción", "prioridad": "🔴 Crítica"},
-        {"id": "P2", "feature": "Venta por pieza + por peso", "porque": "Pan por pieza, pasteles por peso", "prioridad": "🔴 Crítica"}
+        {
+          "id": "P1",
+          "feature": "Producción diaria (recetas con escalado)",
+          "porque": "Calcular insumos por producción",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "P2",
+          "feature": "Venta por pieza + por peso",
+          "porque": "Pan por pieza, pasteles por peso",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Producción", "problema": "POS sin escalado de recetas", "afecta": "TODOS genéricos"}
+        {
+          "area": "Producción",
+          "problema": "POS sin escalado de recetas",
+          "afecta": "TODOS genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Pieza / Hornada"},
-        {"generico": "Empleado", "este_giro": "Panadero / Pastelero"}
+        {
+          "generico": "Producto",
+          "este_giro": "Pieza / Hornada"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Panadero / Pastelero"
+        }
       ]
     },
     {
@@ -513,31 +1635,105 @@
       "regulacion": "COFEPRIS, CFDI",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Cafe Imports", "url": "https://www.cafeimports.com/", "tipo": "café verde"},
-          {"nombre": "Sweet Maria's", "url": "https://www.sweetmarias.com/", "tipo": "café verde"},
-          {"nombre": "Atlas Coffee", "url": "https://www.atlascoffee.com/", "tipo": "importador"}
+          {
+            "nombre": "Cafe Imports",
+            "url": "https://www.cafeimports.com/",
+            "tipo": "café verde"
+          },
+          {
+            "nombre": "Sweet Maria's",
+            "url": "https://www.sweetmarias.com/",
+            "tipo": "café verde"
+          },
+          {
+            "nombre": "Atlas Coffee",
+            "url": "https://www.atlascoffee.com/",
+            "tipo": "importador"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Starbucks", "url": "https://www.starbucks.com/", "scrapeable": true},
-          {"nombre": "Tim Hortons MX", "url": "https://www.timhortons.com.mx/", "scrapeable": true},
-          {"nombre": "The Coffee Bean", "url": "https://www.thecoffeebean.com/", "scrapeable": true}
+          {
+            "nombre": "Starbucks",
+            "url": "https://www.starbucks.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Tim Hortons MX",
+            "url": "https://www.timhortons.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "The Coffee Bean",
+            "url": "https://www.coffeestation.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Square for Restaurants", "url": "https://squareup.com/us/en/point-of-sale/restaurants", "pais": "🌎 Global", "enfoque": "Cafés y QSR", "modelo_cobro": "Freemium+comisión", "precio_base": "$0", "precio_tipico": "$60/mes + 2.6%", "fortaleza": "HW integrado, lealtad", "debilidad": "Comisión"},
-        {"sistema": "Lightspeed Restaurant", "url": "https://www.lightspeedhq.com/pos/restaurant/", "pais": "🇨🇦 CAN/Global", "enfoque": "Cafés/restaurantes", "modelo_cobro": "SaaS", "precio_base": "$69/mes", "precio_tipico": "$69-399/mes", "fortaleza": "Inventario robusto", "debilidad": "Sin CFDI"},
-        {"sistema": "Revel Systems", "url": "https://revelsystems.com/", "pais": "🇺🇸 USA", "enfoque": "QSR/Café iPad", "modelo_cobro": "SaaS", "precio_base": "$99/mes", "precio_tipico": "$99-299/mes", "fortaleza": "iPad-first", "debilidad": "Solo iPad"}
+        {
+          "sistema": "Square for Restaurants",
+          "url": "https://squareup.com/us/en/point-of-sale/restaurants",
+          "pais": "🌎 Global",
+          "enfoque": "Cafés y QSR",
+          "modelo_cobro": "Freemium+comisión",
+          "precio_base": "$0",
+          "precio_tipico": "$60/mes + 2.6%",
+          "fortaleza": "HW integrado, lealtad",
+          "debilidad": "Comisión"
+        },
+        {
+          "sistema": "Lightspeed Restaurant",
+          "url": "https://www.lightspeedhq.com/pos/restaurant/",
+          "pais": "🇨🇦 CAN/Global",
+          "enfoque": "Cafés/restaurantes",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$69/mes",
+          "precio_tipico": "$69-399/mes",
+          "fortaleza": "Inventario robusto",
+          "debilidad": "Sin CFDI"
+        },
+        {
+          "sistema": "Revel Systems",
+          "url": "https://revelsystems.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "QSR/Café iPad",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$99/mes",
+          "precio_tipico": "$99-299/mes",
+          "fortaleza": "iPad-first",
+          "debilidad": "Solo iPad"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "C1", "feature": "Modificadores rápidos (leche/azúcar/shots)", "porque": "Cada bebida tiene 4-8 customizations", "prioridad": "🔴 Crítica"},
-        {"id": "C2", "feature": "Tamaños (chico/mediano/grande)", "porque": "Mismo SKU 3 precios", "prioridad": "🔴 Crítica"}
+        {
+          "id": "C1",
+          "feature": "Modificadores rápidos (leche/azúcar/shots)",
+          "porque": "Cada bebida tiene 4-8 customizations",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "C2",
+          "feature": "Tamaños (chico/mediano/grande)",
+          "porque": "Mismo SKU 3 precios",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Modificadores", "problema": "POS retail no manejan modificadores rápidos", "afecta": "SICAR, Eleventa"}
+        {
+          "area": "Modificadores",
+          "problema": "POS retail no manejan modificadores rápidos",
+          "afecta": "SICAR, Eleventa"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Bebida / Snack"},
-        {"generico": "Empleado", "este_giro": "Barista"}
+        {
+          "generico": "Producto",
+          "este_giro": "Bebida / Snack"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Barista"
+        }
       ]
     },
     {
@@ -548,31 +1744,105 @@
       "regulacion": "CFDI 4.0",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Stanley Black & Decker", "url": "https://www.stanleyblackanddecker.com/", "tipo": "fabricante"},
-          {"nombre": "Milwaukee Tool", "url": "https://www.milwaukeetool.com/", "tipo": "fabricante"},
-          {"nombre": "Makita", "url": "https://www.makita.com/", "tipo": "fabricante"}
+          {
+            "nombre": "Stanley Black & Decker",
+            "url": "https://www.stanleyblackanddecker.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Milwaukee Tool",
+            "url": "https://www.milwaukeetool.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Makita",
+            "url": "https://www.makita.com/",
+            "tipo": "fabricante"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Home Depot", "url": "https://www.homedepot.com/", "scrapeable": true},
-          {"nombre": "Lowes", "url": "https://www.lowes.com/", "scrapeable": true},
-          {"nombre": "Ace Hardware", "url": "https://www.acehardware.com/", "scrapeable": true}
+          {
+            "nombre": "Home Depot",
+            "url": "https://www.homedepot.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Lowes",
+            "url": "https://www.lowes.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Ace Hardware",
+            "url": "https://www.acehardware.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Spruce", "url": "https://www.spruce.io/", "pais": "🇺🇸 USA", "enfoque": "Ferretería/lumber USA", "modelo_cobro": "SaaS enterprise", "precio_base": "Custom", "precio_tipico": "$500+/mes", "fortaleza": "Inventario rico", "debilidad": "Caro"},
-        {"sistema": "Epicor Eagle", "url": "https://www.epicor.com/en-us/industry-productivity-solutions/distribution/eagle/", "pais": "🌎 Global", "enfoque": "Retail especializado", "modelo_cobro": "Licencia enterprise", "precio_base": "Custom", "precio_tipico": "$10K+ implementación", "fortaleza": "Multi-sucursal robusto", "debilidad": "Complejo"},
-        {"sistema": "Paladin POS", "url": "https://www.paladinpos.com/", "pais": "🇺🇸 USA", "enfoque": "Ferretería pequeña", "modelo_cobro": "SaaS", "precio_base": "$129/mes", "precio_tipico": "$129-299/mes", "fortaleza": "Ferretería-first", "debilidad": "USA-only"}
+        {
+          "sistema": "Spruce",
+          "url": "https://www.spruce.io/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Ferretería/lumber USA",
+          "modelo_cobro": "SaaS enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$500+/mes",
+          "fortaleza": "Inventario rico",
+          "debilidad": "Caro"
+        },
+        {
+          "sistema": "Epicor Eagle",
+          "url": "https://www.epicor.com/en-us/industry-productivity-solutions/distribution/eagle/",
+          "pais": "🌎 Global",
+          "enfoque": "Retail especializado",
+          "modelo_cobro": "Licencia enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$10K+ implementación",
+          "fortaleza": "Multi-sucursal robusto",
+          "debilidad": "Complejo"
+        },
+        {
+          "sistema": "Paladin POS",
+          "url": "https://www.paladinpos.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Ferretería pequeña",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$129/mes",
+          "precio_tipico": "$129-299/mes",
+          "fortaleza": "Ferretería-first",
+          "debilidad": "USA-only"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "FE1", "feature": "Venta por pieza + metro + kg", "porque": "Cables por metro, clavos por kg", "prioridad": "🔴 Crítica"},
-        {"id": "FE2", "feature": "Catálogo masivo (20K+ SKUs)", "porque": "Miles de tornillos/tuercas", "prioridad": "🔴 Crítica"}
+        {
+          "id": "FE1",
+          "feature": "Venta por pieza + metro + kg",
+          "porque": "Cables por metro, clavos por kg",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "FE2",
+          "feature": "Catálogo masivo (20K+ SKUs)",
+          "porque": "Miles de tornillos/tuercas",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Catálogo", "problema": "POS con catálogo limitado a 5K items", "afecta": "POS PyME genéricos"}
+        {
+          "area": "Catálogo",
+          "problema": "POS con catálogo limitado a 5K items",
+          "afecta": "POS PyME genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Material / Herramienta"},
-        {"generico": "Cliente", "este_giro": "Cliente final / Contratista"}
+        {
+          "generico": "Producto",
+          "este_giro": "Material / Herramienta"
+        },
+        {
+          "generico": "Cliente",
+          "este_giro": "Cliente final / Contratista"
+        }
       ]
     },
     {
@@ -583,34 +1853,120 @@
       "regulacion": "COFEPRIS, CFDI 4.0",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Sysco", "url": "https://www.sysco.com/", "tipo": "distribuidor"},
-          {"nombre": "Saputo (queso mozzarella)", "url": "https://www.saputo.com/", "tipo": "fabricante"},
-          {"nombre": "Roma Food", "url": "https://www.romafood.com/", "tipo": "ingredientes italianos"}
+          {
+            "nombre": "Sysco",
+            "url": "https://www.sysco.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Saputo (queso mozzarella)",
+            "url": "https://www.saputo.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Roma Food",
+            "url": "https://www.romafood.com/",
+            "tipo": "ingredientes italianos"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Domino's Pizza", "url": "https://www.dominos.com/", "scrapeable": true},
-          {"nombre": "Pizza Hut", "url": "https://www.pizzahut.com/", "scrapeable": true},
-          {"nombre": "Papa John's", "url": "https://www.papajohns.com/", "scrapeable": true}
+          {
+            "nombre": "Domino's Pizza",
+            "url": "https://www.dominos.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Pizza Hut",
+            "url": "https://www.pizzahut.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Papa John's",
+            "url": "https://www.papajohns.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Slice", "url": "https://slicelife.com/", "pais": "🇺🇸 USA", "enfoque": "Pizzerías independientes", "modelo_cobro": "SaaS", "precio_base": "$0 + comisión", "precio_tipico": "+2.99% por orden online", "fortaleza": "Marketplace de pizzas + integración orders", "debilidad": "Solo USA, depende de comisión"},
-        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes + pizzerías", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "KDS robusto, drivers delivery", "debilidad": "Caro, HW obligatorio"},
-        {"sistema": "Square for Restaurants", "url": "https://squareup.com/us/en/point-of-sale/restaurants", "pais": "🌎 Global", "enfoque": "QSR + pizzerías", "modelo_cobro": "Freemium+comisión", "precio_base": "$0", "precio_tipico": "$60/mes + 2.6%", "fortaleza": "Gratis base, HW integrado", "debilidad": "Comisión por venta"}
+        {
+          "sistema": "Slice",
+          "url": "https://slicelife.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Pizzerías independientes",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$0 + comisión",
+          "precio_tipico": "+2.99% por orden online",
+          "fortaleza": "Marketplace de pizzas + integración orders",
+          "debilidad": "Solo USA, depende de comisión"
+        },
+        {
+          "sistema": "Toast POS",
+          "url": "https://pos.toasttab.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes + pizzerías",
+          "modelo_cobro": "SaaS+HW",
+          "precio_base": "$69/mes",
+          "precio_tipico": "$165+/mes",
+          "fortaleza": "KDS robusto, drivers delivery",
+          "debilidad": "Caro, HW obligatorio"
+        },
+        {
+          "sistema": "Square for Restaurants",
+          "url": "https://squareup.com/us/en/point-of-sale/restaurants",
+          "pais": "🌎 Global",
+          "enfoque": "QSR + pizzerías",
+          "modelo_cobro": "Freemium+comisión",
+          "precio_base": "$0",
+          "precio_tipico": "$60/mes + 2.6%",
+          "fortaleza": "Gratis base, HW integrado",
+          "debilidad": "Comisión por venta"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "PZ1", "feature": "Pizza builder (tamaños + ingredientes)", "porque": "Cada pizza es customizada por el cliente", "prioridad": "🔴 Crítica"},
-        {"id": "PZ2", "feature": "Tiempo de cocción y KDS por horno", "porque": "Pizzas tardan ~15min, organizar por horno", "prioridad": "🔴 Crítica"},
-        {"id": 11, "feature": "Integración delivery (Uber/Rappi/DiDi)", "porque": "60%+ ventas son delivery", "prioridad": "🔴 Alta"}
+        {
+          "id": "PZ1",
+          "feature": "Pizza builder (tamaños + ingredientes)",
+          "porque": "Cada pizza es customizada por el cliente",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "PZ2",
+          "feature": "Tiempo de cocción y KDS por horno",
+          "porque": "Pizzas tardan ~15min, organizar por horno",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 11,
+          "feature": "Integración delivery (Uber/Rappi/DiDi)",
+          "porque": "60%+ ventas son delivery",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Builder", "problema": "POS sin pizza builder obliga a notas manuales", "afecta": "POS retail genéricos"},
-        {"area": "Delivery", "problema": "Sin integración aggregators → pedidos perdidos", "afecta": "TODOS sin hub omnicanal"}
+        {
+          "area": "Builder",
+          "problema": "POS sin pizza builder obliga a notas manuales",
+          "afecta": "POS retail genéricos"
+        },
+        {
+          "area": "Delivery",
+          "problema": "Sin integración aggregators → pedidos perdidos",
+          "afecta": "TODOS sin hub omnicanal"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Pizza / Pasta / Bebida"},
-        {"generico": "Categoría", "este_giro": "Tamaño/Tipo (Personal/Mediana/Grande/Familiar)"},
-        {"generico": "Mesa", "este_giro": "Mesa / Para llevar / Delivery"}
+        {
+          "generico": "Producto",
+          "este_giro": "Pizza / Pasta / Bebida"
+        },
+        {
+          "generico": "Categoría",
+          "este_giro": "Tamaño/Tipo (Personal/Mediana/Grande/Familiar)"
+        },
+        {
+          "generico": "Mesa",
+          "este_giro": "Mesa / Para llevar / Delivery"
+        }
       ]
     },
     {
@@ -621,32 +1977,111 @@
       "regulacion": "COFEPRIS, salubridad municipal, CFDI 4.0",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Tortillería La Esperanza", "url": "https://www.tortilleria.com.mx/", "tipo": "tortillas"},
-          {"nombre": "Sigma Alimentos", "url": "https://www.sigma-alimentos.com/", "tipo": "carnes"},
-          {"nombre": "Bachoco", "url": "https://www.bachoco.com.mx/", "tipo": "pollo"}
+          {
+            "nombre": "Tortillería La Esperanza",
+            "url": "https://www.tortilleria.com.mx/",
+            "tipo": "tortillas"
+          },
+          {
+            "nombre": "Sigma Alimentos",
+            "url": "https://www.sigma-alimentos.com/",
+            "tipo": "carnes"
+          },
+          {
+            "nombre": "Bachoco",
+            "url": "https://www.bachoco.com.mx/",
+            "tipo": "pollo"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Taco Bell", "url": "https://www.tacobell.com/", "scrapeable": true},
-          {"nombre": "Chipotle", "url": "https://www.chipotle.com/", "scrapeable": true},
-          {"nombre": "Tacos El Caminero", "url": "https://www.elcaminero.com.mx/", "scrapeable": true}
+          {
+            "nombre": "Taco Bell",
+            "url": "https://www.tacobell.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Chipotle",
+            "url": "https://www.chipotle.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Tacos El Caminero",
+            "url": "https://www.elcaminero.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "SoftRestaurant", "url": "https://national-soft.com/softrestaurant/", "pais": "🇲🇽 MX", "enfoque": "Restaurantes MX", "modelo_cobro": "Licencia+mantto", "precio_base": "$6,000-15,000 MXN", "precio_tipico": "+$300-800/mes", "fortaleza": "Estándar restaurantes MX", "debilidad": "Legacy, no cloud"},
-        {"sistema": "Parrot", "url": "https://parrotsoftware.io/", "pais": "🇲🇽 MX", "enfoque": "Restaurantes SaaS MX", "modelo_cobro": "SaaS", "precio_base": "$400/mes MXN", "precio_tipico": "$500-1500/mes MXN", "fortaleza": "MX-first, KDS, mesas", "debilidad": "Hardware propio"},
-        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes enterprise", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "Mapa mesas + KDS", "debilidad": "Caro"}
+        {
+          "sistema": "SoftRestaurant",
+          "url": "https://national-soft.com/softrestaurant/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Restaurantes MX",
+          "modelo_cobro": "Licencia+mantto",
+          "precio_base": "$6,000-15,000 MXN",
+          "precio_tipico": "+$300-800/mes",
+          "fortaleza": "Estándar restaurantes MX",
+          "debilidad": "Legacy, no cloud"
+        },
+        {
+          "sistema": "Parrot",
+          "url": "https://parrotsoftware.io/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Restaurantes SaaS MX",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$400/mes MXN",
+          "precio_tipico": "$500-1500/mes MXN",
+          "fortaleza": "MX-first, KDS, mesas",
+          "debilidad": "Hardware propio"
+        },
+        {
+          "sistema": "Toast POS",
+          "url": "https://pos.toasttab.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes enterprise",
+          "modelo_cobro": "SaaS+HW",
+          "precio_base": "$69/mes",
+          "precio_tipico": "$165+/mes",
+          "fortaleza": "Mapa mesas + KDS",
+          "debilidad": "Caro"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "TQ1", "feature": "Modificadores (con/sin cebolla, salsa, queso, guacamole)", "porque": "Cada taco se customiza al momento", "prioridad": "🔴 Crítica"},
-        {"id": "TQ2", "feature": "Venta rápida (1-2 clics) para mostrador", "porque": "Filas en hora pico de la noche", "prioridad": "🔴 Crítica"},
-        {"id": 8, "feature": "CFDI 4.0 nativo", "porque": "Cumplimiento MX desde la venta", "prioridad": "🔴 Crítica MX"}
+        {
+          "id": "TQ1",
+          "feature": "Modificadores (con/sin cebolla, salsa, queso, guacamole)",
+          "porque": "Cada taco se customiza al momento",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "TQ2",
+          "feature": "Venta rápida (1-2 clics) para mostrador",
+          "porque": "Filas en hora pico de la noche",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 8,
+          "feature": "CFDI 4.0 nativo",
+          "porque": "Cumplimiento MX desde la venta",
+          "prioridad": "🔴 Crítica MX"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Velocidad", "problema": "POS lentos en hora pico → filas frustradas", "afecta": "Sistemas legacy"}
+        {
+          "area": "Velocidad",
+          "problema": "POS lentos en hora pico → filas frustradas",
+          "afecta": "Sistemas legacy"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Taco / Antojito / Bebida"},
-        {"generico": "Empleado", "este_giro": "Taquero / Mesero"}
+        {
+          "generico": "Producto",
+          "este_giro": "Taco / Antojito / Bebida"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Taquero / Mesero"
+        }
       ]
     },
     {
@@ -657,31 +2092,105 @@
       "regulacion": "COFEPRIS, cadena de frío",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Nestlé Helados", "url": "https://www.nestle.com/", "tipo": "fabricante"},
-          {"nombre": "Sigma Helados", "url": "https://www.sigma-alimentos.com/", "tipo": "distribuidor"},
-          {"nombre": "Dairy Forall", "url": "https://www.dairyforall.com/", "tipo": "ingredientes lácteos"}
+          {
+            "nombre": "Nestlé Helados",
+            "url": "https://www.nestle.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Sigma Helados",
+            "url": "https://www.sigma-alimentos.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Dairy Forall",
+            "url": "https://www.dairyforall.com/",
+            "tipo": "ingredientes lácteos"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Dairy Queen", "url": "https://www.dairyqueen.com/", "scrapeable": true},
-          {"nombre": "Baskin-Robbins", "url": "https://www.baskinrobbins.com/", "scrapeable": true},
-          {"nombre": "Ben & Jerry's", "url": "https://www.benjerry.com/", "scrapeable": true}
+          {
+            "nombre": "Dairy Queen",
+            "url": "https://www.dairyqueen.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Baskin-Robbins",
+            "url": "https://www.baskinrobbins.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Ben & Jerry's",
+            "url": "https://www.benjerry.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "NCR Counterpoint", "url": "https://www.ncr.com/restaurants/aloha-pos", "pais": "🌎 Global", "enfoque": "Retail + food specialty", "modelo_cobro": "Licencia enterprise", "precio_base": "Custom", "precio_tipico": "$300+/mes/terminal", "fortaleza": "Robusto multi-sucursal", "debilidad": "Caro, complejo"},
-        {"sistema": "Retail Pro", "url": "https://www.retailpro.com/", "pais": "🌎 Global", "enfoque": "Retail especializado", "modelo_cobro": "Licencia enterprise", "precio_base": "Custom", "precio_tipico": "$300+/mes", "fortaleza": "Multi-tienda", "debilidad": "Caro"},
-        {"sistema": "LS Central", "url": "https://www.lsretail.com/", "pais": "🇮🇸 ISL/Global", "enfoque": "Retail food", "modelo_cobro": "SaaS+licencia", "precio_base": "Custom", "precio_tipico": "$500+/mes", "fortaleza": "Sobre Dynamics, robusto", "debilidad": "Requiere Microsoft stack"}
+        {
+          "sistema": "NCR Counterpoint",
+          "url": "https://www.ncr.com/restaurants/aloha-pos",
+          "pais": "🌎 Global",
+          "enfoque": "Retail + food specialty",
+          "modelo_cobro": "Licencia enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$300+/mes/terminal",
+          "fortaleza": "Robusto multi-sucursal",
+          "debilidad": "Caro, complejo"
+        },
+        {
+          "sistema": "Retail Pro",
+          "url": "https://www.retailpro.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Retail especializado",
+          "modelo_cobro": "Licencia enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$300+/mes",
+          "fortaleza": "Multi-tienda",
+          "debilidad": "Caro"
+        },
+        {
+          "sistema": "LS Central",
+          "url": "https://www.lsretail.com/",
+          "pais": "🇮🇸 ISL/Global",
+          "enfoque": "Retail food",
+          "modelo_cobro": "SaaS+licencia",
+          "precio_base": "Custom",
+          "precio_tipico": "$500+/mes",
+          "fortaleza": "Sobre Dynamics, robusto",
+          "debilidad": "Requiere Microsoft stack"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "HE1", "feature": "Venta por bola + por kg + por unidad", "porque": "Helado por bola, paletas por unidad", "prioridad": "🔴 Crítica"},
-        {"id": "HE2", "feature": "Modificadores (toppings, sabores combo)", "porque": "Combinaciones infinitas", "prioridad": "🔴 Alta"}
+        {
+          "id": "HE1",
+          "feature": "Venta por bola + por kg + por unidad",
+          "porque": "Helado por bola, paletas por unidad",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "HE2",
+          "feature": "Modificadores (toppings, sabores combo)",
+          "porque": "Combinaciones infinitas",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Cadena de frío", "problema": "Sin alertas de mermas por congelador apagado", "afecta": "Sistemas sin IoT"}
+        {
+          "area": "Cadena de frío",
+          "problema": "Sin alertas de mermas por congelador apagado",
+          "afecta": "Sistemas sin IoT"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Sabor / Paleta / Postre"},
-        {"generico": "Empleado", "este_giro": "Heladero"}
+        {
+          "generico": "Producto",
+          "este_giro": "Sabor / Paleta / Postre"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Heladero"
+        }
       ]
     },
     {
@@ -692,31 +2201,105 @@
       "regulacion": "COFEPRIS, fecha caducidad",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Dawn Foods", "url": "https://www.dawnfoods.com/", "tipo": "ingredientes/equipo"},
-          {"nombre": "Callebaut", "url": "https://www.callebaut.com/", "tipo": "chocolate fino"},
-          {"nombre": "Bakery Solutions", "url": "https://www.bakerysolutions.com/", "tipo": "ingredientes"}
+          {
+            "nombre": "Dawn Foods",
+            "url": "https://www.dawnfoods.com/",
+            "tipo": "ingredientes/equipo"
+          },
+          {
+            "nombre": "Callebaut",
+            "url": "https://www.callebaut.com/",
+            "tipo": "chocolate fino"
+          },
+          {
+            "nombre": "Bakery Solutions",
+            "url": "https://www.bakerysolutions.com/",
+            "tipo": "ingredientes"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "El Globo", "url": "https://www.elglobo.com.mx/", "scrapeable": true},
-          {"nombre": "Cinnabon", "url": "https://www.cinnabon.com/", "scrapeable": true},
-          {"nombre": "Pastelería Ideal", "url": "https://www.pasteleriaideal.com.mx/", "scrapeable": true}
+          {
+            "nombre": "El Globo",
+            "url": "https://www.elglobo.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Cinnabon",
+            "url": "https://www.cinnabon.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Pastelería Ideal",
+            "url": "https://www.pasteleriaideal.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Cybake", "url": "https://www.cybake.com/", "pais": "🇬🇧 UK", "enfoque": "Pastelería+panadería", "modelo_cobro": "SaaS", "precio_base": "$199/mes", "precio_tipico": "$199-499/mes", "fortaleza": "Recetas + producción", "debilidad": "Inglés"},
-        {"sistema": "FlexiBake", "url": "https://www.flexibake.com/", "pais": "🇺🇸 USA", "enfoque": "Pastelería pro", "modelo_cobro": "SaaS", "precio_base": "$249/mes", "precio_tipico": "$249-599/mes", "fortaleza": "Escalado recetas", "debilidad": "Caro"},
-        {"sistema": "FoodMan", "url": "https://www.foodman.io/", "pais": "🌎 Global", "enfoque": "Food production", "modelo_cobro": "SaaS", "precio_base": "$50/mes", "precio_tipico": "$50-200/mes", "fortaleza": "Pricing accesible", "debilidad": "Menos features"}
+        {
+          "sistema": "Cybake",
+          "url": "https://www.cybake.com/",
+          "pais": "🇬🇧 UK",
+          "enfoque": "Pastelería+panadería",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$199/mes",
+          "precio_tipico": "$199-499/mes",
+          "fortaleza": "Recetas + producción",
+          "debilidad": "Inglés"
+        },
+        {
+          "sistema": "FlexiBake",
+          "url": "https://www.flexibake.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Pastelería pro",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$249/mes",
+          "precio_tipico": "$249-599/mes",
+          "fortaleza": "Escalado recetas",
+          "debilidad": "Caro"
+        },
+        {
+          "sistema": "FoodMan",
+          "url": "https://www.foodman.io/",
+          "pais": "🌎 Global",
+          "enfoque": "Food production",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$50/mes",
+          "precio_tipico": "$50-200/mes",
+          "fortaleza": "Pricing accesible",
+          "debilidad": "Menos features"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "PA1", "feature": "Pedidos especiales (pasteles personalizados)", "porque": "Reserva con anticipo, fecha entrega, detalles cliente", "prioridad": "🔴 Crítica"},
-        {"id": "PA2", "feature": "Pago a cuenta de pedido (anticipo)", "porque": "Cliente paga 50% al ordenar, resto al recoger", "prioridad": "🔴 Alta"}
+        {
+          "id": "PA1",
+          "feature": "Pedidos especiales (pasteles personalizados)",
+          "porque": "Reserva con anticipo, fecha entrega, detalles cliente",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "PA2",
+          "feature": "Pago a cuenta de pedido (anticipo)",
+          "porque": "Cliente paga 50% al ordenar, resto al recoger",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Pedidos", "problema": "Sin tracking de pedidos especiales → entregas tarde", "afecta": "POS retail genéricos"}
+        {
+          "area": "Pedidos",
+          "problema": "Sin tracking de pedidos especiales → entregas tarde",
+          "afecta": "POS retail genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Pastel / Postre / Pieza"},
-        {"generico": "Venta", "este_giro": "Pedido / Orden"}
+        {
+          "generico": "Producto",
+          "este_giro": "Pastel / Postre / Pieza"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Pedido / Orden"
+        }
       ]
     },
     {
@@ -727,31 +2310,105 @@
       "regulacion": "COFEPRIS, manejo de frutas",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Central de Abasto CDMX", "url": "https://ficeda.com.mx/", "tipo": "fruta mayoreo"},
-          {"nombre": "Driscoll's", "url": "https://www.driscolls.com/", "tipo": "berries"},
-          {"nombre": "Frutas Selectas de México", "url": "https://www.frutas.com.mx/", "tipo": "distribuidor"}
+          {
+            "nombre": "Central de Abasto CDMX",
+            "url": "https://ficeda.com.mx/",
+            "tipo": "fruta mayoreo"
+          },
+          {
+            "nombre": "Driscoll's",
+            "url": "https://www.driscolls.com/",
+            "tipo": "berries"
+          },
+          {
+            "nombre": "Frutas Selectas de México",
+            "url": "https://www.frutas.com.mx/",
+            "tipo": "distribuidor"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Jamba Juice", "url": "https://www.jamba.com/", "scrapeable": true},
-          {"nombre": "Smoothie King", "url": "https://www.smoothieking.com/", "scrapeable": true},
-          {"nombre": "Boost Juice", "url": "https://www.boostjuice.com/", "scrapeable": true}
+          {
+            "nombre": "Jamba Juice",
+            "url": "https://www.jamba.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Smoothie King",
+            "url": "https://www.smoothieking.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Boost Juice",
+            "url": "https://www.boostjuice.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Square for Restaurants", "url": "https://squareup.com/us/en/point-of-sale/restaurants", "pais": "🌎 Global", "enfoque": "QSR/Café", "modelo_cobro": "Freemium+comisión", "precio_base": "$0", "precio_tipico": "$60/mes+2.6%", "fortaleza": "HW integrado", "debilidad": "Comisión"},
-        {"sistema": "Lavu", "url": "https://lavu.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes pequeños", "modelo_cobro": "SaaS", "precio_base": "$59/mes", "precio_tipico": "$59-329/mes", "fortaleza": "Configurable", "debilidad": "Curva aprendizaje"},
-        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "Robusto", "debilidad": "Caro"}
+        {
+          "sistema": "Square for Restaurants",
+          "url": "https://squareup.com/us/en/point-of-sale/restaurants",
+          "pais": "🌎 Global",
+          "enfoque": "QSR/Café",
+          "modelo_cobro": "Freemium+comisión",
+          "precio_base": "$0",
+          "precio_tipico": "$60/mes+2.6%",
+          "fortaleza": "HW integrado",
+          "debilidad": "Comisión"
+        },
+        {
+          "sistema": "Lavu",
+          "url": "https://lavu.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes pequeños",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$59/mes",
+          "precio_tipico": "$59-329/mes",
+          "fortaleza": "Configurable",
+          "debilidad": "Curva aprendizaje"
+        },
+        {
+          "sistema": "Toast POS",
+          "url": "https://pos.toasttab.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes",
+          "modelo_cobro": "SaaS+HW",
+          "precio_base": "$69/mes",
+          "precio_tipico": "$165+/mes",
+          "fortaleza": "Robusto",
+          "debilidad": "Caro"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "JN1", "feature": "Builder de jugos (frutas + extras)", "porque": "Combos infinitos de fruta + chía + proteína", "prioridad": "🔴 Crítica"},
-        {"id": "JN2", "feature": "Tamaños (chico/mediano/grande)", "porque": "Mismo jugo 3 precios", "prioridad": "🔴 Crítica"}
+        {
+          "id": "JN1",
+          "feature": "Builder de jugos (frutas + extras)",
+          "porque": "Combos infinitos de fruta + chía + proteína",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "JN2",
+          "feature": "Tamaños (chico/mediano/grande)",
+          "porque": "Mismo jugo 3 precios",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Builder", "problema": "POS sin builder customizado → cajero teclea todo manual", "afecta": "Sistemas genéricos"}
+        {
+          "area": "Builder",
+          "problema": "POS sin builder customizado → cajero teclea todo manual",
+          "afecta": "Sistemas genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Jugo / Smoothie / Bowl"},
-        {"generico": "Empleado", "este_giro": "Juiciero / Bartender"}
+        {
+          "generico": "Producto",
+          "este_giro": "Jugo / Smoothie / Bowl"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Juiciero / Bartender"
+        }
       ]
     },
     {
@@ -762,31 +2419,105 @@
       "regulacion": "COFEPRIS, pasteurización HPP",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Central de Abasto", "url": "https://ficeda.com.mx/", "tipo": "fruta mayoreo"},
-          {"nombre": "Productores orgánicos MX", "url": "https://www.organico.org.mx/", "tipo": "fruta orgánica"},
-          {"nombre": "HPP Technologies", "url": "https://www.hpp-international.com/", "tipo": "pasteurización"}
+          {
+            "nombre": "Central de Abasto",
+            "url": "https://ficeda.com.mx/",
+            "tipo": "fruta mayoreo"
+          },
+          {
+            "nombre": "Productores orgánicos MX",
+            "url": "https://www.organico.org.mx/",
+            "tipo": "fruta orgánica"
+          },
+          {
+            "nombre": "HPP Technologies",
+            "url": "https://www.hpp-international.com/",
+            "tipo": "pasteurización"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Pressed Juicery", "url": "https://www.pressedjuicery.com/", "scrapeable": true},
-          {"nombre": "Suja Juice", "url": "https://www.sujaorganic.com/", "scrapeable": true},
-          {"nombre": "Daily Harvest", "url": "https://www.daily-harvest.com/", "scrapeable": true}
+          {
+            "nombre": "Pressed Juicery",
+            "url": "https://www.pressedjuicery.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Suja Juice",
+            "url": "https://www.sujaorganic.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Daily Harvest",
+            "url": "https://www.daily-harvest.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Square Online", "url": "https://squareup.com/us/en/online-store", "pais": "🌎 Global", "enfoque": "E-commerce + retail", "modelo_cobro": "Freemium+comisión", "precio_base": "$0", "precio_tipico": "$29/mes + comisión", "fortaleza": "Subscriptions", "debilidad": "Comisión"},
-        {"sistema": "Shopify POS", "url": "https://www.shopify.com/pos", "pais": "🇨🇦 CAN/Global", "enfoque": "Retail omnicanal", "modelo_cobro": "SaaS+comisión", "precio_base": "$19/mes", "precio_tipico": "$89/mes Pro+%", "fortaleza": "E-commerce robusto", "debilidad": "Sin CFDI, comisión"},
-        {"sistema": "Lightspeed Retail", "url": "https://www.lightspeedhq.com/retail/", "pais": "🇨🇦 CAN/Global", "enfoque": "Retail moderno", "modelo_cobro": "SaaS", "precio_base": "$89/mes", "precio_tipico": "$89-289/mes", "fortaleza": "Catálogo rico", "debilidad": "Sin CFDI nativo"}
+        {
+          "sistema": "Square Online",
+          "url": "https://squareup.com/us/en/online-store",
+          "pais": "🌎 Global",
+          "enfoque": "E-commerce + retail",
+          "modelo_cobro": "Freemium+comisión",
+          "precio_base": "$0",
+          "precio_tipico": "$29/mes + comisión",
+          "fortaleza": "Subscriptions",
+          "debilidad": "Comisión"
+        },
+        {
+          "sistema": "Shopify POS",
+          "url": "https://www.shopify.com/pos",
+          "pais": "🇨🇦 CAN/Global",
+          "enfoque": "Retail omnicanal",
+          "modelo_cobro": "SaaS+comisión",
+          "precio_base": "$19/mes",
+          "precio_tipico": "$89/mes Pro+%",
+          "fortaleza": "E-commerce robusto",
+          "debilidad": "Sin CFDI, comisión"
+        },
+        {
+          "sistema": "Lightspeed Retail",
+          "url": "https://www.lightspeedhq.com/retail/",
+          "pais": "🇨🇦 CAN/Global",
+          "enfoque": "Retail moderno",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$89/mes",
+          "precio_tipico": "$89-289/mes",
+          "fortaleza": "Catálogo rico",
+          "debilidad": "Sin CFDI nativo"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "JF1", "feature": "Suscripciones (entrega semanal)", "porque": "Modelo de negocio recurrente", "prioridad": "🔴 Crítica"},
-        {"id": "JF2", "feature": "Caducidad corta (3-5 días)", "porque": "Jugos frescos se vencen rápido", "prioridad": "🔴 Alta"}
+        {
+          "id": "JF1",
+          "feature": "Suscripciones (entrega semanal)",
+          "porque": "Modelo de negocio recurrente",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "JF2",
+          "feature": "Caducidad corta (3-5 días)",
+          "porque": "Jugos frescos se vencen rápido",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Suscripciones", "problema": "POS retail no maneja recurrencia", "afecta": "SICAR, Eleventa"}
+        {
+          "area": "Suscripciones",
+          "problema": "POS retail no maneja recurrencia",
+          "afecta": "SICAR, Eleventa"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Botella / Jugo prensado"},
-        {"generico": "Venta", "este_giro": "Orden / Suscripción"}
+        {
+          "generico": "Producto",
+          "este_giro": "Botella / Jugo prensado"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Orden / Suscripción"
+        }
       ]
     },
     {
@@ -797,31 +2528,105 @@
       "regulacion": "COFEPRIS, SENASICA, cadena de frío",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Sysco Mariscos", "url": "https://www.sysco.com/", "tipo": "distribuidor"},
-          {"nombre": "Pacific Seafood", "url": "https://www.pacseafood.com/", "tipo": "pescados"},
-          {"nombre": "Mariscos del Mar", "url": "https://www.mariscosdelmar.com.mx/", "tipo": "distribuidor MX"}
+          {
+            "nombre": "Sysco Mariscos",
+            "url": "https://www.sysco.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Pacific Seafood",
+            "url": "https://www.pacseafood.com/",
+            "tipo": "pescados"
+          },
+          {
+            "nombre": "Mariscos del Mar",
+            "url": "https://www.mariscosdelmar.com.mx/",
+            "tipo": "distribuidor MX"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Red Lobster", "url": "https://www.redlobster.com/", "scrapeable": true},
-          {"nombre": "Mariscos El Sarandeado", "url": "https://www.elsarandeado.mx/", "scrapeable": true},
-          {"nombre": "Cazuelas Bigos", "url": "https://www.cazuelasbigos.com.mx/", "scrapeable": true}
+          {
+            "nombre": "Red Lobster",
+            "url": "https://www.redlobster.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Mariscos El Sarandeado",
+            "url": "https://www.elsarandeado.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Cazuelas Bigos",
+            "url": "https://www.cazuelasbigos.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "SoftRestaurant", "url": "https://national-soft.com/softrestaurant/", "pais": "🇲🇽 MX", "enfoque": "Restaurantes MX", "modelo_cobro": "Licencia+mantto", "precio_base": "$6K-15K MXN", "precio_tipico": "+$300-800/mes", "fortaleza": "Estándar MX", "debilidad": "Legacy"},
-        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "Mapa mesas", "debilidad": "Caro"},
-        {"sistema": "Lavu", "url": "https://lavu.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes medianos", "modelo_cobro": "SaaS", "precio_base": "$59/mes", "precio_tipico": "$59-329/mes", "fortaleza": "Configurable", "debilidad": "Inglés"}
+        {
+          "sistema": "SoftRestaurant",
+          "url": "https://national-soft.com/softrestaurant/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Restaurantes MX",
+          "modelo_cobro": "Licencia+mantto",
+          "precio_base": "$6K-15K MXN",
+          "precio_tipico": "+$300-800/mes",
+          "fortaleza": "Estándar MX",
+          "debilidad": "Legacy"
+        },
+        {
+          "sistema": "Toast POS",
+          "url": "https://pos.toasttab.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes",
+          "modelo_cobro": "SaaS+HW",
+          "precio_base": "$69/mes",
+          "precio_tipico": "$165+/mes",
+          "fortaleza": "Mapa mesas",
+          "debilidad": "Caro"
+        },
+        {
+          "sistema": "Lavu",
+          "url": "https://lavu.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes medianos",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$59/mes",
+          "precio_tipico": "$59-329/mes",
+          "fortaleza": "Configurable",
+          "debilidad": "Inglés"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "MA1", "feature": "Precios variables por kilo (mercado del día)", "porque": "Camarón vale distinto cada día", "prioridad": "🔴 Crítica"},
-        {"id": "MA2", "feature": "Venta por kg / por pieza / por porción", "porque": "Pescado por kg, taco de camarón por unidad", "prioridad": "🔴 Crítica"}
+        {
+          "id": "MA1",
+          "feature": "Precios variables por kilo (mercado del día)",
+          "porque": "Camarón vale distinto cada día",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "MA2",
+          "feature": "Venta por kg / por pieza / por porción",
+          "porque": "Pescado por kg, taco de camarón por unidad",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Precios", "problema": "POS con precio fijo obliga a actualizar manual cada mañana", "afecta": "Sistemas genéricos"}
+        {
+          "area": "Precios",
+          "problema": "POS con precio fijo obliga a actualizar manual cada mañana",
+          "afecta": "Sistemas genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Marisco / Platillo / Coctel"},
-        {"generico": "Empleado", "este_giro": "Mesero / Cocinero / Limpiador"}
+        {
+          "generico": "Producto",
+          "este_giro": "Marisco / Platillo / Coctel"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Mesero / Cocinero / Limpiador"
+        }
       ]
     },
     {
@@ -832,31 +2637,105 @@
       "regulacion": "COFEPRIS, manejo de pescado crudo, cadena frío",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Pacific Seafood", "url": "https://www.pacseafood.com/", "tipo": "pescado"},
-          {"nombre": "True World Foods", "url": "https://www.trueworldfoods.com/", "tipo": "distribuidor japonés"},
-          {"nombre": "JFC International", "url": "https://www.jfc.com/", "tipo": "ingredientes asiáticos"}
+          {
+            "nombre": "Pacific Seafood",
+            "url": "https://www.pacseafood.com/",
+            "tipo": "pescado"
+          },
+          {
+            "nombre": "True World Foods",
+            "url": "https://www.trueworldfoods.com/",
+            "tipo": "distribuidor japonés"
+          },
+          {
+            "nombre": "JFC International",
+            "url": "https://www.jfc.com/",
+            "tipo": "ingredientes asiáticos"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Sushi Itto", "url": "https://www.sushiitto.com.mx/", "scrapeable": true},
-          {"nombre": "Sushi Roll", "url": "https://www.sushiroll.com.mx/", "scrapeable": true},
-          {"nombre": "Sushiko", "url": "https://www.sushiko.com.mx/", "scrapeable": true}
+          {
+            "nombre": "Sushi Itto",
+            "url": "https://www.sushiitto.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Sushi Roll",
+            "url": "https://www.sushiroll.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Sushiko",
+            "url": "https://www.sushiko.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "Restaurantes", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "KDS por estación", "debilidad": "Caro"},
-        {"sistema": "TouchBistro", "url": "https://www.touchbistro.com/", "pais": "🇨🇦 CAN", "enfoque": "Restaurantes medianos", "modelo_cobro": "SaaS", "precio_base": "$69/mes", "precio_tipico": "$69-399/mes", "fortaleza": "iPad-first", "debilidad": "Solo iPad"},
-        {"sistema": "Parrot", "url": "https://parrotsoftware.io/", "pais": "🇲🇽 MX", "enfoque": "Restaurantes SaaS MX", "modelo_cobro": "SaaS", "precio_base": "$400/mes MXN", "precio_tipico": "$500-1500/mes MXN", "fortaleza": "KDS, MX-first", "debilidad": "Hardware propio"}
+        {
+          "sistema": "Toast POS",
+          "url": "https://pos.toasttab.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes",
+          "modelo_cobro": "SaaS+HW",
+          "precio_base": "$69/mes",
+          "precio_tipico": "$165+/mes",
+          "fortaleza": "KDS por estación",
+          "debilidad": "Caro"
+        },
+        {
+          "sistema": "TouchBistro",
+          "url": "https://www.touchbistro.com/",
+          "pais": "🇨🇦 CAN",
+          "enfoque": "Restaurantes medianos",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$69/mes",
+          "precio_tipico": "$69-399/mes",
+          "fortaleza": "iPad-first",
+          "debilidad": "Solo iPad"
+        },
+        {
+          "sistema": "Parrot",
+          "url": "https://parrotsoftware.io/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Restaurantes SaaS MX",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$400/mes MXN",
+          "precio_tipico": "$500-1500/mes MXN",
+          "fortaleza": "KDS, MX-first",
+          "debilidad": "Hardware propio"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "SU1", "feature": "Catálogo con fotos de cada roll", "porque": "Cliente elige por imagen, son cientos de combinaciones", "prioridad": "🔴 Crítica"},
-        {"id": "SU2", "feature": "Combos de 3-5 rolls (pricing dinámico)", "porque": "Promos combo más baratas que individual", "prioridad": "🔴 Alta"}
+        {
+          "id": "SU1",
+          "feature": "Catálogo con fotos de cada roll",
+          "porque": "Cliente elige por imagen, son cientos de combinaciones",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "SU2",
+          "feature": "Combos de 3-5 rolls (pricing dinámico)",
+          "porque": "Promos combo más baratas que individual",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Combos", "problema": "POS sin combos → todo se cobra individual y la promo se pierde", "afecta": "Sistemas básicos"}
+        {
+          "area": "Combos",
+          "problema": "POS sin combos → todo se cobra individual y la promo se pierde",
+          "afecta": "Sistemas básicos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Roll / Pieza / Combo"},
-        {"generico": "Empleado", "este_giro": "Sushi chef / Mesero"}
+        {
+          "generico": "Producto",
+          "este_giro": "Roll / Pieza / Combo"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Sushi chef / Mesero"
+        }
       ]
     },
     {
@@ -867,32 +2746,111 @@
       "regulacion": "COFEPRIS, CFDI 4.0",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Sigma Alimentos", "url": "https://www.sigma-alimentos.com/", "tipo": "carne"},
-          {"nombre": "Bimbo (pan)", "url": "https://www.grupobimbo.com/", "tipo": "pan"},
-          {"nombre": "Lamb Weston (papas)", "url": "https://www.lambweston.com/", "tipo": "papas congeladas"}
+          {
+            "nombre": "Sigma Alimentos",
+            "url": "https://www.sigma-alimentos.com/",
+            "tipo": "carne"
+          },
+          {
+            "nombre": "Bimbo (pan)",
+            "url": "https://www.grupobimbo.com/",
+            "tipo": "pan"
+          },
+          {
+            "nombre": "Lamb Weston (papas)",
+            "url": "https://www.lambweston.com/",
+            "tipo": "papas congeladas"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "McDonald's", "url": "https://www.mcdonalds.com/", "scrapeable": true},
-          {"nombre": "Burger King", "url": "https://www.bk.com/", "scrapeable": true},
-          {"nombre": "Carl's Jr", "url": "https://www.carlsjr.com/", "scrapeable": true}
+          {
+            "nombre": "McDonald's",
+            "url": "https://www.mcdonalds.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Burger King",
+            "url": "https://www.bk.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Carl's Jr",
+            "url": "https://www.carlsjr.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "QSR + restaurantes", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "Drive-thru, KDS", "debilidad": "Caro"},
-        {"sistema": "Revel Systems", "url": "https://revelsystems.com/", "pais": "🇺🇸 USA", "enfoque": "QSR iPad", "modelo_cobro": "SaaS", "precio_base": "$99/mes", "precio_tipico": "$99-299/mes", "fortaleza": "iPad-first, robusto", "debilidad": "Solo iPad"},
-        {"sistema": "Square for Restaurants", "url": "https://squareup.com/us/en/point-of-sale/restaurants", "pais": "🌎 Global", "enfoque": "QSR", "modelo_cobro": "Freemium+comisión", "precio_base": "$0", "precio_tipico": "$60/mes+2.6%", "fortaleza": "HW integrado", "debilidad": "Comisión"}
+        {
+          "sistema": "Toast POS",
+          "url": "https://pos.toasttab.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "QSR + restaurantes",
+          "modelo_cobro": "SaaS+HW",
+          "precio_base": "$69/mes",
+          "precio_tipico": "$165+/mes",
+          "fortaleza": "Drive-thru, KDS",
+          "debilidad": "Caro"
+        },
+        {
+          "sistema": "Revel Systems",
+          "url": "https://revelsystems.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "QSR iPad",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$99/mes",
+          "precio_tipico": "$99-299/mes",
+          "fortaleza": "iPad-first, robusto",
+          "debilidad": "Solo iPad"
+        },
+        {
+          "sistema": "Square for Restaurants",
+          "url": "https://squareup.com/us/en/point-of-sale/restaurants",
+          "pais": "🌎 Global",
+          "enfoque": "QSR",
+          "modelo_cobro": "Freemium+comisión",
+          "precio_base": "$0",
+          "precio_tipico": "$60/mes+2.6%",
+          "fortaleza": "HW integrado",
+          "debilidad": "Comisión"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "HB1", "feature": "Builder customizable (extra queso, sin pepinillo)", "porque": "Cada burger es customizada", "prioridad": "🔴 Crítica"},
-        {"id": "HB2", "feature": "Combos (burger + papas + bebida)", "porque": "60% ventas son combos", "prioridad": "🔴 Crítica"},
-        {"id": "HB3", "feature": "Drive-thru con KDS visible", "porque": "Hot order desde el carro", "prioridad": "🔴 Alta"}
+        {
+          "id": "HB1",
+          "feature": "Builder customizable (extra queso, sin pepinillo)",
+          "porque": "Cada burger es customizada",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "HB2",
+          "feature": "Combos (burger + papas + bebida)",
+          "porque": "60% ventas son combos",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "HB3",
+          "feature": "Drive-thru con KDS visible",
+          "porque": "Hot order desde el carro",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Builder", "problema": "Sin builder rápido → cajero teclea cada modificación manual", "afecta": "POS retail genéricos"}
+        {
+          "area": "Builder",
+          "problema": "Sin builder rápido → cajero teclea cada modificación manual",
+          "afecta": "POS retail genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Hamburguesa / Combo / Bebida"},
-        {"generico": "Empleado", "este_giro": "Cocinero / Cajero / Drive-thru"}
+        {
+          "generico": "Producto",
+          "este_giro": "Hamburguesa / Combo / Bebida"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Cocinero / Cajero / Drive-thru"
+        }
       ]
     },
     {
@@ -903,31 +2861,105 @@
       "regulacion": "COFEPRIS, pesas y medidas",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Central de Abasto CDMX", "url": "https://ficeda.com.mx/", "tipo": "mayorista frutas"},
-          {"nombre": "Frutas Selectas de México", "url": "https://www.frutas.com.mx/", "tipo": "distribuidor"},
-          {"nombre": "Driscoll's", "url": "https://www.driscolls.com/", "tipo": "berries"}
+          {
+            "nombre": "Central de Abasto CDMX",
+            "url": "https://ficeda.com.mx/",
+            "tipo": "mayorista frutas"
+          },
+          {
+            "nombre": "Frutas Selectas de México",
+            "url": "https://www.frutas.com.mx/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Driscoll's",
+            "url": "https://www.driscolls.com/",
+            "tipo": "berries"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Whole Foods", "url": "https://www.wholefoodsmarket.com/", "scrapeable": true},
-          {"nombre": "La Comer", "url": "https://www.lacomer.com.mx/", "scrapeable": true},
-          {"nombre": "Mercado Soriana", "url": "https://www.soriana.com/", "scrapeable": true}
+          {
+            "nombre": "Whole Foods",
+            "url": "https://www.wholefoodsmarket.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "La Comer",
+            "url": "https://www.lacomer.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Mercado Soriana",
+            "url": "https://www.soriana.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "SICAR", "url": "https://sicar.mx/", "pais": "🇲🇽 MX", "enfoque": "Retail MX", "modelo_cobro": "Licencia única", "precio_base": "$3K-10K MXN", "precio_tipico": "+soporte", "fortaleza": "Penetración MX, offline", "debilidad": "Legacy"},
-        {"sistema": "Eleventa", "url": "https://eleventa.com/", "pais": "🇲🇽 MX", "enfoque": "Retail PyME", "modelo_cobro": "Sub", "precio_base": "$300/mes MXN", "precio_tipico": "$300-800/mes", "fortaleza": "Simple", "debilidad": "Reportes pobres"},
-        {"sistema": "Loyverse", "url": "https://loyverse.com/", "pais": "🌎 Global", "enfoque": "PyME multi-giro", "modelo_cobro": "Freemium", "precio_base": "$0", "precio_tipico": "+$5-50/mes addons", "fortaleza": "Gratis base", "debilidad": "Funciones premium pagadas"}
+        {
+          "sistema": "SICAR",
+          "url": "https://sicar.mx/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail MX",
+          "modelo_cobro": "Licencia única",
+          "precio_base": "$3K-10K MXN",
+          "precio_tipico": "+soporte",
+          "fortaleza": "Penetración MX, offline",
+          "debilidad": "Legacy"
+        },
+        {
+          "sistema": "Eleventa",
+          "url": "https://eleventa.com/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail PyME",
+          "modelo_cobro": "Sub",
+          "precio_base": "$300/mes MXN",
+          "precio_tipico": "$300-800/mes",
+          "fortaleza": "Simple",
+          "debilidad": "Reportes pobres"
+        },
+        {
+          "sistema": "Loyverse",
+          "url": "https://loyverse.com/",
+          "pais": "🌎 Global",
+          "enfoque": "PyME multi-giro",
+          "modelo_cobro": "Freemium",
+          "precio_base": "$0",
+          "precio_tipico": "+$5-50/mes addons",
+          "fortaleza": "Gratis base",
+          "debilidad": "Funciones premium pagadas"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "FR1", "feature": "Venta por kg + por pieza", "porque": "Sandías por pieza, fresas por kg", "prioridad": "🔴 Crítica"},
-        {"id": "FR2", "feature": "Precio diario actualizable", "porque": "Aguacate cambia precio cada día", "prioridad": "🔴 Crítica"}
+        {
+          "id": "FR1",
+          "feature": "Venta por kg + por pieza",
+          "porque": "Sandías por pieza, fresas por kg",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "FR2",
+          "feature": "Precio diario actualizable",
+          "porque": "Aguacate cambia precio cada día",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Precios", "problema": "Precio fijo obliga a actualizar manual cada mañana", "afecta": "POS retail genéricos"}
+        {
+          "area": "Precios",
+          "problema": "Precio fijo obliga a actualizar manual cada mañana",
+          "afecta": "POS retail genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Fruta / Verdura"},
-        {"generico": "Empleado", "este_giro": "Vendedor / Despachador"}
+        {
+          "generico": "Producto",
+          "este_giro": "Fruta / Verdura"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Vendedor / Despachador"
+        }
       ]
     },
     {
@@ -938,31 +2970,105 @@
       "regulacion": "COFEPRIS, SENASICA, cadena de frío",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Sigma Alimentos", "url": "https://www.sigma-alimentos.com/", "tipo": "carnes"},
-          {"nombre": "Bachoco", "url": "https://www.bachoco.com.mx/", "tipo": "pollo y res"},
-          {"nombre": "SuKarne", "url": "https://www.sukarne.com/", "tipo": "carne premium"}
+          {
+            "nombre": "Sigma Alimentos",
+            "url": "https://www.sigma-alimentos.com/",
+            "tipo": "carnes"
+          },
+          {
+            "nombre": "Bachoco",
+            "url": "https://www.bachoco.com.mx/",
+            "tipo": "pollo y res"
+          },
+          {
+            "nombre": "SuKarne",
+            "url": "https://www.sukarne.com/",
+            "tipo": "carne premium"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Carnicería La Vaquita", "url": "https://www.lavaquita.com.mx/", "scrapeable": true},
-          {"nombre": "El Rey del Cabrito", "url": "https://www.elreydelcabrito.com.mx/", "scrapeable": true},
-          {"nombre": "Costco Carnes", "url": "https://www.costco.com.mx/", "scrapeable": true}
+          {
+            "nombre": "Carnicería La Vaquita",
+            "url": "https://www.lavaquita.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "El Rey del Cabrito",
+            "url": "https://www.elreydelcabrito.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Costco Carnes",
+            "url": "https://www.costco.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "SICAR", "url": "https://sicar.mx/", "pais": "🇲🇽 MX", "enfoque": "Retail MX", "modelo_cobro": "Licencia única", "precio_base": "$3K-10K MXN", "precio_tipico": "+soporte", "fortaleza": "Penetración MX", "debilidad": "Legacy"},
-        {"sistema": "Eleventa", "url": "https://eleventa.com/", "pais": "🇲🇽 MX", "enfoque": "Retail PyME", "modelo_cobro": "Sub", "precio_base": "$300/mes MXN", "precio_tipico": "$300-800/mes", "fortaleza": "Simple", "debilidad": "Reportes pobres"},
-        {"sistema": "MeatPOS", "url": "https://www.meatpos.com/", "pais": "🇺🇸 USA", "enfoque": "Carnicería especializada", "modelo_cobro": "SaaS", "precio_base": "$129/mes", "precio_tipico": "$129-249/mes", "fortaleza": "Cortes + trazabilidad", "debilidad": "USA-only"}
+        {
+          "sistema": "SICAR",
+          "url": "https://sicar.mx/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail MX",
+          "modelo_cobro": "Licencia única",
+          "precio_base": "$3K-10K MXN",
+          "precio_tipico": "+soporte",
+          "fortaleza": "Penetración MX",
+          "debilidad": "Legacy"
+        },
+        {
+          "sistema": "Eleventa",
+          "url": "https://eleventa.com/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail PyME",
+          "modelo_cobro": "Sub",
+          "precio_base": "$300/mes MXN",
+          "precio_tipico": "$300-800/mes",
+          "fortaleza": "Simple",
+          "debilidad": "Reportes pobres"
+        },
+        {
+          "sistema": "MeatPOS",
+          "url": "https://www.meatpos.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Carnicería especializada",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$129/mes",
+          "precio_tipico": "$129-249/mes",
+          "fortaleza": "Cortes + trazabilidad",
+          "debilidad": "USA-only"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "CA1", "feature": "Venta por kg + báscula integrada", "porque": "Todo se vende por peso", "prioridad": "🔴 Crítica"},
-        {"id": "CA2", "feature": "Trazabilidad por corte (lote, fecha matanza)", "porque": "Regulatorio + retiro de lotes", "prioridad": "🔴 Alta"}
+        {
+          "id": "CA1",
+          "feature": "Venta por kg + báscula integrada",
+          "porque": "Todo se vende por peso",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "CA2",
+          "feature": "Trazabilidad por corte (lote, fecha matanza)",
+          "porque": "Regulatorio + retiro de lotes",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Báscula", "problema": "Sin integración báscula → cajero teclea peso manual con errores", "afecta": "POS retail genéricos"}
+        {
+          "area": "Báscula",
+          "problema": "Sin integración báscula → cajero teclea peso manual con errores",
+          "afecta": "POS retail genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Corte / Pieza"},
-        {"generico": "Empleado", "este_giro": "Carnicero"}
+        {
+          "generico": "Producto",
+          "este_giro": "Corte / Pieza"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Carnicero"
+        }
       ]
     },
     {
@@ -973,31 +3079,105 @@
       "regulacion": "COFEPRIS, SENASICA, cadena de frío",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Bachoco", "url": "https://www.bachoco.com.mx/", "tipo": "pollo industrial"},
-          {"nombre": "Pilgrim's", "url": "https://www.pilgrims.com/", "tipo": "pollo"},
-          {"nombre": "Tyson Foods MX", "url": "https://www.tysonfoods.com.mx/", "tipo": "fabricante"}
+          {
+            "nombre": "Bachoco",
+            "url": "https://www.bachoco.com.mx/",
+            "tipo": "pollo industrial"
+          },
+          {
+            "nombre": "Pilgrim's",
+            "url": "https://www.pilgrims.com/",
+            "tipo": "pollo"
+          },
+          {
+            "nombre": "Tyson Foods MX",
+            "url": "https://www.tysonfoods.com.mx/",
+            "tipo": "fabricante"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Pollos El Caminero", "url": "https://www.elcaminero.com.mx/", "scrapeable": true},
-          {"nombre": "Pollos Tampiqueña", "url": "https://www.pollostampiquena.com/", "scrapeable": true},
-          {"nombre": "Pollo Loco", "url": "https://www.elpolloloco.com/", "scrapeable": true}
+          {
+            "nombre": "Pollos El Caminero",
+            "url": "https://www.elcaminero.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Pollos Tampiqueña",
+            "url": "https://www.pollostampiquena.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Pollo Loco",
+            "url": "https://www.elpolloloco.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "SICAR", "url": "https://sicar.mx/", "pais": "🇲🇽 MX", "enfoque": "Retail MX", "modelo_cobro": "Licencia", "precio_base": "$3K-10K MXN", "precio_tipico": "+soporte", "fortaleza": "MX penetración", "debilidad": "Legacy"},
-        {"sistema": "Eleventa", "url": "https://eleventa.com/", "pais": "🇲🇽 MX", "enfoque": "Retail PyME", "modelo_cobro": "Sub", "precio_base": "$300/mes MXN", "precio_tipico": "$300-800/mes", "fortaleza": "Simple", "debilidad": "Reportes básicos"},
-        {"sistema": "Toast POS", "url": "https://pos.toasttab.com/", "pais": "🇺🇸 USA", "enfoque": "QSR + carnicería", "modelo_cobro": "SaaS+HW", "precio_base": "$69/mes", "precio_tipico": "$165+/mes", "fortaleza": "KDS + drive-thru", "debilidad": "Caro"}
+        {
+          "sistema": "SICAR",
+          "url": "https://sicar.mx/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail MX",
+          "modelo_cobro": "Licencia",
+          "precio_base": "$3K-10K MXN",
+          "precio_tipico": "+soporte",
+          "fortaleza": "MX penetración",
+          "debilidad": "Legacy"
+        },
+        {
+          "sistema": "Eleventa",
+          "url": "https://eleventa.com/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail PyME",
+          "modelo_cobro": "Sub",
+          "precio_base": "$300/mes MXN",
+          "precio_tipico": "$300-800/mes",
+          "fortaleza": "Simple",
+          "debilidad": "Reportes básicos"
+        },
+        {
+          "sistema": "Toast POS",
+          "url": "https://pos.toasttab.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "QSR + carnicería",
+          "modelo_cobro": "SaaS+HW",
+          "precio_base": "$69/mes",
+          "precio_tipico": "$165+/mes",
+          "fortaleza": "KDS + drive-thru",
+          "debilidad": "Caro"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "PO1", "feature": "Venta por kg + por pieza + medio pollo", "porque": "Tres modos de venta del mismo producto", "prioridad": "🔴 Crítica"},
-        {"id": "PO2", "feature": "Pollos rostizados con tiempo de horno", "porque": "Trackear cuántos están saliendo del horno", "prioridad": "🔴 Alta"}
+        {
+          "id": "PO1",
+          "feature": "Venta por kg + por pieza + medio pollo",
+          "porque": "Tres modos de venta del mismo producto",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "PO2",
+          "feature": "Pollos rostizados con tiempo de horno",
+          "porque": "Trackear cuántos están saliendo del horno",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Rosticería", "problema": "Sin tracking de horno → pollos se queman o salen crudos", "afecta": "POS sin gestión de tiempo"}
+        {
+          "area": "Rosticería",
+          "problema": "Sin tracking de horno → pollos se queman o salen crudos",
+          "afecta": "POS sin gestión de tiempo"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Pollo / Pieza / Embutido"},
-        {"generico": "Empleado", "este_giro": "Pollero / Rosticero"}
+        {
+          "generico": "Producto",
+          "este_giro": "Pollo / Pieza / Embutido"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Pollero / Rosticero"
+        }
       ]
     },
     {
@@ -1008,31 +3188,105 @@
       "regulacion": "COFEPRIS, salubridad",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Maseca", "url": "https://www.maseca.com.mx/", "tipo": "harina de maíz"},
-          {"nombre": "Minsa", "url": "https://www.minsa.com.mx/", "tipo": "harina"},
-          {"nombre": "Bimbo", "url": "https://www.grupobimbo.com/", "tipo": "harina de trigo"}
+          {
+            "nombre": "Maseca",
+            "url": "https://www.maseca.com.mx/",
+            "tipo": "harina de maíz"
+          },
+          {
+            "nombre": "Minsa",
+            "url": "https://www.minsa.com.mx/",
+            "tipo": "harina"
+          },
+          {
+            "nombre": "Bimbo",
+            "url": "https://www.grupobimbo.com/",
+            "tipo": "harina de trigo"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Tortillería La Esperanza", "url": "https://www.tortilleria.com.mx/", "scrapeable": true},
-          {"nombre": "Tortillas Cuautitlán", "url": "https://www.tortillascuautitlan.com.mx/", "scrapeable": true},
-          {"nombre": "Tortillería Sumesa", "url": "https://www.tortilleriasumesa.com.mx/", "scrapeable": true}
+          {
+            "nombre": "Tortillería La Esperanza",
+            "url": "https://www.tortilleria.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Tortillas Cuautitlán",
+            "url": "https://www.tortillascuautitlan.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Tortillería Sumesa",
+            "url": "https://www.tortilleriasumesa.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "SICAR", "url": "https://sicar.mx/", "pais": "🇲🇽 MX", "enfoque": "Retail MX", "modelo_cobro": "Licencia", "precio_base": "$3K-10K MXN", "precio_tipico": "+soporte", "fortaleza": "MX-first", "debilidad": "Legacy"},
-        {"sistema": "Eleventa", "url": "https://eleventa.com/", "pais": "🇲🇽 MX", "enfoque": "Retail PyME", "modelo_cobro": "Sub", "precio_base": "$300/mes MXN", "precio_tipico": "$300-800/mes", "fortaleza": "Simple", "debilidad": "Reportes pobres"},
-        {"sistema": "WhaSoft", "url": "https://www.whasoft.com/", "pais": "🇲🇽 MX", "enfoque": "Multi-giro MX", "modelo_cobro": "SaaS", "precio_base": "$300/mes MXN", "precio_tipico": "$300-1000/mes", "fortaleza": "Económico", "debilidad": "Poco conocido"}
+        {
+          "sistema": "SICAR",
+          "url": "https://sicar.mx/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail MX",
+          "modelo_cobro": "Licencia",
+          "precio_base": "$3K-10K MXN",
+          "precio_tipico": "+soporte",
+          "fortaleza": "MX-first",
+          "debilidad": "Legacy"
+        },
+        {
+          "sistema": "Eleventa",
+          "url": "https://eleventa.com/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Retail PyME",
+          "modelo_cobro": "Sub",
+          "precio_base": "$300/mes MXN",
+          "precio_tipico": "$300-800/mes",
+          "fortaleza": "Simple",
+          "debilidad": "Reportes pobres"
+        },
+        {
+          "sistema": "WhaSoft",
+          "url": "https://www.whasoft.com/",
+          "pais": "🇲🇽 MX",
+          "enfoque": "Multi-giro MX",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$300/mes MXN",
+          "precio_tipico": "$300-1000/mes",
+          "fortaleza": "Económico",
+          "debilidad": "Poco conocido"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "TO1", "feature": "Venta por kg con báscula", "porque": "Tortillas se venden por peso", "prioridad": "🔴 Crítica"},
-        {"id": "TO2", "feature": "Producción diaria (kg consumidos)", "porque": "Saber cuántas tandas más hacer", "prioridad": "🔴 Alta"}
+        {
+          "id": "TO1",
+          "feature": "Venta por kg con báscula",
+          "porque": "Tortillas se venden por peso",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "TO2",
+          "feature": "Producción diaria (kg consumidos)",
+          "porque": "Saber cuántas tandas más hacer",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Producción", "problema": "Sin tracking de producción → falta o sobra producto", "afecta": "POS no-food"}
+        {
+          "area": "Producción",
+          "problema": "Sin tracking de producción → falta o sobra producto",
+          "afecta": "POS no-food"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Tortilla / Tostada / Tlacoyo"},
-        {"generico": "Empleado", "este_giro": "Tortillero"}
+        {
+          "generico": "Producto",
+          "este_giro": "Tortilla / Tostada / Tlacoyo"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Tortillero"
+        }
       ]
     },
     {
@@ -1043,32 +3297,111 @@
       "regulacion": "CFDI 4.0",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Liverpool Proveedores", "url": "https://www.liverpool.com.mx/", "tipo": "distribuidor"},
-          {"nombre": "El Palacio Hierro Wholesale", "url": "https://www.elpalaciodehierro.com/", "tipo": "distribuidor"},
-          {"nombre": "Vans / Levi's / Brands", "url": "https://www.vans.com.mx/", "tipo": "marcas directas"}
+          {
+            "nombre": "Liverpool Proveedores",
+            "url": "https://www.liverpool.com.mx/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "El Palacio Hierro Wholesale",
+            "url": "https://www.elpalaciodehierro.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Vans / Levi's / Brands",
+            "url": "https://www.vans.com.mx/",
+            "tipo": "marcas directas"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Zara", "url": "https://www.zara.com/mx/", "scrapeable": true},
-          {"nombre": "H&M", "url": "https://www.hm.com/mx/", "scrapeable": true},
-          {"nombre": "Old Navy", "url": "https://oldnavy.com.mx/", "scrapeable": true}
+          {
+            "nombre": "Zara",
+            "url": "https://www.zara.com/mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "H&M",
+            "url": "https://www.hm.com/mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Old Navy",
+            "url": "https://oldnavy.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Shopify POS", "url": "https://www.shopify.com/pos", "pais": "🇨🇦 CAN/Global", "enfoque": "Retail omnicanal", "modelo_cobro": "SaaS+comisión", "precio_base": "$19/mes", "precio_tipico": "$89/mes Pro+%", "fortaleza": "E-commerce robusto", "debilidad": "Comisión, sin CFDI"},
-        {"sistema": "Lightspeed Retail", "url": "https://www.lightspeedhq.com/retail/", "pais": "🇨🇦 CAN/Global", "enfoque": "Retail moderno", "modelo_cobro": "SaaS", "precio_base": "$89/mes", "precio_tipico": "$89-289/mes", "fortaleza": "Catálogo rico, variantes", "debilidad": "Sin CFDI nativo"},
-        {"sistema": "Retail Pro", "url": "https://www.retailpro.com/", "pais": "🌎 Global", "enfoque": "Retail especializado", "modelo_cobro": "Licencia enterprise", "precio_base": "Custom", "precio_tipico": "$300+/terminal/mes", "fortaleza": "Multi-tienda", "debilidad": "Caro"}
+        {
+          "sistema": "Shopify POS",
+          "url": "https://www.shopify.com/pos",
+          "pais": "🇨🇦 CAN/Global",
+          "enfoque": "Retail omnicanal",
+          "modelo_cobro": "SaaS+comisión",
+          "precio_base": "$19/mes",
+          "precio_tipico": "$89/mes Pro+%",
+          "fortaleza": "E-commerce robusto",
+          "debilidad": "Comisión, sin CFDI"
+        },
+        {
+          "sistema": "Lightspeed Retail",
+          "url": "https://www.lightspeedhq.com/retail/",
+          "pais": "🇨🇦 CAN/Global",
+          "enfoque": "Retail moderno",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$89/mes",
+          "precio_tipico": "$89-289/mes",
+          "fortaleza": "Catálogo rico, variantes",
+          "debilidad": "Sin CFDI nativo"
+        },
+        {
+          "sistema": "Retail Pro",
+          "url": "https://www.retailpro.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Retail especializado",
+          "modelo_cobro": "Licencia enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$300+/terminal/mes",
+          "fortaleza": "Multi-tienda",
+          "debilidad": "Caro"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "RO1", "feature": "Variantes talla + color por producto", "porque": "Un mismo modelo tiene 5 tallas × 4 colores = 20 SKUs", "prioridad": "🔴 Crítica"},
-        {"id": "RO2", "feature": "E-commerce sync (Shopify/Woo/ML)", "porque": "Omnicanal real con stock unificado", "prioridad": "🔴 Crítica"},
-        {"id": 19, "feature": "Devoluciones cruzadas (físico↔online)", "porque": "Devolver compra online en tienda física", "prioridad": "🔴 Alta"}
+        {
+          "id": "RO1",
+          "feature": "Variantes talla + color por producto",
+          "porque": "Un mismo modelo tiene 5 tallas × 4 colores = 20 SKUs",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "RO2",
+          "feature": "E-commerce sync (Shopify/Woo/ML)",
+          "porque": "Omnicanal real con stock unificado",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 19,
+          "feature": "Devoluciones cruzadas (físico↔online)",
+          "porque": "Devolver compra online en tienda física",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Variantes", "problema": "POS sin variantes → manejar talla/color con notas manuales", "afecta": "Sistemas básicos"}
+        {
+          "area": "Variantes",
+          "problema": "POS sin variantes → manejar talla/color con notas manuales",
+          "afecta": "Sistemas básicos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Prenda / Modelo / Artículo"},
-        {"generico": "Categoría", "este_giro": "Departamento (Mujer/Hombre/Niño/Accesorios)"}
+        {
+          "generico": "Producto",
+          "este_giro": "Prenda / Modelo / Artículo"
+        },
+        {
+          "generico": "Categoría",
+          "este_giro": "Departamento (Mujer/Hombre/Niño/Accesorios)"
+        }
       ]
     },
     {
@@ -1079,30 +3412,99 @@
       "regulacion": "CFDI 4.0",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Flexi", "url": "https://www.flexi.com.mx/", "tipo": "fabricante"},
-          {"nombre": "Andrea", "url": "https://www.andrea.com/", "tipo": "distribuidor"},
-          {"nombre": "Coppel Wholesale", "url": "https://www.coppel.com/", "tipo": "distribuidor"}
+          {
+            "nombre": "Flexi",
+            "url": "https://www.flexi.com.mx/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Andrea",
+            "url": "https://www.andrea.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Coppel Wholesale",
+            "url": "https://www.coppel.com/",
+            "tipo": "distribuidor"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Skechers", "url": "https://www.skechers.com.mx/", "scrapeable": true},
-          {"nombre": "Nike", "url": "https://www.nike.com.mx/", "scrapeable": true},
-          {"nombre": "Footlocker", "url": "https://www.footlocker.com.mx/", "scrapeable": true}
+          {
+            "nombre": "Skechers",
+            "url": "https://www.skechers.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Nike",
+            "url": "https://www.nike.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Footlocker",
+            "url": "https://www.footlocker.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Lightspeed Retail", "url": "https://www.lightspeedhq.com/retail/", "pais": "🇨🇦 CAN", "enfoque": "Retail moderno", "modelo_cobro": "SaaS", "precio_base": "$89/mes", "precio_tipico": "$89-289/mes", "fortaleza": "Variantes", "debilidad": "Sin CFDI"},
-        {"sistema": "Vend (Lightspeed)", "url": "https://www.vendhq.com/", "pais": "🇳🇿 NZ/Global", "enfoque": "Retail PyME", "modelo_cobro": "SaaS", "precio_base": "$99/mes", "precio_tipico": "$99-249/mes", "fortaleza": "iPad", "debilidad": "Adquirido por Lightspeed"},
-        {"sistema": "Shopify POS", "url": "https://www.shopify.com/pos", "pais": "🇨🇦 CAN", "enfoque": "Retail omnicanal", "modelo_cobro": "SaaS+comisión", "precio_base": "$19/mes", "precio_tipico": "$89/mes+%", "fortaleza": "E-commerce", "debilidad": "Comisión"}
+        {
+          "sistema": "Lightspeed Retail",
+          "url": "https://www.lightspeedhq.com/retail/",
+          "pais": "🇨🇦 CAN",
+          "enfoque": "Retail moderno",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$89/mes",
+          "precio_tipico": "$89-289/mes",
+          "fortaleza": "Variantes",
+          "debilidad": "Sin CFDI"
+        },
+        {
+          "sistema": "Vend (Lightspeed)",
+          "url": "https://www.vendhq.com/",
+          "pais": "🇳🇿 NZ/Global",
+          "enfoque": "Retail PyME",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$99/mes",
+          "precio_tipico": "$99-249/mes",
+          "fortaleza": "iPad",
+          "debilidad": "Adquirido por Lightspeed"
+        },
+        {
+          "sistema": "Shopify POS",
+          "url": "https://www.shopify.com/pos",
+          "pais": "🇨🇦 CAN",
+          "enfoque": "Retail omnicanal",
+          "modelo_cobro": "SaaS+comisión",
+          "precio_base": "$19/mes",
+          "precio_tipico": "$89/mes+%",
+          "fortaleza": "E-commerce",
+          "debilidad": "Comisión"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "ZA1", "feature": "Variantes número (22-30) + color", "porque": "Cada modelo 9 tallas × 3 colores = 27 SKUs", "prioridad": "🔴 Crítica"}
+        {
+          "id": "ZA1",
+          "feature": "Variantes número (22-30) + color",
+          "porque": "Cada modelo 9 tallas × 3 colores = 27 SKUs",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Tallas", "problema": "POS sin variantes obliga a crear 27 productos por modelo", "afecta": "POS retail simples"}
+        {
+          "area": "Tallas",
+          "problema": "POS sin variantes obliga a crear 27 productos por modelo",
+          "afecta": "POS retail simples"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Modelo / Par"},
-        {"generico": "Empleado", "este_giro": "Vendedor"}
+        {
+          "generico": "Producto",
+          "este_giro": "Modelo / Par"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Vendedor"
+        }
       ]
     },
     {
@@ -1113,31 +3515,105 @@
       "regulacion": "CFDI 4.0, garantías",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Ingram Micro", "url": "https://www.ingrammicro.com/", "tipo": "distribuidor IT"},
-          {"nombre": "Synnex", "url": "https://www.synnex.com/", "tipo": "distribuidor"},
-          {"nombre": "DandH", "url": "https://www.dandh.com/", "tipo": "distribuidor"}
+          {
+            "nombre": "Ingram Micro",
+            "url": "https://www.ingrammicro.com/",
+            "tipo": "distribuidor IT"
+          },
+          {
+            "nombre": "Synnex",
+            "url": "https://www.synnex.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "DandH",
+            "url": "https://www.dandh.com/",
+            "tipo": "distribuidor"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Best Buy", "url": "https://www.bestbuy.com/", "scrapeable": true},
-          {"nombre": "RadioShack MX", "url": "https://www.radioshack.com.mx/", "scrapeable": true},
-          {"nombre": "Newegg", "url": "https://www.newegg.com/", "scrapeable": true}
+          {
+            "nombre": "Best Buy",
+            "url": "https://www.walmart.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "RadioShack MX",
+            "url": "https://www.radioshack.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Newegg",
+            "url": "https://www.newegg.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Retail Pro", "url": "https://www.retailpro.com/", "pais": "🌎 Global", "enfoque": "Retail especializado", "modelo_cobro": "Licencia enterprise", "precio_base": "Custom", "precio_tipico": "$300+/terminal", "fortaleza": "Multi-sucursal", "debilidad": "Caro"},
-        {"sistema": "Vend (Lightspeed)", "url": "https://www.vendhq.com/", "pais": "🇳🇿 NZ/Global", "enfoque": "Retail PyME", "modelo_cobro": "SaaS", "precio_base": "$99/mes", "precio_tipico": "$99-249/mes", "fortaleza": "Catálogo rico", "debilidad": "Comisión opcional"},
-        {"sistema": "Lightspeed Retail", "url": "https://www.lightspeedhq.com/retail/", "pais": "🇨🇦 CAN", "enfoque": "Retail moderno", "modelo_cobro": "SaaS", "precio_base": "$89/mes", "precio_tipico": "$89-289/mes", "fortaleza": "Variantes", "debilidad": "Sin CFDI"}
+        {
+          "sistema": "Retail Pro",
+          "url": "https://www.retailpro.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Retail especializado",
+          "modelo_cobro": "Licencia enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$300+/terminal",
+          "fortaleza": "Multi-sucursal",
+          "debilidad": "Caro"
+        },
+        {
+          "sistema": "Vend (Lightspeed)",
+          "url": "https://www.vendhq.com/",
+          "pais": "🇳🇿 NZ/Global",
+          "enfoque": "Retail PyME",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$99/mes",
+          "precio_tipico": "$99-249/mes",
+          "fortaleza": "Catálogo rico",
+          "debilidad": "Comisión opcional"
+        },
+        {
+          "sistema": "Lightspeed Retail",
+          "url": "https://www.lightspeedhq.com/retail/",
+          "pais": "🇨🇦 CAN",
+          "enfoque": "Retail moderno",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$89/mes",
+          "precio_tipico": "$89-289/mes",
+          "fortaleza": "Variantes",
+          "debilidad": "Sin CFDI"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "EL1", "feature": "Número de serie + garantía por unidad", "porque": "Tracking individual de cada celular/laptop", "prioridad": "🔴 Crítica"},
-        {"id": "EL2", "feature": "Catálogo masivo (5K+ SKUs)", "porque": "Electrodomésticos + accesorios + repuestos", "prioridad": "🔴 Crítica"}
+        {
+          "id": "EL1",
+          "feature": "Número de serie + garantía por unidad",
+          "porque": "Tracking individual de cada celular/laptop",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "EL2",
+          "feature": "Catálogo masivo (5K+ SKUs)",
+          "porque": "Electrodomésticos + accesorios + repuestos",
+          "prioridad": "🔴 Crítica"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Garantías", "problema": "POS sin tracking por serie → garantía manual con errores", "afecta": "POS retail genéricos"}
+        {
+          "area": "Garantías",
+          "problema": "POS sin tracking por serie → garantía manual con errores",
+          "afecta": "POS retail genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Equipo / Accesorio / Gadget"},
-        {"generico": "Empleado", "este_giro": "Vendedor / Técnico"}
+        {
+          "generico": "Producto",
+          "este_giro": "Equipo / Accesorio / Gadget"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Vendedor / Técnico"
+        }
       ]
     },
     {
@@ -1148,31 +3624,105 @@
       "regulacion": "CFDI 4.0",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "ACCO Brands", "url": "https://www.acco.com/", "tipo": "fabricante"},
-          {"nombre": "BIC", "url": "https://www.bicworld.com/", "tipo": "fabricante"},
-          {"nombre": "Pentel", "url": "https://www.pentel.com/", "tipo": "fabricante"}
+          {
+            "nombre": "ACCO Brands",
+            "url": "https://www.acco.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "BIC",
+            "url": "https://www.bicworld.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Pentel",
+            "url": "https://www.pentel.com/",
+            "tipo": "fabricante"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Office Depot MX", "url": "https://www.officedepot.com.mx/", "scrapeable": true},
-          {"nombre": "Staples", "url": "https://www.staples.com/", "scrapeable": true},
-          {"nombre": "Lumen", "url": "https://www.lumen.com.mx/", "scrapeable": true}
+          {
+            "nombre": "Office Depot MX",
+            "url": "https://www.officedepot.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Staples",
+            "url": "https://www.staples.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Lumen",
+            "url": "https://www.lumen.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Retail Edge", "url": "https://www.retailedgetx.com/", "pais": "🇺🇸 USA", "enfoque": "Retail pequeño", "modelo_cobro": "Licencia", "precio_base": "$495 único", "precio_tipico": "+$95/año soporte", "fortaleza": "Asequible", "debilidad": "USA-only"},
-        {"sistema": "Lightspeed Retail", "url": "https://www.lightspeedhq.com/retail/", "pais": "🇨🇦 CAN", "enfoque": "Retail moderno", "modelo_cobro": "SaaS", "precio_base": "$89/mes", "precio_tipico": "$89-289/mes", "fortaleza": "Catálogo rico", "debilidad": "Sin CFDI"},
-        {"sistema": "Erply", "url": "https://erply.com/", "pais": "🇪🇪 EE/Global", "enfoque": "Retail multi-tienda", "modelo_cobro": "SaaS", "precio_base": "$99/mes", "precio_tipico": "$99-269/mes", "fortaleza": "Inventario robusto", "debilidad": "Poco conocido en MX"}
+        {
+          "sistema": "Retail Edge",
+          "url": "https://www.retailedgetx.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Retail pequeño",
+          "modelo_cobro": "Licencia",
+          "precio_base": "$495 único",
+          "precio_tipico": "+$95/año soporte",
+          "fortaleza": "Asequible",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "Lightspeed Retail",
+          "url": "https://www.lightspeedhq.com/retail/",
+          "pais": "🇨🇦 CAN",
+          "enfoque": "Retail moderno",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$89/mes",
+          "precio_tipico": "$89-289/mes",
+          "fortaleza": "Catálogo rico",
+          "debilidad": "Sin CFDI"
+        },
+        {
+          "sistema": "Erply",
+          "url": "https://erply.com/",
+          "pais": "🇪🇪 EE/Global",
+          "enfoque": "Retail multi-tienda",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$99/mes",
+          "precio_tipico": "$99-269/mes",
+          "fortaleza": "Inventario robusto",
+          "debilidad": "Poco conocido en MX"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "PA1", "feature": "Cobrar servicios (copias, impresión)", "porque": "Cobro por hoja, no por producto", "prioridad": "🔴 Crítica"},
-        {"id": "PA2", "feature": "Catálogo masivo (3K+ SKUs)", "porque": "Lápices, plumas, hojas, carpetas, etc.", "prioridad": "🔴 Alta"}
+        {
+          "id": "PA1",
+          "feature": "Cobrar servicios (copias, impresión)",
+          "porque": "Cobro por hoja, no por producto",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "PA2",
+          "feature": "Catálogo masivo (3K+ SKUs)",
+          "porque": "Lápices, plumas, hojas, carpetas, etc.",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Servicios", "problema": "POS retail no cobra servicios (copias) sin truco", "afecta": "Sistemas no-mixtos"}
+        {
+          "area": "Servicios",
+          "problema": "POS retail no cobra servicios (copias) sin truco",
+          "afecta": "Sistemas no-mixtos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Útil / Material / Servicio"},
-        {"generico": "Empleado", "este_giro": "Vendedor"}
+        {
+          "generico": "Producto",
+          "este_giro": "Útil / Material / Servicio"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Vendedor"
+        }
       ]
     },
     {
@@ -1183,31 +3733,105 @@
       "regulacion": "CFDI 4.0, PROFEPA (ley contra blanqueo)",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Stuller", "url": "https://www.stuller.com/", "tipo": "fabricante"},
-          {"nombre": "Rio Grande", "url": "https://www.riogrande.com/", "tipo": "joyería pro"},
-          {"nombre": "Fire Mountain Gems", "url": "https://www.firemountaingems.com/", "tipo": "componentes"}
+          {
+            "nombre": "Stuller",
+            "url": "https://www.stuller.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Rio Grande",
+            "url": "https://www.riogrande.com/",
+            "tipo": "joyería pro"
+          },
+          {
+            "nombre": "Fire Mountain Gems",
+            "url": "https://www.firemountaingems.com/",
+            "tipo": "componentes"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Tiffany & Co.", "url": "https://www.tiffany.com/", "scrapeable": true},
-          {"nombre": "Cartier", "url": "https://www.cartier.com/", "scrapeable": true},
-          {"nombre": "Pandora", "url": "https://us.pandora.net/", "scrapeable": true}
+          {
+            "nombre": "Tiffany & Co.",
+            "url": "https://www.tiffany.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Cartier",
+            "url": "https://www.cartier.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Pandora",
+            "url": "https://mx.pandora.net/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "The Edge", "url": "https://www.theedgeforjewelers.com/", "pais": "🇺🇸 USA", "enfoque": "Joyería especializada", "modelo_cobro": "SaaS", "precio_base": "$199/mes", "precio_tipico": "$199-499/mes", "fortaleza": "Joyería-first", "debilidad": "USA-only"},
-        {"sistema": "JewelMate", "url": "https://www.jewelmate.com/", "pais": "🇺🇸 USA", "enfoque": "Joyería pro", "modelo_cobro": "SaaS+licencia", "precio_base": "Custom", "precio_tipico": "$300-700/mes", "fortaleza": "Tracking pieza", "debilidad": "Caro"},
-        {"sistema": "Jewel360", "url": "https://www.jewel360.com/", "pais": "🇺🇸 USA", "enfoque": "Joyería moderna", "modelo_cobro": "SaaS", "precio_base": "$149/mes", "precio_tipico": "$149-349/mes", "fortaleza": "Cloud, fácil", "debilidad": "USA-only"}
+        {
+          "sistema": "The Edge",
+          "url": "https://www.theedgeforjewelers.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Joyería especializada",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$199/mes",
+          "precio_tipico": "$199-499/mes",
+          "fortaleza": "Joyería-first",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "JewelMate",
+          "url": "https://www.jewelmate.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Joyería pro",
+          "modelo_cobro": "SaaS+licencia",
+          "precio_base": "Custom",
+          "precio_tipico": "$300-700/mes",
+          "fortaleza": "Tracking pieza",
+          "debilidad": "Caro"
+        },
+        {
+          "sistema": "Jewel360",
+          "url": "https://www.jewel360.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Joyería moderna",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$149/mes",
+          "precio_tipico": "$149-349/mes",
+          "fortaleza": "Cloud, fácil",
+          "debilidad": "USA-only"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "JO1", "feature": "Tracking individual por pieza única (n° de serie)", "porque": "Cada joya es única, no SKU repetido", "prioridad": "🔴 Crítica"},
-        {"id": "JO2", "feature": "Apartado / cuenta hasta pagar", "porque": "Joyas se apartan con anticipo", "prioridad": "🔴 Alta"}
+        {
+          "id": "JO1",
+          "feature": "Tracking individual por pieza única (n° de serie)",
+          "porque": "Cada joya es única, no SKU repetido",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "JO2",
+          "feature": "Apartado / cuenta hasta pagar",
+          "porque": "Joyas se apartan con anticipo",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Unicidad", "problema": "POS con SKU normal no maneja piezas únicas con foto", "afecta": "Sistemas retail genéricos"}
+        {
+          "area": "Unicidad",
+          "problema": "POS con SKU normal no maneja piezas únicas con foto",
+          "afecta": "Sistemas retail genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Joya / Pieza única"},
-        {"generico": "Empleado", "este_giro": "Joyero / Vendedor"}
+        {
+          "generico": "Producto",
+          "este_giro": "Joya / Pieza única"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Joyero / Vendedor"
+        }
       ]
     },
     {
@@ -1218,31 +3842,105 @@
       "regulacion": "COFEPRIS (productos químicos), cadena de frío",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Mayesh", "url": "https://www.mayesh.com/", "tipo": "mayorista flores"},
-          {"nombre": "Jet Fresh Flowers", "url": "https://www.jetfreshflowers.com/", "tipo": "importador"},
-          {"nombre": "Florabundance", "url": "https://www.florabundance.com/", "tipo": "mayorista"}
+          {
+            "nombre": "Mayesh",
+            "url": "https://www.mayesh.com/",
+            "tipo": "mayorista flores"
+          },
+          {
+            "nombre": "Jet Fresh Flowers",
+            "url": "https://www.jetfreshflowers.com/",
+            "tipo": "importador"
+          },
+          {
+            "nombre": "Florabundance",
+            "url": "https://www.florabundance.com/",
+            "tipo": "mayorista"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "1-800-Flowers", "url": "https://www.1800flowers.com/", "scrapeable": true},
-          {"nombre": "FTD", "url": "https://www.ftd.com/", "scrapeable": true},
-          {"nombre": "Teleflora", "url": "https://www.teleflora.com/", "scrapeable": true}
+          {
+            "nombre": "1-800-Flowers",
+            "url": "https://www.eninteresada.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "FTD",
+            "url": "https://www.florerias-online.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Teleflora",
+            "url": "https://www.rosatel.com.mx/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Floranext", "url": "https://www.floranext.com/", "pais": "🇺🇸 USA", "enfoque": "Floristería online", "modelo_cobro": "SaaS", "precio_base": "$59/mes", "precio_tipico": "$59-249/mes", "fortaleza": "Especializado", "debilidad": "USA-first"},
-        {"sistema": "BloomNation", "url": "https://www.bloomnation.com/", "pais": "🇺🇸 USA", "enfoque": "Marketplace floral", "modelo_cobro": "SaaS+comisión", "precio_base": "$0 + comisión", "precio_tipico": "10% por pedido", "fortaleza": "Marketplace clientes", "debilidad": "Comisión alta"},
-        {"sistema": "Details Flowers", "url": "https://www.detailsflowers.com/", "pais": "🇺🇸 USA", "enfoque": "Eventos + bodas", "modelo_cobro": "SaaS", "precio_base": "$135/mes", "precio_tipico": "$135-329/mes", "fortaleza": "Eventos profesionales", "debilidad": "Caro"}
+        {
+          "sistema": "Floranext",
+          "url": "https://www.floranext.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Floristería online",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$59/mes",
+          "precio_tipico": "$59-249/mes",
+          "fortaleza": "Especializado",
+          "debilidad": "USA-first"
+        },
+        {
+          "sistema": "BloomNation",
+          "url": "https://www.bloomnation.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Marketplace floral",
+          "modelo_cobro": "SaaS+comisión",
+          "precio_base": "$0 + comisión",
+          "precio_tipico": "10% por pedido",
+          "fortaleza": "Marketplace clientes",
+          "debilidad": "Comisión alta"
+        },
+        {
+          "sistema": "Details Flowers",
+          "url": "https://www.detailsflowers.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Eventos + bodas",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$135/mes",
+          "precio_tipico": "$135-329/mes",
+          "fortaleza": "Eventos profesionales",
+          "debilidad": "Caro"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "FL1", "feature": "Pedidos con entrega programada (fecha+hora+dirección)", "porque": "Flores de cumpleaños/aniversario para fecha exacta", "prioridad": "🔴 Crítica"},
-        {"id": "FL2", "feature": "Arreglos custom (foto + dedicatoria)", "porque": "Cada arreglo se personaliza", "prioridad": "🔴 Alta"}
+        {
+          "id": "FL1",
+          "feature": "Pedidos con entrega programada (fecha+hora+dirección)",
+          "porque": "Flores de cumpleaños/aniversario para fecha exacta",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "FL2",
+          "feature": "Arreglos custom (foto + dedicatoria)",
+          "porque": "Cada arreglo se personaliza",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Entregas", "problema": "Sin tracking de fecha entrega → flores llegan tarde o nunca", "afecta": "POS sin gestión de pedidos"}
+        {
+          "area": "Entregas",
+          "problema": "Sin tracking de fecha entrega → flores llegan tarde o nunca",
+          "afecta": "POS sin gestión de pedidos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Arreglo / Ramo / Pieza"},
-        {"generico": "Empleado", "este_giro": "Florista / Repartidor"}
+        {
+          "generico": "Producto",
+          "este_giro": "Arreglo / Ramo / Pieza"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Florista / Repartidor"
+        }
       ]
     },
     {
@@ -1253,31 +3951,105 @@
       "regulacion": "COFEPRIS (químicos), CFDI",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Unipress Corp", "url": "https://www.unipresscorp.com/", "tipo": "equipo industrial"},
-          {"nombre": "Maytag Commercial", "url": "https://www.maytagcommerciallaundry.com/", "tipo": "fabricante"},
-          {"nombre": "Alliance Laundry", "url": "https://www.alliancelaundry.com/", "tipo": "fabricante"}
+          {
+            "nombre": "Unipress Corp",
+            "url": "https://www.unipresscorp.com/",
+            "tipo": "equipo industrial"
+          },
+          {
+            "nombre": "Maytag Commercial",
+            "url": "https://www.maytagcommerciallaundry.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "Alliance Laundry",
+            "url": "https://www.alliancelaundry.com/",
+            "tipo": "fabricante"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "Laundryheap", "url": "https://www.laundryheap.com/", "scrapeable": true},
-          {"nombre": "Tide Cleaners", "url": "https://www.tidecleaners.com/", "scrapeable": true},
-          {"nombre": "Laundromat Resource", "url": "https://www.laundromatresource.com/", "scrapeable": true}
+          {
+            "nombre": "Laundryheap",
+            "url": "https://www.jetlav.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Tide Cleaners",
+            "url": "https://www.tidecleaners.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Laundromat Resource",
+            "url": "https://www.laundromatresource.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "CleanCloud", "url": "https://cleancloud.com/", "pais": "🇬🇧 UK", "enfoque": "Lavandería SaaS", "modelo_cobro": "SaaS", "precio_base": "$135/mes", "precio_tipico": "$135-489/mes", "fortaleza": "App cliente + rutas", "debilidad": "Pricing alto"},
-        {"sistema": "SMRT Systems", "url": "https://www.smrtsystems.com/", "pais": "🇺🇸 USA", "enfoque": "Auto-servicio", "modelo_cobro": "SaaS+HW", "precio_base": "Custom", "precio_tipico": "$200+/mes", "fortaleza": "Máquinas conectadas", "debilidad": "HW propio"},
-        {"sistema": "StarchUp", "url": "https://www.starchup.com/", "pais": "🇺🇸 USA", "enfoque": "Lavandería on-demand", "modelo_cobro": "SaaS", "precio_base": "Custom", "precio_tipico": "$150+/mes", "fortaleza": "App + rutas", "debilidad": "Pricing opaco"}
+        {
+          "sistema": "CleanCloud",
+          "url": "https://cleancloud.com/",
+          "pais": "🇬🇧 UK",
+          "enfoque": "Lavandería SaaS",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$135/mes",
+          "precio_tipico": "$135-489/mes",
+          "fortaleza": "App cliente + rutas",
+          "debilidad": "Pricing alto"
+        },
+        {
+          "sistema": "SMRT Systems",
+          "url": "https://www.smrtsystems.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Auto-servicio",
+          "modelo_cobro": "SaaS+HW",
+          "precio_base": "Custom",
+          "precio_tipico": "$200+/mes",
+          "fortaleza": "Máquinas conectadas",
+          "debilidad": "HW propio"
+        },
+        {
+          "sistema": "StarchUp",
+          "url": "https://www.starchup.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Lavandería on-demand",
+          "modelo_cobro": "SaaS",
+          "precio_base": "Custom",
+          "precio_tipico": "$150+/mes",
+          "fortaleza": "App + rutas",
+          "debilidad": "Pricing opaco"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "LV1", "feature": "Tickets por prenda (cliente puede tener 30 prendas)", "porque": "Tracking individual de cada prenda", "prioridad": "🔴 Crítica"},
-        {"id": "LV2", "feature": "Servicios mixtos (lavado/planchado/teñido por prenda)", "porque": "Una camisa puede llevar 2-3 servicios", "prioridad": "🔴 Alta"}
+        {
+          "id": "LV1",
+          "feature": "Tickets por prenda (cliente puede tener 30 prendas)",
+          "porque": "Tracking individual de cada prenda",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "LV2",
+          "feature": "Servicios mixtos (lavado/planchado/teñido por prenda)",
+          "porque": "Una camisa puede llevar 2-3 servicios",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Tracking", "problema": "Sin tracking por prenda → prendas perdidas o intercambiadas", "afecta": "POS retail genéricos"}
+        {
+          "area": "Tracking",
+          "problema": "Sin tracking por prenda → prendas perdidas o intercambiadas",
+          "afecta": "POS retail genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Servicio / Prenda"},
-        {"generico": "Empleado", "este_giro": "Lavandero / Planchador"}
+        {
+          "generico": "Producto",
+          "este_giro": "Servicio / Prenda"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Lavandero / Planchador"
+        }
       ]
     },
     {
@@ -1288,31 +4060,105 @@
       "regulacion": "CFDI 4.0",
       "cadena_valor": {
         "proveedores": [
-          {"nombre": "Ashley Furniture", "url": "https://www.ashleyfurniture.com/", "tipo": "fabricante"},
-          {"nombre": "La-Z-Boy", "url": "https://www.la-z-boy.com/", "tipo": "fabricante"},
-          {"nombre": "El Palacio Hierro Wholesale", "url": "https://www.elpalaciodehierro.com/", "tipo": "distribuidor"}
+          {
+            "nombre": "Ashley Furniture",
+            "url": "https://www.ashleyfurniture.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "La-Z-Boy",
+            "url": "https://www.la-z-boy.com/",
+            "tipo": "fabricante"
+          },
+          {
+            "nombre": "El Palacio Hierro Wholesale",
+            "url": "https://www.elpalaciodehierro.com/",
+            "tipo": "distribuidor"
+          }
         ],
         "clientes_finales": [
-          {"nombre": "IKEA", "url": "https://www.ikea.com/mx/", "scrapeable": true},
-          {"nombre": "Liverpool Muebles", "url": "https://www.liverpool.com.mx/", "scrapeable": true},
-          {"nombre": "Famsa", "url": "https://www.famsa.com/", "scrapeable": true}
+          {
+            "nombre": "IKEA",
+            "url": "https://www.ikea.com/mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Liverpool Muebles",
+            "url": "https://www.liverpool.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Famsa",
+            "url": "https://www.famsa.com/",
+            "scrapeable": true
+          }
         ]
       },
       "competidores_sector": [
-        {"sistema": "Lightspeed Retail", "url": "https://www.lightspeedhq.com/retail/", "pais": "🇨🇦 CAN", "enfoque": "Retail moderno", "modelo_cobro": "SaaS", "precio_base": "$89/mes", "precio_tipico": "$89-289/mes", "fortaleza": "Variantes", "debilidad": "Sin CFDI"},
-        {"sistema": "Vend", "url": "https://www.vendhq.com/", "pais": "🇳🇿 NZ", "enfoque": "Retail PyME", "modelo_cobro": "SaaS", "precio_base": "$99/mes", "precio_tipico": "$99-249/mes", "fortaleza": "iPad-first", "debilidad": "Adquirido"},
-        {"sistema": "Retail Pro", "url": "https://www.retailpro.com/", "pais": "🌎 Global", "enfoque": "Retail especializado", "modelo_cobro": "Licencia enterprise", "precio_base": "Custom", "precio_tipico": "$300+/terminal", "fortaleza": "Multi-tienda", "debilidad": "Caro"}
+        {
+          "sistema": "Lightspeed Retail",
+          "url": "https://www.lightspeedhq.com/retail/",
+          "pais": "🇨🇦 CAN",
+          "enfoque": "Retail moderno",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$89/mes",
+          "precio_tipico": "$89-289/mes",
+          "fortaleza": "Variantes",
+          "debilidad": "Sin CFDI"
+        },
+        {
+          "sistema": "Vend",
+          "url": "https://www.vendhq.com/",
+          "pais": "🇳🇿 NZ",
+          "enfoque": "Retail PyME",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$99/mes",
+          "precio_tipico": "$99-249/mes",
+          "fortaleza": "iPad-first",
+          "debilidad": "Adquirido"
+        },
+        {
+          "sistema": "Retail Pro",
+          "url": "https://www.retailpro.com/",
+          "pais": "🌎 Global",
+          "enfoque": "Retail especializado",
+          "modelo_cobro": "Licencia enterprise",
+          "precio_base": "Custom",
+          "precio_tipico": "$300+/terminal",
+          "fortaleza": "Multi-tienda",
+          "debilidad": "Caro"
+        }
       ],
       "funcionalidades_criticas": [
-        {"id": "MU1", "feature": "Entrega programada + ensamble", "porque": "Muebles grandes requieren logística", "prioridad": "🔴 Crítica"},
-        {"id": "MU2", "feature": "Apartado / financiamiento", "porque": "Muebles caros se pagan a meses", "prioridad": "🔴 Alta"}
+        {
+          "id": "MU1",
+          "feature": "Entrega programada + ensamble",
+          "porque": "Muebles grandes requieren logística",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "MU2",
+          "feature": "Apartado / financiamiento",
+          "porque": "Muebles caros se pagan a meses",
+          "prioridad": "🔴 Alta"
+        }
       ],
       "problemas_evitar": [
-        {"area": "Logística", "problema": "Sin gestión de entrega → cliente no recibe o llega tarde", "afecta": "POS retail genéricos"}
+        {
+          "area": "Logística",
+          "problema": "Sin gestión de entrega → cliente no recibe o llega tarde",
+          "afecta": "POS retail genéricos"
+        }
       ],
       "terminologia": [
-        {"generico": "Producto", "este_giro": "Mueble / Pieza / Conjunto"},
-        {"generico": "Empleado", "este_giro": "Vendedor / Ensamblador"}
+        {
+          "generico": "Producto",
+          "este_giro": "Mueble / Pieza / Conjunto"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Vendedor / Ensamblador"
+        }
       ]
     }
   ]

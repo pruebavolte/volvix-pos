@@ -6088,6 +6088,23 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
     try { console.error('[products-search-public] load failed:', e && e.message); } catch (_) {}
   }
 
+  // ============ /api/scrape/menu (V10.32) ============
+  // Scrape específico de URLs de clientes finales (mcdonalds.com.mx,
+  // dominos.com.mx, starbucks.com.mx, oxxo.com, etc.) usando 3 técnicas:
+  // 1. Adaptadores HARDCODED por dominio
+  // 2. JSON-LD Schema.org genérico
+  // 3. Open Graph + meta tags fallback
+  try {
+    const sm = require('./scrape-menu');
+    handlers['GET /api/scrape/menu'] = sm.createHandler({
+      sendJSON,
+      sendError,
+      parseQuery: (u) => (url.parse(u, true).query || {}),
+    });
+  } catch (e) {
+    try { console.error('[scrape-menu] load failed:', e && e.message); } catch (_) {}
+  }
+
   // ============ DEVOLUCIONES ============
   handlers['GET /api/devoluciones'] = requireAuth(async (req, res) => {
     try {
