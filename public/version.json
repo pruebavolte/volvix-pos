@@ -1,13 +1,14 @@
 {
-  "version": "1.0.431",
+  "version": "1.0.432",
   "major": 1,
   "minor": 0,
-  "patch": 431,
+  "patch": 432,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-19T15:00:00.000Z",
-  "built_at": "2026-05-19T15:00:00.000Z",
+  "date": "2026-05-19T16:00:00.000Z",
+  "built_at": "2026-05-19T16:00:00.000Z",
   "changelog": [
+    "V10.35 MULTI-SOURCE-PRODUCTOS: nuevo script scripts/fill-products-multi-source.js usa 6 métodos GRATUITOS para extraer productos (sin solo scraping): (1) /api/products/search-public con multi-query 3-4 queries distintas por giro, (2) Shopify /products.json (sujaorganic.com y daily-harvest.com SÍ funcionan), (3) WooCommerce /wp-json/wc/store/products (mucho sitios MX), (4) OpenFoodFacts directo, (5) Wikimedia con queries optimizadas EN, (6) DummyJSON inglés. Resultados: 5/5 giros débiles ahora con 10 productos (veterinaria, ferreteria, pizzeria, barberia, jugos_frescos). Total 353 productos (antes 314). Veterinaria → Pedigree dog food, Ferretería → Screw/bolt/drill, Pizzería → Margherita/Pepperoni, Barbería → Wahl clippers/trimmer, Jugos Frescos → Tropicana/Fanta/Orangensaft. URLs MX inventadas que no existen documentadas como no viables (purofresco.mx, juiceit.mx, etc.) — solo URLs reales con tráfico se mantienen.",
     "V10.34 TABLA-MAESTRA-+20-COLUMNAS-PRODUCTOS: agregadas 20 nuevas columnas (Producto 1..10 + Imagen 1..10) a la tabla maestra de giros en el módulo Giros del panel. Cada fila del giro ahora contiene 53 columnas totales: Giro · ¿Qué vende? · 3×Sistema(URL/País/Modelo/PrecioBase/PrecioTípico/Fortaleza/Debilidad) · 3×Cliente Final · 3×Proveedor · Funcionalidades críticas · Problemas a evitar · Terminología · Regulación · Tenants · 10×(Producto + Imagen). Min-width tabla aumentada a 5800px para soportar scroll horizontal. Cada celda Producto muestra nombre+precio (background verde claro), cada celda Imagen muestra thumbnail 50×50px con fallback 📦. Datos vienen de productos_plantilla del ecosystem JSON (V10.33 — 314 productos en 36 giros).",
     "V10.33 PRODUCTOS-PLANTILLA-PRECARGADOS: el audit V10.32 confirmó que 102 de 108 URLs MX están bloqueadas por Cloudflare/Akamai. Solución pragmática: generar productos_plantilla[] PRE-CARGADOS por cada giro y guardarlos en /data/giros-ecosystem.json. Script scripts/audit-and-fill-products.js llama /api/products/search-public con queries optimizadas (EN para mejor match en DummyJSON, ES para OpenFoodFacts) y guarda 10 productos por giro con nombre+imagen+precio+source. 314 productos en 36 giros (avg 8.7/giro). El preview del módulo inventario/productos ahora carga INSTANT desde la plantilla (no fetch). Fallback a /api/products/search-public si plantilla está vacía. Ejemplos: joyería → Gold ring/Necklace, florería → Rose bouquet, farmacia → Paracetamol, restaurante → Mexican Style Rice/Huarache, sushi → fotos de sushi.",
     "V10.32 SCRAPING-URLS-MX: nuevo endpoint GET /api/scrape/menu?url=X que extrae productos/menú de URLs de clientes finales con 3 técnicas en cascada: (1) Adaptadores específicos por dominio (mcdonalds.com.mx usa __NEXT_DATA__ inline), (2) JSON-LD Schema.org genérico (parser de Product/MenuItem/Service), (3) Open Graph + meta tags fallback. Sin cheerio — regex puro, footprint ligero. User-Agent simula Chrome 120, Accept-Language es-MX, sin auth keys. Cache memoria 1h por URL. Plus: 23 URLs de clientes finales actualizadas a versiones MX populares con tráfico real (mcdonalds.com.mx, dominos.com.mx, bk.com.mx, farmaciasguadalajara.com.mx, petco.com.mx, lenscrafters.com.mx, starbucks.com.mx, dairyqueen.com.mx, baskinrobbins.com.mx, homedepot.com.mx, lowes.com.mx, midas.com.mx, jetlav.com.mx, etc.).",
