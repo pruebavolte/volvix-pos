@@ -10,9 +10,26 @@
       "terminologia (cómo llaman las cosas en este giro)"
     ],
     "notes": "v2.1 agrega URL a cada competidor_sector + 5 giros adicionales (hotel, optica, gimnasio, salon_belleza, taller_mecanico) cubriendo los del documento markdown del usuario.",
-    "last_audit": "2026-05-20T12:34:05.268Z",
-    "products_total": 360,
-    "extraction_v": "V10.36 — cliente final primero"
+    "last_audit": "2026-05-20T12:57:53.545Z",
+    "products_total": 359,
+    "extraction_v": "V10.36 — cliente final primero",
+    "quality_filters": "V10.37: SUSPICIOUS_NAMES + BAD_IMG + wikimedia-noise filters",
+    "cliente_final_rules": {
+      "description": "Reglas estrictas para URLs en clientes_finales[].url",
+      "rules": [
+        "1. Debe estar en ESPAÑOL (sitio o catalogo en es-MX o es-LA)",
+        "2. Debe tener TRAFICO real (sitio comercial reconocido)",
+        "3. Debe permitir EXTRACCION mediante: Shopify products.json, WooCommerce REST, JSON-LD Product/MenuItem, Open Graph rico, o sitemap",
+        "4. Las IMAGENES deben representar PRODUCTOS/SERVICIOS del giro (no logos, banners, iconos, mapas, fotos institucionales)",
+        "5. Debe exponer NOMBRE + PRECIO + IMAGEN coherentes con el giro"
+      ],
+      "filters_applied": {
+        "SUSPICIOUS_NAMES": "temu|noscript|header|menu|click|logo|navegacion|aliexpress|amazon|shop now|comprar|ver mas|cargando|home|login|footer|banner|profile|tour|saturn|planet (eliminados)",
+        "BAD_IMG_TYPES": ".svg, .gif (eliminados)",
+        "BAD_IMG_KEYWORDS": "logo|sprite|icon|favicon|banner|pixel|tracking|1x1|spacer|placeholder (eliminados)",
+        "WIKIMEDIA_NOISE": "taxi|book|portrait|tour|building|street|city|persona|cantante|saturn|planet (eliminados en src=wikimedia)"
+      }
+    }
   },
   "giros": [
     {
@@ -153,13 +170,6 @@
           "source": "open-graph"
         },
         {
-          "nombre": "select",
-          "imagen": "https://www.tiendavenus.com/assets/arrow-chevron-right.svg",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
           "nombre": "Haz click para abrir la categoría Más vendidos",
           "imagen": "https://d2fvoxn4em0o50.cloudfront.net/ecommerce-content/top-sellers.webp",
           "precio": null,
@@ -209,11 +219,18 @@
           "source": "img-tag"
         },
         {
-          "nombre": "where",
-          "imagen": "https://d2fvoxn4em0o50.cloudfront.net/ecommerce-content/pato_ubicacion.svg",
+          "nombre": "Inspirações do Claustro",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Inspira%C3%A7%C3%B5es_do_Claustro.djvu/page1-500px-Inspira%C3%A7%C3%B5es_do_Claustro.djvu.jpg",
           "precio": null,
           "moneda": null,
-          "source": "img-tag"
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Lingerie",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Lingerie.jpg/500px-Lingerie.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
         }
       ]
     },
@@ -369,13 +386,6 @@
           "source": "img-tag"
         },
         {
-          "nombre": "noscript",
-          "imagen": "https://www.bk.com.mx/noscript.php?noca=MTg5LjE1OC42NC4yMDZ8MjAyNjA1MjAwODIzMTh8YmsuY29tLm14fHd3dy5iay5jb20ubXgvfDB8bW96aWxsYS81LjAgKHdpbmRvd3MgbnQgMTAuMDsgd2luNjQ7IHg2NCkgYXBwbGV3ZWJraXQvNTM3LjM2IGNocm9tZS8xMjAuMHx7IkNvbm5lY3Rpb24iOiJrZWVwLWFsaXZlIiwiSG9zdCI6Ind3dy5iay5jb20ubXgiLCJBY2NlcHQtTGFuZ3VhZ2UiOiJlcy1NWCxlcztxPTAuOSIsIkFjY2VwdCI6InRleHRcL2h0bWwsYXBwbGljYXRpb25cL2pzb24sYXBwbGljYXRpb25cL3htbCIsIlVzZXItQWdlbnQiOiJNb3ppbGxhXC81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXRcLzUzNy4zNiBDaHJvbWVcLzEyMC4wIn18eyJpc19ib3QiOmZhbHNlLCJpc19hbGxvd2VkIjp0cnVlLCJib3RfdHlwZSI6Imh1bWFuIiwiY29uZmlkZW5jZSI6MTAwLCJyZWFzb25zIjpbXX18MjAyNjA1MjAwODIzMTg=",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
           "nombre": "ECH 3009 6 - Repostería y bebidas",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/ECH_3009_6_-_Reposter%C3%ADa_y_bebidas.djvu/page1-500px-ECH_3009_6_-_Reposter%C3%ADa_y_bebidas.djvu.jpg",
           "precio": null,
@@ -430,6 +440,13 @@
           "precio": null,
           "moneda": null,
           "source": "off"
+        },
+        {
+          "nombre": "Mexican cuisine 1",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Mexican_cuisine_1.jpg/500px-Mexican_cuisine_1.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
         }
       ]
     },
@@ -558,13 +575,6 @@
       ],
       "productos_plantilla": [
         {
-          "nombre": "menu arrow",
-          "imagen": "https://www.banfield.com/images/Ic_up_arrow.svg",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
           "nombre": "Icon of a skin bump",
           "imagen": "https://www.banfield.com/-/media/Project/Banfield/Main/en/PHADO/Skin/Skin-rashes/20221114_007.svg?iar=0&amp;rev=a09744e8add64e69890fef765edf5d02&amp;hash=859B8CD9C18C1E46E12F71ED72EF0B3B",
           "precio": null,
@@ -581,13 +591,6 @@
         {
           "nombre": "icons",
           "imagen": "https://www.banfield.com/-/media/Aprimo/2026/03/23/19/55/b6e414af_0352_45a0_8e50_b4160145fbf6.svg?iar=0&amp;rev=94e154c717194b1ab0af46b94d5d0ae1&amp;hash=C2C05271CA5E0D0E0858F7C44B98C4FD",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
-          "nombre": "Banfield Logo",
-          "imagen": "https://www.banfield.com/Banfield/images/Banfield_bhere.svg",
           "precio": null,
           "moneda": null,
           "source": "img-tag"
@@ -626,6 +629,20 @@
           "precio": null,
           "moneda": null,
           "source": "img-tag"
+        },
+        {
+          "nombre": "Dr Joham.Lamprecht examining a contestant at 'Mumbai cat show'",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Dr_Joham.Lamprecht_examining_a_contestant_at_%27Mumbai_cat_show%27.JPG/500px-Dr_Joham.Lamprecht_examining_a_contestant_at_%27Mumbai_cat_show%27.JPG",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Entrance to '5th International Cat show'.",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Entrance_to_%275th_International_Cat_show%27..JPG/500px-Entrance_to_%275th_International_Cat_show%27..JPG",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
         }
       ]
     },
@@ -974,13 +991,6 @@
           "source": "wikimedia"
         },
         {
-          "nombre": "Hakatere Station Accommodation Buildings, New Zealand 03",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Hakatere_Station_Accommodation_Buildings%2C_New_Zealand_03.jpg/500px-Hakatere_Station_Accommodation_Buildings%2C_New_Zealand_03.jpg",
-          "precio": null,
-          "moneda": null,
-          "source": "wikimedia"
-        },
-        {
           "nombre": "Ahrweiler, St.-Laurentius-Kirche -- 2020 -- 8575",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Ahrweiler%2C_St.-Laurentius-Kirche_--_2020_--_8575.jpg/500px-Ahrweiler%2C_St.-Laurentius-Kirche_--_2020_--_8575.jpg",
           "precio": null,
@@ -1011,6 +1021,13 @@
         {
           "nombre": "Seiko Lodging ac (2)",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Seiko_Lodging_ac_%282%29.jpg/500px-Seiko_Lodging_ac_%282%29.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Soap? or shampoo? dispenser (3899215674)",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Soap%3F_or_shampoo%3F_dispenser_%283899215674%29.jpg/500px-Soap%3F_or_shampoo%3F_dispenser_%283899215674%29.jpg",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
@@ -1534,20 +1551,6 @@
       ],
       "productos_plantilla": [
         {
-          "nombre": "Smart Fit - MX | 2 meses + anualidad de por vida Gratis*\n",
-          "imagen": "https://www.smartfit.com.mx/files/store/campaign/banner_desktop/1570/1920X850__9_.jpg",
-          "precio": null,
-          "moneda": null,
-          "source": "open-graph"
-        },
-        {
-          "nombre": "Comienza ya - Banner",
-          "imagen": "https://www.smartfit.com.mx/files/store/campaign/banner_mobile/1570/1080X1789__11_.jpg",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
           "nombre": "Imagem de Peso Libre e integrado",
           "imagen": "https://assets.smartfit.com.br/images/new_home_mx/PesoLibre-Integrado.webp",
           "precio": null,
@@ -1597,11 +1600,25 @@
           "source": "img-tag"
         },
         {
-          "nombre": "Three iPhones with Apple Fitness+ workout videos playing.",
-          "imagen": "https://cdn.prod.website-files.com/66aa8fe9dc4db68f448a978f/69776de1fd9bf17534c356dc_home-afp-banner.webp",
+          "nombre": "Soy-whey-protein-diet",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Soy-whey-protein-diet.jpg/500px-Soy-whey-protein-diet.jpg",
           "precio": null,
           "moneda": null,
-          "source": "img-tag"
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Whey protein",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/3/33/Whey_protein.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "ProteinaXtrenght",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/0/0f/ProteinaXtrenght.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
         }
       ]
     },
@@ -1926,13 +1943,6 @@
       ],
       "productos_plantilla": [
         {
-          "nombre": "icon",
-          "imagen": "https://cdn.prod.website-files.com/66d6308541a85d03a812dfe1/66d6308541a85d03a812dff2_close-btn.svg",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
           "nombre": "Image Service",
           "imagen": "https://cdn.prod.website-files.com/66d6308541a85d03a812dff6/66d6308541a85d03a812e033_Cambio-de-aceite.jpg",
           "precio": null,
@@ -1991,6 +2001,13 @@
         {
           "nombre": "Motor oil refill with funnel",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Motor_oil_refill_with_funnel.JPG/500px-Motor_oil_refill_with_funnel.JPG",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Tapa 026103485c audi aceite Castrol",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Tapa_026103485c_audi_aceite_Castrol.jpg/500px-Tapa_026103485c_audi_aceite_Castrol.jpg",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
@@ -2314,13 +2331,6 @@
       ],
       "productos_plantilla": [
         {
-          "nombre": "Floyd’s 99 Barbershop | Haircuts Near Me &amp; Book Online",
-          "imagen": "https://floyds99barber.wpenginepowered.com/wp-content/uploads/2025/05/Listen360_WebBanner_v2_1200w_.png",
-          "precio": null,
-          "moneda": null,
-          "source": "open-graph"
-        },
-        {
           "nombre": "BG Image",
           "imagen": "https://www.floydsbarbershop.com/_next/image?url=https%3A%2F%2Ffloyds99barber.wpenginepowered.com%2Fwp-content%2Fuploads%2F2025%2F05%2FPromiseBG_1920x1080.png&amp;w=3840&amp;q=75&amp;dpl=dpl_FzDHCGCj4SZKk9qHDfe6CxEVLFTc",
           "precio": null,
@@ -2363,13 +2373,6 @@
           "source": "img-tag"
         },
         {
-          "nombre": "Floyds&#x27;s 99 Barbershop team members smiling in front of a shop.",
-          "imagen": "https://www.floydsbarbershop.com/_next/image?url=https%3A%2F%2Ffloyds99barber.wpenginepowered.com%2Fwp-content%2Fuploads%2F2026%2F02%2Fteam-banner.jpeg&amp;w=3840&amp;q=75&amp;dpl=dpl_FzDHCGCj4SZKk9qHDfe6CxEVLFTc",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
           "nombre": "Electric hair clipper (1)",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Electric_hair_clipper_%281%29.jpg/500px-Electric_hair_clipper_%281%29.jpg",
           "precio": null,
@@ -2379,6 +2382,13 @@
         {
           "nombre": "Clipper, barber's electric (AM 1986.12)",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Clipper%2C_barber%27s_electric_%28AM_1986.12%29.jpg/500px-Clipper%2C_barber%27s_electric_%28AM_1986.12%29.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Barbero-afeitado-clasico-compressor",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Barbero-afeitado-clasico-compressor.jpg/500px-Barbero-afeitado-clasico-compressor.jpg",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
@@ -2676,13 +2686,6 @@
       ],
       "productos_plantilla": [
         {
-          "nombre": "Homepage",
-          "imagen": "https://starbucks.com/static/images/default-image.png",
-          "precio": null,
-          "moneda": null,
-          "source": "open-graph"
-        },
-        {
           "nombre": "A small cup of coffee",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/A_small_cup_of_coffee.JPG/500px-A_small_cup_of_coffee.JPG",
           "precio": null,
@@ -2744,6 +2747,13 @@
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
+        },
+        {
+          "nombre": "Espresso Italiano classico",
+          "imagen": "https://images.openfoodfacts.org/images/products/800/007/001/2882/front_fr.27.400.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "off"
         }
       ]
     },
@@ -2899,13 +2909,6 @@
           "source": "wikimedia"
         },
         {
-          "nombre": "Shop window decoration with large bolt and nut, and model of mechanical workbenc",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Shop_window_decoration_with_large_bolt_and_nut%2C_and_model_of_mechanical_workbench_with_%22iron_man%22.jpg/500px-Shop_window_decoration_with_large_bolt_and_nut%2C_and_model_of_mechanical_workbench_with_%22iron_man%22.jpg",
-          "precio": null,
-          "moneda": null,
-          "source": "wikimedia"
-        },
-        {
           "nombre": "Screw vs Bolt",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Screw_vs_Bolt.svg/500px-Screw_vs_Bolt.svg.png",
           "precio": null,
@@ -2922,6 +2925,13 @@
         {
           "nombre": "Drill tip masonry",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Drill_tip_masonry.jpg/500px-Drill_tip_masonry.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Tire-fond cropped",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Tire-fond_cropped.JPG/500px-Tire-fond_cropped.JPG",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
@@ -3783,13 +3793,6 @@
       ],
       "productos_plantilla": [
         {
-          "nombre": "Welcome to Jamba | Jamba",
-          "imagen": "https://images.ctfassets.net/zqt8tllj2cy0/3vXQknBo5wVc0QDWn1zKor/4f5081a763c3868ee32818a66f232006/Jamba-Nav-Logo-Desktop.svg",
-          "precio": null,
-          "moneda": null,
-          "source": "open-graph"
-        },
-        {
           "nombre": "Rule The Day® at Smoothie King - Order Online",
           "imagen": "https://cdn.smoothieking.com/images/site/SEO/smoothie-king-global-share-image.jpg",
           "precio": null,
@@ -3848,6 +3851,13 @@
         {
           "nombre": "Orange juice 1 edit1",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Orange_juice_1_edit1.jpg/500px-Orange_juice_1_edit1.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "La voz del Nilo (1915)",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/La_voz_del_Nilo_%281915%29.djvu/page1-500px-La_voz_del_Nilo_%281915%29.djvu.jpg",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
@@ -4187,13 +4197,6 @@
           "source": "img-tag"
         },
         {
-          "nombre": "Shrimp fisherman",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Shrimp_fisherman.jpg/500px-Shrimp_fisherman.jpg",
-          "precio": null,
-          "moneda": null,
-          "source": "wikimedia"
-        },
-        {
           "nombre": "Saro Shrimp",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Saro_Shrimp.jpg/500px-Saro_Shrimp.jpg",
           "precio": null,
@@ -4213,6 +4216,13 @@
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
+        },
+        {
+          "nombre": "Camarón Boreal Cocido Y Pelado",
+          "imagen": "https://images.openfoodfacts.org/images/products/574/030/110/0621/front_es.24.400.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "off"
         }
       ]
     },
@@ -4514,27 +4524,6 @@
       "productos_plantilla": [
         {
           "nombre": "Promo Image",
-          "imagen": "https://www.carlsjr.com/getContentAsset/a1d83f64-389b-4599-ac6b-9cbba515e972/dfc3d011-8f63-43f6-9ed8-4b444333a1d0/CJ_W3_BYOB_Web-Promo-Banner_600x420.jpg?language=en-US",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
-          "nombre": "Promo Image",
-          "imagen": "https://www.carlsjr.com/getContentAsset/c5feb276-e7f7-4ac2-a36c-4d35e100749e/dfc3d011-8f63-43f6-9ed8-4b444333a1d0/CJ_Triple-Berry-Drinks_Homepage-Promo-Banner_600x420.png?language=en-US",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
-          "nombre": "Promo Image",
-          "imagen": "https://www.carlsjr.com/getContentAsset/7ad49770-2f9e-49dd-bbd0-ad0e9664ee22/dfc3d011-8f63-43f6-9ed8-4b444333a1d0/CJ_W2_Sauces_Web-Promo-Banner_600x420.jpg?language=en-US",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
-          "nombre": "Promo Image",
           "imagen": "https://www.carlsjr.com/getContentAsset/e72655b1-a88e-42f7-b2c8-48fed1063b3b/dfc3d011-8f63-43f6-9ed8-4b444333a1d0/cke_rewards-hero.png?language=en-US",
           "precio": null,
           "moneda": null,
@@ -4562,13 +4551,6 @@
           "source": "img-tag"
         },
         {
-          "nombre": "Mobile app banner",
-          "imagen": "https://www.carlsjr.com/getContentAsset/24547b85-e83c-4e05-af43-f6dc4d865090/dfc3d011-8f63-43f6-9ed8-4b444333a1d0/mobile-app-bannerv4.png?language=en-US",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
           "nombre": "Download on the App Store",
           "imagen": "https://www.carlsjr.com/images/app-store.png",
           "precio": null,
@@ -4581,6 +4563,34 @@
           "precio": null,
           "moneda": null,
           "source": "img-tag"
+        },
+        {
+          "nombre": "NCI Visuals Food Hamburger",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/NCI_Visuals_Food_Hamburger.jpg/500px-NCI_Visuals_Food_Hamburger.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Big Mac hamburger",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Big_Mac_hamburger.jpg/500px-Big_Mac_hamburger.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Burger King double cheeseburger",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Burger_King_double_cheeseburger.jpg/500px-Burger_King_double_cheeseburger.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Hamburguesa de carne con queso gratinado",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Hamburguesa_de_carne_con_queso_gratinado.png/500px-Hamburguesa_de_carne_con_queso_gratinado.png",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
         }
       ]
     },
@@ -5056,13 +5066,6 @@
       ],
       "productos_plantilla": [
         {
-          "nombre": "Flourish image with",
-          "imagen": "https://www.elpolloloco.com/content/img/svgs/MERCH_LocoTenders_Lockup_Red_v2.svg",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
           "nombre": "3 spicy tenders on a white plate with loco sauce and baja lime sauce in white ra",
           "imagen": "https://www.elpolloloco.com/content/img/menu/OurFoodCat-3SpicyTenders-1160x870.jpg",
           "precio": null,
@@ -5124,6 +5127,13 @@
           "precio": null,
           "moneda": null,
           "source": "img-tag"
+        },
+        {
+          "nombre": "Madrid - Fiestas de San Isidro - Pollo rostizado - 20070515-59",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Madrid_-_Fiestas_de_San_Isidro_-_Pollo_rostizado_-_20070515-59.jpg/500px-Madrid_-_Fiestas_de_San_Isidro_-_Pollo_rostizado_-_20070515-59.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
         }
       ]
     },
@@ -5244,13 +5254,6 @@
           "source": "img-tag"
         },
         {
-          "nombre": "noscript",
-          "imagen": "https://www.tortilleria.com.mx/noscript.php?noca=MTg5LjE1OC42NC4yMDZ8MjAyNjA1MjAwODI4MTh8dG9ydGlsbGVyaWEuY29tLm14fHd3dy50b3J0aWxsZXJpYS5jb20ubXgvfDB8bW96aWxsYS81LjAgKHdpbmRvd3MgbnQgMTAuMDsgd2luNjQ7IHg2NCkgYXBwbGV3ZWJraXQvNTM3LjM2IGNocm9tZS8xMjAuMHx7IkNvbm5lY3Rpb24iOiJrZWVwLWFsaXZlIiwiSG9zdCI6Ind3dy50b3J0aWxsZXJpYS5jb20ubXgiLCJBY2NlcHQtTGFuZ3VhZ2UiOiJlcy1NWCxlcztxPTAuOSIsIkFjY2VwdCI6InRleHRcL2h0bWwsYXBwbGljYXRpb25cL2pzb24sYXBwbGljYXRpb25cL3htbCIsIlVzZXItQWdlbnQiOiJNb3ppbGxhXC81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXRcLzUzNy4zNiBDaHJvbWVcLzEyMC4wIn18eyJpc19ib3QiOmZhbHNlLCJpc19hbGxvd2VkIjp0cnVlLCJib3RfdHlwZSI6Imh1bWFuIiwiY29uZmlkZW5jZSI6MTAwLCJyZWFzb25zIjpbXX18MjAyNjA1MjAwODI4MTg=",
-          "precio": null,
-          "moneda": null,
-          "source": "img-tag"
-        },
-        {
           "nombre": "Tortillas de maiz blanco (México) 01",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Tortillas_de_maiz_blanco_%28M%C3%A9xico%29_01.jpg/500px-Tortillas_de_maiz_blanco_%28M%C3%A9xico%29_01.jpg",
           "precio": null,
@@ -5279,13 +5282,6 @@
           "source": "wikimedia"
         },
         {
-          "nombre": "Homemade tortillas on griddle",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Homemade_tortillas_on_griddle.jpg/500px-Homemade_tortillas_on_griddle.jpg",
-          "precio": null,
-          "moneda": null,
-          "source": "wikimedia"
-        },
-        {
           "nombre": "Tortilla de huevo",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Tortilla_de_huevo.jpg/500px-Tortilla_de_huevo.jpg",
           "precio": null,
@@ -5305,6 +5301,20 @@
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
+        },
+        {
+          "nombre": "Tortillas de maíz",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Tortillas_de_ma%C3%ADz.jpg/500px-Tortillas_de_ma%C3%ADz.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Totopos",
+          "imagen": "https://images.openfoodfacts.org/images/products/003/862/290/6554/front_en.44.400.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "off"
         }
       ]
     },
@@ -5452,22 +5462,8 @@
           "source": "wikimedia"
         },
         {
-          "nombre": "Ambigram Ideal, polysymmetrical logo printed on a green T-shirt",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Ambigram_Ideal%2C_polysymmetrical_logo_printed_on_a_green_T-shirt.jpg/500px-Ambigram_Ideal%2C_polysymmetrical_logo_printed_on_a_green_T-shirt.jpg",
-          "precio": null,
-          "moneda": null,
-          "source": "wikimedia"
-        },
-        {
           "nombre": "Ambigram Zen Yes text with meditation pictogram, embroidered on a blue T-shirt",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Ambigram_Zen_Yes_text_with_meditation_pictogram%2C_embroidered_on_a_blue_T-shirt.jpg/500px-Ambigram_Zen_Yes_text_with_meditation_pictogram%2C_embroidered_on_a_blue_T-shirt.jpg",
-          "precio": null,
-          "moneda": null,
-          "source": "wikimedia"
-        },
-        {
-          "nombre": "A Pink Bunny with bunny candy t-shirt in the fashion shop",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/A_Pink_Bunny_with_bunny_candy_t-shirt_in_the_fashion_shop.jpg/500px-A_Pink_Bunny_with_bunny_candy_t-shirt_in_the_fashion_shop.jpg",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
@@ -5489,6 +5485,20 @@
         {
           "nombre": "T-shirt",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/T-shirt.png/500px-T-shirt.png",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Chanel T-shirt",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Chanel_T-shirt.jpg/500px-Chanel_T-shirt.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "T-shirt mocup gray",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/T-shirt_mocup_gray.jpg/500px-T-shirt_mocup_gray.jpg",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
@@ -5982,22 +5992,8 @@
           "source": "wikimedia"
         },
         {
-          "nombre": "A notebook allegedly covered in human skin Wellcome L0043479",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/A_notebook_allegedly_covered_in_human_skin_Wellcome_L0043479.jpg/500px-A_notebook_allegedly_covered_in_human_skin_Wellcome_L0043479.jpg",
-          "precio": null,
-          "moneda": null,
-          "source": "wikimedia"
-        },
-        {
           "nombre": "Small blue notepad - 8 x 11 cm - D",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Small_blue_notepad_-_8_x_11_cm_-_D.jpg/500px-Small_blue_notepad_-_8_x_11_cm_-_D.jpg",
-          "precio": null,
-          "moneda": null,
-          "source": "wikimedia"
-        },
-        {
-          "nombre": "Notebook writing",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Notebook_writing.jpg/500px-Notebook_writing.jpg",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
@@ -6010,22 +6006,36 @@
           "source": "wikimedia"
         },
         {
-          "nombre": "TAHIR SHAH NOTEBOOKS",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/TAHIR_SHAH_NOTEBOOKS.jpg/500px-TAHIR_SHAH_NOTEBOOKS.jpg",
+          "nombre": "Óscar Sánchez L",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/9/9c/%C3%93scar_S%C3%A1nchez_L.jpg",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
         },
         {
-          "nombre": "Chinese notebooks",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Chinese_notebooks.png/500px-Chinese_notebooks.png",
+          "nombre": "Macro Biro writing2",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Macro_Biro_writing2.jpg/500px-Macro_Biro_writing2.jpg",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
         },
         {
-          "nombre": "Notebook (NIH BioArt 394)",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Notebook_%28NIH_BioArt_394%29.png/500px-Notebook_%28NIH_BioArt_394%29.png",
+          "nombre": "Ballpoint Pen",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Ballpoint_Pen.jpg/500px-Ballpoint_Pen.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Ballpoint Pen DS",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Ballpoint_Pen_DS.jpg/500px-Ballpoint_Pen_DS.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Jinhao 182 twist action ballpoint pen",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Jinhao_182_twist_action_ballpoint_pen.jpg/500px-Jinhao_182_twist_action_ballpoint_pen.jpg",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
@@ -6163,13 +6173,6 @@
           "source": "wikimedia"
         },
         {
-          "nombre": "Melted-gold-ring-3D-printed-designed-by-Emmanuel Touraine-for-Ventury",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Melted-gold-ring-3D-printed-designed-by-Emmanuel_Touraine-for-Ventury.jpg/500px-Melted-gold-ring-3D-printed-designed-by-Emmanuel_Touraine-for-Ventury.jpg",
-          "precio": null,
-          "moneda": null,
-          "source": "wikimedia"
-        },
-        {
           "nombre": "Gold rings and other jewelry, Aidonia, AM of Nemea, 201947",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Gold_rings_and_other_jewelry%2C_Aidonia%2C_AM_of_Nemea%2C_201947.jpg/500px-Gold_rings_and_other_jewelry%2C_Aidonia%2C_AM_of_Nemea%2C_201947.jpg",
           "precio": null,
@@ -6207,6 +6210,13 @@
         {
           "nombre": "Gold and diamond rings with passion fruit by ASQ",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Gold_and_diamond_rings_with_passion_fruit_by_ASQ.jpg/500px-Gold_and_diamond_rings_with_passion_fruit_by_ASQ.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Collar de la Orden Mexicana del Águila Azteca",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Collar_de_la_Orden_Mexicana_del_%C3%81guila_Azteca.svg/500px-Collar_de_la_Orden_Mexicana_del_%C3%81guila_Azteca.svg.png",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
@@ -6323,13 +6333,6 @@
       ],
       "productos_plantilla": [
         {
-          "nombre": "Rosé",
-          "imagen": "https://images.openfoodfacts.org/images/products/000/002/004/1953/front_fr.3.400.jpg",
-          "precio": null,
-          "moneda": null,
-          "source": "off"
-        },
-        {
           "nombre": "Bouquet di Rose",
           "imagen": "https://images.openfoodfacts.org/images/products/800/300/036/6901/front_it.3.400.jpg",
           "precio": null,
@@ -6388,6 +6391,13 @@
         {
           "nombre": "Rosa 'Bouquet Rose' kz01",
           "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Rosa_%27Bouquet_Rose%27_kz01.jpg/500px-Rosa_%27Bouquet_Rose%27_kz01.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Ramo Noiva Peonias, mini rosas e frésias.",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Ramo_Noiva_Peonias%2C_mini_rosas_e_fr%C3%A9sias..JPG/500px-Ramo_Noiva_Peonias%2C_mini_rosas_e_fr%C3%A9sias..JPG",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
@@ -6504,13 +6514,6 @@
       ],
       "productos_plantilla": [
         {
-          "nombre": "Home - Laundromat Resource",
-          "imagen": "https://www.laundromatresource.com/wp-content/uploads/2023/09/the-laundromat-resource-logo-v2.png",
-          "precio": null,
-          "moneda": null,
-          "source": "open-graph"
-        },
-        {
           "nombre": "Elizabeth LoCicero",
           "imagen": "https://www.laundromatresource.com/wp-content/uploads/2023/10/elizabeth-locicero.png",
           "precio": null,
@@ -6560,15 +6563,22 @@
           "source": "wikimedia"
         },
         {
-          "nombre": "Photographic silhouette of the face of a woman wearing a conical hat made of rep",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Photographic_silhouette_of_the_face_of_a_woman_wearing_a_conical_hat_made_of_repurposed_bags_of_laundry_detergent_in_Don_Det_Laos.jpg/500px-Photographic_silhouette_of_the_face_of_a_woman_wearing_a_conical_hat_made_of_repurposed_bags_of_laundry_detergent_in_Don_Det_Laos.jpg",
+          "nombre": "Ariel - La Petite Sirène - 20150803 16h44 (10800)",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Ariel_-_La_Petite_Sir%C3%A8ne_-_20150803_16h44_%2810800%29.jpg/500px-Ariel_-_La_Petite_Sir%C3%A8ne_-_20150803_16h44_%2810800%29.jpg",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
         },
         {
-          "nombre": "Woman in the shadow of a conical hat made of repurposed bags of laundry detergen",
-          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Woman_in_the_shadow_of_a_conical_hat_made_of_repurposed_bags_of_laundry_detergent_in_Don_Det_Laos.jpg/500px-Woman_in_the_shadow_of_a_conical_hat_made_of_repurposed_bags_of_laundry_detergent_in_Don_Det_Laos.jpg",
+          "nombre": "Ariel - La Petite Sirène - 20150803 16h44 (10799)",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Ariel_-_La_Petite_Sir%C3%A8ne_-_20150803_16h44_%2810799%29.jpg/500px-Ariel_-_La_Petite_Sir%C3%A8ne_-_20150803_16h44_%2810799%29.jpg",
+          "precio": null,
+          "moneda": null,
+          "source": "wikimedia"
+        },
+        {
+          "nombre": "Ariel - La Petite Sirène - 20150803 16h44 (10803)",
+          "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Ariel_-_La_Petite_Sir%C3%A8ne_-_20150803_16h44_%2810803%29.jpg/500px-Ariel_-_La_Petite_Sir%C3%A8ne_-_20150803_16h44_%2810803%29.jpg",
           "precio": null,
           "moneda": null,
           "source": "wikimedia"
