@@ -1,0 +1,345 @@
+{
+  "meta": {
+    "fecha": "2026-05-20",
+    "fuente_giros_canonicos": "ssot-discovery/giros-canonicos.json (36 giros)",
+    "estrategia_scraping": "listado.mercadolibre.com.mx/<slug-query>  via Chrome MCP — extrae 10 productos del listing card por query, dedupe por imagen",
+    "notas": [
+      "query_path = lo que va después de /listado.mercadolibre.com.mx/ — slug url-friendly",
+      "Para servicios no-físicos (consulta dental, masaje, gimnasio mensualidad) el scraping no traerá precio real → usar fallback OFF/Wikimedia + reglas de precio MXN realistas",
+      "Queries secundarias se usan si la principal no devuelve 10 productos limpios"
+    ]
+  },
+
+  "giros": [
+    {
+      "slug": "restaurante",
+      "categoria": "alimentos",
+      "query_path_principal": "platillo-mexicano-tradicional",
+      "queries_secundarias": ["mole-poblano", "enchiladas-suizas", "chiles-en-nogada", "filete-de-res", "pescado-veracruzana"],
+      "precio_min": 80,
+      "precio_max": 450,
+      "notas": "Restaurante = comida preparada. Buscar PLATILLOS, no ingredientes. Excluir productos de abarrotes."
+    },
+    {
+      "slug": "taqueria",
+      "categoria": "alimentos",
+      "query_path_principal": "taco-al-pastor-trompo",
+      "queries_secundarias": ["taco-bistec", "carnitas-michoacanas", "quesadilla-flor-calabaza", "gringa-pastor", "consome-res"],
+      "precio_min": 12,
+      "precio_max": 80,
+      "notas": "Precios bajos. Excluir 'molcajete' (eso es vajilla, no taquería)."
+    },
+    {
+      "slug": "pizzeria",
+      "categoria": "alimentos",
+      "query_path_principal": "pizza-pepperoni-grande",
+      "queries_secundarias": ["pizza-margarita", "pizza-hawaiana", "alitas-bbq-12-piezas", "pan-de-ajo", "pasta-alfredo"],
+      "precio_min": 60,
+      "precio_max": 350,
+      "notas": "Excluir 'pizzeros' (hornos), 'pala pizza' (herramienta)."
+    },
+    {
+      "slug": "hamburguesas",
+      "categoria": "alimentos",
+      "query_path_principal": "hamburguesa-doble-queso",
+      "queries_secundarias": ["papas-francesas", "aros-cebolla", "hot-dog-jumbo", "malteada-chocolate", "boneless-bbq"],
+      "precio_min": 50,
+      "precio_max": 250,
+      "notas": "Comida preparada, no parrilla ni utensilios."
+    },
+    {
+      "slug": "sushi",
+      "categoria": "alimentos",
+      "query_path_principal": "sushi-roll-california",
+      "queries_secundarias": ["sashimi-salmon", "nigiri-atun", "tempura-camaron", "sopa-miso", "edamame"],
+      "precio_min": 35,
+      "precio_max": 400,
+      "notas": "Excluir 'pastor', 'carnitas', 'taco' (esos son tacos disfrazados)."
+    },
+    {
+      "slug": "marisqueria",
+      "categoria": "alimentos",
+      "query_path_principal": "ceviche-pescado-fresco",
+      "queries_secundarias": ["coctel-camaron", "aguachile-camaron", "pulpo-a-las-brasas", "mojarra-frita", "tostada-atun-fresco"],
+      "precio_min": 55,
+      "precio_max": 400,
+      "notas": "Mariscos preparados, no peces vivos. Excluir 'caña pesca', 'red'."
+    },
+    {
+      "slug": "polleria",
+      "categoria": "alimentos",
+      "query_path_principal": "pollo-entero-fresco-kilo",
+      "queries_secundarias": ["pechuga-pollo-kilo", "muslo-pollo-fresco", "alitas-pollo-kilo", "pollo-rostizado-entero", "huevo-blanco-docena"],
+      "precio_min": 35,
+      "precio_max": 250,
+      "notas": "Aves frescas crudas + rostizado. Excluir 'pollo de juguete', 'taza pollito'."
+    },
+    {
+      "slug": "cafeteria",
+      "categoria": "alimentos",
+      "query_path_principal": "cafe-grano-mexicano-organico",
+      "queries_secundarias": ["capuchino", "espresso-doble", "frappe-caramelo", "te-chai-latte", "croissant-mantequilla"],
+      "precio_min": 25,
+      "precio_max": 150,
+      "notas": "Bebidas y bocadillos. Excluir cafeteras (eléctricas, esas son electrónica)."
+    },
+    {
+      "slug": "panaderia",
+      "categoria": "alimentos",
+      "query_path_principal": "pan-bolillo-mexicano",
+      "queries_secundarias": ["concha-de-vainilla", "cuerno-chocolate", "rol-canela", "pan-integral", "empanada-pina"],
+      "precio_min": 3,
+      "precio_max": 80,
+      "notas": "Productos horneados. Excluir bolillos de moto, panaderías como negocio."
+    },
+    {
+      "slug": "pasteleria",
+      "categoria": "alimentos",
+      "query_path_principal": "pastel-tres-leches-fresno",
+      "queries_secundarias": ["cheesecake-zarzamora", "red-velvet-cuadrado", "tiramisu-individual", "cupcake-vainilla", "macarrones-franceses"],
+      "precio_min": 40,
+      "precio_max": 600,
+      "notas": "Postres finos. Excluir cake makers (electrónica)."
+    },
+    {
+      "slug": "heladeria",
+      "categoria": "alimentos",
+      "query_path_principal": "helado-vainilla-chocolate-litro",
+      "queries_secundarias": ["banana-split", "malteada-fresa", "paleta-fresa-crema", "sundae-caramelo", "cono-doble"],
+      "precio_min": 25,
+      "precio_max": 200,
+      "notas": "Helados de marca o presentación retail."
+    },
+    {
+      "slug": "jugos_naturales",
+      "categoria": "alimentos",
+      "query_path_principal": "jugo-naranja-natural-500ml",
+      "queries_secundarias": ["jugo-verde-detox", "licuado-platano-avena", "smoothie-fresa-yogurt", "agua-jamaica-natural", "shot-jengibre-limon"],
+      "precio_min": 20,
+      "precio_max": 120,
+      "notas": "Bebidas saludables. Excluir extractores de jugos (electrónica)."
+    },
+    {
+      "slug": "tortilleria",
+      "categoria": "alimentos",
+      "query_path_principal": "tortilla-maiz-tradicional-kilo",
+      "queries_secundarias": ["tortilla-harina-paquete", "totopos-200g", "tostadas-12-piezas", "masa-tortilla-kilo", "tamal-verde"],
+      "precio_min": 10,
+      "precio_max": 100,
+      "notas": "Tortillas y derivados. Excluir tortilladoras eléctricas."
+    },
+    {
+      "slug": "fruteria",
+      "categoria": "alimentos",
+      "query_path_principal": "fruta-fresca-mexicana-kilo",
+      "queries_secundarias": ["aguacate-hass-kilo", "platano-tabasco", "manzana-roja", "jitomate-saladet", "papaya-maradol"],
+      "precio_min": 18,
+      "precio_max": 150,
+      "notas": "Frutas y verduras frescas, vendidas por kilo."
+    },
+    {
+      "slug": "carniceria",
+      "categoria": "alimentos",
+      "query_path_principal": "bistec-res-fresco-kilo",
+      "queries_secundarias": ["arrachera-marinada", "costilla-res-kilo", "carne-molida-especial", "chuleta-cerdo", "milanesa-res"],
+      "precio_min": 80,
+      "precio_max": 400,
+      "notas": "Cortes frescos. Excluir 'carne para perro', cuchillos."
+    },
+    {
+      "slug": "cremeria",
+      "categoria": "alimentos",
+      "query_path_principal": "queso-oaxaca-tira-kilo",
+      "queries_secundarias": ["queso-panela", "queso-chihuahua", "crema-acida-mexicana", "yogurt-natural-kilo", "leche-bronca"],
+      "precio_min": 30,
+      "precio_max": 250,
+      "notas": "Lácteos artesanales. Excluir cremeras (utensilios)."
+    },
+
+    {
+      "slug": "abarrotes",
+      "categoria": "retail",
+      "query_path_principal": "coca-cola-600ml-botella",
+      "queries_secundarias": ["sabritas-original-45g", "maruchan-camaron", "pan-bimbo-blanco", "leche-lala-1l", "aceite-capullo-1l"],
+      "precio_min": 8,
+      "precio_max": 250,
+      "notas": "Productos de despensa. Excluir vasos térmicos, máquinas vending."
+    },
+    {
+      "slug": "farmacia",
+      "categoria": "salud",
+      "query_path_principal": "paracetamol-500mg-caja",
+      "queries_secundarias": ["ibuprofeno-400mg", "amoxicilina-500mg", "vitamina-c-1g", "alcohol-etilico-70-litro", "termometro-digital"],
+      "precio_min": 25,
+      "precio_max": 600,
+      "notas": "OTC y dispositivos médicos. Excluir 'farmacias' como negocio."
+    },
+    {
+      "slug": "veterinaria",
+      "categoria": "salud",
+      "query_path_principal": "croqueta-pedigree-perro-adulto",
+      "queries_secundarias": ["alimento-whiskas-gato", "desparasitante-canino", "pipeta-frontline-antipulgas", "arena-sanitaria-gato", "cama-mascota-mediana"],
+      "precio_min": 50,
+      "precio_max": 800,
+      "notas": "Productos para mascotas. Excluir veterinarios como persona."
+    },
+    {
+      "slug": "dentista",
+      "categoria": "salud",
+      "query_path_principal": "cepillo-dental-electrico-oral-b",
+      "queries_secundarias": ["pasta-dental-colgate-total", "enjuague-bucal-listerine", "hilo-dental", "blanqueador-dental-casero", "protector-bucal-nocturno"],
+      "precio_min": 30,
+      "precio_max": 1200,
+      "notas": "Productos dentales OTC. SERVICIOS (consulta, brackets) NO se scrapean — usar precios MXN fijos."
+    },
+    {
+      "slug": "optica",
+      "categoria": "salud",
+      "query_path_principal": "armazon-lentes-graduados-mujer",
+      "queries_secundarias": ["lentes-sol-polarizados", "lentes-contacto-blandos", "estuche-rigido-lentes", "solucion-lentes-contacto", "lentes-progresivos"],
+      "precio_min": 80,
+      "precio_max": 4500,
+      "notas": "Lentes y accesorios visuales."
+    },
+
+    {
+      "slug": "barberia",
+      "categoria": "belleza",
+      "query_path_principal": "rasuradora-wahl-profesional",
+      "queries_secundarias": ["pomada-american-crew", "aceite-barba-30ml", "navaja-recta-barba", "pomada-efecto-mate", "mascarilla-carbon-activado"],
+      "precio_min": 35,
+      "precio_max": 1800,
+      "notas": "Productos masculinos. SERVICIOS (corte, arreglo barba) no se scrapean."
+    },
+    {
+      "slug": "salon_belleza",
+      "categoria": "belleza",
+      "query_path_principal": "tinte-cabello-loreal-permanente",
+      "queries_secundarias": ["esmalte-uñas-opi", "tratamiento-keratina-cabello", "secadora-cabello-revlon", "plancha-pelo-ghd", "mascarilla-facial-coreana"],
+      "precio_min": 60,
+      "precio_max": 3500,
+      "notas": "Productos de belleza femeninos. SERVICIOS (manicure, pedicure) no se scrapean."
+    },
+
+    {
+      "slug": "ropa",
+      "categoria": "retail",
+      "query_path_principal": "playera-algodon-basica-mujer",
+      "queries_secundarias": ["jeans-mujer-skinny", "vestido-floreado-casual", "blusa-manga-larga", "sudadera-capucha", "calcetines-tres-pares"],
+      "precio_min": 80,
+      "precio_max": 1500,
+      "notas": "Moda casual. Excluir ropa para mascotas, sex shop."
+    },
+    {
+      "slug": "zapateria",
+      "categoria": "retail",
+      "query_path_principal": "tenis-nike-mujer-correr",
+      "queries_secundarias": ["zapato-vestir-hombre-piel", "bota-mujer-piel-tacon", "sandalia-mujer-cuero", "huarache-artesanal-mexicano", "tenis-converse-chuck-taylor"],
+      "precio_min": 200,
+      "precio_max": 3500,
+      "notas": "Calzado. Excluir herramientas de calzado."
+    },
+    {
+      "slug": "muebleria",
+      "categoria": "retail",
+      "query_path_principal": "sala-3-piezas-tela-gris",
+      "queries_secundarias": ["comedor-6-sillas-madera", "cama-matrimonial-base", "colchon-individual-ortopedico", "escritorio-oficina-madera", "librero-5-entrepanos"],
+      "precio_min": 800,
+      "precio_max": 25000,
+      "notas": "Muebles para hogar y oficina. Excluir miniaturas, juguetes."
+    },
+    {
+      "slug": "electronica",
+      "categoria": "retail",
+      "query_path_principal": "audifonos-bluetooth-inalambricos",
+      "queries_secundarias": ["cargador-usb-c-rapido", "bocina-bluetooth-portatil", "smartwatch-fitness-tracker", "power-bank-10000mah", "memoria-usb-64gb"],
+      "precio_min": 100,
+      "precio_max": 12000,
+      "notas": "Electrónica de consumo. Excluir cables industriales, componentes."
+    },
+    {
+      "slug": "papeleria",
+      "categoria": "retail",
+      "query_path_principal": "cuaderno-profesional-100-hojas",
+      "queries_secundarias": ["boligrafo-bic-azul-paquete", "lapiz-mirado-hb-caja", "marcador-sharpie-set-8", "carpeta-3-argollas-blanca", "engrapadora-grapas"],
+      "precio_min": 8,
+      "precio_max": 350,
+      "notas": "Material escolar y de oficina. Excluir impresoras (electrónica)."
+    },
+    {
+      "slug": "joyeria",
+      "categoria": "retail",
+      "query_path_principal": "anillo-oro-14k-liso-mujer",
+      "queries_secundarias": ["cadena-plata-925-50cm", "aretes-circonia-plata", "pulsera-tejido-oro", "reloj-acero-mujer", "anillo-compromiso-diamante"],
+      "precio_min": 200,
+      "precio_max": 25000,
+      "notas": "Joyería real. Excluir bisutería ultra-barata, fantasy."
+    },
+    {
+      "slug": "floreria",
+      "categoria": "retail",
+      "query_path_principal": "ramo-12-rosas-rojas",
+      "queries_secundarias": ["ramo-tulipanes-mixtos", "centro-mesa-floral", "arreglo-girasoles", "bouquet-novia-blanco", "orquidea-maceta-pequena"],
+      "precio_min": 100,
+      "precio_max": 2500,
+      "notas": "Flores frescas y arreglos. Excluir flores artificiales (decoración)."
+    },
+    {
+      "slug": "sex_shop",
+      "categoria": "retail",
+      "query_path_principal": "lubricante-intimo-base-agua",
+      "queries_secundarias": ["condones-latex-trojan-12", "lenceria-encaje-conjunto", "vibrador-recargable-clasico", "aceite-masaje-sensual", "antifaz-seda-negro"],
+      "precio_min": 80,
+      "precio_max": 3500,
+      "notas": "Productos adultos. Excluir lencería deportiva."
+    },
+
+    {
+      "slug": "taller_mecanico",
+      "categoria": "automotriz",
+      "query_path_principal": "aceite-mobil-1-sintetico-5w30",
+      "queries_secundarias": ["filtro-aire-motor", "balatas-disco-bosch", "bateria-12v-automovil", "bujias-ngk-iridium", "limpiador-inyectores"],
+      "precio_min": 50,
+      "precio_max": 4500,
+      "notas": "Refacciones automotrices. SERVICIOS (afinación) no se scrapean."
+    },
+
+    {
+      "slug": "hotel",
+      "categoria": "servicios",
+      "query_path_principal": "set-toallas-blancas-hotel",
+      "queries_secundarias": ["sabanas-egipcias-king-size", "cobija-matrimonial-pluma", "almohada-memory-foam", "kit-amenidades-hotel", "set-12-perchas-acero"],
+      "precio_min": 80,
+      "precio_max": 2500,
+      "notas": "Insumos hoteleros. SERVICIOS (noche habitación) no se scrapean."
+    },
+    {
+      "slug": "lavanderia",
+      "categoria": "servicios",
+      "query_path_principal": "detergente-ariel-liquido-5l",
+      "queries_secundarias": ["suavizante-downy-3l", "blanqueador-cloralex-2l", "quitamanchas-vanish-1l", "perfume-textil-aerosol", "limpiador-secadora-pelusa"],
+      "precio_min": 30,
+      "precio_max": 800,
+      "notas": "Productos de lavado. SERVICIOS (lavar por kg) no se scrapean."
+    },
+    {
+      "slug": "gimnasio",
+      "categoria": "servicios",
+      "query_path_principal": "proteina-whey-gold-2lb",
+      "queries_secundarias": ["pre-workout-30-servicios", "mancuernas-ajustables-10kg", "banda-resistencia-gym", "shaker-bottle-vaso", "creatina-monohidrato-300g"],
+      "precio_min": 80,
+      "precio_max": 4500,
+      "notas": "Suplementos y equipo deportivo. SERVICIOS (membresía) no se scrapean."
+    },
+
+    {
+      "slug": "ferreteria",
+      "categoria": "industrial",
+      "query_path_principal": "martillo-uña-stanley-16oz",
+      "queries_secundarias": ["taladro-truper-inalambrico-12v", "desarmador-set-6-piezas", "cinta-metrica-5m", "tornillo-madera-kilo", "foco-led-9w-blanco"],
+      "precio_min": 25,
+      "precio_max": 5000,
+      "notas": "Herramientas y materiales. Excluir maquinaria industrial pesada (giro propio)."
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "fecha": "2026-05-20",
+    "uso": "Validación determinística sin LLM. Aplicar a cada producto raspado.",
+    "logica": "producto válido SI (tiene palabra requerida) AND NOT (tiene palabra prohibida) AND (precio in rango)"
+  },
+  "giros": {
+    "restaurante": { "req": ["mole","enchilada","filete","sopa","platillo","caldo","comida","pollo","arroz","cochinita","cabrito","tortilla"], "prohib": ["cuchillo","plato decorativo","trofeo","peluche","casa","cama"], "min": 80, "max": 450 },
+    "taqueria": { "req": ["taco","quesadilla","gringa","mulita","volcan","consome","trompo","pastor","carnita","bistec","salsa","tortilla","aguacate"], "prohib": ["molcajete","cuchillo","trastes","servilleta","plato","tabla picar"], "min": 12, "max": 90 },
+    "pizzeria": { "req": ["pizza","peperoni","margarita","alit","calzon","pan ajo","pasta","lasaña","alfredo","mozzarella"], "prohib": ["horno pizza","pala pizza","piedra pizza","cortador","molde"], "min": 50, "max": 400 },
+    "hamburguesas": { "req": ["hamburgues","papa","aro","cebolla","hot dog","jumbo","malteada","boneless","nugget","bbq"], "prohib": ["parrilla","carne molida cruda","carbon","asador"], "min": 40, "max": 300 },
+    "sushi": { "req": ["sushi","roll","sashimi","nigiri","tempura","miso","edamame","ramen","japones","unagi","maki","wasabi"], "prohib": ["pastor","carnitas","molcajete","taco","carne","arroz blanco","pollo asado"], "min": 30, "max": 500 },
+    "marisqueria": { "req": ["ceviche","camaron","aguachile","pulpo","mojarra","filete pescado","tostada atun","ostion","callo","langosta","caldo","sashimi"], "prohib": ["caña pesca","red","plomada","anzuelo","acuario","pecera"], "min": 50, "max": 450 },
+    "polleria": { "req": ["pollo","pechuga","muslo","alita","pierna","entero","rostizado","fresco","kilo","molida","huevo"], "prohib": ["pollito juguete","sticker pollo","disfraz pollo","peluche pollo"], "min": 30, "max": 300 },
+    "cafeteria": { "req": ["cafe","capuchino","espresso","latte","americano","mocha","frappe","te","chai","bagel","croissant","muffin"], "prohib": ["cafetera electrica","molino","grano kilo","prensa francesa"], "min": 20, "max": 180 },
+    "panaderia": { "req": ["pan","concha","cuerno","croissant","bolillo","telera","rol","dona","empanada","integral","baguette","bagel"], "prohib": ["panadero juguete","molde","horno panaderia","sarten"], "min": 3, "max": 100 },
+    "pasteleria": { "req": ["pastel","cake","cheesecake","tiramisu","macaron","cupcake","brownie","pay","tarta","mousse","velvet","fresa","chocolate"], "prohib": ["molde","decorador","manga pasteler","horno","batidora"], "min": 35, "max": 700 },
+    "heladeria": { "req": ["helado","nieve","paleta","sundae","banana split","malteada","sorbete","yogurt","sundae","cono","sorbete"], "prohib": ["maquina helados","heladera","freezer","congelador"], "min": 20, "max": 250 },
+    "jugos_naturales": { "req": ["jugo","smoothie","licuado","detox","shot","agua","kombucha","green","fresa","platano","naranja","verde"], "prohib": ["extractor","licuadora","exprimidor","wattages"], "min": 18, "max": 150 },
+    "tortilleria": { "req": ["tortilla","totopo","tostada","masa","atole","tamal","maiz","nopal","azul","blanca"], "prohib": ["tortilladora","comal","plancha","metate"], "min": 8, "max": 120 },
+    "fruteria": { "req": ["fruta","aguacate","platano","manzana","papaya","sandia","piña","naranja","mango","jitomate","verdura","cebolla","limon"], "prohib": ["frutero","jarra","cuchillo","exprimidor","tabla picar"], "min": 15, "max": 180 },
+    "carniceria": { "req": ["bistec","arrachera","costilla","res","cerdo","molida","chuleta","chorizo","milanesa","tocino","jamon","carne"], "prohib": ["cuchillo","sierra carnicera","carne tatua","peluche res","figura"], "min": 60, "max": 500 },
+    "cremeria": { "req": ["queso","crema","leche","yogurt","mantequilla","panela","oaxaca","chihuahua","cotija","ricota","manchego"], "prohib": ["cremera","cuchillo","tabla","fondue"], "min": 25, "max": 350 },
+
+    "abarrotes": { "req": ["coca","sabritas","maruchan","bimbo","leche","huevo","arroz","frijol","aceite","azucar","sal","cafe soluble","cereal"], "prohib": ["coca cola pin","cocacola estatua","abarrotes letrero","caja registradora","tienda kit"], "min": 6, "max": 300 },
+    "farmacia": { "req": ["paracetamol","ibuprofeno","amoxicilina","vitamina","alcohol","termometro","curita","jeringa","suero","mascarilla","gel","jarabe","pastilla"], "prohib": ["disfraz doctor","juguete medico","bata medica adulto disfraz","kit doctor juguete"], "min": 20, "max": 800 },
+    "veterinaria": { "req": ["pedigree","croqueta","perro","gato","whiskas","arena","desparasitante","frontline","cama mascota","collar","correa","alimento mascota"], "prohib": ["peluche perro","figura gato","disfraz","veterinario juguete"], "min": 40, "max": 1000 },
+    "dentista": { "req": ["cepillo dental","pasta dental","colgate","oral b","enjuague","listerine","hilo dental","blanqueador","irrigador","placa","retenedor","protector bucal"], "prohib": ["disfraz dentista","figura","juguete dentista","kit doctor"], "min": 25, "max": 1500 },
+    "optica": { "req": ["lentes","armazon","contacto","ray ban","oakley","graduado","progresivo","polarizado","monofocal","bifocal","estuche lentes","limpiador lentes"], "prohib": ["lente juguete","disfraz","figura","kit doctor"], "min": 60, "max": 5000 },
+
+    "barberia": { "req": ["wahl","rasuradora","trimmer","navaja","pomada","cera","aceite barba","gel cabello","american crew","reuzel","crew","clipper","afeitadora"], "prohib": ["barbero juguete","disfraz","silla barber decoracion","plastico"], "min": 30, "max": 2200 },
+    "salon_belleza": { "req": ["tinte","loreal","esmalte","opi","keratina","secadora","plancha","mascarilla","crema","tratamiento","brocha","cosmetico","maquillaje","champu"], "prohib": ["juguete maquillaje","disfraz","figurin","muñeca"], "min": 50, "max": 4000 },
+
+    "ropa": { "req": ["playera","camisa","blusa","jeans","vestido","short","falda","sudadera","chamarra","saco","pantalon","camiseta","sueter"], "prohib": ["ropa perro","ropa mascota","disfraz","muñeca","figura accion"], "min": 60, "max": 2000 },
+    "zapateria": { "req": ["tenis","zapato","bota","sandalia","mocasin","huarache","pantufla","tacon","botin","plantilla"], "prohib": ["zapato juguete","zapato bebe miniatura","figura","llavero zapato"], "min": 150, "max": 4000 },
+    "muebleria": { "req": ["sala","sillon","comedor","cama","colchon","escritorio","silla","librero","mesa","lampara","espejo","mueble"], "prohib": ["miniatura","casa muñecas","figura coleccion","decoracion miniatura"], "min": 600, "max": 30000 },
+    "electronica": { "req": ["audifono","bluetooth","cargador","bocina","smartwatch","power bank","memoria usb","mouse","teclado","hdmi","auriculares","tablet"], "prohib": ["radio antigua decoracion","figura electronica","juguete control"], "min": 80, "max": 15000 },
+    "papeleria": { "req": ["cuaderno","boligrafo","lapiz","borrador","tijera","pegamento","cartulina","marcador","carpeta","engrapadora","sharpie","resistol","libreta"], "prohib": ["papeleria juguete","kit oficinita","figura"], "min": 5, "max": 400 },
+    "joyeria": { "req": ["anillo","cadena","oro","plata","arete","pulsera","collar","reloj","diamante","esclava","argolla","medalla"], "prohib": ["bisuteria niña","juguete","disfraz","figura"], "min": 150, "max": 30000 },
+    "floreria": { "req": ["ramo","rosa","tulip","gerbera","girasol","orquidea","bouquet","arreglo","centro mesa","flor","corona","floral"], "prohib": ["flor artificial decoracion permanente","plastico","figura"], "min": 80, "max": 3000 },
+    "sex_shop": { "req": ["lubricante","condon","vibrador","lenceria","sensual","intimo","placer","masaje","aceite masaje","disfraz adulto","babydoll","jugar dos","afrodisiaco"], "prohib": ["cristal energetico","vela aromatica permanente","pendulo","amuleto","esoterico","santeria"], "min": 60, "max": 4000 },
+
+    "taller_mecanico": { "req": ["aceite motor","mobil 1","filtro aire","balata","bateria 12v","bujia","liquido frenos","anticongelante","limpiador inyector","castrol","truper","stanley auto"], "prohib": ["carrito juguete","auto miniatura","figura mecanico","kit niños"], "min": 40, "max": 5000 },
+
+    "hotel": { "req": ["toalla","sabana","cobija","almohada","percha","amenidades","kit hotel","jabon","gel ducha hotel","manta","colcha","funda"], "prohib": ["hotel miniatura","figura","disfraz botones"], "min": 60, "max": 3000 },
+    "lavanderia": { "req": ["detergente","ariel","downy","suavizante","cloralex","blanqueador","vanish","quitamanchas","jabon zote","perfume textil","limpiador"], "prohib": ["lavadora juguete","ropa muñeca","figura"], "min": 25, "max": 1000 },
+    "gimnasio": { "req": ["proteina","whey","creatina","pre workout","mancuerna","banda resistencia","shaker","colchoneta","cuerda","aminoacidos","bcaa","fitness"], "prohib": ["pesa juguete","figura culturista","disfraz"], "min": 50, "max": 5000 },
+
+    "ferreteria": { "req": ["martillo","desarmador","taladro","tornillo","cinta metrica","llave stilson","pintura","cemento","cable electrico","foco led","truper","stanley","makita","bosch"], "prohib": ["herramienta juguete","kit herramientas niño","martillo plastico","figura"], "min": 20, "max": 6000 }
+  }
+}
