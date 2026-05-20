@@ -7134,6 +7134,8 @@
       const r = await fetch('/data/giros-ecosystem.json?v=2', { cache: 'no-store' });
       if (!r.ok) return null;
       _ecosystemCache = await r.json();
+      // V10.31: exponer a window para que _buildModuleMockup pueda accederlo desde su closure
+      try { window._ecosystemCache = _ecosystemCache; } catch(_){}
       return _ecosystemCache;
     } catch (_) { return null; }
   }
@@ -7913,18 +7915,55 @@
         '<button disabled style="margin-top:14px;width:100%;background:#0a0a0a;color:#fff;border:0;border-radius:6px;padding:10px;font-weight:700;font-size:13px;cursor:not-allowed">🔒 Cerrar caja e imprimir Z</button>'
       );
     }
-    if (mod === 'inventario') {
+    if (mod === 'inventario' || mod === 'productos') {
+      // V10.31: cargar productos REALES del giro via /api/products/search-public (async).
+      // Mientras carga, mostrar placeholder con grid de 10 cards. Después de fetch,
+      // reemplazar con imágenes/nombres/precios reales del giro.
+      const gridId = 'vlx-prod-grid-' + slug.replace(/[^a-z0-9]/g,'-');
+      const placeholderCards = Array.from({length:10}).map(() =>
+        '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;animation:vlxPulse 1.4s ease-in-out infinite">' +
+          '<div style="aspect-ratio:1;background:linear-gradient(90deg,#f3f4f6,#e5e7eb,#f3f4f6);background-size:200% 100%;animation:vlxShimmer 1.6s linear infinite"></div>' +
+          '<div style="padding:7px"><div style="height:10px;background:#e5e7eb;margin-bottom:5px;border-radius:3px"></div><div style="height:8px;background:#f3f4f6;width:60%;border-radius:3px"></div></div>' +
+        '</div>'
+      ).join('');
+      // setTimeout para que el DOM esté listo y luego hacer fetch async
+      setTimeout(() => {
+        try {
+          const giroQ = String(giroName||'').replace(/^\S+\s+/,'').toLowerCase();
+          // Query: usa "que vende" del giro si disponible, sino el nombre del giro
+          const ecoQuery = (window._ecosystemCache && window._ecosystemCache.giros && window._ecosystemCache.giros.find && window._ecosystemCache.giros.find(g => g.slug === slug)?.que_vende) || giroQ;
+          fetch('/api/products/search-public?q=' + encodeURIComponent(ecoQuery) + '&giro=' + encodeURIComponent(slug) + '&limit=10')
+            .then(r => r.ok ? r.json() : null)
+            .then(j => {
+              const host = document.getElementById(gridId);
+              if (!host || !j || !Array.isArray(j.results) || !j.results.length) return;
+              host.innerHTML = j.results.map(p => {
+                const img = String(p.image || '').replace(/^http:/,'https:');
+                const name = escapeText(p.name || '');
+                const price = p.price ? '$' + p.price + ' ' + (p.currency || '') : '';
+                const src = p.source || '';
+                return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;display:flex;flex-direction:column">' +
+                  '<div style="aspect-ratio:1;background:#fafafa;display:flex;align-items:center;justify-content:center;overflow:hidden">' +
+                    (img ? '<img src="' + escapeAttr(img) + '" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.style.display=\'none\'">' : '📦') +
+                  '</div>' +
+                  '<div style="padding:7px;font-size:11px;flex:1;display:flex;flex-direction:column;gap:2px">' +
+                    '<div style="font-weight:600;line-height:1.25;max-height:2.4em;overflow:hidden;text-overflow:ellipsis">' + name + '</div>' +
+                    (price ? '<div style="color:#16a34a;font-weight:600;font-size:11px">' + escapeText(price) + '</div>' : '') +
+                    '<div style="font-size:9px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.3px;margin-top:auto">' + escapeText(src) + '</div>' +
+                  '</div>' +
+                '</div>';
+              }).join('');
+            }).catch(() => {});
+        } catch(e){}
+      }, 60);
       return wrap(
-        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><input disabled placeholder="🔎 Buscar producto..." style="flex:1;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px"><button disabled style="background:#10b981;color:#fff;border:0;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:not-allowed">+ Nuevo</button></div>' +
-        '<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#f3f4f6"><th style="text-align:left;padding:7px 10px;font-weight:600">Producto</th><th style="text-align:right;padding:7px 10px;font-weight:600">Precio</th><th style="text-align:right;padding:7px 10px;font-weight:600">Stock</th><th style="padding:7px 10px;font-weight:600">Estado</th></tr></thead><tbody>' +
-          [
-            {n:'Producto demo A', p:'$45.00', s:24, ok:true},
-            {n:'Producto demo B', p:'$120.00', s:8, ok:true},
-            {n:'Producto demo C', p:'$15.50', s:2, ok:false},
-            {n:'Producto demo D', p:'$78.00', s:15, ok:true},
-            {n:'Producto demo E', p:'$210.00', s:0, ok:false},
-          ].map(r => '<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:7px 10px">' + r.n + '</td><td style="padding:7px 10px;text-align:right;font-family:monospace">' + r.p + '</td><td style="padding:7px 10px;text-align:right;font-family:monospace">' + r.s + '</td><td style="padding:7px 10px;text-align:center"><span style="background:' + (r.ok?'#dcfce7':'#fef3c7') + ';color:' + (r.ok?'#065f46':'#92400e') + ';padding:2px 8px;border-radius:99px;font-size:9px;font-weight:600">' + (r.ok?'OK':'BAJO') + '</span></td></tr>').join('') +
-        '</tbody></table>'
+        '<style>@keyframes vlxPulse{0%,100%{opacity:0.85}50%{opacity:1}}@keyframes vlxShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}</style>' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' +
+          '<input disabled placeholder="🔎 Buscar producto..." style="flex:1;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px">' +
+          '<button disabled style="background:#10b981;color:#fff;border:0;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:not-allowed">+ Nuevo</button>' +
+        '</div>' +
+        '<div style="font-size:11px;color:#666;margin-bottom:10px">📦 <strong>10 productos del giro</strong> ' + escapeText(giroName) + ' — cargando desde clientes finales (' + (mod==='productos'?'productos':'inventario') + ')…</div>' +
+        '<div id="' + gridId + '" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">' + placeholderCards + '</div>'
       );
     }
     if (mod === 'clientes') {
