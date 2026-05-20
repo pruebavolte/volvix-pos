@@ -1,0 +1,271 @@
+{
+  "ssot_fase_0": {
+    "fecha": "2026-05-20",
+    "objetivo": "Descubrimiento exhaustivo SIN modificar nada. Inventario de todas las fuentes que hablan de 'giro de negocio' en el sistema Volvix POS / SalvadoreX.",
+    "estado": "FASE_0_COMPLETADA — PROHIBIDO MERGEAR HASTA QUE HUMANO REVISE"
+  },
+
+  "fuentes_descubiertas": [
+    {
+      "id": "F001",
+      "tipo": "supabase_table",
+      "ubicacion": "public.volvix_tenants.tipo_negocio",
+      "schema": "text NOT NULL DEFAULT 'retail' (sin FK, sin enum, sin validation)",
+      "definido_en": "supabase-schema.sql:9",
+      "conteo_estimado": "1 valor por tenant — desconocido total (probablemente 200+ valores únicos, free text)",
+      "referenciado_por": ["api/permisos/users", "registro.html OTP signup", "owner panel v7"],
+      "rol_funcional": "Asigna giro a cada negocio registrado. Drift libre — usuarios escriben lo que quieran.",
+      "ejemplos_conocidos": ["abarrotes", "farmacia", "ropa", "estudio_tatuaj", "venta-aire-libre-test123", "almoiadas", "kavanderia", "test_final_lovable"],
+      "patologías": ["sin enum", "sin FK", "sin slugify", "permite typos (almoiadas, pesacado)", "permite tests en prod (test_final_lovable)"]
+    },
+
+    {
+      "id": "F002",
+      "tipo": "supabase_table",
+      "ubicacion": "public.giros_terminologias",
+      "schema": "id, giro VARCHAR(50), terminologias JSONB, modulos_activos JSONB, campos_visibles JSONB, ...",
+      "definido_en": ".audit/migrations/05-create-giros-terminologias.sql + 08-fase6-audio-modules.sql",
+      "conteo": "30 (seed inicial — tarea #4 'Seed giros_terminologias 30 giros')",
+      "referenciado_por": ["api/giros/config?giro=X", "applyGiroConfig.js"],
+      "rol_funcional": "Motor schema-driven: define terminología por giro, módulos activos, campos visibles. Tabla canónica del motor V9.7+",
+      "ejemplos_conocidos": ["barberia", "farmacia", "restaurante", "veterinaria"],
+      "estado": "ACTIVA en prod"
+    },
+
+    {
+      "id": "F003",
+      "tipo": "supabase_table",
+      "ubicacion": "public.vertical_templates",
+      "schema": "id, vertical_slug, label, profile JSONB, terms JSONB, modules_enabled JSONB, ...",
+      "definido_en": "db/R14_VERTICAL_TEMPLATES.sql + R19_FIX",
+      "conteo": "desconocido (15-30 estimado por nombre de archivo)",
+      "referenciado_por": ["código legacy R14", "api/giros/config fallback"],
+      "rol_funcional": "Predecessor de F002 — supposedly DEPRECATED pero quizás aún usado en algún lado",
+      "estado": "PROBABLEMENTE OBSOLETA — auditar uso"
+    },
+
+    {
+      "id": "F004",
+      "tipo": "supabase_table",
+      "ubicacion": "public.giros_synonyms",
+      "schema": "id, giro_padre, sinonimo, weight",
+      "definido_en": "migrations/giros-synonyms.sql",
+      "conteo": "desconocido (~40 sinónimos estimados)",
+      "referenciado_por": ["api/marketplace search", "router de giros"],
+      "rol_funcional": "Mapper de sinónimos → giro canónico (pollo_frito → polleria, etc)"
+    },
+
+    {
+      "id": "F005",
+      "tipo": "supabase_table",
+      "ubicacion": "public.business_plans",
+      "schema": "definido en .audit/migrations/08-fase6-audio-modules.sql",
+      "referenciado_por": ["audio modules"]
+    },
+
+    {
+      "id": "F006",
+      "tipo": "supabase_table",
+      "ubicacion": "public.pos_leads.giro",
+      "schema": "giro text (free text, sin FK)",
+      "definido_en": "migrations/2026_pos_leads_and_tour_progress.sql:14",
+      "referenciado_por": ["marketplace leads"]
+    },
+
+    {
+      "id": "F007",
+      "tipo": "supabase_table",
+      "ubicacion": "public.peripherals_config.giro",
+      "schema": "giro text (gym|farmacia|veterinaria|restaurante|tienda)",
+      "definido_en": "db/R29_PERIPHERALS.sql:137",
+      "rol_funcional": "Define qué periféricos (báscula, scanner, etc) aplican a qué giro"
+    },
+
+    {
+      "id": "F008",
+      "tipo": "json_estatico",
+      "ubicacion": "public/data/giros-ecosystem.json",
+      "conteo": 300,
+      "productos_total": 3000,
+      "schema": "giros[].{slug, name, que_vende, cadena_valor, competidores_sector, funcionalidades_criticas, problemas_evitar, terminologia, productos_plantilla[10]}",
+      "referenciado_por": ["paneldecontrol.html (tabla maestra de Giros)", "loadEcosystem() function"],
+      "rol_funcional": "Catálogo enriquecido con ecosistema (proveedores, clientes, competidores, productos plantilla) — creado iterativamente por mí en V10.10..V10.45",
+      "estado": "ACTIVA — la creé yo (Claude). Es la versión más rica pero NO es SSOT — solo es UN cliente del SSOT que no existe."
+    },
+
+    {
+      "id": "F009",
+      "tipo": "json_estatico",
+      "ubicacion": "public/data/giros-terminologias.json",
+      "conteo": 31,
+      "schema": "{slug: {terminologias, modulos}}",
+      "referenciado_por": ["applyGiroConfig.js cliente"],
+      "rol_funcional": "Mirror cliente de F002 para no hacer roundtrip a DB"
+    },
+
+    {
+      "id": "F010",
+      "tipo": "json_estatico",
+      "ubicacion": "data/industry-schemas.json",
+      "conteo": 28,
+      "schema": "{industry_slug: {fields, validations}}",
+      "rol_funcional": "Modal field catalog por industria (campos custom de producto)"
+    },
+
+    {
+      "id": "F011",
+      "tipo": "json_estatico",
+      "ubicacion": "data/industry-seed-products.json",
+      "conteo": 44,
+      "schema": "{industry_slug: [productos_demo]}",
+      "rol_funcional": "Seed de productos demo al onboarding (10 productos por giro)"
+    },
+
+    {
+      "id": "F012",
+      "tipo": "hardcoded_window_globals",
+      "ubicacion": "public/paneldecontrol.html (IIFE PERM)",
+      "globals": {
+        "INDUSTRY_PROFILES": 298,
+        "INDUSTRY_LABELS": 298,
+        "INDUSTRY_TERMS": 26,
+        "INDUSTRY_PRODUCT_FIELDS": 7,
+        "INDUSTRY_SELL_RULES": 3
+      },
+      "rol_funcional": "Catálogo en runtime del panel — fuente OFICIAL de los 298 giros del sidebar. Mezcla GIRO_CATEGORIES (hardcoded en HTML línea ~6293) + BD merge.",
+      "estado": "ACTIVA — más giros que cualquier otra fuente"
+    },
+
+    {
+      "id": "F013",
+      "tipo": "hardcoded_array_html",
+      "ubicacion": "public/paneldecontrol.html línea 6293-6307 (GIRO_CATEGORIES)",
+      "conteo": "~110 giros agrupados en 9 categorías hardcoded",
+      "categorías": ["comida-bebida (20)", "frescos (5)", "tienda (15)", "salud (7)", "belleza (6)", "retail (19)", "automotriz (6)", "servicios (21)", "tecnologia (8)", "otros (dinámico desde BD)"],
+      "rol_funcional": "Define qué giros aparecen agrupados en el sidebar del panel. Los que NO están aquí caen en 'otros (BD)'."
+    },
+
+    {
+      "id": "F014",
+      "tipo": "hardcoded_aliases_html",
+      "ubicacion": "public/paneldecontrol.html línea 6444-6510 (ECO_ALIASES_TABLE en findEcoFor)",
+      "conteo": "~70 aliases sub-variante → padre",
+      "ejemplos": "estetica→salon_belleza, tienda_mascotas→veterinaria, kavanderia→lavanderia, queseria→restaurante",
+      "rol_funcional": "Mapeo runtime usado por la tabla maestra para resolver giros del sidebar a su entry en giros-ecosystem.json"
+    },
+
+    {
+      "id": "F015",
+      "tipo": "hardcoded_aliases_html",
+      "ubicacion": "public/paneldecontrol.html línea 7179-7263 (ALIASES en ecosystemRowFor)",
+      "conteo": "~40 aliases — DUPLICA F014 con variaciones",
+      "rol_funcional": "Segunda copia de aliases — usada en el detail-pane (no tabla maestra). DRIFT con F014."
+    },
+
+    {
+      "id": "F016",
+      "tipo": "landing_pages_estaticas",
+      "ubicacion": "public/landing-*.html",
+      "conteo": 60,
+      "slugs": ["abarrotes", "agencia-viajes", "alimentos", "barberia", "cafe", "cafeteria", "carniceria", "carwash", "casa-empeno", "clinica-dental", "colegio", "dental", "dulceria", "educacion", "electronica", "escuela-idiomas", "farmacia", "ferreteria", "fitness", "foto-estudio", "fruteria", "funeraria", "gasolinera", "gimnasio", "heladeria", "hotel", "lavado-autos", "lavanderia", "minisuper", "muebleria", "nails", "optica", "panaderia", "papeleria", "pasteleria", "pizzeria", "polleria", "purificadora", "refaccionaria", "renta-autos", "renta-salones", "rentas", "restaurant", "restaurante", "retail", "ropa", "salon-belleza", "salud", "servicio-celulares", "servicios", "spa", "taller-mecanico", "taqueria", "tatuajes", "tienda-celulares", "tienda-conveniencia", "tienda-ropa", "tortilleria", "veterinaria", "zapateria"],
+      "rol_funcional": "Landing pages SEO por giro. Cada uno es un HTML estático separado.",
+      "patologías": ["restaurant + restaurante son 2 landings duplicados", "dental + clinica-dental también", "fitness + gimnasio también"]
+    },
+
+    {
+      "id": "F017",
+      "tipo": "json_wizards",
+      "ubicacion": "public/wizards-by-industry/*.json",
+      "conteo": 10,
+      "slugs": ["abarrotes", "autolavado", "barberia", "cafe", "farmacia", "gimnasio", "papeleria", "restaurante", "ropa", "taqueria"],
+      "rol_funcional": "Wizards de onboarding (preguntas guiadas para crear tenant del giro X)"
+    },
+
+    {
+      "id": "F018",
+      "tipo": "hardcoded_array_html",
+      "ubicacion": "src/registro.html (giros mostrados en wizard de OTP signup)",
+      "conteo": "desconocido (verificar)",
+      "referenciado_por": ["/registro.html signup wizard"]
+    },
+
+    {
+      "id": "F019",
+      "tipo": "hardcoded_array_html",
+      "ubicacion": "tests/b36-regression.spec.js + internal/volvix-qa-scenarios.html",
+      "rol_funcional": "Fixtures de testing — definen qué giros se prueban en regression"
+    },
+
+    {
+      "id": "F020",
+      "tipo": "json_estatico_audit",
+      "ubicacion": ".audit/scripts/generate-giros-1000.js",
+      "rol_funcional": "Script de la sesión anterior — generaba 1000 giros sintéticos. Fue ejecutado y dejó archivos huérfanos en .audit/."
+    }
+  ],
+
+  "matriz_overlap": {
+    "F001_tipo_negocio_BD": "free text — puede contener cualquier cosa",
+    "F002_giros_terminologias": "30 — canónico para motor",
+    "F008_ecosystem_json": "300 — el más rico, mi creación",
+    "F012_INDUSTRY_PROFILES": "298 — fuente runtime del panel",
+    "F013_GIRO_CATEGORIES": "~110 hardcoded",
+    "F016_landings": "60",
+    "F017_wizards": "10"
+  },
+
+  "drift_conocido": [
+    "F008 (300 giros) y F012 (298 giros) deberían coincidir pero F008 tiene 'queseria' y F012 no",
+    "F016 landings tiene 60 archivos pero solo ~58 slugs únicos (restaurant/restaurante, dental/clinica-dental, fitness/gimnasio son duplicados)",
+    "F014 y F015 son DOS COPIAS de aliases (lo mismo distinto) — driftean si una se actualiza",
+    "F002 (30) y F009 (31) deberían coincidir, no se ha verificado",
+    "F011 dice 44 industry-seed-products pero F010 dice 28 industry-schemas — debería ser 1:1"
+  ],
+
+  "huerfanos_sospechosos": [
+    "test_final_lovable (slug en tenants BD F001)",
+    "venta-aire-libre-test123 (test slug en BD)",
+    "almoiadas, pesacado, kavanderia (typos en BD F001)",
+    "techco, techco_soluciones_de_conectividad_y_tecnologia (slugs IA-generados duplicados)",
+    "consultoria_cursos_talleres_clases_master_asesorias_y_coaching_temas_tecnicos_habilidades_blandas_calidad_e_informatica (slug-frase generado por LLM)"
+  ],
+
+  "conflictos_semantica": [
+    {
+      "pregunta_clave": "¿'Taquería' es un GIRO o una taquería que vende 'tacos al pastor' (PRODUCTO)?",
+      "decision_pendiente": "Si giro = negocio, hay ~50-80 giros reales. Si giro = combo negocio+producto, hay 200-1000+",
+      "evidencia": "F008 trata 'pollo_frito' y 'pollos_asados' como GIROS separados de 'polleria'. F014 los mapea a 'polleria' (giro padre). DRIFT."
+    },
+    {
+      "pregunta_clave": "¿'jugos-naturales' (con guión, en sidebar) y 'jugos_naturales' (con underscore, en JSON) son lo mismo?",
+      "decision_pendiente": "Funcionalmente sí, sintácticamente NO. Causaba 11 huecos hasta V10.45."
+    },
+    {
+      "pregunta_clave": "¿'restaurant' y 'restaurante' (landing) son lo mismo?",
+      "decision_pendiente": "Sí, pero hay 2 archivos landing-*.html → drift HTML"
+    }
+  ],
+
+  "resumen_ejecutivo": {
+    "fuentes_totales": 20,
+    "fuentes_SQL_supabase": 7,
+    "fuentes_JSON_estaticas": 5,
+    "fuentes_hardcoded_HTML_JS": 6,
+    "fuentes_landings": 1,
+    "fuentes_tests_misc": 1,
+    "cardinalidad_minima": 7,
+    "cardinalidad_maxima_actual": 300,
+    "cardinalidad_esperada_si_giro_eq_negocio": "50-80 giros reales",
+    "cardinalidad_esperada_si_giro_incluye_producto": "200-300",
+    "SSOT_actual": "NO EXISTE — cada fuente vive su propia verdad",
+    "agentes_culpables_de_fragmentación": [
+      "V10.10 creó F008 sin consultar F002",
+      "V10.43 creó F014 sin consultar F015",
+      "V10.44 expandió F008 a 300 sin sincronizar con F012 (298)",
+      "V10.16 generó F006 (pos_leads.giro) sin FK a F002",
+      "Yo (Claude) en esta sesión ya cometí varios de esos errores"
+    ]
+  },
+
+  "siguiente_paso": "STOP. Esperar decisión humana sobre los conflictos de semántica (¿giro = negocio puro o negocio+producto?). Después aplicar FASE 1-5 del prompt SSOT."
+}
