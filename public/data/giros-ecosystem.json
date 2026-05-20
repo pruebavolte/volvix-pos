@@ -10,7 +10,7 @@
       "terminologia (cómo llaman las cosas en este giro)"
     ],
     "notes": "v2.1 agrega URL a cada competidor_sector + 5 giros adicionales (hotel, optica, gimnasio, salon_belleza, taller_mecanico) cubriendo los del documento markdown del usuario.",
-    "last_audit": "2026-05-20T14:11:02.138Z",
+    "last_audit": "2026-05-20T15:12:28.426Z",
     "products_total": 360,
     "extraction_v": "V10.36 — cliente final primero",
     "quality_filters": "V10.37: SUSPICIOUS_NAMES + BAD_IMG + wikimedia-noise filters",
@@ -30,7 +30,9 @@
         "WIKIMEDIA_NOISE": "taxi|book|portrait|tour|building|street|city|persona|cantante|saturn|planet (eliminados en src=wikimedia)"
       }
     },
-    "curated_version": "V10.39"
+    "curated_version": "V10.40",
+    "ml_enriched_count": 310,
+    "ml_skipped_count": 50
   },
   "giros": [
     {
@@ -165,51 +167,57 @@
       "productos_plantilla": [
         {
           "nombre": "Lubricante íntimo base agua 100ml",
-          "imagen": "https://loremflickr.com/640/480/lubricant",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_807938-MLA99738443197_112025-E.webp",
+          "precio": 199,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Lubricante Intimo A Base Agua Con Aloe Vera 100ml"
         },
         {
           "nombre": "Condones de látex caja con 12",
-          "imagen": "https://loremflickr.com/640/480/condoms",
-          "precio": 180,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_966499-MLA108329872658_032026-E.webp",
+          "precio": 45,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Condones de Látex Prudence Sabor y Aroma Caribbean 5 Condones"
         },
         {
           "nombre": "Lencería conjunto encaje negro",
-          "imagen": "https://loremflickr.com/640/480/lingerie",
-          "precio": 650,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_920502-CBT94663471305_102025-E-babydoll-conjunto-de-encaje-para-mujer-pijama.webp",
+          "precio": 182,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Babydoll Conjunto De Encaje Para Mujer Pijama"
         },
         {
           "nombre": "Vibrador clásico recargable",
-          "imagen": "https://loremflickr.com/640/480/vibrator",
-          "precio": 890,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_854677-MLM110454789101_042026-E.webp",
+          "precio": 236,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Vibrador De Azulejo Con Pantalla 2 Baterías, Ventosa 148mm"
         },
         {
           "nombre": "Aceite para masaje sensual 200ml",
-          "imagen": "https://loremflickr.com/640/480/cooking-oil",
-          "precio": 280,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_838589-CBT111276839771_052026-E-aceite-de-masaje-sensual-para-parejas-35-ml-con-infusion-de.webp",
+          "precio": 148,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Aceite De Masaje Sensual Para Parejas, 35 Ml Con Infusión De"
         },
         {
           "nombre": "Disfraz enfermera sexy talla M",
-          "imagen": "https://loremflickr.com/640/480/costume",
-          "precio": 550,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_611579-CBT96256655078_102025-E-disfraz-de-monja-para-cosplay-sexy-travesti-enfermera-para-halloween-sirvienta-talla-grande-vestido-largo-y-ajustado.webp",
+          "precio": 297,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Disfraz De Monja Para Cosplay, Sexy Travesti, Enfermera, Para Halloween, Sirvienta, Talla Grande, Vestido Largo Y Ajustado"
         },
         {
           "nombre": "Esposas de peluche rosa",
@@ -221,27 +229,30 @@
         },
         {
           "nombre": "Anillo vibrador desechable",
-          "imagen": "https://loremflickr.com/640/480/vibrator",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_916169-MLM76721839100_062024-E.webp",
+          "precio": 163,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Kit Sico Chocolate 3 Condones + Anillo Vibrador"
         },
         {
           "nombre": "Bolas chinas plata silicona",
-          "imagen": "https://loremflickr.com/640/480/silver",
-          "precio": 480,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_679483-CBT109913623117_042026-E-funda-para-iphone-15iphone-16-plata-estampado-de-estrellas-de-8-bolas.webp",
+          "precio": 549,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Funda Para iPhone 15/iPhone 16, Plata, Estampado De Estrellas De 8 Bolas"
         },
         {
           "nombre": "Antifaz de seda con encaje",
-          "imagen": "https://loremflickr.com/640/480/eye-mask",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_714737-MLM46743916436_072021-E-antifaz-antialergico-encaje-fiestas-halloween-mujer.webp",
+          "precio": 95,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Antifaz Antialérgico Encaje Fiestas Halloween Mujer"
         }
       ]
     },
@@ -391,51 +402,57 @@
       "productos_plantilla": [
         {
           "nombre": "Enchiladas verdes con pollo",
-          "imagen": "https://loremflickr.com/640/480/enchiladas",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_883235-MLA99368388178_112025-E.webp",
+          "precio": 18,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Salsa La Costeña Para Chilaquiles Verdes 410g"
         },
         {
           "nombre": "Filete de res a la pimienta",
-          "imagen": "https://loremflickr.com/640/480/pepper-steak",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_904248-MLM98168218284_112025-E.webp",
           "precio": 285,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Sazonador Grileros Pimienta Con Limón  910g  Para Carnes"
         },
         {
           "nombre": "Sopa de tortilla tradicional",
-          "imagen": "https://loremflickr.com/640/480/tortilla-soup",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_786224-MLM30328469740_052019-E.webp",
+          "precio": 16,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Progreso Tradicional Sopa, Tortilla Y Pollo (tortilla Del Po"
         },
         {
           "nombre": "Chiles en nogada (temporada)",
-          "imagen": "https://loremflickr.com/640/480/chiles-en",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_729561-MLM76317306897_052024-E-chiles-guajillo.webp",
+          "precio": 18,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Chiles Guajillo"
         },
         {
           "nombre": "Mole poblano con pollo",
-          "imagen": "https://loremflickr.com/640/480/chicken",
-          "precio": 175,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_943907-MLM79973045188_102024-E.webp",
+          "precio": 965,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Mole Poblano Con Cacao Listo Para Servir 360g Doña María"
         },
         {
           "nombre": "Ensalada César con pollo",
-          "imagen": "https://loremflickr.com/640/480/caesar-salad",
-          "precio": 135,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_903443-MLA99368336640_112025-E.webp",
+          "precio": 69,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Aderezo Clemente Jacques Para Ensalada Cesar Light 473 Gr"
         },
         {
           "nombre": "Pescado a la veracruzana",
@@ -447,27 +464,30 @@
         },
         {
           "nombre": "Arroz con leche tradicional",
-          "imagen": "https://placehold.co/400x300/d97706/ffffff?text=Arroz%20con%20leche%20tradicional",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_658612-MLA99822278659_112025-E.webp",
+          "precio": 296,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Alimento Liquido de Arroz Orgánico sin Azúcar 1L"
         },
         {
           "nombre": "Agua de horchata jarra 1L",
-          "imagen": "https://loremflickr.com/640/480/horchata",
-          "precio": 75,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_773489-MLA99350449512_112025-E.webp",
+          "precio": 149,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Concentrado Del Sol Horchata De Arroz 2 Lts"
         },
         {
           "nombre": "Café de olla taza",
-          "imagen": "https://loremflickr.com/640/480/coffee",
-          "precio": 38,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_988186-MLA110992893791_042026-E.webp",
+          "precio": 345,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Café De La Olla La Monjita- 48 Tazas"
         }
       ]
     },
@@ -605,75 +625,84 @@
         },
         {
           "nombre": "Vacuna múltiple para perro",
-          "imagen": "https://loremflickr.com/640/480/pet-vaccine",
-          "precio": 280,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_637751-MLA99832749327_112025-E.webp",
+          "precio": 438,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Masko Pets Ca 30 Tabletas Complemento De Calcio Norvet Perro"
         },
         {
           "nombre": "Croqueta Pedigree adulto 8kg",
-          "imagen": "https://loremflickr.com/640/480/dog-food",
-          "precio": 485,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_866374-MLM77733727434_072024-E.webp",
+          "precio": 838,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Croqueta De  Adulto Para Todas Las Razas  50 Kg A Granel"
         },
         {
           "nombre": "Whiskas alimento gato 1.5kg",
-          "imagen": "https://loremflickr.com/640/480/cat-food",
-          "precio": 165,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_912189-MLA99358690630_112025-E.webp",
+          "precio": 799,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Alimento Para Gatos Sabor Carne Adultos 1+ 1.5kg Whiskas"
         },
         {
           "nombre": "Desparasitante interno tableta",
-          "imagen": "https://loremflickr.com/640/480/pet-medicine",
-          "precio": 85,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_700132-MLM101587875931_122025-E.webp",
+          "precio": 96,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Desparasitante Interno Para Perros Una Pastilla Por C/35kg"
         },
         {
           "nombre": "Pipeta antipulgas Frontline",
-          "imagen": "https://loremflickr.com/640/480/flea-treatment",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_925248-MLA109815558864_042026-E.webp",
+          "precio": 137,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Frontline Spray 100 Ml Elimina Pulgas Piojos Garrapatas"
         },
         {
           "nombre": "Baño y corte para perro",
-          "imagen": "https://loremflickr.com/640/480/haircut",
-          "precio": 280,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_809045-MLM102099718480_122025-E.webp",
+          "precio": 850,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "4 En1 Maquina Para Cortar Cabello Para Perro"
         },
         {
           "nombre": "Arena sanitaria gato 5kg",
-          "imagen": "https://loremflickr.com/640/480/cat-litter",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_824230-MLA109601792452_042026-E.webp",
+          "precio": 399,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Neutralizador Olores Mascotas + Arena Gato 5kg Frida Pets"
         },
         {
           "nombre": "Esterilización canina hembra",
-          "imagen": "https://loremflickr.com/640/480/vet-surgery",
-          "precio": 1850,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_939754-MLA109214414846_042026-E.webp",
+          "precio": 4942,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Mesa Estetica Canina Mascota Veterinaria Doble Correa Negro"
         },
         {
           "nombre": "Cama para mascota mediana",
-          "imagen": "https://loremflickr.com/640/480/pet-bed",
-          "precio": 380,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_621198-MLA107798063817_022026-E.webp",
+          "precio": 1228,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Welago Cama Casita Para Perro Chico Mascotas Pequeñas Lavable Gris Camas Almohadón 40*35*38cm"
         }
       ]
     },
@@ -799,35 +828,39 @@
       "productos_plantilla": [
         {
           "nombre": "Consulta dental de valoración",
-          "imagen": "https://loremflickr.com/640/480/dentist",
-          "precio": 250,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_792091-MLM108580568021_032026-E.webp",
+          "precio": 279,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cuadro Dental Infantil Consultorio Canvas Set 40x50cm"
         },
         {
           "nombre": "Limpieza dental profesional",
-          "imagen": "https://loremflickr.com/640/480/dental-cleaning",
-          "precio": 650,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_974787-MLA108039698040_032026-E.webp",
+          "precio": 547,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "ANEBAKE Kit 30pz Cepillos Interdentales Profesionales Cuida Encías Cerdas Antibacterianas.Para Limpieza Dental Diaria Eliminación De Placa Y Residuos Entre Dientes Cuidado Bucal"
         },
         {
           "nombre": "Resina dental por pieza",
-          "imagen": "https://loremflickr.com/640/480/dental-filling",
-          "precio": 850,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_768623-MLA84857957007_052025-E.webp",
+          "precio": 195,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Perlas para Reparación Temporal de Dientes con Resina Moldeable de 30ml"
         },
         {
           "nombre": "Extracción dental simple",
-          "imagen": "https://loremflickr.com/640/480/tooth-extraction",
-          "precio": 480,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_777551-MLM106008158967_012026-E.webp",
+          "precio": 195,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Suero Dental Quita Manchas Dientes Blancos Naturalmente"
         },
         {
           "nombre": "Blanqueamiento láser sesión",
@@ -847,19 +880,21 @@
         },
         {
           "nombre": "Brackets metálicos mensualidad",
-          "imagen": "https://loremflickr.com/640/480/braces",
-          "precio": 950,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_719160-MLM91039438871_082025-E-brackets-iline-mini-roth-borgatta-2-juegos-.webp",
+          "precio": 579,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Brackets Iline Mini Roth Borgatta ( 2 Juegos )"
         },
         {
           "nombre": "Implante dental titanio",
-          "imagen": "https://loremflickr.com/640/480/dental-implant",
-          "precio": 18500,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_686084-MLM86748489744_072025-E-clicker-mariposa-titanio-grado-implante.webp",
+          "precio": 129,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Clicker Mariposa Titanio Grado Implante"
         },
         {
           "nombre": "Corona porcelana sobre metal",
@@ -1005,11 +1040,12 @@
       "productos_plantilla": [
         {
           "nombre": "Noche en habitación sencilla",
-          "imagen": "https://loremflickr.com/640/480/hotel-room",
-          "precio": 850,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_645435-MLA100095622740_122025-E.webp",
+          "precio": 978,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Mesita de Noche Moderna Minimalista KALIOFUN - 2 Estantes + 1 Cajón - Negro Mate - para Habitaciones Pequeñas - Fácil Montaje"
         },
         {
           "nombre": "Noche en habitación doble",
@@ -1021,11 +1057,12 @@
         },
         {
           "nombre": "Suite ejecutiva",
-          "imagen": "https://loremflickr.com/640/480/hotel-suite",
-          "precio": 2500,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_665059-MLM89109037813_082025-E.webp",
+          "precio": 109,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Renta Suite Ejecutiva, Las Arboledas, Los Clubes, Atizapan"
         },
         {
           "nombre": "Desayuno buffet incluido",
@@ -1037,43 +1074,48 @@
         },
         {
           "nombre": "Servicio a cuarto",
-          "imagen": "https://loremflickr.com/640/480/room-service",
-          "precio": 250,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_903781-MLM84418724056_052025-E.webp",
+          "precio": 16000,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cuartos De Azotea, Construcción Ligera, Casas Prefabricadas"
         },
         {
           "nombre": "Estacionamiento por noche",
-          "imagen": "https://loremflickr.com/640/480/parking",
-          "precio": 150,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_973128-MLA99371803834_112025-E.webp",
+          "precio": 417,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Grabadora De Coche Hd 1080p 3 En 1 With 64gb Memory Card Inclusive Vision Clara De Día Y Noche, Detalles Nitidos Para Tu Seguridad Vial En México, Funciona Como Cámara De Estacionamiento, Dvr Y"
         },
         {
           "nombre": "Late check-out",
-          "imagen": "https://loremflickr.com/640/480/hotel-checkout",
-          "precio": 200,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_632655-MLM95188439786_102025-E.webp",
+          "precio": 349,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Late Checkout"
         },
         {
           "nombre": "Lavandería express",
-          "imagen": "https://loremflickr.com/640/480/hotel-laundry",
-          "precio": 120,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_606926-MLM107590059129_022026-E.webp",
+          "precio": 85,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Citrus Express Quita Chicle Y Grasa 95002523 2pz"
         },
         {
           "nombre": "Acceso a spa",
-          "imagen": "https://loremflickr.com/640/480/spa-resort",
-          "precio": 350,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_673223-MLA109285691210_042026-E.webp",
+          "precio": 129,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Letrero Solo Personal Autorizado 25x30 Cm Señalamiento De Pvc Para Interior, Publicidad Cartel, Señales De Restricción De Acceso, Ideal Para Oficinas, Comercios, Almacenes Y Áreas Privadas"
         },
         {
           "nombre": "Cama extra en habitación",
@@ -1211,83 +1253,93 @@
       "productos_plantilla": [
         {
           "nombre": "Paracetamol 500mg caja 20 tab",
-          "imagen": "https://loremflickr.com/640/480/paracetamol",
-          "precio": 38,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_885718-MLA90213782695_082025-E.webp",
+          "precio": 95,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Temperal, Paracetamol, 50 Tabletas De 500 Mg"
         },
         {
           "nombre": "Ibuprofeno 400mg caja 30 tab",
-          "imagen": "https://loremflickr.com/640/480/ibuprofen",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_674584-MLU78636636687_082024-E.webp",
+          "precio": 350,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Caja Con Frasco de Ibuprofeno 200 Mg con 100 tabletas Advil"
         },
         {
           "nombre": "Amoxicilina 500mg caja 12 cap",
-          "imagen": "https://loremflickr.com/640/480/antibiotic",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_801964-MLA89437358467_082025-E.webp",
+          "precio": 125,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cefalexina (amsa) C/20 Caps. 500 Mg."
         },
         {
           "nombre": "Vitamina C 1g 30 tabletas",
-          "imagen": "https://loremflickr.com/640/480/vitamin-c",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_994973-MLA96424430197_102025-E.webp",
+          "precio": 381,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Vitamina C Betaglucanos Zinc Y Vitamina D3 C/30 Tab Biomiral Sabor Tabletas Masticables"
         },
         {
           "nombre": "Alcohol etílico 70° 1 litro",
-          "imagen": "https://loremflickr.com/640/480/isopropyl-alcohol",
-          "precio": 55,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_639918-MLM74245612537_012024-E.webp",
+          "precio": 138,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Alcohol Etílico Desnaturalizado Protec 1L"
         },
         {
           "nombre": "Termómetro digital",
-          "imagen": "https://loremflickr.com/640/480/thermometer",
-          "precio": 185,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_790166-MLA92336208903_092025-E.webp",
+          "precio": 130,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Termómetro Digital Omron Eco Temp Basic para Axila con Pantalla Retroiluminada"
         },
         {
           "nombre": "Curitas surtidas caja 100",
-          "imagen": "https://loremflickr.com/640/480/bandages",
-          "precio": 75,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_778818-MLA92589333349_092025-E.webp",
+          "precio": 46,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Curitas Cureband Venditas Translúcidas x 100 Unidades"
         },
         {
           "nombre": "Suero rehidratante Electrolit",
-          "imagen": "https://loremflickr.com/640/480/hair-treatment",
-          "precio": 28,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_935310-MLA99374372632_112025-E.webp",
+          "precio": 204,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pack De 12 Suero Electrolit Fresa 625 Ml"
         },
         {
           "nombre": "Crema antiinflamatoria Voltaren",
-          "imagen": "https://loremflickr.com/640/480/topical-cream",
-          "precio": 175,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_857945-MLM54342280482_032023-E.webp",
+          "precio": 244,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Crema Don Ricardo Plus De 120 Gr Pomada Uso Veterionario"
         },
         {
           "nombre": "Mascarilla quirúrgica caja 50",
-          "imagen": "https://loremflickr.com/640/480/face-mask",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_874698-CBT104915617356_012026-E.webp",
+          "precio": 81,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Good Mascarillas Desechables De 3 Capas: Protección Nice"
         }
       ]
     },
@@ -1425,59 +1477,66 @@
         },
         {
           "nombre": "Armazón para lentes graduados",
-          "imagen": "https://loremflickr.com/640/480/eyeglasses",
-          "precio": 850,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_782652-MLA99974330079_112025-E.webp",
+          "precio": 391,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Magma Life Paquete De 5 Lentes Graduados 2.5 Dioptrías Para Computadora Y Lectura Con Tecnología Blue Light Gafas Para Hombre Y Mujer"
         },
         {
           "nombre": "Lentes graduados monofocales",
-          "imagen": "https://loremflickr.com/640/480/eyeglasses",
-          "precio": 1450,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_754493-MLM78186853708_082024-E.webp",
+          "precio": 386,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Lente Lectura Anti Luz Azul Computadora Bifocal Uso Diario"
         },
         {
           "nombre": "Lentes progresivos premium",
-          "imagen": "https://loremflickr.com/640/480/progressive-lenses",
-          "precio": 4500,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_733578-MLA106694807105_022026-E.webp",
+          "precio": 807,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Lentes Fotocromáticos Anti Luz Azul y UV OBLACIV de TR90 Negro"
         },
         {
           "nombre": "Lentes de contacto blandos par",
-          "imagen": "https://loremflickr.com/640/480/contact-lens",
-          "precio": 380,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_879514-MLA90925209174_082025-E.webp",
+          "precio": 128,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pupilentes Semporna Ojos De Muñeca Con Estuche Y Herramienta Miel"
         },
         {
           "nombre": "Lentes de sol polarizados",
-          "imagen": "https://loremflickr.com/640/480/sunglasses",
-          "precio": 1280,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_961136-MLM108966361978_032026-E.webp",
+          "precio": 460,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Lentes The Sol Off White Virgil Abloh Yellow Originales"
         },
         {
           "nombre": "Estuche rígido para lentes",
-          "imagen": "https://loremflickr.com/640/480/eyeglass-case",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_952617-MLM97249888053_112025-E.webp",
+          "precio": 149,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Estuche Para Lentes Rígido De Dama Cartera Plegable Lila"
         },
         {
           "nombre": "Solución para lentes contacto",
-          "imagen": "https://loremflickr.com/640/480/lens-solution",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_906003-MLA83552584202_042025-E.webp",
+          "precio": 399,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Solución Para Lentes De Contacto Biotrue Bausch + Lomb 2 Pack 296ml"
         },
         {
           "nombre": "Tratamiento antirreflejo",
@@ -1489,11 +1548,12 @@
         },
         {
           "nombre": "Lentes deportivos con micas",
-          "imagen": "https://loremflickr.com/640/480/sports-eyewear",
-          "precio": 1850,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_679307-MLA99600364550_122025-E.webp",
+          "precio": 460,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Lentes De Sol Nemesis Protección Deportivo Negro Mica Negra Lente Azul Tornasol"
         }
       ]
     },
@@ -1631,11 +1691,12 @@
         },
         {
           "nombre": "Sesión entrenador personal",
-          "imagen": "https://loremflickr.com/640/480/personal-trainer",
-          "precio": 380,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_948998-MLM81332987894_122024-E-libro-para-el-entrenador-personal-desde-cero.webp",
+          "precio": 1000,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Libro Para El Entrenador Personal Desde Cero"
         },
         {
           "nombre": "Clase de spinning",
@@ -1647,19 +1708,21 @@
         },
         {
           "nombre": "Clase de yoga grupal",
-          "imagen": "https://loremflickr.com/640/480/yoga-class",
-          "precio": 120,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_662285-MLA92499448905_092025-E.webp",
+          "precio": 229,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Kit 3 Correas De Yoga Pilates Y Estiramiento Moradonegrorosa Color Mix Zen"
         },
         {
           "nombre": "Proteína whey Gold 2lb",
-          "imagen": "https://loremflickr.com/640/480/whey-protein",
-          "precio": 850,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_829274-MLA102442501665_122025-E.webp",
+          "precio": 1447,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Optimum Gold Standard 2lbs S Mores Sabor S&#x27;mores"
         },
         {
           "nombre": "Pase diario al gimnasio",
@@ -1679,27 +1742,30 @@
         },
         {
           "nombre": "Pre-workout 30 servicios",
-          "imagen": "https://loremflickr.com/640/480/pre-workout",
-          "precio": 580,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_842146-MLA99946708231_112025-E.webp",
+          "precio": 1148,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pre Entreno Sin Cafeína Para Entrenamiento y Bombeo Muscular Suplemento Gym Preworkout Sin Estimulantes Con L-Arginina, Citrulina y Beta Alanina 120g 30 Servicios Polvo Preentreno BPN PRO Triforce"
         },
         {
           "nombre": "Sesión de crossfit",
-          "imagen": "https://loremflickr.com/640/480/crossfit",
-          "precio": 150,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_924623-MLM80363306371_102024-E-cuadros-medianos-gym-crossfit-moldura-negra.webp",
+          "precio": 573,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cuadros Medianos Gym Crossfit - Moldura Negra"
         },
         {
           "nombre": "Evaluación física inicial",
-          "imagen": "https://loremflickr.com/640/480/body-fat-test",
-          "precio": 250,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_649165-MLM104002207805_012026-E.webp",
+          "precio": 315,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cuaderno De Evaluaciones 6to Año Jose Maria Noriega Lopez"
         }
       ]
     },
@@ -1829,83 +1895,93 @@
       "productos_plantilla": [
         {
           "nombre": "Corte de cabello mujer",
-          "imagen": "https://loremflickr.com/640/480/haircut",
-          "precio": 280,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_707190-CBT102960403419_122025-E.webp",
+          "precio": 219,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "De Depiladora De Bikini Para Mujer Electrica Doble Cabeza"
         },
         {
           "nombre": "Tinte completo de cabello",
-          "imagen": "https://loremflickr.com/640/480/hair-color",
-          "precio": 850,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_858367-MLM97136733409_112025-E-tinte-instantaneo-2-en-1-con-peine-para-cubrir-canas.webp",
+          "precio": 298,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Tinte Instantáneo 2 En 1 Con Peine Para Cubrir Canas"
         },
         {
           "nombre": "Manicure profesional",
-          "imagen": "https://loremflickr.com/640/480/manicure",
-          "precio": 180,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_620372-MLA79424531488_092024-E.webp",
+          "precio": 391,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Estuche Profesional Manicure Y Pedicure Kit Completo Lobo"
         },
         {
           "nombre": "Pedicure spa con masaje",
-          "imagen": "https://loremflickr.com/640/480/pedicure",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_880798-MLM75672515756_042024-E.webp",
+          "precio": 959,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Tina Para Pies Spa De Pedicura Masajeador Con Burbujas"
         },
         {
           "nombre": "Maquillaje profesional evento",
-          "imagen": "https://loremflickr.com/640/480/makeup-artist",
-          "precio": 580,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_701115-MLM51618153506_092022-E.webp",
+          "precio": 230,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Maquillaje Blanco Profesional Pintura Halloween 6 Piezas"
         },
         {
           "nombre": "Tratamiento hidratante cabello",
-          "imagen": "https://loremflickr.com/640/480/hair-treatment",
-          "precio": 380,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_989003-MLU74410748662_022024-E.webp",
+          "precio": 1420,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Salerm 21 Silk Protein Tratamiento Cabello Muy Seco 100ml"
         },
         {
           "nombre": "Depilación cera piernas",
-          "imagen": "https://loremflickr.com/640/480/waxing",
-          "precio": 320,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_990990-MLA110663879771_042026-E.webp",
+          "precio": 83,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Bandas Tiras Cera Fria Depilacion Depilar Piernas Axilas"
         },
         {
           "nombre": "Limpieza facial profunda",
-          "imagen": "https://loremflickr.com/640/480/facial-treatment",
-          "precio": 480,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_809445-MLA85082607451_052025-E.webp",
+          "precio": 276,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Gel Limpiador Facial Neutrogena Deep Clean Ácido Salicílico 200 ml"
         },
         {
           "nombre": "Diseño de cejas con henna",
-          "imagen": "https://loremflickr.com/640/480/eyebrow-shaping",
-          "precio": 180,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_851579-MLA89298795926_082025-E.webp",
+          "precio": 195,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Henna Para Diseño Cejas Delineado Ojos JDenis Gel Castaño Oscuro"
         },
         {
           "nombre": "Alaciado permanente keratina",
-          "imagen": "https://loremflickr.com/640/480/keratin",
-          "precio": 1850,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_906784-MLA99924944227_112025-E.webp",
+          "precio": 950,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Mascarilla Tratamiento Para Cabello Alisado Semi Permanente 1 L"
         }
       ]
     },
@@ -2035,35 +2111,39 @@
       "productos_plantilla": [
         {
           "nombre": "Cambio de aceite y filtro",
-          "imagen": "https://loremflickr.com/640/480/cooking-oil",
-          "precio": 650,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_888233-MLM108667024369_032026-V.webp",
+          "precio": 399,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cambio De Aceite 5w30 Sintetico Y Filtro Kia Forte 2016-2017"
         },
         {
           "nombre": "Afinación mayor",
-          "imagen": "https://loremflickr.com/640/480/engine-tune-up",
-          "precio": 1800,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_793462-MLM107690929888_032026-V.webp",
+          "precio": 3123,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Kit De Afinación Mayor Original Tiguan 1.4 Tsi"
         },
         {
           "nombre": "Cambio de balatas",
-          "imagen": "https://loremflickr.com/640/480/brake-pads",
-          "precio": 1200,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_992135-MLA92850403304_092025-E.webp",
+          "precio": 428,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Opresor Piston Caliper Cambiar Balatas Auto Universal Set 22 pcs,Juego de Herramientas Automotriz para Discos de Frenos, Compresor de Pistones para Cambio de Pastillas, Portátil y Profesional‌"
         },
         {
           "nombre": "Alineación y balanceo",
-          "imagen": "https://loremflickr.com/640/480/wheel-alignment",
-          "precio": 450,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_881781-MLM45796093479_052021-E-proyectores-laser-para-alineacion-y-balanceo-con-platos.webp",
+          "precio": 20000,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Proyectores Láser Para Alineación Y Balanceo Con Platos"
         },
         {
           "nombre": "Diagnóstico computarizado",
@@ -2091,27 +2171,30 @@
         },
         {
           "nombre": "Cambio de clutch",
-          "imagen": "https://loremflickr.com/640/480/clutch",
-          "precio": 4800,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_950483-MLM79207494869_092024-V.webp",
+          "precio": 4776,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Kit De Clutch 1989-1997 Chevrolet Metro 1.0l-l4"
         },
         {
           "nombre": "Hojalatería y pintura",
-          "imagen": "https://loremflickr.com/640/480/auto-body",
-          "precio": 5500,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_631607-MLM75578777233_042024-E.webp",
+          "precio": 5362,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Soporte Para Pintar Autopartes Hojalatería Y Pintura"
         },
         {
           "nombre": "Cambio de llantas par",
-          "imagen": "https://loremflickr.com/640/480/car-tires",
-          "precio": 2800,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_764883-MLA100006957809_122025-E.webp",
+          "precio": 490,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Par De Llantas Chaoyang Rampage R26 Montaña Xc Reforzada Color Negro"
         }
       ]
     },
@@ -2252,83 +2335,93 @@
       "productos_plantilla": [
         {
           "nombre": "Coca Cola 600ml",
-          "imagen": "https://loremflickr.com/640/480/coca-cola-bottle",
-          "precio": 18,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_685308-MLA99850747891_112025-E.webp",
+          "precio": 193,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pack X 12 Refrescos Sabor Limon 600ml C/u Yoli"
         },
         {
           "nombre": "Sabritas original 45g",
-          "imagen": "https://loremflickr.com/640/480/potato-chips",
-          "precio": 16,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_999128-MLM85140935945_052025-E.webp",
+          "precio": 640,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Sabritas Doritos Nacho 30pz De 54g Botana Sabor Queso"
         },
         {
           "nombre": "Maruchan sabor camarón",
-          "imagen": "https://loremflickr.com/640/480/instant-noodles",
-          "precio": 14,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_993997-MLA99898558049_112025-E.webp",
+          "precio": 10,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Sopa Maruchan Ramen Sabor Camaron Picante 85 Gr"
         },
         {
           "nombre": "Pan Bimbo grande blanco",
-          "imagen": "https://loremflickr.com/640/480/sliced-bread",
-          "precio": 48,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_887413-MLM109457405976_042026-E.webp",
+          "precio": 309,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "2 Pack Bimbo Pan Blanco 4/620 G Ctc"
         },
         {
           "nombre": "Leche Lala entera 1L",
-          "imagen": "https://loremflickr.com/640/480/milk-carton",
-          "precio": 28,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_927353-MLA105484895860_012026-E.webp",
+          "precio": 168,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pack X4 Leche Entera 1l C/u Lala"
         },
         {
           "nombre": "Huevo blanco docena",
-          "imagen": "https://loremflickr.com/640/480/eggs-carton",
-          "precio": 42,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_704780-MLM43943533774_102020-E.webp",
+          "precio": 1437,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Filler 54 Huevos Paquete 20 Piezas"
         },
         {
           "nombre": "Arroz Verde Valle 1kg",
-          "imagen": "https://loremflickr.com/640/480/green",
-          "precio": 32,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_724859-MLA99415739326_112025-E.webp",
+          "precio": 92,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Arroz Sushi Verde Valle Bolsa 1kg"
         },
         {
           "nombre": "Frijol bayo 1kg",
-          "imagen": "https://loremflickr.com/640/480/pinto-beans",
-          "precio": 38,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_985481-MLA111238070373_052026-E.webp",
+          "precio": 75,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Frijol Ayocote Negro 1 Kg"
         },
         {
           "nombre": "Aceite Capullo 1L",
-          "imagen": "https://loremflickr.com/640/480/cooking-oil",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_993113-MLM95381302129_102025-E.webp",
+          "precio": 151,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pack Aceite Vegetal Capullo 3 Piezas De 750 Ml"
         },
         {
           "nombre": "Azúcar estándar 1kg",
-          "imagen": "https://loremflickr.com/640/480/sugar",
-          "precio": 22,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_958818-MLA99443359592_112025-E.webp",
+          "precio": 29,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Azucar morena zulka 1 kg"
         }
       ]
     },
@@ -2443,83 +2536,93 @@
       "productos_plantilla": [
         {
           "nombre": "Corte de cabello clásico",
-          "imagen": "https://loremflickr.com/640/480/haircut",
-          "precio": 150,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_957353-MLM80156245195_102024-E.webp",
+          "precio": 219,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cortadora De Cabello  Cortadora De Cabello De 5 W  Corte"
         },
         {
           "nombre": "Corte + barba completo",
-          "imagen": "https://loremflickr.com/640/480/haircut",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_719376-MLA95877892830_102025-E.webp",
+          "precio": 219,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Máquina Rasuradora Inalámbrica Wahl Para Barba Y Bigote Negra Con Azul"
         },
         {
           "nombre": "Arreglo de barba con navaja",
-          "imagen": "https://placehold.co/400x300/0f172a/ffffff?text=Arreglo%20de%20barba%20con%20navaja",
-          "precio": 120,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_855121-MLM92112777216_092025-E.webp",
+          "precio": 4518,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cortadora De Barba Para Hombre, Hoja Ajustable Manscaped"
         },
         {
           "nombre": "Diseño de barba personalizado",
-          "imagen": "https://loremflickr.com/640/480/diseno-de",
-          "precio": 180,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_887932-MLA104619600660_012026-E.webp",
+          "precio": 336,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Peine De Barba Guía Plantilla Molde De Afeitado Multiusos F Color Transparente 2"
         },
         {
           "nombre": "Mascarilla negra carbón activado",
-          "imagen": "https://loremflickr.com/640/480/face-mask",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_866725-MLA93844059318_102025-E.webp",
+          "precio": 259,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Dexe Black Mask Mascarilla Carbón Activado Elimina Puntos Negros Facial"
         },
         {
           "nombre": "Cera para cabello American Crew",
-          "imagen": "https://loremflickr.com/640/480/hair-pomade",
-          "precio": 320,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_643656-MLU79223074813_092024-E.webp",
+          "precio": 423,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "American Crew - Classic Grooming Cream 85gr"
         },
         {
           "nombre": "Pomada efecto mate",
-          "imagen": "https://placehold.co/400x300/0f172a/ffffff?text=Pomada%20efecto%20mate",
-          "precio": 285,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_753035-MLM48523478785_122021-E.webp",
+          "precio": 335,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cera Acabado Efecto Mate Con Fijación Elástica 100g Salerm"
         },
         {
           "nombre": "Aceite para barba 30ml",
-          "imagen": "https://loremflickr.com/640/480/cooking-oil",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_710869-MLU73980483632_012024-E.webp",
+          "precio": 52,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Aceite Para Barba Larga 30ml Maxcare"
         },
         {
           "nombre": "Corte infantil 0-10 años",
-          "imagen": "https://loremflickr.com/640/480/kid-haircut",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_958428-MLA104866816421_012026-E.webp",
+          "precio": 300,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Libro Mentes Brillantes 8-9 Años"
         },
         {
           "nombre": "Servicio premium con shampoo",
-          "imagen": "https://loremflickr.com/640/480/shampoo",
-          "precio": 280,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_823718-MLA99926476701_112025-E.webp",
+          "precio": 161,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Shampoo Anti-Rotura L&#x27;Oréal Professionnel Metal Detox 500ml"
         }
       ]
     },
@@ -2634,11 +2737,12 @@
       "productos_plantilla": [
         {
           "nombre": "Bolillo blanco pieza",
-          "imagen": "https://loremflickr.com/640/480/mexican-bread",
-          "precio": 4,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_916226-MLM99589570802_122025-E.webp",
+          "precio": 69,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Baqueton Bolillo Para Tambora De Estambre 1 Pieza"
         },
         {
           "nombre": "Concha de vainilla",
@@ -2650,11 +2754,12 @@
         },
         {
           "nombre": "Cuerno de chocolate",
-          "imagen": "https://loremflickr.com/640/480/chocolate",
-          "precio": 16,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_964833-MLM74585033854_022024-E.webp",
+          "precio": 1094,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "* Molde Paletas De Chocolate 4 Cuernos Orejas Unicornio Cup"
         },
         {
           "nombre": "Telera mediana",
@@ -2666,27 +2771,30 @@
         },
         {
           "nombre": "Rol de canela glaseado",
-          "imagen": "https://loremflickr.com/640/480/cinnamon-roll",
-          "precio": 22,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_878687-MLM48802817298_012022-E.webp",
+          "precio": 199,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Aretes Roll D Canela Glaseado Regalo Amor 14 Febrero Arcilla"
         },
         {
           "nombre": "Pan integral de caja",
-          "imagen": "https://loremflickr.com/640/480/whole-wheat-bread",
-          "precio": 45,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_967056-MLM51153896913_082022-E.webp",
+          "precio": 219,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pan Integral Bimbo 680g (3 Panes)"
         },
         {
           "nombre": "Empanada de piña",
-          "imagen": "https://loremflickr.com/640/480/empanada",
-          "precio": 14,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_764555-MLA106281206877_012026-E-empanadas-caseras-dulces-de-masa-crocante.webp",
+          "precio": 166,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Empanadas Caseras Dulces De Masa Crocante"
         },
         {
           "nombre": "Dona con chochitos",
@@ -2698,19 +2806,21 @@
         },
         {
           "nombre": "Polvorón de naranja",
-          "imagen": "https://loremflickr.com/640/480/cookies",
-          "precio": 12,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_643846-MLA107048291798_022026-E.webp",
+          "precio": 46,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Polvorones Marinela 4 Paquetes con 4 pza c/u. 296gr"
         },
         {
           "nombre": "Bagel sencillo",
-          "imagen": "https://loremflickr.com/640/480/bagel",
-          "precio": 28,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_842288-MLM83191087304_042025-E.webp",
+          "precio": 479,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "1 Pan Blanco Sin Corteza Y 1 Pan Para Sandwichón El Retorno"
         }
       ]
     },
@@ -2825,27 +2935,30 @@
       "productos_plantilla": [
         {
           "nombre": "Café americano grande",
-          "imagen": "https://loremflickr.com/640/480/coffee",
-          "precio": 38,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_684917-MLM52236990009_112022-E-cafe-molido-americano.webp",
+          "precio": 345,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Café Molido Americano"
         },
         {
           "nombre": "Capuchino con arte latte",
-          "imagen": "https://loremflickr.com/640/480/cappuccino",
-          "precio": 52,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_699465-MLM110863663062_052026-E.webp",
+          "precio": 285,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Café Cappuccino Clásico 1kg Soluble - Frapuccino Y Latte"
         },
         {
           "nombre": "Latte vainilla mediano",
-          "imagen": "https://loremflickr.com/640/480/latte",
-          "precio": 55,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_634955-MLA99371297414_112025-E.webp",
+          "precio": 296,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Caramel Latte Big Train Polvos 3.5 Libras"
         },
         {
           "nombre": "Espresso doble",
@@ -2857,51 +2970,57 @@
         },
         {
           "nombre": "Mocha chocolate caliente",
-          "imagen": "https://loremflickr.com/640/480/chocolate",
-          "precio": 58,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_735248-MLM85367039609_052025-E.webp",
+          "precio": 762,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Organo | Café Mocha 15u + Chocolate Caliente 15u| Adaptógeno"
         },
         {
           "nombre": "Frappé caramelo",
-          "imagen": "https://loremflickr.com/640/480/frappe",
-          "precio": 75,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_828627-MLM78673167547_082024-E.webp",
+          "precio": 285,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Frappé Base En Polvo Varios Sabores, Etnia 52 - 1 Kg"
         },
         {
           "nombre": "Té chai latte",
-          "imagen": "https://loremflickr.com/640/480/latte",
-          "precio": 55,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_894133-MLA99822465853_112025-E.webp",
+          "precio": 27,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Té Chai Latte Instantáneo Vegano Sin Gluten Kianta Cafetzin 1kg"
         },
         {
           "nombre": "Croissant de almendras",
-          "imagen": "https://loremflickr.com/640/480/croissant",
-          "precio": 38,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_773191-MLM107657855039_022026-E.webp",
+          "precio": 198,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Almendras Con Chocolate Caja 12 Bolsas 30 G Snack"
         },
         {
           "nombre": "Bagel con queso crema",
-          "imagen": "https://loremflickr.com/640/480/bagel",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_713310-MLM80337992557_102024-E.webp",
+          "precio": 285,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Mrs Cubbisons Cebollas Crujientes Sabor Crema Y Especias 80g"
         },
         {
           "nombre": "Brownie con nuez",
-          "imagen": "https://loremflickr.com/640/480/brownie",
-          "precio": 45,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_693480-MLA99928251505_112025-E.webp",
+          "precio": 165,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Chips De Chocolate Sabor Nuez Alpezzi 500 Gr"
         }
       ]
     },
@@ -3016,83 +3135,93 @@
       "productos_plantilla": [
         {
           "nombre": "Martillo de uña 16oz",
-          "imagen": "https://loremflickr.com/640/480/claw-hammer",
-          "precio": 185,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_945371-MLA104117182972_012026-E.webp",
+          "precio": 157,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Martillo Uña Curva 16 Oz Mango Fibra De Vidrio"
         },
         {
           "nombre": "Desarmador plano set 6 piezas",
-          "imagen": "https://loremflickr.com/640/480/screwdriver",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_782082-MLA93785550069_092025-E.webp",
+          "precio": 319,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Juego De 6 Desarmadores - Jdb-6 Mikels"
         },
         {
           "nombre": "Taladro inalámbrico Truper 12V",
-          "imagen": "https://loremflickr.com/640/480/cordless-drill",
-          "precio": 1850,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_809793-MLA99936647809_112025-E.webp",
+          "precio": 1045,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Rotomartillo Inalámbrico, Batería Ion Litio 12v Truper 12793 Color Naranja"
         },
         {
           "nombre": "Tornillo madera 2 pulgadas kg",
-          "imagen": "https://loremflickr.com/640/480/wood-screws",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_850630-MLM42102236099_062020-E.webp",
+          "precio": 129,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Armella De Acero Sh5071 Rosca 1/2pulg Carga 1180kg 15300070"
         },
         {
           "nombre": "Cinta métrica 5m Stanley",
-          "imagen": "https://loremflickr.com/640/480/tape-measure",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_977249-MLM76368766047_052024-E.webp",
           "precio": 165,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cinta Métrica 5m (16plg) Magnética Stanley"
         },
         {
           "nombre": "Llave Stilson 14 pulgadas",
-          "imagen": "https://placehold.co/400x300/b45309/ffffff?text=Llave%20Stilson%2014%20pulgadas",
-          "precio": 285,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_973302-MLA99513116190_112025-E.webp",
+          "precio": 299,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Llave Stilson 14 Cuerpo De Hierro Maleable, Pretul 22013 Color Rojo"
         },
         {
           "nombre": "Pintura vinílica blanca 4L",
-          "imagen": "https://loremflickr.com/640/480/paint-can",
-          "precio": 480,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_809279-MLA99849132039_112025-E.webp",
+          "precio": 715,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pintura Vinílica Negra Mate 4L Alvacolor Alvamex Interiores Exteriores"
         },
         {
           "nombre": "Cemento gris saco 50kg",
-          "imagen": "https://loremflickr.com/640/480/cement-bag",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_837130-MLM79469251492_102024-E.webp",
+          "precio": 200,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cemento Blanco 5 Kg Cemex"
         },
         {
           "nombre": "Cable eléctrico cal. 12 metro",
-          "imagen": "https://loremflickr.com/640/480/electrical-wire",
-          "precio": 18,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_779507-MLA110747684381_042026-E.webp",
+          "precio": 306,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cable Eléctrico Calibre 12 100m Verde VOLTECK CCA-12V"
         },
         {
           "nombre": "Foco LED 9W luz blanca",
-          "imagen": "https://loremflickr.com/640/480/led-bulb",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_874523-MLA100031994897_122025-E.webp",
+          "precio": 135,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Vanance® 6 Focos Led Inteligentes Wifi RGBCW Voz Alexa Google Siri 9W 800LM Ajustable Multicolor 2.4Ghz E26/E27 Hogar Smart Bombillas Luz Blanca 2700-6500k Foco Bluetooth Control De Android IOS APP"
         }
       ]
     },
@@ -3222,19 +3351,21 @@
       "productos_plantilla": [
         {
           "nombre": "Pizza margarita mediana",
-          "imagen": "https://loremflickr.com/640/480/margherita",
-          "precio": 185,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_766943-MLM73851486216_012024-E.webp",
+          "precio": 279,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Malla Charola De Aluminio Hornear Pizza Cocina 45cm"
         },
         {
           "nombre": "Pizza pepperoni grande",
-          "imagen": "https://loremflickr.com/640/480/pepperoni",
-          "precio": 245,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_753468-MLM110264034981_042026-E-pizza-con-pepperoni-sabor-irresistible.webp",
+          "precio": 390,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pizza Con Pepperoni Sabor Irresistible"
         },
         {
           "nombre": "Pizza hawaiana familiar",
@@ -3246,59 +3377,66 @@
         },
         {
           "nombre": "Pizza mexicana picante",
-          "imagen": "https://loremflickr.com/640/480/pizza",
-          "precio": 265,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_911480-MLA99849708593_112025-E.webp",
+          "precio": 285,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Salsa De Tomate Contadina Para Pizza 3 Kg"
         },
         {
           "nombre": "Pizza cuatro quesos",
-          "imagen": "https://loremflickr.com/640/480/four",
-          "precio": 275,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_718052-MLA99372940490_112025-E.webp",
+          "precio": 209,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Salsa Para Pasta Cuatro Quesos 360 Gr Hunt&#x27;s"
         },
         {
           "nombre": "Alitas BBQ 12 piezas",
-          "imagen": "https://loremflickr.com/640/480/chicken-wings",
-          "precio": 195,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_924367-MLM109320630408_042026-E.webp",
+          "precio": 285,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Salsa Para Alitas 1litro Varios Sabores Caja 6 Pzs"
         },
         {
           "nombre": "Pasta Alfredo con pollo",
-          "imagen": "https://loremflickr.com/640/480/pasta",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_795883-MLA99358414410_112025-E.webp",
+          "precio": 10,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Salsa Pastas Bertolli Alfredo Queso Parmesano Y Albahaca 425"
         },
         {
           "nombre": "Lasaña tradicional porción",
-          "imagen": "https://loremflickr.com/640/480/lasagna",
-          "precio": 165,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_883271-MLM97771579054_112025-E.webp",
+          "precio": 59,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pasta Lasagna Lista Para Hornear La Moderna 500 Gr"
         },
         {
           "nombre": "Pan de ajo con queso",
-          "imagen": "https://loremflickr.com/640/480/pan-de",
-          "precio": 75,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_679063-MLM69595543019_052023-E.webp",
+          "precio": 285,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Crutones Ajo Y Queso Parmesano  Olive Garden 907g (2 Bolsas)"
         },
         {
           "nombre": "Refresco 600ml individual",
-          "imagen": "https://loremflickr.com/640/480/beef",
-          "precio": 28,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_743033-MLM50810826235_072022-E.webp",
+          "precio": 272,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Refresco Coca Cola Sabor Original 235 Ml 6 Pz"
         }
       ]
     },
@@ -3419,19 +3557,21 @@
       "productos_plantilla": [
         {
           "nombre": "Taco de pastor con piña",
-          "imagen": "https://loremflickr.com/640/480/al-pastor",
-          "precio": 18,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_701361-MLM92115106276_092025-E.webp",
+          "precio": 129,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Aretes Trompo De Tacos Al Pastor Con Piña Kawaii"
         },
         {
           "nombre": "Taco de bistec con cebolla",
-          "imagen": "https://loremflickr.com/640/480/onion",
-          "precio": 22,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_756328-MLA101414781434_122025-E.webp",
+          "precio": 285,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Botana De Maíz Corn Nuts Sabor Taco Banquetero Con Todo 113g"
         },
         {
           "nombre": "Taco de carnitas surtido",
@@ -3443,27 +3583,30 @@
         },
         {
           "nombre": "Quesadilla con flor de calabaza",
-          "imagen": "https://loremflickr.com/640/480/quesadilla",
-          "precio": 35,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_648744-MLA111855274085_052026-E.webp",
+          "precio": 69,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Galletas Florentinas Gamesa Surtidas Fresa Y Cajeta 12 Piezas"
         },
         {
           "nombre": "Gringa de pastor",
-          "imagen": "https://placehold.co/400x300/b91c1c/ffffff?text=Gringa%20de%20pastor",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_803370-MLM111356292259_052026-E.webp",
+          "precio": 5000,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cachorros Pastor Australiano Ganadero"
         },
         {
           "nombre": "Volcán de bistec",
-          "imagen": "https://loremflickr.com/640/480/beef-steak",
-          "precio": 55,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_798716-MLM110237279579_042026-E-molcajete-artesanal-piedra-volcanica-no7-8-9-pulgadas.webp",
+          "precio": 380,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Molcajete Artesanal Piedra Volcánica. No.7, 8, 9 Pulgadas"
         },
         {
           "nombre": "Mulita de pastor",
@@ -3475,27 +3618,30 @@
         },
         {
           "nombre": "Consomé de res tazón",
-          "imagen": "https://loremflickr.com/640/480/beef-soup",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_679558-MLM42546500886_072020-E.webp",
+          "precio": 279,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Tazon Bowl Multiusos De Vidrio Grande 1.95 Litros Pyr-o-rey"
         },
         {
           "nombre": "Agua de jamaica jarra",
-          "imagen": "https://loremflickr.com/640/480/hibiscus",
-          "precio": 55,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_770668-MLM73779007277_012024-E.webp",
+          "precio": 170,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Jarra De Vidrio Grueso Decanter Para Jugos 1.1 Litros"
         },
         {
           "nombre": "Refresco 600ml",
-          "imagen": "https://loremflickr.com/640/480/beef",
-          "precio": 22,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_705970-MLM86964204050_072025-E.webp",
+          "precio": 297,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Refresco Pepsi Regular 600ml Pack X12"
         }
       ]
     },
@@ -3610,67 +3756,75 @@
       "productos_plantilla": [
         {
           "nombre": "Bola helado vainilla",
-          "imagen": "https://loremflickr.com/640/480/ice-cream",
-          "precio": 35,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_652030-MLM89090737225_082025-E.webp",
+          "precio": 965,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Bath Bombs Bola De Helado"
         },
         {
           "nombre": "Bola helado chocolate",
-          "imagen": "https://loremflickr.com/640/480/chocolate",
-          "precio": 35,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_812967-MLM80254373524_112024-E-bomba-de-chocolate-galerie-edicion-navidad-60g-americana.webp",
+          "precio": 165,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Bomba De Chocolate Galerie Edicion Navidad 60g Americana"
         },
         {
           "nombre": "Banana split clásica",
-          "imagen": "https://loremflickr.com/640/480/banana",
-          "precio": 85,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_977392-MLM110272041691_042026-E-camiseta-the-banana-splits-animales-clasicos.webp",
+          "precio": 301,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Camiseta The Banana Splits Animales Clasicos"
         },
         {
           "nombre": "Malteada de fresa grande",
-          "imagen": "https://loremflickr.com/640/480/milkshake",
-          "precio": 75,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_722813-MLA95679273229_102025-E.webp",
+          "precio": 965,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Peluche Malteada Kawaii Fresa 70cm Grande Jextech Hipoalergénico"
         },
         {
           "nombre": "Nieve de limón vaso",
-          "imagen": "https://loremflickr.com/640/480/sorbet",
-          "precio": 32,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_700467-MLM93119392329_092025-E-kit-desechables-p20-invitados-platos-7y9-vaso-cubierto-serv.webp",
+          "precio": 659,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Kit Desechables P/20 Invitados Platos 7y9 Vaso Cubierto Serv"
         },
         {
           "nombre": "Paleta de fresa con crema",
-          "imagen": "https://loremflickr.com/640/480/popsicle",
-          "precio": 28,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_600384-MLA99833056385_112025-E.webp",
+          "precio": 96,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Chupa Chups Paleta FRESA Y CHOCOLATE 25Pz 300g"
         },
         {
           "nombre": "Sundae caramelo con nuez",
-          "imagen": "https://loremflickr.com/640/480/sundae",
-          "precio": 78,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_663826-MLM91984203539_092025-E.webp",
+          "precio": 109,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Crazy Cups Descafeinado Caramelo Trufa Sundae, Pack 22"
         },
         {
           "nombre": "Cono helado doble",
-          "imagen": "https://loremflickr.com/640/480/ice-cream",
-          "precio": 55,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_860780-MLA99897120741_112025-E.webp",
+          "precio": 27,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Conos de Papel Helado Brooks mx 100 Unidades Colores Mixtos 4.5cm"
         },
         {
           "nombre": "Esquimal cubierto de chocolate",
@@ -3682,11 +3836,12 @@
         },
         {
           "nombre": "Helado de cookies and cream litro",
-          "imagen": "https://loremflickr.com/640/480/ice-cream",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_657519-MLA99420919270_112025-E.webp",
+          "precio": 72,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Concentrado Saborizante Cookies And Cream D-15 Deiman 1 Lt"
         }
       ]
     },
@@ -3801,19 +3956,21 @@
       "productos_plantilla": [
         {
           "nombre": "Pastel de chocolate 8 pers",
-          "imagen": "https://loremflickr.com/640/480/chocolate",
-          "precio": 380,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_874492-MLM98747136576_112025-E-base-para-pasteldecoracion-de-eventosdiferentes-colores.webp",
+          "precio": 395,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Base Para Pastel/decoración De Eventos/diferentes Colores"
         },
         {
           "nombre": "Pastel tres leches 10 pers",
-          "imagen": "https://loremflickr.com/640/480/tres-leches-cake",
-          "precio": 485,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_991368-MLM43747726118_102020-E-pastel-con-fondant-chocolateymoras-30-per-no-mercado-envio.webp",
+          "precio": 1150,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pastel Con Fondant Chocolateymoras. 30 Per. No Mercado Envío"
         },
         {
           "nombre": "Cheesecake de zarzamora rebanada",
@@ -3833,51 +3990,57 @@
         },
         {
           "nombre": "Tiramisú porción individual",
-          "imagen": "https://loremflickr.com/640/480/tiramisu",
-          "precio": 85,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_907716-MLM48964282305_012022-E.webp",
+          "precio": 1399,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Molde Para Tarta /pay Individual Con Tapa 14x5 Cm 100 Juegos"
         },
         {
           "nombre": "Cupcake de vainilla unidad",
-          "imagen": "https://loremflickr.com/640/480/cupcake",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_864522-MLA99338572624_112025-E.webp",
           "precio": 38,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Merengue En Polvo 250g Enco Decoración Cupcakes Reposteria"
         },
         {
           "nombre": "Macarrones franceses caja 6",
-          "imagen": "https://loremflickr.com/640/480/macarons",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_623386-CBT81727064980_012025-E.webp",
+          "precio": 1094,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Macarrones Franceses De Plástico Transparente Con Cierre De"
         },
         {
           "nombre": "Pay de limón 8 pers",
-          "imagen": "https://loremflickr.com/640/480/lemon",
-          "precio": 320,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_787457-MLA99855647905_112025-E.webp",
+          "precio": 69,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Galleta Gamesa Marias Postrecitos Pay Limón - 6 Paquetes"
         },
         {
           "nombre": "Brazo de gitano relleno",
-          "imagen": "https://loremflickr.com/640/480/brazo-de",
-          "precio": 280,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_898257-MLA99373776486_112025-E.webp",
+          "precio": 399,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Relleno De Fresa, Caja Con 6 Kg"
         },
         {
           "nombre": "Galletas decoradas docena",
-          "imagen": "https://loremflickr.com/640/480/cookies",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_710754-MLM106763425505_022026-E.webp",
+          "precio": 52,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Docena De Galletas Decoradas De San Valentin"
         }
       ]
     },
@@ -3992,35 +4155,39 @@
       "productos_plantilla": [
         {
           "nombre": "Jugo de naranja natural 500ml",
-          "imagen": "https://loremflickr.com/640/480/orange",
-          "precio": 35,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_617924-MLM82490440810_022025-E.webp",
+          "precio": 359,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "1 Jugo Bebible Natural De Naranja Agria Noble De 500ml"
         },
         {
           "nombre": "Jugo verde detox 500ml",
-          "imagen": "https://loremflickr.com/640/480/green",
-          "precio": 50,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_784967-MLM90445202819_082025-E.webp",
+          "precio": 1148,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Kit 2 Ismerely | Suker Juice | Jugo Verde Detox | 500ml"
         },
         {
           "nombre": "Licuado de plátano con avena",
-          "imagen": "https://loremflickr.com/640/480/smoothie",
-          "precio": 45,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_863609-MLM108259462230_032026-E.webp",
+          "precio": 65,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Avena En Polvo Para Licuado Sabor Plátano 200g Quick"
         },
         {
           "nombre": "Jugo de zanahoria con naranja",
-          "imagen": "https://loremflickr.com/640/480/carrot",
-          "precio": 40,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_616664-MLM100435278948_122025-E.webp",
+          "precio": 299,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Extractor De Jugos Eléctrico 1500ml Jugueras Frutas Verduras"
         },
         {
           "nombre": "Smoothie de fresa con yogurt",
@@ -4032,43 +4199,48 @@
         },
         {
           "nombre": "Agua de jamaica natural",
-          "imagen": "https://loremflickr.com/640/480/hibiscus",
-          "precio": 25,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_761845-MLM105014263838_012026-E.webp",
+          "precio": 252,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Concentrado De Jamaica Natural Botella 1 Litro"
         },
         {
           "nombre": "Jugo de toronja fresco",
-          "imagen": "https://loremflickr.com/640/480/juice",
-          "precio": 40,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_751033-MLA107092987407_022026-E.webp",
+          "precio": 305,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "JUMEX ÚNICO FRESCO XODA Toronja Hierbabuena 355ml 12 p"
         },
         {
           "nombre": "Licuado proteico chocolate",
-          "imagen": "https://loremflickr.com/640/480/chocolate",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_749686-MLM93669179178_102025-E.webp",
+          "precio": 199,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Licuado Proteico Chocolate Koala Pals Para Niños 570 G"
         },
         {
           "nombre": "Jugo de piña con apio",
-          "imagen": "https://loremflickr.com/640/480/juice",
-          "precio": 42,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_839647-MLA99422626090_112025-E.webp",
+          "precio": 1437,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Jugo Verde Polvo Frutas Verduras Sheló Nopal Apio Piña Limón"
         },
         {
           "nombre": "Bowl de fruta con granola",
-          "imagen": "https://loremflickr.com/640/480/bowl-de",
-          "precio": 75,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_722561-MLA109338065124_042026-E.webp",
+          "precio": 86,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pepita de Calabaza Cruda BUENAHORA 1 Kg Semilla Nacional Limpia y Natural, Rica en Grasas Insaturadas y Fibra, Versátil para Snacks, Bowls, Granolas y Dietas Balanceadas | Pumpkin Seeds"
         }
       ]
     },
@@ -4183,83 +4355,93 @@
       "productos_plantilla": [
         {
           "nombre": "Jugo prensado naranja+jengibre",
-          "imagen": "https://loremflickr.com/640/480/orange",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_737324-MLM75683924112_042024-E.webp",
+          "precio": 36,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Jugo Jumex De Naranja 960 Ml"
         },
         {
           "nombre": "Jugo verde col rizada+manzana",
-          "imagen": "https://loremflickr.com/640/480/apple",
-          "precio": 75,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_745980-MLA108903877609_032026-E-jugo-verde-mix-solanum-americano.webp",
+          "precio": 11992,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Jugo Verde Mix Solanum Americano"
         },
         {
           "nombre": "Shot de jengibre con limón",
-          "imagen": "https://loremflickr.com/640/480/lemon",
-          "precio": 35,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_907196-MLM110751969805_042026-E-te-de-jengibre-limon-mccormick-25-sobres.webp",
+          "precio": 21,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Té De Jengibre Limón Mccormick 25 Sobres"
         },
         {
           "nombre": "Agua de pepino con menta",
-          "imagen": "https://loremflickr.com/640/480/water",
-          "precio": 38,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_857859-MLM88515684805_072025-E.webp",
+          "precio": 1148,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Agua Lavazza Pepino Limón Menta, Caja 100 Unidades"
         },
         {
           "nombre": "Infusión de hierbas detox",
-          "imagen": "https://loremflickr.com/640/480/detox",
-          "precio": 45,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_727185-MLM89003212660_082025-E.webp",
+          "precio": 399,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Biohacking Detox Te Infusion Herbal"
         },
         {
           "nombre": "Kombucha sabor frutos rojos",
-          "imagen": "https://loremflickr.com/640/480/kombucha-sabor",
-          "precio": 85,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_755343-MLM93751427947_092025-E-kombucha-diferentes-sabores-18-botellas-de-240-ml-kombuchita.webp",
+          "precio": 789,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Kombucha Diferentes Sabores 18 Botellas De 240 Ml Kombuchita"
         },
         {
           "nombre": "Smoothie açaí con frutos rojos",
-          "imagen": "https://loremflickr.com/640/480/smoothie",
-          "precio": 85,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_971328-MLM107291451363_022026-E.webp",
+          "precio": 114,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pulpa Para Escarchar Bebidas Frutos Rojos Fruti Mich 1.1kg"
         },
         {
           "nombre": "Agua de coco natural 500ml",
-          "imagen": "https://loremflickr.com/640/480/water",
-          "precio": 55,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_733138-MLA99343462372_112025-E.webp",
+          "precio": 252,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Agua Natural Casa Del Agua 600ml"
         },
         {
           "nombre": "Pack 6 jugos detox 24h",
-          "imagen": "https://loremflickr.com/640/480/detox",
-          "precio": 580,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_784505-MLA99856604239_112025-E.webp",
+          "precio": 425,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Jugo Jumex Sabores Surtidos De 24 Piezas De 200 Ml"
         },
         {
           "nombre": "Leche de almendras casera",
-          "imagen": "https://loremflickr.com/640/480/milk-carton",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_658091-MLM49277308031_032022-E.webp",
+          "precio": 132,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Bebida De Almendra En Polvo 500g Leoli"
         }
       ]
     },
@@ -4374,11 +4556,12 @@
       "productos_plantilla": [
         {
           "nombre": "Coctel de camarón mediano",
-          "imagen": "https://loremflickr.com/640/480/shrimp",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_825176-MLA99346789522_112025-E.webp",
+          "precio": 54,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "COCTEL CLAMATO TOMATE Y ALMEJA 946 ML."
         },
         {
           "nombre": "Ceviche de pescado tostada",
@@ -4398,19 +4581,21 @@
         },
         {
           "nombre": "Camarones al ajillo orden",
-          "imagen": "https://loremflickr.com/640/480/shrimp",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_684612-MLM52322181717_112022-E.webp",
+          "precio": 450,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Camarón Seco 1/2 Kg"
         },
         {
           "nombre": "Pulpo a las brasas",
-          "imagen": "https://loremflickr.com/640/480/octopus",
-          "precio": 285,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_760004-MLM87738758033_072025-E.webp",
+          "precio": 195,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Joyero Pequeño En Forma De Corazón Pulpo Gótico"
         },
         {
           "nombre": "Mojarra frita entera",
@@ -4430,27 +4615,30 @@
         },
         {
           "nombre": "Caldo de mariscos tazón",
-          "imagen": "https://loremflickr.com/640/480/seafood-soup",
-          "precio": 165,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_726056-MLM80661908635_112024-E.webp",
+          "precio": 3300,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Tazón Sopero Nevada 550ml 50 Piezas"
         },
         {
           "nombre": "Tostada de atún fresco",
-          "imagen": "https://loremflickr.com/640/480/tostada",
-          "precio": 55,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_642446-MLA99817325149_112025-E.webp",
+          "precio": 18,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Atún Mazatún en Aceite 285g"
         },
         {
           "nombre": "Ostiones frescos media docena",
-          "imagen": "https://loremflickr.com/640/480/oysters",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_620145-MLA99368715794_112025-E.webp",
+          "precio": 307,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Ostiones Ahumados Enteros Crown Prince 4 Cajas De 106g"
         }
       ]
     },
@@ -4565,19 +4753,21 @@
       "productos_plantilla": [
         {
           "nombre": "Roll California 8 piezas",
-          "imagen": "https://loremflickr.com/640/480/california-roll",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_651200-MLM50775622664_072022-E.webp",
+          "precio": 93,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Rollitos Rollimix Surtido 20pzs 25g C/u 4 Estuches"
         },
         {
           "nombre": "Roll Philadelphia 8 piezas",
-          "imagen": "https://loremflickr.com/640/480/philadelphia-roll",
-          "precio": 165,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_976004-MLA99871054473_112025-E.webp",
+          "precio": 519,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Servitoallas Member&#x27;s Mark Con 8 Piezas"
         },
         {
           "nombre": "Spicy tuna roll 8 piezas",
@@ -4589,19 +4779,21 @@
         },
         {
           "nombre": "Sashimi salmón 6 piezas",
-          "imagen": "https://loremflickr.com/640/480/sashimi",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_612843-MLA99351164424_112025-E.webp",
+          "precio": 559,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Salmón Rosado Kirkland Signature Paq Con 6pzs De 170 Gr"
         },
         {
           "nombre": "Nigiri atún 4 piezas",
-          "imagen": "https://loremflickr.com/640/480/nigiri",
-          "precio": 165,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_803844-MLA99448148160_112025-E.webp",
+          "precio": 18,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Atun En Trozos En Agua Tuny Clasico Paquete Con 8 Sobres De 75 Gr C/u"
         },
         {
           "nombre": "Tempura camarón orden",
@@ -4613,19 +4805,21 @@
         },
         {
           "nombre": "Combo sushi 24 piezas",
-          "imagen": "https://loremflickr.com/640/480/combo-sushi",
-          "precio": 385,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_833985-MLA99390920586_112025-E.webp",
+          "precio": 190,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Paquete Para Sushi Satoru 1 pza"
         },
         {
           "nombre": "Sopa miso tradicional",
-          "imagen": "https://loremflickr.com/640/480/miso-soup",
-          "precio": 55,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_759343-MLM110529785561_042026-E.webp",
+          "precio": 28,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Paquete De 2 Cuencos De Sopa Japoneses Tradicionales De Miso"
         },
         {
           "nombre": "Edamame al vapor",
@@ -4637,11 +4831,12 @@
         },
         {
           "nombre": "Té verde caliente",
-          "imagen": "https://loremflickr.com/640/480/green",
-          "precio": 35,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_972385-MLM111759994801_052026-E.webp",
+          "precio": 27,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Matcha Té Verde Marca Mig 900g Para Frappé O Caliente"
         }
       ]
     },
@@ -4762,59 +4957,66 @@
       "productos_plantilla": [
         {
           "nombre": "Hamburguesa sencilla queso",
-          "imagen": "https://loremflickr.com/640/480/hamburger",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_671443-MLM54766858117_032023-E.webp",
+          "precio": 787,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Barra De Queso Chihuahua Menonita Tipo Chester 2.5 Kg"
         },
         {
           "nombre": "Hamburguesa doble bacon",
-          "imagen": "https://loremflickr.com/640/480/hamburger",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_944078-MLM42755463711_072020-E.webp",
+          "precio": 399,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Caja Para Hamburguesa Y Papas"
         },
         {
           "nombre": "Hamburguesa BBQ con piña",
-          "imagen": "https://loremflickr.com/640/480/hamburger",
-          "precio": 135,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_992812-MLA47381190502_092021-E.webp",
+          "precio": 274,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Salsa Bbq Mr Wings 3.8 L Para Alitas, Hamburguesas, Mariscos"
         },
         {
           "nombre": "Papas a la francesa grandes",
-          "imagen": "https://loremflickr.com/640/480/french-fries",
-          "precio": 55,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_630774-MLA95400842286_102025-E.webp",
+          "precio": 42,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cortadora De Papas A La Francesa Rebanadora Grande 31x21 Cm Color Plateado"
         },
         {
           "nombre": "Papas gajo con dip",
-          "imagen": "https://loremflickr.com/640/480/french-fries",
-          "precio": 75,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_674038-MLA99415747820_112025-E.webp",
+          "precio": 42,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Papas Barcel Chip&#x27;s Jalapeño 240g"
         },
         {
           "nombre": "Aros de cebolla orden",
-          "imagen": "https://loremflickr.com/640/480/onion",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_709993-MLM49634279425_042022-E.webp",
+          "precio": 95,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cebolla Picada Chopped 250 Gramos"
         },
         {
           "nombre": "Malteada chocolate grande",
-          "imagen": "https://loremflickr.com/640/480/chocolate",
-          "precio": 75,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_644929-MLM77767660795_072024-E.webp",
+          "precio": 133,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Bebida Mezclada De Chocolate Y Malta Ovaltine, Lata Grande D"
         },
         {
           "nombre": "Hot dog jumbo con tocino",
@@ -4834,11 +5036,12 @@
         },
         {
           "nombre": "Refresco grande con refill",
-          "imagen": "https://loremflickr.com/640/480/beef",
-          "precio": 38,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_686936-MLA99343455248_112025-E.webp",
+          "precio": 84,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pack x2 Refresco Coca Cola Y Fresca 2L c/u"
         }
       ]
     },
@@ -4953,43 +5156,48 @@
       "productos_plantilla": [
         {
           "nombre": "Plátano Tabasco kg",
-          "imagen": "https://loremflickr.com/640/480/banana",
-          "precio": 22,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_823074-MLM47746227356_102021-E.webp",
+          "precio": 184,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "1 Kg Harina De Plátano Tabasco Deshidratado Alta Calidad"
         },
         {
           "nombre": "Manzana roja kg",
-          "imagen": "https://loremflickr.com/640/480/apple",
-          "precio": 45,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_709228-MLM70026505231_062023-E.webp",
+          "precio": 82,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Manzana Enana Roja ( Injerto ) Crecimiento Rapido"
         },
         {
           "nombre": "Aguacate Hass kg",
-          "imagen": "https://loremflickr.com/640/480/avocado",
-          "precio": 75,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_829401-MLM70062343668_062023-E.webp",
+          "precio": 115,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Aguacate Hass ( Injerto ) Alta Producción"
         },
         {
           "nombre": "Jitomate saladet kg",
-          "imagen": "https://loremflickr.com/640/480/tomato",
-          "precio": 35,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_843230-MLM69267836225_052023-E.webp",
+          "precio": 115,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "50 Gramos Semillas Jitomate Saladet Rio Grande (20,000 Pzas)"
         },
         {
           "nombre": "Cebolla blanca kg",
-          "imagen": "https://loremflickr.com/640/480/onion",
-          "precio": 28,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_660410-MLA99883564973_112025-E.webp",
+          "precio": 82,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cebolla Granulada 5 Kg"
         },
         {
           "nombre": "Limón sin semilla kg",
@@ -5001,35 +5209,39 @@
         },
         {
           "nombre": "Papaya maradol kg",
-          "imagen": "https://loremflickr.com/640/480/papaya",
-          "precio": 32,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_738335-MLM75236745486_032024-E.webp",
+          "precio": 82,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Papaya Maradol Semillas 400 Semillas Alta Producion"
         },
         {
           "nombre": "Sandía sin semilla kg",
-          "imagen": "https://loremflickr.com/640/480/watermelon",
-          "precio": 28,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_977929-MLM82668049839_022025-E.webp",
+          "precio": 115,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "100 Semillas Sandía Amarilla + Regalo K17"
         },
         {
           "nombre": "Naranja Valencia kg",
-          "imagen": "https://loremflickr.com/640/480/orange",
-          "precio": 22,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_827343-MLM79719836824_102024-E.webp",
+          "precio": 82,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Naranja Valencia Alta Producción ( Injerto ) Enano"
         },
         {
           "nombre": "Mango Ataulfo kg",
-          "imagen": "https://loremflickr.com/640/480/mango",
-          "precio": 55,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_672544-MLM48637846544_122021-E.webp",
+          "precio": 119,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Mango Ataulfo Injerto Prod. 1 Año"
         }
       ]
     },
@@ -5168,19 +5380,21 @@
         },
         {
           "nombre": "Pechuga de pollo por kilo",
-          "imagen": "https://loremflickr.com/640/480/chicken-breast",
-          "precio": 120,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_781746-MLM82313985737_022025-E.webp",
+          "precio": 894,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Carne De Pollo En Lata Totalmente Natural 340 G"
         },
         {
           "nombre": "Pierna de pollo por kilo",
-          "imagen": "https://loremflickr.com/640/480/chicken-leg",
-          "precio": 85,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_876587-MLM99042768122_112025-E.webp",
+          "precio": 126,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Engorda Y Crecimiento Para Pollo 5kg"
         },
         {
           "nombre": "Carne molida especial kg",
@@ -5192,19 +5406,21 @@
         },
         {
           "nombre": "Chuleta de cerdo por kilo",
-          "imagen": "https://loremflickr.com/640/480/pork-chop",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_723022-MLM97468706313_112025-E.webp",
+          "precio": 52,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Carnitas De Cerdo 1kg | Listas Para Calentar | Tago"
         },
         {
           "nombre": "Chorizo argentino por kilo",
-          "imagen": "https://loremflickr.com/640/480/chorizo",
-          "precio": 130,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_734340-MLM83907865620_042025-E.webp",
+          "precio": 285,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "1 Kg De Chorizo Oreado Oaxaqueño / Carne De Cerdo"
         },
         {
           "nombre": "Milanesa de res por kilo",
@@ -5216,11 +5432,12 @@
         },
         {
           "nombre": "Tocino ahumado 200g",
-          "imagen": "https://loremflickr.com/640/480/bacon",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_888675-MLM104030121044_012026-E.webp",
+          "precio": 439,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Tocino Bacon Bits Pragna En Trozos 520g (pack 2)"
         }
       ]
     },
@@ -5335,83 +5552,93 @@
       "productos_plantilla": [
         {
           "nombre": "Pollo entero fresco kg",
-          "imagen": "https://loremflickr.com/640/480/whole-chicken",
-          "precio": 75,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_813766-MLM40068312038_122019-E.webp",
+          "precio": 3079,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "20 Pollos De Leche Gourmet (500 Gr Cada Uno)"
         },
         {
           "nombre": "Pechuga con hueso kg",
-          "imagen": "https://loremflickr.com/640/480/chicken-breast",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_972741-MLA99349640276_112025-E.webp",
+          "precio": 142,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pechuga De Pollo En Trozos Member&#x27;s Mark 6 Pzas De 340 G C/u"
         },
         {
           "nombre": "Pechuga sin hueso kg",
-          "imagen": "https://loremflickr.com/640/480/chicken-breast",
-          "precio": 120,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_972741-MLA99349640276_112025-E.webp",
+          "precio": 142,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pechuga De Pollo En Trozos Member&#x27;s Mark 6 Pzas De 340 G C/u"
         },
         {
           "nombre": "Muslo de pollo kg",
-          "imagen": "https://loremflickr.com/640/480/chicken",
-          "precio": 75,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_972741-MLA99349640276_112025-E.webp",
+          "precio": 965,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pechuga De Pollo En Trozos Member&#x27;s Mark 6 Pzas De 340 G C/u"
         },
         {
           "nombre": "Alitas frescas kg",
-          "imagen": "https://loremflickr.com/640/480/chicken-wings",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_669509-MLM88895772443_072025-E.webp",
+          "precio": 64,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Alitas De Pollo"
         },
         {
           "nombre": "Pierna y muslo kg",
-          "imagen": "https://loremflickr.com/640/480/chicken-leg",
-          "precio": 78,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_748887-MLM92389156862_092025-E.webp",
+          "precio": 11850,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Máquina Curl Extensión Piernas Banco Giratorio Muslo 250kg"
         },
         {
           "nombre": "Pollo rostizado entero",
-          "imagen": "https://loremflickr.com/640/480/rotisserie-chicken",
-          "precio": 185,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_766484-MLA96081737023_102025-E.webp",
+          "precio": 30050,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Rosticero 27 Pollos Con Base Marca Hoffman"
         },
         {
           "nombre": "Milanesa de pollo kg",
-          "imagen": "https://loremflickr.com/640/480/milanesa",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_781746-MLM82313985737_022025-E.webp",
+          "precio": 894,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Carne De Pollo En Lata Totalmente Natural 340 G"
         },
         {
           "nombre": "Huevo blanco docena",
-          "imagen": "https://loremflickr.com/640/480/eggs-carton",
-          "precio": 42,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_704780-MLM43943533774_102020-E.webp",
+          "precio": 1437,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Filler 54 Huevos Paquete 20 Piezas"
         },
         {
           "nombre": "Nuggets de pollo kg",
-          "imagen": "https://loremflickr.com/640/480/nuggets",
-          "precio": 110,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_903532-MLM94373779645_102025-E.webp",
+          "precio": 512,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Nuggets Bachoco Selectos 1.36 Kg"
         }
       ]
     },
@@ -5526,51 +5753,57 @@
       "productos_plantilla": [
         {
           "nombre": "Tortilla de maíz kg",
-          "imagen": "https://loremflickr.com/640/480/tortilla-soup",
-          "precio": 22,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_930449-MLA99899386963_112025-E.webp",
+          "precio": 649,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Mejorador Y Suavizante 2.0 Para Tortilla De Maíz De 5kg"
         },
         {
           "nombre": "Tortilla de harina paquete 10",
-          "imagen": "https://loremflickr.com/640/480/tortilla-soup",
-          "precio": 28,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_701645-MLM107278314058_032026-E.webp",
+          "precio": 269,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Tortillas De Harina Gourmet Chipotle 3 Pack Sacramento"
         },
         {
           "nombre": "Tortilla de nopal kg",
-          "imagen": "https://loremflickr.com/640/480/tortilla-soup",
-          "precio": 38,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_686299-MLA99854864589_112025-E.webp",
+          "precio": 389,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Tortillas De Nopal Con Chía Y Linaza. Sin Gluten 6 Pack"
         },
         {
           "nombre": "Tortilla integral kg",
-          "imagen": "https://loremflickr.com/640/480/tortilla-soup",
-          "precio": 32,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_757468-MLM69621522891_052023-E.webp",
+          "precio": 299,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Tortillas De Harina Integrales 100 Tortillas"
         },
         {
           "nombre": "Totopos bolsa 200g",
-          "imagen": "https://loremflickr.com/640/480/tortilla-chips",
-          "precio": 28,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_719207-MLM77146513281_062024-E.webp",
+          "precio": 52,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Snack Susalitas Susalia Flama Horneadas 700g (2 Bolsas)"
         },
         {
           "nombre": "Tostadas paquete 12 piezas",
-          "imagen": "https://loremflickr.com/640/480/tostada",
-          "precio": 18,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_781169-MLA108294707093_032026-E.webp",
+          "precio": 69,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Galletas De Arroz Inflado, Tostadas Paquete C/ 12 Piezas 80g"
         },
         {
           "nombre": "Masa para tortilla kg",
@@ -5582,19 +5815,21 @@
         },
         {
           "nombre": "Tortilla azul kg",
-          "imagen": "https://loremflickr.com/640/480/tortilla-soup",
-          "precio": 35,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_648582-MLM89924015199_082025-E.webp",
+          "precio": 1298,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Caja Tortilla Azul Tortiregias 30 Piezas"
         },
         {
           "nombre": "Tamal verde unidad",
-          "imagen": "https://loremflickr.com/640/480/green",
-          "precio": 18,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_624921-MLM43387127502_092020-E.webp",
+          "precio": 259,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Hoja De Plátano Para Tamales Cruda Para 60 Tamales 100% Nat."
         },
         {
           "nombre": "Atole de masa vaso",
@@ -5723,83 +5958,93 @@
       "productos_plantilla": [
         {
           "nombre": "Playera básica de algodón",
-          "imagen": "https://loremflickr.com/640/480/tshirt",
-          "precio": 185,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_949066-MLM84231032138_052025-E-playera-hombre-optima-32603-cuello-redondo-algodon.webp",
+          "precio": 2790,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Playera Hombre Optima 32603 Cuello Redondo Algodón"
         },
         {
           "nombre": "Jeans corte recto azul",
-          "imagen": "https://loremflickr.com/640/480/jeans",
-          "precio": 480,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_892492-MLM105109716841_012026-E-pantalon-de-corte-recto-con-cintura-elastica-confort-2ztr0.webp",
+          "precio": 519,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pantalón De Corte Recto Con Cintura Elástica Confort 2ztr0"
         },
         {
           "nombre": "Camisa de vestir blanca",
-          "imagen": "https://loremflickr.com/640/480/dress-shirt",
-          "precio": 380,
-          "moneda": "MXN",
-          "marca": null,
-          "source": "curated_v2"
-        },
-        {
-          "nombre": "Vestido casual floreado",
-          "imagen": "https://loremflickr.com/640/480/dress",
-          "precio": 580,
-          "moneda": "MXN",
-          "marca": null,
-          "source": "curated_v2"
-        },
-        {
-          "nombre": "Sudadera con capucha",
-          "imagen": "https://loremflickr.com/640/480/hoodie",
-          "precio": 450,
-          "moneda": "MXN",
-          "marca": null,
-          "source": "curated_v2"
-        },
-        {
-          "nombre": "Chamarra de mezclilla",
-          "imagen": "https://loremflickr.com/640/480/jacket",
-          "precio": 680,
-          "moneda": "MXN",
-          "marca": null,
-          "source": "curated_v2"
-        },
-        {
-          "nombre": "Falda corta de mezclilla",
-          "imagen": "https://loremflickr.com/640/480/skirt",
-          "precio": 320,
-          "moneda": "MXN",
-          "marca": null,
-          "source": "curated_v2"
-        },
-        {
-          "nombre": "Suéter tejido cuello redondo",
-          "imagen": "https://loremflickr.com/640/480/sweater",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_707639-MLM109850090758_042026-E-camisa-slim-fit-manga-larga-para-hombre-casual.webp",
           "precio": 420,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Camisa Slim Fit Manga Larga Para Hombre Casual"
+        },
+        {
+          "nombre": "Vestido casual floreado",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_837451-MLM97277453584_112025-E-vestido-floral-de-manga-larga-abombada-vestido-de-gasa.webp",
+          "precio": 781,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "mercadolibre",
+          "ml_title": "Vestido Floral De Manga Larga Abombada, Vestido De Gasa"
+        },
+        {
+          "nombre": "Sudadera con capucha",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_679415-MLM110173850141_042026-E-sudadera-hombre-con-capucha-de-calidad-con-cierre-hoodie.webp",
+          "precio": 1449,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "mercadolibre",
+          "ml_title": "Sudadera Hombre Con Capucha De Calidad Con Cierre Hoodie"
+        },
+        {
+          "nombre": "Chamarra de mezclilla",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_937858-MLM88542822885_072025-E-chaqueta-de-mezclilla-delgada-negro-slim-para-hombre.webp",
+          "precio": 597,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "mercadolibre",
+          "ml_title": "Chaqueta De Mezclilla Delgada Negro Slim Para Hombre"
+        },
+        {
+          "nombre": "Falda corta de mezclilla",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_663658-MLM85312820210_062025-E-falda-mezclilla-dama-corta-casual-juvenil-premium.webp",
+          "precio": 398,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "mercadolibre",
+          "ml_title": "Falda Mezclilla Dama Corta Casual Juvenil Premium"
+        },
+        {
+          "nombre": "Suéter tejido cuello redondo",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_945368-MLM100123733028_122025-E-sueter-tejido-de-punto-para-mujer-suave-cuello-redondo.webp",
+          "precio": 399,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "mercadolibre",
+          "ml_title": "Suéter Tejido De Punto Para Mujer Suave Cuello Redondo"
         },
         {
           "nombre": "Pantalón de vestir negro",
-          "imagen": "https://loremflickr.com/640/480/pants",
-          "precio": 480,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_742519-MLM87917079079_072025-E-2-pack-pantalones-chino-holstone-hombre-gabardina-slim-fit.webp",
+          "precio": 519,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "2 Pack Pantalones Chino Holstone Hombre Gabardina Slim Fit"
         },
         {
           "nombre": "Calcetines pack 3 pares",
-          "imagen": "https://loremflickr.com/640/480/socks",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_941243-MLM70526866165_072023-E.webp",
+          "precio": 187,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Calcetines Vestir Caballero Algodón Colores Moda 12 Pares"
         }
       ]
     },
@@ -5908,83 +6153,93 @@
       "productos_plantilla": [
         {
           "nombre": "Tenis deportivos Nike",
-          "imagen": "https://loremflickr.com/640/480/sports-eyewear",
-          "precio": 1485,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_690943-MLM71700377577_092023-E-tenis-de-running-hombre-nike-interact-run-negro.webp",
+          "precio": 1899,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Tenis De Running Hombre Nike Interact Run Negro"
         },
         {
           "nombre": "Tenis Converse Chuck Taylor",
-          "imagen": "https://loremflickr.com/640/480/converse",
-          "precio": 985,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_629649-MLM73799188935_012024-E.webp",
+          "precio": 2299,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Tenis All Star Chuck Taylor High Top Unisex Color Negro Converse"
         },
         {
           "nombre": "Sandalia mujer cuero",
-          "imagen": "https://loremflickr.com/640/480/sandals",
-          "precio": 485,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_846896-MLM106990033496_022026-E-sandalias-de-cuero-para-mujeres-sandalias-de-suela-gruesa.webp",
+          "precio": 1590,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Sandalias De Cuero Para Mujeres Sandalias De Suela Gruesa"
         },
         {
           "nombre": "Zapato escolar negro",
-          "imagen": "https://loremflickr.com/640/480/shoes",
-          "precio": 380,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_704957-MLM108194240711_032026-E-zapato-nino-escolar-negro-krsh-19204102.webp",
+          "precio": 2180,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Zapato Niño Escolar Negro Krsh 19204102"
         },
         {
           "nombre": "Bota industrial casquillo",
-          "imagen": "https://loremflickr.com/640/480/boots",
-          "precio": 880,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_714117-MLM44840829024_022021-E-zapato-industrial-bota-con-casquillo-mujer-dama-riverline.webp",
+          "precio": 2958,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Zapato Industrial Bota Con Casquillo Mujer / Dama Riverline"
         },
         {
           "nombre": "Mocasines de vestir",
-          "imagen": "https://loremflickr.com/640/480/loafers",
-          "precio": 685,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_662428-MLM76087897032_052024-E-zapato-custom-style-mocasin-vestir-hombre-casuales-formal.webp",
+          "precio": 1899,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Zapato Custom Style Mocasin Vestir Hombre Casuales Formal"
         },
         {
           "nombre": "Huarache artesanal",
-          "imagen": "https://loremflickr.com/640/480/huaraches",
-          "precio": 280,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_811718-MLM95518630808_102025-E-zapatos-sandalias-huarache-artesanal-piel-color-negro-4237.webp",
+          "precio": 817,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Zapatos Sandalias Huarache Artesanal Piel Color Negro 4237"
         },
         {
           "nombre": "Pantufla peluche unisex",
-          "imagen": "https://loremflickr.com/640/480/slippers",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_761378-MLM106112237578_022026-E-pantuflas-unisex-de-algodon-calido-de-felpa.webp",
+          "precio": 529,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Pantuflas Unisex De Algodón Cálido De Felpa"
         },
         {
           "nombre": "Crema betún negra lata",
-          "imagen": "https://loremflickr.com/640/480/shoe-polish",
-          "precio": 35,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_878124-MLM82116510347_012025-E.webp",
+          "precio": 965,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Betty Crocker Betún Cremoso Rich &amp; Creamy Frosting Vanilla"
         },
         {
           "nombre": "Plantilla ortopédica par",
-          "imagen": "https://loremflickr.com/640/480/shoe-insole",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_919022-MLM98169345984_112025-E-plantilla-ortopedica-memory-foam-plantilla-deportiva.webp",
+          "precio": 312,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Plantilla Ortopedica Memory Foam Plantilla Deportiva"
         }
       ]
     },
@@ -6099,83 +6354,93 @@
       "productos_plantilla": [
         {
           "nombre": "Audífonos Bluetooth inalámbricos",
-          "imagen": "https://loremflickr.com/640/480/earbuds",
-          "precio": 380,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_851731-MLA100096823243_122025-E.webp",
+          "precio": 1077,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Audífonos In-ear Bluetooth Para Celulares, Tablets y Laptops, Conexión Automática, Resistente al Agua y Polvo IP55, Cómodo de Llevar, Estuche de Carga Gran Capacidad, Marca MVPSMART R30 Blanco"
         },
         {
           "nombre": "Cargador USB-C carga rápida",
-          "imagen": "https://loremflickr.com/640/480/usb-charger",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_884471-MLA100044034725_122025-E.webp",
+          "precio": 349,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Power Bank Batería Portátil 10000mAh Incluye Luz de Iluminación, 4 Cables Intergrados Micro USB, iP, Tipo-C y USB MVPSMART P103 Negro, Cargador Portátil Con Batería Recargable, 2 Puertos USB y Tipo-C"
         },
         {
           "nombre": "Bocina Bluetooth portátil",
-          "imagen": "https://loremflickr.com/640/480/bluetooth-speaker",
-          "precio": 580,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_882513-MLM84758130549_052025-E.webp",
+          "precio": 275,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Bocina Jbl Charge 6 Portátil Bluetooth Waterproof Ai Sound"
         },
         {
           "nombre": "Smartwatch fitness tracker",
-          "imagen": "https://loremflickr.com/640/480/smartwatch",
-          "precio": 1280,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_923158-MLA110725455853_042026-E.webp",
+          "precio": 6399,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Reloj Inteligente Smartwatch Deportivo Para Hombre Llamadas Bluetooth 1.53 Pantalla Hd Elegante Impermeable Fitness Tracker Compatible Con Android Ios Caja Negro Correa Negro Bisel Negro"
         },
         {
           "nombre": "Power bank 10000mAh",
-          "imagen": "https://loremflickr.com/640/480/powerbank",
-          "precio": 380,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_884471-MLA100044034725_122025-E.webp",
+          "precio": 349,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Power Bank Batería Portátil 10000mAh Incluye Luz de Iluminación, 4 Cables Intergrados Micro USB, iP, Tipo-C y USB MVPSMART P103 Negro, Cargador Portátil Con Batería Recargable, 2 Puertos USB y Tipo-C"
         },
         {
           "nombre": "Memoria USB 64GB",
-          "imagen": "https://loremflickr.com/640/480/usb-drive",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_969324-MLU74113014960_012024-E.webp",
+          "precio": 211,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Memoria USB Adata UV150 64GB 3.2 Gen 1 negro"
         },
         {
           "nombre": "Cable HDMI 4K 2 metros",
-          "imagen": "https://loremflickr.com/640/480/hdmi-cable",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_915538-MLA111506728461_052026-E.webp",
+          "precio": 103,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "2 Metros Cable Hdmi 2.1 Vídeo 4k 120hz 8k 60hz Para Ps5 Xbox Laptop Pc Tv High Speed Marca Holfill"
         },
         {
           "nombre": "Mouse inalámbrico ergonómico",
-          "imagen": "https://loremflickr.com/640/480/computer-mouse",
-          "precio": 285,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_668395-MLA101919135857_122025-E.webp",
+          "precio": 376,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Mouse Inalámbrico Silencioso Ergonomico recargable Gitifo Bluetooth 2.4g 1600 dpi Gamer"
         },
         {
           "nombre": "Teclado mecánico RGB",
-          "imagen": "https://loremflickr.com/640/480/keyboard",
-          "precio": 880,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_923503-MLM90371917788_082025-E-teclado-mecanico-60-cable-usb-gamer-redes-teclado-pc-rgb.webp",
+          "precio": 658,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Teclado Mecánico 60% Cable Usb Gamer Redes Teclado Pc Rgb"
         },
         {
           "nombre": "Funda silicón celular",
-          "imagen": "https://loremflickr.com/640/480/phone-case",
-          "precio": 145,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_997141-MLM81492171639_122024-E-funda-silicon-case-para-iphone-compatible-con-magsafe.webp",
+          "precio": 155,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Funda Silicon Case Para iPhone Compatible Con Magsafe"
         }
       ]
     },
@@ -6290,83 +6555,93 @@
       "productos_plantilla": [
         {
           "nombre": "Cuaderno profesional 100 hojas",
-          "imagen": "https://loremflickr.com/640/480/notebook",
-          "precio": 45,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_606817-MLA99419826398_112025-E.webp",
+          "precio": 298,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Kit 5 Cuadernos Scribe Profesional 100 Hojas Raya Color colores"
         },
         {
           "nombre": "Bolígrafo BIC azul",
-          "imagen": "https://loremflickr.com/640/480/pen",
-          "precio": 8,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_736394-MLM88822919550_082025-E-60-boligrafo-punto-mediano-bic.webp",
+          "precio": 289,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "60 Boligrafo Punto Mediano Bic"
         },
         {
           "nombre": "Lápiz Mirado HB caja 12",
-          "imagen": "https://loremflickr.com/640/480/pencil",
-          "precio": 65,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_742720-MLM51575593180_092022-E.webp",
+          "precio": 419,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Lápiz Paper Mate Mirado Hb Numero 2 Con 12 Piezas Hexagonal"
         },
         {
           "nombre": "Borrador blanco grande",
-          "imagen": "https://loremflickr.com/640/480/eraser",
-          "precio": 12,
-          "moneda": "MXN",
-          "marca": null,
-          "source": "curated_v2"
-        },
-        {
-          "nombre": "Tijeras escolares",
-          "imagen": "https://loremflickr.com/640/480/scissors",
-          "precio": 35,
-          "moneda": "MXN",
-          "marca": null,
-          "source": "curated_v2"
-        },
-        {
-          "nombre": "Pegamento Resistol 240ml",
-          "imagen": "https://loremflickr.com/640/480/glue",
-          "precio": 55,
-          "moneda": "MXN",
-          "marca": null,
-          "source": "curated_v2"
-        },
-        {
-          "nombre": "Cartulina fluorescente",
-          "imagen": "https://loremflickr.com/640/480/colored-paper",
-          "precio": 18,
-          "moneda": "MXN",
-          "marca": null,
-          "source": "curated_v2"
-        },
-        {
-          "nombre": "Marcadores Sharpie set 8",
-          "imagen": "https://loremflickr.com/640/480/markers",
-          "precio": 185,
-          "moneda": "MXN",
-          "marca": null,
-          "source": "curated_v2"
-        },
-        {
-          "nombre": "Carpeta tres argollas blanca",
-          "imagen": "https://loremflickr.com/640/480/binder",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_606242-MLM92721174454_092025-E.webp",
           "precio": 95,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "2 Gomas Jumbo Grande Borradores Pentel Hi-polymer Zeh10"
+        },
+        {
+          "nombre": "Tijeras escolares",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_708003-MLA99356974130_112025-E.webp",
+          "precio": 75,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "mercadolibre",
+          "ml_title": "Tijeras LOMAREY Oficiales Acero Inoxidable 20cm Pack 3 Corte Preciso"
+        },
+        {
+          "nombre": "Pegamento Resistol 240ml",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_669433-MLA100071019033_122025-E.webp",
+          "precio": 104,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "mercadolibre",
+          "ml_title": "Pegamento Hk-2105651 850 Escolar Henkel De 110gr Resistol"
+        },
+        {
+          "nombre": "Cartulina fluorescente",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_630525-MLM94970008010_102025-E-cartulina-color-flourescente-50-x-65cm-mayoreo-10pz.webp",
+          "precio": 499,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "mercadolibre",
+          "ml_title": "Cartulina Color Flourescente 50 X 65cm Mayoreo 10pz"
+        },
+        {
+          "nombre": "Marcadores Sharpie set 8",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_986053-MLA99580354556_122025-E.webp",
+          "precio": 189,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "mercadolibre",
+          "ml_title": "Marcador Sharpie Acuacolor 2184200 Base De Agua 8 Piezas"
+        },
+        {
+          "nombre": "Carpeta tres argollas blanca",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_622515-MLA107245011221_022026-E.webp",
+          "precio": 119,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "mercadolibre",
+          "ml_title": "Carpeta De Tres Argollas Panoramica 1.5 Pulgadas 350 Hojas Blanco"
         },
         {
           "nombre": "Engrapadora con grapas",
-          "imagen": "https://loremflickr.com/640/480/stapler",
-          "precio": 120,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_840282-MLA99597411606_122025-E.webp",
+          "precio": 165,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Kit 3pz Engrapadora Con 3000 Grapa Para Oficina Y Escuela"
         }
       ]
     },
@@ -6481,83 +6756,93 @@
       "productos_plantilla": [
         {
           "nombre": "Anillo de oro 14k liso",
-          "imagen": "https://loremflickr.com/640/480/gold-ring",
-          "precio": 4500,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_928503-MLM109928201545_042026-E-anillo-oro-laminado-14k-liso-hombre-mujer-unisex-moda.webp",
+          "precio": 1881,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Anillo Oro Laminado 14k Liso Hombre Mujer Unisex Moda"
         },
         {
           "nombre": "Cadena de plata 925 50cm",
-          "imagen": "https://loremflickr.com/640/480/silver-chain",
-          "precio": 850,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_968725-MLM69727510732_052023-E.webp",
+          "precio": 622,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cadena De Plata Solida 925 Doble Torzal 50 Cm X 1.7mm Unisex"
         },
         {
           "nombre": "Aretes de plata con circonia",
-          "imagen": "https://loremflickr.com/640/480/earrings",
-          "precio": 380,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_790996-MLM103884254125_012026-E-aretes-broqueles-plata-925-zirconia-varios-tamanos-estuche.webp",
+          "precio": 129,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Aretes Broqueles Plata 925 Zirconia Varios Tamaños + Estuche"
         },
         {
           "nombre": "Pulsera de oro 14k tejido",
-          "imagen": "https://loremflickr.com/640/480/bracelet",
-          "precio": 3200,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_908734-MLM107772071768_032026-E-esclava-pulsera-tejido-figaro-unisex-oro-laminado-4mm.webp",
+          "precio": 1521,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Esclava Pulsera Tejido Figaro Unisex Oro Laminado 4mm"
         },
         {
           "nombre": "Collar con dije corazón oro",
-          "imagen": "https://loremflickr.com/640/480/necklace",
-          "precio": 5800,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_999453-MLA100864943070_122025-E.webp",
+          "precio": 459,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Collar Mujer De Corazón Con Baño De Oro 18k Elegante Dije Colgante Chapado En Oro Con Zirconia Cúbica Para Novia Esposa Mama Cumpleaños Aniversario 1 Pieza Tender Lihome"
         },
         {
           "nombre": "Reloj de pulso acero inoxidable",
-          "imagen": "https://loremflickr.com/640/480/wristwatch",
-          "precio": 1800,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_962122-MLA99418124292_112025-E.webp",
+          "precio": 3999,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Reloj Impermeable Cuarzo Automatico Hombre Pulsera Skmei 1389 con correa de acero inoxidable color negro"
         },
         {
           "nombre": "Anillo compromiso diamante",
-          "imagen": "https://loremflickr.com/640/480/diamond-ring",
-          "precio": 18500,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_949556-MLA102171535741_122025-E.webp",
+          "precio": 1881,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Anillo de Compromiso Moissanita 1 Quilate Redondo Plata 925 Talla 7"
         },
         {
           "nombre": "Esclava de plata grabada",
-          "imagen": "https://loremflickr.com/640/480/bracelet",
-          "precio": 650,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_622397-MLM109422675618_042026-E.webp",
+          "precio": 209,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Esclava Barbada O Fígaro Plata 925 Sólida Incluye Grabado"
         },
         {
           "nombre": "Medalla religiosa oro",
-          "imagen": "https://loremflickr.com/640/480/medal",
-          "precio": 2200,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_715857-MLM105511664208_012026-E.webp",
+          "precio": 129,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Collar Medalla Corazón Virgen Guadalupe Chapa Oro 14k"
         },
         {
           "nombre": "Aretes argolla oro",
-          "imagen": "https://loremflickr.com/640/480/hoop-earring",
-          "precio": 1450,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_699039-MLA100538412717_122025-E.webp",
+          "precio": 2499,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Fuezoiu 24pare Aretes De Oro Con Piercing Pendientes Joyeria Mujer Regalo para el Día de la Madre, regalo para mamá"
         }
       ]
     },
@@ -6672,83 +6957,93 @@
       "productos_plantilla": [
         {
           "nombre": "Ramo de 12 rosas rojas",
-          "imagen": "https://loremflickr.com/640/480/red-roses",
-          "precio": 380,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_660604-MLA107132747966_022026-E.webp",
+          "precio": 345,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "3 Ramos Flores Rose Artificiales Rama Decorativa Boda Fiesta Color Blanco"
         },
         {
           "nombre": "Ramo de tulipanes mixtos",
-          "imagen": "https://loremflickr.com/640/480/tulips",
-          "precio": 285,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_766913-MLM106754239302_022026-E.webp",
+          "precio": 549,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Ramo Tejido A Crochet Tulipanes Abeja Margarita Regalo"
         },
         {
           "nombre": "Centro de mesa floral",
-          "imagen": "https://loremflickr.com/640/480/centerpiece",
-          "precio": 580,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_901722-MLM103995517694_012026-E-arreglo-floral-centro-de-mesa-flores-artificiales-decoracion.webp",
+          "precio": 159,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Arreglo Floral Centro De Mesa Flores Artificiales Decoracion"
         },
         {
           "nombre": "Arreglo de girasoles",
-          "imagen": "https://loremflickr.com/640/480/sunflowers",
-          "precio": 320,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_801356-MLM71703448865_092023-E.webp",
+          "precio": 699,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Arreglo Flores Naturales Girasol Envio A Domicilio"
         },
         {
           "nombre": "Bouquet de novia",
-          "imagen": "https://loremflickr.com/640/480/bridal-bouquet",
-          "precio": 1280,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_963838-MLM74020849631_012024-E-ramo-para-tirar-novia-artificial-bouquet-recuerdo-cristal.webp",
+          "precio": 399,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Ramo Para Tirar Novia Artificial Bouquet Recuerdo Cristal"
         },
         {
           "nombre": "Corona fúnebre",
-          "imagen": "https://loremflickr.com/640/480/dental-crown",
-          "precio": 950,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_647388-MLA96425529514_102025-E.webp",
+          "precio": 115,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Corona Negra Halloween Janel Figuras 50cm Día de Muertos Calabazas Fantasmas"
         },
         {
           "nombre": "Maceta con orquídea",
-          "imagen": "https://loremflickr.com/640/480/orchid",
-          "precio": 480,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_609493-MLA98383910963_112025-E.webp",
+          "precio": 2489,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Maceta Para Orquidea Transparente 2.2l + Sustrato 2l Ekologi Color Blanco"
         },
         {
           "nombre": "Suculenta decorativa pequeña",
-          "imagen": "https://loremflickr.com/640/480/succulent",
-          "precio": 95,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_956517-MLM49841371054_052022-E-suculenta-artificial-decorativa-en-maceta-modelos-a-elegir.webp",
+          "precio": 1189,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Suculenta Artificial Decorativa En Maceta - Modelos A Elegir"
         },
         {
           "nombre": "Caja de chocolates con flores",
-          "imagen": "https://loremflickr.com/640/480/chocolate",
-          "precio": 580,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_602137-MLM110437301055_042026-E.webp",
+          "precio": 298,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Chocolate Gh De Flor Para Dia De La Madre 24pz"
         },
         {
           "nombre": "Globo metálico con flores",
-          "imagen": "https://loremflickr.com/640/480/balloon",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_867191-MLM111404304121_052026-E.webp",
+          "precio": 92,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Kit 8pz Globo Flores Primavera Fiesta Festival Cumpleaños"
         }
       ]
     },
@@ -6871,35 +7166,39 @@
         },
         {
           "nombre": "Lavado de edredón matrimonial",
-          "imagen": "https://loremflickr.com/640/480/comforter",
-          "precio": 180,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_944708-MLA105406679652_012026-E.webp",
+          "precio": 1359,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Edredón Acolchado Reversible Matrimonial Suave 198x220 Blick Negro Cuadrados"
         },
         {
           "nombre": "Planchado de camisa",
-          "imagen": "https://loremflickr.com/640/480/ironing",
-          "precio": 25,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_775831-MLA103474463162_012026-E.webp",
+          "precio": 450,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Plancha Multiusos Transfer Sublimación Parche Para Camiseta Mecolour"
         },
         {
           "nombre": "Tintorería de traje completo",
-          "imagen": "https://loremflickr.com/640/480/dry-cleaning",
-          "precio": 220,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_852032-MLM102298434651_122025-E.webp",
+          "precio": 249,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Juego 10 Fundas Para Ropa Traje Protector"
         },
         {
           "nombre": "Lavado de cortinas metro",
-          "imagen": "https://loremflickr.com/640/480/curtains",
-          "precio": 55,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_618179-MLM84487493269_052025-E.webp",
+          "precio": 298,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cortinas De Ventana A Cuadros En Forma De Gofre: 36 Pulgadas"
         },
         {
           "nombre": "Lavado a mano delicado",
@@ -6911,19 +7210,21 @@
         },
         {
           "nombre": "Servicio express 2 horas",
-          "imagen": "https://loremflickr.com/640/480/beef",
-          "precio": 150,
-          "moneda": "MXN",
-          "marca": null,
-          "source": "curated_v2"
-        },
-        {
-          "nombre": "Lavado de tenis deportivos",
-          "imagen": "https://loremflickr.com/640/480/sports-eyewear",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_631668-MLM110083608265_042026-E-cafetera-profesional-san-remo-capri-deluxe-2-servicios.webp",
           "precio": 85,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Cafetera Profesional San Remo Capri Deluxe 2 Servicios"
+        },
+        {
+          "nombre": "Lavado de tenis deportivos",
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_781430-MLM96527012265_102025-E-puma-x-lamelo-ball-mb-02-lo-lamel-o-tenis-basquetbol-hombre.webp",
+          "precio": 979,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "mercadolibre",
+          "ml_title": "Puma X Lamelo Ball Mb 02 Lo Lamel-o Tenis Basquetbol Hombre"
         },
         {
           "nombre": "Lavado de tapetes",
@@ -6935,11 +7236,12 @@
         },
         {
           "nombre": "Quitamanchas profesional",
-          "imagen": "https://loremflickr.com/640/480/stain-removal",
-          "precio": 45,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_710627-MLM74697144660_022024-E.webp",
+          "precio": 344,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Duo Profesional Prelavador Aroma Menta Y Enjuague Multifibra"
         }
       ]
     },
@@ -7054,83 +7356,93 @@
       "productos_plantilla": [
         {
           "nombre": "Sala 3 piezas tela gris",
-          "imagen": "https://loremflickr.com/640/480/living-room-set",
-          "precio": 12500,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_786035-MLM82635262168_032025-E.webp",
+          "precio": 6999,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Sillon Sofa Cama Futon Plegable Modular Sala Mueble 3 En 1"
         },
         {
           "nombre": "Comedor 6 sillas madera",
-          "imagen": "https://loremflickr.com/640/480/dining-table",
-          "precio": 8500,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_925801-MLA108861715028_032026-E.webp",
+          "precio": 6412,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Comedor Mesa 135 Cm 6 Sillas Madera Mdf Metal Sala Estudio Marrón Claro Liso"
         },
         {
           "nombre": "Cama matrimonial con base",
-          "imagen": "https://loremflickr.com/640/480/pet-bed",
-          "precio": 5800,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_936821-MLA109346509708_042026-E.webp",
+          "precio": 2449,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Furrific Cama Matrimonial Con Cabecera Tapizada, Base Metálica Con Almacenaje, Luces Rgb Led Inteligentes Y Estación De Carga 1.5m Usb, Recámara Moderna Base Boxs L205*h 110 *w138 Cm Fácil De Armar"
         },
         {
           "nombre": "Colchón ortopédico individual",
-          "imagen": "https://loremflickr.com/640/480/mattress",
-          "precio": 3800,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_906022-MLA107238828177_022026-E.webp",
+          "precio": 3789,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Colchón Individual Memory Foam 100x190 cm Espuma Ergonómico Firme Soporta 100kg en Caja Blick Color Blanco"
         },
         {
           "nombre": "Escritorio oficina madera",
-          "imagen": "https://loremflickr.com/640/480/desk",
-          "precio": 2280,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_624072-CBT110149169246_042026-E-escritorio-minimalista-con-estantes-laterales-mesa-de-trabaj.webp",
+          "precio": 1507,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Escritorio Minimalista Con Estantes Laterales Mesa De Trabaj"
         },
         {
           "nombre": "Silla ejecutiva ergonómica",
-          "imagen": "https://loremflickr.com/640/480/office-chair",
-          "precio": 1880,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_734027-MLA110797751381_042026-E.webp",
+          "precio": 3182,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Silla Ejecutiva Con Masaje Secretarial Oficina Reposapiés Respaldo Reclinable Acojinada Giratoria Ergonómica Descansa Pies SelectShop Color Negro"
         },
         {
           "nombre": "Librero 5 entrepaños",
-          "imagen": "https://loremflickr.com/640/480/bookshelf",
-          "precio": 1685,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_911835-MLM94597358757_102025-E-librero-multiusos-esquinero-3-entrepanos-2-cajones-1-puerta.webp",
+          "precio": 1699,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Librero Multiusos Esquinero 3 Entrepaños 2 Cajones 1 Puerta"
         },
         {
           "nombre": "Mesa de centro vidrio",
-          "imagen": "https://loremflickr.com/640/480/coffee-table",
-          "precio": 1280,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_734860-MLA110505791931_042026-E.webp",
+          "precio": 2199,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Mesa Comedor Mesa De Centro De Vidrio Redonda Madera"
         },
         {
           "nombre": "Lámpara de pie minimalista",
-          "imagen": "https://loremflickr.com/640/480/floor-lamp",
-          "precio": 685,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_794643-CBT109989182575_042026-E-lampara-de-piso-minimalista-led-lamparas-de-pie-moderna-16m.webp",
+          "precio": 1125,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Lampara De Piso Minimalista Led Lamparas De Pie Moderna 1.6m"
         },
         {
           "nombre": "Espejo de pared decorativo",
-          "imagen": "https://loremflickr.com/640/480/mirror",
-          "precio": 880,
+          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_844366-MLM101921876481_122025-E.webp",
+          "precio": 558,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "mercadolibre",
+          "ml_title": "Espejo Luz Led Touch Pared Tocador Baño Vestidor 3 Luces"
         }
       ]
     }
