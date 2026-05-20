@@ -10,7 +10,7 @@
       "terminologia (cómo llaman las cosas en este giro)"
     ],
     "notes": "v2.1 agrega URL a cada competidor_sector + 5 giros adicionales (hotel, optica, gimnasio, salon_belleza, taller_mecanico) cubriendo los del documento markdown del usuario.",
-    "last_audit": "2026-05-20T15:12:28.426Z",
+    "last_audit": "2026-05-20T15:50:32.154Z",
     "products_total": 360,
     "extraction_v": "V10.36 — cliente final primero",
     "quality_filters": "V10.37: SUSPICIOUS_NAMES + BAD_IMG + wikimedia-noise filters",
@@ -30,7 +30,7 @@
         "WIKIMEDIA_NOISE": "taxi|book|portrait|tour|building|street|city|persona|cantante|saturn|planet (eliminados en src=wikimedia)"
       }
     },
-    "curated_version": "V10.40",
+    "curated_version": "V10.41",
     "ml_enriched_count": 310,
     "ml_skipped_count": 50
   },
@@ -221,7 +221,7 @@
         },
         {
           "nombre": "Esposas de peluche rosa",
-          "imagen": "https://loremflickr.com/640/480/handcuffs",
+          "imagen": "https://loremflickr.com/640/480/pink-fuzzy-handcuffs-toy?lock=42",
           "precio": 320,
           "moneda": "MXN",
           "marca": null,
@@ -1049,11 +1049,11 @@
         },
         {
           "nombre": "Noche en habitación doble",
-          "imagen": "https://loremflickr.com/640/480/hotel-room",
+          "imagen": "https://loremflickr.com/640/480/king-size-hotel-room?lock=17908",
           "precio": 1200,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "curated_dedupe"
         },
         {
           "nombre": "Suite ejecutiva",
@@ -1119,11 +1119,11 @@
         },
         {
           "nombre": "Cama extra en habitación",
-          "imagen": "https://loremflickr.com/640/480/hotel-room",
+          "imagen": "https://loremflickr.com/640/480/folding-bed-rollaway?lock=68015",
           "precio": 300,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "curated_dedupe"
         }
       ]
     },
@@ -2380,12 +2380,11 @@
         },
         {
           "nombre": "Huevo blanco docena",
-          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_704780-MLM43943533774_102020-E.webp",
-          "precio": 1437,
+          "imagen": "https://loremflickr.com/640/480/egg-carton-twelve-pack?lock=79013",
+          "precio": 42,
           "moneda": "MXN",
           "marca": null,
-          "source": "mercadolibre",
-          "ml_title": "Filler 54 Huevos Paquete 20 Piezas"
+          "source": "curated_dedupe"
         },
         {
           "nombre": "Arroz Verde Valle 1kg",
@@ -5380,12 +5379,11 @@
         },
         {
           "nombre": "Pechuga de pollo por kilo",
-          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_781746-MLM82313985737_022025-E.webp",
-          "precio": 894,
+          "imagen": "https://loremflickr.com/640/480/raw-chicken-breast-meat?lock=34383",
+          "precio": 120,
           "moneda": "MXN",
           "marca": null,
-          "source": "mercadolibre",
-          "ml_title": "Carne De Pollo En Lata Totalmente Natural 340 G"
+          "source": "curated_dedupe"
         },
         {
           "nombre": "Pierna de pollo por kilo",
@@ -5561,30 +5559,27 @@
         },
         {
           "nombre": "Pechuga con hueso kg",
-          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_972741-MLA99349640276_112025-E.webp",
-          "precio": 142,
+          "imagen": "https://loremflickr.com/640/480/bone-in-chicken-breast?lock=40009",
+          "precio": 95,
           "moneda": "MXN",
           "marca": null,
-          "source": "mercadolibre",
-          "ml_title": "Pechuga De Pollo En Trozos Member&#x27;s Mark 6 Pzas De 340 G C/u"
+          "source": "curated_dedupe"
         },
         {
           "nombre": "Pechuga sin hueso kg",
-          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_972741-MLA99349640276_112025-E.webp",
-          "precio": 142,
+          "imagen": "https://loremflickr.com/640/480/boneless-chicken-fillet?lock=69779",
+          "precio": 120,
           "moneda": "MXN",
           "marca": null,
-          "source": "mercadolibre",
-          "ml_title": "Pechuga De Pollo En Trozos Member&#x27;s Mark 6 Pzas De 340 G C/u"
+          "source": "curated_dedupe"
         },
         {
           "nombre": "Muslo de pollo kg",
-          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_972741-MLA99349640276_112025-E.webp",
-          "precio": 965,
+          "imagen": "https://loremflickr.com/640/480/raw-chicken-thigh?lock=74177",
+          "precio": 75,
           "moneda": "MXN",
           "marca": null,
-          "source": "mercadolibre",
-          "ml_title": "Pechuga De Pollo En Trozos Member&#x27;s Mark 6 Pzas De 340 G C/u"
+          "source": "curated_dedupe"
         },
         {
           "nombre": "Alitas frescas kg",
@@ -5615,21 +5610,19 @@
         },
         {
           "nombre": "Milanesa de pollo kg",
-          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_781746-MLM82313985737_022025-E.webp",
-          "precio": 894,
+          "imagen": "https://loremflickr.com/640/480/breaded-chicken-cutlet?lock=39161",
+          "precio": 145,
           "moneda": "MXN",
           "marca": null,
-          "source": "mercadolibre",
-          "ml_title": "Carne De Pollo En Lata Totalmente Natural 340 G"
+          "source": "curated_dedupe"
         },
         {
           "nombre": "Huevo blanco docena",
-          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_704780-MLM43943533774_102020-E.webp",
-          "precio": 1437,
+          "imagen": "https://loremflickr.com/640/480/fresh-farm-eggs?lock=91946",
+          "precio": 48,
           "moneda": "MXN",
           "marca": null,
-          "source": "mercadolibre",
-          "ml_title": "Filler 54 Huevos Paquete 20 Piezas"
+          "source": "curated_dedupe"
         },
         {
           "nombre": "Nuggets de pollo kg",
@@ -6363,12 +6356,11 @@
         },
         {
           "nombre": "Cargador USB-C carga rápida",
-          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_884471-MLA100044034725_122025-E.webp",
-          "precio": 349,
+          "imagen": "https://loremflickr.com/640/480/usb-c-fast-charger-adapter?lock=53651",
+          "precio": 220,
           "moneda": "MXN",
           "marca": null,
-          "source": "mercadolibre",
-          "ml_title": "Power Bank Batería Portátil 10000mAh Incluye Luz de Iluminación, 4 Cables Intergrados Micro USB, iP, Tipo-C y USB MVPSMART P103 Negro, Cargador Portátil Con Batería Recargable, 2 Puertos USB y Tipo-C"
+          "source": "curated_dedupe"
         },
         {
           "nombre": "Bocina Bluetooth portátil",
@@ -6390,12 +6382,11 @@
         },
         {
           "nombre": "Power bank 10000mAh",
-          "imagen": "https://http2.mlstatic.com/D_Q_NP_2X_884471-MLA100044034725_122025-E.webp",
-          "precio": 349,
+          "imagen": "https://loremflickr.com/640/480/portable-battery-bank?lock=51147",
+          "precio": 380,
           "moneda": "MXN",
           "marca": null,
-          "source": "mercadolibre",
-          "ml_title": "Power Bank Batería Portátil 10000mAh Incluye Luz de Iluminación, 4 Cables Intergrados Micro USB, iP, Tipo-C y USB MVPSMART P103 Negro, Cargador Portátil Con Batería Recargable, 2 Puertos USB y Tipo-C"
+          "source": "curated_dedupe"
         },
         {
           "nombre": "Memoria USB 64GB",
@@ -7158,11 +7149,11 @@
       "productos_plantilla": [
         {
           "nombre": "Lavado y secado por carga",
-          "imagen": "https://loremflickr.com/640/480/laundry",
+          "imagen": "https://loremflickr.com/640/480/commercial-washing-machine?lock=82089",
           "precio": 75,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "curated_dedupe"
         },
         {
           "nombre": "Lavado de edredón matrimonial",
@@ -7202,11 +7193,11 @@
         },
         {
           "nombre": "Lavado a mano delicado",
-          "imagen": "https://loremflickr.com/640/480/laundry",
+          "imagen": "https://loremflickr.com/640/480/hand-washing-delicate-clothes?lock=6943",
           "precio": 95,
           "moneda": "MXN",
           "marca": null,
-          "source": "curated_v2"
+          "source": "curated_dedupe"
         },
         {
           "nombre": "Servicio express 2 horas",
