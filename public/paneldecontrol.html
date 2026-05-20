@@ -7569,7 +7569,7 @@
             const state = overrides[a.key] === false ? 'hidden' : 'enabled';
             return '<div class="permv14-perm-row" style="display:flex;align-items:center;gap:8px;padding:6px 14px;border-bottom:1px solid var(--pv-border);">' +
               '<div class="permv14-perm-icon" style="font-size:14px;flex:0 0 auto;">' + a.icon + '</div>' +
-              '<input type="text" class="permv14-perm-name-input" data-comp-rename="' + escapeAttr(a.key) + '" value="' + escapeAttr(a.label) + '" title="Doble click para editar nombre" style="flex:1 1 auto;font-size:12px;min-width:0;" />' +
+              '<input type="text" class="permv14-perm-name-input" data-comp-rename="' + escapeAttr(a.key) + '" value="' + escapeAttr(a.label) + '" title="Doble click para editar nombre" style="flex:1 1 auto;font-size:12px;min-width:120px;" />' +
               '<select class="permv14-state-select s-' + (state==='enabled'?'on':'hi') + '" data-comp-key="' + escapeAttr(a.key) + '" style="flex:0 0 auto;font-size:10px;padding:2px 6px;">' +
                 '<option value="enabled"' + (state==='enabled'?' selected':'') + '>✓ ACTIVO</option>' +
                 '<option value="hidden"' + (state==='hidden'?' selected':'') + '>🙈 OCULTO</option>' +
