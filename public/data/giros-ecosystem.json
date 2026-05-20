@@ -10,8 +10,8 @@
       "terminologia (cómo llaman las cosas en este giro)"
     ],
     "notes": "v2.1 agrega URL a cada competidor_sector + 5 giros adicionales (hotel, optica, gimnasio, salon_belleza, taller_mecanico) cubriendo los del documento markdown del usuario.",
-    "last_audit": "2026-05-20T17:06:59.337Z",
-    "products_total": 2960,
+    "last_audit": "2026-05-20T17:13:59.431Z",
+    "products_total": 3000,
     "extraction_v": "V10.36 — cliente final primero",
     "quality_filters": "V10.37: SUSPICIOUS_NAMES + BAD_IMG + wikimedia-noise filters",
     "cliente_final_rules": {
@@ -30,10 +30,10 @@
         "WIKIMEDIA_NOISE": "taxi|book|portrait|tour|building|street|city|persona|cantante|saturn|planet (eliminados en src=wikimedia)"
       }
     },
-    "curated_version": "V10.44",
+    "curated_version": "V10.45",
     "ml_enriched_count": 310,
     "ml_skipped_count": 50,
-    "giros_total": 296
+    "giros_total": 300
   },
   "giros": [
     {
@@ -59900,6 +59900,839 @@
         }
       ],
       "_parent": "floreria"
+    },
+    {
+      "slug": "jugos-naturales",
+      "name": "Jugos Naturales",
+      "tipo_operacion": "Mostrador rápido + take-away",
+      "regulacion": "COFEPRIS, manejo de frutas",
+      "que_vende": "Jugos, smoothies, aguas frescas, bowls de fruta",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Central de Abasto CDMX",
+            "url": "https://ficeda.com.mx/",
+            "tipo": "fruta mayoreo"
+          },
+          {
+            "nombre": "Driscoll's",
+            "url": "https://www.driscolls.com/",
+            "tipo": "berries"
+          },
+          {
+            "nombre": "Frutas Selectas de México",
+            "url": "https://www.frutas.com.mx/",
+            "tipo": "distribuidor"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Jamba Juice",
+            "url": "https://www.jamba.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Smoothie King",
+            "url": "https://www.smoothieking.com/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Boost Juice",
+            "url": "https://www.boostjuice.com/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Square for Restaurants",
+          "url": "https://squareup.com/us/en/point-of-sale/restaurants",
+          "pais": "🌎 Global",
+          "enfoque": "QSR/Café",
+          "modelo_cobro": "Freemium+comisión",
+          "precio_base": "$0",
+          "precio_tipico": "$60/mes+2.6%",
+          "fortaleza": "HW integrado",
+          "debilidad": "Comisión"
+        },
+        {
+          "sistema": "Lavu",
+          "url": "https://lavu.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes pequeños",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$59/mes",
+          "precio_tipico": "$59-329/mes",
+          "fortaleza": "Configurable",
+          "debilidad": "Curva aprendizaje"
+        },
+        {
+          "sistema": "Toast POS",
+          "url": "https://pos.toasttab.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes",
+          "modelo_cobro": "SaaS+HW",
+          "precio_base": "$69/mes",
+          "precio_tipico": "$165+/mes",
+          "fortaleza": "Robusto",
+          "debilidad": "Caro"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "JN1",
+          "feature": "Builder de jugos (frutas + extras)",
+          "porque": "Combos infinitos de fruta + chía + proteína",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "JN2",
+          "feature": "Tamaños (chico/mediano/grande)",
+          "porque": "Mismo jugo 3 precios",
+          "prioridad": "🔴 Crítica"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Builder",
+          "problema": "POS sin builder customizado → cajero teclea todo manual",
+          "afecta": "Sistemas genéricos"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Jugo / Smoothie / Bowl"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Juiciero / Bartender"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Jugo de naranja natural 500ml",
+          "imagen": "https://placehold.co/400x300/16a34a/ffffff?text=Jugos%20Naturales+1&id=231164",
+          "precio": 359,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Jugo verde detox 500ml",
+          "imagen": "https://placehold.co/400x300/16a34a/ffffff?text=Jugos%20Naturales+2&id=231163",
+          "precio": 1148,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Licuado de plátano con avena",
+          "imagen": "https://placehold.co/400x300/16a34a/ffffff?text=Jugos%20Naturales+3&id=231162",
+          "precio": 65,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Jugo de zanahoria con naranja",
+          "imagen": "https://placehold.co/400x300/16a34a/ffffff?text=Jugos%20Naturales+4&id=231161",
+          "precio": 299,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Smoothie de fresa con yogurt",
+          "imagen": "https://placehold.co/400x300/16a34a/ffffff?text=Jugos%20Naturales+5&id=231160",
+          "precio": 55,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Agua de jamaica natural",
+          "imagen": "https://placehold.co/400x300/16a34a/ffffff?text=Jugos%20Naturales+6&id=231159",
+          "precio": 252,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Jugo de toronja fresco",
+          "imagen": "https://placehold.co/400x300/16a34a/ffffff?text=Jugos%20Naturales+7&id=231158",
+          "precio": 305,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Licuado proteico chocolate",
+          "imagen": "https://placehold.co/400x300/16a34a/ffffff?text=Jugos%20Naturales+8&id=231157",
+          "precio": 199,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Jugo de piña con apio",
+          "imagen": "https://placehold.co/400x300/16a34a/ffffff?text=Jugos%20Naturales+9&id=231156",
+          "precio": 1437,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Bowl de fruta con granola",
+          "imagen": "https://placehold.co/400x300/16a34a/ffffff?text=Jugos%20Naturales+10&id=231155",
+          "precio": 86,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        }
+      ],
+      "_parent": "jugos_naturales"
+    },
+    {
+      "slug": "taller-mecanico",
+      "name": "Taller Mecanico",
+      "tipo_operacion": "Diagnóstico + presupuesto + reparación + entrega",
+      "regulacion": "PROFEPA (residuos), SEMARNAT (aceites usados)",
+      "que_vende": "Reparación y mantenimiento automotriz, refacciones",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Snap-on",
+            "url": "https://www.snapon.com/",
+            "tipo": "herramientas pro"
+          },
+          {
+            "nombre": "Matco Tools",
+            "url": "https://www.matcotools.com/",
+            "tipo": "herramientas"
+          },
+          {
+            "nombre": "Cornwell Tools",
+            "url": "https://www.cornwelltools.com/",
+            "tipo": "herramientas"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Midas",
+            "url": "https://www.midas.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Meineke",
+            "url": "https://www.jiffylube.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Jiffy Lube",
+            "url": "https://www.jiffylube.com.mx/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Shopmonkey",
+          "url": "https://www.shopmonkey.io/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Taller moderno cloud",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$199 USD/mes",
+          "precio_tipico": "$199-549/mes",
+          "fortaleza": "UX moderna, integraciones",
+          "debilidad": "USA-first"
+        },
+        {
+          "sistema": "Tekmetric",
+          "url": "https://www.tekmetric.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Taller mediano",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$349 USD/mes",
+          "precio_tipico": "$349/mes flat",
+          "fortaleza": "Pricing simple",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "AutoLeap",
+          "url": "https://autoleap.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Taller pequeño-mediano",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$199/mes",
+          "precio_tipico": "$199-449/mes",
+          "fortaleza": "Mobile-first",
+          "debilidad": "USA-only"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "T1",
+          "feature": "Orden de servicio con diagnóstico",
+          "porque": "Documentar problema + presupuesto previo",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "T2",
+          "feature": "Histórico por vehículo (placa/VIN)",
+          "porque": "Saber qué se le ha hecho al carro antes",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "T3",
+          "feature": "Mano de obra + refacciones por orden",
+          "porque": "Cobro mixto servicio + materiales",
+          "prioridad": "🔴 Crítica"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Histórico",
+          "problema": "POS sin tracking por vehículo → repetir trabajos",
+          "afecta": "POS genéricos"
+        },
+        {
+          "area": "Presupuestos",
+          "problema": "Sin OS formales → conflictos cliente",
+          "afecta": "Talleres pequeños"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Servicio / Refacción"
+        },
+        {
+          "generico": "Cliente",
+          "este_giro": "Dueño / Vehículo"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Orden de servicio (OS)"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Cambio de aceite y filtro",
+          "imagen": "https://placehold.co/400x300/1f2937/ffffff?text=Taller%20Mecanico+1&id=73930",
+          "precio": 399,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Afinación mayor",
+          "imagen": "https://placehold.co/400x300/1f2937/ffffff?text=Taller%20Mecanico+2&id=73931",
+          "precio": 3123,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Cambio de balatas",
+          "imagen": "https://placehold.co/400x300/1f2937/ffffff?text=Taller%20Mecanico+3&id=73932",
+          "precio": 428,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Alineación y balanceo",
+          "imagen": "https://placehold.co/400x300/1f2937/ffffff?text=Taller%20Mecanico+4&id=73933",
+          "precio": 20000,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Diagnóstico computarizado",
+          "imagen": "https://placehold.co/400x300/1f2937/ffffff?text=Taller%20Mecanico+5&id=73934",
+          "precio": 350,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Cambio de batería",
+          "imagen": "https://placehold.co/400x300/1f2937/ffffff?text=Taller%20Mecanico+6&id=73935",
+          "precio": 2200,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Reparación suspensión",
+          "imagen": "https://placehold.co/400x300/1f2937/ffffff?text=Taller%20Mecanico+7&id=73936",
+          "precio": 3500,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Cambio de clutch",
+          "imagen": "https://placehold.co/400x300/1f2937/ffffff?text=Taller%20Mecanico+8&id=73937",
+          "precio": 4776,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Hojalatería y pintura",
+          "imagen": "https://placehold.co/400x300/1f2937/ffffff?text=Taller%20Mecanico+9&id=73938",
+          "precio": 5362,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Cambio de llantas par",
+          "imagen": "https://placehold.co/400x300/1f2937/ffffff?text=Taller%20Mecanico+10&id=73939",
+          "precio": 490,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        }
+      ],
+      "_parent": "taller_mecanico"
+    },
+    {
+      "slug": "salon-belleza",
+      "name": "Salon Belleza",
+      "tipo_operacion": "Citas + walk-in, servicio por estilista",
+      "regulacion": "Salubridad municipal, COFEPRIS (productos)",
+      "que_vende": "Cortes, peinados, tratamientos estéticos, tinte, manicure",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Sally Beauty",
+            "url": "https://www.sallybeauty.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "CosmoProf",
+            "url": "https://www.cosmoprofbeauty.com/",
+            "tipo": "distribuidor profesional"
+          },
+          {
+            "nombre": "Salon Centric",
+            "url": "https://www.saloncentric.com/",
+            "tipo": "distribuidor"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "Toni&Guy",
+            "url": "https://www.toniandguy.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Supercuts",
+            "url": "https://www.pelochiquilo.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Fantastic Sams",
+            "url": "https://www.fantasticsams.com/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Vagaro",
+          "url": "https://www.vagaro.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Belleza/salón",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$25 USD/mes",
+          "precio_tipico": "$25-85 USD/mes",
+          "fortaleza": "Citas online, marketing",
+          "debilidad": "Inglés-first, sin CFDI"
+        },
+        {
+          "sistema": "Rosy Salon Software",
+          "url": "https://rosysalonsoftware.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Salón pequeño-mediano",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$29 USD/mes",
+          "precio_tipico": "$29-199/mes",
+          "fortaleza": "Específico para salón",
+          "debilidad": "USA-only"
+        },
+        {
+          "sistema": "Phorest",
+          "url": "https://www.phorest.com/",
+          "pais": "🇮🇪 IRL/Global",
+          "enfoque": "Salón profesional",
+          "modelo_cobro": "SaaS",
+          "precio_base": "Custom",
+          "precio_tipico": "$150-400/mes",
+          "fortaleza": "Marketing + lealtad",
+          "debilidad": "Pricing opaco"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": "SB1",
+          "feature": "Citas con estilista específico",
+          "porque": "Cliente reserva con SU estilista favorito",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "SB2",
+          "feature": "Servicios duración variable",
+          "porque": "Corte 30min vs tinte 2h",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": "SB3",
+          "feature": "Comisión por estilista",
+          "porque": "Modelo de pago estándar del sector",
+          "prioridad": "🔴 Crítica"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Agenda",
+          "problema": "POS sin agendas individuales por estilista",
+          "afecta": "SICAR, Eleventa, Loyverse"
+        },
+        {
+          "area": "Comisiones",
+          "problema": "Cálculo manual de comisiones",
+          "afecta": "POS genéricos"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Servicio / Producto retail"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Estilista / Manicurista"
+        },
+        {
+          "generico": "Mesa",
+          "este_giro": "Estación / Silla"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Corte de cabello mujer",
+          "imagen": "https://placehold.co/400x300/db2777/ffffff?text=Salon%20Belleza+1&id=171707",
+          "precio": 219,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Tinte completo de cabello",
+          "imagen": "https://placehold.co/400x300/db2777/ffffff?text=Salon%20Belleza+2&id=171706",
+          "precio": 298,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Manicure profesional",
+          "imagen": "https://placehold.co/400x300/db2777/ffffff?text=Salon%20Belleza+3&id=171705",
+          "precio": 391,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Pedicure spa con masaje",
+          "imagen": "https://placehold.co/400x300/db2777/ffffff?text=Salon%20Belleza+4&id=171704",
+          "precio": 959,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Maquillaje profesional evento",
+          "imagen": "https://placehold.co/400x300/db2777/ffffff?text=Salon%20Belleza+5&id=171703",
+          "precio": 230,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Tratamiento hidratante cabello",
+          "imagen": "https://placehold.co/400x300/db2777/ffffff?text=Salon%20Belleza+6&id=171702",
+          "precio": 1420,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Depilación cera piernas",
+          "imagen": "https://placehold.co/400x300/db2777/ffffff?text=Salon%20Belleza+7&id=171701",
+          "precio": 83,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Limpieza facial profunda",
+          "imagen": "https://placehold.co/400x300/db2777/ffffff?text=Salon%20Belleza+8&id=171700",
+          "precio": 276,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Diseño de cejas con henna",
+          "imagen": "https://placehold.co/400x300/db2777/ffffff?text=Salon%20Belleza+9&id=171699",
+          "precio": 195,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Alaciado permanente keratina",
+          "imagen": "https://placehold.co/400x300/db2777/ffffff?text=Salon%20Belleza+10&id=171698",
+          "precio": 950,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        }
+      ],
+      "_parent": "salon_belleza"
+    },
+    {
+      "slug": "queseria",
+      "name": "Queseria",
+      "tipo_operacion": "Atención mesa + para llevar + delivery",
+      "regulacion": "CFDI 4.0, COFEPRIS (alimentos), Protección Civil",
+      "que_vende": "Comida y bebidas preparadas",
+      "cadena_valor": {
+        "proveedores": [
+          {
+            "nombre": "Sysco",
+            "url": "https://www.sysco.com/",
+            "tipo": "distribuidor alimentos"
+          },
+          {
+            "nombre": "US Foods",
+            "url": "https://www.usfoods.com/",
+            "tipo": "distribuidor"
+          },
+          {
+            "nombre": "Performance Food",
+            "url": "https://www.performancefoodservice.com/",
+            "tipo": "distribuidor"
+          }
+        ],
+        "clientes_finales": [
+          {
+            "nombre": "McDonald's México",
+            "url": "https://www.mcdonalds.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Domino's Pizza MX",
+            "url": "https://www.dominos.com.mx/",
+            "scrapeable": true
+          },
+          {
+            "nombre": "Burger King MX",
+            "url": "https://www.bk.com.mx/",
+            "scrapeable": true
+          }
+        ]
+      },
+      "competidores_sector": [
+        {
+          "sistema": "Toast POS",
+          "url": "https://pos.toasttab.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes enterprise",
+          "modelo_cobro": "SaaS + hardware",
+          "precio_base": "$69 USD/mes",
+          "precio_tipico": "$165+ USD/mes",
+          "fortaleza": "Mapa mesas avanzado, KDS pro",
+          "debilidad": "Caro, hardware obligatorio"
+        },
+        {
+          "sistema": "TouchBistro",
+          "url": "https://www.touchbistro.com/",
+          "pais": "🇨🇦 CAN",
+          "enfoque": "Restaurantes medianos",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$69 USD/mes",
+          "precio_tipico": "$69-399 USD/mes",
+          "fortaleza": "iPad-first, KDS, mapa mesas",
+          "debilidad": "Solo iPad"
+        },
+        {
+          "sistema": "Lavu",
+          "url": "https://lavu.com/",
+          "pais": "🇺🇸 USA",
+          "enfoque": "Restaurantes pequeños-medianos",
+          "modelo_cobro": "SaaS",
+          "precio_base": "$59 USD/mes",
+          "precio_tipico": "$59-329 USD/mes",
+          "fortaleza": "Configurable",
+          "debilidad": "Curva aprendizaje"
+        }
+      ],
+      "funcionalidades_criticas": [
+        {
+          "id": 1,
+          "feature": "Mapa visual de mesas drag&drop",
+          "porque": "Diseñar restaurante como plano real (terraza, interior, bar, VIP)",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 2,
+          "feature": "Estado mesas tiempo real",
+          "porque": "Saber ocupación sin preguntar al mesero",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 3,
+          "feature": "Split bill avanzado (por persona/ítem/%)",
+          "porque": "Cobro a grupos sin fricción",
+          "prioridad": "🔴 Crítica"
+        },
+        {
+          "id": 9,
+          "feature": "KDS (Kitchen Display System)",
+          "porque": "Pantallas por estación + timers + sonidos",
+          "prioridad": "🔴 Alta"
+        },
+        {
+          "id": 11,
+          "feature": "Hub omnicanal (Uber/Rappi/DiDi)",
+          "porque": "Centralizar pedidos online",
+          "prioridad": "🔴 Alta"
+        }
+      ],
+      "problemas_evitar": [
+        {
+          "area": "Operación mesa",
+          "problema": "Mapa de mesas estático sin drag&drop",
+          "afecta": "SICAR, Eleventa, Shopify"
+        },
+        {
+          "area": "Pagos",
+          "problema": "Sin pagos mixtos (efectivo+tarjeta+QR+vales)",
+          "afecta": "SICAR, Eleventa básico"
+        }
+      ],
+      "terminologia": [
+        {
+          "generico": "Producto",
+          "este_giro": "Platillo"
+        },
+        {
+          "generico": "Categoría",
+          "este_giro": "Sección del menú"
+        },
+        {
+          "generico": "Venta",
+          "este_giro": "Cuenta / Comanda"
+        },
+        {
+          "generico": "Empleado",
+          "este_giro": "Mesero / Cocinero"
+        },
+        {
+          "generico": "Mesa",
+          "este_giro": "Mesa"
+        }
+      ],
+      "productos_plantilla": [
+        {
+          "nombre": "Enchiladas verdes con pollo",
+          "imagen": "https://placehold.co/400x300/d97706/ffffff?text=Queseria+1&id=978731",
+          "precio": 18,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Filete de res a la pimienta",
+          "imagen": "https://placehold.co/400x300/d97706/ffffff?text=Queseria+2&id=978732",
+          "precio": 285,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Sopa de tortilla tradicional",
+          "imagen": "https://placehold.co/400x300/d97706/ffffff?text=Queseria+3&id=978733",
+          "precio": 16,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Chiles en nogada (temporada)",
+          "imagen": "https://placehold.co/400x300/d97706/ffffff?text=Queseria+4&id=978734",
+          "precio": 18,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Mole poblano con pollo",
+          "imagen": "https://placehold.co/400x300/d97706/ffffff?text=Queseria+5&id=978735",
+          "precio": 965,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Ensalada César con pollo",
+          "imagen": "https://placehold.co/400x300/d97706/ffffff?text=Queseria+6&id=978736",
+          "precio": 69,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Pescado a la veracruzana",
+          "imagen": "https://placehold.co/400x300/d97706/ffffff?text=Queseria+7&id=978737",
+          "precio": 245,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Arroz con leche tradicional",
+          "imagen": "https://placehold.co/400x300/d97706/ffffff?text=Queseria+8&id=978738",
+          "precio": 296,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Agua de horchata jarra 1L",
+          "imagen": "https://placehold.co/400x300/d97706/ffffff?text=Queseria+9&id=978739",
+          "precio": 149,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        },
+        {
+          "nombre": "Café de olla taza",
+          "imagen": "https://placehold.co/400x300/d97706/ffffff?text=Queseria+10&id=978740",
+          "precio": 345,
+          "moneda": "MXN",
+          "marca": null,
+          "source": "generated_v45"
+        }
+      ],
+      "_parent": "restaurante"
     }
   ]
 }
