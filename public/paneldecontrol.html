@@ -7916,9 +7916,38 @@
       );
     }
     if (mod === 'inventario' || mod === 'productos') {
-      // V10.31: cargar productos REALES del giro via /api/products/search-public (async).
-      // Mientras carga, mostrar placeholder con grid de 10 cards. Después de fetch,
-      // reemplazar con imágenes/nombres/precios reales del giro.
+      // V10.33: usar productos_plantilla del ecosystem JSON DIRECTAMENTE (sin fetch).
+      // Pre-generados via scripts/audit-and-fill-products.js → cache estática y rápida.
+      // V10.31: fallback async a /api/products/search-public si plantilla está vacía.
+      const ecoRow = (window._ecosystemCache && window._ecosystemCache.giros) ?
+        window._ecosystemCache.giros.find(x => x.slug === slug) : null;
+      const plantilla = (ecoRow && Array.isArray(ecoRow.productos_plantilla)) ? ecoRow.productos_plantilla : [];
+      if (plantilla.length >= 5) {
+        // Render INSTANT con datos pre-cargados
+        const cards = plantilla.slice(0,10).map(p => {
+          const img = String(p.imagen||'').replace(/^http:/,'https:');
+          const price = p.precio ? '$' + p.precio + ' ' + (p.moneda||'') : '';
+          return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;display:flex;flex-direction:column">' +
+            '<div style="aspect-ratio:1;background:#fafafa;display:flex;align-items:center;justify-content:center;overflow:hidden">' +
+              (img ? '<img src="' + escapeAttr(img) + '" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.style.display=\'none\'">' : '📦') +
+            '</div>' +
+            '<div style="padding:7px;font-size:11px;flex:1;display:flex;flex-direction:column;gap:2px">' +
+              '<div style="font-weight:600;line-height:1.25;max-height:2.4em;overflow:hidden;text-overflow:ellipsis">' + escapeText(p.nombre||'') + '</div>' +
+              (price ? '<div style="color:#16a34a;font-weight:600;font-size:11px">' + escapeText(price) + '</div>' : '') +
+              '<div style="font-size:9px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.3px;margin-top:auto">' + escapeText(p.source||'') + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+        return wrap(
+          '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' +
+            '<input disabled placeholder="🔎 Buscar producto..." style="flex:1;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px">' +
+            '<button disabled style="background:#10b981;color:#fff;border:0;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:not-allowed">+ Nuevo</button>' +
+          '</div>' +
+          '<div style="font-size:11px;color:#666;margin-bottom:10px">📦 <strong>' + plantilla.length + ' productos plantilla</strong> del giro ' + escapeText(giroName) + ' — pre-cargados desde ecosystem JSON</div>' +
+          '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">' + cards + '</div>'
+        );
+      }
+      // FALLBACK: si no hay plantilla, hacer fetch async (legacy V10.31)
       const gridId = 'vlx-prod-grid-' + slug.replace(/[^a-z0-9]/g,'-');
       const placeholderCards = Array.from({length:10}).map(() =>
         '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;animation:vlxPulse 1.4s ease-in-out infinite">' +
