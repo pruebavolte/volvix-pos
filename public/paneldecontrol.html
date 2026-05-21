@@ -2757,6 +2757,14 @@
             <button class="permv14-nav-icon" data-permv14-nav="features" title="Features (toggle modulos)" aria-label="Features">
               🎛️<span class="permv14-nav-tooltip">Features</span>
             </button>
+            <!-- V13.23 N1: Catálogo de modales del POS -->
+            <button class="permv14-nav-icon" data-permv14-nav="modales" title="Modales del POS" aria-label="Modales">
+              🪟<span class="permv14-nav-tooltip">Modales <span class="permv14-nav-tooltip-count" data-permv14-count="modales">13</span></span>
+            </button>
+            <!-- V13.23 N2: Catálogo de botones del POS -->
+            <button class="permv14-nav-icon" data-permv14-nav="botones" title="Botones del POS" aria-label="Botones">
+              🔘<span class="permv14-nav-tooltip">Botones <span class="permv14-nav-tooltip-count" data-permv14-count="botones">29</span></span>
+            </button>
             <!-- 2026-05-09: ⚙ Modo de desactivación REMOVIDO del sidebar.
                  Ahora cada módulo/botón tiene su propio 3-state (Activo/Oculto/Bloqueado)
                  directamente en su select. El pane settings sigue existiendo
@@ -2925,6 +2933,41 @@
                 });
               })();
             </script>
+          </section>
+
+          <!-- V13.23 N1: Pane Modales — catálogo de ventanas emergentes del POS -->
+          <section class="permv14-side-pane permv14-side-pane-wide" data-permv14-pane="modales" hidden>
+            <div class="permv14-pane-head">
+              <h3>🪟 Modales del POS</h3>
+              <p class="permv14-pane-help">Catálogo de ventanas emergentes del sistema POS. Cada modal pertenece a un módulo — se activa cuando su módulo padre está habilitado para el tenant.</p>
+              <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+                <input id="modales-search" type="search" placeholder="Buscar modal..." class="permv14-input" style="flex:1;min-width:160px;">
+                <select id="modales-filter-mod" class="permv14-input" style="width:170px;">
+                  <option value="">— Todos los módulos —</option>
+                </select>
+              </div>
+            </div>
+            <div id="modales-list" style="padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;">
+              <div style="color:#888;padding:20px;text-align:center;grid-column:1/-1;">Cargando catálogo de modales...</div>
+            </div>
+          </section>
+
+          <!-- V13.23 N2: Pane Botones — catálogo unificado de todos los botones por módulo -->
+          <section class="permv14-side-pane permv14-side-pane-wide" data-permv14-pane="botones" hidden>
+            <div class="permv14-pane-head">
+              <h3>🔘 Botones del POS</h3>
+              <p class="permv14-pane-help">Vista unificada de todos los botones/acciones del sistema, organizados por módulo. Cada botón tiene una clave de feature que puede ser activada o desactivada por tenant.</p>
+              <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+                <input id="botones-search" type="search" placeholder="Buscar botón o clave..." class="permv14-input" style="flex:1;min-width:160px;">
+                <select id="botones-filter-mod" class="permv14-input" style="width:170px;">
+                  <option value="">— Todos los módulos —</option>
+                </select>
+                <span id="botones-count-badge" style="font-size:11px;background:var(--pv-surface);padding:3px 8px;border-radius:10px;color:var(--pv-text-dim);">0 botones</span>
+              </div>
+            </div>
+            <div id="botones-list" style="padding:14px;">
+              <div style="color:#888;padding:20px;text-align:center;">Cargando catálogo de botones...</div>
+            </div>
           </section>
 
           <!-- Pane: Usuarios (unificado: jerarquía padre→empleados + tipo según override) -->
@@ -6529,6 +6572,12 @@
       renderGirosList();
       renderGiroDetail();
       renderGiroPreview();
+    } else if (navKey === 'modales') {
+      // V13.23 N1
+      renderModalesPane();
+    } else if (navKey === 'botones') {
+      // V13.23 N2
+      renderBotonespane();
     }
   }
 
@@ -6595,6 +6644,155 @@
     if (/^[\x00-\x7F\s]+$/.test(s)) return false;
     return true;
   }
+
+  // ─── V13.23 N1: MODALES ──────────────────────────────────────────────────
+  // Catálogo de todos los modales que existen en salvadorex-pos.html.
+  // Se muestran como tarjetas con: icono, nombre, módulo padre, descripción.
+  // Los modales no tienen toggle propio — se controlan a través de su módulo.
+  const MODAL_CATALOG = [
+    { id:'modal-pay',           icon:'💵', title:'Cobrar ticket',           module:'pos',         desc:'Proceso de cobro con métodos de pago (efectivo, tarjeta, digital). Se abre con F12.' },
+    { id:'modal-search',        icon:'🔎', title:'Buscar producto',          module:'pos',         desc:'Búsqueda rápida de productos por nombre/código. Atajo F10.' },
+    { id:'modal-calc',          icon:'🧮', title:'Calculadora',              module:'pos',         desc:'Calculadora integrada en el punto de venta.' },
+    { id:'modal-granel',        icon:'⚖️', title:'Venta a granel',           module:'pos',         desc:'Registro de ventas por peso o medida (kg, litros, etc.).' },
+    { id:'modal-pay-verify',    icon:'⚠️', title:'Verificación de pago',     module:'pos',         desc:'Overlay de confirmación mientras se procesa un pago.' },
+    { id:'modal-app-pay',       icon:'💳', title:'Pago en proceso',          module:'pos',         desc:'Modal de espera durante procesamiento de pago digital.' },
+    { id:'modal-cash',          icon:'💰', title:'Entrada/Salida efectivo',  module:'corte',       desc:'Registro de movimientos de efectivo en caja (entradas y salidas manuales).' },
+    { id:'modal-sale-search',   icon:'🔎', title:'Buscar venta',             module:'ventas',      desc:'Filtrado y búsqueda de ventas anteriores por fecha, ticket o cliente.' },
+    { id:'modal-sale-detail',   icon:'🧾', title:'Detalle de venta',         module:'ventas',      desc:'Vista detallada completa de una venta específica del historial.' },
+    { id:'modal-late-invoice',  icon:'📄', title:'Factura tardía',           module:'facturacion', desc:'Emitir CFDI posterior a la realización de una venta.' },
+    { id:'modal-cfdi-cancel',   icon:'❌', title:'Cancelar CFDI',            module:'facturacion', desc:'Proceso de cancelación de un comprobante fiscal emitido.' },
+    { id:'modal-cfdi-refacturar', icon:'🔁', title:'Refacturar (corregir RFC)', module:'facturacion', desc:'Corrección del RFC del receptor en una factura ya emitida.' },
+    { id:'modal-product-form',  icon:'📦', title:'Formulario de producto',   module:'inventario',  desc:'Agregar o editar un producto del catálogo de inventario.' },
+  ];
+  const MODAL_MODULE_COLORS = {
+    pos:'#dbeafe', corte:'#fef3c7', ventas:'#dcfce7', facturacion:'#fce7f3',
+    inventario:'#f3e8ff', clientes:'#fff7ed', reportes:'#f0fdf4',
+  };
+
+  function renderModalesPane() {
+    if (window.__modalesPaneLoaded) return;
+    window.__modalesPaneLoaded = true;
+    const list = document.getElementById('modales-list');
+    const searchEl = document.getElementById('modales-search');
+    const filterEl = document.getElementById('modales-filter-mod');
+    if (!list) return;
+
+    // Poblar filtro de módulos
+    const mods = [...new Set(MODAL_CATALOG.map(m => m.module))].sort();
+    if (filterEl) {
+      mods.forEach(mod => {
+        const o = document.createElement('option');
+        o.value = mod; o.textContent = (MOD_LABELS_GLOBAL[mod] || mod);
+        filterEl.appendChild(o);
+      });
+    }
+
+    function renderCards(q, modFilter) {
+      const term = (q || '').toLowerCase();
+      const items = MODAL_CATALOG.filter(m => {
+        const matchQ = !term || m.id.includes(term) || m.title.toLowerCase().includes(term) || m.desc.toLowerCase().includes(term);
+        const matchMod = !modFilter || m.module === modFilter;
+        return matchQ && matchMod;
+      });
+      if (!items.length) { list.innerHTML = '<div style="color:#888;padding:20px;text-align:center;grid-column:1/-1;">Sin resultados.</div>'; return; }
+      list.innerHTML = items.map(m => {
+        const bg = MODAL_MODULE_COLORS[m.module] || '#f9fafb';
+        const modLabel = MOD_LABELS_GLOBAL[m.module] || m.module;
+        return `<div style="background:var(--pv-surface);border:1px solid var(--pv-border);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:22px;">${m.icon}</span>
+            <strong style="font-size:13.5px;color:var(--pv-text);">${m.title}</strong>
+            <span style="margin-left:auto;background:${bg};color:#374151;font-size:10px;padding:2px 7px;border-radius:9px;white-space:nowrap;">${modLabel}</span>
+          </div>
+          <code style="font-size:10.5px;color:var(--pv-accent);background:rgba(var(--pv-accent-rgb,99,102,241),0.08);padding:2px 6px;border-radius:4px;align-self:start;">#${m.id}</code>
+          <p style="font-size:12px;color:var(--pv-text-dim);margin:0;">${m.desc}</p>
+        </div>`;
+      }).join('');
+    }
+
+    renderCards('', '');
+    if (searchEl) searchEl.addEventListener('input', () => renderCards(searchEl.value, filterEl?.value || ''));
+    if (filterEl) filterEl.addEventListener('change', () => renderCards(searchEl?.value || '', filterEl.value));
+
+    // Actualizar badge del nav
+    const badge = document.querySelector('[data-permv14-count="modales"]');
+    if (badge) badge.textContent = MODAL_CATALOG.length;
+  }
+
+  // ─── V13.23 N2: BOTONES ──────────────────────────────────────────────────
+  // Vista unificada de todos los FEAT_LABELS_GLOBAL organizados por módulo.
+  // Cada botón muestra: icono/emoji, label, clave de feature, módulo padre.
+
+  function renderBotonespane() {
+    if (window.__botonesPaneLoaded) return;
+    window.__botonesPaneLoaded = true;
+    const list = document.getElementById('botones-list');
+    const searchEl = document.getElementById('botones-search');
+    const filterEl = document.getElementById('botones-filter-mod');
+    const badge = document.getElementById('botones-count-badge');
+    if (!list) return;
+
+    // Agrupar FEAT_LABELS_GLOBAL por módulo (prefijo antes del punto)
+    const byMod = {};
+    Object.entries(FEAT_LABELS_GLOBAL).forEach(([key, label]) => {
+      const mod = key.split('.')[0];
+      (byMod[mod] = byMod[mod] || []).push({ key, label });
+    });
+
+    // Poblar filtro de módulos
+    const modKeys = Object.keys(byMod).sort();
+    if (filterEl) {
+      modKeys.forEach(mod => {
+        const o = document.createElement('option');
+        o.value = mod; o.textContent = (MOD_LABELS_GLOBAL[mod] || '🔘 ' + mod);
+        filterEl.appendChild(o);
+      });
+    }
+
+    const totalBtns = Object.values(byMod).reduce((a, v) => a + v.length, 0);
+    if (badge) badge.textContent = totalBtns + ' botones';
+    // Actualizar badge del nav
+    const navBadge = document.querySelector('[data-permv14-count="botones"]');
+    if (navBadge) navBadge.textContent = totalBtns;
+
+    function renderGroups(q, modFilter) {
+      const term = (q || '').toLowerCase();
+      const filteredMods = modFilter ? [modFilter] : modKeys;
+      let html = '';
+      let shown = 0;
+      filteredMods.forEach(mod => {
+        const items = (byMod[mod] || []).filter(b =>
+          !term || b.key.includes(term) || b.label.toLowerCase().includes(term)
+        );
+        if (!items.length) return;
+        shown += items.length;
+        const modLabel = MOD_LABELS_GLOBAL[mod] || '🔘 ' + mod;
+        html += `<div style="margin-bottom:16px;">
+          <div style="font-size:11px;font-weight:700;color:var(--pv-text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding:0 2px;">${modLabel} <span style="font-weight:400;opacity:.6;">(${items.length})</span></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;">
+            ${items.map(b => `
+              <div style="background:var(--pv-surface);border:1px solid var(--pv-border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+                <span style="font-size:18px;">${b.label.match(/^[\p{Emoji}]/u)?.[0] || '🔘'}</span>
+                <div style="min-width:0;">
+                  <div style="font-size:13px;color:var(--pv-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${b.label.replace(/^[\p{Emoji}\s]+/u,'')}</div>
+                  <code style="font-size:10px;color:var(--pv-accent);">${b.key}</code>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
+      });
+      if (!shown) html = '<div style="color:#888;padding:20px;text-align:center;">Sin resultados.</div>';
+      list.innerHTML = html;
+      if (badge) badge.textContent = shown + ' botones';
+    }
+
+    renderGroups('', '');
+    if (searchEl) searchEl.addEventListener('input', () => renderGroups(searchEl.value, filterEl?.value || ''));
+    if (filterEl) filterEl.addEventListener('change', () => renderGroups(searchEl?.value || '', filterEl.value));
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   async function renderGirosList() {
     const wrap = $('#permv14-modules-list');
