@@ -13227,6 +13227,73 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: true, items: [], total: 0, note: 'using_in_memory_fallback' });
     }
   };
+  // V13.10: /api/giros/stats — counters de búsquedas + usuarios por giro
+  // Retorna { searchesToday: N, totalTenants: M, byGiro: { slug: { searches, users, first_seen } } }
+  handlers['GET /api/giros/stats'] = async (req, res) => {
+    try {
+      const stats = { searchesToday: 0, totalTenants: 0, byGiro: {} };
+      // 1) Conteo de tenants agrupados por business_type
+      try {
+        const tenants = await supabaseRequest('GET',
+          '/pos_companies?select=business_type&limit=10000');
+        if (Array.isArray(tenants)) {
+          stats.totalTenants = tenants.length;
+          tenants.forEach(t => {
+            const k = String(t.business_type || '').toLowerCase().trim();
+            if (!k) return;
+            stats.byGiro[k] = stats.byGiro[k] || { searches: 0, users: 0 };
+            stats.byGiro[k].users++;
+          });
+        }
+      } catch (_) { /* tabla no existe o sin permisos */ }
+      // 2) Conteo de búsquedas (tabla volvix_giro_searches — se crea on-demand
+      //    cuando un usuario busca en marketplace.html). Si no existe, retorna 0s.
+      try {
+        const searches = await supabaseRequest('GET',
+          '/volvix_giro_searches?select=slug,searched_at&limit=10000');
+        if (Array.isArray(searches)) {
+          const todayISO = new Date().toISOString().slice(0, 10);
+          searches.forEach(s => {
+            const k = String(s.slug || '').toLowerCase().trim();
+            if (!k) return;
+            stats.byGiro[k] = stats.byGiro[k] || { searches: 0, users: 0 };
+            stats.byGiro[k].searches++;
+            if (String(s.searched_at || '').slice(0, 10) === todayISO) {
+              stats.searchesToday++;
+            }
+            // first_seen = la búsqueda más antigua
+            if (!stats.byGiro[k].first_seen || s.searched_at < stats.byGiro[k].first_seen) {
+              stats.byGiro[k].first_seen = s.searched_at;
+            }
+          });
+        }
+      } catch (_) { /* tabla aún no creada */ }
+      sendJSON(res, { ok: true, ...stats });
+    } catch (e) {
+      sendJSON(res, { ok: true, searchesToday: 0, totalTenants: 0, byGiro: {}, error: String(e.message || e) });
+    }
+  };
+  // V13.10: POST /api/giros/track-search — invocado por marketplace.html
+  // cuando un usuario busca un giro. Crea o incrementa el contador.
+  handlers['POST /api/giros/track-search'] = async (req, res) => {
+    try {
+      const body = await readJSON(req);
+      const slug = String(body.slug || body.q || '').toLowerCase().trim().slice(0, 100);
+      if (!slug) return sendJSON(res, { ok: false, error: 'slug requerido' }, 400);
+      // Insert row in volvix_giro_searches (best-effort; tabla puede no existir)
+      try {
+        await supabaseRequest('POST', '/volvix_giro_searches', {
+          slug,
+          searched_at: new Date().toISOString(),
+          query_raw: String(body.q || '').slice(0, 200),
+          ip_hash: req.headers['x-forwarded-for'] ? crypto.createHash('sha256').update(String(req.headers['x-forwarded-for'])).digest('hex').slice(0,16) : null,
+        });
+      } catch (_) { /* tabla no existe — no-op silencioso */ }
+      sendJSON(res, { ok: true, slug });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: String(e.message || e) }, 500);
+    }
+  };
   // /api/marketplace/stores — público
   handlers['GET /api/marketplace/stores'] = async (req, res) => {
     try {

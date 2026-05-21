@@ -1710,6 +1710,16 @@ document.addEventListener('DOMContentLoaded', function () {
     fetch('/api/giros/search?q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
       .then((r) => r.ok ? r.json() : Promise.reject(new Error('search failed')))
       .then((data) => {
+        // V13.10: track la búsqueda (fire-and-forget, no bloquea el flujo)
+        try {
+          const slugTrack = (data && data.slug) || String(q).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim().replace(/\s+/g,'-');
+          fetch('/api/giros/track-search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug: slugTrack, q: q }),
+            keepalive: true,
+          }).catch(()=>{});
+        } catch(_){}
         // 1) Match exacto del backend (q === slug/synonyms) → redirigir
         if (data && data.exists && data.landing &&
             (String(data.slug || '').toLowerCase() === String(q).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim()

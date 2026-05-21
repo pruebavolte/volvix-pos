@@ -3174,67 +3174,53 @@
             </div>
           </main>
 
-          <!-- COLUMNA 5: VISTA PREVIA (flex 1) — V13.8: IFRAMES REALES (POS + Landing) responsive -->
+          <!-- COLUMNA 5: VISTA PREVIA (flex 1) — V13.9: GRID 2x2 con 4 IFRAMES REALES -->
           <main class="permv14-preview-pane" data-permv14-pane="modules">
             <div class="permv14-preview-toolbar">
-              <div class="permv14-view-tabs">
-                <button class="permv14-view-tab active" data-permv14-view="pos" title="App POS real">🛒 App POS</button>
-                <button class="permv14-view-tab" data-permv14-view="landing" title="Landing page pública">🌐 Landing</button>
-                <button class="permv14-view-tab" data-permv14-view="both" title="POS + Landing simultáneo">📊 Ambos</button>
-              </div>
-              <div class="permv14-device-tabs">
-                <button class="permv14-device-tab active" data-permv14-device="desktop">🖥 Desktop</button>
-                <button class="permv14-device-tab" data-permv14-device="mobile">📱 Móvil</button>
-                <button class="permv14-device-tab" data-permv14-device="both">↔ Ambos</button>
-              </div>
+              <span class="permv14-preview-label" id="permv14-preview-giro-label">Vista previa</span>
+              <button class="permv14-btn-soft" id="permv14-open-fullscreen" title="Abrir en pantalla completa" style="margin-left:auto">⛶ Pantalla completa</button>
             </div>
-            <div class="permv14-preview-canvas">
-              <!-- ─── POS REAL ─── -->
-              <div class="permv14-preview-section" data-permv14-section="pos">
-                <div class="permv14-preview-section-label">🛒 App POS · vista cliente</div>
-                <div class="permv14-preview-frames">
-                  <!-- Desktop frame: iframe REAL del POS -->
-                  <div class="permv14-device-desktop" data-permv14-frame="desktop">
-                    <div class="permv14-device-chrome">
-                      <span class="permv14-chrome-dot r"></span>
-                      <span class="permv14-chrome-dot y"></span>
-                      <span class="permv14-chrome-dot g"></span>
-                      <span class="permv14-chrome-url" id="permv14-preview-pos-url">tenant.salvadorex.app</span>
-                    </div>
-                    <div class="permv14-device-screen permv14-iframe-host">
-                      <iframe id="permv14-preview-pos-iframe-desktop" class="permv14-iframe-real" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="POS desktop"></iframe>
-                    </div>
-                  </div>
-                  <!-- Mobile frame: iframe REAL del POS a 390px (iPhone 14/15) -->
-                  <div class="permv14-device-mobile" data-permv14-frame="mobile" hidden>
-                    <div class="permv14-device-mobile-screen">
-                      <div class="permv14-mobile-statusbar"><span>9:41</span><span>📶 5G</span><span>🔋 92%</span></div>
-                      <iframe id="permv14-preview-pos-iframe-mobile" class="permv14-iframe-mobile-real" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="POS mobile"></iframe>
-                    </div>
-                  </div>
+            <div class="permv14-preview-canvas-grid">
+              <!-- CELL 1: POS Desktop -->
+              <div class="permv14-preview-cell" data-cell="pos-desktop">
+                <div class="permv14-cell-header">
+                  <span class="permv14-cell-tag pos">🛒 POS · Desktop</span>
+                  <span class="permv14-chrome-dot r"></span>
+                  <span class="permv14-chrome-dot y"></span>
+                  <span class="permv14-chrome-dot g"></span>
+                  <span class="permv14-cell-url" id="permv14-preview-pos-url">tenant.salvadorex.app</span>
+                </div>
+                <iframe id="permv14-preview-pos-iframe-desktop" class="permv14-cell-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="POS desktop"></iframe>
+              </div>
+              <!-- CELL 2: Landing Desktop -->
+              <div class="permv14-preview-cell" data-cell="landing-desktop">
+                <div class="permv14-cell-header">
+                  <span class="permv14-cell-tag landing">🌐 Landing · Desktop</span>
+                  <span class="permv14-chrome-dot r"></span>
+                  <span class="permv14-chrome-dot y"></span>
+                  <span class="permv14-chrome-dot g"></span>
+                  <span class="permv14-cell-url" id="permv14-preview-landing-url">systeminternational.app</span>
+                </div>
+                <iframe id="permv14-preview-landing-iframe-desktop" class="permv14-cell-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="Landing desktop"></iframe>
+              </div>
+              <!-- CELL 3: POS Mobile -->
+              <div class="permv14-preview-cell" data-cell="pos-mobile">
+                <div class="permv14-cell-header">
+                  <span class="permv14-cell-tag pos">📱 POS · Móvil</span>
+                  <span class="permv14-cell-mobile-info">390 × 700</span>
+                </div>
+                <div class="permv14-cell-mobile-wrap">
+                  <iframe id="permv14-preview-pos-iframe-mobile" class="permv14-cell-iframe-mobile" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="POS mobile"></iframe>
                 </div>
               </div>
-              <!-- ─── LANDING REAL ─── -->
-              <div class="permv14-preview-section" data-permv14-section="landing" hidden>
-                <div class="permv14-preview-section-label">🌐 Landing page pública</div>
-                <div class="permv14-preview-frames">
-                  <div class="permv14-device-desktop" data-permv14-frame="desktop">
-                    <div class="permv14-device-chrome">
-                      <span class="permv14-chrome-dot r"></span>
-                      <span class="permv14-chrome-dot y"></span>
-                      <span class="permv14-chrome-dot g"></span>
-                      <span class="permv14-chrome-url" id="permv14-preview-landing-url">systeminternational.app</span>
-                    </div>
-                    <div class="permv14-device-screen permv14-iframe-host">
-                      <iframe id="permv14-preview-landing-iframe-desktop" class="permv14-iframe-real" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="Landing desktop"></iframe>
-                    </div>
-                  </div>
-                  <div class="permv14-device-mobile" data-permv14-frame="mobile" hidden>
-                    <div class="permv14-device-mobile-screen">
-                      <div class="permv14-mobile-statusbar"><span>9:41</span><span>📶 5G</span><span>🔋 92%</span></div>
-                      <iframe id="permv14-preview-landing-iframe-mobile" class="permv14-iframe-mobile-real" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="Landing mobile"></iframe>
-                    </div>
-                  </div>
+              <!-- CELL 4: Landing Mobile -->
+              <div class="permv14-preview-cell" data-cell="landing-mobile">
+                <div class="permv14-cell-header">
+                  <span class="permv14-cell-tag landing">📱 Landing · Móvil</span>
+                  <span class="permv14-cell-mobile-info">390 × 700</span>
+                </div>
+                <div class="permv14-cell-mobile-wrap">
+                  <iframe id="permv14-preview-landing-iframe-mobile" class="permv14-cell-iframe-mobile" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="Landing mobile"></iframe>
                 </div>
               </div>
             </div>
@@ -4364,63 +4350,81 @@
     background: var(--pv-bg-paper); color: var(--pv-accent);
     box-shadow: 0 1px 2px rgba(0,0,0,0.06);
   }
-  /* V13.8: View tabs (POS / Landing / Both) — al lado del device-tabs */
-  #screen-permisos.permv14 .permv14-view-tabs {
-    display: inline-flex; background: var(--pv-surface);
-    border-radius: 6px; padding: 2px;
+  /* V13.9: Preview pane con grid 2x2 fijo — 4 iframes reales simultáneos */
+  #screen-permisos.permv14 .permv14-preview-canvas-grid {
+    flex: 1; overflow: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+    padding: 10px;
+    background: linear-gradient(180deg, #f5f2ec 0%, var(--pv-bg) 100%);
+    min-height: 0;
   }
-  #screen-permisos.permv14 .permv14-view-tab {
-    background: transparent; border: none;
-    padding: 4px 10px; border-radius: 4px;
-    color: var(--pv-text-muted);
-    font-family: var(--pv-font-body); font-size: 11px; font-weight: 500;
-    cursor: pointer;
+  #screen-permisos.permv14 .permv14-preview-cell {
+    display: flex; flex-direction: column;
+    background: var(--pv-bg-paper);
+    border: 1px solid var(--pv-border-strong);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    min-width: 0; min-height: 240px;
   }
-  #screen-permisos.permv14 .permv14-view-tab.active {
-    background: var(--pv-bg-paper); color: var(--pv-accent);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  #screen-permisos.permv14 .permv14-cell-header {
+    height: 28px; flex-shrink: 0;
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 10px;
+    background: var(--pv-surface);
+    border-bottom: 1px solid var(--pv-border);
+    font-family: var(--pv-font-mono); font-size: 9px;
   }
-  /* V13.8: secciones separadas (POS + Landing) — stack vertical en modo "ambos" */
-  #screen-permisos.permv14 .permv14-preview-section {
-    display: flex; flex-direction: column; gap: 8px;
-    width: 100%; max-width: 100%;
-  }
-  #screen-permisos.permv14 .permv14-preview-section-label {
-    font-family: var(--pv-font-mono); font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.1em;
-    color: var(--pv-accent);
+  #screen-permisos.permv14 .permv14-cell-tag {
     font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--pv-text);
+    margin-right: 4px;
   }
-  #screen-permisos.permv14 .permv14-preview-frames {
-    display: flex; gap: 16px;
-    align-items: flex-start; justify-content: center;
-    flex-wrap: wrap;
+  #screen-permisos.permv14 .permv14-cell-tag.pos { color: #B45309; }
+  #screen-permisos.permv14 .permv14-cell-tag.landing { color: #0369A1; }
+  #screen-permisos.permv14 .permv14-cell-url {
+    flex: 1; text-align: right;
+    font-family: var(--pv-font-mono); font-size: 9px;
+    color: var(--pv-text-muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
-  /* V13.8: iframe REAL desktop — ocupa todo el screen con altura calculada */
-  #screen-permisos.permv14 .permv14-iframe-host {
-    padding: 0 !important;
-    min-height: 480px;
-    height: 540px;
-    background: #fff;
-    position: relative;
+  #screen-permisos.permv14 .permv14-cell-mobile-info {
+    margin-left: auto;
+    font-size: 9px; color: var(--pv-text-dim);
   }
-  #screen-permisos.permv14 .permv14-iframe-real {
-    width: 100%; height: 100%;
+  /* Iframe desktop: ocupa la celda completa */
+  #screen-permisos.permv14 .permv14-cell-iframe {
+    flex: 1; width: 100%; height: 100%;
     border: 0; display: block;
     background: #fff;
+    min-height: 220px;
   }
-  /* V13.8: iframe REAL mobile — 390px (iPhone 14/15 width) dentro del bezel */
-  #screen-permisos.permv14 .permv14-iframe-mobile-real {
-    width: 100%; height: calc(100% - 28px);
+  /* Iframe mobile: 390px width centrado en bezel oscuro */
+  #screen-permisos.permv14 .permv14-cell-mobile-wrap {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    background: #1a1a1a;
+    padding: 8px;
+    min-height: 220px;
+  }
+  #screen-permisos.permv14 .permv14-cell-iframe-mobile {
+    width: 390px; max-width: 100%;
+    height: 100%; min-height: 200px;
     border: 0; display: block;
     background: #fff;
+    border-radius: 18px;
+    box-shadow: inset 0 0 0 2px #2a2a2a;
   }
-  /* V13.8: Mobile frame ampliado a 390px (era 280px) para simular iPhone real */
-  #screen-permisos.permv14 .permv14-preview-pane .permv14-device-mobile {
-    width: 390px;
-  }
-  #screen-permisos.permv14 .permv14-preview-pane .permv14-device-mobile-screen {
-    height: 700px;
+  /* Modo pantalla completa (V13.9) */
+  #screen-permisos.permv14 .permv14-preview-pane.is-fullscreen {
+    position: fixed !important;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 9999;
+    background: var(--pv-bg);
   }
   #screen-permisos.permv14 .permv14-preview-canvas {
     flex: 1; overflow-y: auto;
@@ -6542,11 +6546,24 @@
       // EXPANDIR (default) = tabla full 50+ columnas, sin paneles
       // COMPACTAR = tabla angosta (3 cols) + 4 paneles (módulos+comp+preview)
       const compactInitial = localStorage.getItem('vlx-giros-compact') === '1';
+      // V13.10: Stat bar — total giros + última actualización + última búsqueda
+      const totalGiros = (window._ecosystemCache && window._ecosystemCache.giros && window._ecosystemCache.giros.length) || 0;
+      const ecoGeneratedAt = (window._ecosystemCache && window._ecosystemCache._meta && window._ecosystemCache._meta.generated_at) || '—';
+      const generatedShort = String(ecoGeneratedAt).slice(0, 10) + ' ' + String(ecoGeneratedAt).slice(11, 16);
       host.innerHTML =
         '<button id="permv14-giro-create-btn" style="flex:1;background:var(--pv-accent);color:#fff;border:none;padding:6px 10px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;">+ Nuevo Giro</button>' +
         '<button id="permv14-giro-compact-btn" title="Compactar (mostrar paneles) / Expandir (tabla full)" style="background:#fff;color:var(--pv-text);border:1px solid var(--pv-border);padding:6px 12px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">' +
           (compactInitial ? '🔼 Expandir' : '🔽 Compactar') +
-        '</button>';
+        '</button>' +
+        '<div id="permv14-giro-statbar" style="display:flex;gap:10px;align-items:center;padding:6px 10px;background:#fef3c7;border:1px solid #fcd34d;border-radius:5px;font-size:11px;font-family:var(--pv-font-body);white-space:nowrap;flex-wrap:wrap">' +
+          '<span style="font-weight:700;color:#92400e">📊 Total:</span> <span id="permv14-stat-total" style="background:#92400e;color:#fff;padding:2px 8px;border-radius:8px;font-weight:700">' + totalGiros + ' giros</span>' +
+          '<span style="color:#a16207">·</span>' +
+          '<span style="font-weight:600;color:#854d0e">📅 Actualizado:</span> <span style="color:#713f12;font-family:var(--pv-font-mono);font-size:10px">' + generatedShort + '</span>' +
+          '<span style="color:#a16207">·</span>' +
+          '<span style="font-weight:600;color:#854d0e">🔥 Búsquedas hoy:</span> <span id="permv14-stat-searches" style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:8px;font-weight:700">—</span>' +
+          '<span style="color:#a16207">·</span>' +
+          '<span style="font-weight:600;color:#854d0e">👥 Tenants totales:</span> <span id="permv14-stat-users" style="background:#3b82f6;color:#fff;padding:2px 8px;border-radius:8px;font-weight:700">—</span>' +
+        '</div>';
       wrap.parentNode.insertBefore(host, wrap);
       // Handler del compactar/expandir
       host.querySelector('#permv14-giro-compact-btn').addEventListener('click', () => {
@@ -6826,6 +6843,9 @@
           '<thead><tr>' +
             '<th class="col-giro" style="min-width:160px">Giro de Negocio</th>' +
             '<th class="col-landing" style="background:#f0fdf4;min-width:220px;position:sticky;left:160px;z-index:3;box-shadow:2px 0 4px -2px rgba(0,0,0,0.06)">🌐 Landing pública</th>' +
+            '<th style="background:#fce7f3;min-width:110px;text-align:center">📅 Creado</th>' +
+            '<th style="background:#fef3c7;min-width:90px;text-align:center">🔥 Solicitudes</th>' +
+            '<th style="background:#dbeafe;min-width:80px;text-align:center">👥 Usuarios</th>' +
             '<th style="min-width:200px">¿Qué vende?</th>' +
             sysHeader(1) +
             sysHeader(2) +
@@ -6844,7 +6864,7 @@
             prodHeaders +
           '</tr></thead>' +
           '<tbody>';
-      const COLSPAN = 34 + 20; // 34 columnas previas (+1 landing) + 20 nuevas (Producto/Imagen × 10)
+      const COLSPAN = 34 + 20 + 3; // V13.10: +3 columnas (Creado, Solicitudes, Usuarios)
       groupedVisible.forEach(group => {
         html += '<tr class="vlx-giros-group-label"><td colspan="' + COLSPAN + '" style="background:var(--pv-surface);font-family:var(--pv-font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--pv-text-dim);padding:6px 14px;border-bottom:1px solid var(--pv-border);position:sticky;left:0">' + escapeText(group.catLabel) + ' · ' + group.slugs.length + '</td></tr>';
         group.slugs.forEach(slug => {
@@ -6919,9 +6939,28 @@
               '<span style="font-size:9px;color:#6b7280;display:block;word-break:break-all">' + escapeText(host.slice(0, 60)) + '</span>' +
               '</td>';
           })();
+          // V13.10: Stats por giro (Creado / Solicitudes / Usuarios)
+          // _meta.generated_at es la fecha de creación del ecosystem (proxy del giro)
+          const giroCreated = (ecoRow && (ecoRow.created_at || ecoRow.first_seen)) ||
+                              (window._ecosystemCache && window._ecosystemCache._meta && window._ecosystemCache._meta.generated_at) ||
+                              '2026-05-19';
+          const createdShort = String(giroCreated).slice(0, 10);
+          const createdTime  = String(giroCreated).slice(11, 16) || '—';
+          const searchHits = (window._giroStats && window._giroStats[slug] && window._giroStats[slug].searches) || 0;
+          const userCount  = (window._giroStats && window._giroStats[slug] && window._giroStats[slug].users) || tenantCount || 0;
+          const searchBadge = searchHits > 0
+            ? '<span style="background:#f59e0b;color:#fff;font-family:var(--pv-font-mono);font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px">🔥 ' + searchHits + '</span>'
+            : '<span style="color:#9ca3af;font-family:var(--pv-font-mono);font-size:9px">0</span>';
+          const usersBadge = userCount > 0
+            ? '<span style="background:#3b82f6;color:#fff;font-family:var(--pv-font-mono);font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px">👥 ' + userCount + '</span>'
+            : '<span style="color:#9ca3af;font-family:var(--pv-font-mono);font-size:9px">0</span>';
+
           html += '<tr class="' + sel + '" data-permv14-giro="' + escapeAttr(slug) + '">' +
             '<td class="col-giro cell-name">' + giroDisplay + '</td>' +
             landingCell +
+            '<td style="background:#fdf2f8;text-align:center;font-size:10px;line-height:1.3;font-family:var(--pv-font-mono)"><div style="font-weight:600;color:#831843">' + createdShort + '</div><div style="color:#9d174d;font-size:9px">' + createdTime + '</div></td>' +
+            '<td style="background:#fffbeb;text-align:center">' + searchBadge + '</td>' +
+            '<td style="background:#eff6ff;text-align:center">' + usersBadge + '</td>' +
             '<td class="cell-que-vende" style="font-size:11px;min-width:200px;white-space:normal;line-height:1.4">' + escapeText(queVende || '—') + '</td>' +
             cellSys(sis[0], 0) + cellSys(sis[1], 1) + cellSys(sis[2], 2) +
             cellLink(cfs[0]?.url, cfs[0]?.nombre, cfs[0]?.scrapeable) +
@@ -6944,6 +6983,8 @@
     }
 
     wrap.innerHTML = html;
+    // V13.10: refresh stat bar después de renderizar la tabla
+    if (typeof window._refreshGiroStatBar === 'function') window._refreshGiroStatBar();
     // Wire click en filas para selección
     wrap.querySelectorAll('tr[data-permv14-giro]').forEach(tr => {
       tr.addEventListener('click', async (ev) => {
@@ -7464,6 +7505,37 @@
       try { window._ecosystemCache = _ecosystemCache; } catch(_){}
       return _ecosystemCache;
     } catch (_) { return null; }
+  }
+  // V13.10: Cargar stats de búsquedas + usuarios por giro (Supabase via api/giros/stats)
+  async function loadGiroStats() {
+    try {
+      const r = await fetch('/api/giros/stats', { cache: 'no-store' });
+      if (!r.ok) return;
+      const j = await r.json();
+      window._giroStats = j.byGiro || {};
+      // Update stat bar
+      const totalEl = document.getElementById('permv14-stat-total');
+      const searchesEl = document.getElementById('permv14-stat-searches');
+      const usersEl = document.getElementById('permv14-stat-users');
+      // Total = giros from ecosystem
+      const totalGiros = (window._ecosystemCache && window._ecosystemCache.giros && window._ecosystemCache.giros.length) || 0;
+      if (totalEl) totalEl.textContent = totalGiros + ' giros';
+      if (searchesEl) searchesEl.textContent = (j.searchesToday || 0);
+      if (usersEl) usersEl.textContent = (j.totalTenants || 0);
+    } catch (_) { /* silent */ }
+  }
+  // V13.10: refresca stat bar cuando se renderiza tabla
+  window._refreshGiroStatBar = function() {
+    const totalEl = document.getElementById('permv14-stat-total');
+    if (totalEl) {
+      const total = (window._ecosystemCache && window._ecosystemCache.giros && window._ecosystemCache.giros.length) || 0;
+      totalEl.textContent = total + ' giros';
+    }
+    loadGiroStats();
+  };
+  // Llamar al cargar el módulo giros
+  if (typeof window !== 'undefined') {
+    window.addEventListener('load', () => setTimeout(loadGiroStats, 1500));
   }
   function ecosystemRowFor(slug, dataset) {
     if (!dataset || !Array.isArray(dataset.giros)) return null;
@@ -11281,56 +11353,28 @@
     lastLoadedSlug = slug;
   }
 
-  function applyViewMode(view) {
-    lastView = view;
-    const posSection = document.querySelector('[data-permv14-section="pos"]');
-    const landingSection = document.querySelector('[data-permv14-section="landing"]');
-    if (!posSection || !landingSection) return;
-    if (view === 'pos') {
-      posSection.hidden = false;
-      landingSection.hidden = true;
-    } else if (view === 'landing') {
-      posSection.hidden = true;
-      landingSection.hidden = false;
-    } else { // 'both'
-      posSection.hidden = false;
-      landingSection.hidden = false;
-    }
-    // Update tab active state
-    document.querySelectorAll('.permv14-view-tab').forEach(b => {
-      b.classList.toggle('active', b.dataset.permv14View === view);
-    });
+  function toggleFullscreen() {
+    const pane = document.querySelector('.permv14-preview-pane');
+    if (!pane) return;
+    pane.classList.toggle('is-fullscreen');
+    const btn = document.getElementById('permv14-open-fullscreen');
+    if (btn) btn.textContent = pane.classList.contains('is-fullscreen') ? '⤓ Salir pantalla completa' : '⛶ Pantalla completa';
   }
 
-  function applyDeviceMode(device) {
-    lastDevice = device;
-    document.querySelectorAll('.permv14-preview-section [data-permv14-frame="desktop"]').forEach(el => {
-      el.hidden = (device === 'mobile');
-    });
-    document.querySelectorAll('.permv14-preview-section [data-permv14-frame="mobile"]').forEach(el => {
-      el.hidden = (device === 'desktop');
-    });
-    document.querySelectorAll('.permv14-device-tab').forEach(b => {
-      b.classList.toggle('active', b.dataset.permv14Device === device);
-    });
+  function updateGiroLabel() {
+    const slug = getCurrentGiroSlug();
+    const el = document.getElementById('permv14-preview-giro-label');
+    if (el && slug) {
+      el.textContent = 'Vista previa · ' + slug + ' · 4 vistas reales (POS+Landing × Desktop+Móvil)';
+    }
   }
 
   function init() {
-    // Event delegation para los tabs (sobreviven re-renders)
+    // Click handler para botón pantalla completa
     document.addEventListener('click', function (e) {
-      const viewTab = e.target.closest('.permv14-view-tab');
-      if (viewTab) {
+      if (e.target.closest('#permv14-open-fullscreen')) {
         e.preventDefault();
-        e.stopPropagation();
-        applyViewMode(viewTab.dataset.permv14View);
-        return;
-      }
-      const deviceTab = e.target.closest('.permv14-device-tab');
-      if (deviceTab) {
-        e.preventDefault();
-        e.stopPropagation();
-        applyDeviceMode(deviceTab.dataset.permv14Device);
-        return;
+        toggleFullscreen();
       }
     });
 
@@ -11339,7 +11383,7 @@
     if (screen) {
       const mo = new MutationObserver(() => {
         if (screen.getAttribute('data-giro-selected') === 'true') {
-          setTimeout(loadPreview, 100);
+          setTimeout(() => { loadPreview(); updateGiroLabel(); }, 100);
         }
       });
       mo.observe(screen, { attributes: true, attributeFilter: ['data-giro-selected'] });
@@ -11347,13 +11391,13 @@
       // También observar cuando se haga click en una fila de giro
       document.addEventListener('click', function (e) {
         const row = e.target.closest('.vlx-giros-table tbody tr:not(.vlx-giros-group-label)');
-        if (row) setTimeout(loadPreview, 150);
+        if (row) setTimeout(() => { loadPreview(); updateGiroLabel(); }, 150);
       });
     }
 
     // Inicial: si ya hay giro seleccionado
     if (screen && screen.getAttribute('data-giro-selected') === 'true') {
-      setTimeout(loadPreview, 200);
+      setTimeout(() => { loadPreview(); updateGiroLabel(); }, 200);
     }
   }
 

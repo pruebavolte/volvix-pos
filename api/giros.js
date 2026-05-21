@@ -119,6 +119,73 @@ async function listGiros(ctx, req, res) {
   return send(ctx, res, 200, { count: giros.length, giros });
 }
 
+// V13.10: stats por giro (búsquedas + usuarios)
+async function statsGiros(ctx, req, res) {
+  const stats = { searchesToday: 0, totalTenants: 0, byGiro: {} };
+  // 1) Conteo tenants agrupados por business_type
+  if (ctx && typeof ctx.supabaseRequest === 'function') {
+    try {
+      const tenants = await ctx.supabaseRequest('GET',
+        '/pos_companies?select=business_type&limit=10000');
+      if (Array.isArray(tenants)) {
+        stats.totalTenants = tenants.length;
+        tenants.forEach(t => {
+          const k = String(t.business_type || '').toLowerCase().trim();
+          if (!k) return;
+          stats.byGiro[k] = stats.byGiro[k] || { searches: 0, users: 0 };
+          stats.byGiro[k].users++;
+        });
+      }
+    } catch (_) {}
+    // 2) Conteo búsquedas (tabla volvix_giro_searches)
+    try {
+      const searches = await ctx.supabaseRequest('GET',
+        '/volvix_giro_searches?select=slug,searched_at&limit=10000');
+      if (Array.isArray(searches)) {
+        const todayISO = new Date().toISOString().slice(0, 10);
+        searches.forEach(s => {
+          const k = String(s.slug || '').toLowerCase().trim();
+          if (!k) return;
+          stats.byGiro[k] = stats.byGiro[k] || { searches: 0, users: 0 };
+          stats.byGiro[k].searches++;
+          if (String(s.searched_at || '').slice(0, 10) === todayISO) {
+            stats.searchesToday++;
+          }
+          if (!stats.byGiro[k].first_seen || s.searched_at < stats.byGiro[k].first_seen) {
+            stats.byGiro[k].first_seen = s.searched_at;
+          }
+        });
+      }
+    } catch (_) {}
+  }
+  return send(ctx, res, 200, stats);
+}
+
+// V13.10: track de búsquedas — incrementa contador o crea entry nuevo
+async function trackSearchGiro(ctx, req, res) {
+  let body = {};
+  try {
+    // leer body JSON
+    body = await new Promise((resolve) => {
+      let s = '';
+      req.on('data', c => s += c);
+      req.on('end', () => { try { resolve(JSON.parse(s||'{}')); } catch(_) { resolve({}); } });
+    });
+  } catch (_) {}
+  const slug = String(body.slug || body.q || '').toLowerCase().trim().slice(0, 100);
+  if (!slug) return err(ctx, res, 400, 'BAD_REQUEST', 'slug requerido');
+  if (ctx && typeof ctx.supabaseRequest === 'function') {
+    try {
+      await ctx.supabaseRequest('POST', '/volvix_giro_searches', {
+        slug,
+        searched_at: new Date().toISOString(),
+        query_raw: String(body.q || '').slice(0, 200),
+      });
+    } catch (_) { /* tabla no existe — no-op */ }
+  }
+  return send(ctx, res, 200, { ok: true, slug });
+}
+
 async function searchGiros(ctx, req, res, parsedUrl) {
   const q = normalize((parsedUrl && parsedUrl.query && parsedUrl.query.q) || '');
   if (!q) return send(ctx, res, 200, { exists: false, query: '' });
@@ -1594,9 +1661,11 @@ module.exports = async function handleGiros(req, res, parsedUrl, ctx) {
     if (method === 'GET'  && pathname === '/api/giros/search')        { await searchGiros(ctx, req, res, parsedUrl); return true; }
     if (method === 'GET'  && pathname === '/api/giros/autocomplete')  { await autocompleteGiros(ctx, req, res, parsedUrl); return true; }
     if (method === 'GET'  && pathname === '/api/giros/config')        { await configGiro(ctx, req, res, parsedUrl); return true; }
+    if (method === 'GET'  && pathname === '/api/giros/stats')         { await statsGiros(ctx, req, res); return true; }
     if (method === 'POST' && pathname === '/api/giros/generate')      { await generateGiro(ctx, req, res); return true; }
     if (method === 'POST' && pathname === '/api/giros/resync-images')  { await resyncImages(ctx, req, res); return true; }
     if (method === 'POST' && pathname === '/api/giros/save-image')     { await saveProductImage(ctx, req, res); return true; }
+    if (method === 'POST' && pathname === '/api/giros/track-search')   { await trackSearchGiro(ctx, req, res); return true; }
 
     const slug = matchExistsPath(pathname);
     if (slug && method === 'GET') { await existsGiro(ctx, req, res, slug); return true; }
