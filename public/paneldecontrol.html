@@ -7383,12 +7383,50 @@
     // V13.10: refresh stat bar después de renderizar la tabla
     if (typeof window._refreshGiroStatBar === 'function') window._refreshGiroStatBar();
     // Wire click en filas para selección
+    // V13.30: TOGGLE — clic 1: expandir/seleccionar; clic 2 sobre la MISMA fila: contraer.
+    //         Links (<a>) y elementos dentro de <a> abren en nueva pestaña (target=_blank
+    //         ya está en el render), pero también detenemos propagación para que el toggle
+    //         no se dispare cuando el usuario solo quiere abrir el link.
     wrap.querySelectorAll('tr[data-permv14-giro]').forEach(tr => {
       tr.addEventListener('click', async (ev) => {
-        // ignorar clicks en links de URLs
-        if (ev.target.tagName === 'A') return;
+        // V13.30: detectar click en <a> O en cualquier descendiente de un <a> (img, span, etc.)
+        const anchor = ev.target.closest('a');
+        if (anchor) {
+          // Asegurar que el link abre en pestaña nueva aunque el render se haya hecho sin target=_blank
+          if (!anchor.target) anchor.target = '_blank';
+          if (!anchor.rel) anchor.rel = 'noopener noreferrer';
+          ev.stopPropagation();
+          return; // dejar que el browser maneje el link normalmente
+        }
+        // También ignorar clicks en botones para no toggle accidentalmente
+        if (ev.target.closest('button')) return;
+
         const nextSlug = tr.dataset.permv14Giro;
         const currentSlug = v14.selectedGiro;
+
+        // V13.30 TOGGLE: si el usuario clickea la MISMA fila ya seleccionada → contraer.
+        if (currentSlug && currentSlug === nextSlug) {
+          // Si hay cambios sin guardar, pedir confirmación antes de contraer
+          if (v14.giroIsDirty && v14.giroIsDirty[currentSlug]) {
+            const curLabel = (LABELS[currentSlug] || currentSlug);
+            const ok = await permv14Modal({
+              title: 'Cambios sin guardar',
+              body: 'Tienes cambios sin guardar en "' + curLabel + '". ¿Descartarlos al contraer?',
+              confirmLabel: 'Descartar y contraer',
+              cancelLabel: 'Quedarme aquí',
+            });
+            if (!ok) return;
+            if (window._giroEditOverlay) delete window._giroEditOverlay[currentSlug];
+            delete v14.giroIsDirty[currentSlug];
+          }
+          v14.selectedGiro = null;
+          v14.selectedGiroMod = null;
+          if (typeof _setGiroSelectedAttr === 'function') _setGiroSelectedAttr(false);
+          renderGirosList();
+          try { renderGiroComponentsPane(); } catch(_) {}
+          return;
+        }
+
         // 2026-05-09 fix(H1): warning si hay cambios sin guardar antes de cambiar de giro
         if (currentSlug && currentSlug !== nextSlug && v14.giroIsDirty && v14.giroIsDirty[currentSlug]) {
           const curLabel = (LABELS[currentSlug] || currentSlug);
