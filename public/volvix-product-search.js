@@ -342,6 +342,9 @@
     options = options || {};
     if (!input || input._volvixAutocomplete) return;
     input._volvixAutocomplete = true;
+    // Suprimir dropdown nativo del browser — evita el "dropdown negro" que aparece
+    // en modo oscuro del SO / Chrome y tapa el dropdown blanco personalizado.
+    input.setAttribute('autocomplete', 'off');
 
     const dropdown = document.createElement('div');
     dropdown.className = 'volvix-product-dropdown';

@@ -4174,7 +4174,7 @@
         <label>Código del Producto:</label>
         <div class="pos-code-input-wrap">
           <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M17 5v14"/><path d="M21 5v14"/></svg>
-          <input id="barcode-input" aria-label="Código del producto" class="pos-code-input" type="text" placeholder="Escanear código O escribir nombre del producto…" onkeypress="if(event.key==='Enter')searchProduct(this.value)">
+          <input id="barcode-input" aria-label="Código del producto" class="pos-code-input" type="text" autocomplete="off" spellcheck="false" placeholder="Escanear código O escribir nombre del producto…" onkeypress="if(event.key==='Enter')searchProduct(this.value)">
         </div>
         <button class="btn-enter" onclick="searchProduct(document.getElementById('barcode-input').value)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -11045,7 +11045,7 @@
           <form id="pf-form" style="display:grid;gap:12px;grid-template-columns:1fr;">
             <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
               Nombre del ${_productTerm.toLowerCase()} *
-              <input id="pf-name" type="text" required maxlength="160" value="${escapeAttr(p.name||'')}" style="padding:10px;border:1px solid #E7E5E4;border-radius:7px;font-size:14px;" placeholder="Ej. ${_giro==='farmacia'?'Paracetamol 500mg':_giro==='refaccionaria'?'Filtro de aceite Bosch':_giro==='floreria'?'Ramo de rosas rojas':'Coca Cola 600ml'}">
+              <input id="pf-name" type="text" required maxlength="160" autocomplete="off" spellcheck="false" value="${escapeAttr(p.name||'')}" style="padding:10px;border:1px solid #E7E5E4;border-radius:7px;font-size:14px;" placeholder="Ej. ${_giro==='farmacia'?'Paracetamol 500mg':_giro==='refaccionaria'?'Filtro de aceite Bosch':_giro==='floreria'?'Ramo de rosas rojas':'Coca Cola 600ml'}">
             </label>
             <input id="pf-code" type="hidden" value="${escapeAttr(p.code||'')}">
             <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
