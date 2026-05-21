@@ -3596,26 +3596,35 @@
   /* V13.18: ANCHURAS FIJAS + SCROLL HORIZONTAL — usuario solicitó que las
      columnas NO se compriman; el contenedor crece horizontalmente con scroll
      si excede viewport. 6 columnas TOTAL incluyendo "POS Completo" como 6ta.
-     Total min-width = 52+400+300+260+800+1100 = 2912px → fuerza scroll en monitores <2912 */
+     Total min-width = 52+400+300+260+800+1100 = 2912px → fuerza scroll en monitores <2912
+     V13.22: el scroll estaba en #screen-permisos (overflow:hidden, no visible scrollbar).
+     Fix: poner overflow-x:auto en SCREEN y SHELL para que scrollbar sea visible al usuario. */
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] {
+    overflow-x: auto !important;
+    overflow-y: hidden;
+  }
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] #perm-content {
+    overflow-x: visible;
+    min-width: max-content;
+  }
   #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid {
     grid-template-columns: 52px 400px 300px 260px 800px 1100px;
     grid-template-rows: 1fr;
     grid-template-areas: none;
-    overflow-x: auto !important;
+    overflow-x: visible;
     overflow-y: hidden;
     min-width: max-content;
-    scrollbar-width: auto;
   }
-  /* Custom scrollbar horizontal más visible */
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid::-webkit-scrollbar {
+  /* Custom scrollbar horizontal en el screen container (más visible) */
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"]::-webkit-scrollbar {
     height: 14px;
   }
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid::-webkit-scrollbar-thumb {
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"]::-webkit-scrollbar-thumb {
     background: var(--pv-accent);
     border-radius: 7px;
     border: 2px solid var(--pv-bg);
   }
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid::-webkit-scrollbar-track {
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"]::-webkit-scrollbar-track {
     background: var(--pv-surface);
   }
   /* DEPRECADO V13.18 — anteriormente flex layout reducía columnas, eliminado: */
