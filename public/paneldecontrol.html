@@ -6918,10 +6918,10 @@
           const screen = document.getElementById('screen-permisos');
           if (!screen) return;
           if (t.id === 'permv14-hscroll-right') {
-            screen.scrollBy({ left: SCROLL_STEP, behavior: 'smooth' });
+            screen.scrollBy({ left: SCROLL_STEP, behavior: 'auto' });
             setTimeout(_vlxUpdateHScrollBtns, 350);
           } else if (t.id === 'permv14-hscroll-left') {
-            screen.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' });
+            screen.scrollBy({ left: -SCROLL_STEP, behavior: 'auto' });
             setTimeout(_vlxUpdateHScrollBtns, 350);
           }
         });
