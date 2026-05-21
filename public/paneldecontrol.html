@@ -3562,10 +3562,22 @@
     grid-template-columns: 52px 1fr 0 0;
   }
   #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid {
-    /* V10.22: 5 columnas — sidebar | tabla | módulos | componentes | preview */
-    grid-template-columns: 52px minmax(320px, 1fr) 340px 340px 1.2fr;
+    /* V10.22: 5 columnas — sidebar | tabla | módulos | componentes | preview
+       V13.4: componentes pane reducida 340px → 260px (ocupa solo lo necesario) */
+    grid-template-columns: 52px minmax(320px, 1fr) 300px 260px 1.2fr;
     grid-template-rows: 1fr;
     grid-template-areas: none;
+  }
+  /* V13.4: items dentro del components-pane ocupan 100% del ancho disponible */
+  #screen-permisos.permv14 .permv14-components-pane #permv14-components-body > *,
+  #screen-permisos.permv14 .permv14-components-pane #permv14-components-body .permv14-list-item {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+  #screen-permisos.permv14 .permv14-components-pane #permv14-components-body .permv14-perm-toggle,
+  #screen-permisos.permv14 .permv14-components-pane #permv14-components-body button[role="switch"] {
+    flex: 1 1 auto;
+    min-width: 0;
   }
   /* el components-pane (col 4) tiene su propio estilo */
   #screen-permisos.permv14 .permv14-components-pane {

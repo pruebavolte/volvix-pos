@@ -1,13 +1,14 @@
 {
-  "version": "1.0.448",
+  "version": "1.0.449",
   "major": 1,
   "minor": 0,
-  "patch": 448,
+  "patch": 449,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-21T02:00:00.000Z",
-  "built_at": "2026-05-21T02:00:00.000Z",
+  "date": "2026-05-21T03:00:00.000Z",
+  "built_at": "2026-05-21T03:00:00.000Z",
   "changelog": [
+    "V13.4 COMPONENTS-PANE-COMPACTO: usuario reportó que la columna Punto de Venta del panel de componentes ocupaba demasiado espacio en blanco a la derecha. FIX: grid-template-columns ajustado de 340px → 260px en el components-pane (col 4). Plus CSS para que los items adentro (toggles ACTIVO/OCULTO, botones switch) ocupen 100% del ancho disponible con flex:1 1 auto. Resultado: la columna ahora ocupa solo el espacio necesario sin desperdiciar.",
     "V13.3 LANDING-AL-PRINCIPIO: usuario reportó que NO veía las URLs de landings. Las URLs SÍ existían pero la columna estaba en posición #35 de 55 columnas (después de scrollear 3000px). FIX: mover columna 'Landing pública' al principio (posición 2, justo después de Giro de Negocio). Plus hacer la columna STICKY (left:160px) para que siempre quede visible aunque se haga scroll horizontal. Removida la celda duplicada que estaba después de Tenants. Ahora cada fila muestra inmediatamente al cargar: Giro | Landing pública (con badge OFICIAL/TEMPLATE + URL clickeable) | ¿Qué vende? | ...",
     "V13.2 COMPACTAR=SPLIT-LAYOUT: usuario aclaró con 2 capturas qué significa compactar — NO reducir padding sino ACTIVAR el modo split (tabla angosta 3 cols + 4 paneles laterales: módulos preset + componentes + vista previa POS). El split layout YA EXISTÍA (data-giro-selected='true' en #screen-permisos, V10.22). FIX: handler del botón ahora llama _setGiroSelectedAttr(true) + auto-selecciona primer giro disponible para activar el split. Botón Expandir limpia v14.selectedGiro y _setGiroSelectedAttr(false) para volver a tabla full 50+ columnas. Estado persistido en localStorage 'vlx-giros-compact'. Eliminé CSS .vlx-compact (no necesario — el data-giro-selected ya maneja layout). Auto-aplicación al cargar si última sesión estaba compactada.",
     "V13.1 BOTÓN-COMPACTAR/EXPANDIR: usuario solicitó botón para contraer/expandir filas de la tabla maestra (captura mostraba filas muy altas con 'Venta de Productos Artesanales Salsas Moles Mezcal Café Etcétera' tomando mucho espacio vertical). FIX: botón secundario '🔽 Compactar' al lado de '+ Nuevo Giro' en el sticky header. Al hacer click toggle clase .vlx-compact en .vlx-giros-table-wrap. Modo compacto reduce padding td 9px→4px, font-size 12→11px, max-height fila 50px, white-space nowrap + text-overflow ellipsis, imagen 50→28px. Estado persistido en localStorage (vlx-giros-compact). Botón cambia texto a '🔼 Expandir' cuando compacto activo. Restaurar normal al click nuevo. Aplicable a 295 filas.",
