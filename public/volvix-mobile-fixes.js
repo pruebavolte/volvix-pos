@@ -312,37 +312,13 @@
     }, 250);
   }
 
-  // ── B-4) Banner rojo en modal de "Nuevo producto" ─────────────────
+  // ── B-4) Auto-focus precio en modal de "Nuevo producto" (modo 1×1) ───
+  // V13.20: Banner "Tip rápido" eliminado — solo mantener focus en precio
   function patchProductFormModal() {
     const obs = new MutationObserver(() => {
       const m = document.getElementById('modal-product-form');
-      if (!m) return;
-      if (m.__vlxBannerInjected) return;
-      const card = m.querySelector('div'); // primer div interior
-      if (!card) return;
-      const banner = document.createElement('div');
-      banner.id = 'vlx-product-form-banner';
-      banner.setAttribute('data-feature', 'pos.product_form_tip');
-      banner.innerHTML = '🟥 <strong>Tip rápido:</strong> Solo pon tu <strong>precio</strong> y da <strong>2 Enter</strong>… o llena lo que quieras y guarda. <strong>Así de fácil 🎉</strong>';
-      // Insertar como primer hijo del cuerpo del modal (después del header)
-      const header = card.querySelector('h2');
-      if (header && header.parentNode) {
-        header.parentNode.parentNode.insertBefore(banner, header.parentNode.nextSibling);
-      } else {
-        card.insertBefore(banner, card.firstChild);
-      }
-      // Vencer el feature-flag wiring que oculta elementos no autorizados
-      banner.style.setProperty('display', 'flex', 'important');
-      banner.style.setProperty('visibility', 'visible', 'important');
-      banner.style.setProperty('opacity', '1', 'important');
-      let _bannerTries = 0;
-      const _bannerInt = setInterval(() => {
-        banner.style.setProperty('display', 'flex', 'important');
-        banner.style.setProperty('visibility', 'visible', 'important');
-        banner.classList.remove('vlx-feature-hidden', 'tv-hidden');
-        if (++_bannerTries > 8) clearInterval(_bannerInt);
-      }, 250);
-      m.__vlxBannerInjected = true;
+      if (!m || m.__vlxFocusPatched) return;
+      m.__vlxFocusPatched = true;
       // Forzar foco en input "precio" si estamos en modo 1-por-1 (cursor donde le importa)
       if (window.__vlxOneByOneMode) {
         setTimeout(() => {
