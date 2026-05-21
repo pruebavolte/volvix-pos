@@ -3225,6 +3225,21 @@
               </div>
             </div>
           </main>
+          <!-- COLUMNA 6 V13.18: POS COMPLETO — vista FULL del sistema POS con todos
+               los módulos activos/desactivados según el giro seleccionado. -->
+          <main class="permv14-pos-full-pane" data-permv14-pane="pos-full">
+            <div class="permv14-preview-toolbar">
+              <span class="permv14-preview-label" id="permv14-posfull-label">🛒 Vista POS COMPLETA · todos los módulos del giro</span>
+              <button class="permv14-btn-soft" id="permv14-posfull-reload" title="Recargar iframe" style="margin-left:auto">🔄 Recargar</button>
+            </div>
+            <div class="permv14-pos-full-chrome">
+              <span class="permv14-chrome-dot r"></span>
+              <span class="permv14-chrome-dot y"></span>
+              <span class="permv14-chrome-dot g"></span>
+              <span class="permv14-chrome-url" id="permv14-posfull-url">tenant.salvadorex.app/pos</span>
+            </div>
+            <iframe id="permv14-posfull-iframe" class="permv14-posfull-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="POS completo"></iframe>
+          </main>
         </div>
 
         <!-- ───── BLOQUES LEGACY OCULTOS — los preserva el JS original (renderForTenant los popla)
@@ -3578,11 +3593,33 @@
   #screen-permisos.permv14[data-active-nav="giros"] .permv14-grid {
     grid-template-columns: 52px 1fr 0 0;
   }
+  /* V13.18: ANCHURAS FIJAS + SCROLL HORIZONTAL — usuario solicitó que las
+     columnas NO se compriman; el contenedor crece horizontalmente con scroll
+     si excede viewport. 6 columnas TOTAL incluyendo "POS Completo" como 6ta.
+     Total min-width = 52+400+300+260+800+1100 = 2912px → fuerza scroll en monitores <2912 */
   #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid {
-    /* V10.22: 5 columnas — sidebar | tabla | módulos | componentes | preview
-       V13.4: componentes pane reducida 340px → 260px (ocupa solo lo necesario)
-       V13.5: tabla angosta a 400px (solo Giro 160px + Landing 220px sticky visible);
-       el resto del ancho horizontal se reparte entre módulos+componentes+preview. */
+    grid-template-columns: 52px 400px 300px 260px 800px 1100px;
+    grid-template-rows: 1fr;
+    grid-template-areas: none;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    min-width: max-content;
+    scrollbar-width: auto;
+  }
+  /* Custom scrollbar horizontal más visible */
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid::-webkit-scrollbar {
+    height: 14px;
+  }
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid::-webkit-scrollbar-thumb {
+    background: var(--pv-accent);
+    border-radius: 7px;
+    border: 2px solid var(--pv-bg);
+  }
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid::-webkit-scrollbar-track {
+    background: var(--pv-surface);
+  }
+  /* DEPRECADO V13.18 — anteriormente flex layout reducía columnas, eliminado: */
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid.OLD_FLEX_LAYOUT {
     grid-template-columns: 52px 400px 300px 260px 1.2fr;
     grid-template-rows: 1fr;
     grid-template-areas: none;
@@ -4425,6 +4462,42 @@
     top: 0; left: 0; right: 0; bottom: 0;
     z-index: 9999;
     background: var(--pv-bg);
+  }
+  /* V13.18: 6ta columna POS COMPLETO — ancho fijo 1100px (no se comprime) */
+  #screen-permisos.permv14 .permv14-pos-full-pane {
+    display: flex;
+    flex-direction: column;
+    background: var(--pv-bg);
+    border-left: 2px solid var(--pv-accent);
+    overflow: hidden;
+    min-width: 1100px;
+    width: 1100px;
+  }
+  #screen-permisos.permv14 .permv14-pos-full-pane .permv14-preview-toolbar {
+    height: 38px; padding: 0 16px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--pv-border);
+    background: var(--pv-bg-paper);
+    flex-shrink: 0;
+  }
+  #screen-permisos.permv14 .permv14-pos-full-chrome {
+    height: 32px; background: var(--pv-surface);
+    border-bottom: 1px solid var(--pv-border);
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 12px;
+    flex-shrink: 0;
+  }
+  #screen-permisos.permv14 .permv14-posfull-iframe {
+    flex: 1;
+    width: 100%; height: 100%;
+    border: 0; display: block;
+    background: #fff;
+    min-height: 0;
+  }
+  /* solo visible cuando giro seleccionado */
+  #screen-permisos.permv14:not([data-active-nav="giros"]) .permv14-pos-full-pane,
+  #screen-permisos.permv14[data-active-nav="giros"]:not([data-giro-selected="true"]) .permv14-pos-full-pane {
+    display: none !important;
   }
   #screen-permisos.permv14 .permv14-preview-canvas {
     flex: 1; overflow-y: auto;
@@ -11388,12 +11461,19 @@
     setIframeSrc(document.getElementById('permv14-preview-pos-iframe-mobile'), urls.pos);
     setLandingWithFallback(document.getElementById('permv14-preview-landing-iframe-desktop'));
     setLandingWithFallback(document.getElementById('permv14-preview-landing-iframe-mobile'));
+    // V13.18: cargar también la vista POS COMPLETA (6ta columna)
+    const posFullUrl = '/salvadorex-pos.html?giro=' + encodeURIComponent(slug);
+    setIframeSrc(document.getElementById('permv14-posfull-iframe'), posFullUrl);
 
     // Actualizar URL bar
     const posUrlEl = document.getElementById('permv14-preview-pos-url');
     const landingUrlEl = document.getElementById('permv14-preview-landing-url');
+    const posFullUrlEl = document.getElementById('permv14-posfull-url');
+    const posFullLabelEl = document.getElementById('permv14-posfull-label');
     if (posUrlEl) posUrlEl.textContent = slug + '.salvadorex.app';
     if (landingUrlEl) landingUrlEl.textContent = 'systeminternational.app' + urls.landing;
+    if (posFullUrlEl) posFullUrlEl.textContent = slug + '.salvadorex.app/pos';
+    if (posFullLabelEl) posFullLabelEl.textContent = '🛒 Vista POS COMPLETA — ' + slug + ' (con todos sus módulos activos/desactivos)';
     lastLoadedSlug = slug;
   }
 
@@ -11414,11 +11494,20 @@
   }
 
   function init() {
-    // Click handler para botón pantalla completa
+    // Click handler para botón pantalla completa + recargar POS full
     document.addEventListener('click', function (e) {
       if (e.target.closest('#permv14-open-fullscreen')) {
         e.preventDefault();
         toggleFullscreen();
+      }
+      if (e.target.closest('#permv14-posfull-reload')) {
+        e.preventDefault();
+        const iframe = document.getElementById('permv14-posfull-iframe');
+        if (iframe && iframe.src) {
+          const currentSrc = iframe.src;
+          iframe.src = 'about:blank';
+          setTimeout(() => { iframe.src = currentSrc; }, 50);
+        }
       }
     });
 
