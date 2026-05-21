@@ -1601,15 +1601,21 @@ function serveStaticFile(res, pathname, fullUrl) {
       const sha = (process.env.VERCEL_GIT_COMMIT_SHA || '').slice(0, 8) || 'dev';
       try {
         let html = body.toString('utf8');
+        // Cache-bust JS refs
         html = html.replace(
           /(<script[^>]+src=["'])(\/?volvix-[\w-]+\.js)(["'])/g,
           (m, pre, src, post) => {
-            // Si ya tiene ?v= no tocar
             if (/[?&]v=/.test(src)) return m;
             const sep = src.includes('?') ? '&' : '?';
             return pre + src + sep + 'v=' + sha + post;
           }
         );
+        // V13.17: Inyectar volvix-responsive-emergency.css en TODOS los HTMLs
+        // (safety net global contra amontonamiento mobile). Solo si NO está ya.
+        if (!/volvix-responsive-emergency\.css/.test(html)) {
+          const responsiveLink = '\n<link rel="stylesheet" href="/volvix-responsive-emergency.css?v=' + sha + '">';
+          html = html.replace(/(<\/head>)/i, responsiveLink + '\n$1');
+        }
         body = Buffer.from(html, 'utf8');
       } catch (_) { /* fallback a body original */ }
     }

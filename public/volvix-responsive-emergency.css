@@ -1,0 +1,146 @@
+/*!
+ * volvix-responsive-emergency.css — V13.17
+ * CSS de emergencia para fixar amontonamiento en mobile.
+ * Inyectado automáticamente en TODOS los HTML responses por api/index.js.
+ *
+ * Reglas defensivas:
+ * - overflow-x: hidden en html/body para que nada cause scroll horizontal
+ * - max-width: 100% en imágenes/iframes/videos
+ * - tables con overflow horizontal contenido
+ * - botones grandes y cómodos en touch
+ * - font-size: 16px en inputs (previene zoom iOS al hacer focus)
+ *
+ * NO usa !important agresivo — solo donde hace falta para anular reglas inline.
+ */
+
+/* Safety net global */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+body {
+  -webkit-text-size-adjust: 100%;  /* evita rescale en orientation change iOS */
+}
+
+/* Media responsive global - mobile (max-width: 640px) */
+@media (max-width: 640px) {
+  /* Imágenes, videos, iframes nunca desbordan */
+  img, video, iframe, picture, svg,
+  embed, object, canvas {
+    max-width: 100%;
+    height: auto;
+  }
+  iframe {
+    max-width: 100%;
+  }
+
+  /* Tablas no rompen el layout */
+  table {
+    max-width: 100%;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Inputs y textareas: font-size 16px previene zoom auto iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="search"],
+  input[type="number"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px !important;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Botones full-width opcional (los pone más cómodos para touch) */
+  .btn-block,
+  button.btn-block,
+  a.btn-block {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Padding lateral mínimo en contenedores */
+  .container,
+  .wrap,
+  main,
+  section,
+  article {
+    padding-left: max(env(safe-area-inset-left, 0px), 12px);
+    padding-right: max(env(safe-area-inset-right, 0px), 12px);
+    box-sizing: border-box;
+  }
+
+  /* Grids: cualquier grid con cols > 1 cae a 1 col en mobile */
+  /* (los giros existentes con auto-fit ya funcionan; esto es safety net) */
+  .grid-2-cols,
+  .grid-3-cols,
+  .grid-4-cols {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Modales y diálogos: no más anchos que viewport */
+  .modal,
+  .modal-content,
+  dialog,
+  [role="dialog"] {
+    max-width: 100vw;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Headers fijos: no demasiado altos */
+  header,
+  .header,
+  nav,
+  .nav {
+    flex-wrap: wrap;
+  }
+}
+
+/* Mobile pequeño (max-width: 380px) — iPhone SE, etc */
+@media (max-width: 380px) {
+  /* Tipografías más pequeñas */
+  h1 { font-size: clamp(22px, 6vw, 28px) !important; }
+  h2 { font-size: clamp(18px, 5vw, 22px) !important; }
+  h3 { font-size: clamp(16px, 4.5vw, 18px) !important; }
+
+  /* Botones y CTAs más compactos */
+  .btn, button.btn, a.btn,
+  .btn-big, .btn-primary, .btn-secondary {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  /* Padding más estrecho */
+  section, main, article {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+}
+
+/* Landscape phone con altura baja (<500px) */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Modales y popups deben ser scrollables */
+  .modal,
+  dialog,
+  [role="dialog"] {
+    max-height: 95vh;
+    overflow-y: auto;
+  }
+}
+
+/* Prefers-reduced-motion: respetar usuarios con motion-sensitivity */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
