@@ -6668,6 +6668,7 @@
         '<table class="vlx-giros-table" style="min-width:5800px">' +
           '<thead><tr>' +
             '<th class="col-giro" style="min-width:160px">Giro de Negocio</th>' +
+            '<th class="col-landing" style="background:#f0fdf4;min-width:220px;position:sticky;left:160px;z-index:3;box-shadow:2px 0 4px -2px rgba(0,0,0,0.06)">🌐 Landing pública</th>' +
             '<th style="min-width:200px">¿Qué vende?</th>' +
             sysHeader(1) +
             sysHeader(2) +
@@ -6683,7 +6684,6 @@
             '<th style="background:#e0e7ff;min-width:160px">📖 Terminología</th>' +
             '<th style="min-width:160px">Regulación</th>' +
             '<th style="width:60px">Tenants</th>' +
-            '<th style="background:#f0fdf4;min-width:200px">🌐 Landing pública</th>' +
             prodHeaders +
           '</tr></thead>' +
           '<tbody>';
@@ -6742,8 +6742,29 @@
                               '<td style="background:#f9fafb;color:var(--pv-text-dim);font-size:10px;text-align:center">—</td>';
             }
           }
+          // V13.3: celda Landing pública movida al inicio (después de Giro)
+          const landingCell = (function() {
+            const landingUrl = ecoRow?.landing_url;
+            if (!landingUrl) {
+              return '<td class="col-landing" style="background:#f9fafb;color:var(--pv-text-dim);font-size:10px;text-align:center;font-style:italic;position:sticky;left:160px;z-index:2;min-width:220px;box-shadow:2px 0 4px -2px rgba(0,0,0,0.06)">sin landing</td>';
+            }
+            const isPhysical = ecoRow?.landing_type === 'fisica';
+            const safe = escapeAttr(landingUrl);
+            const host = String(landingUrl).replace(/^https?:\/\//,'').replace(/^www\./,'');
+            const bg = isPhysical ? '#f0fdf4' : '#fef3c7';
+            const badge = isPhysical
+              ? '<span style="background:#16a34a;color:#fff;font-size:8px;font-weight:600;padding:1px 5px;border-radius:3px">🔒 OFICIAL</span>'
+              : '<span style="background:#d97706;color:#fff;font-size:8px;font-weight:600;padding:1px 5px;border-radius:3px">🤖 TEMPLATE</span>';
+            const linkColor = isPhysical ? '#16a34a' : '#d97706';
+            return '<td class="col-landing" style="background:' + bg + ';font-size:10px;padding:6px;line-height:1.3;word-break:break-all;position:sticky;left:160px;z-index:2;min-width:220px;max-width:240px;box-shadow:2px 0 4px -2px rgba(0,0,0,0.06)">' +
+              badge + '<br>' +
+              '<a href="' + safe + '" target="_blank" rel="noopener" style="color:' + linkColor + ';text-decoration:none;font-weight:600">🌐 Ver landing</a><br>' +
+              '<span style="font-size:9px;color:#6b7280;display:block;word-break:break-all">' + escapeText(host.slice(0, 60)) + '</span>' +
+              '</td>';
+          })();
           html += '<tr class="' + sel + '" data-permv14-giro="' + escapeAttr(slug) + '">' +
             '<td class="col-giro cell-name">' + giroDisplay + '</td>' +
+            landingCell +
             '<td class="cell-que-vende" style="font-size:11px;min-width:200px;white-space:normal;line-height:1.4">' + escapeText(queVende || '—') + '</td>' +
             cellSys(sis[0], 0) + cellSys(sis[1], 1) + cellSys(sis[2], 2) +
             cellLink(cfs[0]?.url, cfs[0]?.nombre, cfs[0]?.scrapeable) +
@@ -6757,25 +6778,6 @@
             '<td style="font-size:10px;max-width:200px;white-space:normal;line-height:1.4;background:#f5f3ff">' + termHtml + '</td>' +
             '<td style="font-size:10px;max-width:180px;white-space:normal;line-height:1.4">' + escapeText(ecoRow?.regulacion || '—') + '</td>' +
             '<td style="text-align:center">' + tenantsBadge + '</td>' +
-            (function() {
-              const landingUrl = ecoRow?.landing_url;
-              if (!landingUrl) {
-                return '<td style="background:#f9fafb;color:var(--pv-text-dim);font-size:10px;text-align:center;font-style:italic">sin landing</td>';
-              }
-              const isPhysical = ecoRow?.landing_type === 'fisica';
-              const safe = escapeAttr(landingUrl);
-              const host = String(landingUrl).replace(/^https?:\/\//,'').replace(/^www\./,'');
-              const bg = isPhysical ? '#f0fdf4' : '#fef3c7';
-              const badge = isPhysical
-                ? '<span style="background:#16a34a;color:#fff;font-size:8px;font-weight:600;padding:1px 5px;border-radius:3px">🔒 OFICIAL</span>'
-                : '<span style="background:#d97706;color:#fff;font-size:8px;font-weight:600;padding:1px 5px;border-radius:3px">🤖 TEMPLATE</span>';
-              const linkColor = isPhysical ? '#16a34a' : '#d97706';
-              return '<td style="background:' + bg + ';font-size:10px;padding:6px;line-height:1.3;word-break:break-all">' +
-                badge + '<br>' +
-                '<a href="' + safe + '" target="_blank" rel="noopener" style="color:' + linkColor + ';text-decoration:none;font-weight:600">🌐 Ver landing</a><br>' +
-                '<span style="font-size:9px;color:#6b7280">' + escapeText(host.slice(0, 50)) + '</span>' +
-                '</td>';
-            })() +
             productCells +
           '</tr>';
         });
