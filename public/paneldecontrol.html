@@ -3715,35 +3715,10 @@
   .vlx-giros-table tr.is-selected td {
     background: var(--pv-accent-soft) !important;
   }
-  /* V13.1 — Modo COMPACTO: filas comprimidas + texto truncado */
-  .vlx-giros-table-wrap.vlx-compact .vlx-giros-table td {
-    padding: 4px 8px !important;
-    font-size: 11px !important;
-    line-height: 1.25 !important;
-    max-height: 50px !important;
-    overflow: hidden !important;
-    white-space: nowrap !important;
-    text-overflow: ellipsis !important;
-  }
-  .vlx-giros-table-wrap.vlx-compact .vlx-giros-table td > div,
-  .vlx-giros-table-wrap.vlx-compact .vlx-giros-table td > span {
-    display: inline-block;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .vlx-giros-table-wrap.vlx-compact .vlx-giros-table td img {
-    width: 28px !important;
-    height: 28px !important;
-  }
-  .vlx-giros-table-wrap.vlx-compact .vlx-giros-table tr {
-    max-height: 50px !important;
-  }
-  .vlx-giros-table-wrap.vlx-compact .vlx-giros-table .vlx-giros-group-label td {
-    padding: 4px 14px !important;
-    font-size: 9px !important;
-  }
+  /* V13.2 — Modo COMPACTAR ahora usa el split layout existente
+     (data-giro-selected="true" en #screen-permisos) que muestra
+     tabla angosta + paneles laterales módulos+comp+preview.
+     CSS de compactación visual eliminado — no necesario. */
   .vlx-giros-table td {
     padding: 9px 10px;
     border-bottom: 1px solid var(--pv-border);
@@ -6406,27 +6381,62 @@
       const host = document.createElement('div');
       host.id = 'permv14-giro-create-btn-host';
       host.style.cssText = 'padding:8px 10px;border-bottom:1px solid var(--pv-border);background:var(--pv-bg-paper);position:sticky;top:0;z-index:5;display:flex;gap:8px;';
-      // V13.1: botón compactar/expandir al lado del Nuevo Giro
+      // V13.2: botón Compactar/Expandir — activa modo split con paneles laterales
+      // EXPANDIR (default) = tabla full 50+ columnas, sin paneles
+      // COMPACTAR = tabla angosta (3 cols) + 4 paneles (módulos+comp+preview)
       const compactInitial = localStorage.getItem('vlx-giros-compact') === '1';
       host.innerHTML =
         '<button id="permv14-giro-create-btn" style="flex:1;background:var(--pv-accent);color:#fff;border:none;padding:6px 10px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;">+ Nuevo Giro</button>' +
-        '<button id="permv14-giro-compact-btn" title="Compactar/Expandir filas" style="background:#fff;color:var(--pv-text);border:1px solid var(--pv-border);padding:6px 12px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">' +
+        '<button id="permv14-giro-compact-btn" title="Compactar (mostrar paneles) / Expandir (tabla full)" style="background:#fff;color:var(--pv-text);border:1px solid var(--pv-border);padding:6px 12px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">' +
           (compactInitial ? '🔼 Expandir' : '🔽 Compactar') +
         '</button>';
       wrap.parentNode.insertBefore(host, wrap);
-      // Handler del compactar
+      // Handler del compactar/expandir
       host.querySelector('#permv14-giro-compact-btn').addEventListener('click', () => {
-        const w = document.querySelector('.vlx-giros-table-wrap');
-        if (!w) return;
-        const isCompact = w.classList.toggle('vlx-compact');
-        localStorage.setItem('vlx-giros-compact', isCompact ? '1' : '0');
-        host.querySelector('#permv14-giro-compact-btn').textContent = isCompact ? '🔼 Expandir' : '🔽 Compactar';
+        const btn = host.querySelector('#permv14-giro-compact-btn');
+        const isCurrentlyCompact = localStorage.getItem('vlx-giros-compact') === '1';
+        if (!isCurrentlyCompact) {
+          // ACTIVAR modo COMPACTAR: seleccionar primer giro disponible para mostrar paneles
+          if (!v14.selectedGiro) {
+            // Encontrar primer slug visible
+            for (const cat of Object.values(GIRO_CATEGORIES)) {
+              for (const slug of cat.items) {
+                if (PROFILES[slug] || (v14.catalogs?.giros || []).find(g => g.slug === slug)) {
+                  v14.selectedGiro = slug;
+                  break;
+                }
+              }
+              if (v14.selectedGiro) break;
+            }
+          }
+          if (typeof _setGiroSelectedAttr === 'function') _setGiroSelectedAttr(true);
+          localStorage.setItem('vlx-giros-compact', '1');
+          btn.textContent = '🔼 Expandir';
+        } else {
+          // ACTIVAR modo EXPANDIR: deseleccionar, mostrar tabla full
+          v14.selectedGiro = null;
+          v14.selectedGiroMod = null;
+          if (typeof _setGiroSelectedAttr === 'function') _setGiroSelectedAttr(false);
+          localStorage.setItem('vlx-giros-compact', '0');
+          btn.textContent = '🔽 Compactar';
+        }
       });
-      // Aplicar estado inicial al wrap
+      // Aplicar estado inicial: si compactInitial estaba guardado, activar el split
       setTimeout(() => {
-        const w = document.querySelector('.vlx-giros-table-wrap');
-        if (w && compactInitial) w.classList.add('vlx-compact');
-      }, 50);
+        if (compactInitial && !v14.selectedGiro) {
+          // Seleccionar primer giro disponible
+          for (const cat of Object.values(GIRO_CATEGORIES)) {
+            for (const slug of cat.items) {
+              if (PROFILES[slug] || (v14.catalogs?.giros || []).find(g => g.slug === slug)) {
+                v14.selectedGiro = slug;
+                break;
+              }
+            }
+            if (v14.selectedGiro) break;
+          }
+          if (typeof _setGiroSelectedAttr === 'function') _setGiroSelectedAttr(true);
+        }
+      }, 100);
       host.querySelector('button').addEventListener('click', async () => {
         // 2026-05-09 fix(M5): UN solo modal con 2 fields en vez de 2 prompts nativos.
         const res = await permv14Modal({
