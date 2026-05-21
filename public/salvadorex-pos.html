@@ -11033,49 +11033,59 @@
       const _extraFields = (typeof INDUSTRY_PRODUCT_FIELDS !== 'undefined' ? INDUSTRY_PRODUCT_FIELDS[_giro] : null) || [];
       const _productTerm = _terms.producto || 'producto';
       const _modalTitle = (prefill ? 'Editar ' : 'Nuevo ') + _productTerm.toLowerCase();
+      // V10.8 — Layout minimalista 1 columna: solo Nombre, Código, Precio.
+      // Costo/Stock/Min/Categoría/Descripción ocultos bajo <details>Ver más</details>.
+      // Banner "Tip rápido" eliminado por inyección CSS más abajo.
       modal.innerHTML = `
-        <div style="background:#fff;color:#1C1917;border-radius:12px;padding:22px;width:520px;max-width:92vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <div style="background:#fff;color:#1C1917;border-radius:12px;padding:22px;width:440px;max-width:92vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
             <h2 id="pf-title" style="margin:0;font-size:18px;font-weight:600;letter-spacing:-0.02em;color:#0B0B0F;">${_modalTitle}${_giro ? ' <span style="font-size:11px;font-weight:500;color:#7C3AED;background:#ede9fe;padding:2px 7px;border-radius:6px;margin-left:6px;">'+ _giro +'</span>' : ''}</h2>
             <button id="pf-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:#666;" aria-label="Cerrar (Esc)" title="Esc">&times;</button>
           </div>
-          <form id="pf-form" style="display:grid;gap:10px;grid-template-columns:1fr 1fr;">
-            <label style="grid-column:span 2;display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
+          <form id="pf-form" style="display:grid;gap:12px;grid-template-columns:1fr;">
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
               Nombre del ${_productTerm.toLowerCase()} *
-              <input id="pf-name" type="text" required maxlength="160" value="${escapeAttr(p.name||'')}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;" placeholder="Ej. ${_giro==='farmacia'?'Paracetamol 500mg':_giro==='refaccionaria'?'Filtro de aceite Bosch':_giro==='floreria'?'Ramo de rosas rojas':'Coca Cola 600ml'}">
+              <input id="pf-name" type="text" required maxlength="160" value="${escapeAttr(p.name||'')}" style="padding:10px;border:1px solid #E7E5E4;border-radius:7px;font-size:14px;" placeholder="Ej. ${_giro==='farmacia'?'Paracetamol 500mg':_giro==='refaccionaria'?'Filtro de aceite Bosch':_giro==='floreria'?'Ramo de rosas rojas':'Coca Cola 600ml'}">
             </label>
-            <!-- SKU hidden — auto-derivado del barcode si queda vacío -->
             <input id="pf-code" type="hidden" value="${escapeAttr(p.code||'')}">
-            <label style="grid-column:span 2;display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
               Código de barras
-              <input id="pf-barcode" type="text" maxlength="32" value="${escapeAttr(p.barcode||p.code||'')}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;" placeholder="Se auto-genera (1, 2, 3…) o escribe el tuyo">
+              <input id="pf-barcode" type="text" maxlength="32" value="${escapeAttr(p.barcode||p.code||'')}" style="padding:10px;border:1px solid #E7E5E4;border-radius:7px;font-size:14px;" placeholder="Se auto-genera (1, 2, 3…)">
               <span id="pf-barcode-status" style="font-size:11.5px;font-weight:500;min-height:14px;padding-left:2px"></span>
             </label>
             <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
               Precio (venta) *
-              <input id="pf-price" type="number" required min="0.01" step="0.01" value="${Number(p.price)||0}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;">
+              <input id="pf-price" type="number" required min="0.01" step="0.01" value="${Number(p.price)||0}" style="padding:10px;border:1px solid #E7E5E4;border-radius:7px;font-size:14px;">
             </label>
-            <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
-              Costo <span style="color:#9CA3AF;font-weight:400">(opcional)</span>
-              <input id="pf-cost" type="number" min="0" step="0.01" value="${Number(p.cost)||0}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;">
-              <span style="font-size:11px;color:#9CA3AF;margin-top:2px">Si no lo conoces, déjalo en 0 y lo agregas después</span>
-            </label>
-            <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
-              Stock actual *
-              <input id="pf-stock" type="number" required min="0" step="1" value="${Number(p.stock)||0}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;">
-            </label>
-            <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
-              Stock mínimo
-              <input id="pf-min" type="number" min="0" step="1" value="${Number(p.min_stock)||0}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;">
-            </label>
-            <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
-              Categoría
-              <input id="pf-cat" type="text" maxlength="64" value="${escapeAttr(p.category||'')}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;" placeholder="Bebidas, Abarrotes…">
-            </label>
-            <label style="grid-column:span 2;display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
-              Descripción
-              <textarea id="pf-desc" maxlength="500" rows="2" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;resize:vertical;" placeholder="Notas internas, características…">${escapeHtml(p.description||'')}</textarea>
-            </label>
+
+            <details id="pf-more-details" style="margin-top:4px;border-top:1px dashed #E5E5EA;padding-top:10px">
+              <summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:#7C3AED;list-style:none;display:flex;align-items:center;gap:6px;outline:none">
+                <span id="pf-more-toggle-icon" style="display:inline-block;transition:transform .15s">▶</span>
+                Ver más opciones (costo, stock, categoría, descripción)
+              </summary>
+              <div style="display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:12px">
+                <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
+                  Costo <span style="color:#9CA3AF;font-weight:400">(opcional)</span>
+                  <input id="pf-cost" type="number" min="0" step="0.01" value="${Number(p.cost)||0}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;">
+                </label>
+                <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
+                  Stock actual
+                  <input id="pf-stock" type="number" min="0" step="1" value="${Number(p.stock)||0}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;">
+                </label>
+                <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
+                  Stock mínimo
+                  <input id="pf-min" type="number" min="0" step="1" value="${Number(p.min_stock)||0}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;">
+                </label>
+                <label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
+                  Categoría
+                  <input id="pf-cat" type="text" maxlength="64" value="${escapeAttr(p.category||'')}" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;" placeholder="Bebidas, Abarrotes…">
+                </label>
+                <label style="grid-column:span 2;display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:500;">
+                  Descripción
+                  <textarea id="pf-desc" maxlength="500" rows="2" style="padding:9px;border:1px solid #E7E5E4;border-radius:7px;font-size:13.5px;resize:vertical;" placeholder="Notas internas, características…">${escapeHtml(p.description||'')}</textarea>
+                </label>
+              </div>
+            </details>
             ${_extraFields.length ? `
             <div style="grid-column:span 2;margin-top:6px;padding-top:14px;border-top:1px dashed #E5E5EA;">
               <h3 style="margin:0 0 8px;font-size:13.5px;color:#7C3AED;font-weight:600;">📋 Campos específicos · ${_giro}</h3>
@@ -24159,19 +24169,32 @@ window.addEventListener('volvix:version-loaded', function(e){
 })();
 </script>
 
-<!-- V9.9: Motor schema-driven multi-giro (opt-in via ?giro=slug en URL o window.applyGiroConfig en consola).
-     Cargado en silencio. NO se auto-activa sin trigger explícito. -->
+<!-- V9.9 + V13.13: Motor schema-driven multi-giro.
+     Prioridad: (1) ?giro= en URL > (2) business_type del tenant logueado > (3) window.applyGiroConfig manual.
+     Cargado en silencio. NO se auto-activa sin trigger. -->
 <script src="/js/applyGiroConfig.js" defer></script>
 <script>
 (function(){
-  // Bootstrap motor: si URL tiene ?giro=<slug>, aplicar al cargar.
-  // Permite demos: /salvadorex-pos.html?giro=navaja → POS adaptado a barbería.
   document.addEventListener('DOMContentLoaded', function(){
     try {
+      // 1) URL param tiene prioridad (demos, testing)
       var u = new URL(window.location.href);
       var giro = u.searchParams.get('giro');
+      // 2) V13.13 FIX: si no hay URL param, leer business_type del tenant logueado
+      if (!giro) {
+        try {
+          var sess = JSON.parse(localStorage.getItem('volvixSession') || '{}');
+          giro = (sess.business_type
+                  || (sess.user && sess.user.business_type)
+                  || (sess.user && sess.user.notes && sess.user.notes.business_type)
+                  || '').toString().toLowerCase().trim();
+        } catch(_) {}
+      }
       if (giro && typeof window.applyGiroConfig === 'function') {
-        setTimeout(function(){ window.applyGiroConfig(giro); }, 300);
+        setTimeout(function(){
+          window.applyGiroConfig(giro);
+          console.log('[applyGiroConfig] aplicado giro =', giro);
+        }, 300);
       }
     } catch(_) {}
   });

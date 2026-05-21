@@ -1818,8 +1818,9 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="pains-title">Lo que hace especial a ${giro.systemName}</div>
         <div class="pains-grid">${painsHTML}</div>
 
-        <div class="ai-cta">
-          <a href="landing_dynamic.html?giro=${giro.key}" class="btn-big">Ver ${giro.systemName} en detalle →</a>
+        <div class="ai-cta" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <a href="/registro.html?giro=${encodeURIComponent(giro.key)}&nombre=${encodeURIComponent(giro.systemName || giro.key)}" class="btn-big" style="background:#0a0a0a;color:#fff;">🚀 Empezar gratis ahora</a>
+          <a href="landing_dynamic.html?giro=${giro.key}" class="btn-big" style="background:#fff;color:#0a0a0a;border:1px solid #ddd;">Ver más detalles →</a>
         </div>
       </div>
     `;
@@ -1995,11 +1996,49 @@ document.addEventListener('DOMContentLoaded', function () {
             desc: f
           })),
           terms: payload.terminologia || {},
-          modules: payload.modulos_a_activar || []
+          modules: payload.modulos_a_activar || [],
+          // V13.13 FIX: incluir productos LLM para que el bootstrap del tenant
+          // los use como demo_products en lugar de los 4 DEFAULT_DEMO_PRODUCTS.
+          // registro.html lee match.products y lo manda al backend.
+          products: (Array.isArray(payload.productos_detectados) ? payload.productos_detectados : prods).slice(0, 30).map(function(p){
+            return {
+              name: p.name,
+              price: typeof p.estimated_price === 'number' ? p.estimated_price : (p.price || 0),
+              category: p.category || (p.metadata && p.metadata.category) || null,
+              image: p.image || p.image_url || null,
+              sku: p.sku || null,
+            };
+          }),
         });
         localStorage.setItem('volvix:custom-giros', JSON.stringify(customGiros));
       }
     } catch (_) { /* si localStorage falla, ignorar */ }
+
+    // V13.13: cachear los productos LLM y datos del payload para que registro.html
+    // los pase al backend como custom_data, y el bootstrap inicie el POS CON esos
+    // 9 productos (no con DEFAULT_DEMO_PRODUCTS genéricos).
+    try {
+      sessionStorage.setItem('volvix_last_search', JSON.stringify({
+        query: originalQuery,
+        business_name: nombre || originalQuery,
+        giro: slug || originalQuery,
+        nombre_comercial: nombre,
+        custom_data: {
+          products: prods.map(function(p){
+            return {
+              name: p.name,
+              price: p.price || p.estimated_price || 0,
+              category: p.category || (p.metadata && p.metadata.category) || null,
+              image: p.image || p.image_url || null,
+            };
+          }),
+          terminologia: payload.terminologia || {},
+          modulos_activos: payload.modulos_a_activar || [],
+          dolores: payload.dolores_especificos || [],
+        },
+        ts: Date.now(),
+      }));
+    } catch (_) {}
 
     // URL final: si el backend ya creó la landing real, usar /landing-{slug}.html.
     // Si todavía no, fallback a landing_dynamic con el query.
@@ -2037,7 +2076,8 @@ document.addEventListener('DOMContentLoaded', function () {
         <div style="display:grid;gap:10px;grid-template-columns:1fr;margin-top:12px;">${robosHTML}</div>` : ''}
 
         <div class="ai-cta" style="margin-top:28px;display:flex;gap:10px;flex-wrap:wrap;">
-          <a href="${landingUrl}" class="btn-big">Ver ${escape(nombre)} en detalle →</a>
+          <a href="/registro.html?giro=${encodeURIComponent(slug)}&nombre=${encodeURIComponent(nombre || originalQuery)}" class="btn-big" style="background:#0a0a0a;color:#fff;">🚀 Empezar gratis ahora</a>
+          <a href="${landingUrl}" class="btn-big" style="background:#fff;color:#0a0a0a;border:1px solid #ddd;">Ver más detalles →</a>
         </div>
       </div>
     `;
@@ -2061,7 +2101,8 @@ document.addEventListener('DOMContentLoaded', function () {
           </div>
         </div>
         <div class="ai-cta" style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;">
-          <a href="/landing-${encodeURIComponent(slug)}.html" class="btn-big">Ver el sistema →</a>
+          <a href="/registro.html?giro=${encodeURIComponent(slug)}&nombre=${encodeURIComponent(safe)}" class="btn-big" style="background:#0a0a0a;color:#fff;">🚀 Empezar gratis ahora</a>
+          <a href="/landing-${encodeURIComponent(slug)}.html" class="btn-big" style="background:#fff;color:#0a0a0a;border:1px solid #ddd;">Ver el sistema →</a>
         </div>
       </div>
     `;
