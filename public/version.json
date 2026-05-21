@@ -1,13 +1,14 @@
 {
-  "version": "1.0.449",
+  "version": "1.0.450",
   "major": 1,
   "minor": 0,
-  "patch": 449,
+  "patch": 450,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-21T03:00:00.000Z",
-  "built_at": "2026-05-21T03:00:00.000Z",
+  "date": "2026-05-21T03:30:00.000Z",
+  "built_at": "2026-05-21T03:30:00.000Z",
   "changelog": [
+    "V13.5 TABLA-ULTRA-COMPACTA-2-COLS: usuario reportó que la sección izquierda (tabla maestra) en modo compactar/split aún ocupaba demasiado ancho. Pidió que solo se vea la columna 'Giro de Negocio' (siempre fija/sticky) + UNA columna más (Landing pública). FIX: (1) grid-template-columns ajustado de minmax(320px, 1fr) → 400px fijo (sólo el ancho necesario para Giro 160px + Landing 220px sticky). (2) CSS nth-child(n+3) oculta todas las columnas 3+ de la tabla (¿Qué vende?, Sistema 1-3, Cliente Final 1-3, Proveedor 1-3, Funcionalidades, Problemas, Terminología, Regulación, Tenants, 10×Producto+Imagen) en modo compactar. (3) min-width de tabla bajado de 5800px → 380px en modo compactar (sin scroll horizontal). Resultado: lado izquierdo ultra-compacto, solo 2 columnas visibles. Espacio liberado se reparte entre módulos (300px) + componentes (260px) + preview POS (1.2fr). Modo expandir restaura las 54+20 columnas.",
     "V13.4 COMPONENTS-PANE-COMPACTO: usuario reportó que la columna Punto de Venta del panel de componentes ocupaba demasiado espacio en blanco a la derecha. FIX: grid-template-columns ajustado de 340px → 260px en el components-pane (col 4). Plus CSS para que los items adentro (toggles ACTIVO/OCULTO, botones switch) ocupen 100% del ancho disponible con flex:1 1 auto. Resultado: la columna ahora ocupa solo el espacio necesario sin desperdiciar.",
     "V13.3 LANDING-AL-PRINCIPIO: usuario reportó que NO veía las URLs de landings. Las URLs SÍ existían pero la columna estaba en posición #35 de 55 columnas (después de scrollear 3000px). FIX: mover columna 'Landing pública' al principio (posición 2, justo después de Giro de Negocio). Plus hacer la columna STICKY (left:160px) para que siempre quede visible aunque se haga scroll horizontal. Removida la celda duplicada que estaba después de Tenants. Ahora cada fila muestra inmediatamente al cargar: Giro | Landing pública (con badge OFICIAL/TEMPLATE + URL clickeable) | ¿Qué vende? | ...",
     "V13.2 COMPACTAR=SPLIT-LAYOUT: usuario aclaró con 2 capturas qué significa compactar — NO reducir padding sino ACTIVAR el modo split (tabla angosta 3 cols + 4 paneles laterales: módulos preset + componentes + vista previa POS). El split layout YA EXISTÍA (data-giro-selected='true' en #screen-permisos, V10.22). FIX: handler del botón ahora llama _setGiroSelectedAttr(true) + auto-selecciona primer giro disponible para activar el split. Botón Expandir limpia v14.selectedGiro y _setGiroSelectedAttr(false) para volver a tabla full 50+ columnas. Estado persistido en localStorage 'vlx-giros-compact'. Eliminé CSS .vlx-compact (no necesario — el data-giro-selected ya maneja layout). Auto-aplicación al cargar si última sesión estaba compactada.",

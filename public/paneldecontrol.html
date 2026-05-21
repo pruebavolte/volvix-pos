@@ -3563,10 +3563,24 @@
   }
   #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid {
     /* V10.22: 5 columnas — sidebar | tabla | módulos | componentes | preview
-       V13.4: componentes pane reducida 340px → 260px (ocupa solo lo necesario) */
-    grid-template-columns: 52px minmax(320px, 1fr) 300px 260px 1.2fr;
+       V13.4: componentes pane reducida 340px → 260px (ocupa solo lo necesario)
+       V13.5: tabla angosta a 400px (solo Giro 160px + Landing 220px sticky visible);
+       el resto del ancho horizontal se reparte entre módulos+componentes+preview. */
+    grid-template-columns: 52px 400px 300px 260px 1.2fr;
     grid-template-rows: 1fr;
     grid-template-areas: none;
+  }
+  /* V13.5: en modo COMPACTAR (split layout activo) ocultar todas las columnas
+     de la tabla maestra EXCEPTO Giro (col 1) + Landing pública (col 2).
+     El resto quedan ocultas para liberar espacio visual al lado izquierdo. */
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table thead th:nth-child(n+3),
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table tbody td:nth-child(n+3) {
+    display: none !important;
+  }
+  /* V13.5: reducir min-width de la tabla cuando está en modo compactar
+     para que no fuerce scroll horizontal con columnas ocultas. */
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table {
+    min-width: 380px !important;
   }
   /* V13.4: items dentro del components-pane ocupan 100% del ancho disponible */
   #screen-permisos.permv14 .permv14-components-pane #permv14-components-body > *,
