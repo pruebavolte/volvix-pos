@@ -6904,21 +6904,36 @@
           '</span>' +
         '</div>';
       wrap.parentNode.insertBefore(host, wrap);
-      // V13.27: Wiring de los botones de scroll horizontal ◀ ▶
-      // Mueven el scrollLeft del #screen-permisos (que es el contenedor con
-      // overflow-x:auto cuando data-active-nav=giros). Funciona en TODOS los
-      // browsers (Chrome, Firefox, Safari) sin depender de scrollbar nativo.
-      (function wireHScrollButtons() {
+      // V13.27/V13.28: Wiring por EVENT DELEGATION en document.body para
+      // sobrevivir re-renders del host. El bug en V13.27 era que cada
+      // setActiveNav recreaba el host y los listeners del host viejo
+      // morían con él. Ahora el handler vive en document.body (estable).
+      (function wireHScrollButtonsDelegated() {
         const SCROLL_STEP = 600;
-        const screen = document.getElementById('screen-permisos');
-        const btnLeft = host.querySelector('#permv14-hscroll-left');
-        const btnRight = host.querySelector('#permv14-hscroll-right');
-        const wrapEl = host.querySelector('#permv14-hscroll-controls');
-        if (!screen || !btnLeft || !btnRight) return;
-        function update() {
+        if (window.__vlxHScrollDelegated) return; // idempotente
+        window.__vlxHScrollDelegated = true;
+        document.body.addEventListener('click', (e) => {
+          const t = e.target;
+          if (!t || !t.id) return;
+          const screen = document.getElementById('screen-permisos');
+          if (!screen) return;
+          if (t.id === 'permv14-hscroll-right') {
+            screen.scrollBy({ left: SCROLL_STEP, behavior: 'smooth' });
+            setTimeout(_vlxUpdateHScrollBtns, 350);
+          } else if (t.id === 'permv14-hscroll-left') {
+            screen.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' });
+            setTimeout(_vlxUpdateHScrollBtns, 350);
+          }
+        });
+        // Refresca disabled/visibilidad al scroll y resize
+        function _vlxUpdateHScrollBtns() {
+          const screen = document.getElementById('screen-permisos');
+          const btnLeft = document.getElementById('permv14-hscroll-left');
+          const btnRight = document.getElementById('permv14-hscroll-right');
+          const wrapEl = document.getElementById('permv14-hscroll-controls');
+          if (!screen || !btnLeft || !btnRight) return;
           const max = screen.scrollWidth - screen.clientWidth;
           if (max <= 4) {
-            // Viewport ya muestra todo → ocultar
             if (wrapEl) wrapEl.style.display = 'none';
             return;
           }
@@ -6926,19 +6941,23 @@
           btnLeft.disabled = screen.scrollLeft <= 2;
           btnRight.disabled = screen.scrollLeft >= max - 2;
         }
-        btnLeft.addEventListener('click', () => {
-          screen.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' });
-        });
-        btnRight.addEventListener('click', () => {
-          screen.scrollBy({ left: SCROLL_STEP, behavior: 'smooth' });
-        });
-        screen.addEventListener('scroll', update, { passive: true });
-        window.addEventListener('resize', update);
-        // Update inicial y diferido (el ancho del grid se establece tras render async)
-        update();
-        setTimeout(update, 500);
-        setTimeout(update, 1500);
+        window._vlxUpdateHScrollBtns = _vlxUpdateHScrollBtns;
+        // Listener de scroll: como #screen-permisos puede no existir aún o
+        // re-crearse, bindeamos via delegation también. Usamos capture phase
+        // para captar scroll events que no burbujean.
+        document.addEventListener('scroll', (e) => {
+          if (e.target && e.target.id === 'screen-permisos') _vlxUpdateHScrollBtns();
+        }, true);
+        window.addEventListener('resize', _vlxUpdateHScrollBtns);
+        _vlxUpdateHScrollBtns();
+        setTimeout(_vlxUpdateHScrollBtns, 500);
+        setTimeout(_vlxUpdateHScrollBtns, 1500);
       })();
+      // Update inmediato tras insertar el host (los botones acaban de aparecer)
+      if (window._vlxUpdateHScrollBtns) {
+        setTimeout(window._vlxUpdateHScrollBtns, 100);
+        setTimeout(window._vlxUpdateHScrollBtns, 1000);
+      }
       // Handler del compactar/expandir
       host.querySelector('#permv14-giro-compact-btn').addEventListener('click', () => {
         const btn = host.querySelector('#permv14-giro-compact-btn');
