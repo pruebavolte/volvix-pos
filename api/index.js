@@ -81,20 +81,34 @@ const ALLOWED_ORIGINS = Array.from(new Set([...__ENV_ORIGINS, ...__CAPACITOR_ORI
 // =============================================================
 // SUPABASE REST API CLIENT
 // =============================================================
-function supabaseRequest(method, path, body) {
+function supabaseRequest(method, path, body, extraHeaders) {
   return new Promise((resolve, reject) => {
     const fullUrl = SUPABASE_URL + '/rest/v1' + path;
     const u = new URL(fullUrl);
 
+    // V13.26: aceptar headers extra (ej: Prefer: resolution=merge-duplicates para upserts).
+    // Antes el 4to arg era ignorado silenciosamente y los "upserts" del código nunca
+    // funcionaban como upsert (sólo insert + catch silencioso). Ahora SÍ se mergean.
+    const baseHeaders = {
+      'apikey': SUPABASE_SERVICE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_SERVICE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+    };
+    if (extraHeaders && typeof extraHeaders === 'object') {
+      Object.keys(extraHeaders).forEach((k) => {
+        // Si Prefer ya está en base y el caller manda Prefer, concatenarlos con coma
+        if (k.toLowerCase() === 'prefer' && baseHeaders.Prefer) {
+          baseHeaders.Prefer = baseHeaders.Prefer + ',' + extraHeaders[k];
+        } else {
+          baseHeaders[k] = extraHeaders[k];
+        }
+      });
+    }
     const opts = {
       hostname: u.hostname, port: 443,
       path: u.pathname + u.search, method: method,
-      headers: {
-        'apikey': SUPABASE_SERVICE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_SERVICE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation',
-      }
+      headers: baseHeaders
     };
 
     const req = https.request(opts, (res) => {
@@ -1615,6 +1629,13 @@ function serveStaticFile(res, pathname, fullUrl) {
         if (!/volvix-responsive-emergency\.css/.test(html)) {
           const responsiveLink = '\n<link rel="stylesheet" href="/volvix-responsive-emergency.css?v=' + sha + '">';
           html = html.replace(/(<\/head>)/i, responsiveLink + '\n$1');
+        }
+        // V13.26: Inyectar volvix-presence.js en TODOS los HTMLs públicos
+        // (heartbeat 30s para el contador "Visitantes ahora" del panel).
+        // El script auto-skip en iframes/preview/admin para no inflar contador.
+        if (!/volvix-presence\.js/.test(html)) {
+          const presenceScript = '\n<script defer src="/volvix-presence.js?v=' + sha + '"></script>';
+          html = html.replace(/(<\/head>)/i, presenceScript + '\n$1');
         }
         body = Buffer.from(html, 'utf8');
       } catch (_) { /* fallback a body original */ }
@@ -13306,6 +13327,83 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: true, slug, inserted, insertError });
     } catch (e) {
       sendJSON(res, { ok: false, error: String(e.message || e) }, 500);
+    }
+  };
+  // V13.26: PRESENCIA EN VIVO — usuario quiere ver "Visitantes ahora" en panel.
+  // Cliente (marketplace.html, landing-*.html, etc.) hace ping cada 30s con
+  // session_id único. Server upserta last_seen. GET /active cuenta sesiones
+  // con last_seen >= ahora-90s (margen de 3x el intervalo de ping).
+  handlers['POST /api/presence/ping'] = async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const sid = String(body.session_id || '').slice(0, 64);
+      if (!sid) return sendJSON(res, { ok: false, error: 'session_id requerido' }, 400);
+      const row = {
+        session_id: sid,
+        last_seen: new Date().toISOString(),
+        page: String(body.page || '').slice(0, 100),
+        giro: String(body.giro || '').slice(0, 100),
+        ip_hash: req.headers['x-forwarded-for']
+          ? crypto.createHash('sha256').update(String(req.headers['x-forwarded-for'])).digest('hex').slice(0, 16)
+          : null,
+        user_agent: String(req.headers['user-agent'] || '').slice(0, 200),
+      };
+      let upserted = false;
+      let upsertError = null;
+      try {
+        // UPSERT vía PostgREST: on_conflict=session_id + Prefer: resolution=merge-duplicates
+        await supabaseRequest(
+          'POST',
+          '/volvix_visitor_presence?on_conflict=session_id',
+          row,
+          { 'Prefer': 'resolution=merge-duplicates' }
+        );
+        upserted = true;
+      } catch (e) {
+        upsertError = String(e.message || e).slice(0, 300);
+      }
+      sendJSON(res, { ok: true, upserted, upsertError });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: String(e.message || e) }, 500);
+    }
+  };
+  handlers['GET /api/presence/active'] = async (req, res) => {
+    try {
+      const windowMs = 90 * 1000; // 90s ventana (3x el ping interval de 30s)
+      const since = new Date(Date.now() - windowMs).toISOString();
+      let rows = [];
+      let queryError = null;
+      try {
+        rows = await supabaseRequest(
+          'GET',
+          `/volvix_visitor_presence?last_seen=gte.${encodeURIComponent(since)}&select=session_id,page,giro,last_seen&limit=1000`
+        );
+      } catch (e) {
+        queryError = String(e.message || e).slice(0, 300);
+      }
+      const safeRows = Array.isArray(rows) ? rows : [];
+      // Contar sesiones únicas (defensa adicional aunque session_id sea PK)
+      const uniq = new Set(safeRows.map(r => r.session_id));
+      // Top giros + pages que se están viendo ahora
+      const byGiro = {};
+      const byPage = {};
+      safeRows.forEach(r => {
+        const g = String(r.giro || '').trim();
+        const p = String(r.page || '').trim();
+        if (g) byGiro[g] = (byGiro[g] || 0) + 1;
+        if (p) byPage[p] = (byPage[p] || 0) + 1;
+      });
+      sendJSON(res, {
+        ok: true,
+        active: uniq.size,
+        windowSeconds: 90,
+        since,
+        byGiro,
+        byPage,
+        queryError,
+      });
+    } catch (e) {
+      sendJSON(res, { ok: true, active: 0, error: String(e.message || e) });
     }
   };
   // /api/marketplace/stores — público

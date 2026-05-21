@@ -6851,6 +6851,8 @@
           '<span style="color:#a16207">·</span>' +
           '<span style="font-weight:600;color:#854d0e" title="Cuántas veces clientes buscaron giros en el marketplace HOY">🔥 Buscado hoy:</span> <span id="permv14-stat-searches" style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:8px;font-weight:700">—</span>' +
           '<span style="color:#a16207">·</span>' +
+          '<span style="font-weight:600;color:#854d0e" title="Visitantes únicos viendo el sitio AHORA MISMO (ventana 90s)">🟢 Visitantes ahora:</span> <span id="permv14-stat-active" style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:8px;font-weight:700" title="Visitantes únicos con last_seen en los últimos 90s">—</span>' +
+          '<span style="color:#a16207">·</span>' +
           '<span style="font-weight:600;color:#854d0e">👥 Tenants totales:</span> <span id="permv14-stat-users" style="background:#3b82f6;color:#fff;padding:2px 8px;border-radius:8px;font-weight:700">—</span>' +
         '</div>';
       wrap.parentNode.insertBefore(host, wrap);
@@ -7830,6 +7832,7 @@
     } catch (_) { return null; }
   }
   // V13.10: Cargar stats de búsquedas + usuarios por giro (Supabase via api/giros/stats)
+  // V13.26: + cargar /api/presence/active para badge "Visitantes ahora"
   async function loadGiroStats() {
     try {
       const r = await fetch('/api/giros/stats', { cache: 'no-store' });
@@ -7845,6 +7848,26 @@
       if (totalEl) totalEl.textContent = totalGiros + ' giros';
       if (searchesEl) searchesEl.textContent = (j.searchesToday || 0);
       if (usersEl) usersEl.textContent = (j.totalTenants || 0);
+    } catch (_) { /* silent */ }
+    // V13.26: visitantes activos en vivo (paralelo, no bloquea)
+    try {
+      const r2 = await fetch('/api/presence/active', { cache: 'no-store' });
+      if (r2.ok) {
+        const a = await r2.json();
+        const activeEl = document.getElementById('permv14-stat-active');
+        if (activeEl) {
+          activeEl.textContent = (a.active || 0);
+          // Tooltip con breakdown por giro si hay alguien
+          if (a.byGiro && Object.keys(a.byGiro).length > 0) {
+            const top = Object.entries(a.byGiro)
+              .sort((x, y) => y[1] - x[1]).slice(0, 5)
+              .map(([g, n]) => `${g}: ${n}`).join(' · ');
+            activeEl.title = 'Visitantes únicos (90s). Viendo: ' + top;
+          } else {
+            activeEl.title = 'Visitantes únicos con last_seen en los últimos 90s';
+          }
+        }
+      }
     } catch (_) { /* silent */ }
   }
   // V13.10: refresca stat bar cuando se renderiza tabla
