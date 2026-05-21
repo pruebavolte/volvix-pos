@@ -3589,6 +3589,41 @@
   #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table-wrap::-webkit-scrollbar-track {
     background: var(--pv-surface);
   }
+  /* V13.7: RESIZERS arrastrables entre cada columna del split layout.
+     Cursor col-resize cuando hover entre las 5 columnas (sidebar | tabla |
+     módulos | componentes | preview). Persistido en localStorage 'permv14-grid-cols'. */
+  .permv14-col-resizer {
+    position: absolute;
+    top: 0;
+    right: -3px;
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    background: transparent;
+    z-index: 50;
+    transition: background 0.15s ease;
+  }
+  .permv14-col-resizer:hover { background: rgba(184, 93, 58, 0.25); }
+  .permv14-col-resizer.is-dragging { background: rgba(184, 93, 58, 0.45); }
+  .permv14-col-resizer::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 2px; height: 28px;
+    margin: -14px 0 0 -1px;
+    background: rgba(184, 93, 58, 0);
+    border-radius: 2px;
+    transition: background 0.15s ease;
+  }
+  .permv14-col-resizer:hover::after,
+  .permv14-col-resizer.is-dragging::after {
+    background: rgba(184, 93, 58, 0.85);
+  }
+  body.permv14-resizing,
+  body.permv14-resizing * {
+    cursor: col-resize !important;
+    user-select: none !important;
+  }
   /* V13.4: items dentro del components-pane ocupan 100% del ancho disponible */
   #screen-permisos.permv14 .permv14-components-pane #permv14-components-body > *,
   #screen-permisos.permv14 .permv14-components-pane #permv14-components-body .permv14-list-item {
@@ -11077,6 +11112,132 @@
       }
     } catch(_) {}
   });
+})();
+</script>
+
+<!-- V13.7: Resizers arrastrables entre las 5 columnas del split layout giros -->
+<script>
+(function () {
+  'use strict';
+  const STORAGE_KEY = 'permv14-grid-cols-v1';
+  const MIN_WIDTHS = [40, 200, 200, 180, 250]; // mínimo por columna (sidebar puede ser angosta)
+
+  function findGrid() {
+    // El grid solo está activo cuando giros + giro-selected
+    const screen = document.getElementById('screen-permisos');
+    if (!screen) return null;
+    if (screen.getAttribute('data-active-nav') !== 'giros') return null;
+    if (screen.getAttribute('data-giro-selected') !== 'true') return null;
+    return screen.querySelector('.permv14-grid');
+  }
+
+  function pxOf(grid, idx) {
+    const cs = getComputedStyle(grid).gridTemplateColumns;
+    const parts = cs.split(' ').map(p => parseFloat(p));
+    return parts[idx] || 0;
+  }
+
+  function removeAllResizers(grid) {
+    grid.querySelectorAll(':scope > * > .permv14-col-resizer').forEach(r => r.remove());
+  }
+
+  function setupResizers() {
+    const grid = findGrid();
+    if (!grid) return;
+
+    // El grid tiene ~10 children (panes de varios tabs). Solo 5 son visibles
+    // a la vez (modo giros: sidebar | tabla | módulos | componentes | preview).
+    // Filtramos solo los que tienen ancho > 0 (display:none los excluye).
+    removeAllResizers(grid);
+    const visibleChildren = Array.from(grid.children).filter(c =>
+      !c.classList.contains('permv14-col-resizer') &&
+      c.offsetWidth > 0
+    );
+    if (visibleChildren.length < 2) return;
+
+    // Asegurar position:relative en cada pane visible
+    visibleChildren.forEach((pane) => {
+      const cs = getComputedStyle(pane);
+      if (cs.position === 'static') pane.style.position = 'relative';
+    });
+
+    // Inyectar resizer en cada pane visible excepto el último
+    for (let i = 0; i < visibleChildren.length - 1; i++) {
+      const pane = visibleChildren[i];
+      const r = document.createElement('div');
+      r.className = 'permv14-col-resizer';
+      r.dataset.visibleIndex = String(i);
+      r.title = 'Arrastra para redimensionar';
+      pane.appendChild(r);
+    }
+    grid.dataset.resizersInit = '1';
+
+    // Restaurar columnas guardadas
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) grid.style.gridTemplateColumns = saved;
+    } catch (_) {}
+
+    let dragging = null;
+
+    grid.addEventListener('mousedown', function (e) {
+      const r = e.target.closest('.permv14-col-resizer');
+      if (!r) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const colIdx = parseInt(r.dataset.visibleIndex, 10);
+      const cs = getComputedStyle(grid).gridTemplateColumns;
+      const startCols = cs.split(' ').map(p => parseFloat(p));
+      dragging = { colIdx, startX: e.clientX, startCols, resizer: r };
+      r.classList.add('is-dragging');
+      document.body.classList.add('permv14-resizing');
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      const dx = e.clientX - dragging.startX;
+      const newCols = dragging.startCols.slice();
+      const minW = MIN_WIDTHS[dragging.colIdx] || 100;
+      newCols[dragging.colIdx] = Math.max(minW, dragging.startCols[dragging.colIdx] + dx);
+      // Última col mantiene fracción flexible (1fr)
+      const colsStr = newCols.slice(0, -1).map(c => Math.round(c) + 'px').join(' ') + ' 1fr';
+      grid.style.gridTemplateColumns = colsStr;
+    });
+
+    document.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging.resizer.classList.remove('is-dragging');
+      document.body.classList.remove('permv14-resizing');
+      try { localStorage.setItem(STORAGE_KEY, grid.style.gridTemplateColumns); } catch (_) {}
+      dragging = null;
+    });
+  }
+
+  // Observa SOLO cambios de atributos clave para activar resizers cuando aparece
+  // el split layout. NO subtree/childList porque añadir resizers dispararía
+  // infinite loop. Debounced con rAF.
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => { scheduled = false; setupResizers(); });
+  }
+  function observe() {
+    setupResizers();
+    const screen = document.getElementById('screen-permisos');
+    if (!screen) return;
+    const mo = new MutationObserver(schedule);
+    mo.observe(screen, { attributes: true,
+                         attributeFilter: ['data-active-nav', 'data-giro-selected'] });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', observe);
+  } else {
+    observe();
+  }
+  // También al cambiar de tab/giro hace falta re-render
+  window.addEventListener('hashchange', () => setTimeout(setupResizers, 100));
 })();
 </script>
 
