@@ -3570,17 +3570,24 @@
     grid-template-rows: 1fr;
     grid-template-areas: none;
   }
-  /* V13.5: en modo COMPACTAR (split layout activo) ocultar todas las columnas
-     de la tabla maestra EXCEPTO Giro (col 1) + Landing pública (col 2).
-     El resto quedan ocultas para liberar espacio visual al lado izquierdo. */
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table thead th:nth-child(n+3),
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table tbody td:nth-child(n+3) {
-    display: none !important;
+  /* V13.6: en modo COMPACTAR, el área de la tabla es angosta (400px) pero la tabla
+     conserva su min-width original (5800px) para que las columnas 3+ existan y se
+     puedan ver SCROLLEANDO horizontalmente. Las columnas 1 (Giro) y 2 (Landing)
+     quedan sticky/fijas siempre visibles aunque hagas scroll. */
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table-wrap {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
   }
-  /* V13.5: reducir min-width de la tabla cuando está en modo compactar
-     para que no fuerce scroll horizontal con columnas ocultas. */
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table {
-    min-width: 380px !important;
+  /* Refuerza scrollbar horizontal visible (algunos browsers lo ocultan) */
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table-wrap::-webkit-scrollbar {
+    height: 10px;
+  }
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table-wrap::-webkit-scrollbar-thumb {
+    background: var(--pv-text-dim);
+    border-radius: 5px;
+  }
+  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .vlx-giros-table-wrap::-webkit-scrollbar-track {
+    background: var(--pv-surface);
   }
   /* V13.4: items dentro del components-pane ocupan 100% del ancho disponible */
   #screen-permisos.permv14 .permv14-components-pane #permv14-components-body > *,
