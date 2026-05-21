@@ -3629,27 +3629,38 @@
     overflow: hidden;
     min-height: 0;
   }
-  /* V10.17/V10.19 FIX: cuando nav=giros SIN selección, tabla full-width.
-     V10.19: cuando hay giro seleccionado, layout 4 COLUMNAS horizontales:
-     [sidebar | tabla con scroll horizontal | config | preview]
-     NO apilar vertical (eso era V10.18 que el usuario rechazó). */
-  #screen-permisos.permv14[data-active-nav="giros"] .permv14-grid {
-    grid-template-columns: 52px 1fr 0 0;
-  }
-  /* V13.18: ANCHURAS FIJAS + SCROLL HORIZONTAL — usuario solicitó que las
-     columnas NO se compriman; el contenedor crece horizontalmente con scroll
-     si excede viewport. 6 columnas TOTAL incluyendo "POS Completo" como 6ta.
-     Total min-width = 52+400+300+260+800+1100 = 2912px → fuerza scroll en monitores <2912
-     V13.22: el scroll estaba en #screen-permisos (overflow:hidden, no visible scrollbar).
-     Fix: poner overflow-x:auto en SCREEN y SHELL para que scrollbar sea visible al usuario. */
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] {
+  /* V13.24 FIX: overflow-x:auto en #screen-permisos para AMBOS modos (Expandir
+     y Compactar) — la tabla de 5800px es scrolleable aunque NO haya giro seleccionado.
+     V10.17/V10.19: nav=giros SIN selección → tabla full-width (grid 1fr).
+     V13.18: nav=giros CON selección → 6 columnas fijas (2912px total). */
+  #screen-permisos.permv14[data-active-nav="giros"] {
     overflow-x: auto !important;
     overflow-y: hidden;
   }
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] #perm-content {
+  #screen-permisos.permv14[data-active-nav="giros"] #perm-content {
     overflow-x: visible;
     min-width: max-content;
   }
+  #screen-permisos.permv14[data-active-nav="giros"] .permv14-grid {
+    grid-template-columns: 52px 1fr 0 0;
+    overflow-x: visible;
+    min-width: max-content;
+  }
+  /* Custom scrollbar horizontal para TODOS los modos giros (Expandir y Compactar) */
+  #screen-permisos.permv14[data-active-nav="giros"]::-webkit-scrollbar {
+    height: 14px;
+  }
+  #screen-permisos.permv14[data-active-nav="giros"]::-webkit-scrollbar-thumb {
+    background: var(--pv-accent);
+    border-radius: 7px;
+    border: 2px solid var(--pv-bg);
+  }
+  #screen-permisos.permv14[data-active-nav="giros"]::-webkit-scrollbar-track {
+    background: var(--pv-surface);
+  }
+  /* V13.18: ANCHURAS FIJAS — layout COMPACTAR (giro seleccionado).
+     6 columnas: sidebar | tabla | config | preview | módulos | POS Completo
+     Total min-width = 52+400+300+260+800+1100 = 2912px */
   #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid {
     grid-template-columns: 52px 400px 300px 260px 800px 1100px;
     grid-template-rows: 1fr;
@@ -3657,18 +3668,6 @@
     overflow-x: visible;
     overflow-y: hidden;
     min-width: max-content;
-  }
-  /* Custom scrollbar horizontal en el screen container (más visible) */
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"]::-webkit-scrollbar {
-    height: 14px;
-  }
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"]::-webkit-scrollbar-thumb {
-    background: var(--pv-accent);
-    border-radius: 7px;
-    border: 2px solid var(--pv-bg);
-  }
-  #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"]::-webkit-scrollbar-track {
-    background: var(--pv-surface);
   }
   /* DEPRECADO V13.18 — anteriormente flex layout reducía columnas, eliminado: */
   #screen-permisos.permv14[data-active-nav="giros"][data-giro-selected="true"] .permv14-grid.OLD_FLEX_LAYOUT {
