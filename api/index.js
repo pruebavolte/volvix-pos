@@ -13281,21 +13281,29 @@ handlers['GET /api/config/public'] = async (req, res) => {
   };
   // V13.10: POST /api/giros/track-search — invocado por marketplace.html
   // cuando un usuario busca un giro. Crea o incrementa el contador.
+  // V13.25 FIX: usar readBody (no readJSON que no existe). Reportar error
+  // de inserción a Supabase para diagnóstico (antes era no-op silencioso
+  // que hacía ver el contador siempre en 0 sin pista de por qué).
   handlers['POST /api/giros/track-search'] = async (req, res) => {
     try {
-      const body = await readJSON(req);
+      const body = await readBody(req);
       const slug = String(body.slug || body.q || '').toLowerCase().trim().slice(0, 100);
       if (!slug) return sendJSON(res, { ok: false, error: 'slug requerido' }, 400);
-      // Insert row in volvix_giro_searches (best-effort; tabla puede no existir)
+      let inserted = false;
+      let insertError = null;
       try {
         await supabaseRequest('POST', '/volvix_giro_searches', {
           slug,
           searched_at: new Date().toISOString(),
           query_raw: String(body.q || '').slice(0, 200),
           ip_hash: req.headers['x-forwarded-for'] ? crypto.createHash('sha256').update(String(req.headers['x-forwarded-for'])).digest('hex').slice(0,16) : null,
+          user_agent: String(req.headers['user-agent'] || '').slice(0, 200),
         });
-      } catch (_) { /* tabla no existe — no-op silencioso */ }
-      sendJSON(res, { ok: true, slug });
+        inserted = true;
+      } catch (e) {
+        insertError = String(e.message || e).slice(0, 300);
+      }
+      sendJSON(res, { ok: true, slug, inserted, insertError });
     } catch (e) {
       sendJSON(res, { ok: false, error: String(e.message || e) }, 500);
     }
