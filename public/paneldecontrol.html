@@ -7856,9 +7856,24 @@
     }
     loadGiroStats();
   };
-  // Llamar al cargar el módulo giros
+  // V13.25: Auto-refresh cada 20s para ver el contador "Buscado hoy" subir en vivo.
+  // Cuando un usuario busca un giro en /marketplace.html, en ≤20s aparece reflejado.
+  let _giroStatsInterval = null;
+  function _startGiroStatsAutoRefresh() {
+    if (_giroStatsInterval) return; // idempotente
+    _giroStatsInterval = setInterval(() => {
+      // Solo refrescar si la tab giros está activa (no consumir red de fondo)
+      const screen = document.getElementById('screen-permisos');
+      const active = screen && screen.getAttribute('data-active-nav');
+      if (active === 'giros') loadGiroStats();
+    }, 20000);
+  }
+  // Llamar al cargar el módulo giros + arrancar auto-refresh
   if (typeof window !== 'undefined') {
-    window.addEventListener('load', () => setTimeout(loadGiroStats, 1500));
+    window.addEventListener('load', () => {
+      setTimeout(loadGiroStats, 1500);
+      setTimeout(_startGiroStatsAutoRefresh, 2000);
+    });
   }
   function ecosystemRowFor(slug, dataset) {
     if (!dataset || !Array.isArray(dataset.giros)) return null;
