@@ -6520,6 +6520,10 @@
     // 2026-05-09: hidratar catálogos unificados ANTES de renderizar.
     // Combina BD (canónico) + constantes hardcoded (fallback / overlay legacy).
     await loadAllCatalogs();
+    // V13.11: cargar ecosystem (295 giros) ANTES de calcular allGiroSlugs
+    if (typeof loadEcosystem === 'function') {
+      try { await loadEcosystem(); } catch (_) {}
+    }
     const PROFILES = Object.assign({}, window.INDUSTRY_PROFILES || {}, window.INDUSTRY_PROFILES_FROM_BD || {});
     const LABELS = Object.assign({}, window.INDUSTRY_LABELS || {}, window.INDUSTRY_LABELS_FROM_BD || {});
     // 2026-05-09 SYNC FIX: rellenar bucket "Otros (BD)" con giros de BD que no
@@ -6528,7 +6532,13 @@
     for (const cat of Object.values(GIRO_CATEGORIES)) {
       if (cat !== GIRO_CATEGORIES.otros) cat.items.forEach(s => catalogedGiroSet.add(s));
     }
-    const allGiroSlugs = Object.keys(PROFILES);
+    // V13.11: incluir TODOS los giros del ecosystem JSON (295 giros), no solo
+    // los que están en INDUSTRY_PROFILES (hardcoded). Antes solo se mostraban
+    // ~38 giros porque GIRO_CATEGORIES.otros solo agarraba los de PROFILES.
+    const ecoSlugs = (window._ecosystemCache && Array.isArray(window._ecosystemCache.giros))
+      ? window._ecosystemCache.giros.map(g => g.slug).filter(Boolean)
+      : [];
+    const allGiroSlugs = Array.from(new Set([...Object.keys(PROFILES), ...ecoSlugs]));
     GIRO_CATEGORIES.otros.items = allGiroSlugs.filter(s => !catalogedGiroSet.has(s)).sort();
     const counts = await loadTenantCountsByGiro();
     // 2026-05-09: botón "+ Nuevo Giro" inyectado al inicio del wrap (sticky)
@@ -6776,13 +6786,17 @@
     }
 
     // Recopilar todos los giros visibles agrupados por categoría
+    // V13.11: ya NO requerimos PROFILES[slug] — incluimos también los 257
+    // giros del ecosystem JSON que no están en INDUSTRY_PROFILES hardcoded.
     const usedSlugs = new Set();
     const groupedVisible = [];
     Object.entries(GIRO_CATEGORIES).forEach(([catKey, cat]) => {
       const visible = cat.items.filter(slug => {
-        if (usedSlugs.has(slug) || !PROFILES[slug]) return false;
-        const label = LABELS[slug] || slug;
+        if (usedSlugs.has(slug)) return false;
+        // V13.11: aceptar slug si existe en PROFILES O en ecosystem (eco fallback)
+        const label = LABELS[slug] || (window._ecosystemCache && window._ecosystemCache.giros.find(g => g.slug === slug)?.name) || slug;
         const ecoRow = findEcoFor(slug, label);
+        if (!PROFILES[slug] && !ecoRow) return false; // skip si no existe en ningún lado
         return matchSearch(slug, label, ecoRow);
       });
       if (!visible.length) return;
