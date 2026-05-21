@@ -11546,8 +11546,9 @@
 <script>
 (function () {
   'use strict';
-  const STORAGE_KEY = 'permv14-grid-cols-v1';
-  const MIN_WIDTHS = [40, 200, 200, 180, 250]; // mínimo por columna (sidebar puede ser angosta)
+  // V13.21: bumped a v2 para invalidar layouts guardados con 1fr (bug anterior)
+  const STORAGE_KEY = 'permv14-grid-cols-v2';
+  const MIN_WIDTHS = [40, 200, 200, 180, 250, 600]; // 6 cols: sidebar|tabla|módulos|comp|preview|pos-full
 
   function findGrid() {
     // El grid solo está activo cuando giros + giro-selected
@@ -11599,10 +11600,15 @@
     }
     grid.dataset.resizersInit = '1';
 
-    // Restaurar columnas guardadas
+    // Restaurar columnas guardadas — solo si son todas px (sin 1fr) y >= 6 cols
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) grid.style.gridTemplateColumns = saved;
+      if (saved && !saved.includes('1fr') && saved.trim().split(/\s+/).length >= 6) {
+        grid.style.gridTemplateColumns = saved;
+      } else if (saved) {
+        // Layout guardado inválido → limpiar y usar CSS default
+        localStorage.removeItem(STORAGE_KEY);
+      }
     } catch (_) {}
 
     let dragging = null;
@@ -11626,8 +11632,9 @@
       const newCols = dragging.startCols.slice();
       const minW = MIN_WIDTHS[dragging.colIdx] || 100;
       newCols[dragging.colIdx] = Math.max(minW, dragging.startCols[dragging.colIdx] + dx);
-      // Última col mantiene fracción flexible (1fr)
-      const colsStr = newCols.slice(0, -1).map(c => Math.round(c) + 'px').join(' ') + ' 1fr';
+      // V13.21: todas las columnas como px fijos (sin 1fr al final)
+      // — preserva el layout 6 columnas de V13.18 con scroll horizontal
+      const colsStr = newCols.map(c => Math.round(c) + 'px').join(' ');
       grid.style.gridTemplateColumns = colsStr;
     });
 
