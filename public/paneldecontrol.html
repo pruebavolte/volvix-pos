@@ -3174,35 +3174,66 @@
             </div>
           </main>
 
-          <!-- COLUMNA 5: VISTA PREVIA (flex 1) — mockup reactivo (lee del cache, NO iframe) -->
+          <!-- COLUMNA 5: VISTA PREVIA (flex 1) — V13.8: IFRAMES REALES (POS + Landing) responsive -->
           <main class="permv14-preview-pane" data-permv14-pane="modules">
             <div class="permv14-preview-toolbar">
-              <span class="permv14-preview-label">Vista previa · cómo lo ve el cliente</span>
+              <div class="permv14-view-tabs">
+                <button class="permv14-view-tab active" data-permv14-view="pos" title="App POS real">🛒 App POS</button>
+                <button class="permv14-view-tab" data-permv14-view="landing" title="Landing page pública">🌐 Landing</button>
+                <button class="permv14-view-tab" data-permv14-view="both" title="POS + Landing simultáneo">📊 Ambos</button>
+              </div>
               <div class="permv14-device-tabs">
                 <button class="permv14-device-tab active" data-permv14-device="desktop">🖥 Desktop</button>
                 <button class="permv14-device-tab" data-permv14-device="mobile">📱 Móvil</button>
-                <button class="permv14-device-tab" data-permv14-device="both">📊 Ambos</button>
+                <button class="permv14-device-tab" data-permv14-device="both">↔ Ambos</button>
               </div>
             </div>
             <div class="permv14-preview-canvas">
-              <!-- Desktop frame -->
-              <div class="permv14-device-desktop" data-permv14-frame="desktop">
-                <div class="permv14-device-chrome">
-                  <span class="permv14-chrome-dot r"></span>
-                  <span class="permv14-chrome-dot y"></span>
-                  <span class="permv14-chrome-dot g"></span>
-                  <span class="permv14-chrome-url" id="permv14-preview-url">tenant.salvadorex.app/pos</span>
-                </div>
-                <div class="permv14-device-screen" id="permv14-preview-desktop">
-                  <div class="permv14-empty-row">Selecciona un módulo</div>
+              <!-- ─── POS REAL ─── -->
+              <div class="permv14-preview-section" data-permv14-section="pos">
+                <div class="permv14-preview-section-label">🛒 App POS · vista cliente</div>
+                <div class="permv14-preview-frames">
+                  <!-- Desktop frame: iframe REAL del POS -->
+                  <div class="permv14-device-desktop" data-permv14-frame="desktop">
+                    <div class="permv14-device-chrome">
+                      <span class="permv14-chrome-dot r"></span>
+                      <span class="permv14-chrome-dot y"></span>
+                      <span class="permv14-chrome-dot g"></span>
+                      <span class="permv14-chrome-url" id="permv14-preview-pos-url">tenant.salvadorex.app</span>
+                    </div>
+                    <div class="permv14-device-screen permv14-iframe-host">
+                      <iframe id="permv14-preview-pos-iframe-desktop" class="permv14-iframe-real" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="POS desktop"></iframe>
+                    </div>
+                  </div>
+                  <!-- Mobile frame: iframe REAL del POS a 390px (iPhone 14/15) -->
+                  <div class="permv14-device-mobile" data-permv14-frame="mobile" hidden>
+                    <div class="permv14-device-mobile-screen">
+                      <div class="permv14-mobile-statusbar"><span>9:41</span><span>📶 5G</span><span>🔋 92%</span></div>
+                      <iframe id="permv14-preview-pos-iframe-mobile" class="permv14-iframe-mobile-real" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="POS mobile"></iframe>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <!-- Mobile frame -->
-              <div class="permv14-device-mobile" data-permv14-frame="mobile" hidden>
-                <div class="permv14-device-mobile-screen">
-                  <div class="permv14-mobile-statusbar"><span>9:41</span><span>📶</span><span>🔋</span></div>
-                  <div class="permv14-mobile-content" id="permv14-preview-mobile">
-                    <div class="permv14-empty-row">Selecciona un módulo</div>
+              <!-- ─── LANDING REAL ─── -->
+              <div class="permv14-preview-section" data-permv14-section="landing" hidden>
+                <div class="permv14-preview-section-label">🌐 Landing page pública</div>
+                <div class="permv14-preview-frames">
+                  <div class="permv14-device-desktop" data-permv14-frame="desktop">
+                    <div class="permv14-device-chrome">
+                      <span class="permv14-chrome-dot r"></span>
+                      <span class="permv14-chrome-dot y"></span>
+                      <span class="permv14-chrome-dot g"></span>
+                      <span class="permv14-chrome-url" id="permv14-preview-landing-url">systeminternational.app</span>
+                    </div>
+                    <div class="permv14-device-screen permv14-iframe-host">
+                      <iframe id="permv14-preview-landing-iframe-desktop" class="permv14-iframe-real" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="Landing desktop"></iframe>
+                    </div>
+                  </div>
+                  <div class="permv14-device-mobile" data-permv14-frame="mobile" hidden>
+                    <div class="permv14-device-mobile-screen">
+                      <div class="permv14-mobile-statusbar"><span>9:41</span><span>📶 5G</span><span>🔋 92%</span></div>
+                      <iframe id="permv14-preview-landing-iframe-mobile" class="permv14-iframe-mobile-real" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="Landing mobile"></iframe>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -4332,6 +4363,64 @@
   #screen-permisos.permv14 .permv14-device-tab.active {
     background: var(--pv-bg-paper); color: var(--pv-accent);
     box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+  /* V13.8: View tabs (POS / Landing / Both) — al lado del device-tabs */
+  #screen-permisos.permv14 .permv14-view-tabs {
+    display: inline-flex; background: var(--pv-surface);
+    border-radius: 6px; padding: 2px;
+  }
+  #screen-permisos.permv14 .permv14-view-tab {
+    background: transparent; border: none;
+    padding: 4px 10px; border-radius: 4px;
+    color: var(--pv-text-muted);
+    font-family: var(--pv-font-body); font-size: 11px; font-weight: 500;
+    cursor: pointer;
+  }
+  #screen-permisos.permv14 .permv14-view-tab.active {
+    background: var(--pv-bg-paper); color: var(--pv-accent);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+  /* V13.8: secciones separadas (POS + Landing) — stack vertical en modo "ambos" */
+  #screen-permisos.permv14 .permv14-preview-section {
+    display: flex; flex-direction: column; gap: 8px;
+    width: 100%; max-width: 100%;
+  }
+  #screen-permisos.permv14 .permv14-preview-section-label {
+    font-family: var(--pv-font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--pv-accent);
+    font-weight: 600;
+  }
+  #screen-permisos.permv14 .permv14-preview-frames {
+    display: flex; gap: 16px;
+    align-items: flex-start; justify-content: center;
+    flex-wrap: wrap;
+  }
+  /* V13.8: iframe REAL desktop — ocupa todo el screen con altura calculada */
+  #screen-permisos.permv14 .permv14-iframe-host {
+    padding: 0 !important;
+    min-height: 480px;
+    height: 540px;
+    background: #fff;
+    position: relative;
+  }
+  #screen-permisos.permv14 .permv14-iframe-real {
+    width: 100%; height: 100%;
+    border: 0; display: block;
+    background: #fff;
+  }
+  /* V13.8: iframe REAL mobile — 390px (iPhone 14/15 width) dentro del bezel */
+  #screen-permisos.permv14 .permv14-iframe-mobile-real {
+    width: 100%; height: calc(100% - 28px);
+    border: 0; display: block;
+    background: #fff;
+  }
+  /* V13.8: Mobile frame ampliado a 390px (era 280px) para simular iPhone real */
+  #screen-permisos.permv14 .permv14-preview-pane .permv14-device-mobile {
+    width: 390px;
+  }
+  #screen-permisos.permv14 .permv14-preview-pane .permv14-device-mobile-screen {
+    height: 700px;
   }
   #screen-permisos.permv14 .permv14-preview-canvas {
     flex: 1; overflow-y: auto;
@@ -11112,6 +11201,167 @@
       }
     } catch(_) {}
   });
+})();
+</script>
+
+<!-- V13.8: Vista previa REAL con iframes (POS + Landing) responsive Desktop/Mobile -->
+<script>
+(function () {
+  'use strict';
+  // Cache para evitar recargar iframes innecesariamente
+  let lastLoadedSlug = null;
+  let lastView = 'pos';
+  let lastDevice = 'desktop';
+
+  function getCurrentGiroSlug() {
+    // 1) selectedGiro del estado v14 (si existe)
+    if (window.v14 && window.v14.selectedGiro) return window.v14.selectedGiro;
+    // 2) fallback al data-permv14-giro del row seleccionado
+    const sel = document.querySelector('.vlx-giros-table tr.is-selected');
+    if (sel && sel.dataset.permv14Giro) return sel.dataset.permv14Giro;
+    // 3) primer giro de la lista (default)
+    const first = document.querySelector('.vlx-giros-table tbody tr[data-permv14-giro]');
+    if (first && first.dataset.permv14Giro) return first.dataset.permv14Giro;
+    return null;
+  }
+
+  function buildUrls(slug) {
+    if (!slug) return null;
+    // Normaliza slug (puede venir con underscore o dash)
+    const slugDash = slug.replace(/_/g, '-');
+    return {
+      // POS app: usa el preview mode con giro pre-cargado
+      pos: '/salvadorex-pos.html?preview=1&giro=' + encodeURIComponent(slug) + '#pos',
+      // Landing: archivo físico si existe, fallback al template universal
+      landing: '/landing-' + slugDash + '.html',
+      landingFallback: '/landing-template.html?giro=' + encodeURIComponent(slug),
+    };
+  }
+
+  function setIframeSrc(iframe, url) {
+    if (!iframe) return;
+    if (iframe.dataset.lastSrc === url) return; // skip reload si misma URL
+    iframe.dataset.lastSrc = url;
+    iframe.src = url;
+  }
+
+  function loadPreview() {
+    const slug = getCurrentGiroSlug();
+    if (!slug) return;
+    const urls = buildUrls(slug);
+    if (!urls) return;
+
+    // Setear iframe landing al URL físico — si no existe, onerror dispara fallback
+    function setLandingWithFallback(iframe) {
+      if (!iframe) return;
+      iframe.dataset.lastSrc = urls.landing;
+      iframe.src = urls.landing;
+      // Si el iframe carga 404, fallback al template
+      iframe.onload = () => {
+        try {
+          const doc = iframe.contentDocument;
+          if (doc && doc.title && /404|no encontrado/i.test(doc.title)) {
+            iframe.src = urls.landingFallback;
+          }
+        } catch (_) { /* cross-origin */ }
+      };
+    }
+
+    // Setear iframes (POS desktop + mobile, Landing desktop + mobile)
+    setIframeSrc(document.getElementById('permv14-preview-pos-iframe-desktop'), urls.pos);
+    setIframeSrc(document.getElementById('permv14-preview-pos-iframe-mobile'), urls.pos);
+    setLandingWithFallback(document.getElementById('permv14-preview-landing-iframe-desktop'));
+    setLandingWithFallback(document.getElementById('permv14-preview-landing-iframe-mobile'));
+
+    // Actualizar URL bar
+    const posUrlEl = document.getElementById('permv14-preview-pos-url');
+    const landingUrlEl = document.getElementById('permv14-preview-landing-url');
+    if (posUrlEl) posUrlEl.textContent = slug + '.salvadorex.app';
+    if (landingUrlEl) landingUrlEl.textContent = 'systeminternational.app' + urls.landing;
+    lastLoadedSlug = slug;
+  }
+
+  function applyViewMode(view) {
+    lastView = view;
+    const posSection = document.querySelector('[data-permv14-section="pos"]');
+    const landingSection = document.querySelector('[data-permv14-section="landing"]');
+    if (!posSection || !landingSection) return;
+    if (view === 'pos') {
+      posSection.hidden = false;
+      landingSection.hidden = true;
+    } else if (view === 'landing') {
+      posSection.hidden = true;
+      landingSection.hidden = false;
+    } else { // 'both'
+      posSection.hidden = false;
+      landingSection.hidden = false;
+    }
+    // Update tab active state
+    document.querySelectorAll('.permv14-view-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.permv14View === view);
+    });
+  }
+
+  function applyDeviceMode(device) {
+    lastDevice = device;
+    document.querySelectorAll('.permv14-preview-section [data-permv14-frame="desktop"]').forEach(el => {
+      el.hidden = (device === 'mobile');
+    });
+    document.querySelectorAll('.permv14-preview-section [data-permv14-frame="mobile"]').forEach(el => {
+      el.hidden = (device === 'desktop');
+    });
+    document.querySelectorAll('.permv14-device-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.permv14Device === device);
+    });
+  }
+
+  function init() {
+    // Event delegation para los tabs (sobreviven re-renders)
+    document.addEventListener('click', function (e) {
+      const viewTab = e.target.closest('.permv14-view-tab');
+      if (viewTab) {
+        e.preventDefault();
+        e.stopPropagation();
+        applyViewMode(viewTab.dataset.permv14View);
+        return;
+      }
+      const deviceTab = e.target.closest('.permv14-device-tab');
+      if (deviceTab) {
+        e.preventDefault();
+        e.stopPropagation();
+        applyDeviceMode(deviceTab.dataset.permv14Device);
+        return;
+      }
+    });
+
+    // Watch para cambios de giro seleccionado
+    const screen = document.getElementById('screen-permisos');
+    if (screen) {
+      const mo = new MutationObserver(() => {
+        if (screen.getAttribute('data-giro-selected') === 'true') {
+          setTimeout(loadPreview, 100);
+        }
+      });
+      mo.observe(screen, { attributes: true, attributeFilter: ['data-giro-selected'] });
+
+      // También observar cuando se haga click en una fila de giro
+      document.addEventListener('click', function (e) {
+        const row = e.target.closest('.vlx-giros-table tbody tr:not(.vlx-giros-group-label)');
+        if (row) setTimeout(loadPreview, 150);
+      });
+    }
+
+    // Inicial: si ya hay giro seleccionado
+    if (screen && screen.getAttribute('data-giro-selected') === 'true') {
+      setTimeout(loadPreview, 200);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
 </script>
 
