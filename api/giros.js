@@ -119,6 +119,27 @@ async function listGiros(ctx, req, res) {
   return send(ctx, res, 200, { count: giros.length, giros });
 }
 
+// V13.12: lista todos los giros DINÁMICOS de Supabase verticals (LLM-generados)
+// Estos NO aparecen en scanLandings() porque su landing es generada on-demand.
+async function dynamicGiros(ctx, req, res) {
+  let rows = [];
+  if (ctx && typeof ctx.supabaseRequest === 'function') {
+    try {
+      rows = await ctx.supabaseRequest('GET',
+        '/verticals?select=code,name,description,created_at&order=created_at.desc&limit=500');
+    } catch (_) {}
+  }
+  const giros = Array.isArray(rows) ? rows.map(r => ({
+    slug: r.code,
+    name: r.name || r.code,
+    landing: '/landing-' + r.code + '.html',
+    description: r.description || '',
+    created_at: r.created_at,
+    source: 'llm_generated',
+  })) : [];
+  return send(ctx, res, 200, { count: giros.length, giros });
+}
+
 // V13.10: stats por giro (búsquedas + usuarios)
 async function statsGiros(ctx, req, res) {
   const stats = { searchesToday: 0, totalTenants: 0, byGiro: {} };
@@ -1662,6 +1683,7 @@ module.exports = async function handleGiros(req, res, parsedUrl, ctx) {
     if (method === 'GET'  && pathname === '/api/giros/autocomplete')  { await autocompleteGiros(ctx, req, res, parsedUrl); return true; }
     if (method === 'GET'  && pathname === '/api/giros/config')        { await configGiro(ctx, req, res, parsedUrl); return true; }
     if (method === 'GET'  && pathname === '/api/giros/stats')         { await statsGiros(ctx, req, res); return true; }
+    if (method === 'GET'  && pathname === '/api/giros/dynamic')        { await dynamicGiros(ctx, req, res); return true; }
     if (method === 'POST' && pathname === '/api/giros/generate')      { await generateGiro(ctx, req, res); return true; }
     if (method === 'POST' && pathname === '/api/giros/resync-images')  { await resyncImages(ctx, req, res); return true; }
     if (method === 'POST' && pathname === '/api/giros/save-image')     { await saveProductImage(ctx, req, res); return true; }
