@@ -3715,6 +3715,35 @@
   .vlx-giros-table tr.is-selected td {
     background: var(--pv-accent-soft) !important;
   }
+  /* V13.1 — Modo COMPACTO: filas comprimidas + texto truncado */
+  .vlx-giros-table-wrap.vlx-compact .vlx-giros-table td {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    max-height: 50px !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+  }
+  .vlx-giros-table-wrap.vlx-compact .vlx-giros-table td > div,
+  .vlx-giros-table-wrap.vlx-compact .vlx-giros-table td > span {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .vlx-giros-table-wrap.vlx-compact .vlx-giros-table td img {
+    width: 28px !important;
+    height: 28px !important;
+  }
+  .vlx-giros-table-wrap.vlx-compact .vlx-giros-table tr {
+    max-height: 50px !important;
+  }
+  .vlx-giros-table-wrap.vlx-compact .vlx-giros-table .vlx-giros-group-label td {
+    padding: 4px 14px !important;
+    font-size: 9px !important;
+  }
   .vlx-giros-table td {
     padding: 9px 10px;
     border-bottom: 1px solid var(--pv-border);
@@ -6376,9 +6405,28 @@
     if (!document.getElementById('permv14-giro-create-btn-host')) {
       const host = document.createElement('div');
       host.id = 'permv14-giro-create-btn-host';
-      host.style.cssText = 'padding:8px 10px;border-bottom:1px solid var(--pv-border);background:var(--pv-bg-paper);position:sticky;top:0;z-index:5;';
-      host.innerHTML = '<button id="permv14-giro-create-btn" style="width:100%;background:var(--pv-accent);color:#fff;border:none;padding:6px 10px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;">+ Nuevo Giro</button>';
+      host.style.cssText = 'padding:8px 10px;border-bottom:1px solid var(--pv-border);background:var(--pv-bg-paper);position:sticky;top:0;z-index:5;display:flex;gap:8px;';
+      // V13.1: botón compactar/expandir al lado del Nuevo Giro
+      const compactInitial = localStorage.getItem('vlx-giros-compact') === '1';
+      host.innerHTML =
+        '<button id="permv14-giro-create-btn" style="flex:1;background:var(--pv-accent);color:#fff;border:none;padding:6px 10px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;">+ Nuevo Giro</button>' +
+        '<button id="permv14-giro-compact-btn" title="Compactar/Expandir filas" style="background:#fff;color:var(--pv-text);border:1px solid var(--pv-border);padding:6px 12px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">' +
+          (compactInitial ? '🔼 Expandir' : '🔽 Compactar') +
+        '</button>';
       wrap.parentNode.insertBefore(host, wrap);
+      // Handler del compactar
+      host.querySelector('#permv14-giro-compact-btn').addEventListener('click', () => {
+        const w = document.querySelector('.vlx-giros-table-wrap');
+        if (!w) return;
+        const isCompact = w.classList.toggle('vlx-compact');
+        localStorage.setItem('vlx-giros-compact', isCompact ? '1' : '0');
+        host.querySelector('#permv14-giro-compact-btn').textContent = isCompact ? '🔼 Expandir' : '🔽 Compactar';
+      });
+      // Aplicar estado inicial al wrap
+      setTimeout(() => {
+        const w = document.querySelector('.vlx-giros-table-wrap');
+        if (w && compactInitial) w.classList.add('vlx-compact');
+      }, 50);
       host.querySelector('button').addEventListener('click', async () => {
         // 2026-05-09 fix(M5): UN solo modal con 2 fields en vez de 2 prompts nativos.
         const res = await permv14Modal({
