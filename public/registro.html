@@ -386,7 +386,8 @@
       // Combinar URL params (mas prioridad) + sessionStorage cache
       var cache = getCache();
       var giro = getParam('giro') || cache.giro || cache.query || '';
-      var negocio = getParam('negocio') || cache.business_name || cache.nombre_comercial || '';
+      // V13.13 FIX: marketplace usa ?nombre= (no ?negocio=), aceptar ambos
+      var negocio = getParam('nombre') || getParam('negocio') || cache.business_name || cache.nombre_comercial || '';
       // Si tenemos giro pero no nombre, derivar nombre del giro:
       // "Café Lizingh" -> nombre = "Café Lizingh", giro = "café"/"cafetería" si
       // queda match exacto, o "Café Lizingh" como custom.
