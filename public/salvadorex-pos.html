@@ -24180,14 +24180,27 @@ window.addEventListener('volvix:version-loaded', function(e){
       // 1) URL param tiene prioridad (demos, testing)
       var u = new URL(window.location.href);
       var giro = u.searchParams.get('giro');
-      // 2) V13.13 FIX: si no hay URL param, leer business_type del tenant logueado
+      // 2) V13.13/V13.14 FIX: si no hay URL param, leer business_type del tenant
+      // logueado. Probar AMBAS keys de session (legacy salvadorex_session +
+      // moderno volvixSession). Plus JWT payload como último fallback.
       if (!giro) {
         try {
-          var sess = JSON.parse(localStorage.getItem('volvixSession') || '{}');
-          giro = (sess.business_type
-                  || (sess.user && sess.user.business_type)
-                  || (sess.user && sess.user.notes && sess.user.notes.business_type)
+          var v1 = JSON.parse(localStorage.getItem('volvixSession') || '{}');
+          var v2 = JSON.parse(localStorage.getItem('salvadorex_session') || '{}');
+          giro = (v2.business_type
+                  || v1.business_type
+                  || (v1.user && v1.user.business_type)
+                  || (v1.user && v1.user.notes && v1.user.notes.business_type)
                   || '').toString().toLowerCase().trim();
+          // JWT fallback
+          if (!giro) {
+            var tok = localStorage.getItem('volvix_token') || '';
+            var parts = tok.split('.');
+            if (parts.length >= 2) {
+              var payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+              giro = (payload.business_type || '').toString().toLowerCase().trim();
+            }
+          }
         } catch(_) {}
       }
       if (giro && typeof window.applyGiroConfig === 'function') {

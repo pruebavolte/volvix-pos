@@ -76,11 +76,13 @@ function mintDevJwt() {
 const DEV_JWT = mintDevJwt();
 const DEV_SESSION = JSON.stringify({
   user_id: 'dev-localhost-uid',
+  business_type: 'taqueria',
   user: {
     id: 'dev-localhost-uid',
     email: 'admin@systeminternational.app',
     full_name: 'Dev Admin (localhost)',
     role: 'superadmin',
+    business_type: 'taqueria',
     tenant_id: null,
   },
   token: DEV_JWT,
