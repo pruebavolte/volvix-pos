@@ -41,10 +41,29 @@ section h2 { font-size: 32px; margin-bottom: 32px; text-align: center; color: #1
 .cta-final h2 { color: #fff; }
 .badge { display: inline-block; background: rgba(255,255,255,0.2); color: #fff; padding: 4px 12px; border-radius: 999px; font-size: 12px; margin-bottom: 16px; }
 .loading { padding: 100px 20px; text-align: center; color: #6b7280; font-size: 18px; }
-@media (max-width: 640px) {
-  .hero h1 { font-size: 32px; }
+/* V13.16: Responsive completo para mobile */
+@media (max-width: 768px) {
+  .hero { padding: 50px 16px 40px; }
+  .hero h1 { font-size: 32px; line-height: 1.2; }
   .hero p { font-size: 16px; }
-  .hero .emoji-big { font-size: 56px; }
+  .hero .emoji-big { font-size: 60px; }
+  section { padding: 40px 16px; }
+  section h2 { font-size: 24px; margin-bottom: 24px; }
+  .grid { grid-template-columns: 1fr; gap: 14px; }
+  .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .product-card img { height: 110px; }
+  .product-card .body { padding: 8px; }
+  .product-card .name { font-size: 12px; }
+  .cta-row { gap: 10px; }
+  .btn { padding: 12px 20px; font-size: 14px; width: 100%; max-width: 280px; box-sizing: border-box; text-align: center; }
+  .cta-final { padding: 40px 16px; }
+  .footer { padding: 24px 16px; }
+  .footer a { display: inline-block; margin: 4px 8px; }
+}
+@media (max-width: 380px) {
+  .hero h1 { font-size: 26px; }
+  .hero .emoji-big { font-size: 48px; }
+  .products-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>

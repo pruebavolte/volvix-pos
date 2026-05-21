@@ -878,6 +878,34 @@ footer a:hover{color:var(--brand)}
   .stats-grid > div{border-right:none!important;padding-left:0!important;border-top:1px solid rgba(255,255,255,.15);padding-top:14px}
   .stats-grid > div:first-child{border-top:none;padding-top:0}
   footer > div{flex-direction:column;text-align:center}
+  /* V13.16: refinamiento mobile completo */
+  .hero h1, #hero-title{ font-size:clamp(28px,7vw,40px)!important; line-height:1.15!important }
+  .hero .sub, .sub{ font-size:15px; }
+  .hero{ padding:32px 16px 16px!important; gap:20px!important }
+  .search-box{ padding:8px!important; }
+  .search-input{ font-size:16px!important; padding:12px 14px!important; }
+  .search-btn{ padding:14px!important; font-size:14px!important; }
+  section{ padding-left:16px!important; padding-right:16px!important }
+  .industry-grid, .industries-grid{ grid-template-columns:1fr 1fr!important; gap:10px!important }
+  .industry-card{ padding:14px!important }
+  .industry-card .icon, .industry-card .industry-icon{ font-size:32px!important }
+  .industry-card h3{ font-size:14px!important }
+  .pains-grid{ grid-template-columns:1fr!important; gap:10px!important }
+  .pain-card{ padding:14px!important }
+  .ai-card{ padding:18px!important }
+  .ai-icon{ width:44px!important; height:44px!important; font-size:22px!important }
+  .ai-answer{ font-size:18px!important; line-height:1.3 }
+  .ai-cta .btn-big{ width:100%!important; box-sizing:border-box; text-align:center; padding:14px 18px!important; font-size:15px!important }
+  .dl-grid{ grid-template-columns:1fr!important }
+  .nav-cta{ padding:8px 14px!important; font-size:13px!important }
+  .nav-logo{ font-size:18px!important }
+  /* Asegurar que ningún elemento overflow horizontalmente */
+  body, html{ overflow-x:hidden }
+}
+@media (max-width:380px){
+  .industry-grid, .industries-grid{ grid-template-columns:1fr!important }
+  .hero h1, #hero-title{ font-size:24px!important }
+  .nav-cta{ display:none!important }
 }
 </style>
 <script src="volvix-api.js"></script>
