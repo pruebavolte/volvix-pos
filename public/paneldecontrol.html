@@ -3646,7 +3646,8 @@
     overflow-x: visible;
     min-width: max-content;
   }
-  /* Custom scrollbar horizontal para TODOS los modos giros (Expandir y Compactar) */
+  /* V13.27: Custom scrollbar horizontal — Chrome/Edge/Safari (webkit) + Firefox.
+     Antes solo había webkit; Firefox no mostraba scrollbar visible. */
   #screen-permisos.permv14[data-active-nav="giros"]::-webkit-scrollbar {
     height: 14px;
   }
@@ -3657,6 +3658,49 @@
   }
   #screen-permisos.permv14[data-active-nav="giros"]::-webkit-scrollbar-track {
     background: var(--pv-surface);
+  }
+  /* V13.27 FIX FIREFOX: scrollbar-width/color son los únicos APIs estándar
+     que Firefox respeta. Sin esto el scrollbar es invisible en FF. */
+  #screen-permisos.permv14[data-active-nav="giros"] {
+    scrollbar-width: auto;
+    scrollbar-color: var(--pv-accent) var(--pv-surface);
+  }
+  /* V13.27: Botones de scroll horizontal ◀ ▶ siempre visibles como
+     respaldo. Aparecen flotando arriba-derecha del statbar y mueven
+     el scroll del #screen-permisos en pasos de 600px. Si el viewport
+     ya muestra todo (no hay overflow), se ocultan automáticamente vía JS. */
+  .permv14-hscroll-controls {
+    display: inline-flex;
+    gap: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .permv14-hscroll-btn {
+    width: 36px; height: 32px;
+    background: var(--pv-accent);
+    color: #fff;
+    border: 1px solid var(--pv-border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    transition: transform 0.1s, opacity 0.2s;
+    user-select: none;
+  }
+  .permv14-hscroll-btn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+  }
+  .permv14-hscroll-btn:active {
+    transform: scale(0.95);
+  }
+  .permv14-hscroll-btn[disabled] {
+    opacity: 0.3;
+    cursor: not-allowed;
   }
   /* V13.18: ANCHURAS FIJAS — layout COMPACTAR (giro seleccionado).
      6 columnas: sidebar | tabla | config | preview | módulos | POS Completo
@@ -6854,8 +6898,47 @@
           '<span style="font-weight:600;color:#854d0e" title="Visitantes únicos viendo el sitio AHORA MISMO (ventana 90s)">🟢 Visitantes ahora:</span> <span id="permv14-stat-active" style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:8px;font-weight:700" title="Visitantes únicos con last_seen en los últimos 90s">—</span>' +
           '<span style="color:#a16207">·</span>' +
           '<span style="font-weight:600;color:#854d0e">👥 Tenants totales:</span> <span id="permv14-stat-users" style="background:#3b82f6;color:#fff;padding:2px 8px;border-radius:8px;font-weight:700">—</span>' +
+          '<span class="permv14-hscroll-controls" id="permv14-hscroll-controls" title="Desplazar tabla horizontalmente">' +
+            '<button type="button" class="permv14-hscroll-btn" id="permv14-hscroll-left" title="Desplazar a la izquierda (←)" aria-label="Scroll izquierda">◀</button>' +
+            '<button type="button" class="permv14-hscroll-btn" id="permv14-hscroll-right" title="Desplazar a la derecha (→)" aria-label="Scroll derecha">▶</button>' +
+          '</span>' +
         '</div>';
       wrap.parentNode.insertBefore(host, wrap);
+      // V13.27: Wiring de los botones de scroll horizontal ◀ ▶
+      // Mueven el scrollLeft del #screen-permisos (que es el contenedor con
+      // overflow-x:auto cuando data-active-nav=giros). Funciona en TODOS los
+      // browsers (Chrome, Firefox, Safari) sin depender de scrollbar nativo.
+      (function wireHScrollButtons() {
+        const SCROLL_STEP = 600;
+        const screen = document.getElementById('screen-permisos');
+        const btnLeft = host.querySelector('#permv14-hscroll-left');
+        const btnRight = host.querySelector('#permv14-hscroll-right');
+        const wrapEl = host.querySelector('#permv14-hscroll-controls');
+        if (!screen || !btnLeft || !btnRight) return;
+        function update() {
+          const max = screen.scrollWidth - screen.clientWidth;
+          if (max <= 4) {
+            // Viewport ya muestra todo → ocultar
+            if (wrapEl) wrapEl.style.display = 'none';
+            return;
+          }
+          if (wrapEl) wrapEl.style.display = 'inline-flex';
+          btnLeft.disabled = screen.scrollLeft <= 2;
+          btnRight.disabled = screen.scrollLeft >= max - 2;
+        }
+        btnLeft.addEventListener('click', () => {
+          screen.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' });
+        });
+        btnRight.addEventListener('click', () => {
+          screen.scrollBy({ left: SCROLL_STEP, behavior: 'smooth' });
+        });
+        screen.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        // Update inicial y diferido (el ancho del grid se establece tras render async)
+        update();
+        setTimeout(update, 500);
+        setTimeout(update, 1500);
+      })();
       // Handler del compactar/expandir
       host.querySelector('#permv14-giro-compact-btn').addEventListener('click', () => {
         const btn = host.querySelector('#permv14-giro-compact-btn');
