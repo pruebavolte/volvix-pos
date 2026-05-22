@@ -1,13 +1,14 @@
 {
-  "version": "1.0.489",
+  "version": "1.0.490",
   "major": 1,
   "minor": 0,
-  "patch": 489,
+  "patch": 490,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-22T03:00:00.000Z",
-  "built_at": "2026-05-22T03:00:00.000Z",
+  "date": "2026-05-22T03:30:00.000Z",
+  "built_at": "2026-05-22T03:30:00.000Z",
   "changelog": [
+    "V14.8 FIX-RESTORE-RETRY-ROBUST: durante test multi-giro encontré que despues de navegar 5 giros consecutivos, el 6to (gimnasio) fallaba: hash terminaba en #permisos/giros sin slug y selectedSlug era abarrotes_y_cafeteria (auto-default). ROOT CAUSE: timing — el restoreFromHash hacía retry 8×400ms=3.2s pero el render con 295 rows + auto-select del nav puede tardar mas. Plus el click podia ser pisado por auto-select del setActiveNav. FIX: (1) retries 25×500ms=12.5s. (2) verificación post-click: si después de 500ms el row no tiene is-selected, REINTENTA (puede haber sido pisado por algo). (3) primer intento a 600ms (después de PERM.init). Esto hace el restore mucho mas robusto contra timing variable.",
     "V14.7 FIX-RESTORE-ROW-CLICK: el deeplink /giros/restaurante no seleccionaba el giro porque setear v14.selectedGiro manualmente no disparaba renderGirosList ni renderGiroPreview. FIX: en lugar de setear el state manualmente, dispatch programatic click() en la fila despues que la tabla este rendereada (con retry hasta 8 intentos cada 400ms). Esto re-usa todo el flujo normal del click (selectedGiro + selectedGiroMod + _setGiroSelectedAttr + renderGirosList + renderGiroDetail + renderGiroComponentsPane + renderGiroPreview + _vlxSyncHashToState).",
     "V14.6 FIX-DEEPLINK-INITV14: al testear V14.5 encontré que el deeplink no funcionaba — abrir #permisos/giros/restaurante terminaba en #permisos/users. ROOT CAUSE: initV14() en línea 10362 usaba regex viejo /#permisos:?(\\w+)?/ que NO matchea el formato nuevo con slash. Defaultaba a users. FIX: regex actualizado para soportar AMBOS formatos: nuevo #permisos/<nav> (V14.5) Y viejo #permisos:<nav> (V13 compat). Ahora abrir paneldecontrol.html#permisos/giros/restaurante carga directo en tab Giros con el row Restaurante seleccionado.",
     "V14.5 DEEPLINK-ROUTING-PANEL: usuario reportó que al recargar el panel se pierde el nav/giro seleccionado y hay que volver a clickear. FIX: routing por hash deeplink con formato #permisos/<nav>[/<giro_slug>][/<modulo>]. Ejemplos: #permisos/giros/fruteria selecciona tab Giros + giro Frutería al cargar. setActiveNav() ahora invoca _vlxSyncHashToState() después de cambiar nav. Click en fila de giro y collapse también actualizan URL. _vlxRestoreFromHash() parsea el hash al cargar y restaura nav + selectedGiro + selectedGiroMod en cadena (esperando 800ms a que render termine). hashchange listener detecta edición manual de URL. AUTO-INIT preserva sub-path (antes forzaba #permisos plano). Esto hace que: (a) recargar la página mantiene el mismo nav, (b) compartir URL del giro lleva al destinatario directo a ese giro, (c) historial del browser navegable con Back/Forward.",

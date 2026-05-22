@@ -6858,26 +6858,38 @@
       if (currentNav !== navKey) {
         setActiveNav(navKey);
       }
-      // Si hay slug, esperar que la tabla termine de renderearse, luego click la fila
+      // Si hay slug, esperar que la tabla termine de renderearse, luego click la fila.
+      // V14.8 FIX: 25 retries × 500ms = 12.5s timeout (antes 8×400=3.2s era insuficiente
+      // para giros en categorías abajo cuando la tabla tiene 295 rows). Plus verificación
+      // de que la row está realmente seleccionada DESPUÉS del click.
       if (navKey === 'giros' && targetSlug) {
         const tryClickRow = (attempt) => {
           const row = document.querySelector('tr[data-permv14-giro="' + targetSlug + '"]');
           if (row) {
-            console.log('[_vlxRestoreFromHash] click row:', targetSlug);
-            // Setear módulo deseado ANTES del click si aplica
+            console.log('[_vlxRestoreFromHash] click row attempt=' + attempt + ' slug=' + targetSlug);
             if (targetMod) v14.selectedGiroMod = targetMod;
-            row.click(); // Dispara el handler completo del row (selección + render preview + sync hash)
+            row.click();
             row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Verificar que el click funcionó: si no hay is-selected en el row después
+            // de 500ms, REINTENTAR (puede haber sido pisado por auto-select del nav)
+            setTimeout(() => {
+              const stillSelected = document.querySelector('tr.is-selected[data-permv14-giro="' + targetSlug + '"]');
+              if (!stillSelected && attempt < 20) {
+                console.log('[_vlxRestoreFromHash] click se perdió, retry attempt=' + (attempt + 2));
+                tryClickRow(attempt + 2);
+              }
+            }, 500);
             return true;
           }
-          if (attempt < 8) {
-            setTimeout(() => tryClickRow(attempt + 1), 400);
+          if (attempt < 25) {
+            setTimeout(() => tryClickRow(attempt + 1), 500);
           } else {
-            console.warn('[_vlxRestoreFromHash] no se encontró row para', targetSlug);
+            console.warn('[_vlxRestoreFromHash] no se encontró row para', targetSlug, 'tras 25 intentos');
           }
           return false;
         };
-        setTimeout(() => tryClickRow(0), 400);
+        // Primer intento a 600ms (después del PERM.init que tarda ~500ms)
+        setTimeout(() => tryClickRow(0), 600);
       }
       return true;
     } catch (e) {
