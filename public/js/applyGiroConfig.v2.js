@@ -245,7 +245,13 @@
       return false;
     }
     var t0 = performance.now();
+    // V14.2 FIX: cargar 'default' siempre que aggressive=true para construir
+    // el diccionario de reemplazo (defaultTerm → newTerm). Sin esto el
+    // TreeWalker no tenía base de comparación y no reemplazaba nada.
     var config = await loadConfig(slug);
+    if (opts.aggressive && (!_cache || !_cache['default'])) {
+      await loadConfig('default');
+    }
     if (!config) {
       console.warn('[applyGiroConfig.v2] sin config para', slug);
       return false;
