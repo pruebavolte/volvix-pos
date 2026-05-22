@@ -6837,7 +6837,9 @@
     _vlxSyncHashToState();
   }
 
-  // V14.5: parsear el hash al cargar la página y restaurar el estado
+  // V14.5/V14.6: parsear el hash al cargar y restaurar el estado completo.
+  // Formato soportado: #permisos[/<nav>[/<giro_slug>[/<modulo>]]]
+  // Ejemplos:
   //   #permisos                       → modules (default)
   //   #permisos/giros                 → tab giros sin selección
   //   #permisos/giros/fruteria        → tab giros + giro 'fruteria' seleccionado
@@ -6850,32 +6852,38 @@
       const navKey = parts[1] || 'modules';
       const targetSlug = parts[2] || null;
       const targetMod = parts[3] || null;
-      // Activar el nav
-      const navBtn = document.querySelector('.permv14-nav-icon[data-permv14-nav="' + navKey + '"]');
-      if (navBtn) {
-        // Si es giros + slug, setear primero el slug ANTES de activar
-        if (navKey === 'giros' && targetSlug) {
-          v14.selectedGiro = targetSlug;
-          if (targetMod) v14.selectedGiroMod = targetMod;
-          if (typeof _setGiroSelectedAttr === 'function') _setGiroSelectedAttr(true);
-        }
+      console.log('[_vlxRestoreFromHash] parsed:', { navKey, targetSlug, targetMod });
+      // Si ya estamos en el nav correcto, solo activar el giro
+      const currentNav = v14.selectedNav;
+      if (currentNav !== navKey) {
         setActiveNav(navKey);
-        // Para giros + slug: scroll a la fila + click después de render
-        if (navKey === 'giros' && targetSlug) {
-          setTimeout(() => {
-            const row = document.querySelector('tr[data-permv14-giro="' + targetSlug + '"]');
-            if (row) {
-              row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              row.classList.add('is-selected');
-            }
-            // Re-render para actualizar preview con giro seleccionado
-            try { if (typeof renderGiroPreview === 'function') renderGiroPreview(); } catch(_){}
-            try { if (typeof renderGiroComponentsPane === 'function') renderGiroComponentsPane(); } catch(_){}
-          }, 800);
-        }
+      }
+      // Si hay slug, esperar que la tabla termine de renderearse, luego click la fila
+      if (navKey === 'giros' && targetSlug) {
+        const tryClickRow = (attempt) => {
+          const row = document.querySelector('tr[data-permv14-giro="' + targetSlug + '"]');
+          if (row) {
+            console.log('[_vlxRestoreFromHash] click row:', targetSlug);
+            // Setear módulo deseado ANTES del click si aplica
+            if (targetMod) v14.selectedGiroMod = targetMod;
+            row.click(); // Dispara el handler completo del row (selección + render preview + sync hash)
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return true;
+          }
+          if (attempt < 8) {
+            setTimeout(() => tryClickRow(attempt + 1), 400);
+          } else {
+            console.warn('[_vlxRestoreFromHash] no se encontró row para', targetSlug);
+          }
+          return false;
+        };
+        setTimeout(() => tryClickRow(0), 400);
       }
       return true;
-    } catch (_) { return false; }
+    } catch (e) {
+      console.warn('[_vlxRestoreFromHash] error:', e);
+      return false;
+    }
   }
   window._vlxRestoreFromHash = _vlxRestoreFromHash;
 
