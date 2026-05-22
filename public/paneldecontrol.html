@@ -3225,45 +3225,57 @@
             </div>
             <div class="permv14-preview-canvas-grid">
               <!-- CELL 1: POS Desktop -->
-              <div class="permv14-preview-cell" data-cell="pos-desktop">
+              <div class="permv14-preview-cell" data-cell="pos-desktop" data-viewport-w="1440" data-viewport-h="900">
                 <div class="permv14-cell-header">
                   <span class="permv14-cell-tag pos">🛒 POS · Desktop</span>
                   <span class="permv14-chrome-dot r"></span>
                   <span class="permv14-chrome-dot y"></span>
                   <span class="permv14-chrome-dot g"></span>
                   <span class="permv14-cell-url" id="permv14-preview-pos-url">tenant.salvadorex.app</span>
+                  <button type="button" class="permv14-cell-fs-btn" title="Ver completo">⛶</button>
                 </div>
-                <iframe id="permv14-preview-pos-iframe-desktop" class="permv14-cell-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="POS desktop"></iframe>
+                <div class="permv14-cell-scaler">
+                  <iframe id="permv14-preview-pos-iframe-desktop" class="permv14-cell-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="POS desktop"></iframe>
+                </div>
               </div>
               <!-- CELL 2: Landing Desktop -->
-              <div class="permv14-preview-cell" data-cell="landing-desktop">
+              <div class="permv14-preview-cell" data-cell="landing-desktop" data-viewport-w="1440" data-viewport-h="900">
                 <div class="permv14-cell-header">
                   <span class="permv14-cell-tag landing">🌐 Landing · Desktop</span>
                   <span class="permv14-chrome-dot r"></span>
                   <span class="permv14-chrome-dot y"></span>
                   <span class="permv14-chrome-dot g"></span>
                   <span class="permv14-cell-url" id="permv14-preview-landing-url">systeminternational.app</span>
+                  <button type="button" class="permv14-cell-fs-btn" title="Ver completo">⛶</button>
                 </div>
-                <iframe id="permv14-preview-landing-iframe-desktop" class="permv14-cell-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="Landing desktop"></iframe>
+                <div class="permv14-cell-scaler">
+                  <iframe id="permv14-preview-landing-iframe-desktop" class="permv14-cell-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="Landing desktop"></iframe>
+                </div>
               </div>
               <!-- CELL 3: POS Mobile -->
-              <div class="permv14-preview-cell" data-cell="pos-mobile">
+              <div class="permv14-preview-cell" data-cell="pos-mobile" data-viewport-w="390" data-viewport-h="844">
                 <div class="permv14-cell-header">
                   <span class="permv14-cell-tag pos">📱 POS · Móvil</span>
-                  <span class="permv14-cell-mobile-info">390 × 700</span>
+                  <span class="permv14-cell-mobile-info">390 × 844</span>
+                  <button type="button" class="permv14-cell-fs-btn" title="Ver completo">⛶</button>
                 </div>
                 <div class="permv14-cell-mobile-wrap">
-                  <iframe id="permv14-preview-pos-iframe-mobile" class="permv14-cell-iframe-mobile" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="POS mobile"></iframe>
+                  <div class="permv14-cell-scaler-mobile">
+                    <iframe id="permv14-preview-pos-iframe-mobile" class="permv14-cell-iframe-mobile" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="POS mobile"></iframe>
+                  </div>
                 </div>
               </div>
               <!-- CELL 4: Landing Mobile -->
-              <div class="permv14-preview-cell" data-cell="landing-mobile">
+              <div class="permv14-preview-cell" data-cell="landing-mobile" data-viewport-w="390" data-viewport-h="844">
                 <div class="permv14-cell-header">
                   <span class="permv14-cell-tag landing">📱 Landing · Móvil</span>
-                  <span class="permv14-cell-mobile-info">390 × 700</span>
+                  <span class="permv14-cell-mobile-info">390 × 844</span>
+                  <button type="button" class="permv14-cell-fs-btn" title="Ver completo">⛶</button>
                 </div>
                 <div class="permv14-cell-mobile-wrap">
-                  <iframe id="permv14-preview-landing-iframe-mobile" class="permv14-cell-iframe-mobile" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="Landing mobile"></iframe>
+                  <div class="permv14-cell-scaler-mobile">
+                    <iframe id="permv14-preview-landing-iframe-mobile" class="permv14-cell-iframe-mobile" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy" title="Landing mobile"></iframe>
+                  </div>
                 </div>
               </div>
             </div>
@@ -4528,28 +4540,85 @@
     margin-left: auto;
     font-size: 9px; color: var(--pv-text-dim);
   }
-  /* Iframe desktop: ocupa la celda completa */
-  #screen-permisos.permv14 .permv14-cell-iframe {
-    flex: 1; width: 100%; height: 100%;
-    border: 0; display: block;
+  /* V13.36: scaler desktop — el iframe renderiza a 1440×900 (viewport real)
+     y se escala con transform para caber en el cell. Así el contenido NO
+     se ve apretado/cortado: se ve la página COMPLETA como en desktop, en chico. */
+  #screen-permisos.permv14 .permv14-cell-scaler {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
     background: #fff;
     min-height: 220px;
   }
-  /* Iframe mobile: 390px width centrado en bezel oscuro */
+  #screen-permisos.permv14 .permv14-cell-iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1440px;
+    height: 900px;
+    border: 0;
+    background: #fff;
+    transform-origin: top left;
+    /* transform: scale(X) lo setea el JS dinámicamente según cellWidth */
+  }
+  /* Mobile: bezel oscuro + iframe escalado de 390×844 a fit en cell */
   #screen-permisos.permv14 .permv14-cell-mobile-wrap {
     flex: 1;
     display: flex; align-items: center; justify-content: center;
     background: #1a1a1a;
     padding: 8px;
     min-height: 220px;
+    overflow: hidden;
+  }
+  #screen-permisos.permv14 .permv14-cell-scaler-mobile {
+    position: relative;
+    width: 390px; height: 844px;
+    transform-origin: center center;
+    /* transform: scale(X) lo setea el JS según cellHeight */
   }
   #screen-permisos.permv14 .permv14-cell-iframe-mobile {
-    width: 390px; max-width: 100%;
-    height: 100%; min-height: 200px;
+    width: 100%; height: 100%;
     border: 0; display: block;
     background: #fff;
     border-radius: 18px;
     box-shadow: inset 0 0 0 2px #2a2a2a;
+  }
+  /* V13.36: Botón "Ver completo" por celda */
+  #screen-permisos.permv14 .permv14-cell-fs-btn {
+    margin-left: 6px;
+    background: var(--pv-accent);
+    color: #fff;
+    border: 0;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.1s, filter 0.15s;
+  }
+  #screen-permisos.permv14 .permv14-cell-fs-btn:hover { filter: brightness(1.15); transform: scale(1.05); }
+  /* V13.36: celda en modo pantalla completa — cubre todo el viewport */
+  #screen-permisos.permv14 .permv14-preview-cell.is-cell-fullscreen {
+    position: fixed !important;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 99999;
+    border-radius: 0;
+    min-height: 100vh;
+    box-shadow: 0 0 0 100vmax rgba(0,0,0,0.7);
+  }
+  /* En fullscreen, iframe a tamaño natural sin escalar */
+  #screen-permisos.permv14 .permv14-preview-cell.is-cell-fullscreen .permv14-cell-scaler {
+    overflow: auto;
+  }
+  #screen-permisos.permv14 .permv14-preview-cell.is-cell-fullscreen .permv14-cell-iframe,
+  #screen-permisos.permv14 .permv14-preview-cell.is-cell-fullscreen .permv14-cell-scaler-mobile {
+    transform: none !important;
+  }
+  #screen-permisos.permv14 .permv14-preview-cell.is-cell-fullscreen .permv14-cell-iframe {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  #screen-permisos.permv14 .permv14-preview-cell.is-cell-fullscreen .permv14-cell-fs-btn::after {
+    content: ' ✗ Cerrar';
   }
   /* Modo pantalla completa (V13.9) */
   #screen-permisos.permv14 .permv14-preview-pane.is-fullscreen {
@@ -11968,7 +12037,86 @@
     if (posFullUrlEl) posFullUrlEl.textContent = slug + '.salvadorex.app/pos';
     if (posFullLabelEl) posFullLabelEl.textContent = '🛒 Vista POS COMPLETA — ' + slug + ' (con todos sus módulos activos/desactivos)';
     lastLoadedSlug = slug;
+    // V13.36: aplicar escalado de iframes para que muestren la página COMPLETA
+    // del viewport real (1440×900 desktop, 390×844 mobile) en formato reducido.
+    if (typeof _vlxApplyCellScaling === 'function') {
+      setTimeout(_vlxApplyCellScaling, 50);
+      setTimeout(_vlxApplyCellScaling, 800);
+    }
   }
+
+  // V13.36: escalado de iframes preview + botones "Ver completo"
+  function _vlxApplyCellScaling() {
+    document.querySelectorAll('.permv14-preview-cell').forEach(cell => {
+      if (cell.classList.contains('is-cell-fullscreen')) return; // no escalar en fullscreen
+      const vw = parseInt(cell.dataset.viewportW || '1440', 10);
+      const vh = parseInt(cell.dataset.viewportH || '900', 10);
+      const cellType = cell.dataset.cell || '';
+      if (cellType.endsWith('-desktop')) {
+        // Desktop: scaler ocupa todo el espacio bajo el header
+        const scaler = cell.querySelector('.permv14-cell-scaler');
+        const iframe = cell.querySelector('.permv14-cell-iframe');
+        if (!scaler || !iframe) return;
+        const sw = scaler.clientWidth;
+        const sh = scaler.clientHeight;
+        if (sw < 40 || sh < 40) return; // no listo
+        // Escala = mín entre fitWidth y fitHeight, así la página completa cabe
+        const scale = Math.min(sw / vw, sh / vh);
+        iframe.style.transform = 'scale(' + scale.toFixed(4) + ')';
+      } else if (cellType.endsWith('-mobile')) {
+        const wrap = cell.querySelector('.permv14-cell-mobile-wrap');
+        const scaler = cell.querySelector('.permv14-cell-scaler-mobile');
+        if (!wrap || !scaler) return;
+        const wW = wrap.clientWidth - 16;
+        const wH = wrap.clientHeight - 16;
+        if (wW < 40 || wH < 40) return;
+        const scale = Math.min(wW / vw, wH / vh);
+        scaler.style.transform = 'scale(' + scale.toFixed(4) + ')';
+        // El mobile-wrap usa flex centrado, así que con scale ya queda bien
+      }
+    });
+  }
+  window._vlxApplyCellScaling = _vlxApplyCellScaling;
+
+  // Wire buttons "Ver completo" via event delegation (sobrevive re-renders)
+  (function _vlxWireCellFsButtons() {
+    if (window.__vlxCellFsWired) return;
+    window.__vlxCellFsWired = true;
+    document.body.addEventListener('click', (e) => {
+      const btn = e.target.closest && e.target.closest('.permv14-cell-fs-btn');
+      if (!btn) return;
+      const cell = btn.closest('.permv14-preview-cell');
+      if (!cell) return;
+      cell.classList.toggle('is-cell-fullscreen');
+      const isFs = cell.classList.contains('is-cell-fullscreen');
+      btn.textContent = isFs ? '✗' : '⛶';
+      btn.title = isFs ? 'Cerrar (Esc)' : 'Ver completo';
+      // Después de toggle re-aplicar escalado (en fullscreen se desactiva via CSS)
+      setTimeout(_vlxApplyCellScaling, 100);
+    });
+    // Esc cierra fullscreen
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      document.querySelectorAll('.permv14-preview-cell.is-cell-fullscreen').forEach(c => {
+        c.classList.remove('is-cell-fullscreen');
+        const b = c.querySelector('.permv14-cell-fs-btn');
+        if (b) { b.textContent = '⛶'; b.title = 'Ver completo'; }
+      });
+      setTimeout(_vlxApplyCellScaling, 100);
+    });
+    // ResizeObserver para re-escalar al cambiar tamaño del cell
+    if (typeof ResizeObserver === 'function') {
+      const ro = new ResizeObserver(() => _vlxApplyCellScaling());
+      // Observar todas las celdas cuando se monten
+      setTimeout(() => {
+        document.querySelectorAll('.permv14-preview-cell').forEach(c => ro.observe(c));
+      }, 1000);
+    }
+    window.addEventListener('resize', () => _vlxApplyCellScaling());
+    // Aplicar al cargar inicialmente
+    setTimeout(_vlxApplyCellScaling, 500);
+    setTimeout(_vlxApplyCellScaling, 2000);
+  })();
 
   function toggleFullscreen() {
     const pane = document.querySelector('.permv14-preview-pane');
