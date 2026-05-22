@@ -1,0 +1,439 @@
+{
+  "_meta": {
+    "version": "2.0.0",
+    "generated_at": "2026-05-22T01:00:00.000Z",
+    "notes": "V14 expansión masiva — 30 giros × 50+ keys cada uno. Reemplaza la versión v1 (que tenía solo 7 giros).",
+    "i18n_keys_universales": [
+      "cliente", "clientes", "comprador",
+      "ticket", "nuevo_ticket", "ticket_actual",
+      "producto", "productos", "articulo",
+      "venta", "ventas", "transaccion",
+      "cobrar", "cobrar_ticket", "monto_cobrar",
+      "inventario", "almacen", "stock",
+      "categoria", "departamento",
+      "empleado", "usuario", "vendedor", "cajero",
+      "ubicacion", "sucursal", "mesa",
+      "servicio", "servicios",
+      "caja", "corte", "apertura", "cierre",
+      "recibo", "factura", "comprobante",
+      "precio", "total", "subtotal",
+      "entrada", "salida",
+      "nuevo", "editar", "eliminar", "guardar", "cancelar", "buscar",
+      "agregar", "quitar", "imprimir",
+      "punto_de_venta", "dashboard", "reportes", "config",
+      "descuento", "propina", "iva",
+      "metodo_pago", "efectivo", "tarjeta"
+    ]
+  },
+  "default": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": [],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientes",
+      "ticket": "Ticket", "ticket_actual": "Ticket actual", "nuevo_ticket": "Nuevo ticket",
+      "producto": "Producto", "productos": "Productos", "articulo": "Artículo",
+      "venta": "Venta", "ventas": "Ventas",
+      "cobrar": "Cobrar", "cobrar_ticket": "Cobrar Ticket",
+      "inventario": "Inventario", "stock": "Stock",
+      "categoria": "Categoría", "departamento": "Departamento",
+      "empleado": "Empleado", "usuario": "Usuario", "vendedor": "Vendedor", "cajero": "Cajero",
+      "ubicacion": "Ubicación", "sucursal": "Sucursal",
+      "servicio": "Servicio", "servicios": "Servicios",
+      "punto_de_venta": "Punto de Venta",
+      "comprador": "Comprador",
+      "factura": "Factura", "recibo": "Recibo"
+    }
+  },
+  "restaurante": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","mesas","comandas","cocina","reservaciones","clientes","reportes","config","devoluciones","departamentos","promociones","facturacion","propinas"],
+    "modulos_inactivos": ["recargas","granel","kardex","sugeridas"],
+    "terminologias": {
+      "cliente": "Comensal", "clientes": "Comensales", "comprador": "Comensal",
+      "ticket": "Comanda", "ticket_actual": "Comanda actual", "nuevo_ticket": "Nueva comanda",
+      "producto": "Platillo", "productos": "Platillos", "articulo": "Platillo",
+      "venta": "Servicio", "ventas": "Servicios",
+      "cobrar": "Cobrar comanda", "cobrar_ticket": "Cobrar comanda",
+      "inventario": "Almacén",
+      "categoria": "Sección del menú", "departamento": "Sección",
+      "empleado": "Mesero", "usuario": "Mesero", "vendedor": "Mesero", "cajero": "Cajero",
+      "ubicacion": "Mesa", "sucursal": "Sucursal", "mesa": "Mesa",
+      "servicio": "Servicio",
+      "punto_de_venta": "Comandero",
+      "factura": "Factura", "recibo": "Cuenta"
+    }
+  },
+  "taqueria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","comandas","cocina","clientes","reportes","config","devoluciones","departamentos","promociones"],
+    "modulos_inactivos": ["recargas","granel","kardex","reservaciones","facturacion"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientela",
+      "ticket": "Orden", "ticket_actual": "Orden actual", "nuevo_ticket": "Nueva orden",
+      "producto": "Taco", "productos": "Tacos", "articulo": "Producto",
+      "venta": "Venta", "ventas": "Ventas",
+      "cobrar": "Cobrar", "cobrar_ticket": "Cobrar orden",
+      "inventario": "Inventario",
+      "categoria": "Tipo de taco", "departamento": "Categoría",
+      "empleado": "Taquero", "usuario": "Taquero", "vendedor": "Taquero", "cajero": "Cajero",
+      "ubicacion": "Mesa",
+      "punto_de_venta": "Caja"
+    }
+  },
+  "pizzeria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","comandas","cocina","reservaciones","clientes","reportes","config","devoluciones","departamentos","promociones","delivery"],
+    "modulos_inactivos": ["recargas","granel","kardex"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientes",
+      "ticket": "Orden", "ticket_actual": "Orden actual", "nuevo_ticket": "Nueva orden",
+      "producto": "Pizza", "productos": "Pizzas", "articulo": "Producto",
+      "venta": "Pedido", "ventas": "Pedidos",
+      "cobrar": "Cobrar pedido", "cobrar_ticket": "Cobrar pedido",
+      "categoria": "Tipo de pizza", "departamento": "Categoría",
+      "empleado": "Pizzero", "usuario": "Pizzero", "vendedor": "Mesero", "cajero": "Cajero",
+      "ubicacion": "Mesa",
+      "punto_de_venta": "Caja"
+    }
+  },
+  "cafeteria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","comandas","clientes","reportes","config","devoluciones","departamentos","promociones","mesas"],
+    "modulos_inactivos": ["recargas","granel","kardex","cocina","reservaciones"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientes",
+      "ticket": "Cuenta", "ticket_actual": "Cuenta actual", "nuevo_ticket": "Nueva cuenta",
+      "producto": "Bebida", "productos": "Bebidas", "articulo": "Producto",
+      "venta": "Venta", "ventas": "Ventas",
+      "cobrar": "Cobrar", "cobrar_ticket": "Cobrar cuenta",
+      "categoria": "Tipo de café", "departamento": "Categoría",
+      "empleado": "Barista", "usuario": "Barista", "vendedor": "Barista", "cajero": "Cajero",
+      "ubicacion": "Mesa",
+      "punto_de_venta": "Mostrador"
+    }
+  },
+  "panaderia": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","clientes","reportes","config","devoluciones","departamentos","promociones","inventario"],
+    "modulos_inactivos": ["recargas","granel","comandas","cocina","mesas"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientes",
+      "ticket": "Ticket", "ticket_actual": "Ticket actual", "nuevo_ticket": "Nuevo ticket",
+      "producto": "Pan", "productos": "Panes", "articulo": "Producto",
+      "venta": "Venta", "ventas": "Ventas",
+      "cobrar": "Cobrar", "cobrar_ticket": "Cobrar ticket",
+      "categoria": "Tipo de pan", "departamento": "Categoría",
+      "empleado": "Panadero", "usuario": "Panadero", "vendedor": "Vendedor", "cajero": "Cajero",
+      "punto_de_venta": "Caja"
+    }
+  },
+  "pasteleria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","clientes","reportes","config","devoluciones","departamentos","promociones","inventario","cotizaciones"],
+    "modulos_inactivos": ["recargas","granel","mesas","cocina"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientes",
+      "ticket": "Pedido", "ticket_actual": "Pedido actual", "nuevo_ticket": "Nuevo pedido",
+      "producto": "Pastel", "productos": "Pasteles", "articulo": "Producto",
+      "venta": "Pedido", "ventas": "Pedidos",
+      "cobrar": "Cobrar pedido", "cobrar_ticket": "Cobrar pedido",
+      "categoria": "Tipo de pastel", "departamento": "Categoría",
+      "empleado": "Repostero", "usuario": "Repostero", "vendedor": "Vendedor", "cajero": "Cajero",
+      "punto_de_venta": "Mostrador"
+    }
+  },
+  "heladeria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","clientes","reportes","config","devoluciones","departamentos","promociones","inventario"],
+    "modulos_inactivos": ["recargas","mesas","cocina","comandas"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientes",
+      "ticket": "Ticket", "ticket_actual": "Ticket actual", "nuevo_ticket": "Nuevo ticket",
+      "producto": "Helado", "productos": "Helados", "articulo": "Producto",
+      "venta": "Venta", "ventas": "Ventas",
+      "cobrar": "Cobrar", "cobrar_ticket": "Cobrar ticket",
+      "categoria": "Sabor", "departamento": "Categoría",
+      "empleado": "Heladero", "usuario": "Heladero", "vendedor": "Vendedor", "cajero": "Cajero",
+      "punto_de_venta": "Mostrador"
+    }
+  },
+  "jugos_naturales": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","clientes","reportes","config","devoluciones","departamentos","promociones"],
+    "modulos_inactivos": ["recargas","granel","mesas","cocina"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientes",
+      "ticket": "Orden", "ticket_actual": "Orden actual", "nuevo_ticket": "Nueva orden",
+      "producto": "Jugo", "productos": "Jugos",
+      "venta": "Venta",
+      "cobrar": "Cobrar", "cobrar_ticket": "Cobrar orden",
+      "categoria": "Tipo de jugo",
+      "empleado": "Juguero", "vendedor": "Juguero", "cajero": "Cajero",
+      "punto_de_venta": "Mostrador"
+    }
+  },
+  "hamburguesas": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","comandas","cocina","clientes","reportes","config","devoluciones","departamentos","promociones","delivery"],
+    "modulos_inactivos": ["recargas","granel","kardex","reservaciones"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientes",
+      "ticket": "Orden", "ticket_actual": "Orden actual", "nuevo_ticket": "Nueva orden",
+      "producto": "Hamburguesa", "productos": "Hamburguesas",
+      "venta": "Pedido", "ventas": "Pedidos",
+      "cobrar": "Cobrar pedido", "cobrar_ticket": "Cobrar pedido",
+      "categoria": "Tipo", "empleado": "Cocinero", "vendedor": "Mesero", "cajero": "Cajero",
+      "ubicacion": "Mesa", "punto_de_venta": "Caja"
+    }
+  },
+  "comida_corrida": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","comandas","cocina","mesas","clientes","reportes","config","devoluciones","departamentos","promociones"],
+    "modulos_inactivos": ["recargas","granel","kardex","reservaciones","facturacion"],
+    "terminologias": {
+      "cliente": "Comensal", "clientes": "Comensales",
+      "ticket": "Comanda", "ticket_actual": "Comanda actual", "nuevo_ticket": "Nueva comanda",
+      "producto": "Platillo", "productos": "Platillos",
+      "venta": "Servicio", "ventas": "Servicios",
+      "cobrar": "Cobrar comanda", "cobrar_ticket": "Cobrar comanda",
+      "categoria": "Sección", "empleado": "Mesera", "vendedor": "Mesera", "cajero": "Cajero",
+      "ubicacion": "Mesa", "punto_de_venta": "Comandero"
+    }
+  },
+  "abarrotes": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","kardex","credito","proveedores","recargas","servicios","promociones","departamentos","sugeridas","actualizador","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","reservaciones","granel"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientes", "comprador": "Comprador",
+      "ticket": "Ticket", "ticket_actual": "Ticket actual", "nuevo_ticket": "Nuevo ticket",
+      "producto": "Producto", "productos": "Productos", "articulo": "Artículo",
+      "venta": "Venta", "ventas": "Ventas",
+      "cobrar": "Cobrar", "cobrar_ticket": "Cobrar ticket",
+      "categoria": "Categoría", "departamento": "Departamento",
+      "empleado": "Empleado", "usuario": "Empleado", "vendedor": "Vendedor", "cajero": "Cajero",
+      "punto_de_venta": "Caja registradora"
+    }
+  },
+  "minisuper": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","kardex","credito","proveedores","recargas","servicios","promociones","departamentos","actualizador","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientes",
+      "ticket": "Ticket",
+      "producto": "Producto", "productos": "Productos",
+      "categoria": "Departamento", "departamento": "Departamento",
+      "empleado": "Cajero", "vendedor": "Cajero", "cajero": "Cajero",
+      "punto_de_venta": "Caja"
+    }
+  },
+  "tienda-conveniencia": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","kardex","proveedores","recargas","servicios","promociones","departamentos","actualizador","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel","credito"],
+    "terminologias": {
+      "cliente": "Cliente", "ticket": "Ticket", "producto": "Producto",
+      "categoria": "Departamento", "departamento": "Departamento",
+      "empleado": "Cajero", "vendedor": "Cajero", "cajero": "Cajero",
+      "punto_de_venta": "Caja"
+    }
+  },
+  "dulceria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","proveedores","promociones","departamentos","clientes","reportes","config","devoluciones","granel"],
+    "modulos_inactivos": ["mesas","comandas","cocina","recargas"],
+    "terminologias": {
+      "cliente": "Cliente", "ticket": "Ticket",
+      "producto": "Dulce", "productos": "Dulces",
+      "categoria": "Tipo de dulce",
+      "empleado": "Vendedor", "vendedor": "Vendedor",
+      "punto_de_venta": "Mostrador"
+    }
+  },
+  "fruteria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","granel","departamentos","promociones","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": ["recargas","mesas","comandas","cocina","kardex"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientela",
+      "ticket": "Ticket",
+      "producto": "Fruta", "productos": "Frutas y verduras", "articulo": "Producto",
+      "venta": "Venta",
+      "categoria": "Tipo", "departamento": "Sección",
+      "empleado": "Frutero", "vendedor": "Frutero", "cajero": "Cajero",
+      "punto_de_venta": "Báscula"
+    }
+  },
+  "carniceria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","granel","departamentos","promociones","proveedores","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": ["recargas","mesas","comandas","cocina","kardex"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientela",
+      "ticket": "Ticket",
+      "producto": "Corte", "productos": "Cortes", "articulo": "Corte",
+      "venta": "Venta",
+      "categoria": "Tipo de carne", "departamento": "Sección",
+      "empleado": "Carnicero", "vendedor": "Carnicero", "cajero": "Cajero",
+      "punto_de_venta": "Mostrador"
+    }
+  },
+  "polleria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","granel","departamentos","promociones","proveedores","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": ["recargas","mesas","comandas","cocina","kardex"],
+    "terminologias": {
+      "cliente": "Cliente",
+      "ticket": "Ticket",
+      "producto": "Corte de pollo", "productos": "Cortes",
+      "categoria": "Tipo", "empleado": "Pollero", "vendedor": "Pollero",
+      "punto_de_venta": "Mostrador"
+    }
+  },
+  "tortilleria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","departamentos","promociones","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": ["recargas","mesas","comandas","cocina","kardex","granel"],
+    "terminologias": {
+      "cliente": "Cliente",
+      "ticket": "Ticket",
+      "producto": "Tortilla", "productos": "Tortillas y masas",
+      "categoria": "Tipo", "empleado": "Tortillero", "vendedor": "Tortillero",
+      "punto_de_venta": "Mostrador"
+    }
+  },
+  "cremeria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","granel","departamentos","promociones","proveedores","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": ["recargas","mesas","comandas","cocina","kardex"],
+    "terminologias": {
+      "cliente": "Cliente",
+      "ticket": "Ticket",
+      "producto": "Lácteo", "productos": "Lácteos",
+      "categoria": "Tipo de queso", "empleado": "Cremero", "vendedor": "Cremero",
+      "punto_de_venta": "Mostrador"
+    }
+  },
+  "farmacia": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","kardex","credito","proveedores","facturacion","promociones","departamentos","sugeridas","actualizador","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel","recargas"],
+    "terminologias": {
+      "cliente": "Paciente", "clientes": "Pacientes",
+      "ticket": "Ticket", "nuevo_ticket": "Nuevo ticket",
+      "producto": "Medicamento", "productos": "Medicamentos",
+      "venta": "Venta", "cobrar": "Cobrar", "cobrar_ticket": "Cobrar ticket",
+      "categoria": "Familia farmacéutica", "departamento": "Categoría",
+      "empleado": "Farmacéutico", "usuario": "Farmacéutico", "vendedor": "Farmacéutico", "cajero": "Cajero",
+      "punto_de_venta": "Mostrador"
+    }
+  },
+  "veterinaria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","credito","facturacion","promociones","servicios","clientes","reportes","config","devoluciones","reservaciones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel","recargas","kardex"],
+    "terminologias": {
+      "cliente": "Dueño", "clientes": "Dueños",
+      "ticket": "Consulta", "ticket_actual": "Consulta actual", "nuevo_ticket": "Nueva consulta",
+      "producto": "Servicio veterinario", "productos": "Servicios y productos",
+      "venta": "Consulta", "ventas": "Consultas",
+      "cobrar": "Cobrar consulta", "cobrar_ticket": "Cobrar consulta",
+      "categoria": "Tipo de servicio", "empleado": "Veterinario", "usuario": "Veterinario",
+      "punto_de_venta": "Recepción"
+    }
+  },
+  "clinica-dental": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","credito","facturacion","servicios","clientes","reportes","config","devoluciones","reservaciones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel","recargas","kardex"],
+    "terminologias": {
+      "cliente": "Paciente", "clientes": "Pacientes",
+      "ticket": "Consulta", "ticket_actual": "Consulta actual", "nuevo_ticket": "Nueva consulta",
+      "producto": "Tratamiento", "productos": "Tratamientos",
+      "venta": "Consulta", "ventas": "Consultas",
+      "cobrar": "Cobrar consulta", "cobrar_ticket": "Cobrar consulta",
+      "categoria": "Tipo de tratamiento", "empleado": "Dentista", "usuario": "Dentista",
+      "ubicacion": "Consultorio", "punto_de_venta": "Recepción"
+    }
+  },
+  "optica": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","credito","facturacion","cotizaciones","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel","recargas","kardex","reservaciones"],
+    "terminologias": {
+      "cliente": "Paciente", "clientes": "Pacientes",
+      "ticket": "Receta", "ticket_actual": "Receta actual", "nuevo_ticket": "Nueva receta",
+      "producto": "Lentes", "productos": "Lentes y armazones",
+      "venta": "Venta", "cobrar": "Cobrar", "cobrar_ticket": "Cobrar receta",
+      "categoria": "Tipo", "empleado": "Optometrista", "usuario": "Optometrista",
+      "punto_de_venta": "Mostrador"
+    }
+  },
+  "barberia": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","servicios","promociones","clientes","reportes","config","devoluciones","reservaciones","comisiones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel","recargas","kardex","inventario","facturacion"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientela",
+      "ticket": "Servicio", "ticket_actual": "Servicio actual", "nuevo_ticket": "Nuevo servicio",
+      "producto": "Servicio", "productos": "Servicios", "articulo": "Servicio",
+      "venta": "Servicio", "ventas": "Servicios",
+      "cobrar": "Cobrar servicio", "cobrar_ticket": "Cobrar servicio",
+      "categoria": "Tipo de corte", "empleado": "Barbero", "usuario": "Barbero", "vendedor": "Barbero",
+      "ubicacion": "Silla", "punto_de_venta": "Recepción"
+    }
+  },
+  "salon-belleza": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","servicios","promociones","inventario","clientes","reportes","config","devoluciones","reservaciones","comisiones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel","recargas","kardex"],
+    "terminologias": {
+      "cliente": "Clienta", "clientes": "Clientela",
+      "ticket": "Servicio", "ticket_actual": "Servicio actual", "nuevo_ticket": "Nuevo servicio",
+      "producto": "Servicio o producto", "productos": "Servicios y productos",
+      "venta": "Servicio", "ventas": "Servicios",
+      "cobrar": "Cobrar servicio", "cobrar_ticket": "Cobrar servicio",
+      "categoria": "Tipo de servicio", "empleado": "Estilista", "usuario": "Estilista",
+      "ubicacion": "Silla", "punto_de_venta": "Recepción"
+    }
+  },
+  "nails": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","servicios","promociones","inventario","clientes","reportes","config","devoluciones","reservaciones","comisiones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel","recargas","kardex"],
+    "terminologias": {
+      "cliente": "Clienta", "clientes": "Clientela",
+      "ticket": "Servicio", "nuevo_ticket": "Nuevo servicio",
+      "producto": "Servicio de uñas", "productos": "Servicios y materiales",
+      "venta": "Servicio",
+      "categoria": "Tipo de manicure", "empleado": "Manicurista", "usuario": "Manicurista",
+      "ubicacion": "Estación", "punto_de_venta": "Recepción"
+    }
+  },
+  "spa": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","servicios","promociones","clientes","reportes","config","devoluciones","reservaciones","comisiones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel","recargas","kardex","inventario"],
+    "terminologias": {
+      "cliente": "Huésped", "clientes": "Huéspedes",
+      "ticket": "Sesión", "nuevo_ticket": "Nueva sesión",
+      "producto": "Tratamiento", "productos": "Tratamientos",
+      "venta": "Sesión", "ventas": "Sesiones",
+      "cobrar": "Cobrar sesión", "cobrar_ticket": "Cobrar sesión",
+      "categoria": "Tipo de tratamiento", "empleado": "Terapeuta", "usuario": "Terapeuta",
+      "ubicacion": "Cabina", "punto_de_venta": "Recepción"
+    }
+  },
+  "estetica": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","servicios","promociones","inventario","clientes","reportes","config","devoluciones","reservaciones","comisiones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel","recargas","kardex"],
+    "terminologias": {
+      "cliente": "Clienta", "clientes": "Clientela",
+      "ticket": "Servicio", "nuevo_ticket": "Nuevo servicio",
+      "producto": "Tratamiento", "productos": "Tratamientos y servicios",
+      "venta": "Servicio", "ventas": "Servicios",
+      "categoria": "Tipo de tratamiento", "empleado": "Estilista", "usuario": "Estilista",
+      "ubicacion": "Estación", "punto_de_venta": "Recepción"
+    }
+  },
+  "ropa": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","kardex","credito","proveedores","departamentos","promociones","cotizaciones","facturacion","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel","recargas"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientes",
+      "ticket": "Ticket",
+      "producto": "Prenda", "productos": "Prendas",
+      "venta": "Venta",
+      "categoria": "Categoría", "departamento": "Departamento",
+      "empleado": "Vendedor", "usuario": "Vendedor", "vendedor": "Vendedor", "cajero": "Cajero",
+      "punto_de_venta": "Caja"
+    }
+  },
+  "zapateria": {
+    "modulos_activos": ["pos","dashboard","ventas","corte","apertura","inventario","kardex","credito","proveedores","departamentos","promociones","facturacion","clientes","reportes","config","devoluciones"],
+    "modulos_inactivos": ["mesas","comandas","cocina","granel","recargas"],
+    "terminologias": {
+      "cliente": "Cliente", "clientes": "Clientes",
+      "ticket": "Ticket",
+      "producto": "Par", "productos": "Calzado", "articulo": "Par",
+      "venta": "Venta",
+      "categoria": "Tipo", "departamento": "Departamento",
+      "empleado": "Vendedor", "vendedor": "Vendedor", "cajero": "Cajero",
+      "punto_de_venta": "Caja"
+    }
+  }
+}

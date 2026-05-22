@@ -24169,10 +24169,12 @@ window.addEventListener('volvix:version-loaded', function(e){
 })();
 </script>
 
-<!-- V9.9 + V13.13: Motor schema-driven multi-giro.
+<!-- V14: Motor schema-driven multi-giro V2.
      Prioridad: (1) ?giro= en URL > (2) business_type del tenant logueado > (3) window.applyGiroConfig manual.
-     Cargado en silencio. NO se auto-activa sin trigger. -->
-<script src="/js/applyGiroConfig.js" defer></script>
+     V2 mejoras: paralelo Supabase + static (giros-terminologias-v2.json con 30 giros),
+     MutationObserver para modales lazy, modo AGGRESSIVE con TreeWalker que reemplaza
+     textos sin necesidad de data-i18n attributes (?aggressive=1 o ?preview=1). -->
+<script src="/js/applyGiroConfig.v2.js?v=14" defer></script>
 <script>
 (function(){
   document.addEventListener('DOMContentLoaded', function(){
@@ -24204,9 +24206,13 @@ window.addEventListener('volvix:version-loaded', function(e){
         } catch(_) {}
       }
       if (giro && typeof window.applyGiroConfig === 'function') {
+        // V14: si la URL trae ?preview=1 o ?aggressive=1, usar modo TreeWalker
+        // que reemplaza textos en TODO el DOM sin necesidad de data-i18n
+        var u2 = new URL(window.location.href);
+        var aggressive = u2.searchParams.get('preview') === '1' || u2.searchParams.get('aggressive') === '1';
         setTimeout(function(){
-          window.applyGiroConfig(giro);
-          console.log('[applyGiroConfig] aplicado giro =', giro);
+          window.applyGiroConfig(giro, { aggressive: aggressive, observe: true });
+          console.log('[applyGiroConfig V2] aplicado giro=' + giro + ' aggressive=' + aggressive);
         }, 300);
       }
     } catch(_) {}
