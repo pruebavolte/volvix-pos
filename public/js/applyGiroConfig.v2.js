@@ -206,11 +206,23 @@
           if (!txt || txt.length < 3) continue;
           var changed = false;
           Object.keys(dict).forEach(function (oldT) {
-            if (txt.indexOf(oldT) >= 0) {
-              var re = new RegExp('\\b' + oldT.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
-              var newTxt = txt.replace(re, dict[oldT]);
-              if (newTxt !== txt) { txt = newTxt; changed = true; }
-            }
+            // V14.3 FIX: regex case-INSENSITIVE (flag 'gi') porque el texto en
+            // el DOM puede estar capitalizado, lowercase o mixed. Antes solo
+            // matcheaba "Cliente" (capital) y no "cliente" (lowercase), por
+            // eso no reemplazaba 9 ocurrencias de 'producto' lowercase.
+            var newV = dict[oldT];
+            var re = new RegExp('\\b' + oldT.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+            var newTxt = txt.replace(re, function (match) {
+              // Preservar el caso original del texto que se encuentra:
+              // - "PRODUCTO" → "PLATILLO" (uppercase)
+              // - "producto" → "platillo" (lowercase)
+              // - "Producto" → "Platillo" (capitalized)
+              if (match === match.toUpperCase() && match.length > 1) return newV.toUpperCase();
+              if (match === match.toLowerCase()) return newV.toLowerCase();
+              // Capitalized first letter only
+              return newV.charAt(0).toUpperCase() + newV.slice(1).toLowerCase();
+            });
+            if (newTxt !== txt) { txt = newTxt; changed = true; }
           });
           if (changed) { node.nodeValue = txt; replaced++; count++; }
           if (count > 500) break; // límite de seguridad
