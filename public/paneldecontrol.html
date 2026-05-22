@@ -10355,11 +10355,19 @@
     wireSearch();
     wireDoubleClickEdit();
     refreshNavCounts();
-    // 2026-05-14: Default a 'users' (el caso de uso mas comun del panel).
-    // Otros tabs (modules/giros/audit/versions) siguen accesibles via sidebar.
-    // Si querras volver al default modules, usa #permisos:modules en la URL.
+    // V14.5: parsear el hash en formato deeplink #permisos/<nav>[/<giro>][/<mod>]
+    // Backward compat: también acepta el viejo formato #permisos:<nav> (con dos puntos).
+    // Default a 'users' si no hay sub-tab especificado.
     const hash = location.hash || '';
-    const subTab = (hash.match(/#permisos:?(\w+)?/) || [])[1];
+    let subTab = null;
+    // Nuevo formato V14.5: #permisos/<nav>
+    const slashMatch = hash.match(/^#permisos\/([a-z0-9_-]+)/i);
+    if (slashMatch) subTab = slashMatch[1];
+    // Viejo formato V13: #permisos:<nav>
+    if (!subTab) {
+      const colonMatch = hash.match(/^#permisos:([a-z0-9_-]+)/i);
+      if (colonMatch) subTab = colonMatch[1];
+    }
     const defaultPane = subTab || 'users';
     setActiveNav(defaultPane);
     if (!v14.selectedMod) v14.selectedMod = 'pos';
@@ -10368,7 +10376,7 @@
       renderConfigPane();
       renderPreview();
     }
-    console.log('[PERMv14] layout listo');
+    console.log('[PERMv14] layout listo · subTab parseado:', defaultPane);
   }
 
   // ─── MONKEY-PATCH renderForTenant ───
