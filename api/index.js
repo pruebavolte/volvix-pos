@@ -13343,8 +13343,11 @@ handlers['GET /api/config/public'] = async (req, res) => {
         return {
           slug: r.slug,
           name: (r.emoji ? r.emoji + ' ' : '') + (r.nombre || r.slug),
+          emoji: r.emoji || null,
+          name_only: r.nombre || r.slug,
           categoria: r.categoria,
           sinonimos: r.sinonimos || [],
+          modules_enabled:        meta.modules_enabled || null,   // V13.32: profile del giro (qué módulos default)
           que_vende:              meta.que_vende || '',
           tipo_operacion:         meta.tipo_operacion || '',
           regulacion:             meta.regulacion || null,
@@ -13360,6 +13363,15 @@ handlers['GET /api/config/public'] = async (req, res) => {
           updated_at:             r.updated_at,
         };
       });
+      // V13.32: agregar categorías dinámicas para reemplazar GIRO_CATEGORIES hardcoded
+      const categoriesMap = {};
+      giros.forEach(g => {
+        const c = g.categoria || 'Otros giros (BD)';
+        if (!categoriesMap[c]) categoriesMap[c] = { label: c, items: [] };
+        categoriesMap[c].items.push(g.slug);
+      });
+      // Ordenar categorías por número de items desc para mostrar "Comida & Bebida" antes que "Otros"
+      const categories = Object.values(categoriesMap).sort((a, b) => b.items.length - a.items.length);
       // Calcular el MAX(updated_at) → este es el "Actualizado" REAL del DB
       let maxUpdated = null;
       for (const r of safeRows) {
@@ -13371,6 +13383,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
         generated_at: maxUpdated,   // SIEMPRE refleja la última modificación de cualquier row
         source: 'supabase://giros_maestro',
         giros,
+        categories,                 // V13.32: para reemplazar GIRO_CATEGORIES hardcoded
       });
     } catch (e) {
       sendJSON(res, { ok: false, error: String(e.message || e), giros: [], total: 0 }, 500);

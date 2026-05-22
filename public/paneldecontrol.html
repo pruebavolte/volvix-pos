@@ -7933,9 +7933,10 @@
   async function loadEcosystem() {
     if (_ecosystemCache) return _ecosystemCache;
     try {
-      // V13.31: leer de Supabase giros_maestro en lugar de archivo estático.
-      // El endpoint devuelve el mismo shape ({giros:[], _meta:{generated_at}}).
-      // Fallback al JSON estático si la API falla (defensa contra Supabase down).
+      // V13.31/V13.32: leer 100% de Supabase giros_maestro.
+      // Fase 2: el endpoint también devuelve categories[] + modules_enabled
+      // por giro + emoji, reemplazando GIRO_CATEGORIES + INDUSTRY_PROFILES +
+      // INDUSTRY_LABELS hardcoded.
       let json = null;
       try {
         const r = await fetch('/api/giros/master', { cache: 'no-store' });
@@ -7949,7 +7950,36 @@
                 total: d.total,
               },
               giros: d.giros,
+              categories: d.categories || [],
             };
+            // V13.32: poblar globals FROM_BD para que el merge con los hardcoded
+            // (PROFILE/LABEL en líneas 4887/4931) prefiera siempre la BD.
+            window.INDUSTRY_PROFILES_FROM_BD = window.INDUSTRY_PROFILES_FROM_BD || {};
+            window.INDUSTRY_LABELS_FROM_BD = window.INDUSTRY_LABELS_FROM_BD || {};
+            d.giros.forEach(g => {
+              if (g.modules_enabled) window.INDUSTRY_PROFILES_FROM_BD[g.slug] = g.modules_enabled;
+              if (g.emoji || g.name_only) {
+                window.INDUSTRY_LABELS_FROM_BD[g.slug] = (g.emoji ? g.emoji + ' ' : '') + (g.name_only || g.slug);
+              }
+            });
+            // V13.32: mergear categorías de BD en el GIRO_CATEGORIES local.
+            // GIRO_CATEGORIES es const dentro del IIFE pero como es objeto se
+            // PUEDE mutar (add/update keys). loadEcosystem está en el mismo
+            // scope, así que tiene acceso directo a la variable.
+            if (Array.isArray(d.categories) && d.categories.length > 0 && typeof GIRO_CATEGORIES === 'object' && GIRO_CATEGORIES) {
+              d.categories.forEach((c, i) => {
+                const k = c.label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || ('cat-' + i);
+                // Si la categoría YA existe, mergear items (BD gana en orden)
+                if (GIRO_CATEGORIES[k]) {
+                  const combined = new Set([...c.items, ...(GIRO_CATEGORIES[k].items || [])]);
+                  GIRO_CATEGORIES[k] = { label: c.label, items: Array.from(combined) };
+                } else {
+                  GIRO_CATEGORIES[k] = { label: c.label, items: c.items };
+                }
+              });
+              // Exponer también a window para debug
+              try { window.GIRO_CATEGORIES = GIRO_CATEGORIES; } catch(_){}
+            }
           }
         }
       } catch (_) { /* caer al fallback */ }
