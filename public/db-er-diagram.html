@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🗺️ Mapa Entidad-Relación · Base de Datos Volvix POS</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --pri: #B85D3A;
+    --pri-dark: #8B3F22;
+    --bg: #f5f2ec;
+    --paper: #ffffff;
+    --text: #2a1810;
+    --muted: #6b5d4a;
+    --border: #d8cdb8;
+    --accent: #fef3c7;
+    --green: #16a34a;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0;
+  }
+  header {
+    background: linear-gradient(135deg, var(--pri) 0%, var(--pri-dark) 100%);
+    color: #fff;
+    padding: 32px 24px;
+    text-align: center;
+  }
+  header h1 { font-size: 32px; margin-bottom: 8px; }
+  header p { opacity: 0.95; font-size: 14px; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 24px 0;
+  }
+  .stat-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  }
+  .stat-card .num {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--pri);
+    display: block;
+  }
+  .stat-card .lbl {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  section {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+  section h2 {
+    color: var(--pri);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    font-size: 20px;
+  }
+  section h3 { color: var(--text); margin-top: 16px; margin-bottom: 12px; font-size: 16px; }
+  .domain-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .domain-card {
+    background: var(--accent);
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  .domain-card .count {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--pri);
+  }
+  .domain-card .name { font-size: 13px; font-weight: 600; }
+  .domain-card .tables {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-family: 'Monaco', 'Consolas', monospace;
+  }
+  .mermaid-wrap {
+    background: #fafaf7;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow: auto;
+    margin: 16px 0;
+  }
+  .table-detail {
+    background: #fafaf7;
+    border-left: 4px solid var(--pri);
+    padding: 12px 16px;
+    margin: 12px 0;
+    border-radius: 4px;
+  }
+  .table-detail h4 {
+    font-family: 'Monaco', 'Consolas', monospace;
+    color: var(--pri-dark);
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  table.cols {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  table.cols th, table.cols td {
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    text-align: left;
+  }
+  table.cols th {
+    background: var(--bg);
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+  table.cols code {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 11px;
+    color: var(--pri-dark);
+  }
+  .badge { display: inline-block; padding: 1px 7px; border-radius: 8px; font-size: 10px; font-weight: 600; margin-right: 4px; }
+  .badge-pk { background: var(--pri); color: #fff; }
+  .badge-fk { background: var(--blue); color: #fff; }
+  .badge-req { background: var(--green); color: #fff; }
+  .badge-uq { background: var(--purple); color: #fff; }
+  .pattern-card {
+    background: linear-gradient(135deg, #f0fdf4 0%, #d1fae5 100%);
+    border-left: 4px solid var(--green);
+    padding: 12px 16px;
+    margin: 12px 0;
+    border-radius: 4px;
+  }
+  .pattern-card h4 { color: #14532d; font-size: 14px; margin-bottom: 6px; }
+  .pattern-card p { font-size: 13px; color: #166534; }
+  .footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .print-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: var(--pri);
+    color: #fff;
+    border: 0;
+    border-radius: 24px;
+    padding: 10px 18px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+  }
+  .print-btn:hover { background: var(--pri-dark); }
+  @media print {
+    .print-btn { display: none; }
+    section { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+
+<header>
+  <h1>🗺️ Mapa Entidad-Relación</h1>
+  <p>Base de Datos Volvix POS · Supabase PostgreSQL · 2026-05-22</p>
+</header>
+
+<div class="container">
+
+  <!-- ESTADÍSTICAS GENERALES -->
+  <div class="stats-grid">
+    <div class="stat-card"><span class="num">408</span><span class="lbl">tablas totales</span></div>
+    <div class="stat-card"><span class="num">23</span><span class="lbl">dominios funcionales</span></div>
+    <div class="stat-card"><span class="num">295</span><span class="lbl">giros en catálogo</span></div>
+    <div class="stat-card"><span class="num">128</span><span class="lbl">tenants activos</span></div>
+    <div class="stat-card"><span class="num">JSONB</span><span class="lbl">metadata principal</span></div>
+  </div>
+
+  <!-- DOMINIOS FUNCIONALES -->
+  <section>
+    <h2>📊 Dominios funcionales del sistema</h2>
+    <div class="domain-grid">
+      <div class="domain-card"><div class="count">69</div><div class="name">POS Multi-tenant</div><div class="tables">pos_companies, pos_users, pos_products, pos_sales, pos_customers</div></div>
+      <div class="domain-card"><div class="count">18</div><div class="name">CFDI / SAT</div><div class="tables">cfdi_invoices, cfdi_folios, cfdi_templates, invoice_lines</div></div>
+      <div class="domain-card"><div class="count">17</div><div class="name">Volvix Core (SaaS)</div><div class="tables">volvix_tenants, volvix_features, volvix_audit_log, volvix_giro_*</div></div>
+      <div class="domain-card"><div class="count">16</div><div class="name">CRM / Clientes</div><div class="tables">customer_otps, crm_activities, loyalty_transactions</div></div>
+      <div class="domain-card"><div class="count">13</div><div class="name">Inventario</div><div class="tables">inventory_warehouses, inventory_stock, inventory_movements</div></div>
+      <div class="domain-card"><div class="count">10</div><div class="name">Giros (catálogo)</div><div class="tables">giros_maestro, giros_terminologias, giros_modulos, giros_buttons</div></div>
+      <div class="domain-card"><div class="count">7</div><div class="name">Email / Drip</div><div class="tables">email_campaigns, drip_subscriptions, newsletter_subscribers</div></div>
+      <div class="domain-card"><div class="count">7</div><div class="name">Marketplaces</div><div class="tables">ml_orders, ml_listings, amazon_orders_mirror, shopify_*</div></div>
+      <div class="domain-card"><div class="count">7</div><div class="name">Seguridad</div><div class="tables">mfa_attempts, fraud_alerts, admin_2fa_secrets, admin_sessions</div></div>
+      <div class="domain-card"><div class="count">5</div><div class="name">Caja</div><div class="tables">cuts, cuts_cash_movements, cash_register, cashier_checkins</div></div>
+      <div class="domain-card"><div class="count">5</div><div class="name">RRHH / Citas</div><div class="tables">employees, appointments, attendance, employee_documents</div></div>
+      <div class="domain-card"><div class="count">5</div><div class="name">Cocina (KDS)</div><div class="tables">kds_tickets, kds_stations, kitchen_orders, kitchen_notifications</div></div>
+      <div class="domain-card"><div class="count">199</div><div class="name">Otros</div><div class="tables">logs, configs, jobs, abtest, kiosk, fingerprint, gift_cards, ...</div></div>
+    </div>
+  </section>
+
+  <!-- DIAGRAMA ER MERMAID -->
+  <section>
+    <h2>🌐 Diagrama Entidad-Relación · Núcleo del sistema</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">
+      Las 18 entidades core conectadas con sus FK. Las cajas muestran columnas principales.
+      <strong>Click en el botón "+" abajo si quieres ver el diagrama más grande.</strong>
+    </p>
+    <div class="mermaid-wrap">
+      <pre class="mermaid">
+erDiagram
+    pos_users {
+        uuid id PK
+        text phone
+        text email
+        text role
+        text password_hash
+        boolean is_active
+    }
+    pos_companies {
+        uuid id PK
+        text name
+        uuid owner_user_id FK
+        text plan
+        text business_type
+        text rfc
+    }
+    pos_products {
+        uuid id PK
+        uuid pos_user_id FK
+        text name
+        text code_SKU
+        numeric price
+        integer stock
+        char3 currency_code FK
+        integer version
+    }
+    pos_sales {
+        uuid id PK
+        uuid pos_user_id FK
+        numeric total
+        jsonb items
+        text payment_method
+        numeric tip_amount
+        char3 currency_code FK
+    }
+    pos_customers {
+        uuid id PK
+        text name
+        text email
+        text phone
+        numeric credit_balance
+        integer loyalty_points
+    }
+    giros_maestro {
+        uuid id PK
+        text slug UK
+        text nombre
+        text categoria
+        text emoji
+        jsonb metadata
+    }
+    giros_terminologias {
+        uuid id PK
+        text giro_slug
+        jsonb terminologias
+        jsonb modulos_activos
+        jsonb modulos_inactivos
+    }
+    volvix_tenants {
+        uuid id PK
+        text nombre
+        text tipo_negocio
+        text plan
+        jsonb features_activos
+    }
+    volvix_features {
+        uuid id PK
+        uuid tenant_id FK
+        text feature
+        boolean activo
+    }
+    volvix_audit_log {
+        bigint id PK
+        timestamptz ts
+        text user_id
+        text action
+        jsonb before
+        jsonb after
+    }
+    volvix_giro_searches {
+        bigint id PK
+        timestamptz searched_at
+        text slug
+        text query_raw
+        text ip_hash
+    }
+    volvix_visitor_presence {
+        text session_id PK
+        timestamptz last_seen
+        text page
+        text giro
+    }
+    cfdi_invoices {
+        uuid id PK
+        text ticket_id
+        text customer_rfc
+        text uuid_sat
+        numeric total
+        text status
+    }
+    inventory_warehouses {
+        bigint id PK
+        text name
+        text address
+        boolean is_main
+    }
+    inventory_stock {
+        uuid product_id PK
+        uuid location_id PK
+        numeric qty
+        numeric reserved_qty
+    }
+    appointments {
+        uuid id PK
+        uuid customer_id FK
+        uuid service_id FK
+        uuid staff_id FK
+        timestamptz starts_at
+    }
+    employees {
+        uuid id PK
+        text name
+        text role
+    }
+    cuts {
+        uuid id PK
+        uuid cashier_user_id FK
+        numeric total_ventas
+        timestamptz cerrado_at
+    }
+    kds_tickets {
+        uuid id PK
+        uuid station_id FK
+        uuid sale_id FK
+        text status
+    }
+    pos_users ||--o{ pos_companies : "owner_user_id"
+    pos_users ||--o{ pos_products : "pos_user_id"
+    pos_users ||--o{ pos_sales : "pos_user_id"
+    pos_companies ||--o{ pos_products : "tenant_id"
+    pos_companies ||--o{ pos_sales : "tenant_id"
+    pos_companies ||--o{ pos_customers : "tenant_id"
+    pos_companies }o--|| giros_maestro : "business_type → slug"
+    pos_sales }o--|| pos_customers : "customer_id"
+    pos_sales }o--o{ pos_products : "items jsonb"
+    pos_sales ||--o{ cfdi_invoices : "ticket_id"
+    pos_products ||--o{ inventory_stock : "product_id"
+    inventory_warehouses ||--o{ inventory_stock : "location_id"
+    pos_customers ||--o{ appointments : "customer_id"
+    employees ||--o{ appointments : "staff_id"
+    volvix_tenants ||--o{ volvix_features : "tenant_id"
+    volvix_tenants ||--o{ volvix_audit_log : "tenant_id"
+    volvix_tenants }o--|| pos_users : "owner_user_id"
+    giros_maestro ||--o{ giros_terminologias : "slug"
+    giros_maestro ||--o{ volvix_giro_searches : "slug"
+    giros_maestro }o--o{ volvix_visitor_presence : "giro"
+    cuts }o--|| pos_users : "cashier_user_id"
+    kds_tickets }o--|| pos_sales : "sale_id"
+    pos_companies ||--o{ inventory_warehouses : "tenant_id"
+    pos_companies ||--o{ employees : "tenant_id"
+      </pre>
+    </div>
+  </section>
+
+  <!-- TABLAS DETALLE -->
+  <section>
+    <h2>📋 Tablas core con detalle de columnas</h2>
+
+    <div class="table-detail">
+      <h4>🏢 pos_companies — Tenant / Empresa (21 columnas)</h4>
+      <table class="cols">
+        <tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr>
+        <tr><td><code>id</code></td><td>uuid</td><td><span class="badge badge-pk">PK</span></td></tr>
+        <tr><td><code>name</code></td><td>text</td><td><span class="badge badge-req">REQ</span> Nombre del negocio</td></tr>
+        <tr><td><code>owner_user_id</code></td><td>uuid</td><td><span class="badge badge-fk">FK</span> → pos_users.id</td></tr>
+        <tr><td><code>plan</code></td><td>text</td><td>trial / basic / pro / enterprise</td></tr>
+        <tr><td><code>business_type</code></td><td>text</td><td>→ giros_maestro.slug (lógico)</td></tr>
+        <tr><td><code>rfc</code></td><td>text</td><td>RFC para CFDI MX</td></tr>
+        <tr><td><code>city, state</code></td><td>text</td><td>—</td></tr>
+        <tr><td><code>is_active</code></td><td>boolean</td><td>—</td></tr>
+        <tr><td><code>expires_at, plan_changed_at</code></td><td>timestamptz</td><td>Tracking de subscripción</td></tr>
+      </table>
+    </div>
+
+    <div class="table-detail">
+      <h4>👤 pos_users — Usuarios POS (70 columnas)</h4>
+      <table class="cols">
+        <tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr>
+        <tr><td><code>id</code></td><td>uuid</td><td><span class="badge badge-pk">PK</span></td></tr>
+        <tr><td><code>phone</code></td><td>text</td><td>Login principal MX</td></tr>
+        <tr><td><code>email</code></td><td>text</td><td>—</td></tr>
+        <tr><td><code>password_hash</code></td><td>text</td><td>—</td></tr>
+        <tr><td><code>role</code></td><td>text</td><td>owner / manager / cashier / customer</td></tr>
+        <tr><td><code>plan</code></td><td>text</td><td>—</td></tr>
+        <tr><td><code>platform_signup</code></td><td>text</td><td>De qué giro vino</td></tr>
+        <tr><td>+60 cols más</td><td colspan="2">Multi-image, multimedia, features, etc.</td></tr>
+      </table>
+    </div>
+
+    <div class="table-detail">
+      <h4>📦 pos_products — Productos (78 columnas)</h4>
+      <table class="cols">
+        <tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr>
+        <tr><td><code>id</code></td><td>uuid</td><td><span class="badge badge-pk">PK</span></td></tr>
+        <tr><td><code>pos_user_id</code></td><td>uuid</td><td><span class="badge badge-fk">FK</span> → pos_users.id</td></tr>
+        <tr><td><code>code</code> (SKU)</td><td>text</td><td>—</td></tr>
+        <tr><td><code>name</code></td><td>text</td><td><span class="badge badge-req">REQ</span></td></tr>
+        <tr><td><code>price</code></td><td>numeric</td><td>Precio de venta</td></tr>
+        <tr><td><code>cost</code></td><td>numeric</td><td>Costo</td></tr>
+        <tr><td><code>stock</code></td><td>integer</td><td>—</td></tr>
+        <tr><td><code>currency_code</code></td><td>char(3)</td><td><span class="badge badge-fk">FK</span> → currencies.code</td></tr>
+        <tr><td><code>version</code></td><td>integer</td><td>Optimistic locking</td></tr>
+        <tr><td>+68 cols más</td><td colspan="2">Multi-imagen, video, ficha técnica, etc.</td></tr>
+      </table>
+    </div>
+
+    <div class="table-detail">
+      <h4>💰 pos_sales — Ventas (45 columnas)</h4>
+      <table class="cols">
+        <tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr>
+        <tr><td><code>id</code></td><td>uuid</td><td><span class="badge badge-pk">PK</span></td></tr>
+        <tr><td><code>pos_user_id</code></td><td>uuid</td><td><span class="badge badge-fk">FK</span> → pos_users.id</td></tr>
+        <tr><td><code>total</code></td><td>numeric</td><td><span class="badge badge-req">REQ</span></td></tr>
+        <tr><td><code>items</code></td><td>jsonb</td><td><span class="badge badge-req">REQ</span> Array de productos</td></tr>
+        <tr><td><code>payment_method</code></td><td>text</td><td>—</td></tr>
+        <tr><td><code>tip_amount, tip_split</code></td><td>numeric / jsonb</td><td>Propinas</td></tr>
+        <tr><td><code>fraud_review, fraud_score</code></td><td>bool / int</td><td>Anti-fraude</td></tr>
+        <tr><td><code>currency_code</code></td><td>char(3)</td><td><span class="badge badge-fk">FK</span> → currencies.code</td></tr>
+        <tr><td><code>fx_rate_to_base</code></td><td>numeric</td><td>Snapshot conversión</td></tr>
+      </table>
+    </div>
+
+    <div class="table-detail">
+      <h4>🌎 giros_maestro — Catálogo SSOT (13 columnas) · 295 rows</h4>
+      <table class="cols">
+        <tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr>
+        <tr><td><code>id</code></td><td>uuid</td><td><span class="badge badge-pk">PK</span></td></tr>
+        <tr><td><code>slug</code></td><td>text</td><td><span class="badge badge-uq">UQ</span> Identificador único</td></tr>
+        <tr><td><code>nombre</code></td><td>text</td><td>"Restaurante", "Frutería", ...</td></tr>
+        <tr><td><code>categoria</code></td><td>text</td><td>"Comida & Bebida", "Retail", "Servicios"</td></tr>
+        <tr><td><code>emoji</code></td><td>text</td><td>🌮 ☕ 💊</td></tr>
+        <tr><td><code>sinonimos</code></td><td>text[]</td><td>Array de aliases</td></tr>
+        <tr><td><code>landing_slug</code></td><td>text</td><td>Landing pública del giro</td></tr>
+        <tr><td><code>activo</code></td><td>boolean</td><td>—</td></tr>
+        <tr><td><code>prioridad</code></td><td>integer</td><td>Orden en marketplace</td></tr>
+        <tr><td><code>metadata</code></td><td>jsonb</td><td><strong>SSOT:</strong> terminologias_full, modules_enabled, productos_plantilla, cadena_valor, competidores_sector</td></tr>
+      </table>
+    </div>
+
+    <div class="table-detail">
+      <h4>🔥 volvix_giro_searches — Tracking público (7 cols) · 40+ rows</h4>
+      <table class="cols">
+        <tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr>
+        <tr><td><code>id</code></td><td>bigserial</td><td><span class="badge badge-pk">PK</span></td></tr>
+        <tr><td><code>searched_at</code></td><td>timestamptz</td><td>—</td></tr>
+        <tr><td><code>slug</code></td><td>text</td><td>Giro buscado</td></tr>
+        <tr><td><code>query_raw</code></td><td>text</td><td>Texto exacto del usuario</td></tr>
+        <tr><td><code>ip_hash</code></td><td>text</td><td>SHA256 truncado (privacidad)</td></tr>
+        <tr><td><code>user_agent</code></td><td>text</td><td>—</td></tr>
+      </table>
+    </div>
+
+    <div class="table-detail">
+      <h4>🟢 volvix_visitor_presence — Presencia en vivo (6 cols) · TTL 24h</h4>
+      <table class="cols">
+        <tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr>
+        <tr><td><code>session_id</code></td><td>text</td><td><span class="badge badge-pk">PK</span> generado client-side</td></tr>
+        <tr><td><code>last_seen</code></td><td>timestamptz</td><td>Updated cada ping (30s)</td></tr>
+        <tr><td><code>page, giro</code></td><td>text</td><td>—</td></tr>
+        <tr><td><code>ip_hash, user_agent</code></td><td>text</td><td>—</td></tr>
+      </table>
+    </div>
+
+    <div class="table-detail">
+      <h4>📄 cfdi_invoices — Facturación MX (38 cols)</h4>
+      <table class="cols">
+        <tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr>
+        <tr><td><code>id</code></td><td>uuid</td><td><span class="badge badge-pk">PK</span></td></tr>
+        <tr><td><code>tenant_id</code></td><td>text</td><td>Multi-tenant</td></tr>
+        <tr><td><code>ticket_id</code></td><td>text</td><td>→ pos_sales.id (logical FK)</td></tr>
+        <tr><td><code>customer_rfc, customer_name</code></td><td>text</td><td>Receptor</td></tr>
+        <tr><td><code>series, folio</code></td><td>text</td><td>Numeración SAT</td></tr>
+        <tr><td><code>uuid_sat</code></td><td>text</td><td>UUID asignado por SAT</td></tr>
+        <tr><td><code>facturama_id</code></td><td>text</td><td>ID del proveedor de timbrado</td></tr>
+        <tr><td><code>status</code></td><td>text</td><td>issued / cancelled</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- PATRONES ARQUITECTÓNICOS -->
+  <section>
+    <h2>🏛️ Patrones arquitectónicos detectados</h2>
+
+    <div class="pattern-card">
+      <h4>A. Multi-tenancy doble</h4>
+      <p><strong>pos_companies</strong> (legacy original) + <strong>volvix_tenants</strong> (modelo SaaS nuevo) coexisten. Las tablas hijas (productos, ventas) usan <code>tenant_id</code> uuid para aislar.</p>
+    </div>
+
+    <div class="pattern-card">
+      <h4>B. SSOT en giros_maestro.metadata (JSONB)</h4>
+      <p>295 giros con todo dentro de <code>metadata</code>: terminologías, módulos enabled, productos plantilla, cadena de valor, competidores. Permite cambios sin DDL.</p>
+    </div>
+
+    <div class="pattern-card">
+      <h4>C. Tracking en vivo</h4>
+      <p><code>volvix_giro_searches</code> append-only para auditoria. <code>volvix_visitor_presence</code> upsert por session_id con TTL 24h vía DELETE on-demand (5% probability).</p>
+    </div>
+
+    <div class="pattern-card">
+      <h4>D. RLS (Row Level Security)</h4>
+      <p>Mayoría de tablas tienen RLS habilitado: <code>service_role</code> full access, <code>authenticated</code> por <code>tenant_id = auth.jwt() ->> 'tenant_id'</code>, <code>anon</code> solo SELECT en tablas marketplace públicas.</p>
+    </div>
+
+    <div class="pattern-card">
+      <h4>E. Multi-divisa</h4>
+      <p><code>pos_sales</code> y <code>pos_products</code> referencian <code>currencies.code</code> + guardan <code>fx_rate_to_base</code> para snapshot histórico.</p>
+    </div>
+
+    <div class="pattern-card">
+      <h4>F. Versionado optimistic</h4>
+      <p><code>pos_products.version</code> + <code>pos_sales.version</code> (integer) para concurrent updates. UPDATE ... WHERE version=N → si falla, retry.</p>
+    </div>
+  </section>
+
+  <!-- DATOS DE PRODUCCIÓN -->
+  <section>
+    <h2>📈 Estado actual en producción</h2>
+    <table class="cols">
+      <tr><th>Tabla</th><th>Rows aproximados</th><th>Comentario</th></tr>
+      <tr><td><code>giros_maestro</code></td><td>295</td><td>Catálogo SSOT (V13.31)</td></tr>
+      <tr><td><code>giros_terminologias</code></td><td>30</td><td>Seedados V13.31 a Supabase</td></tr>
+      <tr><td><code>volvix_giro_searches</code></td><td>40+</td><td>V13.25 + tests adversariales</td></tr>
+      <tr><td><code>volvix_visitor_presence</code></td><td>1-N</td><td>TTL 24h, V13.26</td></tr>
+      <tr><td><code>pos_companies</code></td><td>128</td><td>Tenants activos (mostrado en stat bar)</td></tr>
+      <tr><td><code>Giros con categoria</code></td><td>100%</td><td>V13.35 reclasificación completa</td></tr>
+    </table>
+  </section>
+
+  <!-- SUGERENCIAS -->
+  <section>
+    <h2>💡 Sugerencias de cleanup</h2>
+    <table class="cols">
+      <tr><th>Tabla</th><th>Acción sugerida</th></tr>
+      <tr><td><code>_backup_giros_synonyms_pre_giros1200</code></td><td>Borrar (backup viejo pre-migración)</td></tr>
+      <tr><td><code>_backup_vertical_templates_pre_giros1200</code></td><td>Borrar (backup viejo)</td></tr>
+      <tr><td><code>_backup_verticals_pre_giros1200</code></td><td>Borrar (backup viejo)</td></tr>
+      <tr><td><code>giros_synonyms_compat</code>, <code>giros_terminologias_compat</code></td><td>Borrar si migración V13/V14 estable</td></tr>
+      <tr><td>Índice compuesto en <code>volvix_giro_searches (slug, searched_at)</code></td><td>Crear para queries del statbar</td></tr>
+      <tr><td>pg_cron limpieza <code>volvix_visitor_presence</code> >24h</td><td>Reemplazar DELETE on-demand</td></tr>
+    </table>
+  </section>
+
+</div>
+
+<div class="footer">
+  Generado automáticamente desde Supabase OpenAPI spec ·
+  Project: <code>zhvwmzkcqngcaqpdxtwr</code> ·
+  <button onclick="window.print()" style="background:none;border:none;color:var(--pri);cursor:pointer;text-decoration:underline">Imprimir / Guardar como PDF</button>
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'default',
+  themeVariables: {
+    primaryColor: '#B85D3A',
+    primaryTextColor: '#2a1810',
+    primaryBorderColor: '#8B3F22',
+    lineColor: '#6b5d4a',
+    secondaryColor: '#fef3c7',
+    tertiaryColor: '#f5f2ec'
+  },
+  er: {
+    diagramPadding: 20,
+    layoutDirection: 'TB',
+    minEntityWidth: 100,
+    minEntityHeight: 75,
+    entityPadding: 15,
+    stroke: '#8B3F22',
+    fill: '#fef3c7',
+    fontSize: 12
+  }
+});
+</script>
+
+</body>
+</html>
