@@ -13333,10 +13333,19 @@ handlers['GET /api/config/public'] = async (req, res) => {
   // Reemplaza la dependencia del archivo estático /data/giros-ecosystem.json.
   // Devuelve { ok, generated_at (MAX updated_at de la tabla), giros: [...] } con
   // el mismo shape que el JSON anterior para que el panel no necesite re-mapeo.
+  // V13.34: soporte ?slug=X para filtrar 1 giro (landing-template.html lo usa).
+  // V13.34: Cache-Control 5min + ETag con hash de generated_at para 304 cuando
+  //         nada cambió. Antes era no-store → 1.5MB downloaded en cada panel
+  //         load + 2s response time. Ahora primer hit cachea, siguientes 304.
   handlers['GET /api/giros/master'] = async (req, res) => {
     try {
-      const rows = await supabaseRequest('GET',
-        '/giros_maestro?activo=eq.true&select=slug,nombre,emoji,categoria,sinonimos,landing_slug,metadata,updated_at&order=prioridad.desc,slug.asc&limit=2000');
+      const url = new URL(req.url, 'http://x');
+      const filterSlug = url.searchParams.get('slug');
+      let query = '/giros_maestro?activo=eq.true&select=slug,nombre,emoji,categoria,sinonimos,landing_slug,metadata,updated_at&order=prioridad.desc,slug.asc&limit=2000';
+      if (filterSlug) {
+        query = `/giros_maestro?slug=eq.${encodeURIComponent(filterSlug)}&select=slug,nombre,emoji,categoria,sinonimos,landing_slug,metadata,updated_at&limit=1`;
+      }
+      const rows = await supabaseRequest('GET', query);
       const safeRows = Array.isArray(rows) ? rows : [];
       const giros = safeRows.map(r => {
         const meta = r.metadata || {};
@@ -13377,14 +13386,20 @@ handlers['GET /api/config/public'] = async (req, res) => {
       for (const r of safeRows) {
         if (r.updated_at && (!maxUpdated || r.updated_at > maxUpdated)) maxUpdated = r.updated_at;
       }
-      sendJSON(res, {
+      // V13.34: usar sendJSONPublic que ya maneja Cache-Control + ETag + 304.
+      // sendJSON sobrescribiría con 'no-store'. sendJSONPublic genera ETag
+      // basado en SHA1 del payload y responde 304 si If-None-Match coincide.
+      // TTL 60s — el panel hace auto-refresh cada 20s del statbar (otro
+      // endpoint /api/giros/stats), así que el catálogo se puede cachear
+      // 60s sin que el usuario lo note. Edge cache (s-maxage) 300s.
+      sendJSONPublic(res, {
         ok: true,
         total: giros.length,
         generated_at: maxUpdated,   // SIEMPRE refleja la última modificación de cualquier row
         source: 'supabase://giros_maestro',
         giros,
         categories,                 // V13.32: para reemplazar GIRO_CATEGORIES hardcoded
-      });
+      }, 60, 200, req);
     } catch (e) {
       sendJSON(res, { ok: false, error: String(e.message || e), giros: [], total: 0 }, 500);
     }

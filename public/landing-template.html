@@ -156,10 +156,37 @@ section h2 { font-size: 32px; margin-bottom: 32px; text-align: center; color: #1
     hotel: '🏨', taller_mecanico: '🔧', lavanderia: '🧺', ferreteria: '🔨',
   };
 
-  // Cargar ecosystem JSON
+  // V13.34: Cargar 1 giro desde Supabase (no del JSON estático).
+  // /api/giros/master?slug=X devuelve solo 1 giro (~5KB en vez de 1.5MB).
+  // Fallback al JSON estático si la API falla.
   try {
-    const res = await fetch('/data/giros-ecosystem.json');
-    const data = await res.json();
+    let data;
+    try {
+      const r1 = await fetch('/api/giros/master?slug=' + encodeURIComponent(slug));
+      if (r1.ok) {
+        const j = await r1.json();
+        if (j && j.ok && Array.isArray(j.giros) && j.giros.length) {
+          data = { giros: j.giros };
+        }
+      }
+      // Si no encontró por slug exacto, intentar con guiones/underscores normalizado
+      if (!data) {
+        const normSlug = slug.replace(/-/g, '_');
+        if (normSlug !== slug) {
+          const r2 = await fetch('/api/giros/master?slug=' + encodeURIComponent(normSlug));
+          if (r2.ok) {
+            const j = await r2.json();
+            if (j && j.ok && Array.isArray(j.giros) && j.giros.length) {
+              data = { giros: j.giros };
+            }
+          }
+        }
+      }
+    } catch (_) { /* caer al fallback */ }
+    if (!data) {
+      const res = await fetch('/data/giros-ecosystem.json');
+      data = await res.json();
+    }
     const giro = data.giros.find(g => g.slug === slug ||
       g.slug.replace(/-/g, '_') === slug.replace(/-/g, '_'));
 
