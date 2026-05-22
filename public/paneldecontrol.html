@@ -7933,9 +7933,33 @@
   async function loadEcosystem() {
     if (_ecosystemCache) return _ecosystemCache;
     try {
-      const r = await fetch('/data/giros-ecosystem.json?v=2', { cache: 'no-store' });
-      if (!r.ok) return null;
-      _ecosystemCache = await r.json();
+      // V13.31: leer de Supabase giros_maestro en lugar de archivo estático.
+      // El endpoint devuelve el mismo shape ({giros:[], _meta:{generated_at}}).
+      // Fallback al JSON estático si la API falla (defensa contra Supabase down).
+      let json = null;
+      try {
+        const r = await fetch('/api/giros/master', { cache: 'no-store' });
+        if (r.ok) {
+          const d = await r.json();
+          if (d && d.ok && Array.isArray(d.giros) && d.giros.length > 0) {
+            json = {
+              _meta: {
+                generated_at: d.generated_at,
+                source: d.source,
+                total: d.total,
+              },
+              giros: d.giros,
+            };
+          }
+        }
+      } catch (_) { /* caer al fallback */ }
+      if (!json) {
+        // Fallback: archivo estático (compat para si DB no disponible)
+        const r2 = await fetch('/data/giros-ecosystem.json?v=2', { cache: 'no-store' });
+        if (!r2.ok) return null;
+        json = await r2.json();
+      }
+      _ecosystemCache = json;
       // V13.12: traer también los giros LLM-generados desde Supabase y mergearlos
       try {
         const dyn = await fetch('/api/giros/dynamic', { cache: 'no-store' });

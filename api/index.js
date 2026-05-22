@@ -13329,6 +13329,53 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: false, error: String(e.message || e) }, 500);
     }
   };
+  // V13.31: GET /api/giros/master — SSOT desde tabla giros_maestro de Supabase.
+  // Reemplaza la dependencia del archivo estático /data/giros-ecosystem.json.
+  // Devuelve { ok, generated_at (MAX updated_at de la tabla), giros: [...] } con
+  // el mismo shape que el JSON anterior para que el panel no necesite re-mapeo.
+  handlers['GET /api/giros/master'] = async (req, res) => {
+    try {
+      const rows = await supabaseRequest('GET',
+        '/giros_maestro?activo=eq.true&select=slug,nombre,emoji,categoria,sinonimos,landing_slug,metadata,updated_at&order=prioridad.desc,slug.asc&limit=2000');
+      const safeRows = Array.isArray(rows) ? rows : [];
+      const giros = safeRows.map(r => {
+        const meta = r.metadata || {};
+        return {
+          slug: r.slug,
+          name: (r.emoji ? r.emoji + ' ' : '') + (r.nombre || r.slug),
+          categoria: r.categoria,
+          sinonimos: r.sinonimos || [],
+          que_vende:              meta.que_vende || '',
+          tipo_operacion:         meta.tipo_operacion || '',
+          regulacion:             meta.regulacion || null,
+          cadena_valor:           meta.cadena_valor || { proveedores: [], clientes_finales: [] },
+          competidores_sector:    meta.competidores_sector || [],
+          funcionalidades_criticas: meta.funcionalidades_criticas || [],
+          problemas_evitar:       meta.problemas_evitar || [],
+          terminologia:           meta.terminologia || [],
+          productos_plantilla:    meta.productos_plantilla || [],
+          landing_url:            meta.landing_url || (r.landing_slug ? 'https://systeminternational.app/' + r.landing_slug : null),
+          landing_type:           meta.landing_type || null,
+          source:                 meta.source || 'ecosystem',
+          updated_at:             r.updated_at,
+        };
+      });
+      // Calcular el MAX(updated_at) → este es el "Actualizado" REAL del DB
+      let maxUpdated = null;
+      for (const r of safeRows) {
+        if (r.updated_at && (!maxUpdated || r.updated_at > maxUpdated)) maxUpdated = r.updated_at;
+      }
+      sendJSON(res, {
+        ok: true,
+        total: giros.length,
+        generated_at: maxUpdated,   // SIEMPRE refleja la última modificación de cualquier row
+        source: 'supabase://giros_maestro',
+        giros,
+      });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: String(e.message || e), giros: [], total: 0 }, 500);
+    }
+  };
   // V13.26: PRESENCIA EN VIVO — usuario quiere ver "Visitantes ahora" en panel.
   // Cliente (marketplace.html, landing-*.html, etc.) hace ping cada 30s con
   // session_id único. Server upserta last_seen. GET /active cuenta sesiones
