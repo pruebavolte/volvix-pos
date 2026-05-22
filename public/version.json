@@ -1,13 +1,14 @@
 {
-  "version": "1.0.486",
+  "version": "1.0.487",
   "major": 1,
   "minor": 0,
-  "patch": 486,
+  "patch": 487,
   "commit": "pending",
   "branch": "main",
-  "date": "2026-05-22T01:45:00.000Z",
-  "built_at": "2026-05-22T01:45:00.000Z",
+  "date": "2026-05-22T02:00:00.000Z",
+  "built_at": "2026-05-22T02:00:00.000Z",
   "changelog": [
+    "V14.5 DEEPLINK-ROUTING-PANEL: usuario reportó que al recargar el panel se pierde el nav/giro seleccionado y hay que volver a clickear. FIX: routing por hash deeplink con formato #permisos/<nav>[/<giro_slug>][/<modulo>]. Ejemplos: #permisos/giros/fruteria selecciona tab Giros + giro Frutería al cargar. setActiveNav() ahora invoca _vlxSyncHashToState() después de cambiar nav. Click en fila de giro y collapse también actualizan URL. _vlxRestoreFromHash() parsea el hash al cargar y restaura nav + selectedGiro + selectedGiroMod en cadena (esperando 800ms a que render termine). hashchange listener detecta edición manual de URL. AUTO-INIT preserva sub-path (antes forzaba #permisos plano). Esto hace que: (a) recargar la página mantiene el mismo nav, (b) compartir URL del giro lleva al destinatario directo a ese giro, (c) historial del browser navegable con Back/Forward.",
     "V14.4 FIX-MOTOR-LOOP-FREEZE: el browser se freezeo durante test post V14.3. ROOT CAUSE: MutationObserver detectaba las mutaciones que el propio motor causaba (node.nodeValue = txt en TreeWalker) y disparaba applyTo otra vez → loop infinito → freeze. FIX: (a) flag _applying global que se setea true durante applyTo y vuelve a false 100ms después, observer ignora mutaciones cuando _applying=true. (b) debounce 300ms en MutationObserver para batch de mutaciones externas (modales lazy). (c) Filtro hasNewElements: skip si no hay addedNodes con elementos (ignora text-only changes). Resultado: motor ya no causa freeze, MutationObserver solo re-aplica cuando aparecen elementos nuevos (modales lazy, contenido AJAX) y nunca por sus propias modificaciones.",
     "V14.3 FIX-REGEX-CASE-INSENSITIVE: auditoría iframe reveló 9 ocurrencias de \"producto\" (lowercase) + 3 de \"ticket\" (lowercase) que el motor V2 NO reemplazaba aunque _cache[default] estaba bien cargado. ROOT CAUSE 2: el RegExp era case-SENSITIVE (\"\bProducto\b\" con flag g) — solo matcheaba capitalizadas. Pero el texto en iframe preview viene lowercase. FIX: cambiado a flag gi + callback en replace que preserva el caso original: PRODUCTO->PLATILLO, producto->platillo, Producto->Platillo. Ahora reemplaza 100% de las apariciones independiente de capitalización.",
     "V14.2 FIX-AGGRESSIVE-MODE-NO-REPLACE: auditoría visual en Chrome reveló que el motor V2 cargaba bien (data-vlx-active-giro=restaurante, scripts.v2=1) pero NO reemplazaba ninguna palabra (counts: Comensal=0, Comanda=0, Mesero=0, Platillo=0, Ticket=3). ROOT CAUSE: el modo aggressive del TreeWalker construye dict comparando defaultTerms vs currentTerms, pero _cache['default'] NUNCA se llenaba — solo se llenaba _cache[slug]. Por eso defaultTerms={} y dict={}, no había nada que reemplazar. FIX: agregado pre-load explícito de loadConfig('default') cuando opts.aggressive=true antes de aplicar. Ahora el TreeWalker sí encuentra 'Cliente'→'Comensal', 'Ticket'→'Comanda', etc. Verificado en producción: iframe POS con giro=restaurante debería mostrar terminología de comensal/comanda/mesero después del reemplazo. Plus auditoría reveló: bodyLen=1441 (preview mode oculta UI extensa), 81 elementos visibles, motor V2 OK, applyGiroConfigGetActive() expuesto correctamente.",

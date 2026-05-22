@@ -6754,8 +6754,35 @@
     } catch(_){}
   }
 
+  // V14.5: helper para construir hash deeplink reflejando estado completo.
+  // Formato: #permisos/<nav>[/<giro_slug>][/<modulo>]
+  // Al recargar la página, leerá esta URL y restaurará exactamente la vista.
+  function _vlxBuildHash() {
+    const parts = ['permisos'];
+    const nav = v14.selectedNav || 'modules';
+    parts.push(nav);
+    if (nav === 'giros' && v14.selectedGiro) {
+      parts.push(v14.selectedGiro);
+      if (v14.selectedGiroMod) parts.push(v14.selectedGiroMod);
+    }
+    return '#' + parts.join('/');
+  }
+  function _vlxSyncHashToState() {
+    try {
+      const newHash = _vlxBuildHash();
+      if (location.hash !== newHash) {
+        // replaceState evita meter entradas en el history por cada click
+        history.replaceState(null, '', newHash);
+      }
+    } catch (_) {}
+  }
+  window._vlxBuildHash = _vlxBuildHash;
+  window._vlxSyncHashToState = _vlxSyncHashToState;
+
   function setActiveNav(navKey) {
     v14.selectedNav = navKey;
+    // V14.5: al cambiar de nav, limpiar selectedGiro/selectedGiroMod
+    // SOLO si venimos de un nav distinto (no en restauración inicial).
     $$('.permv14-nav-icon').forEach(el => {
       el.classList.toggle('active', el.dataset.permv14Nav === navKey);
     });
@@ -6806,7 +6833,60 @@
       // V13.23 N2
       renderBotonespane();
     }
+    // V14.5: sincronizar URL hash al cambiar de nav (deeplink)
+    _vlxSyncHashToState();
   }
+
+  // V14.5: parsear el hash al cargar la página y restaurar el estado
+  //   #permisos                       → modules (default)
+  //   #permisos/giros                 → tab giros sin selección
+  //   #permisos/giros/fruteria        → tab giros + giro 'fruteria' seleccionado
+  //   #permisos/giros/fruteria/pos    → + módulo 'pos' del giro fruteria
+  function _vlxRestoreFromHash() {
+    try {
+      const h = (location.hash || '').replace(/^#/, '');
+      const parts = h.split('/').filter(Boolean);
+      if (parts[0] !== 'permisos') return false;
+      const navKey = parts[1] || 'modules';
+      const targetSlug = parts[2] || null;
+      const targetMod = parts[3] || null;
+      // Activar el nav
+      const navBtn = document.querySelector('.permv14-nav-icon[data-permv14-nav="' + navKey + '"]');
+      if (navBtn) {
+        // Si es giros + slug, setear primero el slug ANTES de activar
+        if (navKey === 'giros' && targetSlug) {
+          v14.selectedGiro = targetSlug;
+          if (targetMod) v14.selectedGiroMod = targetMod;
+          if (typeof _setGiroSelectedAttr === 'function') _setGiroSelectedAttr(true);
+        }
+        setActiveNav(navKey);
+        // Para giros + slug: scroll a la fila + click después de render
+        if (navKey === 'giros' && targetSlug) {
+          setTimeout(() => {
+            const row = document.querySelector('tr[data-permv14-giro="' + targetSlug + '"]');
+            if (row) {
+              row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              row.classList.add('is-selected');
+            }
+            // Re-render para actualizar preview con giro seleccionado
+            try { if (typeof renderGiroPreview === 'function') renderGiroPreview(); } catch(_){}
+            try { if (typeof renderGiroComponentsPane === 'function') renderGiroComponentsPane(); } catch(_){}
+          }, 800);
+        }
+      }
+      return true;
+    } catch (_) { return false; }
+  }
+  window._vlxRestoreFromHash = _vlxRestoreFromHash;
+
+  // V14.5: listener de hashchange para sincronizar si el usuario edita la URL manualmente
+  window.addEventListener('hashchange', () => {
+    // Solo si cambia el sub-path después de #permisos (no si volvió a #permisos solo)
+    const h = (location.hash || '').replace(/^#/, '');
+    if (h.startsWith('permisos/')) {
+      _vlxRestoreFromHash();
+    }
+  });
 
   // ─── MÓDULO GIROS — catálogo de los 37 perfiles ───
   // Lee directamente de window.INDUSTRY_PROFILES, INDUSTRY_LABELS, INDUSTRY_TERMS,
@@ -7625,6 +7705,8 @@
           if (typeof _setGiroSelectedAttr === 'function') _setGiroSelectedAttr(false);
           renderGirosList();
           try { renderGiroComponentsPane(); } catch(_) {}
+          // V14.5: actualizar URL al colapsar
+          if (typeof _vlxSyncHashToState === 'function') _vlxSyncHashToState();
           return;
         }
 
@@ -7654,6 +7736,8 @@
         renderGiroDetail();
         try { renderGiroComponentsPane(); } catch(_) {}
         renderGiroPreview();
+        // V14.5: deeplink al giro seleccionado
+        if (typeof _vlxSyncHashToState === 'function') _vlxSyncHashToState();
       });
     });
     // V13.37: wire toggle "Mostrar todo" + global filter + per-row expand + per-column menu
@@ -12213,22 +12297,29 @@
 
 <!-- ════════════════════════════════════════════════════════════════
      AUTO-INIT — al cargar fuerza el hash y dispara PERM.init().
-     Conserva el contrato original: window.PERM init lee location.hash.
+     V14.5: PRESERVA el sub-path después de #permisos (deeplink).
+            Formato soportado: #permisos[/nav[/giro[/modulo]]]
      ════════════════════════════════════════════════════════════════ -->
 <script>
 (function(){
   function go(){
-    if ((location.hash||'').replace('#','') !== 'permisos') {
+    // V14.5: preservar sub-path si llega con deeplink (ej #permisos/giros/fruteria)
+    var rawHash = (location.hash || '').replace('#','');
+    var startsWithPermisos = rawHash === 'permisos' || rawHash.indexOf('permisos/') === 0 || rawHash.indexOf('permisos?') === 0;
+    if (!startsWithPermisos) {
       try { history.replaceState(null, '', '#permisos'); } catch(_){ location.hash = '#permisos'; }
     }
-    // Quitar 'hidden' por seguridad (ya lo quité al cortar, pero por si acaso)
     var sec = document.getElementById('screen-permisos');
     if (sec) sec.classList.remove('hidden');
-    // Disparar init del módulo. PERM ya hace su propio setTimeout cuando ve #permisos,
-    // pero forzamos por si la página entra sin hash.
     if (window.PERM && typeof window.PERM.init === 'function') {
       try { window.PERM.init(); } catch(e){ console.error('[paneldecontrol] PERM.init falló:', e); }
     }
+    // V14.5: después de init, restaurar nav/giro desde el hash
+    setTimeout(function(){
+      if (typeof window._vlxRestoreFromHash === 'function') {
+        try { window._vlxRestoreFromHash(); } catch(e){ console.warn('[paneldecontrol] restoreFromHash falló:', e); }
+      }
+    }, 800);
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', go, { once: true });
