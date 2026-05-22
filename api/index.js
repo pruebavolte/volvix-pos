@@ -13431,6 +13431,17 @@ handlers['GET /api/config/public'] = async (req, res) => {
     try {
       const windowMs = 90 * 1000; // 90s ventana (3x el ping interval de 30s)
       const since = new Date(Date.now() - windowMs).toISOString();
+      // V13.33: TTL cleanup — 5% de las requests barren rows >24h old (best-effort).
+      // Sin esto la tabla crecería infinitamente (cada visitante = 1 row permanente
+      // si nunca vuelve). Mantener 24h da analytics razonable + DB compacta.
+      try {
+        if (Math.random() < 0.05) {
+          const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+          supabaseRequest('DELETE',
+            `/volvix_visitor_presence?last_seen=lt.${encodeURIComponent(cutoff)}`
+          ).catch(() => {}); // fire-and-forget
+        }
+      } catch (_) {}
       let rows = [];
       let queryError = null;
       try {

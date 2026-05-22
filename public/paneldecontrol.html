@@ -4943,6 +4943,37 @@
     sabanas_premium:'🛏️ Sábanas premium',
     floreria:'🌷 Florería',
   };
+  // V13.33: helpers que prefieren BD (window.INDUSTRY_*_FROM_BD que loadEcosystem
+  // puebla con /api/giros/master) sobre los hardcoded. Si quitas los consts,
+  // estos helpers siguen funcionando con la BD. Si la BD no está, fallback al const.
+  function getGiroProfile(slug) {
+    if (!slug) return null;
+    return (window.INDUSTRY_PROFILES_FROM_BD && window.INDUSTRY_PROFILES_FROM_BD[slug])
+        || INDUSTRY_PROFILES[slug]
+        || null;
+  }
+  function getGiroLabel(slug) {
+    if (!slug) return '';
+    return (window.INDUSTRY_LABELS_FROM_BD && window.INDUSTRY_LABELS_FROM_BD[slug])
+        || INDUSTRY_LABELS[slug]
+        || slug;
+  }
+  // Catálogo unión (hardcoded + BD) para iterar todos los slugs disponibles
+  function getAllGiroSlugs() {
+    const set = new Set([
+      ...Object.keys(INDUSTRY_PROFILES),
+      ...Object.keys(INDUSTRY_LABELS),
+      ...Object.keys(window.INDUSTRY_PROFILES_FROM_BD || {}),
+      ...Object.keys(window.INDUSTRY_LABELS_FROM_BD || {}),
+    ]);
+    return Array.from(set).sort();
+  }
+  // Exponer para debug / consumo externo
+  try {
+    window.getGiroProfile = getGiroProfile;
+    window.getGiroLabel = getGiroLabel;
+    window.getAllGiroSlugs = getAllGiroSlugs;
+  } catch(_){}
 
   // 2026-05-09: Terminología por giro. Cada giro renombra los términos del UI
   // (cliente↔paciente, venta↔consulta, etc.). El wiring lee data-term="X" y
@@ -5154,8 +5185,10 @@
       if (!sel) return;
       try { if (typeof loadAllCatalogs === 'function') await loadAllCatalogs(); } catch(_){}
       const opts = ['<option value="">— Selecciona giro —</option>'];
-      Object.keys(INDUSTRY_PROFILES).sort().forEach(k => {
-        opts.push('<option value="' + k + '">' + (INDUSTRY_LABELS[k] || k) + '</option>');
+      // V13.33: usar unión hardcoded + BD para que aparezcan los 295 giros, no solo 38
+      getAllGiroSlugs().forEach(k => {
+        if (!getGiroProfile(k)) return; // solo los que tienen modules_enabled
+        opts.push('<option value="' + k + '">' + getGiroLabel(k) + '</option>');
       });
       sel.innerHTML = opts.join('');
     },
@@ -5168,8 +5201,8 @@
       // o en _flagCache cuando es un fetch de otro tenant
       const t = (this._tenantsList || []).find(x => (x.tenant_id || x.id) === tid);
       const giro = t && (t.business_type || '');
-      const profile = INDUSTRY_PROFILES[giro];
-      return profile ? { giro, profile, label: INDUSTRY_LABELS[giro] || giro } : null;
+      const profile = getGiroProfile(giro);
+      return profile ? { giro, profile, label: getGiroLabel(giro) } : null;
     },
 
     // Aplica el perfil seleccionado al tenant: setea cada módulo del preset.
@@ -5185,10 +5218,10 @@
       if (!giro) { alert('Selecciona un giro primero'); return; }
       const tid = this.selectedTid;
       if (!tid) { alert('No hay tenant seleccionado'); return; }
-      const profile = INDUSTRY_PROFILES[giro];
+      const profile = getGiroProfile(giro);
       if (!profile) { alert('Giro desconocido: ' + giro); return; }
       const total = Object.keys(profile).length;
-      if (!confirm('Aplicar perfil "' + (INDUSTRY_LABELS[giro] || giro) + '" a ' + tid + '?\n\nEsto va a setear ' + total + ' módulos al estado base del giro. Los toggles individuales que hagas DESPUÉS de esto sobrescriben el preset.')) return;
+      if (!confirm('Aplicar perfil "' + getGiroLabel(giro) + '" a ' + tid + '?\n\nEsto va a setear ' + total + ' módulos al estado base del giro. Los toggles individuales que hagas DESPUÉS de esto sobrescriben el preset.')) return;
       const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
       const errors = [];
       let okCount = 0;
@@ -5222,7 +5255,7 @@
       }
       if (!diff) return;
       if (!giro) { diff.style.display = 'none'; return; }
-      const profile = INDUSTRY_PROFILES[giro];
+      const profile = getGiroProfile(giro);
       if (!profile) return;
       const tid = this.selectedTid;
       const localState = window.VOLVIX && VOLVIX.getState ? VOLVIX.getState() : {};
