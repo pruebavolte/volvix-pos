@@ -3224,8 +3224,9 @@
               <button class="permv14-btn-soft" id="permv14-open-fullscreen" title="Abrir en pantalla completa" style="margin-left:auto">⛶ Pantalla completa</button>
             </div>
             <div class="permv14-preview-canvas-grid">
-              <!-- CELL 1: POS Desktop -->
-              <div class="permv14-preview-cell" data-cell="pos-desktop" data-viewport-w="1440" data-viewport-h="900">
+              <!-- CELL 1: POS Desktop. V13.38: viewport 1280×720 (estándar laptop)
+                   para escala menos agresiva, fonts más legibles en preview. -->
+              <div class="permv14-preview-cell" data-cell="pos-desktop" data-viewport-w="1280" data-viewport-h="720">
                 <div class="permv14-cell-header">
                   <span class="permv14-cell-tag pos">🛒 POS · Desktop</span>
                   <span class="permv14-chrome-dot r"></span>
@@ -3239,7 +3240,7 @@
                 </div>
               </div>
               <!-- CELL 2: Landing Desktop -->
-              <div class="permv14-preview-cell" data-cell="landing-desktop" data-viewport-w="1440" data-viewport-h="900">
+              <div class="permv14-preview-cell" data-cell="landing-desktop" data-viewport-w="1280" data-viewport-h="720">
                 <div class="permv14-cell-header">
                   <span class="permv14-cell-tag landing">🌐 Landing · Desktop</span>
                   <span class="permv14-chrome-dot r"></span>
@@ -4634,8 +4635,8 @@
   #screen-permisos.permv14 .permv14-cell-iframe {
     position: absolute;
     top: 0; left: 0;
-    width: 1440px;
-    height: 900px;
+    width: 1280px;
+    height: 720px;
     border: 0;
     background: #fff;
     transform-origin: top left;
