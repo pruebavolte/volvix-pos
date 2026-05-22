@@ -25,6 +25,7 @@
   var _activeSlug = null;
   var _activeConfig = null;
   var _observer = null;
+  var _applying = false; // V14.4: guard contra loop infinito en MutationObserver
 
   function _now() { return Date.now(); }
   function _expired() { return !_cache || (_now() - _cacheAt) > _CACHE_TTL; }
@@ -274,21 +275,42 @@
     var res = applyTo(document, config, opts);
     injectCss(config);
 
-    // MutationObserver para re-aplicar cuando aparezcan nodos nuevos
+    // V14.4 FIX-PERFORMANCE: MutationObserver con debounce + flag _applying
+    // para evitar el loop infinito (applyTo modifica text nodes → mutaciones
+    // → observer dispara applyTo otra vez → freeze del browser). Solucion:
+    // (a) flag _applying para ignorar las mutaciones causadas por el motor.
+    // (b) debounce 300ms para batch de mutaciones DOM externas (modales lazy).
+    // (c) skip si no hay addedNodes con elementos nuevos (ignorar text changes).
     if (opts.observe !== false && !_observer) {
       try {
+        var _debounce = null;
         _observer = new MutationObserver(function (muts) {
-          var hasNew = false;
+          if (_applying) return; // ignorar mutaciones que el propio motor causó
+          var hasNewElements = false;
           for (var i = 0; i < muts.length; i++) {
-            if (muts[i].addedNodes && muts[i].addedNodes.length) { hasNew = true; break; }
+            var m = muts[i];
+            if (m.type !== 'childList' || !m.addedNodes || !m.addedNodes.length) continue;
+            for (var j = 0; j < m.addedNodes.length; j++) {
+              if (m.addedNodes[j].nodeType === 1) { hasNewElements = true; break; }
+            }
+            if (hasNewElements) break;
           }
-          if (hasNew && _activeConfig) {
-            applyTo(document, _activeConfig, opts);
-          }
+          if (!hasNewElements || !_activeConfig) return;
+          clearTimeout(_debounce);
+          _debounce = setTimeout(function () {
+            if (!_activeConfig) return;
+            _applying = true;
+            try { applyTo(document, _activeConfig, opts); }
+            finally { setTimeout(function(){ _applying = false; }, 50); }
+          }, 300);
         });
-        _observer.observe(document.body, { childList: true, subtree: true });
+        // V14.4: subtree:true mantenido pero hasNewElements filtra antes
+        _observer.observe(document.body, { childList: true, subtree: true, attributes: false, characterData: false });
       } catch (_) {}
     }
+    // Setear flag durante la primera aplicación tampoco causa loop
+    _applying = true;
+    setTimeout(function(){ _applying = false; }, 100);
 
     var t1 = performance.now();
     var detail = { slug: slug, hidden: res.hidden, replaced: res.replaced, ms: Math.round(t1 - t0) };
