@@ -13329,6 +13329,36 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: false, error: String(e.message || e) }, 500);
     }
   };
+  // V13.35: GET /api/giros/master/meta — ligero, sin cache. Solo retorna
+  // {total, generated_at, categories[]} sin el array completo de giros (5KB
+  // en lugar de 1.5MB). El panel lo usa para el stat bar "Actualizado" sin
+  // depender del cache de 60s del endpoint pesado. Garantiza que el
+  // contador refleje cambios en BD instantáneamente.
+  handlers['GET /api/giros/master/meta'] = async (req, res) => {
+    try {
+      const rows = await supabaseRequest('GET',
+        '/giros_maestro?activo=eq.true&select=slug,categoria,updated_at&order=updated_at.desc&limit=2000');
+      const safeRows = Array.isArray(rows) ? rows : [];
+      const maxUpdated = safeRows.length ? safeRows[0].updated_at : null;
+      const categoriesMap = {};
+      safeRows.forEach(r => {
+        const c = r.categoria || 'Otros giros (BD)';
+        categoriesMap[c] = (categoriesMap[c] || 0) + 1;
+      });
+      const categories = Object.entries(categoriesMap)
+        .map(([label, count]) => ({ label, count }))
+        .sort((a, b) => b.count - a.count);
+      sendJSON(res, {
+        ok: true,
+        total: safeRows.length,
+        generated_at: maxUpdated,
+        source: 'supabase://giros_maestro',
+        categories,
+      });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: String(e.message || e), total: 0 }, 500);
+    }
+  };
   // V13.31: GET /api/giros/master — SSOT desde tabla giros_maestro de Supabase.
   // Reemplaza la dependencia del archivo estático /data/giros-ecosystem.json.
   // Devuelve { ok, generated_at (MAX updated_at de la tabla), giros: [...] } con

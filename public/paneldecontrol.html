@@ -8076,6 +8076,28 @@
       if (searchesEl) searchesEl.textContent = (j.searchesToday || 0);
       if (usersEl) usersEl.textContent = (j.totalTenants || 0);
     } catch (_) { /* silent */ }
+    // V13.35: meta del catálogo sin cache (timestamp REAL + total dinámico).
+    // Antes el "Actualizado" venía del cache /api/giros/master (60s stale).
+    // Ahora /api/giros/master/meta es no-store → refleja BD instantáneamente.
+    try {
+      const rMeta = await fetch('/api/giros/master/meta', { cache: 'no-store' });
+      if (rMeta.ok) {
+        const m = await rMeta.json();
+        const totalEl = document.getElementById('permv14-stat-total');
+        if (totalEl && m.total) totalEl.textContent = m.total + ' giros';
+        // Actualizar el span "Actualizado: ..." si existe
+        try {
+          const statbar = document.getElementById('permv14-giro-statbar');
+          if (statbar && m.generated_at) {
+            const txt = String(m.generated_at).replace('T', ' ').slice(0, 16);
+            const spans = statbar.querySelectorAll('span');
+            spans.forEach(sp => {
+              if (/^\s*20\d{2}-\d{2}-\d{2}/.test(sp.textContent)) sp.textContent = txt;
+            });
+          }
+        } catch(_){}
+      }
+    } catch (_) { /* silent */ }
     // V13.26: visitantes activos en vivo (paralelo, no bloquea)
     try {
       const r2 = await fetch('/api/presence/active', { cache: 'no-store' });
