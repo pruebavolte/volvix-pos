@@ -152,9 +152,12 @@
     addPayment: function (state, method, amount, details) {
       amount = round2(amount);
       if (!method || amount <= 0) return state;
-
+      var missing = state.getMissing();
+      if (method !== 'EFECTIVO' && amount > missing + 0.01) {
+        amount = missing;
+        if (details) details._capped = true;
+      }
       if (method === 'EFECTIVO') {
-        // Consolidar efectivo en una sola fila
         var existing = state.payments.find(function (p) { return p.method === 'EFECTIVO'; });
         if (existing) {
           existing.amount = round2(existing.amount + amount);
@@ -162,7 +165,6 @@
           return state;
         }
       }
-
       state.payments.push({
         id: uuid(),
         method: method,

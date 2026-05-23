@@ -10307,6 +10307,7 @@
     } else if (key === '.') {
       if (!raw.includes('.')) raw = raw + '.';
     } else {
+      if (parseFloat(raw) === 0 && !raw.includes('.')) raw = '';
       raw = raw + key;
     }
     const num = parseFloat(raw) || 0;
@@ -14154,7 +14155,11 @@
   function openSearch() {
     $('#modal-search').classList.add('open');
     $('#search-input').value = '';
-    filterSearch();
+    if (CATALOG.length === 0 && typeof loadCatalogReal === 'function') {
+      loadCatalogReal().then(() => filterSearch()).catch(() => filterSearch());
+    } else {
+      filterSearch();
+    }
     setTimeout(() => $('#search-input').focus(), 100);
   }
   function filterSearch() {
@@ -14187,6 +14192,28 @@
     }
     closeModal('modal-search');
   }
+
+  // APERTURA CAJA
+  async function saveOpenCash() {
+    const bal = parseFloat($('#ap-balance').value) || 0;
+    if (bal < 0) { showToast('Saldo inicial no válido', 'error'); return; }
+    try {
+      const r = await fetch('/api/cash-opening', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('volvix_token') || ''), 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ initial_balance: bal, shift: $('#ap-shift').value || 'matutino', notes: $('#ap-notes').value || '' })
+      });
+      if (!r.ok) { showToast('Error guardando apertura', 'error'); return; }
+      showToast('✓ Caja abierta · $' + fmt(bal));
+      showScreen('vender');
+      localStorage.setItem('volvix_cash_open', JSON.stringify({ balance: bal, time: Date.now() }));
+    } catch (e) { console.error('[apertura]', e); showToast('Error: ' + e.message, 'error'); }
+  }
+  if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('btn-open-cut');
+    if (btn) btn.addEventListener('click', saveOpenCash);
+  });
 
   // DESCUENTO
   async function applyDiscount() {
