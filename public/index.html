@@ -354,6 +354,21 @@
             const placeholder = document.getElementById('videoPlaceholder');
             if (placeholder) placeholder.classList.add('hidden');
         }
+
+        // Protección: interceptar clicks en links para evitar exposición de railway.app
+        document.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                const href = e.target.getAttribute('href');
+                if (href && (href.startsWith('/') || href.startsWith('http'))) {
+                    e.preventDefault();
+                    if (href.startsWith('/')) {
+                        window.location.href = window.location.origin + href;
+                    } else {
+                        window.location.href = href;
+                    }
+                }
+            }
+        }, true);
     </script>
 </body>
 </html>
