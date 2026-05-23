@@ -157,6 +157,7 @@
         amount = missing;
         if (details) details._capped = true;
       }
+      if (amount <= 0) return state;
       if (method === 'EFECTIVO') {
         var existing = state.payments.find(function (p) { return p.method === 'EFECTIVO'; });
         if (existing) {
@@ -184,7 +185,15 @@
       var row = state.payments.find(function (p) { return p.id === id; });
       if (!row || !patch) return state;
       if (typeof patch.method === 'string') row.method = patch.method;
-      if (patch.amount != null) row.amount = round2(patch.amount);
+      if (patch.amount != null) {
+        var nextAmount = round2(patch.amount);
+        if (row.method !== 'EFECTIVO') {
+          var paidWithoutRow = sumAmounts(state.payments.filter(function (p) { return p.id !== id; }).map(function (p) { return p.amount; }));
+          nextAmount = Math.min(nextAmount, Math.max(0, state.getTotal() - paidWithoutRow));
+          if (patch.details && round2(patch.amount) !== nextAmount) patch.details._capped = true;
+        }
+        row.amount = nextAmount;
+      }
       if (patch.details) row.details = Object.assign({}, row.details || {}, patch.details);
       return state;
     },
