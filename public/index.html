@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volvix POS - Sistema Integral de Punto de Venta</title>
+    <title>SalvadorEx - Sistema Profesional de Punto de Venta para Abarroterías</title>
     <style>
         * {
             margin: 0;
@@ -308,100 +308,51 @@
                     <!-- Badge -->
                     <div class="hero__badge">
                         <svg class="hero__badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
                         </svg>
-                        <span class="hero__badge-text">Tu Nuevo Aliado en IA</span>
+                        <span class="hero__badge-text">Solución Premium para tu Negocio</span>
                     </div>
 
                     <!-- Heading -->
                     <h1 class="hero__heading">
                         <span class="hero__heading-line">
-                            <span class="word">Desbloquea</span>
-                            <span class="word">el</span>
-                            <span class="word">Poder</span>
-                            <span class="word">de</span>
-                            <span class="word">tu</span>
+                            <span class="word">SalvadorEx</span>
                         </span>
                         <span class="hero__heading-line">
-                            <span class="word">IA</span>
-                            <span class="word">para</span>
+                            <span class="word">POS</span>
+                            <span class="word">Profesional</span>
                         </span>
                         <span class="hero__heading-line hero__heading-serif">
-                            <span class="word">Negocios.</span>
+                            <span class="word">para Abarroterías</span>
                         </span>
                     </h1>
 
                     <!-- Subtitle -->
-                    <p class="hero__subtitle">Nuestra plataforma de IA automatiza, analiza y acelera tus procesos para que te enfoques en lo que realmente importa.</p>
+                    <p class="hero__subtitle">Gestión integral de inventario, ventas y cliente para abarroterías, tiendas y minisupers. Fácil, rápido y confiable.</p>
                 </div>
 
                 <!-- CTA Buttons -->
                 <div class="hero__buttons">
-                    <a href="./salvadorex-pos.html" class="btn btn-primary">
-                        Comenzar Ahora
+                    <a href="./login.html" class="btn btn-primary">
+                        Acceder al POS
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                             <polyline points="12 5 19 12 12 19"></polyline>
                         </svg>
                     </a>
-                    <a href="#learn" class="btn btn-secondary">Saber más</a>
+                    <a href="./registro.html" class="btn btn-secondary">Crear Cuenta</a>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const video = document.querySelector('.hero__video');
-        const placeholder = document.getElementById('videoPlaceholder');
-
-        if (video && placeholder) {
-            const videoUrl = 'https://stream.mux.com/s8pMcOvMQXc4GD6AX4e1o01xFogFxipmuKltNfSYza0200.m3u8';
-            
-            // Intentar cargar HLS directamente en navegadores Safari/iOS
-            video.src = videoUrl;
-            
-            // Eventos de carga
-            video.addEventListener('loadstart', () => {
-                placeholder.classList.remove('hidden');
-            });
-            
-            video.addEventListener('loadeddata', () => {
-                video.classList.add('loaded');
-                placeholder.classList.add('hidden');
-            });
-            
-            video.addEventListener('play', () => {
-                video.classList.add('loaded');
-                placeholder.classList.add('hidden');
-            });
-
-            // Fallback: Si HLS nativo no funciona, cargar HLS.js
-            video.addEventListener('error', loadHLSJS);
-            
-            // Si no se carga en 3 segundos, intentar HLS.js
-            setTimeout(() => {
-                if (!video.classList.contains('loaded')) {
-                    loadHLSJS();
-                }
-            }, 3000);
-            
-            function loadHLSJS() {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js';
-                script.onload = function() {
-                    if (window.Hls && window.Hls.isSupported()) {
-                        const hls = new window.Hls();
-                        hls.loadSource(videoUrl);
-                        hls.attachMedia(video);
-                        hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
-                            video.play().catch(err => console.log('Autoplay error:', err));
-                            video.classList.add('loaded');
-                            placeholder.classList.add('hidden');
-                        });
-                    }
-                };
-                document.head.appendChild(script);
-            }
+        // Cambiar video por imagen de productos
+        const videoWrapper = document.querySelector('.hero__video-wrapper');
+        if (videoWrapper) {
+            videoWrapper.innerHTML = '<img src="./comandero.png" alt="SalvadorEx POS" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;margin-left:200px;transform:scale(1.2);transform-origin:left;" class="hero-image loaded">';
+            const placeholder = document.getElementById('videoPlaceholder');
+            if (placeholder) placeholder.classList.add('hidden');
         }
     </script>
 </body>
