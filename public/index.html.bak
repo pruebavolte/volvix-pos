@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="canonical-domain" content="negocio.international">
+    <title>SalvadorEx - Sistema Profesional de Punto de Venta para Abarroterías</title>
+    <script src="./hide-railway.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+        }
+
+        @keyframes blur-in {
+            from {
+                opacity: 0;
+                filter: blur(10px);
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes split-text {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #070612;
+        }
+
+        .hero__video-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero__video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            margin-left: 200px;
+            transform: scale(1.2);
+            transform-origin: left;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .hero__video.loaded {
+            opacity: 1;
+        }
+
+        .hero__gradient {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 160px;
+            background: linear-gradient(to bottom, rgba(7, 6, 18, 0), rgba(7, 6, 18, 1));
+            z-index: 10;
+        }
+
+        .hero__content {
+            position: relative;
+            z-index: 20;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+        }
+
+        @media (min-width: 1024px) {
+            .hero__content {
+                padding: 0 48px;
+            }
+        }
+
+        .hero__inner {
+            max-width: 1280px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+        }
+
+        .hero__group {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .hero__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            background-color: rgba(255, 255, 255, 0.05);
+            width: fit-content;
+            animation: blur-in 0.6s ease-out 0s both;
+        }
+
+        .hero__badge-icon {
+            width: 12px;
+            height: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            flex-shrink: 0;
+        }
+
+        .hero__badge-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            white-space: nowrap;
+        }
+
+        .hero__heading {
+            color: white;
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 500;
+            line-height: 1.2;
+            margin: 0;
+            animation: blur-in 0.8s ease-out 0.1s both;
+        }
+
+        .hero__heading-line {
+            display: block;
+        }
+
+        .hero__heading-serif {
+            font-family: Georgia, serif;
+            font-style: italic;
+        }
+
+        .word {
+            display: inline-block;
+            margin-right: 0.25em;
+            animation: split-text 0.6s ease-out both;
+        }
+
+        .word:nth-child(1) { animation-delay: 0.15s; }
+        .word:nth-child(2) { animation-delay: 0.23s; }
+        .word:nth-child(3) { animation-delay: 0.31s; }
+        .word:nth-child(4) { animation-delay: 0.39s; }
+        .word:nth-child(5) { animation-delay: 0.47s; }
+        .word:nth-child(6) { animation-delay: 0.55s; }
+        .word:nth-child(7) { animation-delay: 0.63s; }
+        .word:nth-child(8) { animation-delay: 0.71s; }
+
+        .hero__subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.125rem;
+            font-weight: 400;
+            line-height: 1.6;
+            max-width: 560px;
+            margin: 0;
+            animation: blur-in 0.6s ease-out 0.4s both;
+        }
+
+        .hero__buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            animation: blur-in 0.6s ease-out 0.6s both;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: white;
+            color: #070612;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a0f3a 0%, #2d1b4e 100%);
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+            text-align: center;
+            z-index: 1;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-placeholder.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Responsive Mobile */
+        @media (max-width: 640px) {
+            .hero__content {
+                padding: 0 16px;
+            }
+
+            .hero__inner {
+                gap: 32px;
+            }
+
+            .hero__group {
+                gap: 16px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <!-- Video Background -->
+        <div class="hero__video-wrapper">
+            <video class="hero__video" autoplay loop muted playsinline disablepictureinpicture></video>
+            <div class="video-placeholder" id="videoPlaceholder">
+                <div>
+                    <p style="margin: 0 0 8px 0; font-weight: 500;">Cargando video...</p>
+                    <p style="margin: 0; font-size: 12px; opacity: 0.7;">Este hero usa video HLS en vivo</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gradient Overlay -->
+        <div class="hero__gradient"></div>
+
+        <!-- Content -->
+        <div class="hero__content">
+            <div class="hero__inner">
+                <!-- Badge + Heading + Subtitle -->
+                <div class="hero__group">
+                    <!-- Badge -->
+                    <div class="hero__badge">
+                        <svg class="hero__badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
+                        </svg>
+                        <span class="hero__badge-text">Solución Premium para tu Negocio</span>
+                    </div>
+
+                    <!-- Heading -->
+                    <h1 class="hero__heading">
+                        <span class="hero__heading-line">
+                            <span class="word">SalvadorEx</span>
+                        </span>
+                        <span class="hero__heading-line">
+                            <span class="word">POS</span>
+                            <span class="word">Profesional</span>
+                        </span>
+                        <span class="hero__heading-line hero__heading-serif">
+                            <span class="word">para Abarroterías</span>
+                        </span>
+                    </h1>
+
+                    <!-- Subtitle -->
+                    <p class="hero__subtitle">Gestión integral de inventario, ventas y cliente para abarroterías, tiendas y minisupers. Fácil, rápido y confiable.</p>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="hero__buttons">
+                    <a href="./login.html" class="btn btn-primary">
+                        Acceder al POS
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                    <a href="./registro.html" class="btn btn-secondary">Crear Cuenta</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cambiar video por imagen de productos
+        const videoWrapper = document.querySelector('.hero__video-wrapper');
+        if (videoWrapper) {
+            videoWrapper.innerHTML = '<img src="./comandero.png" alt="SalvadorEx POS" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;margin-left:200px;transform:scale(1.2);transform-origin:left;" class="hero-image loaded">';
+            const placeholder = document.getElementById('videoPlaceholder');
+            if (placeholder) placeholder.classList.add('hidden');
+        }
+
+        // Protección: interceptar clicks en links para evitar exposición de railway.app
+        document.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                const href = e.target.getAttribute('href');
+                if (href && (href.startsWith('/') || href.startsWith('http'))) {
+                    e.preventDefault();
+                    if (href.startsWith('/')) {
+                        window.location.href = window.location.origin + href;
+                    } else {
+                        window.location.href = href;
+                    }
+                }
+            }
+        }, true);
+    </script>
+</body>
+</html>

@@ -120,7 +120,21 @@ function sendJSON(res, data, code = 200) {
   res.end(JSON.stringify(data));
 }
 
-function serveFile(filePath, res) {
+function rewriteHTML(html, hostHeader) {
+  // Reescribir referencias a railway.app si viene desde GoDaddy forward
+  if (hostHeader && !hostHeader.includes('railway')) {
+    // Si el request vino como negocio.international (via GoDaddy forward)
+    // no cambiar nada, servir como está
+    return html;
+  }
+
+  // Si viene como volvix-pos-production.up.railway.app directamente
+  // Reescribir referencias a negocio.international (para casos donde se accede directo)
+  // Pero esto es poco probable en producción
+  return html;
+}
+
+function serveFile(filePath, res, hostHeader) {
   if (!fs.existsSync(filePath)) {
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     return res.end('404 Not Found');
@@ -139,14 +153,32 @@ function serveFile(filePath, res) {
   };
 
   const contentType = mimeTypes[ext] || 'application/octet-stream';
-  const stat = fs.statSync(filePath);
 
-  res.writeHead(200, {
-    'Content-Type': contentType,
-    'Content-Length': stat.size,
-    'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=31536000',
-  });
-  fs.createReadStream(filePath).pipe(res);
+  // Para HTML, leer y reescribir; para otros, stream directo
+  if (ext === '.html') {
+    fs.readFile(filePath, 'utf-8', (err, data) => {
+      if (err) {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        return res.end('500 Server Error');
+      }
+
+      const rewritten = rewriteHTML(data, hostHeader);
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Content-Length': Buffer.byteLength(rewritten),
+        'Cache-Control': 'no-cache',
+      });
+      res.end(rewritten);
+    });
+  } else {
+    const stat = fs.statSync(filePath);
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Content-Length': stat.size,
+      'Cache-Control': 'public, max-age=31536000',
+    });
+    fs.createReadStream(filePath).pipe(res);
+  }
 }
 
 // ============================================================
@@ -196,7 +228,8 @@ const server = http.createServer(async (req, res) => {
     if (fs.existsSync(withHtml)) filePath = withHtml;
   }
 
-  serveFile(filePath, res);
+  const hostHeader = req.headers.host || '';
+  serveFile(filePath, res, hostHeader);
 });
 
 server.listen(PORT, HOST, () => {
