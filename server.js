@@ -37,8 +37,8 @@ const { exec } = require('child_process');
 // CONFIG AUTO-DETECTADA (nada hardcodeado)
 // ============================================================
 const CONFIG = {
-  host: process.env.HOST || 'localhost',
-  preferredPort: parseInt(process.env.PORT) || 3000,
+  host: process.env.HOST || (process.env.RAILWAY_ENVIRONMENT ? '0.0.0.0' : 'localhost'),
+  preferredPort: process.env.RAILWAY_ENVIRONMENT ? 8080 : (parseInt(process.env.PORT) || 3000),
   publicDir: path.resolve(process.env.PUBLIC_DIR || './public'),
   dbPath: path.resolve(process.env.DB_PATH || './db/volvix.db'),
   apiKey: process.env.ANTHROPIC_API_KEY || '',
