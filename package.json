@@ -4,9 +4,9 @@
   "description": "Volvix · SaaS POS multi-giro · Offline-first · IA autónoma · Web + Android + Windows + Mac · v20 single-source-of-truth snapshot 2026-05-05",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node railway-server.js",
     "dev": "node server.js",
-    "prod": "NODE_ENV=production node server.js",
+    "prod": "NODE_ENV=production node railway-server.js",
     "build": "node scripts/bump-version.js && echo 'Volvix ready'",
     "build:android": "node build-apps.js android",
     "build:windows": "node build-apps.js windows",
