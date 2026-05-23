@@ -3,16 +3,23 @@
   const metaDomain = document.querySelector('meta[name="canonical-domain"]');
   const DOMAIN_TARGET = metaDomain ? metaDomain.getAttribute('content') : 'negocio.international';
   const RAILWAY_DOMAIN = 'volvix-pos-production.up.railway.app';
-  const REDIRECT_COOKIE = `${DOMAIN_TARGET}_redirect_done`;
 
-  // Inmediatamente al cargar, si no estamos en el dominio correcto, redirigir
-  if (window.location.hostname === RAILWAY_DOMAIN && !document.cookie.includes(REDIRECT_COOKIE)) {
-    const newUrl = `https://${DOMAIN_TARGET}${window.location.pathname}${window.location.search}${window.location.hash}`;
-    document.cookie = `${REDIRECT_COOKIE}=1; max-age=600; path=/`;
-    window.location.href = newUrl;
+  // sessionStorage para evitar loops infinitos
+  const redirectKey = 'railway-redirect-attempted';
+  const redirectAttempted = sessionStorage.getItem(redirectKey);
+
+  // Si estamos en railway pero no en negocio, intenta redirect (solo una vez por sesión)
+  if (window.location.hostname === RAILWAY_DOMAIN && !redirectAttempted) {
+    sessionStorage.setItem(redirectKey, 'true');
+    // Intenta redirect después de un pequeño delay
+    setTimeout(() => {
+      const newUrl = `https://${DOMAIN_TARGET}${window.location.pathname}${window.location.search}${window.location.hash}`;
+      // Usa replace para no dejar historial
+      window.location.replace(newUrl);
+    }, 100);
   }
 
-  // Interceptar clicks en links internos
+  // Interceptar clicks en links internos para mantener dominio
   document.addEventListener('click', function(e) {
     const link = e.target.tagName === 'A' ? e.target : e.target.closest('a');
     if (link) {
@@ -46,5 +53,12 @@
       }
       return originalOpen.apply(this, arguments);
     };
+  }
+
+  // Registrar Service Worker para interceptación profunda
+  if ('serviceWorker' in navigator && window.location.hostname === RAILWAY_DOMAIN) {
+    navigator.serviceWorker.register('./sw-railway-hide.js', { scope: '/' }).catch(err => {
+      console.warn('[hide-railway] SW registration failed:', err.message);
+    });
   }
 })();

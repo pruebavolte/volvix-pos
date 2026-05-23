@@ -121,16 +121,32 @@ function sendJSON(res, data, code = 200) {
 }
 
 function rewriteHTML(html, hostHeader) {
-  // Reescribir referencias a railway.app si viene desde GoDaddy forward
-  if (hostHeader && !hostHeader.includes('railway')) {
-    // Si el request vino como negocio.international (via GoDaddy forward)
-    // no cambiar nada, servir como está
-    return html;
+  // Si viene como volvix-pos-production.up.railway.app, inyectar meta tag para redirect
+  if (hostHeader && hostHeader.includes('railway')) {
+    // Inyectar meta tag canonical-domain si no existe
+    if (!html.includes('meta name="canonical-domain"')) {
+      const metaTag = '<meta name="canonical-domain" content="negocio.international">\n';
+      html = html.replace('</head>', metaTag + '</head>');
+    }
+
+    // Inyectar script que intenta hacer redirect más agresivo
+    const redirectScript = `
+<script>
+// Redirect agresivo: intentar ir a negocio.international
+if (window.location.hostname === 'volvix-pos-production.up.railway.app' && !sessionStorage.getItem('redirect-attempted')) {
+  sessionStorage.setItem('redirect-attempted', 'true');
+  // location.replace en lugar de location.href para no dejar en historial
+  setTimeout(function() {
+    var target = 'https://negocio.international' + window.location.pathname + window.location.search + window.location.hash;
+    window.location.replace(target);
+  }, 50);
+}
+</script>
+`;
+    // Inyectar ANTES de otros scripts
+    html = html.replace('<head>', '<head>' + redirectScript);
   }
 
-  // Si viene como volvix-pos-production.up.railway.app directamente
-  // Reescribir referencias a negocio.international (para casos donde se accede directo)
-  // Pero esto es poco probable en producción
   return html;
 }
 
