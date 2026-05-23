@@ -9141,7 +9141,7 @@
     // 2026-05-10 fix: respetar p.qty (antes se ignoraba — bug afectaba a
     // _convertToTicket de pedidos PWA con qty>1, que cargaban siempre qty:1).
     const reqQty = Math.max(1, parseInt(p && p.qty, 10) || 1);
-    const existing = CART.find(c => c.code === p.code);
+    const existing = CART.find(c => (p.code && c.code === p.code) || (p.id && c.id === p.id));
     if (existing) existing.qty += reqQty;
     else CART.push({...p, qty: reqQty});
     renderCart();
@@ -9200,7 +9200,8 @@
       const draft = {
         v: 1,
         items: CART.map(it => ({
-          code: it.code, name: it.name, price: Number(it.price) || 0,
+          id: it.id || null, code: it.code, barcode: it.barcode || null,
+          name: it.name, price: Number(it.price) || 0,
           qty: Number(it.qty) || 1, stock: Number(it.stock) || 0
         })),
         ts: Date.now(),
@@ -9347,6 +9348,8 @@
         items: CART.map(function (it) {
           return {
             code: it.code, name: it.name,
+            id: it.id || null,
+            barcode: it.barcode || null,
             price: Number(it.price) || 0,
             qty: Number(it.qty) || 1,
             stock: Number(it.stock) || 0
@@ -9850,6 +9853,12 @@
     if (!ok) return;
     CART.length = 0; renderCart();
     try { __r8aClearCartDraft(); } catch (_) {}
+    try {
+      $('#footer-pago').textContent = '$0.00';
+      $('#footer-cambio').textContent = '$0.00';
+      const rec = $('#pay-recibido'); if (rec) rec.value = '$0.00';
+      const cam = $('#pay-cambio'); if (cam) cam.textContent = '$0.00';
+    } catch (_) {}
     showToast('Venta eliminada');
   }
   async function newTicket() {
@@ -9864,6 +9873,12 @@
     }
     CART.length = 0; renderCart();
     try { __r8aClearCartDraft(); } catch (_) {}
+    try {
+      $('#footer-pago').textContent = '$0.00';
+      $('#footer-cambio').textContent = '$0.00';
+      const rec = $('#pay-recibido'); if (rec) rec.value = '$0.00';
+      const cam = $('#pay-cambio'); if (cam) cam.textContent = '$0.00';
+    } catch (_) {}
     showToast('✓ Nuevo ticket iniciado');
   }
   // AGENTE 6 (IVA fiscal MX) — cálculo correcto con tax_config configurable por tenant.
@@ -9970,6 +9985,11 @@
       btnF12.style.cursor = hasItems ? 'pointer' : 'not-allowed';
       btnF12.title = hasItems ? 'F12 - Cobrar ticket actual' : 'Agrega productos al carrito para cobrar';
     }
+  }
+  function getCheckoutTotal() {
+    const last = window.__volvixLastTotals;
+    if (last && isFinite(Number(last.total))) return Number(last.total);
+    return CART.reduce((s,i) => s + (Number(i.price)||0) * (Number(i.qty)||0), 0);
   }
 
   /* ============ GAP-2: MULTI-TAB CART SYNC ============ */
@@ -10221,7 +10241,7 @@
         }
       }
     } catch (e) { console.warn('[VOLVIX] reglas venta:', e); }
-    const total = CART.reduce((s,i) => s + i.price * i.qty, 0);
+    const total = getCheckoutTotal();
     $('#pay-total').textContent = fmt(total);
     $('#pay-items').textContent = CART.reduce((s,i) => s + i.qty, 0);
     $('#pay-recibido').value = fmt(total);
@@ -10357,7 +10377,13 @@
     try {
       // ===== CABLEADO: Guardar venta en base de datos =====
       const session = JSON.parse(localStorage.getItem('volvixSession') || 'null');
-      const total = CART.reduce((s, i) => s + i.price * i.qty, 0);
+      const total = getCheckoutTotal();
+      const recibido = parse$($('#pay-recibido').value);
+      if (recibido + 0.005 < total) {
+        showToast('Pago incompleto: faltan ' + fmt(total - recibido), 'error');
+        return;
+      }
+      const cambio = Math.max(0, recibido - total);
       const folio = parseInt($('#currentFolio').textContent);
 
       const saleData = {
@@ -10381,6 +10407,8 @@
           subtotal: i.price * i.qty
         })),
         total: total,
+        amount_received: recibido,
+        change: cambio,
         // FIX-N5-B1/B2: respetar el método seleccionado por el cajero (no hardcoded)
         payment_method: window.__volvixSelectedPayMethod || 'efectivo',
         // FIX-N5-B1: incluir evidencia de verificación bancaria si aplicó
@@ -10785,6 +10813,30 @@
     } catch (_) {}
   }
   window._logSearch = _logSearch;
+  function _persistSavedProductLocal(result, fallback) {
+    try {
+      const p = (result && (result.product || result.item || result.data)) || result || fallback;
+      if (!p || typeof p !== 'object') return;
+      const prod = {
+        id: p.id || fallback?.id,
+        code: p.code || p.sku || p.barcode || p.codigo_barras || fallback?.code || '',
+        name: p.name || p.nombre || fallback?.name || '',
+        price: Number(p.price || p.precio || fallback?.price || 0),
+        cost: Number(p.cost || p.costo || fallback?.cost || 0),
+        stock: Number(p.stock || p.stock_actual || p.qty || fallback?.stock || 0),
+        min_stock: Number(p.min_stock || p.minimo || fallback?.min_stock || 0),
+        category: p.category || p.categoria || fallback?.category || '',
+        barcode: p.barcode || p.codigo_barras || p.code || fallback?.barcode || ''
+      };
+      if (!prod.id && !prod.code) return;
+      const idx = CATALOG.findIndex(x => (prod.id && x.id === prod.id) || (prod.code && x.code === prod.code));
+      if (idx >= 0) CATALOG[idx] = Object.assign({}, CATALOG[idx], prod);
+      else CATALOG.unshift(prod);
+      if (window.VolvixProductSearch && typeof window.VolvixProductSearch.upsert === 'function') {
+        window.VolvixProductSearch.upsert(prod).catch(() => {});
+      }
+    } catch (_) {}
+  }
   async function saveProduct(data, productId){
     const url = productId ? '/api/products/' + encodeURIComponent(productId) : '/api/products';
     // Use PATCH for update (per spec), POST for create
@@ -10798,6 +10850,7 @@
           const r2 = await _authFetch(url, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
           if (r2.ok) {
             const result = await r2.json().catch(()=> ({}));
+            _persistSavedProductLocal(result, Object.assign({ id: productId }, data));
             await loadCatalogReal();
             showToast('✓ Producto actualizado');
             return result;
@@ -10808,6 +10861,7 @@
         return null;
       }
       const result = await r.json().catch(()=> ({}));
+      _persistSavedProductLocal(result, Object.assign({ id: productId }, data));
       await loadCatalogReal();
       showToast(productId ? '✓ Producto actualizado' : '✓ Producto creado');
       return result;
@@ -13078,7 +13132,7 @@
       </div>
       ${p.description_long ? `<div style="background:#f7f9fb;padding:8px 10px;border-radius:4px;font-size:11.5px;line-height:1.45;color:#444;margin-bottom:10px">${p.description_long}</div>` : ''}
       ${techRows ? `<div style="margin-bottom:10px"><div style="font-weight:600;font-size:11.5px;color:#2D5F8F;margin-bottom:3px">📋 Ficha técnica</div>${techRows}</div>` : ''}
-      <button onclick="addQuickPick('${safeCode}')" style="width:100%;padding:10px;background:#2D5F8F;color:#fff;border:0;border-radius:5px;font-size:12.5px;font-weight:600;cursor:pointer">+ Agregar al ticket</button>`;
+      <button onclick="addQuickPick('${escapeAttr(p.code || p.id || '')}')" style="width:100%;padding:10px;background:#2D5F8F;color:#fff;border:0;border-radius:5px;font-size:12.5px;font-weight:600;cursor:pointer">+ Agregar al ticket</button>`;
     // V10.4.3 — MutationObserver que mantiene las imágenes visibles aunque
     // algún wiring trate de ocultarlas con display:none!important.
     const forceVis = (img) => {
@@ -13133,9 +13187,9 @@
     document.addEventListener('keydown', escHandler);
   };
   function addQuickPick(code) {
-    const p = QUICKPICK.find(x => x.code === code);
+    const p = QUICKPICK.find(x => x.code === code || x.id === code);
     if (!p) return;
-    const existing = CART.find(c => c.code === code);
+    const existing = CART.find(c => (p.code && c.code === p.code) || (p.id && c.id === p.id));
     if (existing) {
       existing.qty++;
       SELECTED_CART_INDEX = CART.indexOf(existing);
@@ -13144,6 +13198,7 @@
       SELECTED_CART_INDEX = CART.length - 1; // V10.3 — auto-seleccionar línea recién agregada
     }
     renderCart();
+    try { __r8aSaveCartDraft(); } catch (_) {}
     // V10.3 — siempre mostrar panel (no solo >=1100); el panel es columna fija ahora
     try { showProductSidebar(code); } catch(_){}
     // Cerrar panel en móvil después de agregar
@@ -14165,14 +14220,14 @@
   function filterSearch() {
     const q = ($('#search-input').value || '').toLowerCase();
     const results = CATALOG.filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      p.code.toLowerCase().includes(q)
+      String(p.name || '').toLowerCase().includes(q) ||
+      String(p.code || p.barcode || '').toLowerCase().includes(q)
     );
     // R7b FIX-V3: escapar p.name, p.code (vienen de CATALOG que carga del server)
     $('#search-results').innerHTML = results.length === 0
       ? '<div style="padding:30px;text-align:center;color:var(--text-3);font-size:13px;">Sin resultados</div>'
       : results.slice(0, 50).map(p => `
-        <div onclick="pickSearchResult('${escapeAttr(p.code||'')}')" style="padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:10px;align-items:center;" onmouseover="this.style.background='var(--accent-soft)'" onmouseout="this.style.background=''">
+        <div onclick="pickSearchResult('${escapeAttr(p.code||p.id||'')}')" style="padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:10px;align-items:center;" onmouseover="this.style.background='var(--accent-soft)'" onmouseout="this.style.background=''">
           <div style="flex:1;">
             <div style="font-weight:600;font-size:13px;">${escapeHtml(p.name||'')}</div>
             <div style="font-family:monospace;font-size:11px;color:var(--text-3);">${escapeHtml(p.code||'')} · Stock: ${Number(p.stock)||0}</div>
@@ -14182,12 +14237,9 @@
       `).join('');
   }
   function pickSearchResult(code) {
-    const p = CATALOG.find(x => x.code === code);
+    const p = CATALOG.find(x => x.code === code || x.id === code);
     if (p) {
-      const existing = CART.find(c => c.code === code);
-      if (existing) existing.qty++;
-      else CART.push({ ...p, qty: 1 });
-      renderCart();
+      addToCart(p);
       showToast('+ ' + p.name);
     }
     closeModal('modal-search');
@@ -14212,7 +14264,7 @@
   }
   if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('btn-open-cut');
-    if (btn) btn.addEventListener('click', saveOpenCash);
+    if (btn && typeof openCut !== 'function') btn.addEventListener('click', saveOpenCash);
   });
 
   // DESCUENTO

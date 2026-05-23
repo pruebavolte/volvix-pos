@@ -13359,6 +13359,147 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: false, error: String(e.message || e), total: 0 }, 500);
     }
   };
+  // V14.1: GET /api/giros/terminologias — read-only, public. Mergea archivo
+  // estático /public/data/giros-terminologias-v2.json con giros_maestro.metadata
+  // de Supabase. BD gana sobre estático. Soporta ?slug=X para 1 giro o todos.
+  // Cache 5 min + ETag vía sendJSONPublic.
+  //
+  // Shape (sin slug):
+  //   { ok, total, source: "merged://static+supabase",
+  //     giros: { "restaurante": { modulos_activos:[], modulos_inactivos:[], terminologias:{} }, ... } }
+  // Shape (con slug):
+  //   { ok, slug, terminologias, modulos_activos, modulos_inactivos, source }
+  handlers['GET /api/giros/terminologias'] = async (req, res) => {
+    // Cache en memoria del archivo estático (no se re-lee en cada request).
+    // Cargamos perezosamente la primera vez que se pide el endpoint.
+    if (!global.__girosTermStaticCache) {
+      let staticData = {};
+      try {
+        const staticPath = path.join(__dirname, '..', 'public', 'data', 'giros-terminologias-v2.json');
+        const raw = fs.readFileSync(staticPath, 'utf8');
+        staticData = JSON.parse(raw) || {};
+      } catch (_) {
+        // archivo no existe / JSON inválido → arrancamos con {} y dejamos
+        // que el merge use solo lo que venga de Supabase.
+        staticData = {};
+      }
+      global.__girosTermStaticCache = staticData;
+    }
+    const staticGiros = global.__girosTermStaticCache || {};
+
+    // Convierte el array metadata.terminologia ([{generico, este_giro}, ...])
+    // al shape de objeto plano {generico: este_giro} que el frontend espera.
+    function termArrayToObject(arr) {
+      const out = {};
+      if (!Array.isArray(arr)) return out;
+      arr.forEach(t => {
+        if (!t || !t.generico) return;
+        out[String(t.generico)] = t.este_giro != null ? String(t.este_giro) : '';
+      });
+      return out;
+    }
+
+    // Normaliza un row de giros_maestro a la shape estándar del endpoint.
+    function normalizeFromDb(row) {
+      const meta = (row && row.metadata) || {};
+      const me = meta.modules_enabled || {};
+      // modules_enabled puede venir como {ventas:true, inventario:false, ...}
+      // o como {activos:[...], inactivos:[...]}. Soportamos ambas.
+      let activos = Array.isArray(me.activos) ? me.activos.slice() : [];
+      let inactivos = Array.isArray(me.inactivos) ? me.inactivos.slice() : [];
+      if (!activos.length && !inactivos.length && typeof me === 'object') {
+        Object.keys(me).forEach(k => {
+          if (k === 'activos' || k === 'inactivos') return;
+          if (me[k] === true) activos.push(k);
+          else if (me[k] === false) inactivos.push(k);
+        });
+      }
+      return {
+        modulos_activos: activos,
+        modulos_inactivos: inactivos,
+        terminologias: termArrayToObject(meta.terminologia),
+      };
+    }
+
+    // Mergea estático + BD. BD gana — sobrescribe campos definidos.
+    function mergeGiro(staticEntry, dbEntry) {
+      const s = staticEntry || {};
+      const d = dbEntry || {};
+      return {
+        modulos_activos: d.modulos_activos && d.modulos_activos.length
+          ? d.modulos_activos
+          : (Array.isArray(s.modulos_activos) ? s.modulos_activos : []),
+        modulos_inactivos: d.modulos_inactivos && d.modulos_inactivos.length
+          ? d.modulos_inactivos
+          : (Array.isArray(s.modulos_inactivos) ? s.modulos_inactivos : []),
+        terminologias: Object.assign(
+          {},
+          (s && typeof s.terminologias === 'object') ? s.terminologias : {},
+          (d && typeof d.terminologias === 'object') ? d.terminologias : {}
+        ),
+      };
+    }
+
+    try {
+      const u = new URL(req.url, 'http://x');
+      const slug = u.searchParams.get('slug');
+      let dbAvailable = true;
+
+      if (slug) {
+        // Una sola entrada: query filtrada por slug.
+        let dbEntry = null;
+        try {
+          const rows = await supabaseRequest('GET',
+            `/giros_maestro?slug=eq.${encodeURIComponent(slug)}&select=slug,metadata&limit=1`);
+          if (Array.isArray(rows) && rows.length) {
+            dbEntry = normalizeFromDb(rows[0]);
+          }
+        } catch (_) {
+          dbAvailable = false;
+        }
+        const merged = mergeGiro(staticGiros[slug], dbEntry);
+        return sendJSONPublic(res, {
+          ok: true,
+          slug,
+          modulos_activos: merged.modulos_activos,
+          modulos_inactivos: merged.modulos_inactivos,
+          terminologias: merged.terminologias,
+          source: dbAvailable ? 'merged://static+supabase' : 'static_only',
+        }, 300, 200, req);
+      }
+
+      // Todos los giros: traer toda la BD y mergear con todo el estático.
+      let dbBySlug = {};
+      try {
+        const rows = await supabaseRequest('GET',
+          '/giros_maestro?activo=eq.true&select=slug,metadata&limit=2000');
+        if (Array.isArray(rows)) {
+          rows.forEach(r => {
+            if (r && r.slug) dbBySlug[r.slug] = normalizeFromDb(r);
+          });
+        }
+      } catch (_) {
+        dbAvailable = false;
+        dbBySlug = {};
+      }
+
+      // Union de keys: todo lo del estático + todo lo de BD.
+      const allKeys = new Set([...Object.keys(staticGiros), ...Object.keys(dbBySlug)]);
+      const giros = {};
+      allKeys.forEach(k => {
+        giros[k] = mergeGiro(staticGiros[k], dbBySlug[k]);
+      });
+
+      sendJSONPublic(res, {
+        ok: true,
+        total: Object.keys(giros).length,
+        source: dbAvailable ? 'merged://static+supabase' : 'static_only',
+        giros,
+      }, 300, 200, req);
+    } catch (e) {
+      sendJSON(res, { ok: false, error: String(e.message || e), giros: {}, total: 0 }, 500);
+    }
+  };
   // V13.31: GET /api/giros/master — SSOT desde tabla giros_maestro de Supabase.
   // Reemplaza la dependencia del archivo estático /data/giros-ecosystem.json.
   // Devuelve { ok, generated_at (MAX updated_at de la tabla), giros: [...] } con
