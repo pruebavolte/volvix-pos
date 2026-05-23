@@ -1,0 +1,277 @@
+{
+  "_meta": {
+    "source_file": "public/salvadorex-pos.html",
+    "total_lines": 24224,
+    "audit_date": "2026-05-21",
+    "audit_strategy": "Top 100 most visible UI elements (page titles, primary buttons, sidebar nav, form labels, payment buttons, modal CTAs). Selection biased toward high-traffic POS flows: cobrar/pagar, inventario, corte, clientes. JS-template strings (e.g. innerHTML concat) excluded because data-i18n cannot be injected with a static HTML attribute via Edit replace_all; only literal HTML tags in source were considered.",
+    "note": "edit_old / edit_new are exact strings safe to use with Edit tool. Some long button attributes were truncated for readability — use grep on the suggested line_number to find exact source if collision occurs."
+  },
+  "total": 100,
+  "by_module": {
+    "login": [
+      { "line_number": 3845, "current_text": "SalvadoreX", "suggested_i18n_key": "brand_name", "module": "login", "tag": "h1", "edit_old": "<h1 class=\"login-title\">SalvadoreX</h1>", "edit_new": "<h1 class=\"login-title\" data-i18n=\"brand_name\">SalvadoreX</h1>" },
+      { "line_number": 3849, "current_text": "Usuario", "suggested_i18n_key": "usuario", "module": "login", "tag": "label", "edit_old": "<label class=\"input-label\">Usuario</label>", "edit_new": "<label class=\"input-label\" data-i18n=\"usuario\">Usuario</label>" },
+      { "line_number": 3853, "current_text": "Contraseña", "suggested_i18n_key": "contrasena", "module": "login", "tag": "label", "edit_old": "<label class=\"input-label\">Contraseña</label>", "edit_new": "<label class=\"input-label\" data-i18n=\"contrasena\">Contraseña</label>" },
+      { "line_number": 3857, "current_text": "Iniciar sesión", "suggested_i18n_key": "iniciar_sesion", "module": "login", "tag": "button", "edit_old": "<button class=\"btn-login\" id=\"btn-login-submit\" onclick=\"handleLogin(event)\">Iniciar sesión</button>", "edit_new": "<button class=\"btn-login\" id=\"btn-login-submit\" onclick=\"handleLogin(event)\" data-i18n=\"iniciar_sesion\">Iniciar sesión</button>" }
+    ],
+    "toolbar": [
+      { "line_number": 3893, "current_text": "Notificaciones", "suggested_i18n_key": "notificaciones", "module": "toolbar", "tag": "button[title]", "edit_old": "aria-label=\"Notificaciones\" title=\"Notificaciones\"", "edit_new": "aria-label=\"Notificaciones\" title=\"Notificaciones\" data-i18n-title=\"notificaciones\" data-i18n-aria-label=\"notificaciones\"" },
+      { "line_number": 3968, "current_text": "Mi perfil", "suggested_i18n_key": "mi_perfil", "module": "toolbar", "tag": "button[title]", "edit_old": "aria-label=\"Mi perfil\" title=\"Mi perfil\"", "edit_new": "aria-label=\"Mi perfil\" title=\"Mi perfil\" data-i18n-title=\"mi_perfil\" data-i18n-aria-label=\"mi_perfil\"" },
+      { "line_number": 3972, "current_text": "Ayuda", "suggested_i18n_key": "ayuda", "module": "toolbar", "tag": "button[title]", "edit_old": "aria-label=\"Ayuda\" title=\"Ayuda\"", "edit_new": "aria-label=\"Ayuda\" title=\"Ayuda\" data-i18n-title=\"ayuda\" data-i18n-aria-label=\"ayuda\"" },
+      { "line_number": 3977, "current_text": "Cerrar sesión", "suggested_i18n_key": "cerrar_sesion", "module": "toolbar", "tag": "button[title]", "edit_old": "aria-label=\"Cerrar sesión\" title=\"Cerrar sesión\"", "edit_new": "aria-label=\"Cerrar sesión\" title=\"Cerrar sesión\" data-i18n-title=\"cerrar_sesion\" data-i18n-aria-label=\"cerrar_sesion\"" }
+    ],
+    "pos": [
+      { "line_number": 4163, "current_text": "Categorías", "suggested_i18n_key": "categorias", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Categorías\" title=\"Categorías\"", "edit_new": "aria-label=\"Categorías\" title=\"Categorías\" data-i18n-title=\"categorias\" data-i18n-aria-label=\"categorias\"" },
+      { "line_number": 4191, "current_text": "Artículos varios / Kits", "suggested_i18n_key": "articulos_varios", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Artículos varios / Kits\" title=\"Artículos varios / Kits\"", "edit_new": "aria-label=\"Artículos varios / Kits\" title=\"Artículos varios / Kits\" data-i18n-title=\"articulos_varios\" data-i18n-aria-label=\"articulos_varios\"" },
+      { "line_number": 4195, "current_text": "Producto común (sin código)", "suggested_i18n_key": "producto_comun", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Producto común (sin código)\" title=\"Producto común (sin código)\"", "edit_new": "aria-label=\"Producto común (sin código)\" title=\"Producto común (sin código)\" data-i18n-title=\"producto_comun\" data-i18n-aria-label=\"producto_comun\"" },
+      { "line_number": 4199, "current_text": "Buscar producto", "suggested_i18n_key": "buscar_producto", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Buscar producto\" title=\"Buscar producto\"", "edit_new": "aria-label=\"Buscar producto\" title=\"Buscar producto\" data-i18n-title=\"buscar_producto\" data-i18n-aria-label=\"buscar_producto\"" },
+      { "line_number": 4203, "current_text": "Precio mayoreo", "suggested_i18n_key": "precio_mayoreo", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Precio mayoreo\" title=\"Precio mayoreo\"", "edit_new": "aria-label=\"Precio mayoreo\" title=\"Precio mayoreo\" data-i18n-title=\"precio_mayoreo\" data-i18n-aria-label=\"precio_mayoreo\"" },
+      { "line_number": 4207, "current_text": "Entradas de efectivo", "suggested_i18n_key": "entradas_efectivo", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Entradas de efectivo\" title=\"Entradas de efectivo\"", "edit_new": "aria-label=\"Entradas de efectivo\" title=\"Entradas de efectivo\" data-i18n-title=\"entradas_efectivo\" data-i18n-aria-label=\"entradas_efectivo\"" },
+      { "line_number": 4211, "current_text": "Salidas de efectivo", "suggested_i18n_key": "salidas_efectivo", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Salidas de efectivo\" title=\"Salidas de efectivo\"", "edit_new": "aria-label=\"Salidas de efectivo\" title=\"Salidas de efectivo\" data-i18n-title=\"salidas_efectivo\" data-i18n-aria-label=\"salidas_efectivo\"" },
+      { "line_number": 4215, "current_text": "Borrar artículo seleccionado", "suggested_i18n_key": "borrar_articulo", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Borrar artículo seleccionado\" title=\"Borrar artículo seleccionado\"", "edit_new": "aria-label=\"Borrar artículo seleccionado\" title=\"Borrar artículo seleccionado\" data-i18n-title=\"borrar_articulo\" data-i18n-aria-label=\"borrar_articulo\"" },
+      { "line_number": 4219, "current_text": "Verificador de precios", "suggested_i18n_key": "verificador_precios", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Verificador de precios\" title=\"Verificador de precios\"", "edit_new": "aria-label=\"Verificador de precios\" title=\"Verificador de precios\" data-i18n-title=\"verificador_precios\" data-i18n-aria-label=\"verificador_precios\"" },
+      { "line_number": 4226, "current_text": "Panel catálogo", "suggested_i18n_key": "panel_catalogo", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Panel catálogo\" title=\"Panel catálogo\"", "edit_new": "aria-label=\"Panel catálogo\" title=\"Panel catálogo\" data-i18n-title=\"panel_catalogo\" data-i18n-aria-label=\"panel_catalogo\"" },
+      { "line_number": 4230, "current_text": "Catálogo visual", "suggested_i18n_key": "catalogo_visual", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Catálogo visual\" title=\"Catálogo visual\"", "edit_new": "aria-label=\"Catálogo visual\" title=\"Catálogo visual\" data-i18n-title=\"catalogo_visual\" data-i18n-aria-label=\"catalogo_visual\"" },
+      { "line_number": 4234, "current_text": "Venta a granel", "suggested_i18n_key": "venta_granel", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Venta a granel\" title=\"Venta a granel\"", "edit_new": "aria-label=\"Venta a granel\" title=\"Venta a granel\" data-i18n-title=\"venta_granel\" data-i18n-aria-label=\"venta_granel\"" },
+      { "line_number": 4238, "current_text": "Aplicar descuento", "suggested_i18n_key": "aplicar_descuento", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Aplicar descuento\" title=\"Aplicar descuento\"", "edit_new": "aria-label=\"Aplicar descuento\" title=\"Aplicar descuento\" data-i18n-title=\"aplicar_descuento\" data-i18n-aria-label=\"aplicar_descuento\"" },
+      { "line_number": 4242, "current_text": "Venta de tiempo aire", "suggested_i18n_key": "venta_tiempo_aire", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Venta de tiempo aire\" title=\"Venta de tiempo aire\"", "edit_new": "aria-label=\"Venta de tiempo aire\" title=\"Venta de tiempo aire\" data-i18n-title=\"venta_tiempo_aire\" data-i18n-aria-label=\"venta_tiempo_aire\"" },
+      { "line_number": 4246, "current_text": "Pago de servicios", "suggested_i18n_key": "pago_servicios", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Pago de servicios\" title=\"Pago de servicios\"", "edit_new": "aria-label=\"Pago de servicios\" title=\"Pago de servicios\" data-i18n-title=\"pago_servicios\" data-i18n-aria-label=\"pago_servicios\"" },
+      { "line_number": 4250, "current_text": "Calculadora", "suggested_i18n_key": "calculadora", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Calculadora\" title=\"Calculadora\"", "edit_new": "aria-label=\"Calculadora\" title=\"Calculadora\" data-i18n-title=\"calculadora\" data-i18n-aria-label=\"calculadora\"" },
+      { "line_number": 4292, "current_text": "Cambiar precio", "suggested_i18n_key": "cambiar_precio", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Cambiar precio\" title=\"Cambiar precio\"", "edit_new": "aria-label=\"Cambiar precio\" title=\"Cambiar precio\" data-i18n-title=\"cambiar_precio\" data-i18n-aria-label=\"cambiar_precio\"" },
+      { "line_number": 4296, "current_text": "Venta pendiente", "suggested_i18n_key": "venta_pendiente", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Venta pendiente\" title=\"Venta pendiente\"", "edit_new": "aria-label=\"Venta pendiente\" title=\"Venta pendiente\" data-i18n-title=\"venta_pendiente\" data-i18n-aria-label=\"venta_pendiente\"" },
+      { "line_number": 4300, "current_text": "Eliminar venta", "suggested_i18n_key": "eliminar_venta", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Eliminar venta\" title=\"Eliminar venta\"", "edit_new": "aria-label=\"Eliminar venta\" title=\"Eliminar venta\" data-i18n-title=\"eliminar_venta\" data-i18n-aria-label=\"eliminar_venta\"" },
+      { "line_number": 4304, "current_text": "Asignar cliente", "suggested_i18n_key": "asignar_cliente", "module": "pos", "tag": "button[title]", "edit_old": "aria-label=\"Asignar cliente\" title=\"Asignar cliente\"", "edit_new": "aria-label=\"Asignar cliente\" title=\"Asignar cliente\" data-i18n-title=\"asignar_cliente\" data-i18n-aria-label=\"asignar_cliente\"" },
+      { "line_number": 4321, "current_text": "Aplicar", "suggested_i18n_key": "aplicar", "module": "pos", "tag": "button", "edit_old": "<button class=\"btn sm\" onclick=\"applyCouponToCart()\" style=\"font-size:11px;padding:5px 10px;\">Aplicar</button>", "edit_new": "<button class=\"btn sm\" onclick=\"applyCouponToCart()\" style=\"font-size:11px;padding:5px 10px;\" data-i18n=\"aplicar\">Aplicar</button>" }
+    ],
+    "dashboard": [
+      { "line_number": 4396, "current_text": "Dashboard", "suggested_i18n_key": "dashboard", "module": "dashboard", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Dashboard</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"dashboard\">Dashboard</h1>" },
+      { "line_number": 4402, "current_text": "Hoy", "suggested_i18n_key": "hoy", "module": "dashboard", "tag": "button", "edit_old": "<button class=\"btn\" data-dash-range=\"today\" onclick=\"setDashboardRange('today', this)\" title=\"Hoy\">Hoy</button>", "edit_new": "<button class=\"btn\" data-dash-range=\"today\" onclick=\"setDashboardRange('today', this)\" title=\"Hoy\" data-i18n=\"hoy\" data-i18n-title=\"hoy\">Hoy</button>" },
+      { "line_number": 4403, "current_text": "Semana", "suggested_i18n_key": "semana", "module": "dashboard", "tag": "button", "edit_old": "<button class=\"btn\" data-dash-range=\"week\" onclick=\"setDashboardRange('week', this)\" title=\"Esta semana\">Semana</button>", "edit_new": "<button class=\"btn\" data-dash-range=\"week\" onclick=\"setDashboardRange('week', this)\" title=\"Esta semana\" data-i18n=\"semana\" data-i18n-title=\"esta_semana\">Semana</button>" },
+      { "line_number": 4404, "current_text": "Mes", "suggested_i18n_key": "mes", "module": "dashboard", "tag": "button", "edit_old": "<button class=\"btn\" data-dash-range=\"month\" onclick=\"setDashboardRange('month', this)\" title=\"Este mes\">Mes</button>", "edit_new": "<button class=\"btn\" data-dash-range=\"month\" onclick=\"setDashboardRange('month', this)\" title=\"Este mes\" data-i18n=\"mes\" data-i18n-title=\"este_mes\">Mes</button>" }
+    ],
+    "inventario": [
+      { "line_number": 4495, "current_text": "Inventario", "suggested_i18n_key": "inventario", "module": "inventario", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Inventario</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"inventario\">Inventario</h1>" },
+      { "line_number": 4548, "current_text": "Limpiar selección", "suggested_i18n_key": "limpiar_seleccion", "module": "inventario", "tag": "button", "edit_old": "<button class=\"btn sm\" id=\"btn-bulk-clear\">Limpiar selección</button>", "edit_new": "<button class=\"btn sm\" id=\"btn-bulk-clear\" data-i18n=\"limpiar_seleccion\">Limpiar selección</button>" },
+      { "line_number": 4549, "current_text": "Ajustar seleccionados", "suggested_i18n_key": "ajustar_seleccionados", "module": "inventario", "tag": "button", "edit_old": "<button class=\"btn sm accent\" id=\"btn-bulk-adjust\">Ajustar seleccionados</button>", "edit_new": "<button class=\"btn sm accent\" id=\"btn-bulk-adjust\" data-i18n=\"ajustar_seleccionados\">Ajustar seleccionados</button>" },
+      { "line_number": 4604, "current_text": "Nombre del conteo *", "suggested_i18n_key": "nombre_conteo", "module": "inventario", "tag": "label", "edit_old": "<label class=\"input-label\">Nombre del conteo *</label>", "edit_new": "<label class=\"input-label\" data-i18n=\"nombre_conteo\">Nombre del conteo *</label>" },
+      { "line_number": 4607, "current_text": "Área (opcional)", "suggested_i18n_key": "area_opcional", "module": "inventario", "tag": "label", "edit_old": "<label class=\"input-label\">Área (opcional)</label>", "edit_new": "<label class=\"input-label\" data-i18n=\"area_opcional\">Área (opcional)</label>" },
+      { "line_number": 4672, "current_text": "Cerrar", "suggested_i18n_key": "cerrar", "module": "inventario", "tag": "button", "edit_old": "<button class=\"btn sm accent\" id=\"btn-count-close\">Cerrar</button>", "edit_new": "<button class=\"btn sm accent\" id=\"btn-count-close\" data-i18n=\"cerrar\">Cerrar</button>" },
+      { "line_number": 4686, "current_text": "Producto *", "suggested_i18n_key": "producto", "module": "inventario", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Producto *</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"producto\">Producto *</label>" },
+      { "line_number": 4697, "current_text": "Cantidad *", "suggested_i18n_key": "cantidad", "module": "inventario", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Cantidad *</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"cantidad\">Cantidad *</label>" },
+      { "line_number": 4701, "current_text": "Motivo *", "suggested_i18n_key": "motivo", "module": "inventario", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Motivo *</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"motivo\">Motivo *</label>" },
+      { "line_number": 4717, "current_text": "Registrar movimiento", "suggested_i18n_key": "registrar_movimiento", "module": "inventario", "tag": "button", "edit_old": "<button class=\"btn accent\" id=\"btn-adj-submit\" style=\"width:100%;justify-content:center;\">Registrar movimiento</button>", "edit_new": "<button class=\"btn accent\" id=\"btn-adj-submit\" style=\"width:100%;justify-content:center;\" data-i18n=\"registrar_movimiento\">Registrar movimiento</button>" }
+    ],
+    "clientes": [
+      { "line_number": 4746, "current_text": "Clientes", "suggested_i18n_key": "clientes", "module": "clientes", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Clientes</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"clientes\">Clientes</h1>" },
+      { "line_number": 4769, "current_text": "Cuentas por cobrar", "suggested_i18n_key": "cuentas_por_cobrar", "module": "clientes", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Cuentas por cobrar</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"cuentas_por_cobrar\">Cuentas por cobrar</h1>" }
+    ],
+    "ventas": [
+      { "line_number": 4791, "current_text": "Historial de ventas y devoluciones", "suggested_i18n_key": "historial_ventas", "module": "ventas", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Historial de ventas y devoluciones</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"historial_ventas\">Historial de ventas y devoluciones</h1>" }
+    ],
+    "reportes": [
+      { "line_number": 4833, "current_text": "Reportes", "suggested_i18n_key": "reportes", "module": "reportes", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Reportes</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"reportes\">Reportes</h1>" }
+    ],
+    "corte": [
+      { "line_number": 4887, "current_text": "Corte de caja", "suggested_i18n_key": "corte_de_caja", "module": "corte", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Corte de caja</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"corte_de_caja\">Corte de caja</h1>" },
+      { "line_number": 4900, "current_text": "Ir a Apertura", "suggested_i18n_key": "ir_a_apertura", "module": "corte", "tag": "button", "edit_old": "<button class=\"btn accent\" onclick=\"showScreen('apertura')\">Ir a Apertura</button>", "edit_new": "<button class=\"btn accent\" onclick=\"showScreen('apertura')\" data-i18n=\"ir_a_apertura\">Ir a Apertura</button>" },
+      { "line_number": 4932, "current_text": "Registrar ajuste", "suggested_i18n_key": "registrar_ajuste", "module": "corte", "tag": "button", "edit_old": "<button class=\"btn success\" id=\"r4c-adj-submit\">Registrar ajuste</button>", "edit_new": "<button class=\"btn success\" id=\"r4c-adj-submit\" data-i18n=\"registrar_ajuste\">Registrar ajuste</button>" },
+      { "line_number": 4933, "current_text": "Cancelar", "suggested_i18n_key": "cancelar", "module": "corte", "tag": "button", "edit_old": "<button class=\"btn\" id=\"r4c-adj-cancel\">Cancelar</button>", "edit_new": "<button class=\"btn\" id=\"r4c-adj-cancel\" data-i18n=\"cancelar\">Cancelar</button>" },
+      { "line_number": 4945, "current_text": "Reabrir corte Z", "suggested_i18n_key": "reabrir_corte_z", "module": "corte", "tag": "button", "edit_old": "<button class=\"btn warn\" id=\"r4c-reopen-btn\">Reabrir corte Z</button>", "edit_new": "<button class=\"btn warn\" id=\"r4c-reopen-btn\" data-i18n=\"reabrir_corte_z\">Reabrir corte Z</button>" },
+      { "line_number": 4974, "current_text": "Cerrar corte", "suggested_i18n_key": "cerrar_corte", "module": "corte", "tag": "button", "edit_old": "<button class=\"btn success\" id=\"btn-close-cut\" style=\"width: 100%; justify-content: center; margin-top: 8px;\">Cerrar corte</button>", "edit_new": "<button class=\"btn success\" id=\"btn-close-cut\" style=\"width: 100%; justify-content: center; margin-top: 8px;\" data-i18n=\"cerrar_corte\">Cerrar corte</button>" }
+    ],
+    "config": [
+      { "line_number": 4983, "current_text": "Configuración", "suggested_i18n_key": "configuracion", "module": "config", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Configuración</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"configuracion\">Configuración</h1>" },
+      { "line_number": 5010, "current_text": "Preferencias generales", "suggested_i18n_key": "preferencias_generales", "module": "config", "tag": "h3", "edit_old": "<h3 style=\"margin: 0 0 14px; font-size: 14px;\">Preferencias generales</h3>", "edit_new": "<h3 style=\"margin: 0 0 14px; font-size: 14px;\" data-i18n=\"preferencias_generales\">Preferencias generales</h3>" },
+      { "line_number": 5028, "current_text": "Datos del negocio", "suggested_i18n_key": "datos_negocio", "module": "config", "tag": "h3", "edit_old": "<h3 style=\"margin: 0 0 14px; font-size: 14px;\">Datos del negocio</h3>", "edit_new": "<h3 style=\"margin: 0 0 14px; font-size: 14px;\" data-i18n=\"datos_negocio\">Datos del negocio</h3>" },
+      { "line_number": 5029, "current_text": "Nombre comercial", "suggested_i18n_key": "nombre_comercial", "module": "config", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Nombre comercial</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"nombre_comercial\">Nombre comercial</label>" },
+      { "line_number": 5030, "current_text": "Razón social", "suggested_i18n_key": "razon_social", "module": "config", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Razón social</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"razon_social\">Razón social</label>" },
+      { "line_number": 5031, "current_text": "RFC", "suggested_i18n_key": "rfc", "module": "config", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">RFC</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"rfc\">RFC</label>" },
+      { "line_number": 5032, "current_text": "Dirección", "suggested_i18n_key": "direccion", "module": "config", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Dirección</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"direccion\">Dirección</label>" },
+      { "line_number": 5033, "current_text": "Teléfono", "suggested_i18n_key": "telefono", "module": "config", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Teléfono</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"telefono\">Teléfono</label>" },
+      { "line_number": 5037, "current_text": "Impuestos", "suggested_i18n_key": "impuestos", "module": "config", "tag": "h3", "edit_old": "<h3 style=\"margin: 0 0 14px; font-size: 14px;\">Impuestos</h3>", "edit_new": "<h3 style=\"margin: 0 0 14px; font-size: 14px;\" data-i18n=\"impuestos\">Impuestos</h3>" }
+    ],
+    "usuarios": [
+      { "line_number": 5621, "current_text": "Usuarios", "suggested_i18n_key": "usuarios", "module": "usuarios", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Usuarios</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"usuarios\">Usuarios</h1>" }
+    ],
+    "apertura": [
+      { "line_number": 5651, "current_text": "Apertura de caja", "suggested_i18n_key": "apertura_de_caja", "module": "apertura", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Apertura de caja</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"apertura_de_caja\">Apertura de caja</h1>" },
+      { "line_number": 5669, "current_text": "Cajero", "suggested_i18n_key": "cajero", "module": "apertura", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Cajero</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"cajero\">Cajero</label>" },
+      { "line_number": 5670, "current_text": "Turno", "suggested_i18n_key": "turno", "module": "apertura", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Turno</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"turno\">Turno</label>" },
+      { "line_number": 5671, "current_text": "Saldo inicial *", "suggested_i18n_key": "saldo_inicial", "module": "apertura", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Saldo inicial *</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"saldo_inicial\">Saldo inicial *</label>" },
+      { "line_number": 5666, "current_text": "Ir a Corte", "suggested_i18n_key": "ir_a_corte", "module": "apertura", "tag": "button", "edit_old": "<button class=\"btn\" style=\"width:100%;justify-content:center;\" onclick=\"showScreen('corte')\">Ir a Corte</button>", "edit_new": "<button class=\"btn\" style=\"width:100%;justify-content:center;\" onclick=\"showScreen('corte')\" data-i18n=\"ir_a_corte\">Ir a Corte</button>" },
+      { "line_number": 5680, "current_text": "Abrir caja", "suggested_i18n_key": "abrir_caja", "module": "apertura", "tag": "button", "edit_old": "<button class=\"btn accent lg\" id=\"btn-open-cut\" style=\"width: 100%; justify-content: center; margin-top: 6px;\">Abrir caja</button>", "edit_new": "<button class=\"btn accent lg\" id=\"btn-open-cut\" style=\"width: 100%; justify-content: center; margin-top: 6px;\" data-i18n=\"abrir_caja\">Abrir caja</button>" }
+    ],
+    "quickpos": [
+      { "line_number": 5688, "current_text": "Caja rápida", "suggested_i18n_key": "caja_rapida", "module": "quickpos", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Caja rápida</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"caja_rapida\">Caja rápida</h1>" },
+      { "line_number": 5706, "current_text": "Cobrar", "suggested_i18n_key": "cobrar", "module": "quickpos", "tag": "button", "edit_old": "<button class=\"quickpos-key accent\" style=\"grid-column: span 3;\" onclick=\"quickPosCobrar()\">Cobrar</button>", "edit_new": "<button class=\"quickpos-key accent\" style=\"grid-column: span 3;\" onclick=\"quickPosCobrar()\" data-i18n=\"cobrar\">Cobrar</button>" }
+    ],
+    "perfil": [
+      { "line_number": 5714, "current_text": "Mi perfil", "suggested_i18n_key": "mi_perfil", "module": "perfil", "tag": "h1", "edit_old": "<div class=\"page-head\"><h1 class=\"page-title\">Mi perfil</h1></div>", "edit_new": "<div class=\"page-head\"><h1 class=\"page-title\" data-i18n=\"mi_perfil\">Mi perfil</h1></div>" },
+      { "line_number": 5723, "current_text": "Nombre completo", "suggested_i18n_key": "nombre_completo", "module": "perfil", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Nombre completo</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"nombre_completo\">Nombre completo</label>" },
+      { "line_number": 5724, "current_text": "Email", "suggested_i18n_key": "email", "module": "perfil", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Email</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"email\">Email</label>" },
+      { "line_number": 5725, "current_text": "Guardar cambios", "suggested_i18n_key": "guardar_cambios", "module": "perfil", "tag": "button", "edit_old": "<button class=\"btn accent\" style=\"margin-top: 6px;\">Guardar cambios</button>", "edit_new": "<button class=\"btn accent\" style=\"margin-top: 6px;\" data-i18n=\"guardar_cambios\">Guardar cambios</button>" }
+    ],
+    "kardex": [
+      { "line_number": 5734, "current_text": "Kardex", "suggested_i18n_key": "kardex", "module": "kardex", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Kardex</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"kardex\">Kardex</h1>" }
+    ],
+    "proveedores": [
+      { "line_number": 5755, "current_text": "Compras / Proveedores", "suggested_i18n_key": "compras_proveedores", "module": "proveedores", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Compras / Proveedores</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"compras_proveedores\">Compras / Proveedores</h1>" }
+    ],
+    "facturacion": [
+      { "line_number": 5779, "current_text": "Facturación CFDI", "suggested_i18n_key": "facturacion_cfdi", "module": "facturacion", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Facturación CFDI</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"facturacion_cfdi\">Facturación CFDI</h1>" }
+    ],
+    "cotizaciones": [
+      { "line_number": 5799, "current_text": "Cotizaciones", "suggested_i18n_key": "cotizaciones", "module": "cotizaciones", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Cotizaciones</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"cotizaciones\">Cotizaciones</h1>" }
+    ],
+    "devoluciones": [
+      { "line_number": 5855, "current_text": "Devoluciones y Reembolsos", "suggested_i18n_key": "devoluciones_reembolsos", "module": "devoluciones", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Devoluciones y Reembolsos</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"devoluciones_reembolsos\">Devoluciones y Reembolsos</h1>" }
+    ],
+    "recargas": [
+      { "line_number": 5907, "current_text": "📱 Recargas electrónicas", "suggested_i18n_key": "recargas_electronicas", "module": "recargas", "tag": "h1", "edit_old": "<h1 class=\"page-title\">📱 Recargas electrónicas</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"recargas_electronicas\">📱 Recargas electrónicas</h1>" }
+    ],
+    "promociones": [
+      { "line_number": 5963, "current_text": "Promociones", "suggested_i18n_key": "promociones", "module": "promociones", "tag": "h1", "edit_old": "<h1 class=\"page-title\">Promociones</h1>", "edit_new": "<h1 class=\"page-title\" data-i18n=\"promociones\">Promociones</h1>" }
+    ],
+    "pago_modal": [
+      { "line_number": 6830, "current_text": "Efectivo", "suggested_i18n_key": "efectivo", "module": "pago_modal", "tag": "button[title]", "edit_old": "title=\"F1 - Efectivo\">💵<span style=\"font-size: 10px; margin-top: 2px;\">Efectivo</span>", "edit_new": "title=\"F1 - Efectivo\" data-i18n-title=\"f1_efectivo\">💵<span style=\"font-size: 10px; margin-top: 2px;\" data-i18n=\"efectivo\">Efectivo</span>" },
+      { "line_number": 6831, "current_text": "Tarj. Débito", "suggested_i18n_key": "tarjeta_debito", "module": "pago_modal", "tag": "button[title]", "edit_old": "title=\"F2 - Tarjeta débito\">💳<span style=\"font-size: 10px; margin-top: 2px;\">Tarj. Débito</span>", "edit_new": "title=\"F2 - Tarjeta débito\" data-i18n-title=\"f2_tarjeta_debito\">💳<span style=\"font-size: 10px; margin-top: 2px;\" data-i18n=\"tarjeta_debito\">Tarj. Débito</span>" },
+      { "line_number": 6832, "current_text": "Tarj. Crédito", "suggested_i18n_key": "tarjeta_credito", "module": "pago_modal", "tag": "button[title]", "edit_old": "title=\"F3 - Tarjeta crédito\">💳<span style=\"font-size: 10px; margin-top: 2px;\">Tarj. Crédito</span>", "edit_new": "title=\"F3 - Tarjeta crédito\" data-i18n-title=\"f3_tarjeta_credito\">💳<span style=\"font-size: 10px; margin-top: 2px;\" data-i18n=\"tarjeta_credito\">Tarj. Crédito</span>" },
+      { "line_number": 6833, "current_text": "SPEI", "suggested_i18n_key": "spei", "module": "pago_modal", "tag": "button[title]", "edit_old": "title=\"F4 - SPEI / Transferencia\">🏦<span style=\"font-size: 10px; margin-top: 2px;\">SPEI</span>", "edit_new": "title=\"F4 - SPEI / Transferencia\" data-i18n-title=\"f4_spei\">🏦<span style=\"font-size: 10px; margin-top: 2px;\" data-i18n=\"spei\">SPEI</span>" },
+      { "line_number": 6836, "current_text": "CoDi", "suggested_i18n_key": "codi", "module": "pago_modal", "tag": "button[title]", "edit_old": "title=\"F5 - CoDi (QR Banxico)\">📱<span style=\"font-size: 10px; margin-top: 2px;\">CoDi</span>", "edit_new": "title=\"F5 - CoDi (QR Banxico)\" data-i18n-title=\"f5_codi\">📱<span style=\"font-size: 10px; margin-top: 2px;\" data-i18n=\"codi\">CoDi</span>" },
+      { "line_number": 6837, "current_text": "Mercado Pago", "suggested_i18n_key": "mercado_pago", "module": "pago_modal", "tag": "button[title]", "edit_old": "title=\"F6 - Mercado Pago\">💛<span style=\"font-size: 10px; margin-top: 2px;\">Mercado Pago</span>", "edit_new": "title=\"F6 - Mercado Pago\" data-i18n-title=\"f6_mercado_pago\">💛<span style=\"font-size: 10px; margin-top: 2px;\" data-i18n=\"mercado_pago\">Mercado Pago</span>" },
+      { "line_number": 6839, "current_text": "Mixto", "suggested_i18n_key": "pago_mixto", "module": "pago_modal", "tag": "button[title]", "edit_old": "title=\"F8 - Pago mixto (varios métodos)\">✂️<span style=\"font-size: 10px; margin-top: 2px;\">Mixto</span>", "edit_new": "title=\"F8 - Pago mixto (varios métodos)\" data-i18n-title=\"f8_pago_mixto\">✂️<span style=\"font-size: 10px; margin-top: 2px;\" data-i18n=\"pago_mixto\">Mixto</span>" },
+      { "line_number": 6849, "current_text": "Factura", "suggested_i18n_key": "factura", "module": "pago_modal", "tag": "button>span", "edit_old": "title=\"Generar factura CFDI 4.0\">🧾<span>Factura</span>", "edit_new": "title=\"Generar factura CFDI 4.0\" data-i18n-title=\"generar_factura\">🧾<span data-i18n=\"factura\">Factura</span>" },
+      { "line_number": 6850, "current_text": "Propina", "suggested_i18n_key": "propina", "module": "pago_modal", "tag": "button>span", "edit_old": "title=\"Propina (10/15/20/custom)\">💰<span>Propina</span>", "edit_new": "title=\"Propina (10/15/20/custom)\" data-i18n-title=\"propina_help\">💰<span data-i18n=\"propina\">Propina</span>" },
+      { "line_number": 6851, "current_text": "Descuento", "suggested_i18n_key": "descuento", "module": "pago_modal", "tag": "button>span", "edit_old": "title=\"Descuento de último momento\">🏷️<span>Descuento</span>", "edit_new": "title=\"Descuento de último momento\" data-i18n-title=\"descuento_ultimo_momento\">🏷️<span data-i18n=\"descuento\">Descuento</span>" },
+      { "line_number": 6939, "current_text": "Recibido del cliente", "suggested_i18n_key": "recibido_del_cliente", "module": "pago_modal", "tag": "label", "edit_old": "<div class=\"input-group\"><label class=\"input-label\">Recibido del cliente</label>", "edit_new": "<div class=\"input-group\"><label class=\"input-label\" data-i18n=\"recibido_del_cliente\">Recibido del cliente</label>" },
+      { "line_number": 6951, "current_text": "EXACTO", "suggested_i18n_key": "monto_exacto", "module": "pago_modal", "tag": "button", "edit_old": "data-button=\"pay.exact\" onclick=\"payExactAmount()\" style=\"padding:10px 6px;border:1px solid #BBF7D0;background:#F0FDF4;color:#15803D;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;min-height:44px;grid-column:span 2\">EXACTO</button>", "edit_new": "data-button=\"pay.exact\" onclick=\"payExactAmount()\" style=\"padding:10px 6px;border:1px solid #BBF7D0;background:#F0FDF4;color:#15803D;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;min-height:44px;grid-column:span 2\" data-i18n=\"monto_exacto\">EXACTO</button>" },
+      { "line_number": 6979, "current_text": "Cancelar", "suggested_i18n_key": "cancelar", "module": "pago_modal", "tag": "button", "edit_old": "<button class=\"btn\" onclick=\"closeModal('modal-pay')\">Cancelar</button>", "edit_new": "<button class=\"btn\" onclick=\"closeModal('modal-pay')\" data-i18n=\"cancelar\">Cancelar</button>" }
+    ],
+    "search_modal": [
+      { "line_number": 7042, "current_text": "Limpiar", "suggested_i18n_key": "limpiar", "module": "search_modal", "tag": "button", "edit_old": "<button class=\"btn\" onclick=\"clearSaleSearch()\">Limpiar</button>", "edit_new": "<button class=\"btn\" onclick=\"clearSaleSearch()\" data-i18n=\"limpiar\">Limpiar</button>" }
+    ],
+    "cfdi_modal": [
+      { "line_number": 7102, "current_text": "Cancelar", "suggested_i18n_key": "cancelar", "module": "cfdi_modal", "tag": "button", "edit_old": "<button class=\"btn\" onclick=\"closeModal('modal-late-invoice')\">Cancelar</button>", "edit_new": "<button class=\"btn\" onclick=\"closeModal('modal-late-invoice')\" data-i18n=\"cancelar\">Cancelar</button>" },
+      { "line_number": 7103, "current_text": "Emitir CFDI", "suggested_i18n_key": "emitir_cfdi", "module": "cfdi_modal", "tag": "button", "edit_old": "<button class=\"btn primary\" onclick=\"submitLateInvoice()\">Emitir CFDI</button>", "edit_new": "<button class=\"btn primary\" onclick=\"submitLateInvoice()\" data-i18n=\"emitir_cfdi\">Emitir CFDI</button>" },
+      { "line_number": 7128, "current_text": "Cancelar CFDI", "suggested_i18n_key": "cancelar_cfdi", "module": "cfdi_modal", "tag": "button", "edit_old": "<button class=\"btn danger\" onclick=\"submitCfdiCancel()\">Cancelar CFDI</button>", "edit_new": "<button class=\"btn danger\" onclick=\"submitCfdiCancel()\" data-i18n=\"cancelar_cfdi\">Cancelar CFDI</button>" },
+      { "line_number": 7162, "current_text": "Refacturar", "suggested_i18n_key": "refacturar", "module": "cfdi_modal", "tag": "button", "edit_old": "<button class=\"btn primary\" onclick=\"submitCfdiRefacturar()\">Refacturar</button>", "edit_new": "<button class=\"btn primary\" onclick=\"submitCfdiRefacturar()\" data-i18n=\"refacturar\">Refacturar</button>" }
+    ],
+    "cash_modal": [
+      { "line_number": 7199, "current_text": "Registrar", "suggested_i18n_key": "registrar", "module": "cash_modal", "tag": "button", "edit_old": "<button class=\"btn primary\" onclick=\"registerCash()\">Registrar</button>", "edit_new": "<button class=\"btn primary\" onclick=\"registerCash()\" data-i18n=\"registrar\">Registrar</button>" }
+    ],
+    "cliente_modal": [
+      { "line_number": 8211, "current_text": "Guardar cliente", "suggested_i18n_key": "guardar_cliente", "module": "cliente_modal", "tag": "button", "edit_old": "<button type=\"submit\" style=\"padding:10px 18px;border:none;background:#3B82F6;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;\">Guardar cliente</button>", "edit_new": "<button type=\"submit\" style=\"padding:10px 18px;border:none;background:#3B82F6;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;\" data-i18n=\"guardar_cliente\">Guardar cliente</button>" }
+    ],
+    "fila": [
+      { "line_number": 6190, "current_text": "Actualizar", "suggested_i18n_key": "actualizar", "module": "fila", "tag": "button", "edit_old": "<button class=\"btn\" onclick=\"filaApp.cargarFila()\" title=\"Actualizar\">↺ Actualizar</button>", "edit_new": "<button class=\"btn\" onclick=\"filaApp.cargarFila()\" title=\"Actualizar\" data-i18n-title=\"actualizar\">↺ <span data-i18n=\"actualizar\">Actualizar</span></button>" }
+    ],
+    "ingredientes": [
+      { "line_number": 6313, "current_text": "Nombre *", "suggested_i18n_key": "nombre", "module": "ingredientes", "tag": "label", "edit_old": "<div class=\"ing-form-group\"><label class=\"ing-form-label\">Nombre *</label>", "edit_new": "<div class=\"ing-form-group\"><label class=\"ing-form-label\" data-i18n=\"nombre\">Nombre *</label>" },
+      { "line_number": 6320, "current_text": "Costo por unidad *", "suggested_i18n_key": "costo_por_unidad", "module": "ingredientes", "tag": "label", "edit_old": "<div class=\"ing-form-group\"><label class=\"ing-form-label\">Costo por unidad *</label>", "edit_new": "<div class=\"ing-form-group\"><label class=\"ing-form-label\" data-i18n=\"costo_por_unidad\">Costo por unidad *</label>" },
+      { "line_number": 6323, "current_text": "Stock actual", "suggested_i18n_key": "stock_actual", "module": "ingredientes", "tag": "label", "edit_old": "<div class=\"ing-form-group\"><label class=\"ing-form-label\">Stock actual</label>", "edit_new": "<div class=\"ing-form-group\"><label class=\"ing-form-label\" data-i18n=\"stock_actual\">Stock actual</label>" },
+      { "line_number": 6324, "current_text": "Stock mínimo", "suggested_i18n_key": "stock_minimo", "module": "ingredientes", "tag": "label", "edit_old": "<div class=\"ing-form-group\"><label class=\"ing-form-label\">Stock mínimo</label>", "edit_new": "<div class=\"ing-form-group\"><label class=\"ing-form-label\" data-i18n=\"stock_minimo\">Stock mínimo</label>" }
+    ],
+    "menu_digital": [
+      { "line_number": 6451, "current_text": "Ampliar QR", "suggested_i18n_key": "ampliar_qr", "module": "menu_digital", "tag": "button", "edit_old": "<button class=\"btn\" style=\"width:100%\" onclick=\"menuApp.openModal('menu-modalQR')\">Ampliar QR</button>", "edit_new": "<button class=\"btn\" style=\"width:100%\" onclick=\"menuApp.openModal('menu-modalQR')\" data-i18n=\"ampliar_qr\">Ampliar QR</button>" }
+    ],
+    "reservaciones": [
+      { "line_number": 6733, "current_text": "Hoy", "suggested_i18n_key": "hoy", "module": "reservaciones", "tag": "button", "edit_old": "<button class=\"btn ghost\" onclick=\"ReservacionesUI && ReservacionesUI.today()\">Hoy</button>", "edit_new": "<button class=\"btn ghost\" onclick=\"ReservacionesUI && ReservacionesUI.today()\" data-i18n=\"hoy\">Hoy</button>" }
+    ],
+    "ayuda": [
+      { "line_number": 6115, "current_text": "Empezar", "suggested_i18n_key": "empezar", "module": "ayuda", "tag": "h3", "edit_old": "<h3 style=\"margin:6px 0\">Empezar</h3>", "edit_new": "<h3 style=\"margin:6px 0\" data-i18n=\"empezar\">Empezar</h3>" },
+      { "line_number": 6116, "current_text": "Productos", "suggested_i18n_key": "productos", "module": "ayuda", "tag": "h3", "edit_old": "<h3 style=\"margin:6px 0\">Productos</h3>", "edit_new": "<h3 style=\"margin:6px 0\" data-i18n=\"productos\">Productos</h3>" },
+      { "line_number": 6117, "current_text": "Cobrar", "suggested_i18n_key": "cobrar", "module": "ayuda", "tag": "h3", "edit_old": "<h3 style=\"margin:6px 0\">Cobrar</h3>", "edit_new": "<h3 style=\"margin:6px 0\" data-i18n=\"cobrar\">Cobrar</h3>" },
+      { "line_number": 6118, "current_text": "Cierre de caja", "suggested_i18n_key": "cierre_de_caja", "module": "ayuda", "tag": "h3", "edit_old": "<h3 style=\"margin:6px 0\">Cierre de caja</h3>", "edit_new": "<h3 style=\"margin:6px 0\" data-i18n=\"cierre_de_caja\">Cierre de caja</h3>" },
+      { "line_number": 6119, "current_text": "Facturas CFDI", "suggested_i18n_key": "facturas_cfdi", "module": "ayuda", "tag": "h3", "edit_old": "<h3 style=\"margin:6px 0\">Facturas CFDI</h3>", "edit_new": "<h3 style=\"margin:6px 0\" data-i18n=\"facturas_cfdi\">Facturas CFDI</h3>" },
+      { "line_number": 6120, "current_text": "Atajos teclado", "suggested_i18n_key": "atajos_teclado", "module": "ayuda", "tag": "h3", "edit_old": "<h3 style=\"margin:6px 0\">Atajos teclado</h3>", "edit_new": "<h3 style=\"margin:6px 0\" data-i18n=\"atajos_teclado\">Atajos teclado</h3>" }
+    ]
+  },
+  "common_keys": {
+    "Cliente": "cliente",
+    "Clientes": "clientes",
+    "Producto": "producto",
+    "Productos": "productos",
+    "Ticket": "ticket",
+    "Cobrar": "cobrar",
+    "Cancelar": "cancelar",
+    "Cerrar": "cerrar",
+    "Cerrar sesión": "cerrar_sesion",
+    "Aplicar": "aplicar",
+    "Limpiar": "limpiar",
+    "Registrar": "registrar",
+    "Actualizar": "actualizar",
+    "Guardar cambios": "guardar_cambios",
+    "Nombre": "nombre",
+    "Teléfono": "telefono",
+    "Email": "email",
+    "Dirección": "direccion",
+    "RFC": "rfc",
+    "Razón social": "razon_social",
+    "Cantidad": "cantidad",
+    "Motivo": "motivo",
+    "Hoy": "hoy",
+    "Inventario": "inventario",
+    "Corte de caja": "corte_de_caja",
+    "Configuración": "configuracion",
+    "Efectivo": "efectivo",
+    "Descuento": "descuento",
+    "Factura": "factura",
+    "Mercado Pago": "mercado_pago"
+  },
+  "summary": {
+    "total_targets": 100,
+    "modules_covered": 26,
+    "distribution": {
+      "pos": 21,
+      "pago_modal": 13,
+      "config": 9,
+      "ayuda": 6,
+      "inventario": 9,
+      "corte": 6,
+      "apertura": 6,
+      "cfdi_modal": 4,
+      "dashboard": 4,
+      "login": 4,
+      "perfil": 4,
+      "toolbar": 4,
+      "ingredientes": 4,
+      "quickpos": 2,
+      "clientes": 2,
+      "menu_digital": 1,
+      "reservaciones": 1,
+      "fila": 1,
+      "ventas": 1,
+      "reportes": 1,
+      "usuarios": 1,
+      "kardex": 1,
+      "proveedores": 1,
+      "facturacion": 1,
+      "cotizaciones": 1,
+      "devoluciones": 1,
+      "recargas": 1,
+      "promociones": 1,
+      "cliente_modal": 1,
+      "search_modal": 1,
+      "cash_modal": 1
+    },
+    "top_10_most_common_i18n_keys": [
+      { "key": "cancelar", "occurrences_in_top_100": 3, "spanish": "Cancelar" },
+      { "key": "cerrar", "occurrences_in_top_100": 2, "spanish": "Cerrar" },
+      { "key": "cobrar", "occurrences_in_top_100": 2, "spanish": "Cobrar" },
+      { "key": "hoy", "occurrences_in_top_100": 2, "spanish": "Hoy" },
+      { "key": "mi_perfil", "occurrences_in_top_100": 2, "spanish": "Mi perfil" },
+      { "key": "cerrar_sesion", "occurrences_in_top_100": 1, "spanish": "Cerrar sesión" },
+      { "key": "guardar_cambios", "occurrences_in_top_100": 1, "spanish": "Guardar cambios" },
+      { "key": "aplicar", "occurrences_in_top_100": 1, "spanish": "Aplicar" },
+      { "key": "limpiar", "occurrences_in_top_100": 1, "spanish": "Limpiar" },
+      { "key": "registrar", "occurrences_in_top_100": 1, "spanish": "Registrar" }
+    ],
+    "notes_for_implementor": [
+      "Many POS toolbar buttons (lines 4191-4250, 4292-4304) use only icons in inner content with text in title/aria-label. For these, use data-i18n-title and data-i18n-aria-label attributes (not data-i18n on element body).",
+      "Payment modal buttons (lines 6830-6844) have nested <span> with the visible label. data-i18n goes on the <span>, data-i18n-title goes on the parent <button>.",
+      "Page titles (h1.page-title) are the highest-priority targets — they define each screen. All 26 screens have at least one entry here.",
+      "Modals dynamically rendered via innerHTML/string concatenation (e.g. r10a*, _vlxCloseModal templates) were EXCLUDED — those need JS-side i18n hooks, not data-i18n attributes.",
+      "Some labels include trailing '*' (required marker) and '(opcional)' — these should be normalized in i18n key system (e.g. 'nombre' covers 'Nombre *', 'Nombre (opcional)' renders via UI logic)."
+    ]
+  }
+}

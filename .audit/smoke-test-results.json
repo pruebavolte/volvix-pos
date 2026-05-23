@@ -1,0 +1,214 @@
+{
+  "started": "2026-05-18T17:36:56.922Z",
+  "steps": [
+    {
+      "name": "1. /api/health responde 200 + supabase_connected",
+      "ok": true,
+      "ms": 1349,
+      "errors": [],
+      "console": [],
+      "net": [],
+      "status": 200,
+      "body": "{\"ok\":true,\"time\":1779125840888,\"version\":\"7.2.0\",\"database\":\"Supabase\",\"supabase_connected\":true,\"users_table_accessible\":true,\"deploy_marker\":{\"commit\":\"9b82f90\",\"built_at\":\"2026-04-30T19:00:00Z\",\"f"
+    },
+    {
+      "name": "2. POST /api/login devuelve JWT válido",
+      "ok": true,
+      "ms": 365,
+      "errors": [],
+      "console": [],
+      "net": [],
+      "status": 200,
+      "role": "superadmin",
+      "tenant": "TNT-P5E74"
+    },
+    {
+      "name": "3. marketplace.html carga sin errores JS",
+      "ok": true,
+      "ms": 5133,
+      "errors": [],
+      "console": [
+        "[error] Failed to load resource: the server responded with a status of 404 ()",
+        "[error] Manifest fetch from https://systeminternational.app/marketplace-assets/site.webmanifest failed, code 404",
+        "[error] Refused to apply style from 'https://systeminternational.app/volvix-import-export.css' because its MIME type ('text/html') is not a supported stylesheet MIME type, and strict MIME checking is enabled.",
+        "[error] Failed to load resource: the server responded with a status of 404 ()",
+        "[error] Refused to execute script from 'https://systeminternational.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+        "[error] Failed to load resource: the server responded with a status of 404 ()",
+        "[error] Manifest fetch from https://systeminternational.app/marketplace-assets/site.webmanifest failed, code 404",
+        "[error] Failed to load resource: the server responded with a status of 404 ()",
+        "[error] Failed to load resource: the server responded with a status of 404 ()",
+        "[error] Manifest fetch from https://systeminternational.app/marketplace-assets/site.webmanifest failed, code 404",
+        "[error] Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "net": [
+        "[failed] https://systeminternational.app/volvix-import-export.css — net::ERR_ABORTED",
+        "[failed] https://systeminternational.app/volvix-tests-wiring.js — net::ERR_ABORTED"
+      ],
+      "status": 200,
+      "pickerVisible": null
+    },
+    {
+      "name": "4. navaja.html carga + sin errores consola críticos",
+      "ok": true,
+      "ms": 3621,
+      "errors": [],
+      "console": [],
+      "net": [],
+      "status": 200,
+      "hero": "Motor de marcas Volvix"
+    },
+    {
+      "name": "4. comandero.html carga + sin errores consola críticos",
+      "ok": true,
+      "ms": 3255,
+      "errors": [],
+      "console": [],
+      "net": [],
+      "status": 200,
+      "hero": "Motor de marcas Volvix"
+    },
+    {
+      "name": "4. tendito.html carga + sin errores consola críticos",
+      "ok": true,
+      "ms": 3200,
+      "errors": [],
+      "console": [],
+      "net": [],
+      "status": 200,
+      "hero": "Motor de marcas Volvix"
+    },
+    {
+      "name": "4. receta.html carga + sin errores consola críticos",
+      "ok": true,
+      "ms": 3285,
+      "errors": [],
+      "console": [],
+      "net": [],
+      "status": 200,
+      "hero": "Motor de marcas Volvix"
+    },
+    {
+      "name": "4. corte.html carga + sin errores consola críticos",
+      "ok": true,
+      "ms": 3136,
+      "errors": [],
+      "console": [],
+      "net": [],
+      "status": 200,
+      "hero": "Motor de marcas Volvix"
+    },
+    {
+      "name": "5. salvadorex-pos.html carga (sin login redirect)",
+      "ok": true,
+      "ms": 3430,
+      "errors": [],
+      "console": [
+        "[error] Refused to apply style from 'https://systeminternational.app/volvix-feature-flags.css' because its MIME type ('text/html') is not a supported stylesheet MIME type, and strict MIME checking is enabled.",
+        "[error] Refused to apply style from 'https://systeminternational.app/volvix-shared.css' because its MIME type ('text/html') is not a supported stylesheet MIME type, and strict MIME checking is enabled.",
+        "[error] Failed to load resource: the server responded with a status of 404 ()",
+        "[error] Refused to apply style from 'https://systeminternational.app/volvix-import-export.css' because its MIME type ('text/html') is not a supported stylesheet MIME type, and strict MIME checking is enabled.",
+        "[error] Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "net": [
+        "[failed] https://systeminternational.app/volvix-feature-flags.css — net::ERR_ABORTED",
+        "[failed] https://systeminternational.app/volvix-shared.css — net::ERR_ABORTED",
+        "[failed] https://systeminternational.app/volvix-import-export.css — net::ERR_ABORTED"
+      ],
+      "status": 200,
+      "url": "https://systeminternational.app/login.html?redirect=%2Fsalvadorex-pos.html"
+    },
+    {
+      "name": "6. paneldecontrol.html carga",
+      "ok": true,
+      "ms": 2944,
+      "errors": [],
+      "console": [
+        "[error] Refused to apply style from 'https://systeminternational.app/volvix-feature-flags.css' because its MIME type ('text/html') is not a supported stylesheet MIME type, and strict MIME checking is enabled.",
+        "[error] Failed to load resource: the server responded with a status of 404 ()",
+        "[error] Refused to apply style from 'https://systeminternational.app/volvix-import-export.css' because its MIME type ('text/html') is not a supported stylesheet MIME type, and strict MIME checking is enabled.",
+        "[error] Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "net": [
+        "[failed] https://systeminternational.app/volvix-feature-flags.css — net::ERR_ABORTED",
+        "[failed] https://systeminternational.app/volvix-import-export.css — net::ERR_ABORTED"
+      ],
+      "status": 200,
+      "url": "https://systeminternational.app/login.html?expired=0&redirect=%2Fpaneldecontrol.html"
+    },
+    {
+      "name": "7. router resuelve 10 giros típicos sin crash",
+      "ok": true,
+      "ms": 3340,
+      "errors": [],
+      "console": [
+        "[error] Refused to apply style from 'https://systeminternational.app/volvix-import-export.css' because its MIME type ('text/html') is not a supported stylesheet MIME type, and strict MIME checking is enabled.",
+        "[error] Failed to load resource: the server responded with a status of 404 ()",
+        "[error] Refused to execute script from 'https://systeminternational.app/volvix-tests-wiring.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.",
+        "[error] Failed to load resource: the server responded with a status of 404 ()",
+        "[error] Manifest fetch from https://systeminternational.app/marketplace-assets/site.webmanifest failed, code 404",
+        "[error] Failed to load resource: the server responded with a status of 404 ()",
+        "[error] Manifest fetch from https://systeminternational.app/marketplace-assets/site.webmanifest failed, code 404"
+      ],
+      "net": [
+        "[failed] https://systeminternational.app/volvix-import-export.css — net::ERR_ABORTED",
+        "[failed] https://systeminternational.app/volvix-tests-wiring.js — net::ERR_ABORTED"
+      ],
+      "routerTests": [
+        {
+          "q": "barbería",
+          "url": "navaja.html",
+          "brand": "Navaja"
+        },
+        {
+          "q": "restaurante",
+          "url": "comandero.html",
+          "brand": "Comandero"
+        },
+        {
+          "q": "farmacia",
+          "url": "receta.html",
+          "brand": "Receta"
+        },
+        {
+          "q": "dental",
+          "url": "pulso.html",
+          "brand": "Pulso"
+        },
+        {
+          "q": "veterinaria",
+          "url": "pata.html",
+          "brand": "Pata"
+        },
+        {
+          "q": "abarrotes",
+          "url": "tendito.html",
+          "brand": "Tendito"
+        },
+        {
+          "q": "hotel",
+          "url": "folio.html",
+          "brand": "Folio"
+        },
+        {
+          "q": "taller",
+          "url": "refacciona.html",
+          "brand": "Refacciona"
+        },
+        {
+          "q": "vinatería",
+          "url": "tarima.html",
+          "brand": "Tarima"
+        },
+        {
+          "q": "sexshop",
+          "url": "discreto.html",
+          "brand": "Discreto"
+        }
+      ]
+    }
+  ],
+  "finished": "2026-05-18T17:37:30.697Z",
+  "passed": 11,
+  "failed": 0,
+  "total": 11
+}

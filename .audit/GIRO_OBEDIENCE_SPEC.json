@@ -1,0 +1,1216 @@
+{
+  "_meta": {
+    "audited_file": "public/salvadorex-pos.html",
+    "audited_lines": 24218,
+    "audit_date": "2026-05-21",
+    "current_instrumented_elements": 7,
+    "newly_identified_elements": 96,
+    "engine": "applyGiroConfig.js",
+    "supported_attrs": ["data-i18n", "data-i18n-placeholder", "data-module", "data-giros"],
+    "note": "data-term ya se usa hoy en 7 spans. Mantenemos data-term existente y proponemos data-i18n para nuevos (motor soporta ambos). Sugerencia: unificar a data-i18n."
+  },
+  "summary": {
+    "total_elements": 96,
+    "by_module": {
+      "menubar": 18,
+      "pos": 14,
+      "inventario": 11,
+      "clientes": 7,
+      "credito": 3,
+      "ventas": 6,
+      "reportes": 3,
+      "corte": 9,
+      "apertura": 5,
+      "config": 6,
+      "kardex": 3,
+      "proveedores": 2,
+      "facturacion": 3,
+      "cotizaciones": 2,
+      "devoluciones": 1,
+      "recargas": 1,
+      "servicios": 1,
+      "rentas": 1
+    },
+    "by_concept": {
+      "cliente": 11,
+      "producto": 14,
+      "ticket_venta": 9,
+      "cobrar_pagar": 6,
+      "inventario_stock": 6,
+      "agregar_nuevo": 8,
+      "otros": 42
+    }
+  },
+  "instrumentation_plan": [
+    {
+      "line": 3845,
+      "module": "global",
+      "current_html_snippet": "<h1 class=\"login-title\">SalvadoreX</h1>",
+      "suggested_i18n_key": "brand_title",
+      "suggested_data_module": null,
+      "suggested_data_giros": null,
+      "default_text": "SalvadoreX",
+      "per_giro_overrides_example": {
+        "restaurante": "Restaurante POS",
+        "barberia": "Barbería POS",
+        "fruteria": "Frutería POS",
+        "clinica_dental": "Clínica Dental"
+      }
+    },
+    {
+      "line": 3849,
+      "module": "global",
+      "current_html_snippet": "<label class=\"input-label\">Usuario</label>",
+      "suggested_i18n_key": "usuario_label",
+      "default_text": "Usuario",
+      "per_giro_overrides_example": {
+        "clinica_dental": "Usuario",
+        "restaurante": "Mesero/Usuario"
+      }
+    },
+    {
+      "line": 3857,
+      "module": "global",
+      "current_html_snippet": "<button class=\"btn-login\">Iniciar sesión</button>",
+      "suggested_i18n_key": "login_btn",
+      "default_text": "Iniciar sesión",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 3988,
+      "module": "menubar",
+      "current_html_snippet": "<span data-term=\"venta\">💰 Vender</span>",
+      "suggested_i18n_key": "venta",
+      "suggested_data_module": "pos",
+      "default_text": "💰 Vender",
+      "per_giro_overrides_example": {
+        "restaurante": "🍽 Atender mesa",
+        "barberia": "✂️ Atender cliente",
+        "clinica_dental": "🦷 Atender paciente",
+        "fruteria": "💰 Vender",
+        "taller_mecanico": "🔧 Orden de servicio"
+      },
+      "note": "YA TIENE data-term — solo cambiar a data-i18n para unificar"
+    },
+    {
+      "line": 3992,
+      "module": "menubar",
+      "current_html_snippet": "<span data-term=\"inventario\">📦 Inventario</span>",
+      "suggested_i18n_key": "inventario",
+      "suggested_data_module": "inventario",
+      "default_text": "📦 Inventario",
+      "per_giro_overrides_example": {
+        "restaurante": "📦 Insumos",
+        "barberia": "📦 Productos",
+        "clinica_dental": "📦 Insumos clínicos",
+        "fruteria": "📦 Inventario",
+        "ferreteria": "📦 Almacén"
+      }
+    },
+    {
+      "line": 3996,
+      "module": "menubar",
+      "current_html_snippet": "<span>📊 Reportes</span>",
+      "suggested_i18n_key": "reportes_menu",
+      "suggested_data_module": "reportes",
+      "default_text": "📊 Reportes",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4009,
+      "module": "menubar",
+      "current_html_snippet": "<span>↩️ Devoluciones</span>",
+      "suggested_i18n_key": "devoluciones_menu",
+      "suggested_data_module": "devoluciones",
+      "suggested_data_giros": "fruteria,abarrotes,ferreteria,ropa,zapateria,papeleria",
+      "default_text": "↩️ Devoluciones",
+      "per_giro_overrides_example": {
+        "ropa": "↩️ Cambios y devoluciones"
+      }
+    },
+    {
+      "line": 4013,
+      "module": "menubar",
+      "current_html_snippet": "<span>🔐 Corte</span>",
+      "suggested_i18n_key": "corte_menu",
+      "suggested_data_module": "corte",
+      "default_text": "🔐 Corte",
+      "per_giro_overrides_example": {
+        "restaurante": "🔐 Cierre turno",
+        "barberia": "🔐 Cierre día"
+      }
+    },
+    {
+      "line": 4021,
+      "module": "menubar",
+      "current_html_snippet": "<span data-term=\"cliente\">👥 Clientes</span>",
+      "suggested_i18n_key": "cliente_plural",
+      "suggested_data_module": "clientes",
+      "default_text": "👥 Clientes",
+      "per_giro_overrides_example": {
+        "restaurante": "👥 Comensales",
+        "clinica_dental": "👥 Pacientes",
+        "veterinaria": "👥 Mascotas",
+        "barberia": "👥 Clientes",
+        "hotel": "👥 Huéspedes",
+        "escuela": "👥 Alumnos"
+      }
+    },
+    {
+      "line": 4040,
+      "module": "menubar",
+      "current_html_snippet": "<span>💳 Créditos</span>",
+      "suggested_i18n_key": "credito_menu",
+      "suggested_data_module": "credito",
+      "default_text": "💳 Créditos",
+      "per_giro_overrides_example": {
+        "abarrotes": "💳 Fiado"
+      }
+    },
+    {
+      "line": 4045,
+      "module": "menubar",
+      "current_html_snippet": "<span>📋 Kardex</span>",
+      "suggested_i18n_key": "kardex_menu",
+      "suggested_data_module": "kardex",
+      "default_text": "📋 Kardex",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4050,
+      "module": "menubar",
+      "current_html_snippet": "<span>🚚 Proveedores</span>",
+      "suggested_i18n_key": "proveedores_menu",
+      "suggested_data_module": "proveedores",
+      "default_text": "🚚 Proveedores",
+      "per_giro_overrides_example": {
+        "restaurante": "🚚 Proveedores de insumos"
+      }
+    },
+    {
+      "line": 4055,
+      "module": "menubar",
+      "current_html_snippet": "<span>🧾 Facturas</span>",
+      "suggested_i18n_key": "facturas_menu",
+      "suggested_data_module": "facturacion",
+      "default_text": "🧾 Facturas",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4059,
+      "module": "menubar",
+      "current_html_snippet": "<span data-term=\"ticket\">📄 Historial</span>",
+      "suggested_i18n_key": "ticket_historial_menu",
+      "suggested_data_module": "ventas",
+      "default_text": "📄 Historial",
+      "per_giro_overrides_example": {
+        "restaurante": "📄 Comandas",
+        "barberia": "📄 Servicios",
+        "clinica_dental": "📄 Consultas",
+        "hotel": "📄 Reservaciones"
+      }
+    },
+    {
+      "line": 4082,
+      "module": "menubar",
+      "current_html_snippet": "<span>💬 Cotizaciones</span>",
+      "suggested_i18n_key": "cotizaciones_menu",
+      "suggested_data_module": "cotizaciones",
+      "default_text": "💬 Cotizaciones",
+      "per_giro_overrides_example": {
+        "taller_mecanico": "💬 Presupuestos",
+        "ferreteria": "💬 Presupuestos"
+      }
+    },
+    {
+      "line": 4086,
+      "module": "menubar",
+      "current_html_snippet": "<span>📱 Recargas</span>",
+      "suggested_i18n_key": "recargas_menu",
+      "suggested_data_module": "recargas",
+      "suggested_data_giros": "abarrotes,papeleria,ciber,fruteria,tlapaleria",
+      "default_text": "📱 Recargas",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4091,
+      "module": "menubar",
+      "current_html_snippet": "<span>💡 Servicios</span>",
+      "suggested_i18n_key": "servicios_menu",
+      "suggested_data_module": "servicios",
+      "suggested_data_giros": "abarrotes,papeleria,ciber",
+      "default_text": "💡 Servicios",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4104,
+      "module": "menubar",
+      "current_html_snippet": "<span>🏷️ Promos</span>",
+      "suggested_i18n_key": "promos_menu",
+      "suggested_data_module": "promociones",
+      "default_text": "🏷️ Promos",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4109,
+      "module": "menubar",
+      "current_html_snippet": "<span>🏢 Depto.</span>",
+      "suggested_i18n_key": "departamentos_menu",
+      "suggested_data_module": "departamentos",
+      "default_text": "🏢 Depto.",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4174,
+      "module": "pos",
+      "current_html_snippet": "<label>Código del Producto:</label>",
+      "suggested_i18n_key": "codigo_producto_label",
+      "suggested_data_module": "pos",
+      "default_text": "Código del Producto:",
+      "per_giro_overrides_example": {
+        "restaurante": "Código del Platillo:",
+        "barberia": "Código del Servicio:",
+        "clinica_dental": "Código del Tratamiento:"
+      }
+    },
+    {
+      "line": 4177,
+      "module": "pos",
+      "current_html_snippet": "<input id=\"barcode-input\" ... placeholder=\"Escanear código O escribir nombre del producto…\">",
+      "suggested_i18n_key": "barcode_input_placeholder",
+      "suggested_data_module": "pos",
+      "default_text": "Escanear código O escribir nombre del producto…",
+      "instrumentation": "data-i18n-placeholder",
+      "per_giro_overrides_example": {
+        "restaurante": "Buscar platillo o escribir código…",
+        "barberia": "Buscar servicio o producto…",
+        "clinica_dental": "Buscar tratamiento o insumo…",
+        "veterinaria": "Buscar producto/servicio para mascota…"
+      }
+    },
+    {
+      "line": 4260,
+      "module": "pos",
+      "current_html_snippet": "Ticket 1",
+      "suggested_i18n_key": "ticket_singular",
+      "suggested_data_module": "pos",
+      "default_text": "Ticket {n}",
+      "per_giro_overrides_example": {
+        "restaurante": "Comanda {n}",
+        "barberia": "Servicio {n}",
+        "clinica_dental": "Consulta {n}",
+        "hotel": "Reserva {n}"
+      }
+    },
+    {
+      "line": 4262,
+      "module": "pos",
+      "current_html_snippet": "<button class=\"btn-new-ticket\" onclick=\"newTicket()\">+ Nuevo</button>",
+      "suggested_i18n_key": "nuevo_ticket_btn",
+      "suggested_data_module": "pos",
+      "default_text": "+ Nuevo",
+      "per_giro_overrides_example": {
+        "restaurante": "+ Nueva comanda",
+        "barberia": "+ Nuevo servicio",
+        "clinica_dental": "+ Nueva consulta"
+      }
+    },
+    {
+      "line": 4270,
+      "module": "pos",
+      "current_html_snippet": "<th>Código de Barras</th>",
+      "suggested_i18n_key": "th_codigo_barras",
+      "suggested_data_module": "pos",
+      "default_text": "Código de Barras",
+      "per_giro_overrides_example": {
+        "restaurante": "SKU",
+        "barberia": "Código",
+        "clinica_dental": "Código SAT"
+      }
+    },
+    {
+      "line": 4271,
+      "module": "pos",
+      "current_html_snippet": "<th>Descripción del Producto</th>",
+      "suggested_i18n_key": "th_descripcion_producto",
+      "suggested_data_module": "pos",
+      "default_text": "Descripción del Producto",
+      "per_giro_overrides_example": {
+        "restaurante": "Platillo",
+        "barberia": "Servicio",
+        "clinica_dental": "Tratamiento",
+        "ropa": "Artículo",
+        "veterinaria": "Producto / Servicio"
+      }
+    },
+    {
+      "line": 4272,
+      "module": "pos",
+      "current_html_snippet": "<th>Precio Venta</th>",
+      "suggested_i18n_key": "th_precio_venta",
+      "suggested_data_module": "pos",
+      "default_text": "Precio Venta",
+      "per_giro_overrides_example": {
+        "clinica_dental": "Honorario",
+        "restaurante": "Precio"
+      }
+    },
+    {
+      "line": 4275,
+      "module": "pos",
+      "current_html_snippet": "<th>Existencia</th>",
+      "suggested_i18n_key": "th_existencia",
+      "suggested_data_module": "pos",
+      "suggested_data_giros": "fruteria,abarrotes,ferreteria,ropa,papeleria,tlapaleria",
+      "default_text": "Existencia",
+      "per_giro_overrides_example": {
+        "restaurante": "Disponible",
+        "barberia": "—"
+      }
+    },
+    {
+      "line": 4287,
+      "module": "pos",
+      "current_html_snippet": "<span class=\"item-counter-txt\">Productos en la venta actual.</span>",
+      "suggested_i18n_key": "items_en_venta_txt",
+      "suggested_data_module": "pos",
+      "default_text": "Productos en la venta actual.",
+      "per_giro_overrides_example": {
+        "restaurante": "Platillos en la comanda.",
+        "barberia": "Servicios agregados.",
+        "clinica_dental": "Tratamientos en la consulta."
+      }
+    },
+    {
+      "line": 4294,
+      "module": "pos",
+      "current_html_snippet": "<span>F5 - Cambiar</span>",
+      "suggested_i18n_key": "f5_cambiar_precio",
+      "suggested_data_module": "pos",
+      "default_text": "F5 - Cambiar",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4298,
+      "module": "pos",
+      "current_html_snippet": "<span>F6 - Pendiente</span>",
+      "suggested_i18n_key": "f6_pendiente",
+      "suggested_data_module": "pos",
+      "default_text": "F6 - Pendiente",
+      "per_giro_overrides_example": {
+        "restaurante": "F6 - Mesa en espera"
+      }
+    },
+    {
+      "line": 4302,
+      "module": "pos",
+      "current_html_snippet": "<span>Eliminar</span> (cancelar_venta)",
+      "suggested_i18n_key": "cancelar_venta_btn",
+      "suggested_data_module": "pos",
+      "default_text": "Eliminar",
+      "per_giro_overrides_example": {
+        "restaurante": "Cancelar comanda",
+        "barberia": "Cancelar servicio"
+      }
+    },
+    {
+      "line": 4306,
+      "module": "pos",
+      "current_html_snippet": "<span>Asignar cliente</span>",
+      "suggested_i18n_key": "asignar_cliente_btn",
+      "suggested_data_module": "pos",
+      "default_text": "Asignar cliente",
+      "per_giro_overrides_example": {
+        "restaurante": "Asignar comensal",
+        "clinica_dental": "Asignar paciente",
+        "veterinaria": "Asignar mascota",
+        "hotel": "Asignar huésped"
+      }
+    },
+    {
+      "line": 4311,
+      "module": "pos",
+      "current_html_snippet": "<span>F12 - Cobrar</span>",
+      "suggested_i18n_key": "cobrar_btn",
+      "suggested_data_module": "pos",
+      "default_text": "F12 - Cobrar",
+      "per_giro_overrides_example": {
+        "restaurante": "F12 - Cerrar cuenta",
+        "barberia": "F12 - Cobrar servicio",
+        "clinica_dental": "F12 - Cobrar consulta",
+        "hotel": "F12 - Cobrar estancia"
+      }
+    },
+    {
+      "line": 4329,
+      "module": "pos",
+      "current_html_snippet": "<span class=\"lbl\">Total:</span>",
+      "suggested_i18n_key": "total_lbl",
+      "default_text": "Total:",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4333,
+      "module": "pos",
+      "current_html_snippet": "<span class=\"lbl\">Pagó Con:</span>",
+      "suggested_i18n_key": "pago_con_lbl",
+      "default_text": "Pagó Con:",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4337,
+      "module": "pos",
+      "current_html_snippet": "<span class=\"lbl\">Cambio:</span>",
+      "suggested_i18n_key": "cambio_lbl",
+      "default_text": "Cambio:",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4346,
+      "module": "pos",
+      "current_html_snippet": "<span>Reimprimir Último Ticket</span>",
+      "suggested_i18n_key": "reimprimir_ultimo_ticket_btn",
+      "suggested_data_module": "pos",
+      "default_text": "Reimprimir Último Ticket",
+      "per_giro_overrides_example": {
+        "restaurante": "Reimprimir última comanda",
+        "barberia": "Reimprimir último servicio"
+      }
+    },
+    {
+      "line": 4354,
+      "module": "pos",
+      "current_html_snippet": "<span>Ventas del día y Devoluciones</span>",
+      "suggested_i18n_key": "ventas_del_dia_btn",
+      "suggested_data_module": "pos",
+      "default_text": "Ventas del día y Devoluciones",
+      "per_giro_overrides_example": {
+        "restaurante": "Comandas del día",
+        "barberia": "Servicios del día",
+        "clinica_dental": "Consultas del día"
+      }
+    },
+    {
+      "line": 4396,
+      "module": "reportes",
+      "current_html_snippet": "<h1 class=\"page-title\">Dashboard</h1>",
+      "suggested_i18n_key": "dashboard_title",
+      "suggested_data_module": "dashboard",
+      "default_text": "Dashboard",
+      "per_giro_overrides_example": {
+        "restaurante": "Resumen del día"
+      }
+    },
+    {
+      "line": 4472,
+      "module": "reportes",
+      "current_html_snippet": "<th>Producto</th><th>Vendidos</th><th>Ingresos</th>",
+      "suggested_i18n_key": "th_dashboard_top_productos",
+      "suggested_data_module": "dashboard",
+      "default_text": "Producto / Vendidos / Ingresos",
+      "per_giro_overrides_example": {
+        "restaurante": "Platillo / Servidos / Ingresos",
+        "barberia": "Servicio / Realizados / Ingresos",
+        "clinica_dental": "Tratamiento / Aplicados / Ingresos"
+      }
+    },
+    {
+      "line": 4495,
+      "module": "inventario",
+      "current_html_snippet": "<h1 class=\"page-title\">Inventario</h1>",
+      "suggested_i18n_key": "inventario_title",
+      "suggested_data_module": "inventario",
+      "default_text": "Inventario",
+      "per_giro_overrides_example": {
+        "restaurante": "Insumos y recetas",
+        "barberia": "Productos y stock",
+        "clinica_dental": "Insumos clínicos",
+        "ferreteria": "Almacén"
+      }
+    },
+    {
+      "line": 4499,
+      "module": "inventario",
+      "current_html_snippet": "<input type=\"text\" placeholder=\"🔎 Buscar...\">",
+      "suggested_i18n_key": "inventario_search_placeholder",
+      "suggested_data_module": "inventario",
+      "default_text": "🔎 Buscar...",
+      "instrumentation": "data-i18n-placeholder",
+      "per_giro_overrides_example": {
+        "restaurante": "🔎 Buscar platillo o insumo…",
+        "barberia": "🔎 Buscar producto/servicio…"
+      }
+    },
+    {
+      "line": 4523,
+      "module": "inventario",
+      "current_html_snippet": "<button>+ Nuevo producto</button>",
+      "suggested_i18n_key": "nuevo_producto_btn",
+      "suggested_data_module": "inventario",
+      "default_text": "+ Nuevo producto",
+      "per_giro_overrides_example": {
+        "restaurante": "+ Nuevo platillo",
+        "barberia": "+ Nuevo servicio",
+        "clinica_dental": "+ Nuevo tratamiento",
+        "ropa": "+ Nuevo artículo"
+      }
+    },
+    {
+      "line": 4537,
+      "module": "inventario",
+      "current_html_snippet": "<button>📦 Stock actual</button>",
+      "suggested_i18n_key": "tab_stock_actual",
+      "suggested_data_module": "inventario",
+      "default_text": "📦 Stock actual",
+      "per_giro_overrides_example": {
+        "restaurante": "📦 Insumos disponibles"
+      }
+    },
+    {
+      "line": 4538,
+      "module": "inventario",
+      "current_html_snippet": "<button>🔄 Movimientos</button>",
+      "suggested_i18n_key": "tab_movimientos",
+      "suggested_data_module": "inventario",
+      "default_text": "🔄 Movimientos",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4539,
+      "module": "inventario",
+      "current_html_snippet": "<button>📋 Conteo físico</button>",
+      "suggested_i18n_key": "tab_conteo_fisico",
+      "suggested_data_module": "inventario",
+      "suggested_data_giros": "fruteria,abarrotes,ferreteria,ropa,papeleria",
+      "default_text": "📋 Conteo físico",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4556,
+      "module": "inventario",
+      "current_html_snippet": "<th>Código</th><th>Producto</th><th>Categoría</th>",
+      "suggested_i18n_key": "th_inv_main",
+      "suggested_data_module": "inventario",
+      "default_text": "Código / Producto / Categoría",
+      "per_giro_overrides_example": {
+        "restaurante": "SKU / Platillo / Familia",
+        "barberia": "Código / Servicio / Tipo"
+      }
+    },
+    {
+      "line": 4558,
+      "module": "inventario",
+      "current_html_snippet": "<th>Stock</th><th>Mín</th>",
+      "suggested_i18n_key": "th_stock_min",
+      "suggested_data_module": "inventario",
+      "suggested_data_giros": "fruteria,abarrotes,ferreteria,ropa,papeleria,veterinaria,tlapaleria",
+      "default_text": "Stock / Mín",
+      "per_giro_overrides_example": {
+        "restaurante": "Disponible / Mínimo"
+      }
+    },
+    {
+      "line": 4588,
+      "module": "inventario",
+      "current_html_snippet": "<thead><tr><th>Fecha</th><th>Tipo</th><th>Producto</th>...",
+      "suggested_i18n_key": "th_movs_inv",
+      "suggested_data_module": "inventario",
+      "default_text": "Fecha / Tipo / Producto / Cantidad / Antes / Después / Usuario / Motivo",
+      "per_giro_overrides_example": {
+        "restaurante": "Fecha / Tipo / Insumo / Cantidad / Antes / Después / Usuario / Motivo"
+      }
+    },
+    {
+      "line": 4686,
+      "module": "inventario",
+      "current_html_snippet": "<label class=\"input-label\">Producto *</label>",
+      "suggested_i18n_key": "producto_label_required",
+      "suggested_data_module": "inventario",
+      "default_text": "Producto *",
+      "per_giro_overrides_example": {
+        "restaurante": "Platillo / Insumo *",
+        "barberia": "Servicio / Producto *",
+        "clinica_dental": "Insumo *"
+      }
+    },
+    {
+      "line": 4746,
+      "module": "clientes",
+      "current_html_snippet": "<h1 class=\"page-title\">Clientes</h1><p>0 clientes registrados</p>",
+      "suggested_i18n_key": "clientes_title",
+      "suggested_data_module": "clientes",
+      "default_text": "Clientes",
+      "per_giro_overrides_example": {
+        "restaurante": "Comensales",
+        "clinica_dental": "Pacientes",
+        "veterinaria": "Mascotas y dueños",
+        "hotel": "Huéspedes",
+        "escuela": "Alumnos"
+      }
+    },
+    {
+      "line": 4749,
+      "module": "clientes",
+      "current_html_snippet": "<input placeholder=\"🔍 Buscar por nombre, teléfono, RFC…\">",
+      "suggested_i18n_key": "clientes_search_placeholder",
+      "suggested_data_module": "clientes",
+      "default_text": "🔍 Buscar por nombre, teléfono, RFC…",
+      "instrumentation": "data-i18n-placeholder",
+      "per_giro_overrides_example": {
+        "clinica_dental": "🔍 Buscar paciente por nombre, teléfono, expediente…",
+        "veterinaria": "🔍 Buscar mascota o dueño…"
+      }
+    },
+    {
+      "line": 4753,
+      "module": "clientes",
+      "current_html_snippet": "<button>+ Nuevo cliente</button>",
+      "suggested_i18n_key": "nuevo_cliente_btn",
+      "suggested_data_module": "clientes",
+      "default_text": "+ Nuevo cliente",
+      "per_giro_overrides_example": {
+        "restaurante": "+ Nuevo comensal",
+        "clinica_dental": "+ Nuevo paciente",
+        "veterinaria": "+ Nueva mascota",
+        "hotel": "+ Nuevo huésped"
+      }
+    },
+    {
+      "line": 4759,
+      "module": "clientes",
+      "current_html_snippet": "<th>Cliente</th><th>Teléfono</th><th>Crédito</th><th>Saldo</th><th>Puntos</th><th>Última compra</th>",
+      "suggested_i18n_key": "th_clientes_main",
+      "suggested_data_module": "clientes",
+      "default_text": "Cliente / Teléfono / Crédito / Saldo / Puntos / Última compra",
+      "per_giro_overrides_example": {
+        "clinica_dental": "Paciente / Tel / Crédito / Saldo / Puntos / Última consulta",
+        "veterinaria": "Mascota / Dueño / Crédito / Saldo / Puntos / Última visita"
+      }
+    },
+    {
+      "line": 4769,
+      "module": "credito",
+      "current_html_snippet": "<h1>Cuentas por cobrar</h1>",
+      "suggested_i18n_key": "credito_title",
+      "suggested_data_module": "credito",
+      "default_text": "Cuentas por cobrar",
+      "per_giro_overrides_example": {
+        "abarrotes": "Fiado",
+        "clinica_dental": "Adeudos de pacientes"
+      }
+    },
+    {
+      "line": 4770,
+      "module": "credito",
+      "current_html_snippet": "<button>+ Registrar abono</button>",
+      "suggested_i18n_key": "registrar_abono_btn",
+      "suggested_data_module": "credito",
+      "default_text": "+ Registrar abono",
+      "per_giro_overrides_example": {
+        "abarrotes": "+ Registrar pago de fiado"
+      }
+    },
+    {
+      "line": 4781,
+      "module": "credito",
+      "current_html_snippet": "<th>Cliente</th>...",
+      "suggested_i18n_key": "th_credito_main",
+      "suggested_data_module": "credito",
+      "default_text": "Cliente / Límite / Saldo / Pagado / Último abono / Estado",
+      "per_giro_overrides_example": {
+        "clinica_dental": "Paciente / Límite / Saldo / Pagado / Último abono / Estado"
+      }
+    },
+    {
+      "line": 4791,
+      "module": "ventas",
+      "current_html_snippet": "<h1>Historial de ventas y devoluciones</h1>",
+      "suggested_i18n_key": "ventas_title",
+      "suggested_data_module": "ventas",
+      "default_text": "Historial de ventas y devoluciones",
+      "per_giro_overrides_example": {
+        "restaurante": "Historial de comandas",
+        "barberia": "Historial de servicios",
+        "clinica_dental": "Historial de consultas",
+        "hotel": "Historial de estancias"
+      }
+    },
+    {
+      "line": 4814,
+      "module": "ventas",
+      "current_html_snippet": "<button>📂 Ver todas</button>",
+      "suggested_i18n_key": "ver_todas_ventas_btn",
+      "suggested_data_module": "ventas",
+      "default_text": "📂 Ver todas",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4823,
+      "module": "ventas",
+      "current_html_snippet": "<th>Ticket</th><th>Fecha</th><th>Cliente</th><th>Cajero</th>...",
+      "suggested_i18n_key": "th_ventas_main",
+      "suggested_data_module": "ventas",
+      "default_text": "Ticket / Fecha / Cliente / Cajero / Pago / Total / Estado",
+      "per_giro_overrides_example": {
+        "restaurante": "Comanda / Fecha / Comensal / Mesero / Pago / Total / Estado",
+        "barberia": "Servicio / Fecha / Cliente / Barbero / Pago / Total / Estado",
+        "clinica_dental": "Consulta / Fecha / Paciente / Doctor / Pago / Total / Estado"
+      }
+    },
+    {
+      "line": 4835,
+      "module": "reportes",
+      "current_html_snippet": "<button>📈 Ver Ventas por día</button>",
+      "suggested_i18n_key": "rep_ventas_por_dia_btn",
+      "suggested_data_module": "reportes",
+      "default_text": "📈 Ver Ventas por día",
+      "per_giro_overrides_example": {
+        "restaurante": "📈 Comandas por día",
+        "barberia": "📈 Servicios por día"
+      }
+    },
+    {
+      "line": 4836,
+      "module": "ventas",
+      "current_html_snippet": "<button>🔎 Buscar venta</button>",
+      "suggested_i18n_key": "buscar_venta_btn",
+      "suggested_data_module": "ventas",
+      "default_text": "🔎 Buscar venta",
+      "per_giro_overrides_example": {
+        "restaurante": "🔎 Buscar comanda",
+        "barberia": "🔎 Buscar servicio"
+      }
+    },
+    {
+      "line": 4887,
+      "module": "corte",
+      "current_html_snippet": "<h1>Corte de caja</h1><p>Cierre del turno</p>",
+      "suggested_i18n_key": "corte_title",
+      "suggested_data_module": "corte",
+      "default_text": "Corte de caja",
+      "per_giro_overrides_example": {
+        "restaurante": "Cierre de turno",
+        "barberia": "Cierre del día"
+      }
+    },
+    {
+      "line": 4890,
+      "module": "corte",
+      "current_html_snippet": "<button>🖨️ Imprimir corte</button>",
+      "suggested_i18n_key": "imprimir_corte_btn",
+      "suggested_data_module": "corte",
+      "default_text": "🖨️ Imprimir corte",
+      "per_giro_overrides_example": {
+        "restaurante": "🖨️ Imprimir cierre"
+      }
+    },
+    {
+      "line": 4900,
+      "module": "corte",
+      "current_html_snippet": "<button>Ir a Apertura</button>",
+      "suggested_i18n_key": "ir_apertura_btn",
+      "suggested_data_module": "apertura",
+      "default_text": "Ir a Apertura",
+      "per_giro_overrides_example": {
+        "restaurante": "Abrir turno"
+      }
+    },
+    {
+      "line": 4945,
+      "module": "corte",
+      "current_html_snippet": "<button>Reabrir corte Z</button>",
+      "suggested_i18n_key": "reabrir_corte_z_btn",
+      "suggested_data_module": "corte",
+      "default_text": "Reabrir corte Z",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4974,
+      "module": "corte",
+      "current_html_snippet": "<button>Cerrar corte</button>",
+      "suggested_i18n_key": "cerrar_corte_btn",
+      "suggested_data_module": "corte",
+      "default_text": "Cerrar corte",
+      "per_giro_overrides_example": {
+        "restaurante": "Cerrar turno",
+        "barberia": "Cerrar día"
+      }
+    },
+    {
+      "line": 4983,
+      "module": "config",
+      "current_html_snippet": "<h1>Configuración</h1>",
+      "suggested_i18n_key": "config_title",
+      "suggested_data_module": "config",
+      "default_text": "Configuración",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 4988,
+      "module": "config",
+      "current_html_snippet": "<button>🏪 Datos del negocio</button>",
+      "suggested_i18n_key": "tab_datos_negocio",
+      "suggested_data_module": "config",
+      "default_text": "🏪 Datos del negocio",
+      "per_giro_overrides_example": {
+        "restaurante": "🏪 Datos del restaurante",
+        "barberia": "🏪 Datos de la barbería",
+        "clinica_dental": "🏪 Datos de la clínica"
+      }
+    },
+    {
+      "line": 4991,
+      "module": "config",
+      "current_html_snippet": "<button>👥 Equipo</button>",
+      "suggested_i18n_key": "tab_equipo",
+      "suggested_data_module": "config",
+      "default_text": "👥 Equipo",
+      "per_giro_overrides_example": {
+        "restaurante": "👥 Meseros y cocina",
+        "barberia": "👥 Barberos",
+        "clinica_dental": "👥 Doctores y asistentes"
+      }
+    },
+    {
+      "line": 5005,
+      "module": "config",
+      "current_html_snippet": "<button>🖥️ Vista del POS</button>",
+      "suggested_i18n_key": "tab_vista_pos",
+      "suggested_data_module": "config",
+      "default_text": "🖥️ Vista del POS",
+      "per_giro_overrides_example": {
+        "restaurante": "🖥️ Vista de cocina"
+      }
+    },
+    {
+      "line": 5621,
+      "module": "config",
+      "current_html_snippet": "<h1>Usuarios</h1>",
+      "suggested_i18n_key": "usuarios_title",
+      "suggested_data_module": "usuarios",
+      "default_text": "Usuarios",
+      "per_giro_overrides_example": {
+        "restaurante": "Personal",
+        "clinica_dental": "Personal clínico"
+      }
+    },
+    {
+      "line": 5627,
+      "module": "config",
+      "current_html_snippet": "<th>Usuario</th><th>Rol</th><th>Email</th>...",
+      "suggested_i18n_key": "th_usuarios",
+      "suggested_data_module": "usuarios",
+      "default_text": "Usuario / Rol / Email / Última conexión / Estado",
+      "per_giro_overrides_example": {
+        "restaurante": "Empleado / Rol / Email / Último ingreso / Estado"
+      }
+    },
+    {
+      "line": 5651,
+      "module": "apertura",
+      "current_html_snippet": "<h1>Apertura de caja</h1>",
+      "suggested_i18n_key": "apertura_title",
+      "suggested_data_module": "apertura",
+      "default_text": "Apertura de caja",
+      "per_giro_overrides_example": {
+        "restaurante": "Apertura de turno"
+      }
+    },
+    {
+      "line": 5669,
+      "module": "apertura",
+      "current_html_snippet": "<label>Cajero</label>",
+      "suggested_i18n_key": "cajero_label",
+      "suggested_data_module": "apertura",
+      "default_text": "Cajero",
+      "per_giro_overrides_example": {
+        "restaurante": "Mesero responsable",
+        "barberia": "Barbero",
+        "clinica_dental": "Recepcionista"
+      }
+    },
+    {
+      "line": 5670,
+      "module": "apertura",
+      "current_html_snippet": "<label>Turno</label>",
+      "suggested_i18n_key": "turno_label",
+      "suggested_data_module": "apertura",
+      "default_text": "Turno",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 5671,
+      "module": "apertura",
+      "current_html_snippet": "<label>Saldo inicial *</label>",
+      "suggested_i18n_key": "saldo_inicial_label",
+      "suggested_data_module": "apertura",
+      "default_text": "Saldo inicial *",
+      "per_giro_overrides_example": {
+        "restaurante": "Fondo de caja inicial *"
+      }
+    },
+    {
+      "line": 5688,
+      "module": "pos",
+      "current_html_snippet": "<h1>Caja rápida</h1>",
+      "suggested_i18n_key": "caja_rapida_title",
+      "suggested_data_module": "pos",
+      "default_text": "Caja rápida",
+      "per_giro_overrides_example": {
+        "restaurante": "Cobro rápido",
+        "barberia": "Cobro express"
+      }
+    },
+    {
+      "line": 5714,
+      "module": "config",
+      "current_html_snippet": "<h1>Mi perfil</h1>",
+      "suggested_i18n_key": "mi_perfil_title",
+      "default_text": "Mi perfil",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 5733,
+      "module": "kardex",
+      "current_html_snippet": "<h1>Kardex</h1><p>Movimientos por producto · entradas, salidas, ajustes, traslados</p>",
+      "suggested_i18n_key": "kardex_title",
+      "suggested_data_module": "kardex",
+      "default_text": "Kardex",
+      "per_giro_overrides_example": {
+        "restaurante": "Kardex de insumos",
+        "ferreteria": "Kardex de almacén"
+      }
+    },
+    {
+      "line": 5744,
+      "module": "kardex",
+      "current_html_snippet": "<th>Fecha</th><th>Producto</th><th>Tipo</th>...",
+      "suggested_i18n_key": "th_kardex",
+      "suggested_data_module": "kardex",
+      "default_text": "Fecha / Producto / Tipo / Cantidad / Costo / Usuario / Notas",
+      "per_giro_overrides_example": {
+        "restaurante": "Fecha / Insumo / Tipo / Cantidad / Costo / Usuario / Notas"
+      }
+    },
+    {
+      "line": 5754,
+      "module": "proveedores",
+      "current_html_snippet": "<h1>Compras / Proveedores</h1>",
+      "suggested_i18n_key": "proveedores_title",
+      "suggested_data_module": "proveedores",
+      "default_text": "Compras / Proveedores",
+      "per_giro_overrides_example": {
+        "restaurante": "Compras / Proveedores de insumos"
+      }
+    },
+    {
+      "line": 5768,
+      "module": "proveedores",
+      "current_html_snippet": "<th>Nombre</th><th>RFC</th>...",
+      "suggested_i18n_key": "th_proveedores",
+      "suggested_data_module": "proveedores",
+      "default_text": "Nombre / RFC / Teléfono / Email / Acciones",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 5778,
+      "module": "facturacion",
+      "current_html_snippet": "<h1>Facturación CFDI</h1>",
+      "suggested_i18n_key": "facturacion_title",
+      "suggested_data_module": "facturacion",
+      "default_text": "Facturación CFDI",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 5791,
+      "module": "facturacion",
+      "current_html_snippet": "<th>Folio</th><th>Cliente</th>...",
+      "suggested_i18n_key": "th_facturas",
+      "suggested_data_module": "facturacion",
+      "default_text": "Folio / Cliente / RFC / Total / Estado / UUID SAT / Acciones",
+      "per_giro_overrides_example": {
+        "clinica_dental": "Folio / Paciente / RFC / Total / Estado / UUID SAT / Acciones"
+      }
+    },
+    {
+      "line": 5799,
+      "module": "cotizaciones",
+      "current_html_snippet": "<h1>Cotizaciones</h1>",
+      "suggested_i18n_key": "cotizaciones_title",
+      "suggested_data_module": "cotizaciones",
+      "default_text": "Cotizaciones",
+      "per_giro_overrides_example": {
+        "taller_mecanico": "Presupuestos",
+        "ferreteria": "Presupuestos de obra"
+      }
+    },
+    {
+      "line": 5836,
+      "module": "cotizaciones",
+      "current_html_snippet": "<th>Folio</th><th>Fecha</th><th>Cliente</th><th>Items</th><th>Total</th>",
+      "suggested_i18n_key": "th_cotizaciones",
+      "suggested_data_module": "cotizaciones",
+      "default_text": "Folio / Fecha / Cliente / Items / Total",
+      "per_giro_overrides_example": {
+        "taller_mecanico": "Folio / Fecha / Cliente / Refacciones+Servicios / Total"
+      }
+    },
+    {
+      "line": 5855,
+      "module": "devoluciones",
+      "current_html_snippet": "<h1>Devoluciones y Reembolsos</h1>",
+      "suggested_i18n_key": "devoluciones_title",
+      "suggested_data_module": "devoluciones",
+      "suggested_data_giros": "fruteria,abarrotes,ferreteria,ropa,zapateria,papeleria",
+      "default_text": "Devoluciones y Reembolsos",
+      "per_giro_overrides_example": {
+        "ropa": "Cambios y devoluciones"
+      }
+    },
+    {
+      "line": 5907,
+      "module": "recargas",
+      "current_html_snippet": "<h1>📱 Recargas electrónicas</h1>",
+      "suggested_i18n_key": "recargas_title",
+      "suggested_data_module": "recargas",
+      "default_text": "📱 Recargas electrónicas",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 5942,
+      "module": "servicios",
+      "current_html_snippet": "<h1>💡 Pago de servicios</h1>",
+      "suggested_i18n_key": "servicios_title",
+      "suggested_data_module": "servicios",
+      "default_text": "💡 Pago de servicios",
+      "per_giro_overrides_example": {}
+    },
+    {
+      "line": 6685,
+      "module": "rentas",
+      "current_html_snippet": "<h1 data-term=\"rentas_title\">🔑 Rentas</h1>",
+      "suggested_i18n_key": "rentas_title",
+      "suggested_data_module": "rentas",
+      "default_text": "🔑 Rentas",
+      "per_giro_overrides_example": {
+        "hotel": "🔑 Reservaciones",
+        "renta_equipos": "🔑 Equipos rentados"
+      },
+      "note": "YA TIENE data-term"
+    },
+    {
+      "line": 8180,
+      "module": "clientes",
+      "current_html_snippet": "<h2>+ Nuevo Cliente</h2> (modal header)",
+      "suggested_i18n_key": "modal_nuevo_cliente_title",
+      "suggested_data_module": "clientes",
+      "default_text": "+ Nuevo Cliente",
+      "per_giro_overrides_example": {
+        "restaurante": "+ Nuevo Comensal",
+        "clinica_dental": "+ Nuevo Paciente",
+        "veterinaria": "+ Nueva Mascota",
+        "hotel": "+ Nuevo Huésped"
+      }
+    },
+    {
+      "line": 11570,
+      "module": "corte",
+      "current_html_snippet": "<h2>📋 CORTE DE CAJA</h2> (print header)",
+      "suggested_i18n_key": "print_corte_title",
+      "suggested_data_module": "corte",
+      "default_text": "📋 CORTE DE CAJA",
+      "per_giro_overrides_example": {
+        "restaurante": "📋 CIERRE DE TURNO"
+      }
+    },
+    {
+      "line": 11649,
+      "module": "apertura",
+      "current_html_snippet": "<h2>📋 APERTURA DE CAJA</h2> (print header)",
+      "suggested_i18n_key": "print_apertura_title",
+      "suggested_data_module": "apertura",
+      "default_text": "📋 APERTURA DE CAJA",
+      "per_giro_overrides_example": {
+        "restaurante": "📋 APERTURA DE TURNO"
+      }
+    },
+    {
+      "line": 16640,
+      "module": "pos",
+      "current_html_snippet": "<h2>📒 Panel catálogo rápido</h2>",
+      "suggested_i18n_key": "modal_panel_catalogo_title",
+      "suggested_data_module": "pos",
+      "default_text": "📒 Panel catálogo rápido",
+      "per_giro_overrides_example": {
+        "restaurante": "📒 Menú rápido",
+        "barberia": "📒 Servicios rápidos"
+      }
+    },
+    {
+      "line": 16657,
+      "module": "pos",
+      "current_html_snippet": "<h2>🖼️ Catálogo visual</h2>",
+      "suggested_i18n_key": "modal_catalogo_visual_title",
+      "suggested_data_module": "pos",
+      "default_text": "🖼️ Catálogo visual",
+      "per_giro_overrides_example": {
+        "restaurante": "🖼️ Menú con fotos",
+        "barberia": "🖼️ Galería de servicios"
+      }
+    },
+    {
+      "line": 16685,
+      "module": "pos",
+      "current_html_snippet": "<h2>F5 · Cambiar precio</h2>",
+      "suggested_i18n_key": "modal_cambiar_precio_title",
+      "suggested_data_module": "pos",
+      "default_text": "F5 · Cambiar precio",
+      "per_giro_overrides_example": {
+        "clinica_dental": "F5 · Cambiar honorario"
+      }
+    },
+    {
+      "line": 16789,
+      "module": "pos",
+      "current_html_snippet": "<h2>👤 Asignar cliente</h2>",
+      "suggested_i18n_key": "modal_asignar_cliente_title",
+      "suggested_data_module": "pos",
+      "default_text": "👤 Asignar cliente",
+      "per_giro_overrides_example": {
+        "restaurante": "👤 Asignar comensal",
+        "clinica_dental": "👤 Asignar paciente",
+        "veterinaria": "👤 Asignar mascota"
+      }
+    }
+  ],
+  "implementation_recommendations": {
+    "priority_order": [
+      "1) Sidebar/menubar (líneas 3986-4137) — 18 elementos visibles SIEMPRE",
+      "2) POS table + bottom bar (líneas 4260-4356) — 14 elementos = corazón del flujo",
+      "3) Page titles (h1.page-title) — 15 elementos = primer impacto al cambiar de pantalla",
+      "4) Table headers (th) — 12 elementos = columnas de datos",
+      "5) Modales nuevos (8180, 16640+) — confirman terminología contextual"
+    ],
+    "unify_data_term_to_data_i18n": "Actualmente 7 elementos usan data-term (líneas 3988, 3992, 4021, 4059, 4128, 4132, 4136, 6685, 6717, 6754). Migrar a data-i18n para consistencia con motor actual.",
+    "data_module_strategy": "Usar data-module en CONTENEDORES de sección (no en cada th individual). Ej: envolver tabla completa con div[data-module=\"inventario\"] en vez de marcar cada th.",
+    "data_giros_use_cases": [
+      "tab_conteo_fisico: solo giros con stock físico (fruteria, abarrotes, ferreteria…)",
+      "th_existencia/stock_min: ocultar para barberia, clinica_dental, restaurante (servicios sin stock)",
+      "recargas/servicios: solo abarrotes, papeleria, ciber",
+      "devoluciones: solo retail (no servicios)"
+    ],
+    "missing_concepts_to_seed_in_giros_terminologias": [
+      "cliente / cliente_plural",
+      "producto / producto_plural",
+      "ticket / ticket_plural",
+      "cobrar",
+      "venta / venta_plural",
+      "inventario",
+      "cajero",
+      "nuevo_cliente",
+      "nuevo_producto",
+      "corte / apertura",
+      "asignar_cliente"
+    ]
+  }
+}
