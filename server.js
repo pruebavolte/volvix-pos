@@ -520,6 +520,65 @@ const api = {
     }
   },
 
+  // =============== REGISTRO SIMPLE ===============
+  'POST /api/auth/register-simple': async (req, res) => {
+    try {
+      const body = await readBody(req);
+      const { email, business_name, giro, password, phone } = body;
+
+      if (!email || !business_name || !giro || !password) {
+        return json(res, { error: 'email, business_name, giro, password required' }, 400);
+      }
+
+      // Crear tenant
+      const tenantId = 'TNT-' + Date.now().toString(36).toUpperCase();
+      const tenant = {
+        id: tenantId,
+        name: business_name,
+        giro: giro,
+        status: 'active',
+        plan: 'free',
+        created: Date.now(),
+      };
+      store.insert('tenants', tenant);
+
+      // Crear usuario
+      const userId = 'USR-' + Date.now().toString(36).toUpperCase();
+      const user = {
+        id: userId,
+        email: email.toLowerCase(),
+        password: password,
+        role: 'owner',
+        tenant_id: tenantId,
+        status: 'active',
+        created: Date.now(),
+      };
+      store.insert('users', user);
+
+      // JWT simple (base64)
+      const token = Buffer.from(JSON.stringify({
+        sub: userId,
+        email: email,
+        tenant_id: tenantId,
+        role: 'owner',
+        iat: Date.now(),
+      })).toString('base64');
+
+      wsBroadcast({ type: 'user:registered', user, tenant });
+
+      return json(res, {
+        ok: true,
+        user: { id: userId, email, tenant_id: tenantId, role: 'owner' },
+        tenant: { id: tenantId, name: business_name, giro },
+        token,
+        message: 'Cuenta creada exitosamente. Redirigiendo...',
+      });
+    } catch (err) {
+      console.error('[register-simple]', err.message);
+      return json(res, { ok: false, error: 'Error al registrar: ' + err.message }, 500);
+    }
+  },
+
   // =============== TENANTS ===============
   'GET /api/tenants': (req, res) => json(res, store.all('tenants')),
   'GET /api/tenants/:id': (req, res, params) => {
