@@ -203,6 +203,16 @@ function serveFile(filePath, res, hostHeader) {
 const server = http.createServer(async (req, res) => {
   const parsed = url.parse(req.url);
   const pathname = parsed.pathname;
+  const hostHeader = req.headers.host || '';
+
+  // Si acceden directamente a railway.app (no a negocio.international)
+  // y no es una request a /api, mostrar página de setup
+  if (hostHeader.includes('railway.app') && !pathname.startsWith('/api/')) {
+    // Para / mostrar dns-check.html
+    if (pathname === '/') {
+      return serveFile(path.join(PUBLIC_DIR, 'dns-check.html'), res, hostHeader);
+    }
+  }
 
   // CORS preflight
   if (req.method === 'OPTIONS') {

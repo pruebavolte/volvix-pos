@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Configuración de Dominio - SalvadorEx</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: Inter, sans-serif; background: linear-gradient(135deg, #16A34A, #15803D); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+.container { max-width: 600px; background: white; border-radius: 16px; padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,.2); }
+.status { text-align: center; margin-bottom: 30px; }
+.status h1 { font-size: 24px; margin-bottom: 10px; color: #DC2626; }
+.status p { color: #666; font-size: 14px; }
+.warning { background: #FEF2F2; border-left: 4px solid #DC2626; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
+.warning strong { color: #991B1B; }
+.steps { background: #F3F4F6; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+.step { margin-bottom: 15px; }
+.step-num { background: #16A34A; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; }
+.step p { display: inline; color: #333; }
+.code { background: white; border: 1px solid #E5E7EB; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; margin-top: 5px; color: #666; word-break: break-all; }
+.button { background: #16A34A; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 20px; font-weight: 600; transition: background .3s; }
+.button:hover { background: #15803D; }
+.verify-btn { background: #2563EB; }
+.verify-btn:hover { background: #1D4ED8; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="status">
+    <h1>⚠️ Configuración de Dominio Incompleta</h1>
+    <p>Tu sitio está activo pero accesible solo desde railway.app. Se necesita un paso más.</p>
+  </div>
+
+  <div class="warning">
+    <strong>Problema:</strong> negocio.international aún no apunta a Railway. Está redirigiéndote a railroad.app automáticamente.
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">1</span>
+      <p><strong>Ve a GoDaddy.com</strong> e inicia sesión</p>
+    </div>
+    <div class="step">
+      <span class="step-num">2</span>
+      <p><strong>Dominios</strong> → negocio.international</p>
+    </div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <p><strong>DNS</strong> (o Nameservers)</p>
+    </div>
+    <div class="step">
+      <span class="step-num">4</span>
+      <p>Cambia el registro <strong>A</strong> o <strong>CNAME</strong>:</p>
+      <div class="code">
+        OPCIÓN A (A Record):<br>
+        Nombre: @<br>
+        Valor: 66.33.22.215<br>
+        <br>
+        OPCIÓN B (CNAME):<br>
+        Nombre: @<br>
+        Valor: volvix-pos-production.up.railway.app
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">5</span>
+      <p><strong>Guarda</strong> y espera 5-15 minutos</p>
+    </div>
+  </div>
+
+  <button class="button verify-btn" onclick="checkDNS()">🔄 Verificar DNS Ahora</button>
+  <button class="button" onclick="goToApp()">Entrar a la Aplicación Anyway</button>
+</div>
+
+<script>
+function checkDNS() {
+  const status = document.querySelector('.status h1');
+  const warn = document.querySelector('.warning');
+  status.textContent = '⏳ Verificando...';
+  warn.innerHTML = '<strong>Comprobando DNS...</strong> por favor espera.';
+
+  // Intenta acceder a negocio.international
+  fetch('https://negocio.international/manifest.json', {mode: 'no-cors'})
+    .then(() => {
+      // Si funciona, probablemente ya apunta a Railway
+      location.href = 'https://negocio.international/';
+    })
+    .catch(() => {
+      status.textContent = '❌ DNS Aún No Está Listo';
+      warn.innerHTML = '<strong>Aún apunta al servidor anterior.</strong> Por favor:<br>1. Verifica que hiciste los cambios en GoDaddy<br>2. Espera 5-15 minutos más<br>3. Recarga esta página';
+    });
+}
+
+function goToApp() {
+  location.href = '/';
+}
+
+// Auto-check al cargar
+window.addEventListener('load', () => {
+  // Intenta auto-detectar si ya está listo
+  setTimeout(checkDNS, 2000);
+});
+</script>
+
+</body>
+</html>
