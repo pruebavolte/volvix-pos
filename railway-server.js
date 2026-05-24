@@ -14,6 +14,19 @@ const HOST = process.env.HOST || '0.0.0.0';
 const PUBLIC_DIR = path.resolve(process.env.PUBLIC_DIR || './public');
 
 // ============================================================
+// API HANDLER COMPLETO (delegado a api/index.js)
+// ============================================================
+// api/index.js exporta un único handler (req, res) tipo serverless con TODOS los
+// endpoints (/api/log/client, /api/owner/low-stock, /api/sales/latest, login,
+// register, etc.). Lo importamos aquí para que Railway sirva la API completa.
+let apiHandler = null;
+try {
+  apiHandler = require('./api/index.js');
+} catch (err) {
+  console.error('[railway-server] No se pudo cargar api/index.js:', err.message);
+}
+
+// ============================================================
 // SUPABASE + AUTH (duplicado mínimo de api/index.js)
 // ============================================================
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://cd6936c4-d884-4d4d-ad42-0d74f02aa106.supabase.co';
@@ -191,9 +204,20 @@ const server = http.createServer(async (req, res) => {
     return res.end();
   }
 
-  // API routes
+  // API routes — delegamos al handler completo de api/index.js
   if (pathname.startsWith('/api/')) {
-    // POST /api/auth/register-simple
+    if (apiHandler) {
+      try {
+        return await apiHandler(req, res);
+      } catch (err) {
+        console.error('[railway-server] apiHandler error:', err);
+        if (!res.headersSent) {
+          return sendJSON(res, { ok: false, error: 'Internal server error' }, 500);
+        }
+        return;
+      }
+    }
+    // Fallback solo si api/index.js no pudo cargarse
     if (req.method === 'POST' && pathname === '/api/auth/register-simple') {
       let body = '';
       req.on('data', (chunk) => (body += chunk));
@@ -207,8 +231,6 @@ const server = http.createServer(async (req, res) => {
       });
       return;
     }
-
-    // Fallback
     return sendJSON(res, { error: 'endpoint not found' }, 404);
   }
 
@@ -227,5 +249,5 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, HOST, () => {
   console.log(`\n✓ Volvix API servidor en http://${HOST}:${PORT}`);
   console.log(`✓ Static files: ${PUBLIC_DIR}`);
-  console.log(`✓ Endpoints disponibles:\n  POST /api/auth/register-simple\n`);
+  console.log(`✓ Endpoints disponibles: handler completo de api/index.js ${apiHandler ? '(cargado)' : '(NO cargado — solo register-simple fallback)'}\n`);
 });
