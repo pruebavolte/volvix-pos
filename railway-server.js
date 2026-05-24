@@ -121,32 +121,8 @@ function sendJSON(res, data, code = 200) {
 }
 
 function rewriteHTML(html, hostHeader) {
-  // Si viene como volvix-pos-production.up.railway.app, inyectar meta tag para redirect
-  if (hostHeader && hostHeader.includes('railway')) {
-    // Inyectar meta tag canonical-domain si no existe
-    if (!html.includes('meta name="canonical-domain"')) {
-      const metaTag = '<meta name="canonical-domain" content="negocio.international">\n';
-      html = html.replace('</head>', metaTag + '</head>');
-    }
-
-    // Inyectar script que intenta hacer redirect más agresivo
-    const redirectScript = `
-<script>
-// Redirect agresivo: intentar ir a negocio.international
-if (window.location.hostname === 'volvix-pos-production.up.railway.app' && !sessionStorage.getItem('redirect-attempted')) {
-  sessionStorage.setItem('redirect-attempted', 'true');
-  // location.replace en lugar de location.href para no dejar en historial
-  setTimeout(function() {
-    var target = 'https://negocio.international' + window.location.pathname + window.location.search + window.location.hash;
-    window.location.replace(target);
-  }, 50);
-}
-</script>
-`;
-    // Inyectar ANTES de otros scripts
-    html = html.replace('<head>', '<head>' + redirectScript);
-  }
-
+  // Custom domain (negocio.international) ya configurado en Railway.
+  // No se inyecta redirect; Railway sirve directo el dominio correcto.
   return html;
 }
 
@@ -205,15 +181,6 @@ const server = http.createServer(async (req, res) => {
   const pathname = parsed.pathname;
   const hostHeader = req.headers.host || '';
 
-  // Si acceden directamente a railway.app (no a negocio.international)
-  // y no es una request a /api, mostrar página de setup
-  if (hostHeader.includes('railway.app') && !pathname.startsWith('/api/')) {
-    // Para / mostrar dns-check.html
-    if (pathname === '/') {
-      return serveFile(path.join(PUBLIC_DIR, 'dns-check.html'), res, hostHeader);
-    }
-  }
-
   // CORS preflight
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
@@ -254,7 +221,6 @@ const server = http.createServer(async (req, res) => {
     if (fs.existsSync(withHtml)) filePath = withHtml;
   }
 
-  const hostHeader = req.headers.host || '';
   serveFile(filePath, res, hostHeader);
 });
 
