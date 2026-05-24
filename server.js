@@ -33,6 +33,16 @@ const net = require('net');
 const crypto = require('crypto');
 const { exec } = require('child_process');
 
+// Handler serverless completo (api/index.js). Cuando una request /api/* no
+// matchea ninguna ruta de este archivo, se delega a este handler que tiene
+// /api/log/client, /api/owner/low-stock, /api/sales/latest, /api/login, etc.
+let apiIndexHandler = null;
+try {
+  apiIndexHandler = require('./api/index.js');
+} catch (err) {
+  console.error('[server.js] No se pudo cargar api/index.js:', err && err.message);
+}
+
 // ============================================================
 // CONFIG AUTO-DETECTADA (nada hardcodeado)
 // ============================================================
@@ -1706,6 +1716,17 @@ const server = http.createServer(async (req, res) => {
       try { await match.handler(req, res, match.params); }
       catch (err) { json(res, { error: err.message }, 500); }
       return;
+    }
+    // Fallback: delegar al handler completo de api/index.js (Vercel-style)
+    // que tiene /api/log/client, /api/owner/low-stock, /api/sales/latest, etc.
+    if (apiIndexHandler) {
+      try {
+        return await apiIndexHandler(req, res);
+      } catch (err) {
+        console.error('[server.js] apiIndexHandler error:', err && err.message);
+        if (!res.headersSent) return json(res, { error: 'Internal server error' }, 500);
+        return;
+      }
     }
     return json(res, { error: 'endpoint not found' }, 404);
   }
