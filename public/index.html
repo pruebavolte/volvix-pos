@@ -196,35 +196,42 @@
 
         .hero__form {
             display: flex;
-            gap: 12px;
+            gap: 24px;
             flex-wrap: wrap;
             align-items: center;
-            max-width: 640px;
-            animation: blur-in 0.8s ease-out 0.2s both;
+            animation: blur-in 0.8s ease-out 0.15s both;
         }
 
         .hero__input {
-            flex: 1 1 320px;
-            min-width: 260px;
-            padding: 18px 24px;
-            border-radius: 9999px;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
+            flex: 1 1 480px;
+            min-width: 280px;
+            padding: 8px 0;
+            border: none;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.35);
+            background: transparent;
             color: white;
-            font-size: clamp(1rem, 2.2vw, 1.25rem);
             font-family: inherit;
+            font-size: clamp(2rem, 8vw, 4rem);
             font-weight: 500;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
             outline: none;
-            transition: all 0.25s ease;
+            transition: border-color 0.25s ease;
         }
-        .hero__input::placeholder { color: rgba(255, 255, 255, 0.55); font-weight: 400; }
-        .hero__input:focus {
-            border-color: rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.14);
-            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+        .hero__input::placeholder {
+            color: rgba(255, 255, 255, 0.65);
+            font-weight: 500;
+            font-family: Georgia, serif;
+            font-style: italic;
         }
-        .hero__form .btn { padding: 16px 28px; font-size: 1.05rem; }
+        .hero__input:focus { border-bottom-color: white; }
+
+        .hero__form .btn {
+            padding: 18px 36px;
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+        .hero__form .btn-icon { width: 22px; height: 22px; }
 
         .btn {
             display: inline-flex;
