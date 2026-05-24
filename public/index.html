@@ -1,47 +1,408 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <!-- 2026-05-12 BUG #5 FIX: bridge para APK Capacitor -->
-  <script src="/volvix-capacitor-bridge.js"></script>
-<title>Volvix POS</title>
-<style>
-  html, body { margin: 0; height: 100%; background: #ffffff; font-family: system-ui, sans-serif; }
-  .l { display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column; gap: 14px; }
-  .s { width: 38px; height: 38px; border: 3px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  p { color: #6b7280; font-size: 13px; margin: 0; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volvix — Tu Nuevo Aliado en IA para Negocios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+        }
+
+        @keyframes blur-in {
+            from {
+                opacity: 0;
+                filter: blur(10px);
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes split-text {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #070612;
+        }
+
+        .hero__video-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero__video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            margin-left: 200px;
+            transform: scale(1.2);
+            transform-origin: left;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .hero__video.loaded {
+            opacity: 1;
+        }
+
+        .hero__gradient {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 160px;
+            background: linear-gradient(to bottom, rgba(7, 6, 18, 0), rgba(7, 6, 18, 1));
+            z-index: 10;
+        }
+
+        .hero__content {
+            position: relative;
+            z-index: 20;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+        }
+
+        @media (min-width: 1024px) {
+            .hero__content {
+                padding: 0 48px;
+            }
+        }
+
+        .hero__inner {
+            max-width: 1280px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+        }
+
+        .hero__group {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .hero__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            background-color: rgba(255, 255, 255, 0.05);
+            width: fit-content;
+            animation: blur-in 0.6s ease-out 0s both;
+        }
+
+        .hero__badge-icon {
+            width: 12px;
+            height: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            flex-shrink: 0;
+        }
+
+        .hero__badge-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            white-space: nowrap;
+        }
+
+        .hero__heading {
+            color: white;
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 500;
+            line-height: 1.2;
+            margin: 0;
+            animation: blur-in 0.8s ease-out 0.1s both;
+        }
+
+        .hero__heading-line {
+            display: block;
+        }
+
+        .hero__heading-serif {
+            font-family: Georgia, serif;
+            font-style: italic;
+        }
+
+        .word {
+            display: inline-block;
+            margin-right: 0.25em;
+            animation: split-text 0.6s ease-out both;
+        }
+
+        .word:nth-child(1) { animation-delay: 0.15s; }
+        .word:nth-child(2) { animation-delay: 0.23s; }
+        .word:nth-child(3) { animation-delay: 0.31s; }
+        .word:nth-child(4) { animation-delay: 0.39s; }
+        .word:nth-child(5) { animation-delay: 0.47s; }
+        .word:nth-child(6) { animation-delay: 0.55s; }
+        .word:nth-child(7) { animation-delay: 0.63s; }
+        .word:nth-child(8) { animation-delay: 0.71s; }
+
+        .hero__subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.125rem;
+            font-weight: 400;
+            line-height: 1.6;
+            max-width: 560px;
+            margin: 0;
+            animation: blur-in 0.6s ease-out 0.4s both;
+        }
+
+        .hero__buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            animation: blur-in 0.6s ease-out 0.6s both;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 9999px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: white;
+            color: #070612;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a0f3a 0%, #2d1b4e 100%);
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+            text-align: center;
+            z-index: 1;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-placeholder.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Responsive Mobile */
+        @media (max-width: 640px) {
+            .hero__content {
+                padding: 0 16px;
+            }
+
+            .hero__inner {
+                gap: 32px;
+            }
+
+            .hero__group {
+                gap: 16px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="l"><div class="s"></div><p>Iniciando…</p></div>
-<script>
-  // Entry point para Capacitor APK / PWA / browser:
-  // Redirige al POS principal (salvadorex-pos.html) o login según haya sesión.
-  (function () {
-    try {
-      var token = null;
-      try { token = localStorage.getItem('volvix_token'); } catch (_) {}
-      // Detectar Capacitor por user-agent o protocol
-      var isCapacitor =
-        (window.location.protocol === 'capacitor:') ||
-        (window.location.hostname === 'localhost' &&
-         navigator.userAgent.indexOf('Mobile') >= 0);
-      var target;
-      if (token) {
-        target = './salvadorex-pos.html';
-      } else if (isCapacitor) {
-        target = './login.html';
-      } else {
-        // Browser web — si están en la raíz, mandar al marketplace
-        target = './marketplace.html';
-      }
-      window.location.replace(target);
-    } catch (e) {
-      window.location.replace('./salvadorex-pos.html');
-    }
-  })();
-</script>
+    <div class="hero">
+        <!-- Video Background -->
+        <div class="hero__video-wrapper">
+            <video class="hero__video" autoplay loop muted playsinline disablepictureinpicture></video>
+            <div class="video-placeholder" id="videoPlaceholder">
+                <div>
+                    <p style="margin: 0 0 8px 0; font-weight: 500;">Cargando video...</p>
+                    <p style="margin: 0; font-size: 12px; opacity: 0.7;">Este hero usa video HLS en vivo</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gradient Overlay -->
+        <div class="hero__gradient"></div>
+
+        <!-- Content -->
+        <div class="hero__content">
+            <div class="hero__inner">
+                <!-- Badge + Heading + Subtitle -->
+                <div class="hero__group">
+                    <!-- Badge -->
+                    <div class="hero__badge">
+                        <svg class="hero__badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        <span class="hero__badge-text">Tu Nuevo Aliado en IA</span>
+                    </div>
+
+                    <!-- Heading -->
+                    <h1 class="hero__heading">
+                        <span class="hero__heading-line">
+                            <span class="word">Desbloquea</span>
+                            <span class="word">el</span>
+                            <span class="word">Poder</span>
+                            <span class="word">de</span>
+                            <span class="word">tu</span>
+                        </span>
+                        <span class="hero__heading-line">
+                            <span class="word">IA</span>
+                            <span class="word">para</span>
+                        </span>
+                        <span class="hero__heading-line hero__heading-serif">
+                            <span class="word">Negocios.</span>
+                        </span>
+                    </h1>
+
+                    <!-- Subtitle -->
+                    <p class="hero__subtitle">Nuestra plataforma de IA automatiza, analiza y acelera tus procesos para que te enfoques en lo que realmente importa.</p>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="hero__buttons">
+                    <a href="./marketplace.html" class="btn btn-primary">
+                        Comenzar Ahora
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                    <a href="./marketplace.html#giros" class="btn btn-secondary">Saber más</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.querySelector('.hero__video');
+        const placeholder = document.getElementById('videoPlaceholder');
+
+        if (video && placeholder) {
+            const videoUrl = 'https://stream.mux.com/s8pMcOvMQXc4GD6AX4e1o01xFogFxipmuKltNfSYza0200.m3u8';
+            
+            // Intentar cargar HLS directamente en navegadores Safari/iOS
+            video.src = videoUrl;
+            
+            // Eventos de carga
+            video.addEventListener('loadstart', () => {
+                placeholder.classList.remove('hidden');
+            });
+            
+            video.addEventListener('loadeddata', () => {
+                video.classList.add('loaded');
+                placeholder.classList.add('hidden');
+            });
+            
+            video.addEventListener('play', () => {
+                video.classList.add('loaded');
+                placeholder.classList.add('hidden');
+            });
+
+            // Fallback: Si HLS nativo no funciona, cargar HLS.js
+            video.addEventListener('error', loadHLSJS);
+            
+            // Si no se carga en 3 segundos, intentar HLS.js
+            setTimeout(() => {
+                if (!video.classList.contains('loaded')) {
+                    loadHLSJS();
+                }
+            }, 3000);
+            
+            function loadHLSJS() {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js';
+                script.onload = function() {
+                    if (window.Hls && window.Hls.isSupported()) {
+                        const hls = new window.Hls();
+                        hls.loadSource(videoUrl);
+                        hls.attachMedia(video);
+                        hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
+                            video.play().catch(err => console.log('Autoplay error:', err));
+                            video.classList.add('loaded');
+                            placeholder.classList.add('hidden');
+                        });
+                    }
+                };
+                document.head.appendChild(script);
+            }
+        }
+    </script>
 </body>
 </html>
