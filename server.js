@@ -491,101 +491,28 @@ const api = {
   'GET /api/health': (req, res) => json(res, { ok: true, time: Date.now() }),
 
   // =============== AUTH ===============
-  'POST /api/login': async (req, res) => {
-    try {
-      const body = await readBody(req);
-      const { email, password } = body;
-
-      if (!email || !password) {
-        return json(res, { error: 'Email y contraseña requeridos' }, 400);
-      }
-
-      // Buscar usuario
-      const user = store.all('users').find(u => u.email === email && u.password === password);
-      if (!user) {
-        return json(res, { error: 'Credenciales inválidas' }, 401);
-      }
-
-      // Obtener datos del tenant
-      const tenant = store.find('tenants', user.tenant_id);
-
-      // Construir sesión
-      const session = {
-        user_id: user.id,
-        email: user.email,
-        role: user.role,
-        tenant_id: user.tenant_id,
-        tenant_name: tenant?.name || 'Mi Negocio',
-        expires_at: Date.now() + (3600 * 1000), // 1 hora
-        plan: tenant?.plan || 'free',
-      };
-      // Issue bearer token for API role checks
-      const token = _newToken();
-      _sessions.set(token, session);
-      session.token = token;
-
-      json(res, { ok: true, session });
-    } catch (err) {
-      json(res, { error: 'Error en login' }, 500);
-    }
-  },
+  // /api/login se delega al handler completo de api/index.js (que valida
+  // password_hash con scrypt contra Supabase pos_users). Se removio el handler
+  // local que solo buscaba en store en memoria (vacio en Railway) y eso
+  // bloqueaba el login de TODOS los usuarios reales.
 
   // =============== REGISTRO SIMPLE ===============
-  'POST /api/auth/register-simple': async (req, res) => {
+  // /api/auth/register-simple se delega a api/index.js (que persiste a Supabase
+  // pos_users + pos_tenants con password_hash scrypt). El handler local solo
+  // guardaba en store en memoria (no en Supabase), entonces el user creado no
+  // podia hacer login despues. Mantenemos un stub que NUNCA debe ejecutarse
+  // (api/index.js intercepta primero porque tambien tiene esta ruta y el
+  // fallback siempre delega).
+  '__DISABLED__POST /api/auth/register-simple': async (req, res) => {
     try {
       const body = await readBody(req);
       const { email, business_name, giro, password, phone } = body;
-
       if (!email || !business_name || !giro || !password) {
         return json(res, { error: 'email, business_name, giro, password required' }, 400);
       }
-
-      // Crear tenant
-      const tenantId = 'TNT-' + Date.now().toString(36).toUpperCase();
-      const tenant = {
-        id: tenantId,
-        name: business_name,
-        giro: giro,
-        status: 'active',
-        plan: 'free',
-        created: Date.now(),
-      };
-      store.insert('tenants', tenant);
-
-      // Crear usuario
-      const userId = 'USR-' + Date.now().toString(36).toUpperCase();
-      const user = {
-        id: userId,
-        email: email.toLowerCase(),
-        password: password,
-        role: 'owner',
-        tenant_id: tenantId,
-        status: 'active',
-        created: Date.now(),
-      };
-      store.insert('users', user);
-
-      // JWT simple (base64)
-      const token = Buffer.from(JSON.stringify({
-        sub: userId,
-        email: email,
-        tenant_id: tenantId,
-        role: 'owner',
-        iat: Date.now(),
-      })).toString('base64');
-
-      wsBroadcast({ type: 'user:registered', user, tenant });
-
-      return json(res, {
-        ok: true,
-        user: { id: userId, email, tenant_id: tenantId, role: 'owner' },
-        tenant: { id: tenantId, name: business_name, giro },
-        token,
-        message: 'Cuenta creada exitosamente. Redirigiendo...',
-      });
+      return json(res, { error: 'Handler deshabilitado, debe delegar a api/index.js' }, 500);
     } catch (err) {
-      console.error('[register-simple]', err.message);
-      return json(res, { ok: false, error: 'Error al registrar: ' + err.message }, 500);
+      return json(res, { ok: false, error: 'Error: ' + err.message }, 500);
     }
   },
 
@@ -1711,19 +1638,38 @@ const server = http.createServer(async (req, res) => {
 
   // API routes
   if (pathname.startsWith('/api/')) {
+    // PRIORIDAD: paths de auth / usuarios / tenants / sesion / health
+    // SIEMPRE pasan por api/index.js (que valida password_hash scrypt vs
+    // Supabase pos_users). El handler local de server.js usa store en memoria
+    // (vacio en Railway prod) y bloqueaba el login de TODOS los usuarios reales.
+    const AUTH_PREFIXES = [
+      '/api/login', '/api/logout', '/api/me', '/api/session',
+      '/api/auth/', '/api/users', '/api/tenants', '/api/health',
+      '/api/owner/', '/api/sales', '/api/products', '/api/customers',
+      '/api/inventory', '/api/categories', '/api/giros',
+    ];
+    const mustDelegate = AUTH_PREFIXES.some(p => pathname === p || pathname.startsWith(p));
+    if (mustDelegate && apiIndexHandler) {
+      try {
+        return await apiIndexHandler(req, res);
+      } catch (err) {
+        console.error('[server.js] apiIndexHandler error (delegated):', err && err.message);
+        if (!res.headersSent) return json(res, { error: 'Internal server error' }, 500);
+        return;
+      }
+    }
+    // Resto: intentar handler local primero, luego api/index.js como fallback
     const match = matchRoute(req.method, pathname);
     if (match) {
       try { await match.handler(req, res, match.params); }
       catch (err) { json(res, { error: err.message }, 500); }
       return;
     }
-    // Fallback: delegar al handler completo de api/index.js (Vercel-style)
-    // que tiene /api/log/client, /api/owner/low-stock, /api/sales/latest, etc.
     if (apiIndexHandler) {
       try {
         return await apiIndexHandler(req, res);
       } catch (err) {
-        console.error('[server.js] apiIndexHandler error:', err && err.message);
+        console.error('[server.js] apiIndexHandler error (fallback):', err && err.message);
         if (!res.headersSent) return json(res, { error: 'Internal server error' }, 500);
         return;
       }
