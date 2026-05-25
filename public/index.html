@@ -632,6 +632,39 @@
         return '<span class="dots"><span></span><span></span><span></span></span>' + (text || 'Analizando tu giro de negocio...');
       }
 
+      function showOverlay(q){
+        var SAFE = String(q || '').replace(/[<>&"]/g, '');
+        var ov = document.createElement('div');
+        ov.id = 'gen-loader-overlay';
+        ov.innerHTML = ''
+          + '<div style="text-align:center;max-width:680px;padding:24px;">'
+          +   '<div style="display:flex;gap:14px;align-items:center;justify-content:center;margin-bottom:22px;">'
+          +     '<span style="display:inline-flex;gap:10px;">'
+          +       '<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:linear-gradient(120deg,#2563eb,#7c3aed);animation:vlx-pulse 1.4s ease-in-out infinite;"></span>'
+          +       '<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:linear-gradient(120deg,#2563eb,#7c3aed);animation:vlx-pulse 1.4s ease-in-out 0.2s infinite;"></span>'
+          +       '<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:linear-gradient(120deg,#2563eb,#7c3aed);animation:vlx-pulse 1.4s ease-in-out 0.4s infinite;"></span>'
+          +     '</span>'
+          +   '</div>'
+          +   '<div style="font-size:clamp(20px,4.5vw,30px);font-weight:700;color:#070612;line-height:1.25;">'
+          +     'Un momento, estoy buscando el sistema para '
+          +     '<span style="background:linear-gradient(120deg,#2563eb,#7c3aed);-webkit-background-clip:text;background-clip:text;color:transparent;">' + (SAFE || 'tu negocio') + '</span>'
+          +   '</div>'
+          + '</div>';
+        ov.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:99998;';
+        document.body.appendChild(ov);
+
+        if (!document.getElementById('vlx-pulse-style')) {
+          var st = document.createElement('style');
+          st.id = 'vlx-pulse-style';
+          st.textContent = '@keyframes vlx-pulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}';
+          document.head.appendChild(st);
+        }
+      }
+      function hideOverlay(){
+        var ov = document.getElementById('gen-loader-overlay');
+        if (ov) ov.remove();
+      }
+
       window.runGiroSearch = function(ev){
         if (ev) ev.preventDefault();
         var input = document.getElementById('giroInput');
@@ -647,6 +680,7 @@
         setBusy(true);
         setFeedback(thinking('Analizando tu giro: ' + q + '...'));
 
+        // 1) Buscar en catálogo existente (match exacto -> redirect directo)
         fetch('/api/giros/search?q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
         .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('search failed')); })
         .then(function(data){
@@ -669,11 +703,53 @@
             window.location.assign(data.landing);
             return;
           }
-          setFeedback('Preparando tu sistema personalizado...');
-          window.location.assign('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
+
+          // 2) No match exacto -> generar landing nueva con LLM (igual que marketplace)
+          showOverlay(q);
+          var fetchStartedAt = Date.now();
+          var ANIM_MIN = 3500;
+          var HARD_TIMEOUT = 60000;
+          var resolved = false;
+
+          var finish = function(target){
+            if (resolved) return;
+            resolved = true;
+            var minWait = Math.max(0, ANIM_MIN - (Date.now() - fetchStartedAt));
+            setTimeout(function(){
+              window.location.assign(target);
+            }, minWait);
+          };
+
+          var timer = setTimeout(function(){
+            // Timeout: caer a marketplace con force_new para que ahí genere el fallback
+            finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
+          }, HARD_TIMEOUT);
+
+          fetch('/api/giros/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ name: q, force: true })
+          })
+          .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('generate http_' + r.status)); })
+          .then(function(gen){
+            clearTimeout(timer);
+            var slug = (gen && gen.slug) || (gen && gen.payload && gen.payload.slug) || '';
+            if (slug) {
+              // Landing dinámica del giro recién generado
+              finish('/landing_dynamic.html?giro=' + encodeURIComponent(slug));
+            } else {
+              // Sin slug: dejar que marketplace renderice el resultado
+              finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
+            }
+          })
+          .catch(function(){
+            clearTimeout(timer);
+            finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
+          });
         })
         .catch(function(){
           setBusy(false);
+          hideOverlay();
           setFeedback('No pudimos consultar ahora. Reintentamos en el marketplace...', true);
           setTimeout(function(){
             window.location.assign('/marketplace.html?q=' + encodeURIComponent(q));
