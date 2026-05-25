@@ -13,10 +13,12 @@
 
         html, body {
             width: 100%;
-            height: 100%;
-            overflow: hidden;
+            min-height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: #FFFFFF;
+            color: #070612;
         }
+        body { overflow-x: hidden; }
 
         @keyframes blur-in {
             from {
@@ -42,12 +44,72 @@
             }
         }
 
+        /* ===== NAV ===== */
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            background: rgba(255,255,255,0.78);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(7,6,18,0.08);
+        }
+        .nav__brand {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 800; font-size: 18px; letter-spacing: -0.02em;
+            color: #070612; text-decoration: none;
+        }
+        .nav__brand-mark {
+            width: 32px; height: 32px; border-radius: 9px;
+            background: #070612; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-family: Georgia, serif; font-style: italic; font-weight: 700;
+        }
+        .nav__links { display: flex; align-items: center; gap: 8px; }
+        .nav__link {
+            padding: 9px 16px; border-radius: 9999px;
+            font-size: 14px; font-weight: 500;
+            color: rgba(7,6,18,0.75); text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .nav__link:hover { color: #070612; background: rgba(7,6,18,0.06); }
+        .nav__link--primary {
+            background: #070612; color: #fff;
+        }
+        .nav__link--primary:hover { background: #1a1830; color: #fff; transform: translateY(-1px); }
+        .nav__toggle {
+            display: none;
+            background: none; border: none; cursor: pointer;
+            width: 40px; height: 40px;
+            color: #070612;
+        }
+        @media (max-width: 768px) {
+            .nav { padding: 12px 16px; }
+            .nav__toggle { display: inline-flex; align-items: center; justify-content: center; }
+            .nav__links {
+                position: absolute; top: 100%; left: 0; right: 0;
+                flex-direction: column; align-items: stretch;
+                gap: 4px; padding: 12px;
+                background: rgba(255,255,255,0.95);
+                backdrop-filter: blur(14px);
+                border-bottom: 1px solid rgba(7,6,18,0.08);
+                transform: translateY(-12px); opacity: 0; pointer-events: none;
+                transition: all 0.25s ease;
+            }
+            .nav__links.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+            .nav__link { text-align: center; }
+        }
+
         .hero {
             position: relative;
             width: 100%;
-            height: 100vh;
+            min-height: 100vh;
             overflow: hidden;
             background-color: #FFFFFF;
+            padding-top: 64px;
         }
 
         .hero__video-wrapper {
@@ -304,28 +366,107 @@
             pointer-events: none;
         }
 
+        /* ===== ALIANZAS ===== */
+        .alianzas {
+            padding: 72px 24px 96px;
+            background: #FAFAF9;
+            border-top: 1px solid rgba(7,6,18,0.06);
+            text-align: center;
+        }
+        .alianzas__kicker {
+            font-size: 11px; font-weight: 700; letter-spacing: .18em;
+            color: rgba(7,6,18,0.45); text-transform: uppercase;
+            margin: 0 0 8px;
+        }
+        .alianzas__title {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            font-weight: 500; color: #070612;
+            margin: 0 0 40px; letter-spacing: -0.02em;
+        }
+        .alianzas__title em { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
+        .alianzas__grid {
+            display: flex; flex-wrap: wrap;
+            align-items: center; justify-content: center;
+            gap: 40px;
+            max-width: 1100px; margin: 0 auto;
+        }
+        .alianza-card {
+            display: flex; align-items: center; justify-content: center;
+            background: #fff; border: 1px solid rgba(7,6,18,0.08);
+            border-radius: 18px;
+            padding: 22px 28px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.04);
+            transition: transform .25s ease, box-shadow .25s ease;
+        }
+        .alianza-card:hover { transform: translateY(-4px); box-shadow: 0 14px 32px rgba(0,0,0,.10); }
+        .alianza-card img { height: 80px; width: auto; object-fit: contain; display: block; }
+        .alianza-card--main {
+            border: 2px solid #fb923c;
+            box-shadow: 0 14px 40px rgba(249,115,22,.22), 0 0 0 4px rgba(249,115,22,.08);
+            transform: translateY(-14px);
+            position: relative;
+            padding: 26px 36px;
+        }
+        .alianza-card--main:hover { transform: translateY(-20px); box-shadow: 0 20px 52px rgba(249,115,22,.32), 0 0 0 6px rgba(249,115,22,.10); }
+        .alianza-card--main img { height: 120px; }
+        .alianza-card__badge {
+            position: absolute; top: -13px; left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #f97316, #ea580c);
+            color: #fff;
+            font-size: 10px; font-weight: 700; letter-spacing: .08em;
+            text-transform: uppercase;
+            padding: 4px 12px; border-radius: 20px;
+            white-space: nowrap;
+        }
+
         /* Responsive Mobile */
-        @media (max-width: 640px) {
-            .hero__content {
-                padding: 0 16px;
+        @media (max-width: 768px) {
+            .hero { padding-top: 56px; }
+            .hero__content { padding: 0 16px; }
+            .hero__inner { gap: 28px; }
+            .hero__group { gap: 16px; }
+            .hero__form { gap: 14px; }
+            .hero__input {
+                flex: 1 1 100%;
+                font-size: clamp(1.6rem, 8vw, 2.4rem) !important;
+                padding: 6px 0;
             }
+            .hero__form .btn { width: 100%; justify-content: center; padding: 14px 24px; }
+            .hero__subtitle { font-size: 1rem; }
+            .btn { padding: 10px 18px; font-size: 0.95rem; }
 
-            .hero__inner {
-                gap: 32px;
-            }
-
-            .hero__group {
-                gap: 16px;
-            }
-
-            .btn {
-                padding: 10px 16px;
-                font-size: 0.9rem;
-            }
+            .alianzas { padding: 48px 16px 64px; }
+            .alianzas__grid { gap: 24px; }
+            .alianza-card { padding: 14px 18px; }
+            .alianza-card img { height: 60px; }
+            .alianza-card--main { transform: translateY(0); padding: 18px 22px; }
+            .alianza-card--main:hover { transform: translateY(-4px); }
+            .alianza-card--main img { height: 90px; }
+        }
+        @media (max-width: 480px) {
+            .nav__brand { font-size: 16px; }
+            .nav__brand-mark { width: 28px; height: 28px; font-size: 14px; }
         }
     </style>
 </head>
 <body>
+    <!-- NAV -->
+    <nav class="nav">
+        <a href="/" class="nav__brand">
+            <span class="nav__brand-mark">V</span>
+            <span>Volvix</span>
+        </a>
+        <button class="nav__toggle" aria-label="Menu" onclick="document.getElementById('navLinks').classList.toggle('open')">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="nav__links" id="navLinks">
+            <a class="nav__link" href="/marketplace.html#descargas">Descargas</a>
+            <a class="nav__link" href="/login.html">Iniciar sesión</a>
+            <a class="nav__link nav__link--primary" href="/registro.html">Crear cuenta</a>
+        </div>
+    </nav>
+
     <div class="hero">
         <!-- Video Background -->
         <div class="hero__video-wrapper">
@@ -424,5 +565,23 @@
             }
         }
     </script>
+
+    <!-- ALIANZAS -->
+    <section class="alianzas" id="alianzas">
+        <p class="alianzas__kicker">Tenemos alianzas con</p>
+        <h2 class="alianzas__title">Nuestras <em>Alianzas</em></h2>
+        <div class="alianzas__grid">
+            <div class="alianza-card">
+                <img src="/sellos/alianza-caintra.webp" alt="CAINTRA Nuevo Leon" loading="lazy" decoding="async">
+            </div>
+            <div class="alianza-card alianza-card--main">
+                <span class="alianza-card__badge">Alianza Principal</span>
+                <img src="/sellos/alianza-hechoennl.png" alt="Hecho en Nuevo Leon Mexico" loading="eager" decoding="async">
+            </div>
+            <div class="alianza-card">
+                <img src="/sellos/alianza-coparmex.jpg" alt="COPARMEX" loading="lazy" decoding="async">
+            </div>
+        </div>
+    </section>
 </body>
 </html>
