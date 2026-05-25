@@ -665,6 +665,87 @@
         if (ov) ov.remove();
       }
 
+      // ===== IA local (Gemma/Gemini via edge function) =====
+      var GEMMA_URL = 'https://vnruooisqnbqguavrdvd.supabase.co/functions/v1/gemma-chat';
+      var GEMMA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZucnVvb2lzcW5icWd1YXZyZHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzA1ODUsImV4cCI6MjA4MzIwNjU4NX0.Mnv5SEBaD5uWRjXnUTnrw-_0OXHMiTb-6ws6NX73XUk';
+      var GEMMA_MODEL = 'gemini-flash-latest';
+
+      // Pregunta a la IA si lo que busco el usuario realmente es el giro encontrado.
+      // Devuelve Promise<boolean>. En 6s sin respuesta -> asume true (no bloquear UX).
+      function aiValidateMatch(userQuery, foundName, foundSlug){
+        var prompt = ''
+          + 'Un usuario busca un sistema de punto de venta (POS) para su negocio. '
+          + 'Escribio exactamente: "' + userQuery + '". '
+          + 'Nuestro catalogo le quiere mostrar el sistema para: "' + (foundName || foundSlug) + '" (slug: ' + foundSlug + '). '
+          + 'Responde UNICAMENTE con la palabra SI o NO (sin puntuacion, sin explicacion). '
+          + 'Responde SI solo si el negocio del usuario y el sistema sugerido son el MISMO giro o muy equivalentes. '
+          + 'Responde NO si son giros distintos, aunque suenen parecido (ej: "pantimedias" vs "panaderia" = NO).';
+        return new Promise(function(resolve){
+          var done = false;
+          var timer = setTimeout(function(){ if (!done){ done = true; resolve(true); } }, 6000);
+          fetch(GEMMA_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': GEMMA_KEY,
+              'Authorization': 'Bearer ' + GEMMA_KEY
+            },
+            body: JSON.stringify({
+              model: GEMMA_MODEL,
+              messages: [{ role: 'user', content: prompt }]
+            })
+          })
+          .then(function(r){ return r.json(); })
+          .then(function(j){
+            if (done) return;
+            done = true; clearTimeout(timer);
+            var txt = String((j && j.response) || '').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);
+            resolve(txt.indexOf('SI') === 0 || txt === 'YES' || txt === 'SI');
+          })
+          .catch(function(){
+            if (done) return;
+            done = true; clearTimeout(timer);
+            resolve(true); // fallo de IA -> no bloquear, asume match valido
+          });
+        });
+      }
+
+      function runGenerate(q){
+        showOverlay(q);
+        var fetchStartedAt = Date.now();
+        var ANIM_MIN = 3500;
+        var HARD_TIMEOUT = 60000;
+        var resolved = false;
+        var finish = function(target){
+          if (resolved) return;
+          resolved = true;
+          var minWait = Math.max(0, ANIM_MIN - (Date.now() - fetchStartedAt));
+          setTimeout(function(){ window.location.assign(target); }, minWait);
+        };
+        var timer = setTimeout(function(){
+          finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
+        }, HARD_TIMEOUT);
+        fetch('/api/giros/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ name: q, force: true })
+        })
+        .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('generate http_' + r.status)); })
+        .then(function(gen){
+          clearTimeout(timer);
+          var slug = (gen && gen.slug) || (gen && gen.payload && gen.payload.slug) || '';
+          if (slug) {
+            finish('/landing_dynamic.html?giro=' + encodeURIComponent(slug));
+          } else {
+            finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
+          }
+        })
+        .catch(function(){
+          clearTimeout(timer);
+          finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
+        });
+      }
+
       window.runGiroSearch = function(ev){
         if (ev) ev.preventDefault();
         var input = document.getElementById('giroInput');
@@ -699,60 +780,27 @@
           var nameN = normalize(data && data.name);
 
           if (data && data.exists && data.landing && (qN === slugN || qN === nameN)) {
-            setFeedback('Encontramos tu sistema. Redirigiendo...');
-            // FIX: forzar navegacion aun cuando la URL destino sea igual a la actual
-            var dest = data.landing + (data.landing.indexOf('?') >= 0 ? '&' : '?') + '_ts=' + Date.now();
-            try { window.location.assign(dest); }
-            catch(_) { window.location.href = dest; }
-            setTimeout(function(){
-              // si assign no hizo nada por alguna razon, forzar con replace
-              if (document.visibilityState === 'visible') window.location.replace(dest);
-            }, 800);
-            return;
+            // Match exacto del catalogo -> consultar a la IA si realmente coincide
+            setFeedback(thinking('La IA esta verificando si "' + q + '" coincide con "' + (data.name || data.slug) + '"...'));
+            return aiValidateMatch(q, data.name, data.slug).then(function(coincide){
+              if (coincide) {
+                setFeedback('La IA confirma. Redirigiendo a tu sistema...');
+                var dest = data.landing + (data.landing.indexOf('?') >= 0 ? '&' : '?') + '_ts=' + Date.now();
+                try { window.location.assign(dest); }
+                catch(_) { window.location.href = dest; }
+                setTimeout(function(){
+                  if (document.visibilityState === 'visible') window.location.replace(dest);
+                }, 800);
+                return;
+              }
+              // IA dijo NO -> ese match no aplica, generar landing nueva con LLM
+              setFeedback('La IA detecto que no coincide. Generando tu sistema personalizado...');
+              return runGenerate(q);
+            });
           }
 
-          // 2) No match exacto -> generar landing nueva con LLM (igual que marketplace)
-          showOverlay(q);
-          var fetchStartedAt = Date.now();
-          var ANIM_MIN = 3500;
-          var HARD_TIMEOUT = 60000;
-          var resolved = false;
-
-          var finish = function(target){
-            if (resolved) return;
-            resolved = true;
-            var minWait = Math.max(0, ANIM_MIN - (Date.now() - fetchStartedAt));
-            setTimeout(function(){
-              window.location.assign(target);
-            }, minWait);
-          };
-
-          var timer = setTimeout(function(){
-            // Timeout: caer a marketplace con force_new para que ahí genere el fallback
-            finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
-          }, HARD_TIMEOUT);
-
-          fetch('/api/giros/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ name: q, force: true })
-          })
-          .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('generate http_' + r.status)); })
-          .then(function(gen){
-            clearTimeout(timer);
-            var slug = (gen && gen.slug) || (gen && gen.payload && gen.payload.slug) || '';
-            if (slug) {
-              // Landing dinámica del giro recién generado
-              finish('/landing_dynamic.html?giro=' + encodeURIComponent(slug));
-            } else {
-              // Sin slug: dejar que marketplace renderice el resultado
-              finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
-            }
-          })
-          .catch(function(){
-            clearTimeout(timer);
-            finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
-          });
+          // 2) No match exacto -> generar landing nueva con LLM
+          return runGenerate(q);
         })
         .catch(function(){
           setBusy(false);
