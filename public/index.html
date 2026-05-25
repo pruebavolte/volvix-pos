@@ -106,10 +106,9 @@
         .hero {
             position: relative;
             width: 100%;
-            min-height: 100vh;
+            min-height: 80vh;
             overflow: hidden;
             background-color: #FFFFFF;
-            padding-top: 64px;
         }
 
         .hero__video-wrapper {
@@ -373,6 +372,12 @@
             border-top: 1px solid rgba(7,6,18,0.06);
             text-align: center;
         }
+        .alianzas--top {
+            padding-top: 100px;
+            border-top: none;
+            border-bottom: 1px solid rgba(7,6,18,0.06);
+            padding-bottom: 56px;
+        }
         .alianzas__kicker {
             font-size: 11px; font-weight: 700; letter-spacing: .18em;
             color: rgba(7,6,18,0.45); text-transform: uppercase;
@@ -422,7 +427,7 @@
 
         /* Responsive Mobile */
         @media (max-width: 768px) {
-            .hero { padding-top: 56px; }
+            .alianzas--top { padding-top: 84px; padding-bottom: 36px; }
             .hero__content { padding: 0 16px; }
             .hero__inner { gap: 28px; }
             .hero__group { gap: 16px; }
@@ -466,6 +471,24 @@
             <a class="nav__link nav__link--primary" href="/registro.html">Crear cuenta</a>
         </div>
     </nav>
+
+    <!-- ALIANZAS (arriba del hero) -->
+    <section class="alianzas alianzas--top" id="alianzas">
+        <p class="alianzas__kicker">Tenemos alianzas con</p>
+        <h2 class="alianzas__title">Nuestras <em>Alianzas</em></h2>
+        <div class="alianzas__grid">
+            <div class="alianza-card">
+                <img src="/sellos/alianza-caintra.webp" alt="CAINTRA Nuevo Leon" loading="eager" decoding="async">
+            </div>
+            <div class="alianza-card alianza-card--main">
+                <span class="alianza-card__badge">Alianza Principal</span>
+                <img src="/sellos/alianza-hechoennl.png" alt="Hecho en Nuevo Leon Mexico" loading="eager" decoding="async">
+            </div>
+            <div class="alianza-card">
+                <img src="/sellos/alianza-coparmex.jpg" alt="COPARMEX" loading="eager" decoding="async">
+            </div>
+        </div>
+    </section>
 
     <div class="hero">
         <!-- Video Background -->
@@ -566,22 +589,5 @@
         }
     </script>
 
-    <!-- ALIANZAS -->
-    <section class="alianzas" id="alianzas">
-        <p class="alianzas__kicker">Tenemos alianzas con</p>
-        <h2 class="alianzas__title">Nuestras <em>Alianzas</em></h2>
-        <div class="alianzas__grid">
-            <div class="alianza-card">
-                <img src="/sellos/alianza-caintra.webp" alt="CAINTRA Nuevo Leon" loading="lazy" decoding="async">
-            </div>
-            <div class="alianza-card alianza-card--main">
-                <span class="alianza-card__badge">Alianza Principal</span>
-                <img src="/sellos/alianza-hechoennl.png" alt="Hecho en Nuevo Leon Mexico" loading="eager" decoding="async">
-            </div>
-            <div class="alianza-card">
-                <img src="/sellos/alianza-coparmex.jpg" alt="COPARMEX" loading="lazy" decoding="async">
-            </div>
-        </div>
-    </section>
 </body>
 </html>
