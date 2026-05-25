@@ -725,25 +725,20 @@
         var timer = setTimeout(function(){
           finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
         }, HARD_TIMEOUT);
+        // Disparamos generate (best-effort, calienta BD) y mandamos siempre a
+        // marketplace?q=&force_new=1, donde el render es inline y NO depende de
+        // que landing_dynamic encuentre el slug recien persistido (race condition).
         fetch('/api/giros/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ name: q, force: true })
-        })
-        .then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('generate http_' + r.status)); })
-        .then(function(gen){
-          clearTimeout(timer);
-          var slug = (gen && gen.slug) || (gen && gen.payload && gen.payload.slug) || '';
-          if (slug) {
-            finish('/landing_dynamic.html?giro=' + encodeURIComponent(slug));
-          } else {
-            finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
-          }
-        })
-        .catch(function(){
+          body: JSON.stringify({ name: q, force: true }),
+          keepalive: true
+        }).catch(function(){});
+        // Damos un pequeno respiro al animacion + persist y vamos directo a marketplace
+        setTimeout(function(){
           clearTimeout(timer);
           finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
-        });
+        }, 1200);
       }
 
       window.runGiroSearch = function(ev){
