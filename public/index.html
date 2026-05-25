@@ -47,7 +47,7 @@
             width: 100%;
             height: 100vh;
             overflow: hidden;
-            background-color: #070612;
+            background-color: #FFFFFF;
         }
 
         .hero__video-wrapper {
@@ -83,7 +83,7 @@
             left: 0;
             right: 0;
             height: 160px;
-            background: linear-gradient(to bottom, rgba(7, 6, 18, 0), rgba(7, 6, 18, 1));
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
             z-index: 10;
         }
 
@@ -123,9 +123,9 @@
             gap: 8px;
             padding: 8px 16px;
             border-radius: 9999px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(7, 6, 18, 0.2);
             backdrop-filter: blur(4px);
-            background-color: rgba(255, 255, 255, 0.05);
+            background-color: rgba(7, 6, 18, 0.05);
             width: fit-content;
             animation: blur-in 0.6s ease-out 0s both;
         }
@@ -133,19 +133,19 @@
         .hero__badge-icon {
             width: 12px;
             height: 12px;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(7, 6, 18, 0.8);
             flex-shrink: 0;
         }
 
         .hero__badge-text {
             font-size: 0.875rem;
             font-weight: 500;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(7, 6, 18, 0.8);
             white-space: nowrap;
         }
 
         .hero__heading {
-            color: white;
+            color: #070612;
             font-size: clamp(2rem, 8vw, 4rem);
             font-weight: 500;
             line-height: 1.2;
@@ -178,7 +178,7 @@
         .word:nth-child(8) { animation-delay: 0.71s; }
 
         .hero__subtitle {
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(7, 6, 18, 0.8);
             font-size: 1.125rem;
             font-weight: 400;
             line-height: 1.6;
@@ -207,9 +207,9 @@
             min-width: 280px;
             padding: 8px 0;
             border: none;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.35);
+            border-bottom: 2px solid rgba(7, 6, 18, 0.35);
             background: transparent;
-            color: white;
+            color: #070612;
             font-family: inherit;
             font-size: clamp(2rem, 8vw, 4rem);
             font-weight: 500;
@@ -219,12 +219,12 @@
             transition: border-color 0.25s ease;
         }
         .hero__input::placeholder {
-            color: rgba(255, 255, 255, 0.65);
+            color: rgba(7, 6, 18, 0.5);
             font-weight: 500;
             font-family: Georgia, serif;
             font-style: italic;
         }
-        .hero__input:focus { border-bottom-color: white; }
+        .hero__input:focus { border-bottom-color: #070612; }
 
         .hero__form .btn {
             padding: 18px 36px;
@@ -253,25 +253,25 @@
         }
 
         .btn-primary {
-            background-color: white;
-            color: #070612;
+            background-color: #070612;
+            color: white;
         }
 
         .btn-primary:hover {
             transform: scale(1.05);
-            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 16px rgba(7, 6, 18, 0.25);
         }
 
         .btn-secondary {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
+            background-color: rgba(7, 6, 18, 0.08);
+            color: #070612;
             backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(7, 6, 18, 0.15);
         }
 
         .btn-secondary:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.2);
+            background-color: rgba(7, 6, 18, 0.15);
+            border-color: rgba(7, 6, 18, 0.25);
         }
 
         .btn-icon {
@@ -288,8 +288,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #1a0f3a 0%, #2d1b4e 100%);
-            color: rgba(255, 255, 255, 0.4);
+            background: linear-gradient(135deg, #F5F4F1 0%, #E8E5DF 100%);
+            color: rgba(7, 6, 18, 0.45);
             font-size: 13px;
             text-align: center;
             z-index: 1;
