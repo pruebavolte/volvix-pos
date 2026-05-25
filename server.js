@@ -1638,41 +1638,33 @@ const server = http.createServer(async (req, res) => {
 
   // API routes
   if (pathname.startsWith('/api/')) {
-    // PRIORIDAD: paths de auth / usuarios / tenants / sesion / health
-    // SIEMPRE pasan por api/index.js (que valida password_hash scrypt vs
-    // Supabase pos_users). El handler local de server.js usa store en memoria
-    // (vacio en Railway prod) y bloqueaba el login de TODOS los usuarios reales.
-    const AUTH_PREFIXES = [
-      '/api/login', '/api/logout', '/api/me', '/api/session',
-      '/api/auth/', '/api/users', '/api/tenants', '/api/health',
-      '/api/owner/', '/api/sales', '/api/products', '/api/customers',
-      '/api/inventory', '/api/categories', '/api/giros',
+    // POR DEFAULT: TODO /api/* delega a api/index.js (que persiste en Supabase
+    // con auth scrypt + RLS + tenant filtering). Los handlers locales de
+    // server.js usan store en MEMORIA (se borra en cada redeploy de Railway)
+    // y dejaban en blanco productos/ventas/tickets/clientes/etc cada deploy.
+    //
+    // Blacklist: paths que SOLO existen como mock local en server.js y NO en
+    // api/index.js. Estos quedan en server.js (websockets/scrape/etc internos).
+    const LOCAL_ONLY_PREFIXES = [
+      '/api/ws',           // websocket internals
+      '/api/_internal/',   // internos del runtime local
     ];
-    const mustDelegate = AUTH_PREFIXES.some(p => pathname === p || pathname.startsWith(p));
-    if (mustDelegate && apiIndexHandler) {
+    const isLocalOnly = LOCAL_ONLY_PREFIXES.some(p => pathname === p || pathname.startsWith(p));
+    if (!isLocalOnly && apiIndexHandler) {
       try {
         return await apiIndexHandler(req, res);
       } catch (err) {
-        console.error('[server.js] apiIndexHandler error (delegated):', err && err.message);
+        console.error('[server.js] apiIndexHandler error:', err && err.message);
         if (!res.headersSent) return json(res, { error: 'Internal server error' }, 500);
         return;
       }
     }
-    // Resto: intentar handler local primero, luego api/index.js como fallback
+    // Solo si apiIndexHandler no cargo, o el path es local-only: handler local
     const match = matchRoute(req.method, pathname);
     if (match) {
       try { await match.handler(req, res, match.params); }
       catch (err) { json(res, { error: err.message }, 500); }
       return;
-    }
-    if (apiIndexHandler) {
-      try {
-        return await apiIndexHandler(req, res);
-      } catch (err) {
-        console.error('[server.js] apiIndexHandler error (fallback):', err && err.message);
-        if (!res.headersSent) return json(res, { error: 'Internal server error' }, 500);
-        return;
-      }
     }
     return json(res, { error: 'endpoint not found' }, 404);
   }
