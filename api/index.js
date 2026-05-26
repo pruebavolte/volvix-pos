@@ -8686,6 +8686,109 @@ function verifyResetToken(token) {
   return payload;
 }
 
+// ============================================================
+// GOOGLE OAUTH via Supabase — sin GOOGLE_CLIENT_ID propio
+// ============================================================
+handlers['GET /api/auth/oauth/providers'] = async (req, res) => {
+  // Ofrecemos google si Supabase está configurado (usa su OAuth proxy)
+  const providers = SUPABASE_URL ? ['google'] : [];
+  sendJSON(res, { ok: true, providers });
+};
+
+handlers['GET /api/auth/oauth/google/start'] = async (req, res) => {
+  if (!SUPABASE_URL) return sendJSON(res, { ok: false, error: 'OAuth no configurado' }, 503);
+  const host = (req.headers.host || 'systeminternational.app').replace(/:\d+$/, '');
+  const appUrl = process.env.APP_URL || `https://${host}`;
+  const callbackUrl = encodeURIComponent(`${appUrl}/auth-callback.html`);
+  const oauthUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${callbackUrl}`;
+  res.writeHead(302, { Location: oauthUrl, 'Cache-Control': 'no-store' });
+  res.end();
+};
+
+handlers['POST /api/auth/oauth/google/exchange'] = async (req, res) => {
+  try {
+    const body = await readBody(req);
+    const accessToken = String(body.access_token || body.token || '').trim();
+    if (!accessToken) return sendJSON(res, { ok: false, error: 'access_token requerido' }, 400);
+
+    // Verificar token con Supabase Auth API
+    const supabaseUser = await new Promise((resolve, reject) => {
+      const https = require('https');
+      const u = new URL(SUPABASE_URL + '/auth/v1/user');
+      const r = https.request({
+        hostname: u.hostname,
+        path: u.pathname,
+        method: 'GET',
+        headers: {
+          'apikey': SUPABASE_SERVICE_KEY || '',
+          'Authorization': 'Bearer ' + accessToken,
+          'Accept': 'application/json',
+        },
+      }, (resp) => {
+        let buf = '';
+        resp.on('data', c => buf += c);
+        resp.on('end', () => { try { resolve(JSON.parse(buf)); } catch { reject(new Error('invalid json')); } });
+      });
+      r.on('error', reject);
+      r.end();
+    });
+
+    if (!supabaseUser || !supabaseUser.email) {
+      return sendJSON(res, { ok: false, error: 'Token inválido o expirado' }, 401);
+    }
+
+    const email = supabaseUser.email.toLowerCase();
+
+    // Buscar usuario en pos_users por email
+    let user = null;
+    try {
+      const users = await supabaseRequest('GET', `/pos_users?email=eq.${encodeURIComponent(email)}&select=*&limit=1`);
+      user = users && users[0];
+    } catch (e) { console.error('[oauth/exchange] lookup error:', e.message); }
+
+    // Si no existe, crear tenant + usuario
+    if (!user) {
+      const tenantId = 'TNT-' + Date.now().toString(36).toUpperCase();
+      const userId = 'USR-' + Date.now().toString(36).toUpperCase();
+      const now = new Date().toISOString();
+      try {
+        await supabaseRequest('POST', '/pos_tenants', {
+          id: tenantId, business_name: email.split('@')[0], business_type: 'general',
+          status: 'active', created_at: now,
+        });
+      } catch (e) {}
+      try {
+        const rows = await supabaseRequest('POST', '/pos_users', {
+          id: userId, tenant_id: tenantId, email, role: 'owner',
+          is_active: true, created_at: now, auth_provider: 'google',
+        });
+        user = (rows && rows[0]) || { id: userId, tenant_id: tenantId, email, role: 'owner' };
+      } catch (e) {
+        user = { id: userId, tenant_id: tenantId, email, role: 'owner' };
+      }
+    }
+
+    const tenantId = user.tenant_id || user.company_id || '';
+    const token = signJWT({
+      sub: user.id, id: user.id, email,
+      tenant_id: tenantId, company_id: tenantId,
+      role: user.role || 'owner',
+      auth_provider: 'google',
+    });
+
+    sendJSON(res, {
+      ok: true, token,
+      user: { id: user.id, email, role: user.role || 'owner', tenant_id: tenantId },
+      tenant: { id: tenantId },
+      redirect: (user.role === 'superadmin' || user.role === 'platform_owner')
+        ? '/volvix-launcher.html' : '/salvadorex-pos.html',
+    });
+  } catch (err) {
+    console.error('[oauth/google/exchange]', err.message);
+    sendJSON(res, { ok: false, error: err.message || 'Error interno' }, 500);
+  }
+};
+
 handlers['POST /api/auth/password-reset/request'] = async (req, res) => {
   try {
     if (!rateLimit('pwdreset:' + clientIp(req), 5, 15 * 60 * 1000)) {
