@@ -472,13 +472,18 @@
         if (raw) session = JSON.parse(raw);
       } catch (_) {}
 
-      const role = (payload && payload.role) || (session && session.role) || 'cajero';
+      // FIX 2026-07-06: normalizar roles de plataforma — el backend emite
+      // 'platform_owner' tal cual de BD y ROLE_RANK no lo conocia (rank 0 =>
+      // el dueno de la plataforma veia "No tienes acceso a ninguna aplicacion").
+      let role = (payload && payload.role) || (session && session.role) || 'cajero';
+      role = String(role).toLowerCase();
+      if (role === 'platform_owner' || role === 'super_admin') role = 'superadmin';
       const email = (payload && payload.email) || (session && session.email) || 'usuario@volvix';
       const tenant_id = (payload && payload.tenant_id) || (session && session.tenant_id) || null;
       const tenant_name = (session && session.tenant_name) || tenant_id || '';
       const full_name = (session && session.full_name) || email.split('@')[0];
 
-      return { role: String(role).toLowerCase(), email, tenant_id, tenant_name, full_name };
+      return { role: role, email, tenant_id, tenant_name, full_name };
     }
 
     // Expose a tiny VolvixAuth getter so other code (and the sandbox tests) can read it.
@@ -556,10 +561,13 @@
       { id: 'ai-support',  icon: '💬', title: 'AI Support',          desc: 'Soporte conversacional 24/7 con IA.',                  url: '/volvix_ai_support.html',   group: 'tools', minRole: 'cajero' },
 
       // Plataforma SaaS (superadmin)
+      // FIX 2026-07-06: agregado Panel de Control (era huerfano: el dueno de la
+      // plataforma no tenia forma de llegar a paneldecontrol.html desde el launcher).
+      // Eliminadas cards a paginas 404: BITACORA_LIVE.html no existe.
+      { id: 'panel',       icon: '🎛️', title: 'Panel de Control',   desc: 'Permisos, giros, módulos, terminología y usuarios.',  url: '/paneldecontrol.html',      group: 'saas', minRole: 'superadmin' },
       { id: 'admin-saas',  icon: '🛡️', title: 'Admin SaaS',         desc: 'Panel global de la plataforma: tenants, planes.',     url: '/volvix-admin-saas.html',   group: 'saas', minRole: 'superadmin' },
       { id: 'mega-dash',   icon: '📊', title: 'Mega Dashboard',     desc: 'KPIs platform-wide: ARR, churn, MAU.',                 url: '/volvix-mega-dashboard.html', group: 'saas', minRole: 'superadmin' },
       { id: 'audit',       icon: '🔍', title: 'Audit Viewer',       desc: 'Visor de logs de auditoría y eventos críticos.',       url: '/volvix-audit-viewer.html', group: 'saas', minRole: 'owner' },
-      { id: 'bitacora',    icon: '📓', title: 'Bitácora Live',      desc: 'Bitácora de pruebas en tiempo real (interno).',        url: '/BITACORA_LIVE.html',       group: 'saas', minRole: 'superadmin' },
       { id: 'remote',      icon: '🛰️', title: 'Volvix Remote',      desc: 'Control remoto y telemetría de terminales.',          url: '/volvix_remote.html',       group: 'saas', minRole: 'superadmin' },
 
       // Marketing y onboarding
@@ -574,9 +582,8 @@
       { id: 'docs',        icon: '📚', title: 'Documentación',       desc: 'Manuales, tutoriales y guías de inicio.',             url: '/docs.html',                group: 'docs', minRole: 'cajero' },
       { id: 'api-docs',    icon: '⚙️', title: 'API Docs',           desc: 'Referencia de la API REST de Volvix.',                url: '/volvix-api-docs.html',     group: 'docs', minRole: 'manager' },
       { id: 'sitemap',     icon: '🗺️', title: 'Sitemap',            desc: 'Índice navegable de todas las páginas.',              url: '/volvix-sitemap.html',      group: 'docs', minRole: 'cajero' },
-      { id: 'modals-demo', icon: '🪟', title: 'Modals Demo',         desc: 'Demo de componentes UI (modales).',                   url: '/volvix-modals-demo.html',  group: 'docs', minRole: 'manager' },
-      { id: 'qa-scenarios',icon: '🧪', title: 'QA Scenarios',        desc: 'Escenarios de prueba manual.',                        url: '/volvix-qa-scenarios.html', group: 'docs', minRole: 'manager' },
-      { id: 'sandbox',     icon: '🧫', title: 'Sandbox',             desc: 'Entorno de pruebas para devs.',                       url: '/volvix-sandbox.html',      group: 'docs', minRole: 'manager' },
+      // FIX 2026-07-06: eliminadas cards Modals Demo / QA Scenarios / Sandbox —
+      // vercel.json las bloquea con 404 en produccion (paginas internas).
       { id: 'pwa-final',   icon: '📱', title: 'PWA Test',           desc: 'Página de verificación PWA / offline.',               url: '/volvix-pwa-final.html',    group: 'docs', minRole: 'manager' },
     ];
 

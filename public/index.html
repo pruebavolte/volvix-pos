@@ -665,6 +665,17 @@
         if (ov) ov.remove();
       }
 
+      // FIX 2026-07-06: si el usuario regresa con "Atras" desde marketplace/landing,
+      // el bfcache restauraba la pagina con el overlay full-screen pegado y el
+      // boton en "Buscando..." — quedaba atorado sin poder buscar de nuevo.
+      window.addEventListener('pageshow', function(e){
+        if (e.persisted) {
+          hideOverlay();
+          setBusy(false);
+          setFeedback('');
+        }
+      });
+
       // ===== IA local (Gemma/Gemini via edge function) =====
       var GEMMA_URL = 'https://vnruooisqnbqguavrdvd.supabase.co/functions/v1/gemma-chat';
       var GEMMA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZucnVvb2lzcW5icWd1YXZyZHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzA1ODUsImV4cCI6MjA4MzIwNjU4NX0.Mnv5SEBaD5uWRjXnUTnrw-_0OXHMiTb-6ws6NX73XUk';
@@ -674,12 +685,15 @@
       // Devuelve Promise<boolean>. En 6s sin respuesta -> asume true (no bloquear UX).
       function aiValidateMatch(userQuery, foundName, foundSlug){
         var prompt = ''
-          + 'Un usuario busca un sistema de punto de venta (POS) para su negocio. '
-          + 'Escribio exactamente: "' + userQuery + '". '
-          + 'Nuestro catalogo le quiere mostrar el sistema para: "' + (foundName || foundSlug) + '" (slug: ' + foundSlug + '). '
-          + 'Responde UNICAMENTE con la palabra SI o NO (sin puntuacion, sin explicacion). '
-          + 'Responde SI solo si el negocio del usuario y el sistema sugerido son el MISMO giro o muy equivalentes. '
-          + 'Responde NO si son giros distintos, aunque suenen parecido (ej: "pantimedias" vs "panaderia" = NO).';
+          + 'Eres un clasificador ESTRICTO de giros de negocio para un sistema POS. '
+          + 'Un usuario escribio exactamente: ' + String(userQuery).toUpperCase() + '. '
+          + 'El catalogo le quiere sugerir el sistema para: ' + String(foundName || foundSlug).toUpperCase() + '. '
+          + 'Responde SOLO con SI o NO (1 palabra, sin puntuacion, sin explicacion). '
+          + 'Responde SI unicamente si son EL MISMO giro exacto (no relacionado, no parecido, no similar). '
+          + 'Si son giros distintos aunque vendan cosas parecidas, responde NO. '
+          + 'Ejemplos: TORNILLERIA vs FERRETERIA = NO. CAFETERIA vs CAFETERIA = SI. '
+          + 'SALON DE EVENTOS vs RENTA SALONES = NO. BARBERIA vs ESTETICA = NO. '
+          + 'VETERINARIA vs PEDIATRA = NO. PANADERIA vs PANADERIA = SI.';
         return new Promise(function(resolve){
           var done = false;
           var timer = setTimeout(function(){ if (!done){ done = true; resolve(true); } }, 6000);
@@ -725,16 +739,10 @@
         var timer = setTimeout(function(){
           finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');
         }, HARD_TIMEOUT);
-        // Disparamos generate (best-effort, calienta BD) y mandamos siempre a
-        // marketplace?q=&force_new=1, donde el render es inline y NO depende de
-        // que landing_dynamic encuentre el slug recien persistido (race condition).
-        fetch('/api/giros/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ name: q, force: true }),
-          keepalive: true
-        }).catch(function(){});
-        // Damos un pequeno respiro al animacion + persist y vamos directo a marketplace
+        // FIX 2026-07-06: se elimino el fetch generate {force:true} que vivia aqui —
+        // marketplace?force_new=1 vuelve a generar con force:true de todos modos,
+        // asi que cada busqueda costaba DOS llamadas LLM completas por el mismo giro.
+        // La generacion ahora ocurre UNA sola vez, en marketplace (render inline).
         setTimeout(function(){
           clearTimeout(timer);
           finish('/marketplace.html?q=' + encodeURIComponent(q) + '&force_new=1');

@@ -2765,6 +2765,11 @@
             <button class="permv14-nav-icon" data-permv14-nav="botones" title="Botones del POS" aria-label="Botones">
               🔘<span class="permv14-nav-tooltip">Botones <span class="permv14-nav-tooltip-count" data-permv14-count="botones">29</span></span>
             </button>
+            <!-- FIX 2026-07-06: tab Seguridad rescatado del bloque legacy-shadow
+                 (2FA + IP allowlist + sesiones; backend ya existia y funcionaba) -->
+            <button class="permv14-nav-icon" data-permv14-nav="security" title="Seguridad (2FA, IPs, sesiones)" aria-label="Seguridad">
+              🛡️<span class="permv14-nav-tooltip">Seguridad</span>
+            </button>
             <!-- 2026-05-09: ⚙ Modo de desactivación REMOVIDO del sidebar.
                  Ahora cada módulo/botón tiene su propio 3-state (Activo/Oculto/Bloqueado)
                  directamente en su select. El pane settings sigue existiendo
@@ -2801,6 +2806,11 @@
               <h3>🎛️ Features del Negocio</h3>
               <p class="permv14-pane-help">Activa o desactiva modulos por tenant. Algunos requieren config adicional (ej. CFDI requiere RFC + cert SAT).</p>
               <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+                <!-- FIX 2026-07-06: selector de tenant — antes el superadmin toggleaba
+                     features de SU PROPIO tenant creyendo que administraba clientes -->
+                <select id="features-tenant" class="permv14-input" style="min-width:200px;" title="Tenant a administrar">
+                  <option value="">📍 Mi tenant (actual)</option>
+                </select>
                 <input id="features-search" type="search" placeholder="Buscar feature..." class="permv14-input" style="flex:1;min-width:180px;">
                 <button class="permv14-btn-soft" id="features-refresh" title="Refrescar">🔄</button>
                 <button class="permv14-btn-soft" id="features-setup-defaults" title="Pre-cargar tax_rates MX + features recomendados">⚡ Setup Default</button>
@@ -2814,16 +2824,44 @@
               (function() {
                 if (window.__featuresInit) return;
                 window.__featuresInit = true;
+                // FIX 2026-07-06: tenant seleccionado -> ?tenant_id= (resolveTenant
+                // del backend acepta override por query para superadmin)
+                function tenantQuery() {
+                  const sel = document.getElementById('features-tenant');
+                  const v = sel && sel.value;
+                  return v ? ('?tenant_id=' + encodeURIComponent(v)) : '';
+                }
+                function fillTenantSelect() {
+                  const sel = document.getElementById('features-tenant');
+                  if (!sel || sel.dataset.filled === '1') return;
+                  const tenants = (window.PERM && window.PERM._tenantsList) || [];
+                  if (!tenants.length) return;
+                  tenants.forEach(function(t) {
+                    const id = t.tenant_id || t.id;
+                    if (!id) return;
+                    const o = document.createElement('option');
+                    o.value = id;
+                    o.textContent = (t.business_name || t.name || id) + ' — ' + id;
+                    sel.appendChild(o);
+                  });
+                  sel.dataset.filled = '1';
+                  sel.addEventListener('change', function() {
+                    const p = document.querySelector('[data-permv14-pane="features"]');
+                    if (p) { p.dataset.loaded = ''; }
+                    loadFeatures();
+                  });
+                }
                 async function loadFeatures() {
                   const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
                   const headers = { 'Authorization': 'Bearer ' + tok };
                   const list = document.getElementById('features-list');
                   if (!list) return;
+                  fillTenantSelect();
                   list.innerHTML = '<div style="color:#888;padding:20px;text-align:center;grid-column:1/-1;">Cargando...</div>';
                   try {
                     const [catR, curR] = await Promise.all([
                       fetch('/api/admin/features/catalog', { headers }),
-                      fetch('/api/admin/features', { headers })
+                      fetch('/api/admin/features' + tenantQuery(), { headers })
                     ]);
                     const cat = await catR.json();
                     const cur = await curR.json();
@@ -2867,7 +2905,7 @@
                         const enabled = e.target.checked;
                         const card = e.target.closest('.feature-card');
                         try {
-                          const r = await fetch('/api/admin/features', {
+                          const r = await fetch('/api/admin/features' + tenantQuery(), {
                             method: 'POST', headers: Object.assign(headers, {'Content-Type':'application/json'}),
                             body: JSON.stringify({ feature_key: key, enabled })
                           });
@@ -3320,8 +3358,11 @@
           <div id="perm-pane-users"></div>
           <div id="perm-pane-hierarchy"></div>
           <div id="perm-pane-audit"></div>
-          <!-- AGENTE 4 — pane Seguridad -->
-          <div id="perm-pane-security" style="display:none;padding:16px">
+        </div><!-- /permv14-legacy-shadow — FIX 2026-07-06: cerrado ANTES del pane
+                    Seguridad, que estaba atrapado ahi (hidden + display:none
+                    !important = inalcanzable) pese a que su backend funciona -->
+        <section class="permv14-side-pane permv14-side-pane-wide" data-permv14-pane="security" hidden>
+          <div id="perm-pane-security" style="padding:16px">
             <div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:10px;padding:14px;margin-bottom:18px">
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
                 <span style="font-size:22px">🛡️</span>
@@ -3386,7 +3427,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </section>
 
@@ -5744,7 +5785,12 @@
     async loadAudit() {
       const wrap = document.getElementById('perm-audit-list');
       if (!wrap) return;
-      const tid = this.selectedTid || (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().id) || 'TNT001';
+      // FIX 2026-07-06: sin fallback 'TNT001' hardcodeado — pedir seleccion.
+      const tid = this.selectedTid || (window.VOLVIX && VOLVIX.getState && VOLVIX.getState().id);
+      if (!tid) {
+        wrap.innerHTML = '<p style="color:var(--text-3);font-size:13px;">Selecciona un tenant primero para ver su audit log.</p>';
+        return;
+      }
       wrap.innerHTML = 'Cargando…';
       const j = await this._apiCall('GET', '/api/admin/tenant/' + encodeURIComponent(tid) + '/audit');
       if (!j || !j.audit || j.audit.length === 0) {
@@ -6819,6 +6865,8 @@
     if (navKey === 'hierarchy' && window.PERM && window.PERM.loadHierarchy) window.PERM.loadHierarchy();
     if (navKey === 'audit' && window.PERM && window.PERM.loadAudit) window.PERM.loadAudit();
     if (navKey === 'users') renderUsersUnified();
+    // FIX 2026-07-06: cargar datos del pane Seguridad (2FA/IPs/sesiones) al entrar
+    if (navKey === 'security' && typeof window.secLoadAll === 'function') window.secLoadAll();
     // Render según el modo activo
     if (navKey === 'modules') {
       renderModulesList(); renderConfigPane(); renderPreview();
@@ -12170,33 +12218,11 @@
       _verCache = data;
       renderVersionsTable(data);
     } catch(e) {
-      // Sin endpoint aún → mostrar datos de demostración (solo para superadmin)
-      renderVersionsTable(getDemoData());
+      // FIX 2026-07-06: antes caia a getDemoData() y pintaba versiones/plataformas
+      // INVENTADAS sin aviso (violaba regla anti-hardcode). Ahora muestra el error.
+      if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#dc2626;">No se pudo cargar /api/version/status (' + String(e && e.message || e).replace(/[<>&]/g, '') + '). Reintenta.</td></tr>';
     }
   };
-
-  function getDemoData() {
-    var tenants = (window.PERM && window.PERM._tenantsList) || [];
-    var platforms = ['windows', 'android', 'pwa'];
-    var rows = [];
-    tenants.slice(0, 30).forEach(function(t, i) {
-      var platform = platforms[i % 3];
-      var ver = (i % 5 === 0) ? '0.9.8' : (i % 7 === 0) ? '0.9.9' : CURRENT_VERSION;
-      rows.push({
-        email: t.email || t.owner_email || '—',
-        business: t.business_name || t.giro || '—',
-        platform: platform,
-        version: ver,
-        last_seen: (i % 4 === 0) ? null : new Date(Date.now() - i * 86400000 * 2).toISOString(),
-        current: CURRENT_VERSION
-      });
-    });
-    if (!rows.length) {
-      // Sin tenants cargados aún
-      rows = [{ email: 'grupovolvix@gmail.com', business: 'Mi Negocio', platform: 'pwa', version: CURRENT_VERSION, last_seen: new Date().toISOString(), current: CURRENT_VERSION }];
-    }
-    return { ok: true, rows: rows, current_version: CURRENT_VERSION };
-  }
 
   function renderVersionsTable(data) {
     var rows = (data && data.rows) || [];
@@ -12267,7 +12293,7 @@
       body: JSON.stringify({ email: email, platform: platform, new_version: CURRENT_VERSION })
     })
     .then(function(r){ return r.json(); })
-    .then(function(){ if(window.showToast) showToast('📣 Notificación enviada a ' + email); })
+    .then(function(){ if(window.showToast) showToast('📝 Notificación registrada para ' + email + ' (el canal de entrega email/push está pendiente)'); })
     .catch(function(){ if(window.showToast) showToast('⚠️ No se pudo enviar (endpoint pendiente)', 'warn'); });
   };
 

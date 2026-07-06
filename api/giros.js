@@ -309,6 +309,7 @@ async function searchGiros(ctx, req, res, parsedUrl) {
       '/landing-abarrotes.html': '/tendito.html',
       '/landing-clinica-dental.html': '/pulso.html',
       '/landing-pediatra.html': '/pulso.html',
+      '/landing-consultorio-medico.html': '/pulso.html',
       '/landing-optica.html': '/armazon.html',
       '/landing-farmacia.html': '/receta.html',
       '/landing-barberia.html': '/navaja.html',
@@ -427,6 +428,10 @@ const GIRO_SYNONYMS = {
   'tatuajes': { name:'Estudio de Tatuajes', synonyms:['tattoo','tatuajes','piercing','tatuador'], sells:['tatuajes'] },
   'farmacia': { name:'Farmacia', synonyms:['medicinas','medicamentos','pharmacy','drug store','farmacéutica'], sells:['medicamentos','vitaminas'] },
   'clinica_dental': { name:'Clínica Dental', synonyms:['dentista','dental','muelas','dentadura','ortodoncia'], sells:['consultas','limpiezas'] },
+  // FIX 2026-07-06: 'pediatra' no existia en el catalogo (exists:false) pese a que
+  // PLAIN_TO_PREMIUM ya tenia el remap /landing-pediatra.html -> /pulso.html.
+  'pediatra': { name:'Pediatría', synonyms:['pediatra','pediatria','pediatría','consultorio pediatrico','medico de niños','doctor de niños'], sells:['consultas','vacunas'] },
+  'consultorio_medico': { name:'Consultorio Médico', synonyms:['consultorio','doctor','medico','médico','medicina general','clinica','clínica'], sells:['consultas'] },
   'veterinaria': { name:'Veterinaria', synonyms:['veterinario','vet','mascotas','perros','gatos','animales'], sells:['consultas','vacunas'] },
   'optica': { name:'Óptica', synonyms:['lentes','anteojos','optometría','optometra','vista'], sells:['lentes','armazones'] },
   'abarrotes': { name:'Abarrotes', synonyms:['tienda','tendajón','tendajon','misceláneo','abarrote','tiendita','minisuper','miscelanea'], sells:['refrescos','botanas','despensa'] },

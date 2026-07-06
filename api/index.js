@@ -2205,16 +2205,30 @@ const handlers = {
   'GET /api/giro/config': requireAuth(async (req, res) => {
     try {
       const tenantId = resolveTenant(req, null);
-      // Derivar giro_slug del tenant: leer tenants.giro_slug si existe, sino 'default'.
+      // Derivar giro_slug del tenant.
+      // FIX 2026-07-06: el registro guarda el giro en pos_companies.business_type
+      // (api register-simple), NUNCA en la tabla `tenants` — por eso este handler
+      // devolvia 'default' para TODOS los tenants. Leer pos_companies primero
+      // (mismo patron que /api/app/config) y dejar `tenants` como fallback legacy.
       let giroSlug = 'default';
       try {
-        const tres = await supabaseFetch(
-          `/tenants?id=eq.${encodeURIComponent(tenantId)}&select=giro_slug,giro,industry&limit=1`
+        const cres = await supabaseFetch(
+          `/pos_companies?tenant_id=eq.${encodeURIComponent(tenantId)}&select=business_type&limit=1`
         );
-        if (tres && Array.isArray(tres) && tres.length) {
-          giroSlug = String(tres[0].giro_slug || tres[0].giro || tres[0].industry || 'default').toLowerCase();
+        if (cres && Array.isArray(cres) && cres.length && cres[0].business_type) {
+          giroSlug = String(cres[0].business_type).toLowerCase();
         }
       } catch (_) {}
+      if (giroSlug === 'default') {
+        try {
+          const tres = await supabaseFetch(
+            `/tenants?id=eq.${encodeURIComponent(tenantId)}&select=giro_slug,giro,industry&limit=1`
+          );
+          if (tres && Array.isArray(tres) && tres.length) {
+            giroSlug = String(tres[0].giro_slug || tres[0].giro || tres[0].industry || 'default').toLowerCase();
+          }
+        } catch (_) {}
+      }
       // Validar que el giro existe en la tabla; si no, fallback a 'default'.
       try {
         const exists = await supabaseFetch(
@@ -15519,7 +15533,10 @@ handlers['GET /api/config/public'] = async (req, res) => {
 
   handlers['GET /api/admin/features'] = requireAuth(async (req, res) => {
     try {
-      const tnt = resolveTenant(req);
+      // FIX 2026-07-06: aceptar ?tenant_id= (solo superadmin/platform_owner puede
+      // override, resolveTenant lo valida) — el panel administra tenants de clientes.
+      const q = url.parse(req.url, true).query || {};
+      const tnt = resolveTenant(req, q.tenant_id);
       const rows = await supabaseRequest('GET',
         `/pos_features?tenant_id=eq.${encodeURIComponent(tnt)}&select=*&order=feature_key.asc&limit=200`);
       sendJSON(res, { ok: true, tenant_id: tnt, features: rows || [] });
@@ -15534,7 +15551,9 @@ handlers['GET /api/config/public'] = async (req, res) => {
       }
       const body = await readBody(req);
       if (!body.feature_key) return sendValidation(res, 'feature_key requerido', 'feature_key');
-      const tnt = resolveTenant(req);
+      // FIX 2026-07-06: aceptar ?tenant_id= igual que el GET (panel multi-tenant).
+      const q = url.parse(req.url, true).query || {};
+      const tnt = resolveTenant(req, q.tenant_id);
       const featureKey = String(body.feature_key).slice(0, 80).toLowerCase().replace(/[^a-z0-9_]/g, '');
       const enabled = !!body.enabled;
       const config = (body.config && typeof body.config === 'object') ? body.config : null;
@@ -37823,7 +37842,10 @@ if (process.env.NODE_ENV === 'test') {
       const isProd = process.env.NODE_ENV === 'production';
       const noEmailProvider = !hasEmailProvider;
       const emailAttemptedButFailed = !emailSent && !!emailError && hasEmailProvider;
-      const allowDevVisibleBridge = !isProd || noEmailProvider || emailAttemptedButFailed;
+      // FIX SEC 2026-07-06: en produccion NUNCA exponer el OTP en la respuesta
+      // HTTP (cualquiera que llame el endpoint lo veria). El auto-login por
+      // verify_pending ya deja entrar al usuario sin necesidad del codigo.
+      const allowDevVisibleBridge = !isProd;
       const respPayload = {
         ok: true,
         tenant_id: tenantId,
@@ -37901,9 +37923,13 @@ if (process.env.NODE_ENV === 'test') {
         // Firmar JWT inmediato para auto-login (cuenta queda email_verified=false
         // hasta que el usuario haga click en el link).
         const jti = crypto.randomBytes(16).toString('hex');
+        // FIX 2026-07-06: incluir business_type en JWT y session — sin esto el
+        // POS no sabe el giro del recien registrado y nunca aplica terminologia
+        // ni modulos por giro (bootstrap de salvadorex-pos.html lee session/JWT).
         const autoToken = signJWT({
           id: userId, email: emailValue,
           role: 'owner', tenant_id: tenantId,
+          business_type: giro || null,
           email_verified: false,
           jti: jti
         });
@@ -37911,6 +37937,7 @@ if (process.env.NODE_ENV === 'test') {
         respPayload.session = {
           user_id: userId, email: emailValue, tenant_id: tenantId,
           role: 'owner', email_verified: false,
+          business_type: giro || null,
           expires_at: Date.now() + 7 * 24 * 60 * 60 * 1000
         };
         respPayload.redirect = '/salvadorex-pos.html?welcome=1';
@@ -38230,10 +38257,13 @@ if (process.env.NODE_ENV === 'test') {
       } catch (_) {}
 
       // JWT
+      // FIX 2026-07-06: business_type en JWT+session para que el POS aplique
+      // terminologia/modulos del giro desde el primer login (antes llegaba sin giro).
       const jti = crypto.randomBytes(16).toString('hex');
       const token = signJWT({
         id: user.id, email: user.email,
         role: 'owner', tenant_id: finalTenantId,
+        business_type: businessType || null,
         jti: jti
       });
 
@@ -38251,7 +38281,8 @@ if (process.env.NODE_ENV === 'test') {
           user_id: user.id,
           role: 'owner',
           email: user.email,
-          full_name: user.full_name
+          full_name: user.full_name,
+          business_type: businessType || null
         },
         // 2026-05: el dueño del negocio (owner-de-tenant) entra DIRECTO al POS.
         // /volvix-launcher.html y /mis-modulos.html son del equipo de plataforma.

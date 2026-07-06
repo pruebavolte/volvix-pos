@@ -2130,7 +2130,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
         <div class="ai-cta" style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;">
           <a href="/registro.html?giro=${encodeURIComponent(slug)}&nombre=${encodeURIComponent(safe)}" class="btn-big" style="background:#0a0a0a;color:#fff;">🚀 Empezar gratis ahora</a>
-          <a href="/landing-${encodeURIComponent(slug)}.html" class="btn-big" style="background:#fff;color:#0a0a0a;border:1px solid #ddd;">Ver el sistema →</a>
+          <a href="/landing_dynamic.html?giro=${encodeURIComponent(slug)}" class="btn-big" style="background:#fff;color:#0a0a0a;border:1px solid #ddd;">Ver el sistema →</a>
         </div>
       </div>
     `;
@@ -2203,7 +2203,9 @@ document.addEventListener('DOMContentLoaded', function () {
         input.focus();
         try { input.select(); } catch(_){}
       }, 300);
-      try { history.replaceState({}, '', '/'); } catch(_){}
+      // FIX 2026-07-06: '/' regresaba a index.html al recargar y se perdia el
+      // resultado generado; quedarse en marketplace.html.
+      try { history.replaceState({}, '', '/marketplace.html'); } catch(_){}
       if (edit !== '1' && q.length >= 2) {
         if (typeof searchGiro === 'function') searchGiro();
       }

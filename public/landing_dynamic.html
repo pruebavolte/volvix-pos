@@ -701,7 +701,7 @@
     try {
       const description = `${data.systemName} es el sistema POS #1 para ${giro.plural}. ${data.subheadline}`.slice(0, 158);
       document.getElementById('meta-desc').setAttribute('content', description);
-      const canonical = (location.origin || 'https://volvix.com') + '/landing_dynamic.html?giro=' + encodeURIComponent(giro.key);
+      const canonical = (location.origin || 'https://systeminternational.app') + '/landing_dynamic.html?giro=' + encodeURIComponent(giro.key);
       document.getElementById('meta-canonical').setAttribute('href', canonical);
 
       const cheapestPrice = (data.pricing && data.pricing.length) ? Math.min(...data.pricing.map(p => Number(p.price)||0)) : 399;
@@ -802,7 +802,7 @@
           <a href="#features">Funciones</a>
           <a href="#pricing">Precios</a>
           <a href="#faq">Preguntas</a>
-          <a href="/registro.html?giro=landing_dynamic" class="nav-cta">Empezar gratis</a>
+          <a href="/registro.html?giro=${encodeURIComponent(giro.key)}" class="nav-cta">Empezar gratis</a>
         </div>
       </nav>
 
@@ -813,7 +813,7 @@
             <h1>${data.systemName}, <span class="accent">hecho para ${giro.plural}.</span></h1>
             <p class="sub">${data.subheadline}</p>
             <div class="hero-cta-row">
-              <a href="/registro.html?giro=landing_dynamic" class="btn-primary">Empezar gratis →</a>
+              <a href="/registro.html?giro=${encodeURIComponent(giro.key)}" class="btn-primary">Empezar gratis →</a>
               <a href="#features" class="btn-secondary">Ver cómo funciona</a>
             </div>
             <div class="hero-trust">

@@ -759,7 +759,7 @@ body {
           const params = new URLSearchParams(location.search);
           const r = params.get('redirect');
           // Solo aceptar paths internos (que empiecen con / y no //)
-          if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':')) {
+          if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':') && !r.includes('\\')) {
             dest = decodeURIComponent(r);
           }
         } catch(e){}
@@ -909,7 +909,7 @@ async function handleLogin(event) {
       }
       const params = new URLSearchParams(location.search);
       const r = params.get('redirect');
-      if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':')) {
+      if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':') && !r.includes('\\')) {
         dest = decodeURIComponent(r);
       }
     } catch(e){}

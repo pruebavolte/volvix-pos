@@ -7555,21 +7555,26 @@
       // 1) Modulos: ocultar .menu-btn[data-menu] que no este en cfg.modulos
       try {
         var modulos = cfg.modulos || [];
-        document.querySelectorAll('.menu-btn[data-menu]').forEach(function (el) {
-          var m = el.getAttribute('data-menu');
-          if (!modulos.length || modulos.indexOf(m) === -1) {
-            // Modulo no activo para este giro -> ocultar
-            // Permitimos siempre los 6 nucleo (vender/inventario/clientes/corte/reportes/config)
-            var nucleo = ['vender','inventario','clientes','corte','reportes','config'];
-            if (nucleo.indexOf(m) === -1) {
-              el.style.display = 'none';
-              el.setAttribute('data-giro-hidden', '1');
+        // FIX 2026-07-06: si el giro NO tiene rows en giros_modulos (lista vacia)
+        // NO ocultar nada — antes escondia todos los botones no-nucleo, incluido
+        // el de venta (el data-menu real es 'pos', no 'vender').
+        if (modulos.length) {
+          document.querySelectorAll('.menu-btn[data-menu]').forEach(function (el) {
+            var m = el.getAttribute('data-menu');
+            if (modulos.indexOf(m) === -1) {
+              // Modulo no activo para este giro -> ocultar
+              // Permitimos siempre los nucleo (pos=vender/inventario/clientes/corte/reportes/config)
+              var nucleo = ['pos','vender','inventario','clientes','corte','reportes','config'];
+              if (nucleo.indexOf(m) === -1) {
+                el.style.display = 'none';
+                el.setAttribute('data-giro-hidden', '1');
+              }
+            } else {
+              el.style.display = '';
+              el.removeAttribute('data-giro-hidden');
             }
-          } else {
-            el.style.display = '';
-            el.removeAttribute('data-giro-hidden');
-          }
-        });
+          });
+        }
       } catch (_) {}
       // 2) Terminologia: reemplazar textos en elementos con data-i18n="X"
       try {
@@ -14101,11 +14106,15 @@
           } catch(_){}
         }
       }
-      if (giro && typeof window.applyIndustryTerminology === 'function') {
-        const applied = window.applyIndustryTerminology(giro);
-        if (applied) console.log('[VOLVIX] terminología aplicada para giro:', giro);
-        // Guardar giro en window para que promptProductForm lo use
+      if (giro) {
+        // FIX 2026-07-06: guardar giro SIEMPRE (antes solo se guardaba si
+        // applyIndustryTerminology existia — funcion que se fue con el extract
+        // a paneldecontrol.html y dejo al POS sin terminologia por giro).
         window.__volvixGiro = giro;
+        if (typeof window.applyIndustryTerminology === 'function') {
+          const applied = window.applyIndustryTerminology(giro);
+          if (applied) console.log('[VOLVIX] terminología aplicada para giro:', giro);
+        }
       } else {
         console.log('[VOLVIX] sin giro detectado:', giro);
       }
@@ -14134,8 +14143,12 @@
                 const renames = (j.giro && j.giro.moduleNameOverrides) || {};
                 const bs = (j.giro && j.giro.buttonsState) || {};
                 const brenames = (j.giro && j.giro.buttonNameOverrides) || {};
+                // FIX 2026-07-06: terms del giro (giros_terminologia) — el applier
+                // de [data-term] se perdio en el extract a paneldecontrol.html.
+                const giroTerms = (j.giro && j.giro.terms) || {};
                 if ((ms && Object.keys(ms).length) || (renames && Object.keys(renames).length) ||
-                    (bs && Object.keys(bs).length) || (brenames && Object.keys(brenames).length)) {
+                    (bs && Object.keys(bs).length) || (brenames && Object.keys(brenames).length) ||
+                    (giroTerms && Object.keys(giroTerms).length)) {
                   // Helper: aplicar estado a un elemento (hidden/locked/enabled)
                   const applyState = function(el, st){
                     if (el.dataset.giroVisApplied === st) return;
@@ -14188,6 +14201,21 @@
                     Object.entries(brenames).forEach(function(entry){
                       var key = entry[0], newName = entry[1];
                       document.querySelectorAll('[data-vlx-button="' + key + '"]').forEach(function(el){ applyRename(el, newName); });
+                    });
+                    // 3) TERMINOLOGIA — selector [data-term="<clave>"]
+                    // Reemplaza el texto preservando el emoji inicial. Usa plural
+                    // (los labels de menu son plurales: Clientes -> Pacientes).
+                    Object.entries(giroTerms).forEach(function(entry){
+                      var k = entry[0], t = entry[1] || {};
+                      var val = (typeof t === 'string') ? t : (t.plural || t.singular);
+                      if (!val) return;
+                      document.querySelectorAll('[data-term="' + k + '"]').forEach(function(el){
+                        if (el.dataset.giroTermApplied === val) return;
+                        var orig = (el.textContent || '').trim();
+                        var emojiMatch = orig.match(/^([^\w\s]+\s)/);
+                        el.textContent = (emojiMatch ? emojiMatch[1] : '') + val;
+                        el.dataset.giroTermApplied = val;
+                      });
                     });
                   };
                   applyByFeature();
@@ -24285,10 +24313,13 @@ window.addEventListener('volvix:version-loaded', function(e){
         } catch(_) {}
       }
       if (giro && typeof window.applyGiroConfig === 'function') {
-        // V14: si la URL trae ?preview=1 o ?aggressive=1, usar modo TreeWalker
-        // que reemplaza textos en TODO el DOM sin necesidad de data-i18n
+        // V14: modo TreeWalker que reemplaza textos en TODO el DOM sin data-i18n.
+        // FIX 2026-07-06: activo por DEFAULT cuando hay giro real — el POS no
+        // tiene ningun elemento data-i18n, asi que sin aggressive el motor V2
+        // era un no-op y todos los giros veian los mismos textos. Se puede
+        // apagar explicitamente con ?aggressive=0.
         var u2 = new URL(window.location.href);
-        var aggressive = u2.searchParams.get('preview') === '1' || u2.searchParams.get('aggressive') === '1';
+        var aggressive = u2.searchParams.get('aggressive') !== '0' && giro !== 'default';
         setTimeout(function(){
           window.applyGiroConfig(giro, { aggressive: aggressive, observe: true });
           console.log('[applyGiroConfig V2] aplicado giro=' + giro + ' aggressive=' + aggressive);
