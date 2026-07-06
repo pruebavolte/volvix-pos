@@ -24313,15 +24313,17 @@ window.addEventListener('volvix:version-loaded', function(e){
         } catch(_) {}
       }
       if (giro && typeof window.applyGiroConfig === 'function') {
-        // V14: modo TreeWalker que reemplaza textos en TODO el DOM sin data-i18n.
-        // FIX 2026-07-06: activo por DEFAULT cuando hay giro real — el POS no
-        // tiene ningun elemento data-i18n, asi que sin aggressive el motor V2
-        // era un no-op y todos los giros veian los mismos textos. Se puede
-        // apagar explicitamente con ?aggressive=0.
+        // REVERT 2026-07-06: el modo TreeWalker "aggressive" reemplazaba CADA
+        // palabra en TODO el DOM de forma NO idempotente + observe:true → se
+        // repetia en cada mutacion produciendo "Cobrar servicio servicio
+        // servicio..." y "Servicios & Servicios". Es destructivo. La
+        // terminologia por giro se aplica SOLO en elementos marcados [data-term]
+        // (ver bloque /api/app/config mas arriba) y [data-i18n]. aggressive queda
+        // OFF salvo que se pida explicito con ?aggressive=1 para depurar.
         var u2 = new URL(window.location.href);
-        var aggressive = u2.searchParams.get('aggressive') !== '0' && giro !== 'default';
+        var aggressive = u2.searchParams.get('aggressive') === '1' || u2.searchParams.get('preview') === '1';
         setTimeout(function(){
-          window.applyGiroConfig(giro, { aggressive: aggressive, observe: true });
+          window.applyGiroConfig(giro, { aggressive: aggressive, observe: false });
           console.log('[applyGiroConfig V2] aplicado giro=' + giro + ' aggressive=' + aggressive);
         }, 300);
       }
