@@ -1114,8 +1114,29 @@
     try {
       var params = new URLSearchParams(location.search);
       var g = params.get('giro') || params.get('vertical') || '';
+      // FIX 2026-07-06: preferir el giro REAL tecleado en la búsqueda (cache
+      // fresco <30min) sobre el ?giro= de la URL. Las landings premium pasan su
+      // slug de MARCA (corte, pata, tendito) y el autocomplete lo fuzzy-matchea
+      // al giro EQUIVOCADO (corte→barberia porque barbería vende "cortes"),
+      // guardando el negocio con el giro incorrecto.
+      var fromCache = false;
+      try {
+        var raw = sessionStorage.getItem('volvix_last_search') || localStorage.getItem('volvix_last_search');
+        if (raw) {
+          var c = JSON.parse(raw);
+          var cg = c && String(c.giro || c.query || '').trim();
+          var fresh = c && c.ts && (Date.now() - c.ts) < 30 * 60 * 1000;
+          if (fresh && cg) { g = cg; fromCache = true; }
+        }
+      } catch (_) {}
       if (!g) return;
-      // Pedimos al backend la mejor match
+      // Si el giro viene del cache de búsqueda (lo que el usuario ESCRIBIÓ),
+      // usarlo tal cual sin fuzzy-match: slugificar y seleccionar directo.
+      if (fromCache) {
+        var slug = g.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+        if (slug) { selectGiro(slug, g); return; }
+      }
+      // Sin cache: caer al comportamiento anterior (mejor match del catálogo)
       fetch('/api/giros/autocomplete?q=' + encodeURIComponent(g) + '&limit=1')
         .then(function (r) { return r.json(); })
         .then(function (data) {
