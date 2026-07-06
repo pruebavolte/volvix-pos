@@ -383,9 +383,18 @@
         if (ph) ph.addEventListener('blur', persist);
       }
 
-      // Combinar URL params (mas prioridad) + sessionStorage cache
+      // Combinar URL params + sessionStorage cache
       var cache = getCache();
-      var giro = getParam('giro') || cache.giro || cache.query || '';
+      // FIX 2026-07-06: preferir el giro REAL que el usuario tecleó en la búsqueda
+      // (cache fresco) sobre el ?giro= de la URL. Las landings premium pasan su
+      // slug de MARCA (corte, pata, tendito...) que NO es el giro real
+      // (carniceria, veterinaria, abarrotes) → el POS aplicaba terminología del
+      // giro equivocado (una carnicería salía como "Servicio/Cita"). El cache
+      // volvix_last_search.giro guarda lo que el usuario escribió = el giro real.
+      var urlGiro = getParam('giro');
+      var cacheGiro = String(cache.giro || cache.query || '').trim();
+      var cacheFresh = cache.ts && (Date.now() - cache.ts) < 30 * 60 * 1000;
+      var giro = (cacheFresh && cacheGiro) ? cacheGiro : (urlGiro || cacheGiro || '');
       // V13.13 FIX: marketplace usa ?nombre= (no ?negocio=), aceptar ambos
       var negocio = getParam('nombre') || getParam('negocio') || cache.business_name || cache.nombre_comercial || '';
       // Si tenemos giro pero no nombre, derivar nombre del giro:
