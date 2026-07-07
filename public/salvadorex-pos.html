@@ -5646,7 +5646,7 @@
     <section id="screen-usuarios" class="screen-pad hidden">
       <div class="page-head">
         <div><h1 class="page-title">Usuarios</h1><p class="page-sub" id="usr-sub">— usuarios · permisos y roles</p></div>
-        <button class="btn accent">+ Nuevo usuario</button>
+        <button class="btn accent" id="usr-add-btn" onclick="posNuevoUsuario()">+ Nuevo usuario</button>
       </div>
       <div class="card">
         <div class="tbl-wrap">
@@ -8199,6 +8199,10 @@
     // Cargar datos de crédito al navegar a la pantalla
     if (name === 'credito') {
       try { if (typeof loadCreditReal === 'function') loadCreditReal(); } catch (_) {}
+    }
+    // 2026-07-07: refrescar equipo REAL desde backend al abrir Usuarios
+    if (name === 'usuarios') {
+      try { window.__posTeam = null; if (typeof renderUsuarios === 'function') renderUsuarios(); } catch (_) {}
     }
     // 2026-05: actualizar fecha dinamica en Dashboard al activar (era hardcoded)
     if (name === 'dashboard') {
@@ -12112,25 +12116,204 @@
     }, 50);
   }
   window.startDevolucionFromSale = startDevolucionFromSale;
+  // 2026-07-07: equipo REAL desde backend (GET /api/users). Antes esta pantalla
+  // solo mostraba al usuario logueado (USERS del JWT) y "Editar" era un toast.
+  // Ahora carga el equipo del tenant y permite alta/edición/baja (owner/admin).
+  window.__posTeam = null; // cache: null=aun no cargado, []=cargado vacio
+  var __POS_ROLE_LABELS = {
+    owner: 'Dueño', superadmin: 'Dueño', admin: 'Administrador', manager: 'Gerente',
+    cajero: 'Cajero', cashier: 'Cajero', inventario: 'Inventario', contador: 'Contador'
+  };
+  function __posRoleLabel(r) {
+    r = String(r || '').toLowerCase();
+    return __POS_ROLE_LABELS[r] || (r ? r.charAt(0).toUpperCase() + r.slice(1) : '—');
+  }
+  function __posAuthTok() {
+    return localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+  }
+  async function loadPosTeam() {
+    var tok = __posAuthTok();
+    if (!tok) { window.__posTeam = []; return; }
+    try {
+      var r = await fetch('/api/users', { headers: { Authorization: 'Bearer ' + tok } });
+      if (r.status === 403) { window.__posTeam = 'forbidden'; return; }
+      var j = await r.json().catch(function () { return {}; });
+      window.__posTeam = (j && Array.isArray(j.users)) ? j.users : [];
+    } catch (_) { window.__posTeam = []; }
+  }
   function renderUsuarios() {
-    // 2026-05: contador dinamico (era hardcoded "5 usuarios")
     var sub = document.getElementById('usr-sub');
-    if (sub) sub.textContent = USERS.length + ' usuario' + (USERS.length === 1 ? '' : 's') + ' · permisos y roles';
-    $('#usr-body').innerHTML = USERS.map(u => {
-      const roleChip = u[1]==='Administrador'?'info':u[1]==='Gerente'?'accent':'ok';
-      const ss = u[4]==='online'?'ok':'';
-      return `<tr>
-        <td><div style="display: flex; align-items: center; gap: 10px;"><div class="tb-btn perfil" style="pointer-events:none;"><div class="ava" style="width:26px;height:26px;font-size:9px;background:linear-gradient(135deg,#3B82F6,#1E40AF);">${escapeHtml(u[0]||'').substring(0,2).toUpperCase()}</div></div><strong>${escapeHtml(u[0]||'')}</strong></div></td>
-        <td><span class="chip ${roleChip}">${escapeHtml(u[1]||'')}</span></td>
-        <td style="color: var(--text-3); font-size: 11px;">${escapeHtml(u[2]||'')}</td>
-        <td style="color: var(--text-3); font-size: 11px;">${escapeHtml(u[3]||'')}</td>
-        <td><span class="chip ${ss}"><span class="dot"></span>${u[4]==='online'?'Activo':'Inactivo'}</span></td>
-        <td style="text-align: right;"><button class="btn sm" data-uid="${escapeHtml(u[0]||'')}" onclick="editarUsuario(this)">Editar</button></td>
-      </tr>`;
+    var team = window.__posTeam;
+    // Sin permiso (rol no-owner): esconder alta y mostrar solo al usuario logueado.
+    if (team === 'forbidden') {
+      var addB = document.getElementById('usr-add-btn'); if (addB) addB.style.display = 'none';
+      if (sub) sub.textContent = 'Gestión de equipo disponible solo para el dueño';
+      $('#usr-body').innerHTML = USERS.map(function (u) {
+        return '<tr><td><strong>' + escapeHtml(u[0] || '') + '</strong></td><td><span class="chip info">' +
+          escapeHtml(u[1] || '') + '</span></td><td style="color:var(--text-3);font-size:11px;">' +
+          escapeHtml(u[2] || '') + '</td><td style="color:var(--text-3);font-size:11px;">—</td>' +
+          '<td><span class="chip ok"><span class="dot"></span>Activo</span></td><td></td></tr>';
+      }).join('');
+      return;
+    }
+    // Aun no cargado -> disparar carga y pintar placeholder.
+    if (team === null) {
+      if (sub) sub.textContent = 'Cargando equipo…';
+      $('#usr-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:18px;">Cargando…</td></tr>';
+      loadPosTeam().then(renderUsuarios);
+      return;
+    }
+    if (sub) sub.textContent = team.length + ' usuario' + (team.length === 1 ? '' : 's') + ' · permisos y roles';
+    if (!team.length) {
+      $('#usr-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:18px;">Aún no hay usuarios. Usa "+ Nuevo usuario" para invitar a tu equipo.</td></tr>';
+      return;
+    }
+    var myId = '';
+    try { var p = JSON.parse(atob(__posAuthTok().split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); myId = p.id || p.sub || ''; } catch (_) {}
+    $('#usr-body').innerHTML = team.map(function (u) {
+      var rl = String(u.role || '').toLowerCase();
+      var isOwnerRole = (rl === 'owner' || rl === 'superadmin' || rl === 'admin');
+      var roleChip = isOwnerRole ? 'info' : (rl === 'manager' ? 'accent' : 'ok');
+      var active = u.is_active !== false;
+      var name = u.full_name || (u.email ? u.email.split('@')[0] : (u.phone || 'usuario'));
+      var conn = u.created_at ? ('Alta ' + new Date(u.created_at).toLocaleDateString('es-MX')) : '—';
+      var self = (u.id && u.id === myId);
+      var actions = '<button class="btn sm" onclick="posEditUsuario(\'' + escapeHtml(u.id || '') + '\')">Editar</button>';
+      if (!self && !(isOwnerRole && rl !== 'admin')) {
+        var safeName = escapeHtml((name || '').replace(/'/g, ''));
+        actions += active
+          ? ' <button class="btn sm" style="color:#b91c1c;" onclick="posDesactivarUsuario(\'' + escapeHtml(u.id || '') + '\',\'' + safeName + '\')">Desactivar</button>'
+          : ' <button class="btn sm" style="color:#065f46;" onclick="posReactivarUsuario(\'' + escapeHtml(u.id || '') + '\')">Reactivar</button>';
+      }
+      return '<tr' + (active ? '' : ' style="opacity:.5;"') + '>' +
+        '<td><div style="display:flex;align-items:center;gap:10px;"><div class="tb-btn perfil" style="pointer-events:none;"><div class="ava" style="width:26px;height:26px;font-size:9px;background:linear-gradient(135deg,#3B82F6,#1E40AF);">' + escapeHtml(String(name).substring(0, 2).toUpperCase()) + '</div></div><strong>' + escapeHtml(name) + '</strong>' + (self ? ' <span class="chip" style="font-size:9px;">tú</span>' : '') + '</div></td>' +
+        '<td><span class="chip ' + roleChip + '">' + escapeHtml(__posRoleLabel(u.role)) + '</span></td>' +
+        '<td style="color:var(--text-3);font-size:11px;">' + escapeHtml(u.email || u.phone || '—') + '</td>' +
+        '<td style="color:var(--text-3);font-size:11px;">' + escapeHtml(conn) + '</td>' +
+        '<td><span class="chip ' + (active ? 'ok' : '') + '"><span class="dot"></span>' + (active ? 'Activo' : 'Inactivo') + '</span></td>' +
+        '<td style="text-align:right;white-space:nowrap;">' + actions + '</td></tr>';
     }).join('');
   }
+  // Modal genérico self-contained (sin depender de CSS de modales existentes).
+  function __posUserModal(opts) {
+    var ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
+    ov.innerHTML =
+      '<div style="background:#fff;border-radius:14px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">' +
+      '<div style="padding:16px 18px;border-bottom:1px solid #eee;font-weight:700;font-size:15px;">' + escapeHtml(opts.title) + '</div>' +
+      '<div style="padding:18px;">' + opts.bodyHtml + '<div id="__posUserMsg" style="font-size:12px;margin-top:8px;"></div></div>' +
+      '<div style="padding:12px 18px;border-top:1px solid #eee;display:flex;gap:8px;justify-content:flex-end;">' +
+      '<button class="btn" id="__posUserCancel">Cancelar</button>' +
+      '<button class="btn accent" id="__posUserSave">' + escapeHtml(opts.saveLabel || 'Guardar') + '</button></div></div>';
+    document.body.appendChild(ov);
+    function close() { try { document.body.removeChild(ov); } catch (_) {} }
+    ov.querySelector('#__posUserCancel').onclick = close;
+    ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
+    var saveBtn = ov.querySelector('#__posUserSave');
+    saveBtn.onclick = function () {
+      var msg = ov.querySelector('#__posUserMsg');
+      msg.textContent = ''; saveBtn.disabled = true; saveBtn.textContent = '⏳…';
+      Promise.resolve(opts.onSave(ov, msg)).then(function (ok) {
+        if (ok === true) { close(); }
+        else { saveBtn.disabled = false; saveBtn.textContent = opts.saveLabel || 'Guardar'; }
+      }).catch(function (e) {
+        msg.style.color = '#b91c1c'; msg.textContent = '❌ ' + (e && e.message || 'error');
+        saveBtn.disabled = false; saveBtn.textContent = opts.saveLabel || 'Guardar';
+      });
+    };
+    return ov;
+  }
+  function __posInput(id, label, type, val, ph) {
+    return '<div class="input-group" style="margin-bottom:10px;"><label class="input-label">' + escapeHtml(label) +
+      '</label><input id="' + id + '" class="input-field" type="' + (type || 'text') + '" value="' + escapeHtml(val || '') +
+      '" placeholder="' + escapeHtml(ph || '') + '"></div>';
+  }
+  function __posRoleSelect(id, current) {
+    var opts = [['cajero', 'Cajero'], ['inventario', 'Inventario'], ['contador', 'Contador'], ['manager', 'Gerente'], ['admin', 'Administrador']];
+    var cur = String(current || 'cajero').toLowerCase();
+    return '<div class="input-group" style="margin-bottom:10px;"><label class="input-label">Rol</label><select id="' + id + '" class="input-field">' +
+      opts.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === cur ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') +
+      '</select></div>';
+  }
+  window.posNuevoUsuario = function () {
+    var body = __posInput('__nu-name', 'Nombre', 'text', '', 'Ej. Juan Pérez') +
+      __posInput('__nu-email', 'Email', 'email', '', 'correo@ejemplo.com') +
+      __posInput('__nu-phone', 'Teléfono (opcional)', 'tel', '', '8110000000') +
+      __posRoleSelect('__nu-role', 'cajero') +
+      '<p style="font-size:11px;color:var(--text-3);margin:4px 0 0;">Se genera una contraseña temporal que verás una sola vez para entregarla al empleado.</p>';
+    __posUserModal({
+      title: '＋ Nuevo usuario', saveLabel: 'Crear usuario', bodyHtml: body,
+      onSave: async function (ov, msg) {
+        var name = ov.querySelector('#__nu-name').value.trim();
+        var email = ov.querySelector('#__nu-email').value.trim();
+        var phone = ov.querySelector('#__nu-phone').value.replace(/\D/g, '');
+        var role = ov.querySelector('#__nu-role').value;
+        if (!email && !phone) { msg.style.color = '#b91c1c'; msg.textContent = 'Pon al menos email o teléfono'; return false; }
+        var r = await fetch('/api/admin/users/inline-quick', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + __posAuthTok() },
+          body: JSON.stringify({ name: name, email: email, phone: phone, role: role })
+        });
+        var j = await r.json().catch(function () { return {}; });
+        if (r.status === 409) { msg.style.color = '#b91c1c'; msg.textContent = 'Ya existe un usuario con ese ' + (j.field || 'dato'); return false; }
+        if (!r.ok || j.error) { msg.style.color = '#b91c1c'; msg.textContent = '❌ ' + (j.error || j.message || 'no se pudo crear'); return false; }
+        window.__posTeam = null; renderUsuarios();
+        if (j.temp_password) {
+          showToast('✅ Usuario creado. Contraseña temporal: ' + j.temp_password, 9000);
+          try { alert('Usuario creado.\n\nEntrégale estos datos al empleado:\nAcceso: ' + (email || phone) + '\nContraseña temporal: ' + j.temp_password + '\n\n(Debe cambiarla al entrar.)'); } catch (_) {}
+        } else { showToast('✅ Usuario creado'); }
+        return true;
+      }
+    });
+  };
+  window.posEditUsuario = function (id) {
+    var team = Array.isArray(window.__posTeam) ? window.__posTeam : [];
+    var u = team.find(function (x) { return x.id === id; }) || {};
+    var body = __posInput('__eu-name', 'Nombre', 'text', u.full_name || '', 'Nombre completo') +
+      __posInput('__eu-email', 'Email', 'email', u.email || '', 'correo@ejemplo.com') +
+      __posRoleSelect('__eu-role', u.role);
+    __posUserModal({
+      title: '✏️ Editar usuario', saveLabel: 'Guardar cambios', bodyHtml: body,
+      onSave: async function (ov, msg) {
+        var patch = {
+          full_name: ov.querySelector('#__eu-name').value.trim(),
+          email: ov.querySelector('#__eu-email').value.trim(),
+          role: ov.querySelector('#__eu-role').value
+        };
+        var r = await fetch('/api/users/' + encodeURIComponent(id), {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + __posAuthTok() },
+          body: JSON.stringify(patch)
+        });
+        var j = await r.json().catch(function () { return {}; });
+        if (!r.ok || j.error) { msg.style.color = '#b91c1c'; msg.textContent = '❌ ' + (j.hint || j.error || 'no se pudo guardar'); return false; }
+        window.__posTeam = null; renderUsuarios(); showToast('✅ Usuario actualizado');
+        return true;
+      }
+    });
+  };
+  window.posDesactivarUsuario = function (id, name) {
+    if (!confirm('¿Desactivar a ' + (name || 'este usuario') + '? No podrá iniciar sesión hasta reactivarlo.')) return;
+    fetch('/api/users/' + encodeURIComponent(id), {
+      method: 'DELETE', headers: { Authorization: 'Bearer ' + __posAuthTok() }
+    }).then(function (r) { return r.json().then(function (j) { return { r: r, j: j }; }); })
+      .then(function (o) {
+        if (!o.r.ok || o.j.error) { showToast('❌ ' + (o.j.hint || o.j.error || 'no se pudo desactivar')); return; }
+        window.__posTeam = null; renderUsuarios(); showToast('✅ Usuario desactivado');
+      }).catch(function () { showToast('❌ Error de red'); });
+  };
+  window.posReactivarUsuario = function (id) {
+    fetch('/api/users/' + encodeURIComponent(id), {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + __posAuthTok() },
+      body: JSON.stringify({ is_active: true })
+    }).then(function (r) { return r.json().then(function (j) { return { r: r, j: j }; }); })
+      .then(function (o) {
+        if (!o.r.ok || o.j.error) { showToast('❌ ' + (o.j.hint || o.j.error || 'no se pudo reactivar')); return; }
+        window.__posTeam = null; renderUsuarios(); showToast('✅ Usuario reactivado');
+      }).catch(function () { showToast('❌ Error de red'); });
+  };
+  // compat: viejas llamadas onclick="editarUsuario(this)" siguen sin romper
   window.editarUsuario = function (btn) {
-    showToast('⚠️ Edición de usuarios disponible en Panel de Control');
+    var id = btn && btn.getAttribute ? btn.getAttribute('data-uid') : '';
+    if (id) posEditUsuario(id); else showToast('Edición disponible desde el panel');
   };
   function renderFFTree() {
     $('#ff-tree').innerHTML = FF_TREE.map(m => {

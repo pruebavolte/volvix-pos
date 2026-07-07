@@ -22860,6 +22860,11 @@ if (process.env.NODE_ENV === 'test') {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return sendValidation(res, 'email inválido', 'email');
         patch.email = em;
       }
+      // 2026-07-07: permitir reactivar/desactivar (is_active) desde gestión de equipo.
+      if (body.is_active !== undefined) {
+        patch.is_active = !!body.is_active;
+        if (patch.is_active) { try { patch.disabled_at = null; } catch (_) {} }
+      }
       if (body.role !== undefined) {
         var rl = String(body.role).toLowerCase();
         var allowedRoles2 = ['cajero', 'inventario', 'contador', 'manager', 'admin', 'owner', 'superadmin'];
