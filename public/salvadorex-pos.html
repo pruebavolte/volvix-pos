@@ -156,7 +156,31 @@
             }
           }
         } catch(e){}
-        return origFetch.apply(this, arguments);
+        // FIX 2026-07-06: sesión vencida a media operación. Si una API core
+        // (no auth/login) responde 401 y HAY token guardado, la sesión murió →
+        // limpiar y mandar a login (antes: pantallas vacías silenciosas).
+        var _p = origFetch.apply(this, arguments);
+        try {
+          var _url = (typeof input === 'string') ? input : (input && input.url) || '';
+          if (_url.indexOf('/api/') !== -1 &&
+              _url.indexOf('/api/auth/') === -1 && _url.indexOf('/api/login') === -1) {
+            return _p.then(function(resp){
+              try {
+                if (resp && resp.status === 401 && !window.__vlxSessionExpiredHandled) {
+                  var hasTok = !!(localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken'));
+                  if (hasTok) {
+                    window.__vlxSessionExpiredHandled = true;
+                    try { localStorage.removeItem('volvix_token'); localStorage.removeItem('volvixAuthToken'); } catch(_){}
+                    var back = encodeURIComponent(location.pathname + location.search);
+                    setTimeout(function(){ location.replace('/login.html?redirect=' + back + '&expired=1'); }, 400);
+                  }
+                }
+              } catch(_){}
+              return resp;
+            });
+          }
+        } catch(_){}
+        return _p;
       };
     }
   } catch(e){ /* never break app boot */ }
@@ -7253,11 +7277,11 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
         <div>
           <label style="font-size:12px;font-weight:600;">Peso (kg)</label>
-          <input id="granel-peso" type="number" step="0.001" value="0.540" style="width:100%;margin-top:6px;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:20px;font-weight:700;" oninput="calcGranel()">
+          <input id="granel-peso" type="number" step="0.001" value="0" style="width:100%;margin-top:6px;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:20px;font-weight:700;" oninput="calcGranel()">
         </div>
         <div>
           <label style="font-size:12px;font-weight:600;">Total</label>
-          <input id="granel-total" readonly value="$97.20" style="width:100%;margin-top:6px;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:20px;font-weight:700;background:var(--accent-soft);color:var(--accent);">
+          <input id="granel-total" readonly value="$0.00" style="width:100%;margin-top:6px;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:20px;font-weight:700;background:var(--accent-soft);color:var(--accent);">
         </div>
       </div>
       <div style="padding:10px 14px;background:#F0F9FF;border-radius:8px;font-size:12px;color:#0369A1;">
@@ -8139,7 +8163,32 @@
   }
 
   /* ============ NAV ============ */
+  // FIX 2026-07-06 RBAC UI: pantallas que un CAJERO no debe ver (config del
+  // negocio, gestión de usuarios, reportes de dueño). El backend ya bloquea los
+  // writes; esto evita que el cajero siquiera abra la pantalla.
+  var VLX_OWNER_ONLY_SCREENS = { config: 1, usuarios: 1, reportes: 1, dashboard: 1 };
+  function vlxCurrentRole() {
+    try {
+      var s = JSON.parse(localStorage.getItem('volvixSession') || localStorage.getItem('salvadorex_session') || '{}');
+      var r = String(s.role || (s.user && s.user.role) || '').toLowerCase();
+      if (!r) {
+        var tok = localStorage.getItem('volvix_token') || '';
+        var p = JSON.parse(atob(tok.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        r = String(p.role || '').toLowerCase();
+      }
+      return r;
+    } catch (_) { return ''; }
+  }
+  function vlxIsCashierUI() {
+    var r = vlxCurrentRole();
+    return r === 'cajero' || r === 'cashier' || r === 'vendor' || r === 'kiosk' || r === 'kiosko';
+  }
   function showScreen(name) {
+    // Cajero: bloquear pantallas solo-dueño (regresa a vender)
+    if (VLX_OWNER_ONLY_SCREENS[name] && vlxIsCashierUI()) {
+      try { showToast('🔒 Solo el dueño o gerente puede abrir ' + name); } catch (_) {}
+      name = 'pos';
+    }
     $$('section[id^="screen-"]').forEach(s => s.classList.add('hidden'));
     // La POS screen tiene su propia clase .pos-screen, no screen-pad
     const isPos = name === 'pos';
@@ -8163,6 +8212,21 @@
       } catch(_) {}
     }
   }
+
+  // FIX 2026-07-06 RBAC UI: ocultar del menú los botones solo-dueño cuando el
+  // usuario es cajero. Se llama al cargar (tras aplicar config por giro).
+  function vlxApplyRoleUI() {
+    try {
+      if (!vlxIsCashierUI()) return;
+      Object.keys(VLX_OWNER_ONLY_SCREENS).forEach(function (m) {
+        document.querySelectorAll('.menu-btn[data-menu="' + m + '"]').forEach(function (el) {
+          el.style.setProperty('display', 'none', 'important');
+          el.setAttribute('data-role-hidden', '1');
+        });
+      });
+    } catch (_) {}
+  }
+  try { window.vlxApplyRoleUI = vlxApplyRoleUI; } catch (_) {}
 
   /* ============ TOAST ============ */
   function showToast(msg) {
@@ -9811,7 +9875,11 @@
           <td class="mono">${htmlEsc(item.code||'')}</td>
           <td class="desc">${htmlEsc(item.name||'')}</td>
           <td class="num">${fmt(item.price)}</td>
-          <td class="center">${item.qty}</td>
+          <td class="center"><span style="display:inline-flex;align-items:center;gap:4px;">
+            <button onclick="event.stopPropagation();changeCartQty(${i},-1)" title="Menos" style="width:22px;height:22px;border:1px solid var(--border);background:#fff;border-radius:5px;cursor:pointer;font-weight:700;line-height:1;">−</button>
+            <input type="number" min="0" step="1" value="${item.qty}" onclick="event.stopPropagation();" onchange="setCartQty(${i}, this.value)" style="width:46px;text-align:center;padding:3px;border:1px solid var(--border);border-radius:5px;font-weight:700;">
+            <button onclick="event.stopPropagation();changeCartQty(${i},1)" title="Más" style="width:22px;height:22px;border:1px solid var(--border);background:#fff;border-radius:5px;cursor:pointer;font-weight:700;line-height:1;">+</button>
+          </span></td>
           <td class="importe">${fmt(item.price * item.qty)}</td>
           <td class="center">${item.stock}</td>
           <td class="center"><button class="cart-del-btn" onclick="event.stopPropagation();removeFromCart(${i})" aria-label="Eliminar" title="Eliminar">×</button></td>
@@ -9845,6 +9913,25 @@
     renderCart();
     try { __r8aSaveCartDraft(); } catch (_) {}
   }
+  // FIX 2026-07-06: editar cantidad desde la fila del carrito (antes solo se
+  // podía re-escanear). qty 0 elimina el renglón. Respeta stock si está definido.
+  function setCartQty(i, val) {
+    const it = CART[i]; if (!it) return;
+    let q = Math.floor(Number(val));
+    if (!isFinite(q) || q < 0) q = it.qty;
+    if (q <= 0) { removeFromCart(i); return; }
+    if (typeof it.stock === 'number' && it.stock >= 0 && q > it.stock) {
+      q = it.stock; try { showToast('Stock máximo: ' + it.stock); } catch(_){}
+    }
+    it.qty = q;
+    renderCart();
+    try { __r8aSaveCartDraft(); } catch (_) {}
+  }
+  function changeCartQty(i, delta) {
+    const it = CART[i]; if (!it) return;
+    setCartQty(i, (Number(it.qty) || 0) + delta);
+  }
+  try { window.setCartQty = setCartQty; window.changeCartQty = changeCartQty; } catch(_){}
   function deleteCartItem() {
     if (CART.length === 0) { showToast('No hay artículos'); return; }
     CART.pop();
@@ -14254,6 +14341,8 @@
                   applyByFeature();
                   // Re-aplicar varias veces porque wirings async pueden inyectar/reemplazar botones tarde
                   [300,800,1500,3000,5000,8000].forEach(function(d){ setTimeout(applyByFeature, d); });
+                  // FIX 2026-07-06: ocultar botones solo-dueño si es cajero (mismo timing)
+                  try { vlxApplyRoleUI(); [400,1200,3200].forEach(function(d){ setTimeout(vlxApplyRoleUI, d); }); } catch(_) {}
                   console.log('[VOLVIX] aplicado:', Object.keys(ms).length, 'mod-states,', Object.keys(renames).length, 'mod-renames,', Object.keys(bs).length, 'btn-states,', Object.keys(brenames).length, 'btn-renames');
                 }
               } catch (e) { console.warn('[VOLVIX] modulesState err:', e); }
@@ -14638,18 +14727,30 @@
     calcGranel();
   }
   function calcGranel() {
-    const sel = $('#granel-product').selectedIndex;
-    const prices = [180, 220, 45, 30];
+    // FIX 2026-07-06: usar el precio REAL del producto seleccionado (data-price),
+    // no un array hardcodeado [180,220,45,30] que daba totales falsos.
+    const selectEl = $('#granel-product');
+    const opt = selectEl && selectEl.options[selectEl.selectedIndex];
+    const price = opt ? (parseFloat(opt.dataset.price || '0') || 0) : 0;
     const peso = parseFloat($('#granel-peso').value) || 0;
-    const total = peso * prices[sel];
-    $('#granel-total').value = fmt(total);
+    $('#granel-total').value = fmt(peso * price);
   }
   function readBascula() {
-    // Simula lectura de báscula
-    const peso = (0.100 + Math.random() * 2).toFixed(3);
-    $('#granel-peso').value = peso;
-    calcGranel();
-    showToast('📡 Báscula: ' + peso + ' kg');
+    // FIX 2026-07-06: NO inventar peso random. Si hay báscula real conectada
+    // (VLX_SCALE.weight en kg) usarla; si no, pedir al usuario que capture el
+    // peso a mano (antes simulaba un peso falso que confundía).
+    try {
+      var w = (window.VLX_SCALE && Number(window.VLX_SCALE.weight)) ||
+              (window.__vlxScaleWeight && Number(window.__vlxScaleWeight)) || 0;
+      if (w > 0) {
+        $('#granel-peso').value = w.toFixed(3);
+        calcGranel();
+        showToast('📡 Báscula: ' + w.toFixed(3) + ' kg');
+        return;
+      }
+    } catch (_) {}
+    showToast('⚖️ Sin báscula conectada — captura el peso a mano');
+    try { $('#granel-peso').focus(); $('#granel-peso').select(); } catch (_) {}
   }
   function addGranelToCart() {
     // 2026-05-07 cleanup: hardcoded names/prices removido, ahora desde el option seleccionado

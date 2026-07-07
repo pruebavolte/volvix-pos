@@ -22310,7 +22310,9 @@ if (process.env.NODE_ENV === 'test') {
   handlers['POST /api/admin/users/inline-quick'] = requireAuth(async function (req, res) {
     try {
       const role = String((req.user && req.user.role) || '').toLowerCase();
-      if (!['owner','admin','superadmin','manager'].includes(role)) {
+      // FIX 2026-07-06: incluir platform_owner (el resto del panel lo acepta;
+      // antes lo rechazaba con 403 aunque es el dueño de la plataforma).
+      if (!['owner','admin','superadmin','manager','platform_owner'].includes(role)) {
         return sendJSON(res, { error: 'forbidden', need_role: 'manager+' }, 403);
       }
       let tnt = b36Tenant(req);
@@ -37251,10 +37253,13 @@ if (process.env.NODE_ENV === 'test') {
       } catch (_) {}
 
       // ---- Emitir JWT ----
+      // FIX 2026-07-06: incluir business_type para que el POS aplique la config
+      // del giro desde el primer login (igual que register-simple/verify-email-link).
       const jti = crypto.randomBytes(16).toString('hex');
       const token = signJWT({
         id: user.id, email: user.email,
         role: 'owner', tenant_id: tenantId2,
+        business_type: businessType || null,
         jti: jti
       });
       // Registrar sesión activa
@@ -37284,6 +37289,7 @@ if (process.env.NODE_ENV === 'test') {
           role: 'owner',
           tenant_id: tenantId2,
           tenant_name: tenantName,
+          business_type: businessType || null,
           full_name: user.full_name,
           company_id: user.company_id,
           plan: user.plan || 'trial',
@@ -42806,6 +42812,14 @@ if (process.env.NODE_ENV === 'test') {
       await supabaseRequest('POST', '/verticals', {
         code: slug, name, active: true, modules: [],
       });
+      // FIX 2026-07-06: si el admin no especifica módulos, sembrar el NÚCLEO por
+      // default para que el giro nuevo tenga un POS funcional (antes quedaba sin
+      // módulos → el POS caía a 'default'). El admin los ajusta luego.
+      if (!body.modules || !Object.keys(body.modules).length) {
+        const CORE = ['pos','inventario','ventas','clientes','corte','apertura','config','reportes','usuarios','dashboard','devoluciones'];
+        const coreRows = CORE.map((m, i) => ({ giro_slug: slug, modulo: m, activo: true, state: 'enabled', orden: i * 10 }));
+        await supabaseRequest('POST', '/giros_modulos?on_conflict=giro_slug,modulo', coreRows).catch(() => null);
+      }
       // Si vienen modules/terms/etc, delegar al PATCH para reaprovechar lógica
       if (body.modules || body.terms || body.product_fields || body.buttons) {
         // Inline call al handler PATCH
