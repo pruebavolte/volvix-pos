@@ -5518,17 +5518,29 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
       const body = await readBody(req);
       const tenantId = resolveTenant(req);
       if (!body.sale_id) return sendJSON(res, { error: 'sale_id required' }, 400);
-      // B43 FIX: pos_sales has NO tenant_id column — query by id alone, then verify pos_user_id
       let sale = [];
       try {
         sale = await supabaseRequest('GET',
-          `/pos_sales?id=eq.${body.sale_id}&select=*&limit=1`);
+          `/pos_sales?id=eq.${encodeURIComponent(body.sale_id)}&select=*&limit=1`);
       } catch (_) {}
       if (!sale || !sale[0]) return sendJSON(res, { error: 'sale not found' }, 404);
       const saleRow = sale[0];
-      // Verify ownership via pos_user_id mapping (resolveOwnerPosUserId returns tenant owner)
-      const ownerUserId = resolveOwnerPosUserId(tenantId);
-      if (saleRow.pos_user_id !== ownerUserId && req.user.role !== 'superadmin') {
+      // FIX 2026-07-07: validar pertenencia por tenant_id de la venta (la columna YA
+      // existe y se puebla). El check viejo (pos_user_id === owner resuelto) BLOQUEABA
+      // el reembolso de cualquier venta hecha por un CAJERO (pos_user_id = cajero,
+      // != owner) con un enganoso "sale not found" — rompia devoluciones multi-cajero.
+      // Patron R7a strict: tenant_id directo O pos_user_id -> pos_users.tenant_id.
+      let ownOk = false;
+      if (saleRow.tenant_id && String(saleRow.tenant_id) === String(tenantId)) ownOk = true;
+      if (!ownOk && saleRow.pos_user_id) {
+        try {
+          const su = await supabaseRequest('GET',
+            '/pos_users?id=eq.' + encodeURIComponent(saleRow.pos_user_id) + '&select=tenant_id&limit=1');
+          if (su && su[0] && String(su[0].tenant_id) === String(tenantId)) ownOk = true;
+        } catch (_) {}
+        if (!ownOk && saleRow.pos_user_id === resolveOwnerPosUserId(tenantId)) ownOk = true;
+      }
+      if (!ownOk && !['superadmin', 'admin'].includes(String(req.user.role || '').toLowerCase())) {
         return sendJSON(res, { error: 'sale not found' }, 404);
       }
       // R3a/GAP-D5: a sale already fully refunded cannot be refunded again
