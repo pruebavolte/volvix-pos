@@ -22619,9 +22619,13 @@ if (process.env.NODE_ENV === 'test') {
         'cheque': 'CHEQUE',
         'credito cliente': 'CREDITO_CLIENTE', 'credito_cliente': 'CREDITO_CLIENTE', 'fiado': 'CREDITO_CLIENTE'
       };
+      // Valores validos del enum payment_method_type (para pasar directo si ya vienen bien).
+      var __methodEnum = { EFECTIVO:1, TARJETA_DEBITO:1, TARJETA_CREDITO:1, SPEI:1, CODI:1, MERCADO_PAGO:1, CLIP:1, VALE_DESPENSA:1, VALE_RESTAURANTE:1, MONEDERO_ELECTRONICO:1, USD_EFECTIVO:1, CHEQUE:1, CREDITO_CLIENTE:1, TRANSFERENCIA_INTL:1, OTRO:1 };
       function __normMethod(m) {
-        var k = String(m || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
-        return __methodMap[k] || (/^[A-Z_]+$/.test(String(m)) ? String(m) : 'OTRO');
+        var up = String(m || '').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+        if (__methodEnum[up]) return up;                       // ya es un valor valido del enum
+        var k = up.toLowerCase().replace(/_/g, ' ').trim();    // normalizar underscores→espacio
+        return __methodMap[k] || 'OTRO';
       }
       const paymentRows = payments.map(function (p) {
         const details = p.details || {};
