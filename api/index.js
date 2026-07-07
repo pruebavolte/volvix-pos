@@ -423,7 +423,26 @@ const TENANT_SLUG_RE = /^[A-Z][A-Z0-9_-]{2,40}$/;
 function isTenantId(s) { return typeof s === 'string' && (UUID_RE.test(s) || TENANT_SLUG_RE.test(s)); }
 
 // FIX R13 (#9): Whitelists de campos
-const ALLOWED_FIELDS_PRODUCTS = ['code', 'name', 'category', 'cost', 'price', 'stock', 'icon'];
+const ALLOWED_FIELDS_PRODUCTS = ['code', 'name', 'category', 'cost', 'price', 'stock', 'icon', 'industry_fields'];
+// 2026-07-07: campos extra por giro (product_fields). Se guardan como jsonb en
+// pos_products.industry_fields. Aceptar solo objeto plano de primitivos, cap 40
+// claves y 500 chars por valor. Devuelve null si no hay nada válido.
+function sanitizeIndustryFields(v) {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
+  const out = {};
+  let n = 0;
+  for (const k of Object.keys(v)) {
+    if (n >= 40) break;
+    const key = String(k).slice(0, 64);
+    if (!key) continue;
+    let val = v[k];
+    if (val === null || val === undefined) continue;
+    if (typeof val === 'boolean' || typeof val === 'number') { out[key] = val; n++; continue; }
+    if (typeof val === 'string') { out[key] = val.slice(0, 500); n++; continue; }
+    // ignora objetos/anidados
+  }
+  return Object.keys(out).length ? out : null;
+}
 const ALLOWED_FIELDS_CUSTOMERS = ['name', 'email', 'phone', 'address', 'credit_limit', 'credit_balance', 'points', 'loyalty_points', 'active', 'rfc'];
 // R26 FIX: SAT RFC validator. Persona física (13 chars: 4 letras + 6 dígitos YYMMDD + 3 alfanum)
 // Persona moral (12 chars: 3 letras + 6 dígitos YYMMDD + 3 alfanum). Genérico nacional XAXX010101000, extranjero XEXX010101000.
@@ -2268,12 +2287,12 @@ const handlers = {
       const [modulos, terminologia, campos] = await Promise.all([
         supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=modulo,activo,orden&order=orden.asc`).catch(() => []),
         supabaseRequest('GET', `/giros_terminologia?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=clave,valor_singular,valor_plural`).catch(() => []),
-        supabaseRequest('GET', `/giros_campos?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=modal,campo,visible,requerido,orden,label_override&order=modal.asc,orden.asc`).catch(() => []),
+        supabaseRequest('GET', `/giros_campos?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=modal,campo,visible,requerido,orden,label_override,tipo,opciones,placeholder,help&order=modal.asc,orden.asc`).catch(() => []),
       ]);
 
       // Tambien cargar 'default' como fallback para campos no definidos en el giro especifico
       const defaultCampos = giroSlug !== 'default'
-        ? await supabaseRequest('GET', `/giros_campos?giro_slug=eq.default&select=modal,campo,visible,requerido,orden,label_override`).catch(() => [])
+        ? await supabaseRequest('GET', `/giros_campos?giro_slug=eq.default&select=modal,campo,visible,requerido,orden,label_override,tipo,opciones,placeholder,help`).catch(() => [])
         : [];
 
       // Merge: defaults + override del giro
@@ -2525,11 +2544,16 @@ const handlers = {
           }
         } catch (_) { /* si el lookup falla, seguir e dejar que el DB constraint capture */ }
       }
+      // 2026-07-07: industry_fields (campos específicos del giro, jsonb). Solo se
+      // persiste si es objeto plano; se descarta cualquier otra cosa para no
+      // romper el insert ni permitir payloads gigantes.
+      const industryFields = sanitizeIndustryFields(safe.industry_fields);
       const result = await supabaseRequest('POST', '/pos_products', {
         pos_user_id: ownerUserId,
         code: safe.code, name: safe.name, category: safe.category || 'general',
         cost: costNum, price: safe.price, stock: Number(safe.stock || 0),
-        icon: safe.icon || '📦'
+        icon: safe.icon || '📦',
+        industry_fields: industryFields
       });
       const created = result && (result[0] || result);
       try { logAudit(req, 'product.created', 'pos_products', { id: created && created.id, after: { name: safe.name } }); } catch(_){}
@@ -2587,6 +2611,10 @@ const handlers = {
           return sendValidation(res, 'stock debe ser entero >= 0', 'stock');
         }
         safe.stock = stockNum;
+      }
+      // 2026-07-07: sanea industry_fields (jsonb) si viene en el PATCH.
+      if (safe.industry_fields !== undefined) {
+        safe.industry_fields = sanitizeIndustryFields(safe.industry_fields);
       }
       // R22 FIX 2: PATCH con WHERE version=expected
       const result = await supabaseRequest('PATCH',
@@ -42123,6 +42151,10 @@ if (process.env.NODE_ENV === 'test') {
         requerido: !!r.requerido,
         orden: r.orden || 0,
         label_override: r.label_override || null,
+        tipo: r.tipo || 'text',
+        opciones: r.opciones || null,
+        placeholder: r.placeholder || null,
+        help: r.help || null,
       });
     });
     return (Array.isArray(verticals) ? verticals : []).map(v => ({
@@ -42153,7 +42185,7 @@ if (process.env.NODE_ENV === 'test') {
         supabaseRequest('GET', '/verticals?select=code,name,category_id,modules,settings,active,icon,color&order=name.asc&limit=500').catch(() => []),
         supabaseRequest('GET', '/giros_modulos?select=giro_slug,modulo,activo,orden,name_override,state&limit=5000').catch(() => []),
         supabaseRequest('GET', '/giros_terminologia?select=giro_slug,clave,valor_singular,valor_plural&limit=5000').catch(() => []),
-        supabaseRequest('GET', '/giros_campos?select=giro_slug,modal,campo,visible,requerido,orden,label_override&limit=5000').catch(() => []),
+        supabaseRequest('GET', '/giros_campos?select=giro_slug,modal,campo,visible,requerido,orden,label_override,tipo,opciones,placeholder,help&limit=5000').catch(() => []),
         supabaseRequest('GET', '/giros_buttons?select=giro_slug,button_key,activo,state,name_override,orden&limit=5000').catch(() => []),
       ]);
       const items = _buildGirosCatalog(verticals, modulos, terminologia, campos, btns);
@@ -42983,7 +43015,7 @@ if (process.env.NODE_ENV === 'test') {
         supabaseRequest('GET', `/verticals?code=eq.${enc}&select=code,name,category_id,modules,settings,active,icon,color&limit=1`).catch(() => []),
         supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${enc}&select=giro_slug,modulo,activo,orden,name_override,state&limit=500`).catch(() => []),
         supabaseRequest('GET', `/giros_terminologia?giro_slug=eq.${enc}&select=giro_slug,clave,valor_singular,valor_plural&limit=500`).catch(() => []),
-        supabaseRequest('GET', `/giros_campos?giro_slug=eq.${enc}&select=giro_slug,modal,campo,visible,requerido,orden,label_override&limit=500`).catch(() => []),
+        supabaseRequest('GET', `/giros_campos?giro_slug=eq.${enc}&select=giro_slug,modal,campo,visible,requerido,orden,label_override,tipo,opciones,placeholder,help&limit=500`).catch(() => []),
       ]);
       const items = _buildGirosCatalog(verticals, modulos, terminologia, campos);
       if (!items.length) return sendJSON(res, { ok: false, error: 'not_found' }, 404);
@@ -43214,15 +43246,31 @@ if (process.env.NODE_ENV === 'test') {
       if (Array.isArray(body.product_fields)) {
         // Delete-then-insert: simpler than computing the keep-set on (modal,campo) tuples.
         await supabaseRequest('DELETE', `/giros_campos?giro_slug=eq.${enc}`).catch(() => null);
-        const rows = body.product_fields.map((f, idx) => ({
-          giro_slug: slug,
-          modal: String(f.modal || 'product'),
-          campo: String(f.campo || ''),
-          visible: f.visible !== false,
-          requerido: !!f.requerido,
-          orden: typeof f.orden === 'number' ? f.orden : idx,
-          label_override: f.label_override || null,
-        })).filter(r => r.campo);
+        // 2026-07-07: modal default 'producto' (NO 'product') — así coincide con
+        // los datos existentes y con lo que lee el POS (cfg.campos.producto).
+        const ALLOWED_FIELD_TYPES = ['text', 'number', 'select', 'date', 'boolean', 'money', 'textarea'];
+        const rows = body.product_fields.map((f, idx) => {
+          let tipo = String(f.tipo || 'text').toLowerCase();
+          if (ALLOWED_FIELD_TYPES.indexOf(tipo) === -1) tipo = 'text';
+          // opciones: solo para select; array de strings, cap 40.
+          let opciones = null;
+          if (tipo === 'select' && Array.isArray(f.opciones)) {
+            opciones = f.opciones.map(o => String(o).slice(0, 80)).filter(Boolean).slice(0, 40);
+          }
+          return {
+            giro_slug: slug,
+            modal: String(f.modal || 'producto'),
+            campo: String(f.campo || '').trim().slice(0, 64),
+            visible: f.visible !== false,
+            requerido: !!f.requerido,
+            orden: typeof f.orden === 'number' ? f.orden : idx,
+            label_override: f.label_override ? String(f.label_override).slice(0, 120) : null,
+            tipo: tipo,
+            opciones: opciones,
+            placeholder: f.placeholder ? String(f.placeholder).slice(0, 120) : null,
+            help: f.help ? String(f.help).slice(0, 200) : null,
+          };
+        }).filter(r => r.campo);
         if (rows.length) {
           await supabaseRequest('POST',
             '/giros_campos?on_conflict=giro_slug,modal,campo',
