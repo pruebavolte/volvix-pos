@@ -22480,29 +22480,32 @@ if (process.env.NODE_ENV === 'test') {
       }
 
       // 1) Insert sale
+      // FIX 2026-07-06: este handler insertaba columnas que NO existen en
+      // pos_sales (sale_number, subtotal, user_id, cashier_id, customer_id,
+      // notes, delivery_*, discount_*...) — schema imaginario. El primer
+      // INSERT fallaba, el fallback tambien, y TODA venta del POS respondia
+      // 500: el sync del frontend reintentaba por siempre y el historial
+      // quedaba vacio. Ahora usa el schema REAL (mismo que POST /api/sales):
+      // tenant_id, pos_user_id, folio, total, tip_amount, payment_method,
+      // items (jsonb), status, created_at.
       const saleRow = {
         tenant_id: tnt,
-        customer_id: body.customer_id || null,
-        user_id: userId,
-        cashier_id: userId,
-        sale_number: body.ticket_number || ('TKT-' + Date.now()),
-        subtotal: subtotal,
-        discount: discount.amount || 0,
-        discount_reason: discount.reason || null,
-        discount_authorized_by: discount.authorized_by || null,
-        tip_amount: tip.amount || 0,
-        tip_percent: tip.percent || null,
-        rounding_amount: rounding.amount || 0,
-        rounding_destination: rounding.destination || null,
+        pos_user_id: userId,
+        // folio es INTEGER autogenerado por la BD — NO mandar el ticket_number
+        // de texto aqui (22P02 invalid input syntax for type integer).
         total: total,
-        status: 'paid',
+        tip_amount: tip.amount || 0,
         payment_method: payments.length > 1 ? 'mixto' : String(payments[0].method || '').toLowerCase(),
-        payment_methods_summary: payments.map(function (p) { return p.method; }).join('+'),
-        delivery_method: delivery.method || 'PRINT',
-        delivery_target: delivery.target || null,
-        notes: notes,
-        device_id: body.device_id || null,
-        app_version: body.app_version || null,
+        items: items.map(function (it) {
+          return {
+            code: it.code || it.barcode || null,
+            name: typeof it.name === 'string' ? __vlxSanitize(it.name, 160) : null,
+            qty: Number(it.qty) || 1,
+            price: Number(it.price) || 0,
+            discount: Number(it.discount) || 0
+          };
+        }),
+        status: 'paid',
         created_at: new Date().toISOString()
       };
 
@@ -22512,16 +22515,11 @@ if (process.env.NODE_ENV === 'test') {
         sale = (saleResult && saleResult[0]) || saleResult;
         saleId = sale && sale.id;
       } catch (e) {
-        // Schema fallback si alguna columna nueva aún no existe
+        // Schema fallback si alguna columna opcional no existe
         const msg = String((e && e.message) || '');
         if (/PGRST204|column.*does not exist|42703/i.test(msg)) {
           console.warn('[/api/cobro] schema fallback applied:', msg.slice(0, 200));
-          delete saleRow.tip_amount; delete saleRow.tip_percent;
-          delete saleRow.rounding_amount; delete saleRow.rounding_destination;
-          delete saleRow.delivery_method; delete saleRow.delivery_target;
-          delete saleRow.discount_authorized_by; delete saleRow.discount_reason;
-          delete saleRow.payment_methods_summary; delete saleRow.device_id;
-          delete saleRow.app_version;
+          delete saleRow.tip_amount; delete saleRow.folio;
           const saleResult2 = await supabaseRequest('POST', '/pos_sales', saleRow);
           sale = (saleResult2 && saleResult2[0]) || saleResult2;
           saleId = sale && sale.id;
@@ -22533,12 +22531,34 @@ if (process.env.NODE_ENV === 'test') {
       }
 
       // 2) Insert payments (N filas)
+      // FIX 2026-07-06: method_type es enum Postgres en MAYUSCULAS español
+      // (EFECTIVO, TARJETA_DEBITO, ...) — normalizar lo que mande el frontend
+      // (efectivo, cash, Tarj. Débito, etc.) para que el insert no truene 22P02.
+      const __methodMap = {
+        'efectivo': 'EFECTIVO', 'cash': 'EFECTIVO',
+        'tarj. debito': 'TARJETA_DEBITO', 'tarjeta debito': 'TARJETA_DEBITO', 'debito': 'TARJETA_DEBITO', 'debit': 'TARJETA_DEBITO',
+        'tarj. credito': 'TARJETA_CREDITO', 'tarjeta credito': 'TARJETA_CREDITO', 'credito': 'TARJETA_CREDITO', 'credit': 'TARJETA_CREDITO', 'card': 'TARJETA_CREDITO',
+        'spei': 'SPEI', 'transferencia': 'SPEI',
+        'codi': 'CODI',
+        'mercado pago': 'MERCADO_PAGO', 'mercado_pago': 'MERCADO_PAGO', 'mercadopago': 'MERCADO_PAGO',
+        'clip': 'CLIP',
+        'vale': 'VALE_DESPENSA', 'vale despensa': 'VALE_DESPENSA', 'vale restaurante': 'VALE_RESTAURANTE',
+        'monedero': 'MONEDERO_ELECTRONICO',
+        'usd': 'USD_EFECTIVO', 'dolares': 'USD_EFECTIVO',
+        'cheque': 'CHEQUE',
+        'credito cliente': 'CREDITO_CLIENTE', 'credito_cliente': 'CREDITO_CLIENTE', 'fiado': 'CREDITO_CLIENTE'
+      };
+      function __normMethod(m) {
+        var k = String(m || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+        return __methodMap[k] || (/^[A-Z_]+$/.test(String(m)) ? String(m) : 'OTRO');
+      }
       const paymentRows = payments.map(function (p) {
         const details = p.details || {};
         return {
           sale_id: saleId,
-          tenant_id: tnt,
-          method_type: p.method,
+          // FIX 2026-07-06: payments.tenant_id es UUID y el tenant es 'TNT-…'
+          // (22P02). La venta ya liga por sale_id — no mandar tenant_id.
+          method_type: __normMethod(p.method),
           amount_cents: Math.round(Number(p.amount) * 100),
           provider: p.method,
           status: 'completed',
@@ -22569,7 +22589,7 @@ if (process.env.NODE_ENV === 'test') {
           // Schema fallback: remover columnas nuevas
           const minimal = paymentRows.map(function (r) {
             return {
-              sale_id: r.sale_id, tenant_id: r.tenant_id,
+              sale_id: r.sale_id,
               provider: r.provider, status: r.status,
               amount_cents: r.amount_cents, currency: r.currency,
               raw: r.raw, created_at: r.created_at
@@ -22631,7 +22651,8 @@ if (process.env.NODE_ENV === 'test') {
       const responseBody = {
         ok: true,
         sale_id: saleId,
-        sale_number: sale.sale_number,
+        sale_number: sale.folio || sale.sale_number || null,
+        folio: sale.folio || null,
         payments_inserted: paymentsInserted,
         cfdi_pending: cfdiPending,
         cfdi_id: cfdiId,
