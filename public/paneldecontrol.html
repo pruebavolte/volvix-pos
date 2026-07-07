@@ -11263,6 +11263,14 @@
         saveBtn.disabled = true;
         try {
           const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+          // FIX 2026-07-06: adjuntar el tenant DESTINO seleccionado en el panel,
+          // para que el nuevo empleado se cree en el negocio correcto (no en el
+          // tenant del propio admin). El backend solo respeta este override si
+          // el solicitante es superadmin/platform_owner.
+          try {
+            var _selTid = window.PERM && window.PERM.selectedTid;
+            if (_selTid && !data.tenant_id) data.tenant_id = _selTid;
+          } catch (_) {}
           const r = await fetch('/api/admin/users/inline-quick', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },

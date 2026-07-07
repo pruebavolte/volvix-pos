@@ -99,11 +99,14 @@
       subtotal: sale.subtotal,
       total: sale.total,
       items: sale.items,
-      payments: [{
-        method: sale.payment_method,
-        amount: sale.payment_received || sale.total,
-        details: {}
-      }],
+      // FIX 2026-07-06: PAGO MIXTO — mandar el desglose real de metodos si existe
+      // (sale.payments), no un solo 'MIXTO'. Antes el corte/reportes no podian
+      // cuadrar cuanto fue efectivo vs tarjeta. Fallback a 1 metodo.
+      payments: (Array.isArray(sale.payments) && sale.payments.length)
+        ? sale.payments.map(function (p) {
+            return { method: p.method, amount: Number(p.amount) || 0, details: { reference: p.reference || '' } };
+          })
+        : [{ method: sale.payment_method, amount: sale.payment_received || sale.total, details: {} }],
       cfdi: null,
       tip: { amount: sale.tip || 0 },
       discount: { amount: sale.discount || 0 },

@@ -22313,9 +22313,17 @@ if (process.env.NODE_ENV === 'test') {
       if (!['owner','admin','superadmin','manager'].includes(role)) {
         return sendJSON(res, { error: 'forbidden', need_role: 'manager+' }, 403);
       }
-      const tnt = b36Tenant(req);
+      let tnt = b36Tenant(req);
       const body = await readBody(req, { maxBytes: 16 * 1024, strictJson: true });
       if (checkBodyError(req, res)) return;
+      // FIX 2026-07-06: superadmin/platform_owner provisionando desde el panel
+      // puede indicar el tenant DESTINO (negocio del cliente). Antes el empleado
+      // siempre caia en el tenant del propio admin. Solo se respeta el override
+      // para roles de plataforma; un owner/manager normal queda atado a su tenant.
+      if (body.tenant_id && (role === 'superadmin' || role === 'platform_owner')) {
+        const _t = String(body.tenant_id).trim();
+        if (_t && _t.length >= 3) tnt = _t;
+      }
       const email = body.email ? String(body.email).trim().toLowerCase() : '';
       const phone = body.phone ? String(body.phone).replace(/[^\d]/g, '') : '';
       const name  = body.name ? sanitizeName(String(body.name)) : '';

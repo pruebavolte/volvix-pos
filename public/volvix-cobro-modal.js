@@ -1075,6 +1075,19 @@
         tip: window.__vlxTipAmount || 0,
         tax: 0,
         payment_method: method.toUpperCase(),
+        // FIX 2026-07-06: PAGO MIXTO — guardar el desglose de métodos (antes se
+        // perdía: el ticket y el corte solo veían 'MIXTO' sin saber cuánto fue
+        // efectivo/tarjeta). payments[] queda en el registro local, el ticket y
+        // se manda al server. Para 1 solo método también se llena (consistencia).
+        payments: (function(){
+          try {
+            if (method === 'mixto' && typeof getMixtoRows === 'function') {
+              var rs = getMixtoRows().filter(function(r){ return r.amount > 0; });
+              if (rs.length) return rs.map(function(r){ return { method: String(r.method||'').toUpperCase(), amount: r.amount, reference: r.reference || '' }; });
+            }
+          } catch(_){}
+          return [{ method: method.toUpperCase(), amount: total, reference: '' }];
+        })(),
         payment_received: fastRecibido,
         payment_change: Math.max(0, fastRecibido - total),
         // Estado del registro
