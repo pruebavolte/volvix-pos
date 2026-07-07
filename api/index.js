@@ -22298,7 +22298,26 @@ if (process.env.NODE_ENV === 'test') {
       if (!b36IsSuperadmin(req)) qs += '&tenant_id=eq.' + encodeURIComponent(tnt);
       var rows = [];
       try { rows = await supabaseRequest('GET', '/pos_users' + qs); } catch (_) { rows = []; }
-      sendJSON(res, { ok: true, users: rows || [] });
+      rows = rows || [];
+      // FIX 2026-07-07: garantizar que el usuario que consulta SIEMPRE se vea a si
+      // mismo, aunque su fila legacy tenga tenant_id NULL (owners creados antes del
+      // fix de register-simple). Ademas AUTO-REPARA la columna tenant_id si viene
+      // nula, para que quede consistente de aqui en adelante.
+      try {
+        var myId = req.user && req.user.id;
+        if (myId && !rows.some(function (u) { return u.id === myId; })) {
+          var mine = await supabaseRequest('GET',
+            '/pos_users?id=eq.' + encodeURIComponent(myId) +
+            '&select=id,email,role,is_active,full_name,phone,created_at,tenant_id&limit=1');
+          if (Array.isArray(mine) && mine.length) {
+            rows.unshift(mine[0]);
+            if (!mine[0].tenant_id && tnt) {
+              try { await supabaseRequest('PATCH', '/pos_users?id=eq.' + encodeURIComponent(myId), { tenant_id: tnt }); } catch (_) {}
+            }
+          }
+        }
+      } catch (_) {}
+      sendJSON(res, { ok: true, users: rows });
     } catch (err) { sendError(res, err); }
   });
 
@@ -37706,12 +37725,24 @@ if (process.env.NODE_ENV === 'test') {
             password_hash: passwordHash,
             notes: notes,
             full_name: 'Owner ' + business_name,
+            // FIX 2026-07-07: setear la COLUMNA tenant_id (no solo notes.tenant_id).
+            // GET /api/users/resolveOwner filtran por la columna; sin esto el dueño
+            // no aparecía ni en su propia lista de equipo.
+            tenant_id: tenantId,
             updated_at: new Date().toISOString()
           };
           if (phone) patchU.phone = phone;
-          await supabaseRequest('PATCH', '/pos_users?id=eq.' + reuseUserId, patchU);
+          try {
+            await supabaseRequest('PATCH', '/pos_users?id=eq.' + reuseUserId, patchU);
+          } catch (ePatch) {
+            // Schema fallback: si tenant_id no existe como columna, reintentar sin ella
+            if (/PGRST204|column.*does not exist|42703/i.test(String(ePatch && ePatch.message))) {
+              delete patchU.tenant_id;
+              await supabaseRequest('PATCH', '/pos_users?id=eq.' + reuseUserId, patchU);
+            } else throw ePatch;
+          }
         } else {
-          const insU = await supabaseRequest('POST', '/pos_users', {
+          const ownerRow = {
             email: emailValue,
             password_hash: passwordHash,
             role: 'USER',
@@ -37720,11 +37751,22 @@ if (process.env.NODE_ENV === 'test') {
             full_name: 'Owner ' + business_name,
             notes: notes,
             phone: phone,
+            // FIX 2026-07-07: setear la COLUMNA tenant_id en el alta del dueño.
+            tenant_id: tenantId,
             email_verified: false,
             phone_verified: false,
             mfa_enabled: false,
             created_at: new Date().toISOString()
-          });
+          };
+          let insU;
+          try {
+            insU = await supabaseRequest('POST', '/pos_users', ownerRow);
+          } catch (eIns) {
+            if (/PGRST204|column.*does not exist|42703/i.test(String(eIns && eIns.message))) {
+              delete ownerRow.tenant_id;
+              insU = await supabaseRequest('POST', '/pos_users', ownerRow);
+            } else throw eIns;
+          }
           if (Array.isArray(insU) && insU.length > 0) userId = insU[0].id;
         }
       } catch (e) {
