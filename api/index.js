@@ -2212,7 +2212,7 @@ const handlers = {
       // (mismo patron que /api/app/config) y dejar `tenants` como fallback legacy.
       let giroSlug = 'default';
       try {
-        const cres = await supabaseFetch(
+        const cres = await supabaseRequest('GET', 
           `/pos_companies?tenant_id=eq.${encodeURIComponent(tenantId)}&select=business_type&limit=1`
         );
         if (cres && Array.isArray(cres) && cres.length && cres[0].business_type) {
@@ -2221,7 +2221,7 @@ const handlers = {
       } catch (_) {}
       if (giroSlug === 'default') {
         try {
-          const tres = await supabaseFetch(
+          const tres = await supabaseRequest('GET', 
             `/tenants?id=eq.${encodeURIComponent(tenantId)}&select=giro_slug,giro,industry&limit=1`
           );
           if (tres && Array.isArray(tres) && tres.length) {
@@ -2231,7 +2231,7 @@ const handlers = {
       }
       // Validar que el giro existe en la tabla; si no, fallback a 'default'.
       try {
-        const exists = await supabaseFetch(
+        const exists = await supabaseRequest('GET', 
           `/giros_modulos?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=giro_slug&limit=1`
         );
         if (!exists || !exists.length) giroSlug = 'default';
@@ -2239,14 +2239,14 @@ const handlers = {
 
       // Cargar las 3 config tables en paralelo
       const [modulos, terminologia, campos] = await Promise.all([
-        supabaseFetch(`/giros_modulos?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=modulo,activo,orden&order=orden.asc`).catch(() => []),
-        supabaseFetch(`/giros_terminologia?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=clave,valor_singular,valor_plural`).catch(() => []),
-        supabaseFetch(`/giros_campos?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=modal,campo,visible,requerido,orden,label_override&order=modal.asc,orden.asc`).catch(() => []),
+        supabaseRequest('GET', `/giros_modulos?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=modulo,activo,orden&order=orden.asc`).catch(() => []),
+        supabaseRequest('GET', `/giros_terminologia?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=clave,valor_singular,valor_plural`).catch(() => []),
+        supabaseRequest('GET', `/giros_campos?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=modal,campo,visible,requerido,orden,label_override&order=modal.asc,orden.asc`).catch(() => []),
       ]);
 
       // Tambien cargar 'default' como fallback para campos no definidos en el giro especifico
       const defaultCampos = giroSlug !== 'default'
-        ? await supabaseFetch(`/giros_campos?giro_slug=eq.default&select=modal,campo,visible,requerido,orden,label_override`).catch(() => [])
+        ? await supabaseRequest('GET', `/giros_campos?giro_slug=eq.default&select=modal,campo,visible,requerido,orden,label_override`).catch(() => [])
         : [];
 
       // Merge: defaults + override del giro
