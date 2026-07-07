@@ -156,14 +156,15 @@
             }
           }
         } catch(e){}
-        // FIX 2026-07-06: sesión vencida a media operación. Si una API core
-        // (no auth/login) responde 401 y HAY token guardado, la sesión murió →
-        // limpiar y mandar a login (antes: pantallas vacías silenciosas).
+        // FIX 2026-07-06: sesión vencida a media operación. SOLO reacciona al
+        // validador de sesión (/api/auth/session): si ESE da 401, el token está
+        // muerto de verdad → limpiar y mandar a login. (Antes reaccionaba a
+        // cualquier 401 de /api/, y kickeaba a usuarios recién registrados cuyo
+        // token verify_pending 401ea en algún endpoint opcional del POS.)
         var _p = origFetch.apply(this, arguments);
         try {
           var _url = (typeof input === 'string') ? input : (input && input.url) || '';
-          if (_url.indexOf('/api/') !== -1 &&
-              _url.indexOf('/api/auth/') === -1 && _url.indexOf('/api/login') === -1) {
+          if (_url.indexOf('/api/auth/session') !== -1) {
             return _p.then(function(resp){
               try {
                 if (resp && resp.status === 401 && !window.__vlxSessionExpiredHandled) {
