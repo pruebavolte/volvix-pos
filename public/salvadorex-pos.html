@@ -7566,11 +7566,14 @@
               // Permitimos siempre los nucleo (pos=vender/inventario/clientes/corte/reportes/config)
               var nucleo = ['pos','vender','inventario','clientes','corte','reportes','config'];
               if (nucleo.indexOf(m) === -1) {
-                el.style.display = 'none';
+                // FIX 2026-07-06: setProperty con 'important' — un display:none
+                // simple perdia contra una regla CSS !important del menubar y
+                // los botones ocultos seguian visibles (computed=flex).
+                el.style.setProperty('display', 'none', 'important');
                 el.setAttribute('data-giro-hidden', '1');
               }
             } else {
-              el.style.display = '';
+              el.style.removeProperty('display');
               el.removeAttribute('data-giro-hidden');
             }
           });
