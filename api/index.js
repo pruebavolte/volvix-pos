@@ -1040,6 +1040,16 @@ function requireAuth(handler, requiredRoles) {
       is_impersonation: payload.is_impersonation === true,
       impersonated_by_user_id: payload.impersonated_by_user_id || payload.impersonated_by || null,
     };
+    // FIX 2026-07-06: recordar tenant->owner cuando el DUEÑO se autentica, para
+    // que resolveOwnerPosUserId (productos/ventas/inventario) funcione sin el
+    // viejo mapa hardcodeado. Solo owner/admin/superadmin (el dueño), no cajeros.
+    try {
+      const _r = String(payload.role || '').toLowerCase();
+      if (payload.id && payload.tenant_id && !payload.is_impersonation &&
+          (_r === 'owner' || _r === 'admin' || _r === 'superadmin' || _r === 'platform_owner' || _r === 'business_owner')) {
+        rememberTenantOwner(payload.tenant_id, payload.id);
+      }
+    } catch (_) {}
     // 2026-05-14: SOPORTE TÉCNICO — quitado el read-only enforcement.
     // El admin necesita acceso TOTAL durante impersonacion para brindar soporte
     // efectivo a usuarios de 60-80 años (dueños de restaurantes, abarrotes) sin
@@ -1166,20 +1176,30 @@ function resolvePosUserId(req, tenantId) {
 //   - El fix de menu-digital (whitelist KNOWN_TENANTS) ya bloquea unknown
 //     tenants antes de invocar esta funcion. Otros callers pueden recibir null
 //     y deben tratarlo como "no data" en lugar de leak.
+// FIX 2026-07-06 (CRITICO): antes esto era un mapa HARDCODEADO de 3 tenants —
+// para CUALQUIER usuario registrado real devolvia null y /api/products,
+// /api/sales, inventario, etc. salian VACIOS (POS inutilizable). Ahora hay un
+// cache dinamico tenant->owner_pos_user_id que se llena en requireAuth cada vez
+// que el dueño (owner/admin/superadmin) del tenant se autentica, y en el
+// registro. El proceso Railway es persistente, asi que el mapeo sobrevive.
+const KNOWN_TENANT_OWNERS = {
+  'TNT001': 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',
+  'TNT002': 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1',
+  'TNT-P5E74': 'fd4c05db-cde2-45bb-a7b0-b1a3391921bd',
+};
+const __tenantOwnerCache = Object.create(null);
+// Registrar mapeo tenant->owner (llamado desde requireAuth y registro).
+function rememberTenantOwner(tenantId, posUserId) {
+  if (!tenantId || !posUserId) return;
+  if (KNOWN_TENANT_OWNERS[tenantId]) return; // no pisar seeds
+  __tenantOwnerCache[tenantId] = posUserId;
+}
 function resolveOwnerPosUserId(tenantId) {
-  const KNOWN_TENANT_OWNERS = {
-    'TNT001': 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',
-    'TNT002': 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1',
-    // V10.1 — Fruteria bartola (grupovolvix@gmail.com)
-    'TNT-P5E74': 'fd4c05db-cde2-45bb-a7b0-b1a3391921bd',
-  };
-  if (tenantId && KNOWN_TENANT_OWNERS[tenantId]) {
-    return KNOWN_TENANT_OWNERS[tenantId];
-  }
-  // Tenant desconocido: NO hacer fallback silencioso. Log y null.
+  if (!tenantId) return null;
+  if (KNOWN_TENANT_OWNERS[tenantId]) return KNOWN_TENANT_OWNERS[tenantId];
+  if (__tenantOwnerCache[tenantId]) return __tenantOwnerCache[tenantId];
   try {
-    console.warn('[resolveOwnerPosUserId] unknown tenant:', String(tenantId).slice(0, 40),
-                 '— returning null. Add to KNOWN_TENANT_OWNERS if legitimate.');
+    console.warn('[resolveOwnerPosUserId] tenant sin owner en cache:', String(tenantId).slice(0, 40));
   } catch (_) {}
   return null;
 }
@@ -36572,8 +36592,34 @@ if (process.env.NODE_ENV === 'test') {
           sku: p.sku || (giro.toUpperCase().slice(0,4) + '-' + String(i + 1).padStart(3, '0'))
         };
       });
+    } else if (DEMO_PRODUCTS[giro]) {
+      products = DEMO_PRODUCTS[giro];
     } else {
-      products = DEMO_PRODUCTS[giro] || DEFAULT_DEMO_PRODUCTS;
+      // FIX 2026-07-06: para giros sin DEMO_PRODUCTS curados (la mayoria de los
+      // 295 del catalogo), sembrar los productos_plantilla REALES del giro desde
+      // giros_maestro (productos con nombre+precio del giro, no genericos). Antes
+      // caia a DEFAULT_DEMO_PRODUCTS -> una carniceria/taller veia productos que
+      // no eran de su giro. Best-effort: si falla, cae a los genericos.
+      products = DEFAULT_DEMO_PRODUCTS;
+      try {
+        const gslug = giro.toLowerCase();
+        const mrow = await supabaseRequest('GET',
+          '/giros_maestro?slug=eq.' + encodeURIComponent(gslug) + '&select=metadata&limit=1');
+        const plantilla = (Array.isArray(mrow) && mrow[0] && mrow[0].metadata && mrow[0].metadata.productos_plantilla) || [];
+        const mapped = plantilla
+          .filter(function(p){ return p && (p.nombre || p.name); })
+          .slice(0, 12)
+          .map(function(p, i){
+            var nm = String(p.nombre || p.name).replace(/&#x27;/g, "'").replace(/&amp;/g, '&').slice(0, 120);
+            var pr = Number(p.precio || p.price);
+            return {
+              name: nm,
+              price: (isFinite(pr) && pr > 0) ? Math.round(pr * 100) / 100 : 50,
+              sku: (gslug.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4) || 'GEN') + '-' + String(i + 1).padStart(3, '0')
+            };
+          });
+        if (mapped.length >= 3) products = mapped;
+      } catch (_) { /* fail-open a genericos */ }
     }
     const nowIso = new Date().toISOString();
     const ownerId = opts.user_id;
@@ -37892,6 +37938,23 @@ if (process.env.NODE_ENV === 'test') {
       if (!emailSent && isProd && !noEmailProvider && emailError) {
         respPayload.email_error = String(emailError).slice(0, 120);
       }
+
+      // FIX 2026-07-06: sembrar datos del giro (productos, cliente General,
+      // settings) AHORA. Antes bootstrapTenant SOLO corria al verificar OTP,
+      // pero el auto-login (verify_pending) entra al POS sin verificar → el
+      // usuario caia en un POS VACIO (0 productos). Fire-and-forget en Railway
+      // (proceso persistente): para cuando navega a Inventario ya estan.
+      try { rememberTenantOwner(tenantId, userId); } catch (_) {}
+      try {
+        bootstrapTenant({
+          tenant_id: tenantId,
+          company_id: companyId,
+          user_id: userId,
+          business_type: giro,
+          business_name: business_name,
+          custom_data: (typeof customDataSafe !== 'undefined' ? customDataSafe : null)
+        }).catch(function (e) { try { console.warn('[register-simple] bootstrap:', e && e.message); } catch (_) {} });
+      } catch (_) {}
 
       // 2026-05-13 — VERIFICACIÓN POR LINK + AUTO-LOGIN INMEDIATO
       // Nuevo flujo: genera verify_token único, manda correo con LINK (además del
