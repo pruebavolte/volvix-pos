@@ -19767,6 +19767,13 @@
         return;
       }
       __r8c.selectedSale = sale;
+      var _payLabel = function (m) {
+        m = String(m || '').toLowerCase();
+        var MAP = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', tarjeta_credito: 'Tarjeta crédito',
+          tarjeta_debito: 'Tarjeta débito', transferencia: 'Transferencia', mixto: 'Mixto (varios métodos)',
+          credito: 'Crédito', vale: 'Vale', vale_despensa: 'Vale despensa', codi: 'CoDi', mercado_pago: 'Mercado Pago' };
+        return MAP[m] || (m ? m.charAt(0).toUpperCase() + m.slice(1) : '-');
+      };
       var cfdiInfo = sale.cfdi_uuid
         ? '<div>📄 <strong>CFDI:</strong> ' + _esc(sale.cfdi_uuid) + ' (' + (sale.cfdi_status || 'vigente') + ')</div>'
         : '<div>📄 <em>Sin CFDI emitido</em></div>';
@@ -19774,10 +19781,22 @@
         '<div>🆔 <strong>ID:</strong> ' + _esc(sale.id) + '</div>' +
         '<div>📅 <strong>Fecha:</strong> ' + _fmtDate(sale.created_at) + '</div>' +
         '<div>💰 <strong>Total:</strong> ' + _fmt$(sale.total) + '</div>' +
-        '<div>💳 <strong>Pago:</strong> ' + _esc(sale.payment_method || '-') + '</div>' +
+        '<div>💳 <strong>Pago:</strong> ' + _esc(_payLabel(sale.payment_method)) + '<span id="sd-pay-breakdown"></span></div>' +
         '<div>📦 <strong>Items:</strong> ' + sale.item_count + '</div>' +
         cfdiInfo;
       if (items) items.innerHTML = '<em>Para ver detalle completo de items, click en "Reimprimir"</em>';
+      // 2026-07-07: desglose real de pago MIXTO en pantalla (antes solo "mixto")
+      if (String(sale.payment_method || '').toLowerCase() === 'mixto') {
+        try {
+          var _pr = await _api()('/api/sales/' + encodeURIComponent(sale.id) + '/payments');
+          var _pj = await _pr.json();
+          if (_pj && Array.isArray(_pj.payments) && _pj.payments.length) {
+            var _bd = document.getElementById('sd-pay-breakdown');
+            if (_bd) _bd.innerHTML = ' <span style="color:var(--text-3);font-size:12px">(' +
+              _pj.payments.map(function (p) { return _esc(_payLabel(p.method)) + ' ' + _fmt$(p.amount); }).join(' + ') + ')</span>';
+          }
+        } catch (_) {}
+      }
     } catch (e) {
       if (info) info.innerHTML = '<div style="color:#DC2626">❌ ' + _esc(e.message) + '</div>';
     }

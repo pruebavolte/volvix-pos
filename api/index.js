@@ -17550,6 +17550,47 @@ handlers['GET /api/config/public'] = async (req, res) => {
     } catch (err) { sendError(res, err); }
   });
 
+  // 2026-07-07: desglose JSON de pagos de una venta (tenant-scoped, R7a strict).
+  // Lo usa el detalle de venta / historial del POS para mostrar el reparto real
+  // de un pago MIXTO (EFECTIVO+TARJETA...) en vez del string "mixto".
+  handlers['GET /api/sales/:id/payments'] = requireAuth(async (req, res, params) => {
+    try {
+      const id = params && params.id;
+      if (!id) return sendValidation(res, 'sale id required', 'id');
+      let sale = null;
+      try {
+        const rows = await supabaseRequest('GET',
+          `/pos_sales?id=eq.${encodeURIComponent(id)}&select=id,tenant_id,pos_user_id,payment_method,total&limit=1`);
+        sale = rows && rows[0];
+      } catch (_) {}
+      if (!sale) return sendJSON(res, { error: 'sale not found' }, 404);
+      // R7a strict: tenant_id directo O pos_user_id -> pos_users.tenant_id.
+      let ok = false;
+      const tnt = b36Tenant(req);
+      if (b36IsSuperadmin(req)) ok = true;
+      if (!ok && sale.tenant_id && String(sale.tenant_id) === String(tnt)) ok = true;
+      if (!ok && sale.pos_user_id) {
+        try {
+          const u = await supabaseRequest('GET',
+            '/pos_users?id=eq.' + encodeURIComponent(sale.pos_user_id) + '&select=tenant_id&limit=1');
+          if (u && u[0] && String(u[0].tenant_id) === String(tnt)) ok = true;
+        } catch (_) {}
+      }
+      if (!ok) return sendJSON(res, { error: 'sale not found' }, 404);
+      let pays = [];
+      try {
+        pays = await supabaseRequest('GET',
+          `/payments?sale_id=eq.${encodeURIComponent(id)}&select=method_type,amount,details&order=amount.desc`) || [];
+      } catch (_) { pays = []; }
+      const payments = (Array.isArray(pays) ? pays : []).map(p => ({
+        method: String(p.method_type || '').toLowerCase(),
+        amount: Number(p.amount) || 0,
+        reference: (p.details && p.details.reference) || ''
+      }));
+      sendJSON(res, { ok: true, sale_id: id, payment_method: sale.payment_method || '', total: Number(sale.total) || 0, payments });
+    } catch (err) { sendError(res, err); }
+  });
+
   // ==================== R17 TIPS ====================
   // GET /api/tips/by-staff?from=&to=&user_id=
   handlers['GET /api/tips/by-staff'] = requireAuth(async (req, res) => {
