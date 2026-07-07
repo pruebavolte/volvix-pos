@@ -782,7 +782,14 @@
           var slugN = normalize(data && data.slug);
           var nameN = normalize(data && data.name);
 
-          if (data && data.exists && data.landing && (qN === slugN || qN === nameN)) {
+          // FIX 2026-07-06: confiar en el backend cuando resuelve SINONIMOS.
+          // searchGiros ya hace match ESTRICTO server-side (slug exacto o
+          // synonym exacto de GIRO_SYNONYMS). El gate viejo (qN===slugN ||
+          // qN===nameN) descartaba aciertos legitimos de sinonimo ("dentista",
+          // "medicinas", "tacos", "gym") y los mandaba a generacion LLM —
+          // duplicando giros que YA tienen landing premium. La validacion IA
+          // (aiValidateMatch) sigue corriendo como segundo filtro.
+          if (data && data.exists && data.landing) {
             // Match exacto del catalogo -> consultar a la IA si realmente coincide
             setFeedback(thinking('La IA esta verificando si "' + q + '" coincide con "' + (data.name || data.slug) + '"...'));
             return aiValidateMatch(q, data.name, data.slug).then(function(coincide){

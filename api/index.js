@@ -1194,6 +1194,13 @@ function rememberTenantOwner(tenantId, posUserId) {
   if (KNOWN_TENANT_OWNERS[tenantId]) return; // no pisar seeds
   __tenantOwnerCache[tenantId] = posUserId;
 }
+// FIX 2026-07-06 RBAC: helper — ¿el usuario es cajero/vendedor (rol de baja
+// autoridad que NO gestiona inventario ni config)? Usado por guards en el
+// cuerpo de handlers de escritura.
+function __vlxIsCashier(req) {
+  const r = String(req && req.user && req.user.role || '').toLowerCase();
+  return r === 'cajero' || r === 'cashier' || r === 'vendor' || r === 'kiosk' || r === 'kiosko';
+}
 function resolveOwnerPosUserId(tenantId) {
   if (!tenantId) return null;
   if (KNOWN_TENANT_OWNERS[tenantId]) return KNOWN_TENANT_OWNERS[tenantId];
@@ -2442,6 +2449,10 @@ const handlers = {
 
   'POST /api/products': requireAuth(async (req, res) => {
     try {
+      // FIX 2026-07-06 RBAC: solo dueño/gerente gestionan inventario. Un cajero
+      // no debe crear productos ni fijar precios (guard en el cuerpo para
+      // sobrevivir a los re-wraps posteriores del handler).
+      if (__vlxIsCashier(req)) return send403(res, { need_role: ['owner','admin','manager','superadmin'], have_role: req.user && req.user.role });
       // B31.3 + 2026-05-11: rate-limit per-tenant — 600/min para sync masivos offline
       // (antes 120 saturaba con offline queue paralelo de 8 workers)
       const tnt = (req.user && req.user.tenant_id) || 'anon';
@@ -2528,6 +2539,7 @@ const handlers = {
 
   'PATCH /api/products/:id': requireAuth(async (req, res, params) => {
     try {
+      if (__vlxIsCashier(req)) return send403(res, { need_role: ['owner','admin','manager','superadmin'], have_role: req.user && req.user.role });
       if (!isUuid(params.id)) return sendJSON(res, { error: 'invalid id' }, 400); // FIX R13 (#10)
       const body = await readBody(req, { maxBytes: 100 * 1024, strictJson: true });
       if (checkBodyError(req, res)) return;
@@ -2595,6 +2607,7 @@ const handlers = {
 
   'DELETE /api/products/:id': requireAuth(async (req, res, params) => {
     try {
+      if (__vlxIsCashier(req)) return send403(res, { need_role: ['owner','admin','manager','superadmin'], have_role: req.user && req.user.role });
       if (!isUuid(params.id)) return sendJSON(res, { error: 'invalid id' }, 400);
       // FIX v340: existence check before delete
       const existing = await supabaseRequest('GET', `/pos_products?id=eq.${params.id}&select=id,pos_user_id`);
@@ -22550,6 +22563,36 @@ if (process.env.NODE_ENV === 'test') {
         return sendJSON(res, { error: 'sale_insert_failed' }, 500);
       }
 
+      // FIX 2026-07-06: descontar STOCK. /api/cobro (el path real de cobro del
+      // POS) NUNCA bajaba inventario en el servidor → el stock quedaba inflado
+      // eternamente. Los items traen 'code' (no el UUID que pide la RPC), asi
+      // que resolvemos el producto por code + pos_user_id del dueño y luego
+      // decrementamos. Best-effort: un fallo aqui no revierte la venta ya cobrada.
+      try {
+        const ownerId = resolveOwnerPosUserId(tnt) || userId;
+        if (ownerId) {
+          const stockItems = [];
+          for (const it of items) {
+            const qty = Number(it.qty) || 0;
+            if (qty <= 0) continue;
+            if (it.id && isUuid(String(it.id))) { stockItems.push({ id: it.id, qty }); continue; }
+            const code = String(it.code || it.barcode || '').trim();
+            if (!code) continue;
+            try {
+              const prod = await supabaseRequest('GET',
+                '/pos_products?pos_user_id=eq.' + encodeURIComponent(ownerId) +
+                '&code=eq.' + encodeURIComponent(code) +
+                '&deleted_at=is.null&select=id&limit=1');
+              if (Array.isArray(prod) && prod[0] && prod[0].id) stockItems.push({ id: prod[0].id, qty });
+            } catch (_) {}
+          }
+          if (stockItems.length) {
+            await supabaseRequest('POST', '/rpc/decrement_stock_atomic', { items: stockItems })
+              .catch(function (e) { try { console.warn('[/api/cobro] stock decrement:', e && e.message); } catch (_) {} });
+          }
+        }
+      } catch (_) { /* no revertir la venta por un fallo de stock */ }
+
       // 2) Insert payments (N filas)
       // FIX 2026-07-06: method_type es enum Postgres en MAYUSCULAS español
       // (EFECTIVO, TARJETA_DEBITO, ...) — normalizar lo que mande el frontend
@@ -36710,6 +36753,48 @@ if (process.env.NODE_ENV === 'test') {
       }).catch(function () { return null; });
     } catch (_) {}
 
+    // 4) FIX 2026-07-06: materializar config del GIRO GENERADO por IA.
+    // Cuando el usuario busca un giro raro, el marketplace genera con LLM
+    // custom_data.modules (modulos recomendados) y custom_data.terms
+    // (terminologia). Antes bootstrapTenant SOLO usaba custom_data.products →
+    // el POS del giro generado caia a 'default' (sin sus modulos ni su
+    // terminologia). Ahora se vuelca a giros_modulos + giros_terminologia para
+    // que /api/giro/config lo aplique. Idempotente (on_conflict). Best-effort.
+    try {
+      const cd = opts.custom_data || {};
+      const gslug = giro.toLowerCase();
+      if (gslug && gslug !== 'default') {
+        // ¿el giro ya tiene modulos materializados? (los del catalogo ya estan)
+        let hasMods = false;
+        try {
+          const ex = await supabaseRequest('GET',
+            '/giros_modulos?giro_slug=eq.' + encodeURIComponent(gslug) + '&select=giro_slug&limit=1');
+          hasMods = Array.isArray(ex) && ex.length > 0;
+        } catch (_) {}
+
+        if (!hasMods && Array.isArray(cd.modules) && cd.modules.length) {
+          const CORE = ['pos','inventario','ventas','clientes','corte','apertura','config','reportes','usuarios','dashboard','devoluciones'];
+          const set = new Set(cd.modules.map(function (m) { return String(m).toLowerCase().trim(); }).filter(Boolean));
+          CORE.forEach(function (c) { set.add(c); });
+          const rows = Array.from(set).map(function (m, i) { return { giro_slug: gslug, modulo: m, activo: true, orden: i }; });
+          await supabaseRequest('POST', '/giros_modulos?on_conflict=giro_slug,modulo', rows).catch(function () {});
+        }
+
+        // Terminologia: cd.terms = { clave: valor } o { clave: {singular,plural} }
+        if (cd.terms && typeof cd.terms === 'object') {
+          const trows = Object.keys(cd.terms).map(function (k) {
+            const v = cd.terms[k];
+            const sing = (v && typeof v === 'object') ? (v.singular || v.value || '') : String(v || '');
+            const plur = (v && typeof v === 'object') ? (v.plural || sing) : sing;
+            return sing ? { giro_slug: gslug, clave: String(k).toLowerCase().trim(), valor_singular: sing, valor_plural: plur } : null;
+          }).filter(Boolean);
+          if (trows.length) {
+            await supabaseRequest('POST', '/giros_terminologia?on_conflict=giro_slug,clave', trows).catch(function () {});
+          }
+        }
+      }
+    } catch (_) { /* best-effort */ }
+
     try {
       console.log('[bootstrap] tenant=' + opts.tenant_id + ' giro=' + giro +
         ' inserted=' + insertedCount + '/' + products.length +
@@ -41984,7 +42069,19 @@ if (process.env.NODE_ENV === 'test') {
       const url = new URL(req.url, 'http://x');
       // 2026-05-09 fix: tenant_id viene como 'TNT-XXXXX' (case-sensitive) — NO lowercase
       const tenantSlug = String(url.searchParams.get('t') || '').trim();
-      if (!tenantSlug) return sendJSON(res, { error: 'tenant_slug requerido (?t=)' }, 400);
+      // FIX 2026-07-06: COLISION DE RUTA — habia DOS handlers 'GET /api/app/config'.
+      // Este (config de giro por ?t=) pisa al de version/permisos (?since=), asi
+      // que el polling /api/app/config?since=0 daba 400 (ruido en cada carga del
+      // POS). Si viene sin ?t= pero con ?since=, respondemos el shape de version
+      // (no-change) en vez de 400. Los permisos por-tenant se aplican por el path
+      // ?t= (modulesState) que el POS ya consume.
+      if (!tenantSlug) {
+        const since = url.searchParams.get('since');
+        if (since !== null) {
+          return sendJSON(res, { ok: true, version: 1, modules: {}, polling_interval_seconds: 120, note: 'giro-config via ?t=' });
+        }
+        return sendJSON(res, { error: 'tenant_slug requerido (?t=)' }, 400);
+      }
       const enc = encodeURIComponent(tenantSlug);
       // pos_companies usa tenant_id (TNT-XXXX) como key. ?t= acepta tenant_id directo.
       const tenants = await supabaseRequest('GET',

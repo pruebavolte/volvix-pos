@@ -4767,13 +4767,15 @@
     <section id="screen-credito" class="screen-pad hidden">
       <div class="page-head">
         <div><h1 class="page-title">Cuentas por cobrar</h1><p class="page-sub" id="cred-sub">— clientes con crédito · $0 por cobrar</p></div>
-        <button class="btn accent">+ Registrar abono</button>
+        <button class="btn accent" onclick="credRegistrarAbono()">+ Registrar abono</button>
       </div>
+      <!-- FIX 2026-07-06: KPIs con datos reales (ids), no numeros inventados
+           hardcodeados. Se pueblan desde credLoadKPIs() con la BD; sin datos = $0. -->
       <div class="kpi-grid">
-        <div class="kpi"><div class="kpi-label">Total crédito</div><div class="kpi-value">$11,700</div></div>
-        <div class="kpi"><div class="kpi-label">Por cobrar</div><div class="kpi-value">$4,810</div></div>
-        <div class="kpi"><div class="kpi-label">Vencido</div><div class="kpi-value" style="color: var(--danger);">$1,760</div></div>
-        <div class="kpi"><div class="kpi-label">Al día</div><div class="kpi-value">4</div></div>
+        <div class="kpi"><div class="kpi-label">Total crédito</div><div class="kpi-value" id="cred-kpi-total">$0</div></div>
+        <div class="kpi"><div class="kpi-label">Por cobrar</div><div class="kpi-value" id="cred-kpi-porcobrar">$0</div></div>
+        <div class="kpi"><div class="kpi-label">Vencido</div><div class="kpi-value" id="cred-kpi-vencido" style="color: var(--danger);">$0</div></div>
+        <div class="kpi"><div class="kpi-label">Clientes al día</div><div class="kpi-value" id="cred-kpi-aldia">0</div></div>
       </div>
       <div class="card">
         <div class="tbl-wrap">
@@ -11824,6 +11826,19 @@
         sub.textContent = conCredito + ' cliente' + (conCredito === 1 ? '' : 's') + ' con crédito · $' + totalDebt.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' por cobrar';
       }
     } catch(_) {}
+    // FIX 2026-07-06: poblar KPIs reales (antes eran numeros hardcodeados).
+    try {
+      var money = function (n) { return '$' + (Number(n) || 0).toLocaleString('es-MX', { maximumFractionDigits: 2 }); };
+      var totalLim = CREDIT.reduce(function (a, c) { return a + (Number(c[1]) || 0); }, 0);
+      var totalSaldo = CREDIT.reduce(function (a, c) { return a + (Number(c[2]) || 0); }, 0);
+      var vencido = CREDIT.filter(function (c) { return c[5] === 'vencido'; }).reduce(function (a, c) { return a + (Number(c[2]) || 0); }, 0);
+      var alDia = CREDIT.filter(function (c) { return c[5] === 'ok'; }).length;
+      var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+      set('cred-kpi-total', money(totalLim));
+      set('cred-kpi-porcobrar', money(totalSaldo));
+      set('cred-kpi-vencido', money(vencido));
+      set('cred-kpi-aldia', String(alDia));
+    } catch(_) {}
     $('#cred-body').innerHTML = CREDIT.map(c => {
       const chip = c[5]==='ok'?'ok':c[5]==='vencido'?'err':'warn';
       const lbl = c[5]==='ok'?'Al corriente':c[5]==='vencido'?'Vencido':'Sin abonos';
@@ -11856,6 +11871,21 @@
         showToast('Error: ' + (j.error || j.message || 'No se pudo registrar'));
       }
     } catch (e) { showToast('Error: ' + (e.message || e)); }
+  };
+  // FIX 2026-07-06: boton "+ Registrar abono" del header (antes muerto). Pide
+  // cliente + monto y reusa el endpoint de abono. Para abono rapido tambien
+  // esta el boton "Abonar" de cada fila.
+  window.credRegistrarAbono = async function () {
+    if (!Array.isArray(CREDIT) || CREDIT.length === 0) {
+      showToast('Aún no hay clientes con crédito. Asigna crédito a un cliente primero.');
+      return;
+    }
+    var nombre = prompt('Registrar abono\n\nNombre del cliente con crédito:');
+    if (!nombre) return;
+    nombre = String(nombre).trim();
+    var match = CREDIT.find(function (c) { return String(c[0]).toLowerCase() === nombre.toLowerCase(); });
+    if (!match) { showToast('No encontré "' + nombre + '" en la lista de crédito.'); return; }
+    return window.abonarCredito(match[0], match[2]);
   };
   // 2026-05 adversarial fix A3+N2: escape para HTML attribute y text-content.
   // Antes solo se reemplazaba ' por \', dejando " < > etc. crudos. Si un sale_id

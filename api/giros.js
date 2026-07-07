@@ -77,6 +77,30 @@ let _cache = null;
 let _cacheAt = 0;
 const CACHE_MS = 60 * 1000;
 
+// FIX 2026-07-06: valida que un path de landing (ej "/corte.html" o
+// "/landing-foodtruck.html") exista fisicamente en alguno de los roots.
+// Cachea resultados (el filesystem no cambia en runtime).
+const _landingExistsCache = Object.create(null);
+function landingFileExists(landing) {
+  const clean = String(landing || '').split('?')[0].replace(/^\/+/, '');
+  if (!clean || !/\.html$/i.test(clean)) return false;
+  if (clean in _landingExistsCache) return _landingExistsCache[clean];
+  const roots = [
+    path.join(__dirname, '..', 'public'),
+    path.join(__dirname, '..'),
+    path.join(process.cwd(), 'public'),
+    process.cwd(),
+    '/var/task/public',
+    '/var/task',
+  ];
+  let found = false;
+  for (const root of roots) {
+    try { if (fs.existsSync(path.join(root, clean))) { found = true; break; } } catch (_) {}
+  }
+  _landingExistsCache[clean] = found;
+  return found;
+}
+
 function scanLandings() {
   const now = Date.now();
   if (_cache && (now - _cacheAt) < CACHE_MS) return _cache;
@@ -398,6 +422,15 @@ async function searchGiros(ctx, req, res, parsedUrl) {
     };
     if (PLAIN_TO_PREMIUM[hit.landing]) {
       hit.landing = PLAIN_TO_PREMIUM[hit.landing];
+    }
+    // FIX 2026-07-06: validar que la landing exista FISICAMENTE antes de
+    // responder exists:true. Giros solo-sinonimo (foodtruck, parking, cine,
+    // bowling, karaoke, inmobiliaria, tabaqueria...) construian
+    // /landing-<slug>.html que NO existe en disco ni tiene remap premium →
+    // el usuario tecleaba un giro valido y caia en 404. Si no existe, se
+    // devuelve exists:false para que el frontend genere la landing dinamica.
+    if (!landingFileExists(hit.landing)) {
+      return send(ctx, res, 200, { exists: false, query: q, note: 'landing_missing:' + hit.landing });
     }
     return send(ctx, res, 200, {
       exists: true,

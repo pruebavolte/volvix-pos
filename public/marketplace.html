@@ -1748,10 +1748,13 @@ document.addEventListener('DOMContentLoaded', function () {
             keepalive: true,
           }).catch(()=>{});
         } catch(_){}
-        // 1) Match exacto del backend (q === slug/synonyms) → redirigir
-        if (data && data.exists && data.landing &&
-            (String(data.slug || '').toLowerCase() === String(q).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim()
-             || String(data.name || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim() === String(q).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim())) {
+        // 1) Match del backend → redirigir.
+        // FIX 2026-07-06: confiar en searchGiros (ya hace match ESTRICTO de
+        // slug/sinonimo server-side). El gate viejo re-comparaba q===slug/name
+        // y descartaba sinonimos legitimos (dentista, gym, tacos) mandandolos
+        // a generacion LLM duplicada. Se respeta __forceNewGiro (flujo
+        // force_new=1: el usuario pidio explicitamente un sistema nuevo).
+        if (data && data.exists && data.landing && window.__forceNewGiro !== true) {
           window.location.assign(data.landing);
           return;
         }
