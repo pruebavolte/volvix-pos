@@ -17471,10 +17471,14 @@ handlers['GET /api/config/public'] = async (req, res) => {
       let current = null;
       try {
         const rows = await supabaseRequest('GET',
-          `/pos_sales?id=eq.${encodeURIComponent(id)}&select=id,status,total,pos_user_id&limit=1`);
+          `/pos_sales?id=eq.${encodeURIComponent(id)}&select=id,status,total,pos_user_id,tenant_id&limit=1`);
         current = rows && rows[0];
       } catch (_) {}
       if (!current) return sendJSON(res, { error: 'not_found', message: 'venta no encontrada' }, 404);
+      // FIX 2026-07-07 (multi-tenant/IDOR): no cancelar ventas de otro negocio.
+      if (!b36IsSuperadmin(req) && String(current.tenant_id || '') !== String(b36Tenant(req) || ' ')) {
+        return sendJSON(res, { error: 'not_found', message: 'venta no encontrada' }, 404);
+      }
 
       const curStatus = (current.status || 'paid').toLowerCase();
       // R7c FIX-N1: canonical 'cancelled' (post-r7c-canonicalize-status migration).
@@ -17510,9 +17514,23 @@ handlers['GET /api/config/public'] = async (req, res) => {
         sale = rows && rows[0];
       } catch (_) {}
       if (!sale) return sendJSON(res, { error: 'sale not found' }, 404);
+      // FIX 2026-07-07 (multi-tenant/IDOR): scope por tenant. Antes cualquier usuario
+      // autenticado podia leer el recibo de una venta de OTRO negocio con su id.
+      if (!b36IsSuperadmin(req) && String(sale.tenant_id || '') !== String(b36Tenant(req) || ' ')) {
+        return sendJSON(res, { error: 'sale not found' }, 404);
+      }
       const items = Array.isArray(sale.items) ? sale.items : [];
-      const rows = items.map(it => `<tr><td>${it.product_id || ''}</td><td>${it.qty || 0}</td><td>${it.price || 0}</td></tr>`).join('');
-      const html = `<!doctype html><html><head><meta charset="utf-8"><title>Receipt ${id}</title><style>body{width:80mm;font-family:monospace}</style></head><body><h3>VOLVIX POS</h3><div>RFC: VOL000000XXX</div><div>Sale: ${id}</div><table>${rows}</table><div>Total: ${sale.total || 0}</div><div>Method: ${sale.payment_method || ''}</div></body></html>`;
+      const rows = items.map(it => `<tr><td>${it.product_id || it.code || ''}</td><td>${it.qty || 0}</td><td>${it.price || 0}</td></tr>`).join('');
+      // Desglose de pagos (mixto): mostrar cuanto fue por cada metodo, no solo "MIXTO".
+      let payBreakdown = '';
+      try {
+        const pays = await supabaseRequest('GET', `/payments?sale_id=eq.${encodeURIComponent(id)}&select=method_type,amount`);
+        if (Array.isArray(pays) && pays.length > 1) {
+          payBreakdown = '<table>' + pays.map(p => `<tr><td>${(p.method_type || '').toString().replace(/_/g, ' ')}</td><td style="text-align:right">$${Number(p.amount || 0).toFixed(2)}</td></tr>`).join('') + '</table>';
+        }
+      } catch (_) {}
+      const methodLabel = payBreakdown ? 'MIXTO (ver desglose)' : (sale.payment_method || '');
+      const html = `<!doctype html><html><head><meta charset="utf-8"><title>Receipt ${id}</title><style>body{width:80mm;font-family:monospace}</style></head><body><h3>VOLVIX POS</h3><div>RFC: VOL000000XXX</div><div>Sale: ${id}</div><table>${rows}</table><div>Total: ${sale.total || 0}</div><div>Method: ${methodLabel}</div>${payBreakdown}</body></html>`;
       try {
         try { await supabaseRequest('PATCH', `/pos_sales?id=eq.${encodeURIComponent(id)}`, { printed: true }); } catch (_) {}
         res.statusCode = 200; res.setHeader('Content-Type', 'text/html; charset=utf-8'); res.end(html);
@@ -17651,6 +17669,10 @@ handlers['GET /api/config/public'] = async (req, res) => {
         sale = rows && rows[0];
       } catch (_) {}
       if (!sale) return sendJSON(res, { error: 'sale not found' }, 404);
+      // FIX 2026-07-07 (multi-tenant/IDOR): scope por tenant (mismo que /receipt).
+      if (!b36IsSuperadmin(req) && String(sale.tenant_id || '') !== String(b36Tenant(req) || ' ')) {
+        return sendJSON(res, { error: 'sale not found' }, 404);
+      }
       const ESC = String.fromCharCode(0x1b);
       const lines = [ESC + '@', 'VOLVIX POS\n', `Sale: ${id}\n`, `Total: ${sale.total || 0}\n`, `Method: ${sale.payment_method || ''}\n`, '\n\n\n', ESC + 'd' + String.fromCharCode(3)];
       const buf = Buffer.from(lines.join(''), 'binary');
