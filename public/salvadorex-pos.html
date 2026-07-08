@@ -11187,7 +11187,32 @@
       // 2026-05-09: terminología del giro — el título y los campos extra cambian
       const _giro = String(window.__volvixGiro || '').toLowerCase();
       const _terms = (typeof INDUSTRY_TERMS !== 'undefined' ? INDUSTRY_TERMS[_giro] : null) || {};
-      const _extraFields = (typeof INDUSTRY_PRODUCT_FIELDS !== 'undefined' ? INDUSTRY_PRODUCT_FIELDS[_giro] : null) || [];
+      // 2026-07-07: campos extra del giro leídos de la config de BD (giros_campos),
+      // que VolvixGiroConfig ya hidrata desde /api/giro/config al iniciar el POS.
+      // Antes leía el global INDUSTRY_PRODUCT_FIELDS que NO existe en el POS (se
+      // extrajo a paneldecontrol.html) → siempre daba [] y nunca renderizaba nada.
+      const _extraFields = (function () {
+        try {
+          const cfg = window.VolvixGiroConfig && window.VolvixGiroConfig.config;
+          const prod = cfg && cfg.campos && cfg.campos.producto;
+          if (!prod) return [];
+          const RESERVED = ['name','code','barcode','price','cost','stock','min_stock','category','description'];
+          return Object.keys(prod).map(function (k) { return prod[k]; })
+            .filter(function (r) { return r && r.visible !== false && RESERVED.indexOf(String(r.campo)) === -1; })
+            .sort(function (a, b) { return (a.orden || 0) - (b.orden || 0); })
+            .map(function (r) {
+              return {
+                key: r.campo,
+                label: r.label_override || r.campo,
+                type: r.tipo || 'text',
+                options: Array.isArray(r.opciones) ? r.opciones : undefined,
+                required: !!r.requerido,
+                placeholder: r.placeholder || '',
+                help: r.help || '',
+              };
+            });
+        } catch (_) { return []; }
+      })();
       const _productTerm = _terms.producto || 'producto';
       const _modalTitle = (prefill ? 'Editar ' : 'Nuevo ') + _productTerm.toLowerCase();
       // V10.8 — Layout minimalista 1 columna: solo Nombre, Código, Precio.
