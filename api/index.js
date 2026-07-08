@@ -2290,17 +2290,11 @@ const handlers = {
         supabaseRequest('GET', `/giros_campos?giro_slug=eq.${encodeURIComponent(giroSlug)}&select=modal,campo,visible,requerido,orden,label_override,tipo,opciones,placeholder,help&order=modal.asc,orden.asc`).catch(() => []),
       ]);
 
-      // Tambien cargar 'default' como fallback para campos no definidos en el giro especifico
-      const defaultCampos = giroSlug !== 'default'
-        ? await supabaseRequest('GET', `/giros_campos?giro_slug=eq.default&select=modal,campo,visible,requerido,orden,label_override,tipo,opciones,placeholder,help`).catch(() => [])
-        : [];
-
-      // Merge: defaults + override del giro
+      // 2026-07-08: 'default' YA NO se hereda en todos los giros (opt-in).
+      // Antes se fusionaba en CADA giro y filtraba campos como 'caducidad'
+      // (visible=true) a TODOS los giros. Ahora cada giro usa SOLO sus propios
+      // campos; para tener los de 'default' el giro debe definirlos explícitamente.
       const camposByModal = {};
-      (defaultCampos || []).forEach(r => {
-        camposByModal[r.modal] = camposByModal[r.modal] || {};
-        camposByModal[r.modal][r.campo] = r;
-      });
       (campos || []).forEach(r => {
         camposByModal[r.modal] = camposByModal[r.modal] || {};
         camposByModal[r.modal][r.campo] = r;

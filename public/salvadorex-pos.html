@@ -11199,7 +11199,8 @@
           const cfg = window.VolvixGiroConfig && window.VolvixGiroConfig.config;
           const prod = cfg && cfg.campos && cfg.campos.producto;
           if (!prod) return [];
-          const RESERVED = ['name','code','barcode','price','cost','stock','min_stock','category','description'];
+          const RESERVED = ['name','code','barcode','price','cost','stock','min_stock','category','description',
+            'nombre','codigo','codigo_barras','precio','costo','stock_actual','stock_minimo','categoria','descripcion','existencia'];
           return Object.keys(prod).map(function (k) { return prod[k]; })
             .filter(function (r) { return r && r.visible !== false && RESERVED.indexOf(String(r.campo)) === -1; })
             .sort(function (a, b) { return (a.orden || 0) - (b.orden || 0); })
