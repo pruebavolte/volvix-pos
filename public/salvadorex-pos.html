@@ -10841,7 +10841,10 @@
         max_stock: Number(p.max_stock || p.maximo || 0),
         category: p.category || p.categoria || '',
         description: p.description || p.descripcion || '',
-        barcode: p.barcode || p.codigo_barras || p.code || ''
+        barcode: p.barcode || p.codigo_barras || p.code || '',
+        // 2026-07-07 FIX(review): conservar industry_fields para que al Editar el
+        // modal pre-llene los campos del giro (si no, un re-guardado los borraba).
+        industry_fields: p.industry_fields || null
       }));
       if (typeof renderInv === 'function') renderInv();
       // 2026-05-10: tras CATALOG, syncar TOP 500 a IndexedDB local (offline-first)

@@ -2411,6 +2411,9 @@ const handlers = {
         videos: Array.isArray(p.videos) ? p.videos : (p.videos || []),
         description_long: p.description_long || null,
         tech_info: p.tech_info || {},
+        // 2026-07-07: industry_fields (campos por giro) para que el modal de edición
+        // pre-llene y un re-guardado parcial NO borre valores no re-capturados.
+        industry_fields: p.industry_fields || null,
         tenant_id: tenantId || 'TNT001',
       }));
 
@@ -43249,8 +43252,6 @@ if (process.env.NODE_ENV === 'test') {
 
       // ── Product fields ──
       if (Array.isArray(body.product_fields)) {
-        // Delete-then-insert: simpler than computing the keep-set on (modal,campo) tuples.
-        await supabaseRequest('DELETE', `/giros_campos?giro_slug=eq.${enc}`).catch(() => null);
         // 2026-07-07: modal default 'producto' (NO 'product') — así coincide con
         // los datos existentes y con lo que lee el POS (cfg.campos.producto).
         const ALLOWED_FIELD_TYPES = ['text', 'number', 'select', 'date', 'boolean', 'money', 'textarea'];
@@ -43276,6 +43277,16 @@ if (process.env.NODE_ENV === 'test') {
             help: f.help ? String(f.help).slice(0, 200) : null,
           };
         }).filter(r => r.campo);
+        // 2026-07-07 FIX(review): Delete-then-insert acotado a los MODALES presentes
+        // en el payload (NO todos). giros_campos es multi-modal (producto/cliente/venta);
+        // borrar sin filtro por modal perdía silenciosamente los campos de otros modales.
+        // Si el payload viene vacío se limpia 'producto' (dominio del editor del panel).
+        const modalsToClear = new Set(rows.map(r => r.modal));
+        if (!modalsToClear.size) modalsToClear.add('producto');
+        const modalList = Array.from(modalsToClear)
+          .map(m => `"${String(m).replace(/["\\]/g, '')}"`).join(',');
+        await supabaseRequest('DELETE',
+          `/giros_campos?giro_slug=eq.${enc}&modal=in.(${modalList})`).catch(() => null);
         if (rows.length) {
           await supabaseRequest('POST',
             '/giros_campos?on_conflict=giro_slug,modal,campo',

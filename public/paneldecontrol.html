@@ -7766,6 +7766,7 @@
             });
             if (!ok) return;
             if (window._giroEditOverlay) delete window._giroEditOverlay[currentSlug];
+            if (v14.giroFieldsOverlay) delete v14.giroFieldsOverlay[currentSlug]; // 2026-07-07 FIX(review)
             delete v14.giroIsDirty[currentSlug];
           }
           v14.selectedGiro = null;
@@ -7792,6 +7793,7 @@
           if (!ok) return;
           // descartar cambios in-memory del giro previo
           if (window._giroEditOverlay) delete window._giroEditOverlay[currentSlug];
+          if (v14.giroFieldsOverlay) delete v14.giroFieldsOverlay[currentSlug]; // 2026-07-07 FIX(review)
           delete v14.giroIsDirty[currentSlug];
         }
         v14.selectedGiro = nextSlug;
@@ -8042,8 +8044,10 @@
           TERMS[v14.selectedGiro][k] = typeof v === 'object' ? (v.singular || v.plural || '') : v;
         });
       }
-      if (giroFromBd.product_fields && giroFromBd.product_fields.length) {
-        // 2026-07-07: preservar tipo/opciones/visible desde BD (antes forzaba text).
+      if (Array.isArray(giroFromBd.product_fields)) {
+        // 2026-07-07: BD autoritativa — un array vacío (giro sin campos) DEBE ganar
+        // sobre el hardcoded INDUSTRY_PRODUCT_FIELDS (si no, borrar todo resucitaba
+        // los campos hardcodeados). Preservar tipo/opciones/visible desde BD.
         PRODUCT_FIELDS[v14.selectedGiro] = giroFromBd.product_fields.map(f => ({
           key: f.campo,
           label: f.label_override || f.campo,
@@ -8186,6 +8190,10 @@
             if (v14.giroFieldsOverlay) delete v14.giroFieldsOverlay[slug];
             v14.catalogs.lastLoaded = 0;
             _giroCatalogCache = null;
+            // 2026-07-07 FIX(review): re-fetch del catálogo ANTES de re-render, si no
+            // renderGiroDetail re-hidrata del catálogo viejo y el campo recién guardado
+            // desaparece de la UI (parecía que no se guardó). Igual que el alta de giro.
+            try { if (typeof loadAllCatalogs === 'function') await loadAllCatalogs(true); } catch (_) {}
             renderGiroDetail();
           } catch (e) {
             alert('Error de red: ' + e.message);
