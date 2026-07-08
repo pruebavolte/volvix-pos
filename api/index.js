@@ -2545,16 +2545,18 @@ const handlers = {
         } catch (_) { /* si el lookup falla, seguir e dejar que el DB constraint capture */ }
       }
       // 2026-07-07: industry_fields (campos específicos del giro, jsonb). Solo se
-      // persiste si es objeto plano; se descarta cualquier otra cosa para no
-      // romper el insert ni permitir payloads gigantes.
+      // persiste si es objeto plano con datos; se descarta cualquier otra cosa.
+      // Se OMITE la clave si no hay datos → un producto normal no depende de que
+      // la columna exista (deploy-safe si la migración R39 aún no corrió).
       const industryFields = sanitizeIndustryFields(safe.industry_fields);
-      const result = await supabaseRequest('POST', '/pos_products', {
+      const insertRow = {
         pos_user_id: ownerUserId,
         code: safe.code, name: safe.name, category: safe.category || 'general',
         cost: costNum, price: safe.price, stock: Number(safe.stock || 0),
-        icon: safe.icon || '📦',
-        industry_fields: industryFields
-      });
+        icon: safe.icon || '📦'
+      };
+      if (industryFields) insertRow.industry_fields = industryFields;
+      const result = await supabaseRequest('POST', '/pos_products', insertRow);
       const created = result && (result[0] || result);
       try { logAudit(req, 'product.created', 'pos_products', { id: created && created.id, after: { name: safe.name } }); } catch(_){}
       sendJSON(res, created);
@@ -2612,9 +2614,12 @@ const handlers = {
         }
         safe.stock = stockNum;
       }
-      // 2026-07-07: sanea industry_fields (jsonb) si viene en el PATCH.
+      // 2026-07-07: sanea industry_fields (jsonb) si viene en el PATCH. Si queda
+      // sin datos se OMITE la clave (deploy-safe: no depende de la columna R39).
       if (safe.industry_fields !== undefined) {
-        safe.industry_fields = sanitizeIndustryFields(safe.industry_fields);
+        const cleaned = sanitizeIndustryFields(safe.industry_fields);
+        if (cleaned) safe.industry_fields = cleaned;
+        else delete safe.industry_fields;
       }
       // R22 FIX 2: PATCH con WHERE version=expected
       const result = await supabaseRequest('PATCH',
