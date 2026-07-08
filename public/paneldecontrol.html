@@ -8043,8 +8043,15 @@
         });
       }
       if (giroFromBd.product_fields && giroFromBd.product_fields.length) {
+        // 2026-07-07: preservar tipo/opciones/visible desde BD (antes forzaba text).
         PRODUCT_FIELDS[v14.selectedGiro] = giroFromBd.product_fields.map(f => ({
-          key: f.campo, label: f.label_override || f.campo, type: 'text', required: !!f.requerido,
+          key: f.campo,
+          label: f.label_override || f.campo,
+          type: f.tipo || 'text',
+          options: Array.isArray(f.opciones) ? f.opciones : undefined,
+          visible: f.visible !== false,
+          required: !!f.requerido,
+          orden: f.orden || 0,
         }));
       }
     }
@@ -8140,11 +8147,32 @@
             if (ovB.name_override) entry.name_override = ovB.name_override;
             buttonsPatch[bk] = entry;
           });
+          // 2026-07-07: product_fields desde el overlay editable. campo se deriva del
+          // label (slug) si es nuevo; se deduplica y se descartan filas sin campo.
+          const fldOverlay = (v14.giroFieldsOverlay && v14.giroFieldsOverlay[slug]) || [];
+          const _slugField = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 64);
+          const _seenCampo = {};
+          const productFieldsPatch = fldOverlay.map((f, idx) => {
+            const label = String(f.label_override || '').trim();
+            const campo = f.campo || _slugField(label);
+            if (!campo || _seenCampo[campo]) return null;
+            _seenCampo[campo] = true;
+            return {
+              campo: campo,
+              label_override: label || campo,
+              tipo: f.tipo || 'text',
+              opciones: (f.tipo === 'select' && Array.isArray(f.opciones)) ? f.opciones : null,
+              visible: f.visible !== false,
+              requerido: !!f.requerido,
+              orden: (idx + 1) * 10,
+              modal: 'producto',
+            };
+          }).filter(Boolean);
           try {
             const r = await fetch('/api/admin/giros/' + encodeURIComponent(slug), {
               method: 'PATCH',
               headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
-              body: JSON.stringify({ modules: modulesPatch, terms: termsPatch, buttons: buttonsPatch, cascade: true }),
+              body: JSON.stringify({ modules: modulesPatch, terms: termsPatch, buttons: buttonsPatch, product_fields: productFieldsPatch, cascade: true }),
             });
             const j = await r.json();
             if (!r.ok) {
@@ -8152,8 +8180,10 @@
               saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar Giro';
               return;
             }
-            if (window.toast) window.toast('✅ Giro "' + slug + '" guardado: ' + (j.applied?.modules || 0) + ' módulos + ' + (j.applied?.terms || 0) + ' terms — cascadeado a ' + (j.applied?.cascaded_tenants || 0) + ' tenants', 'ok');
+            if (window.toast) window.toast('✅ Giro "' + slug + '" guardado: ' + (j.applied?.modules || 0) + ' módulos + ' + (j.applied?.terms || 0) + ' terms + ' + (j.applied?.product_fields || 0) + ' campos — cascadeado a ' + (j.applied?.cascaded_tenants || 0) + ' tenants', 'ok');
             if (v14.giroIsDirty) delete v14.giroIsDirty[slug];
+            // 2026-07-07: limpiar overlay de campos para re-hidratar desde BD fresca.
+            if (v14.giroFieldsOverlay) delete v14.giroFieldsOverlay[slug];
             v14.catalogs.lastLoaded = 0;
             _giroCatalogCache = null;
             renderGiroDetail();
@@ -8319,6 +8349,20 @@
       const rules = SELL_RULES[slug];
       const fields = PRODUCT_FIELDS[slug] || [];
       const tenantCount = (_girosTenantCounts || {})[slug] || 0;
+      // 2026-07-07: overlay editable de campos de producto (product_fields).
+      // Se inicializa 1 vez por giro desde BD; los edits persisten hasta 💾 Guardar.
+      v14.giroFieldsOverlay = v14.giroFieldsOverlay || {};
+      if (!v14.giroFieldsOverlay[slug]) {
+        v14.giroFieldsOverlay[slug] = (fields || []).map(f => ({
+          campo: f.key || f.campo,
+          label_override: f.label || f.label_override || (f.key || f.campo),
+          tipo: f.type || f.tipo || 'text',
+          opciones: Array.isArray(f.options) ? f.options.slice() : (Array.isArray(f.opciones) ? f.opciones.slice() : []),
+          visible: f.visible !== false,
+          requerido: !!(f.required || f.requerido),
+        }));
+      }
+      const fieldRows = v14.giroFieldsOverlay[slug];
 
       let html = '';
       // Tenants usando este giro
@@ -8352,21 +8396,27 @@
             + '</div>';
         });
       }
-      // Campos extra del producto (resumen)
-      if (fields.length) {
-        html += '<div class="permv14-perm-row">'
-          + '<div class="permv14-perm-icon">📋</div>'
-          + '<input class="permv14-perm-name-input" value="Campos extra del producto" readonly>'
-          + '<span class="permv14-state-select s-on" style="text-align:center;cursor:default;">' + fields.length + ' campos</span>'
+      // Campos del producto — EDITOR (2026-07-07). Editable: label, tipo, visible,
+      // requerido, opciones (select). Se persiste vía 💾 Guardar Giro → giros_campos
+      // → cascada a los tenants del giro. El POS los renderiza en el modal de alta.
+      html += '<div class="permv14-perm-row" style="border-top:1px dashed var(--pv-border);margin-top:6px;padding-top:8px;">'
+        + '<div class="permv14-perm-icon">📋</div>'
+        + '<input class="permv14-perm-name-input" value="Campos del producto (' + fieldRows.length + ')" readonly>'
+        + '<button type="button" id="giro-fld-add" style="flex:0 0 auto;background:var(--pv-accent);color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;">➕ Agregar</button>'
+        + '</div>';
+      fieldRows.forEach((f, i) => {
+        const TIPOS = ['text','number','select','date','boolean'];
+        const tsel = TIPOS.map(t => '<option value="' + t + '"' + (f.tipo === t ? ' selected' : '') + '>' + t + '</option>').join('');
+        html += '<div class="permv14-perm-row" data-fld-row="' + i + '" style="flex-wrap:wrap;gap:4px;align-items:center;">'
+          + '<div class="permv14-perm-icon">·</div>'
+          + '<input class="permv14-perm-name-input" data-fld-label="' + i + '" value="' + escapeAttr(f.label_override || '') + '" placeholder="Etiqueta (ej. Lote)" style="flex:1 1 110px;min-width:90px;">'
+          + '<select data-fld-tipo="' + i + '" title="Tipo de campo" style="flex:0 0 auto;width:80px;background:var(--pv-bg-paper);border:1px solid var(--pv-border);border-radius:5px;padding:4px;font-size:11px;color:var(--pv-text);">' + tsel + '</select>'
+          + '<label style="flex:0 0 auto;font-size:11px;color:var(--pv-text-soft);display:flex;align-items:center;gap:2px;cursor:pointer;" title="Visible en el POS"><input type="checkbox" data-fld-vis="' + i + '"' + (f.visible !== false ? ' checked' : '') + '>👁</label>'
+          + '<label style="flex:0 0 auto;font-size:11px;color:var(--pv-text-soft);display:flex;align-items:center;gap:2px;cursor:pointer;" title="Requerido"><input type="checkbox" data-fld-req="' + i + '"' + (f.requerido ? ' checked' : '') + '>*</label>'
+          + '<button type="button" data-fld-del="' + i + '" title="Borrar campo" style="flex:0 0 auto;background:#b91c1c;color:#fff;border:none;border-radius:5px;padding:3px 7px;font-size:11px;cursor:pointer;">🗑</button>'
+          + (f.tipo === 'select' ? '<input data-fld-opts="' + i + '" value="' + escapeAttr((f.opciones || []).join(', ')) + '" placeholder="Opciones separadas por coma" style="flex:1 1 100%;margin-top:2px;background:var(--pv-bg-paper);border:1px solid var(--pv-border);border-radius:5px;padding:4px 8px;font-size:11px;color:var(--pv-text);">' : '')
           + '</div>';
-        fields.slice(0, 6).forEach(f => {
-          html += '<div class="permv14-perm-row" style="opacity:.85;">'
-            + '<div class="permv14-perm-icon">·</div>'
-            + '<input class="permv14-perm-name-input" value="' + escapeAttr(f.label) + '" readonly>'
-            + '<span class="permv14-state-select s-on" style="text-align:center;cursor:default;font-size:9px;">' + escapeText(f.type || 'text').toUpperCase() + '</span>'
-            + '</div>';
-        });
-      }
+      });
 
       moduleTable.innerHTML = html || '<div class="permv14-empty-row">Sin metadata adicional para este giro.</div>';
       // Wire inputs editables de terminología — guarda al perder foco / Enter.
@@ -8385,6 +8435,34 @@
         };
         inp.addEventListener('blur', save);
         inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); inp.blur(); } });
+      });
+      // 2026-07-07: wire del editor de campos de producto (product_fields).
+      const _fldMark = () => { v14.giroIsDirty[slug] = true; };
+      const _fldAdd = moduleTable.querySelector('#giro-fld-add');
+      if (_fldAdd) _fldAdd.addEventListener('click', () => {
+        fieldRows.push({ campo: '', label_override: '', tipo: 'text', opciones: [], visible: true, requerido: false });
+        _fldMark(); renderGiroDetail();
+      });
+      $$('input[data-fld-label]', moduleTable).forEach(inp => {
+        inp.addEventListener('input', () => { const i = +inp.dataset.fldLabel; if (fieldRows[i]) { fieldRows[i].label_override = inp.value; _fldMark(); } });
+        inp.addEventListener('blur', () => renderGiroDetail());
+        inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); inp.blur(); } });
+      });
+      $$('select[data-fld-tipo]', moduleTable).forEach(sel => {
+        sel.addEventListener('change', () => { const i = +sel.dataset.fldTipo; if (fieldRows[i]) { fieldRows[i].tipo = sel.value; _fldMark(); renderGiroDetail(); } });
+      });
+      $$('input[data-fld-vis]', moduleTable).forEach(cb => {
+        cb.addEventListener('change', () => { const i = +cb.dataset.fldVis; if (fieldRows[i]) { fieldRows[i].visible = cb.checked; _fldMark(); renderGiroDetail(); } });
+      });
+      $$('input[data-fld-req]', moduleTable).forEach(cb => {
+        cb.addEventListener('change', () => { const i = +cb.dataset.fldReq; if (fieldRows[i]) { fieldRows[i].requerido = cb.checked; _fldMark(); renderGiroDetail(); } });
+      });
+      $$('input[data-fld-opts]', moduleTable).forEach(inp => {
+        inp.addEventListener('input', () => { const i = +inp.dataset.fldOpts; if (fieldRows[i]) { fieldRows[i].opciones = inp.value.split(',').map(s => s.trim()).filter(Boolean); _fldMark(); } });
+        inp.addEventListener('blur', () => renderGiroDetail());
+      });
+      $$('button[data-fld-del]', moduleTable).forEach(btn => {
+        btn.addEventListener('click', () => { const i = +btn.dataset.fldDel; if (fieldRows[i]) { fieldRows.splice(i, 1); _fldMark(); renderGiroDetail(); renderGiroPreview(); } });
       });
     }
 
