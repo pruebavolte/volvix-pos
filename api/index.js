@@ -1003,6 +1003,15 @@ function requireAuth(handler, requiredRoles) {
     if (!tok) return sendJSON(res, { error: 'unauthorized' }, 401);
     const payload = verifyJWT(tok);
     if (!payload) return sendJSON(res, { error: 'unauthorized' }, 401);
+    // SECURITY 2026-07-08: exigir id (UUID) + jti en TODO JWT de sesión. Cierra el
+    // bypass donde un token firmado sin id/jti saltaba la validación de revocación
+    // (jti vs pos_active_sessions, más abajo) → permitía evadir el cierre de sesión.
+    // Todo signJWT() emite id+jti; un token sin ellos es forjado / no-sesión → 401.
+    // La rama X-API-Key retorna antes (arriba) y NO llega aquí, así que no le aplica.
+    const _idNoDash = payload.id != null ? String(payload.id).replace(/-/g, '') : '';
+    if (!/^[0-9a-fA-F]{32}$/.test(_idNoDash) || !payload.jti) {
+      return sendJSON(res, { error: 'unauthorized', error_code: 'INVALID_SESSION_TOKEN', reason: 'missing_id_or_jti' }, 401);
+    }
     if (requiredRoles && requiredRoles.length && !requiredRoles.includes(payload.role)) {
       return sendJSON(res, { error: 'forbidden' }, 403);
     }
