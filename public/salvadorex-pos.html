@@ -7563,19 +7563,30 @@
   //   - Oculta/muestra campos del modal producto segun campos.producto[X].visible
   window.VolvixGiroConfig = {
     config: null,
+    _loadPromise: null,
     async load() {
-      var token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
-      if (!token) return;
-      try {
-        var r = await fetch('/api/giro/config', {
-          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-          credentials: 'include',
-        });
-        if (!r.ok) return;
-        this.config = await r.json();
-        this.apply();
-      } catch (e) { console.warn('[GiroConfig] load:', e); }
+      // PERF 2026-07-10: dedupe — load() se dispara en 'volvix:login' Y en
+      // DOMContentLoaded, así que /api/giro/config se pedía 2x por sesión.
+      // Guard de promesa compartida: llamadas concurrentes/repetidas reusan
+      // el mismo fetch. force reload disponible via VolvixGiroConfig.reload().
+      if (this._loadPromise) return this._loadPromise;
+      var self = this;
+      this._loadPromise = (async function () {
+        var token = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+        if (!token) { self._loadPromise = null; return; } // sin token: permitir reintento post-login
+        try {
+          var r = await fetch('/api/giro/config', {
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            credentials: 'include',
+          });
+          if (!r.ok) return;
+          self.config = await r.json();
+          self.apply();
+        } catch (e) { console.warn('[GiroConfig] load:', e); }
+      })();
+      return this._loadPromise;
     },
+    reload() { this._loadPromise = null; return this.load(); },
     apply() {
       if (!this.config) return;
       var cfg = this.config;
@@ -10861,10 +10872,20 @@
   async function _syncTopProductsToIDB(items) {
     if (!window.VolvixProductSearch || typeof window.VolvixProductSearch.upsert !== 'function') return;
     if (!Array.isArray(items) || !items.length) return;
+    // PERF 2026-07-10: antes era un await POR PRODUCTO en serie (hasta 2000
+    // round-trips secuenciales a IndexedDB) — janqueaba el hilo principal justo
+    // al arrancar. Ahora va en lotes de 100 en paralelo (IDB encola internamente)
+    // con un respiro entre lotes para no bloquear el render del POS.
     let ok = 0, fail = 0;
-    for (const p of items) {
-      try { await window.VolvixProductSearch.upsert(p); ok++; }
-      catch (_) { fail++; }
+    const CHUNK = 100;
+    for (let i = 0; i < items.length; i += CHUNK) {
+      const lote = items.slice(i, i + CHUNK);
+      const rs = await Promise.allSettled(lote.map(function (p) {
+        return window.VolvixProductSearch.upsert(p);
+      }));
+      for (const r of rs) { if (r.status === 'fulfilled') ok++; else fail++; }
+      // ceder el hilo entre lotes (deja pintar/atender clicks)
+      if (i + CHUNK < items.length) await new Promise(function (r) { setTimeout(r, 0); });
     }
     console.log('[volvix-search] Pre-sync IDB: ' + ok + ' OK, ' + fail + ' fail');
   }
@@ -14348,6 +14369,14 @@
   // Bug reportado: usuario veía POS vacío al login. Race condition entre token + DOMContentLoaded.
   async function __vlxRetryLoadProducts() {
     for (let i = 0; i < 5; i++) {
+      // PERF 2026-07-10: chequear ANTES de fetchear — la versión anterior
+      // SIEMPRE re-descargaba el catálogo completo en el intento 0 aunque el
+      // boot de DOMContentLoaded ya lo hubiera cargado (catálogo bajado 2x
+      // en cada arranque). Ahora solo fetchea si de verdad falta.
+      if (typeof CATEGORIES !== 'undefined' && CATEGORIES && CATEGORIES.length > 0) {
+        if (i === 0) console.log('[vlx-retry] catálogo ya cargado, skip re-fetch');
+        return;
+      }
       try {
         if (typeof loadProductsFromAPI === 'function') {
           await loadProductsFromAPI();
@@ -14369,6 +14398,27 @@
   window.addEventListener('online', __vlxRetryLoadProducts);
 
   window.addEventListener('DOMContentLoaded', async () => {
+    // PERF 2026-07-10: BOOT EN PARALELO. Antes los 3 requests de arranque iban
+    // EN SERIE (await productos → await active-modules → await app/config): el
+    // tiempo percibido era la SUMA de los 3. Ahora los 3 salen al mismo tiempo
+    // y el boot tarda lo que el más lento. Los awaits de abajo consumen estas
+    // promesas en el mismo orden de siempre (misma semántica, cero re-orden).
+    const __bootTok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+    let __bootTnt = null;
+    try {
+      if (__bootTok) {
+        const __p = JSON.parse(atob(__bootTok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+        __bootTnt = __p.tenant_id || __p.tnt || null;
+      }
+    } catch (_) {}
+    const __bootProductsP = (typeof loadProductsFromAPI === 'function')
+      ? loadProductsFromAPI() : Promise.resolve();
+    const __bootModulesP = __bootTok
+      ? fetch('/api/tenant/active-modules', { headers: { 'Authorization': 'Bearer ' + __bootTok } }).catch(function(){ return null; })
+      : Promise.resolve(null);
+    const __bootAppCfgP = __bootTnt
+      ? fetch('/api/app/config?t=' + encodeURIComponent(__bootTnt)).catch(function(){ return null; })
+      : Promise.resolve(null);
     // Render inicial con placeholders (mientras carga el API)
     renderCart();
     renderInv();
@@ -14380,7 +14430,7 @@
     renderCategories();
     renderQuickPick();
     // 2026-05-07: cargar productos REALES desde Supabase y re-render
-    await loadProductsFromAPI();
+    await __bootProductsP;
     renderCategories();
     renderQuickPick();
     populateGranelSelect(); // poblar select de venta a granel desde productos reales
@@ -14391,10 +14441,10 @@
     // /api/tenant/active-modules y mergea con el state local antes del
     // applyState — los cambios del super-admin se ven en cualquier sesión.
     try {
-      const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
-      if (tok) {
-        const r = await fetch('/api/tenant/active-modules', { headers: { 'Authorization': 'Bearer ' + tok }});
-        if (r.ok) {
+      if (__bootTok) {
+        // PERF 2026-07-10: consumir la promesa que ya salió en paralelo arriba
+        const r = await __bootModulesP;
+        if (r && r.ok) {
           const j = await r.json();
           const state = VOLVIX.getState();
           if (!state.modules) state.modules = {};
@@ -14455,13 +14505,12 @@
       // Trae el giro completo via /api/app/config?t=<tenant_id> y renombra módulos
       // como "Inventario" → "Productos / Inventario" según el giro del negocio.
       try {
-        const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
-        if (tok) {
-          const p = JSON.parse(atob(tok.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-          const tnt = p.tenant_id || p.tnt;
-          if (tnt) {
-            const r = await fetch('/api/app/config?t=' + encodeURIComponent(tnt));
-            if (r.ok) {
+        if (__bootTnt) {
+          {
+            // PERF 2026-07-10: consumir la promesa paralela del boot (antes:
+            // fetch secuencial aquí, 3er round-trip en serie del arranque)
+            const r = await __bootAppCfgP;
+            if (r && r.ok) {
               const j = await r.json();
               if (j.giro && j.giro.moduleNameOverrides && typeof applyModuleRenames === 'function') {
                 window.__volvixGiroData = j.giro;

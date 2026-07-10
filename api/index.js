@@ -81,6 +81,17 @@ const ALLOWED_ORIGINS = Array.from(new Set([...__ENV_ORIGINS, ...__CAPACITOR_ORI
 // =============================================================
 // SUPABASE REST API CLIENT
 // =============================================================
+// PERF 2026-07-10: keep-alive — antes CADA llamada REST a Supabase abría una
+// conexión TLS nueva (handshake +100-300ms por request). Con el agent compartido
+// las conexiones se reusan y el overhead fijo por query desaparece. Diagnóstico:
+// el SQL del POS corre en 1-6ms; el tiempo se iba en round-trips TLS repetidos.
+const __sbKeepAliveAgent = new https.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 15000,
+  maxSockets: 50,
+  maxFreeSockets: 10
+});
+
 function supabaseRequest(method, path, body, extraHeaders) {
   return new Promise((resolve, reject) => {
     const fullUrl = SUPABASE_URL + '/rest/v1' + path;
@@ -108,7 +119,8 @@ function supabaseRequest(method, path, body, extraHeaders) {
     const opts = {
       hostname: u.hostname, port: 443,
       path: u.pathname + u.search, method: method,
-      headers: baseHeaders
+      headers: baseHeaders,
+      agent: __sbKeepAliveAgent // PERF 2026-07-10: reusar conexiones TLS
     };
 
     const req = https.request(opts, (res) => {
