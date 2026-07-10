@@ -1385,48 +1385,27 @@
           }
         } catch (_) {}
 
-        // 5) FIRE-AND-FORGET fetch /api/cobro en background.
-        // Si responde, actualizamos el record local. Si falla, queda en cola.
-        (function syncInBackground() {
-          var bgCtrl = new AbortController();
-          var bgTimer = setTimeout(function(){ bgCtrl.abort(); }, 20000);
-          fetch('/api/cobro', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Idempotency-Key': idemKey,
-              Authorization: token ? ('Bearer ' + token) : ''
-            },
-            body: JSON.stringify(payload),
-            signal: bgCtrl.signal
-          }).then(function(resp){
-            clearTimeout(bgTimer);
-            if (resp.ok || resp.status === 409) {
-              return resp.json().catch(function(){ return {}; }).then(function(data){
-                // Actualizar la cola: marcar como synced + guardar sale_id real
-                try {
-                  var queueKey = 'volvix_cobro_offline_queue';
-                  var queue = JSON.parse(localStorage.getItem(queueKey) || '[]');
-                  for (var i = 0; i < queue.length; i++) {
-                    if (queue[i].idemKey === idemKey) {
-                      queue[i].synced = true;
-                      queue[i].serverSaleId = data.sale_id || data.id;
-                      queue[i].serverSaleNumber = data.sale_number;
-                      break;
-                    }
-                  }
-                  localStorage.setItem(queueKey, JSON.stringify(queue));
-                } catch (_) {}
-                log('background sync OK:', data.sale_id || data.id);
-              });
-            }
-            log('background sync NON-OK:', resp.status);
-          }).catch(function(e){
-            clearTimeout(bgTimer);
-            log('background sync failed:', e.message);
-            // Quedará en cola para futuro reintento (otro sync wakeup)
-          });
-        })();
+        // 5) SUBIR AL SERVER — UNA SOLA RUTA: el sync engine.
+        // ────────────────────────────────────────────────────────────────
+        // FIX DUPLICADOS 2026-07-09: aquí antes había un fetch fire-and-forget
+        // a /api/cobro con SU idempotency-key (deterministicIdemKey: hash de
+        // items+total+ticket+tenant). AL MISMO TIEMPO el sync engine
+        // (volvix-sales-sync.js) subía la MISMA venta desde
+        // volvix_sales_local_v1 con OTRA key (idempotencyKeyFor: hash de
+        // caja_id|local_sale_id|ts|total). Dos keys distintas = el server no
+        // podía deduplicar = 2 filas en pos_sales por cada venta.
+        //
+        // Ahora hay UNA sola ruta de subida: la venta ya quedó persistida en
+        // volvix_sales_local_v1 en FASE 2 (con su retry/backoff/idempotency).
+        // Aquí solo DESPERTAMOS al sync engine para que la suba YA (sube en
+        // ~0s en vez de esperar el tick), preservando la experiencia instantánea
+        // SIN duplicar. Si el sync engine aún no cargó, su primer tick (1.5s) o
+        // el listener 'online' la suben igual — ninguna venta se pierde.
+        try {
+          if (window.VolvixSalesSync && typeof window.VolvixSalesSync.syncNow === 'function') {
+            Promise.resolve(window.VolvixSalesSync.syncNow()).catch(function(){});
+          }
+        } catch (_) {}
 
         return;
       } catch (e) {

@@ -22555,6 +22555,21 @@ if (process.env.NODE_ENV === 'test') {
           // Replay dentro de ventana de 10min → respuesta cacheada
           return sendJSON(res, Object.assign({ replayed: true }, cached.body), 201);
         }
+        // FIX DUPLICADOS 2026-07-09 (defensa en profundidad): la cache in-memory
+        // solo vive dentro de UN lambda warm. Un reintento del sync engine que
+        // caiga en OTRO lambda (cold start) o después de evicción crearía una
+        // venta duplicada. Consultamos la tabla idempotency_keys en la BD.
+        // Best-effort: si la tabla falla/no existe, seguimos (jamás bloquear una venta).
+        try {
+          const dbKey = 'cobro:' + tnt + ':' + idemKey;
+          const rows = await supabaseRequest('GET',
+            '/idempotency_keys?key=eq.' + encodeURIComponent(dbKey) +
+            '&select=response_body,expires_at&limit=1');
+          if (rows && rows.length && rows[0].expires_at &&
+              new Date(rows[0].expires_at).getTime() > Date.now()) {
+            return sendJSON(res, Object.assign({ replayed: true }, rows[0].response_body || {}), 201);
+          }
+        } catch (_) { /* tabla ausente o error → continuar */ }
       }
 
       const userId = (req.user && req.user.id) || null;
@@ -22839,6 +22854,19 @@ if (process.env.NODE_ENV === 'test') {
           keys.forEach(function (k) { __vlxCobroIdemCache.delete(k); });
         }
         __vlxCobroIdemCache.set(tnt + ':' + idemKey, { ts: Date.now(), body: responseBody });
+        // FIX DUPLICADOS 2026-07-09: persistir también en BD (idempotency_keys)
+        // para deduplicar reintentos que caigan en otro lambda. Fire-and-forget:
+        // un fallo aquí no afecta la venta (ya se insertó y se responde 201).
+        try {
+          supabaseRequest('POST', '/idempotency_keys', {
+            key: 'cobro:' + tnt + ':' + idemKey,
+            user_id: userId,
+            endpoint: 'POST /api/cobro',
+            response_body: responseBody,
+            status_code: 201,
+            expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString()
+          }).catch(function () {});
+        } catch (_) {}
       }
 
       sendJSON(res, responseBody, 201);
