@@ -37912,7 +37912,7 @@ if (process.env.NODE_ENV === 'test') {
             plan: 'trial',
             full_name: 'Owner ' + business_name,
             notes: notes,
-            phone: phone,
+            phone: storagePhone,
             // FIX 2026-07-07: setear la COLUMNA tenant_id en el alta del dueño.
             tenant_id: tenantId,
             email_verified: false,
