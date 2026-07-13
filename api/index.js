@@ -22474,6 +22474,7 @@ if (process.env.NODE_ENV === 'test') {
       const email = body.email ? String(body.email).trim().toLowerCase() : '';
       const phone = body.phone ? String(body.phone).replace(/[^\d]/g, '') : '';
       const name  = body.name ? sanitizeName(String(body.name)) : '';
+      const storagePhone = phone || (email ? ('email:' + email).slice(0, 80) : ('internal:' + crypto.randomUUID()));
       const businessType = body.business_type ? String(body.business_type).trim().toLowerCase().slice(0, 40) : null;
       let userRole = String(body.role || 'cajero').toLowerCase();
       const allowedRoles = ['cajero','inventario','contador','manager','admin','owner'];
@@ -22518,7 +22519,7 @@ if (process.env.NODE_ENV === 'test') {
       const tempPwd = !body.password;
       const row = {
         email: email || null,
-        phone: phone || null,
+        phone: storagePhone,
         password_hash: b36Hash(pwd),
         role: userRole,
         is_active: true,
@@ -22527,6 +22528,8 @@ if (process.env.NODE_ENV === 'test') {
         business_type: businessType,
         email_verified: false,
         phone_verified: false,
+        mfa_enabled: false,
+        mfa_backup_codes: [],
         must_change_password: tempPwd,
         created_at: new Date().toISOString()
       };
@@ -22537,12 +22540,16 @@ if (process.env.NODE_ENV === 'test') {
         // Schema fallback: si phone/email_verified/business_type/must_change_password
         // no existen como columnas, reintentar sin esos campos.
         const msg = String((e && e.message) || '');
-        if (/PGRST204|column.*does not exist|42703|22P02|invalid input syntax.*uuid/i.test(msg)) {
-          delete row.phone;
+        if (/22P02|invalid input syntax.*uuid/i.test(msg)) {
+          delete row.tenant_id;
+          result = await supabaseRequest('POST', '/pos_users', row);
+        } else if (/PGRST204|column.*does not exist|42703/i.test(msg)) {
           delete row.email_verified;
           delete row.phone_verified;
           delete row.business_type;
           delete row.must_change_password;
+          delete row.mfa_enabled;
+          delete row.mfa_backup_codes;
           if (!row.email) {
             return sendJSON(res, { error: 'phone_column_missing', message: 'El schema no soporta phone-only. Provee email.' }, 400);
           }
@@ -37833,6 +37840,7 @@ if (process.env.NODE_ENV === 'test') {
       // ---- Crear pos_users (o reusar el abandonado y refrescar pass/notes) ----
       const passwordHash = hashPasswordScrypt(password);
       const emailValue = email; // email es requerido ahora
+      const storagePhone = phone || ('email:' + emailValue).slice(0, 80);
       // 2026-05-12: si el cliente envió custom_data (productos/dolores generados
       // por el marketplace para giros nuevos), lo guardamos en notes para que
       // bootstrapTenant lo use después de la verificación de OTP.
@@ -37879,13 +37887,13 @@ if (process.env.NODE_ENV === 'test') {
             password_hash: passwordHash,
             notes: notes,
             full_name: 'Owner ' + business_name,
+            phone: storagePhone,
             // FIX 2026-07-07: setear la COLUMNA tenant_id (no solo notes.tenant_id).
             // GET /api/users/resolveOwner filtran por la columna; sin esto el dueño
             // no aparecía ni en su propia lista de equipo.
             tenant_id: tenantId,
             updated_at: new Date().toISOString()
           };
-          if (phone) patchU.phone = phone;
           try {
             await supabaseRequest('PATCH', '/pos_users?id=eq.' + reuseUserId, patchU);
           } catch (ePatch) {
@@ -37910,6 +37918,7 @@ if (process.env.NODE_ENV === 'test') {
             email_verified: false,
             phone_verified: false,
             mfa_enabled: false,
+            mfa_backup_codes: [],
             created_at: new Date().toISOString()
           };
           let insU;
