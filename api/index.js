@@ -22537,7 +22537,7 @@ if (process.env.NODE_ENV === 'test') {
         // Schema fallback: si phone/email_verified/business_type/must_change_password
         // no existen como columnas, reintentar sin esos campos.
         const msg = String((e && e.message) || '');
-        if (/PGRST204|column.*does not exist|42703/i.test(msg)) {
+        if (/PGRST204|column.*does not exist|42703|22P02|invalid input syntax.*uuid/i.test(msg)) {
           delete row.phone;
           delete row.email_verified;
           delete row.phone_verified;
@@ -37890,7 +37890,7 @@ if (process.env.NODE_ENV === 'test') {
             await supabaseRequest('PATCH', '/pos_users?id=eq.' + reuseUserId, patchU);
           } catch (ePatch) {
             // Schema fallback: si tenant_id no existe como columna, reintentar sin ella
-            if (/PGRST204|column.*does not exist|42703/i.test(String(ePatch && ePatch.message))) {
+            if (/PGRST204|column.*does not exist|42703|22P02|invalid input syntax.*uuid/i.test(String(ePatch && ePatch.message))) {
               delete patchU.tenant_id;
               await supabaseRequest('PATCH', '/pos_users?id=eq.' + reuseUserId, patchU);
             } else throw ePatch;
@@ -37916,7 +37916,7 @@ if (process.env.NODE_ENV === 'test') {
           try {
             insU = await supabaseRequest('POST', '/pos_users', ownerRow);
           } catch (eIns) {
-            if (/PGRST204|column.*does not exist|42703/i.test(String(eIns && eIns.message))) {
+            if (/PGRST204|column.*does not exist|42703|22P02|invalid input syntax.*uuid/i.test(String(eIns && eIns.message))) {
               delete ownerRow.tenant_id;
               insU = await supabaseRequest('POST', '/pos_users', ownerRow);
             } else throw eIns;
@@ -43582,4 +43582,3 @@ if (process.env.NODE_ENV === 'test') {
   });
 
 })();
-
