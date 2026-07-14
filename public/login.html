@@ -892,7 +892,12 @@ async function handleLogin(event) {
       }
     }
 
-    showAlert('¡Bienvenido!', 'success');
+    const mustChangePassword = !!(
+      result.must_change_password ||
+      (result.session && result.session.must_change_password)
+    );
+
+    showAlert(mustChangePassword ? 'Actualiza tu contrasena para continuar' : '¡Bienvenido!', 'success');
 
     // 2026-05: redirect según rol — owner-de-tenant → POS; plataforma → launcher.
     // 2026-05-06 fix: variable era `data` (typo) — la respuesta esta en `result`.
@@ -911,6 +916,9 @@ async function handleLogin(event) {
       const r = params.get('redirect');
       if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':') && !r.includes('\\')) {
         dest = decodeURIComponent(r);
+      }
+      if (mustChangePassword) {
+        dest = '/change-password.html';
       }
     } catch(e){}
     setTimeout(() => { window.location.href = dest; }, 600);

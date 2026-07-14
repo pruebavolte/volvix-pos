@@ -23228,6 +23228,7 @@ if (process.env.NODE_ENV === 'test') {
       await supabaseRequest('PATCH', '/pos_users?id=eq.' + encodeURIComponent(uid), {
         password_hash: passwordHash,
         notes: typeof u.notes === 'string' ? JSON.stringify(notesObj) : notesObj,
+        must_change_password: false,
         last_login_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       });
