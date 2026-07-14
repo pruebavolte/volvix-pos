@@ -21742,6 +21742,10 @@ if (process.env.NODE_ENV === 'test') {
   function b36IsSuperadmin(req) {
     return req.user && req.user.role === 'superadmin';
   }
+  function b36IsPlatformAdmin(req) {
+    var r = req.user && req.user.role;
+    return r === 'superadmin' || r === 'platform_owner';
+  }
   function b36ParseDate(v) {
     if (!v) return null;
     var d = new Date(String(v));
@@ -23138,7 +23142,8 @@ if (process.env.NODE_ENV === 'test') {
   // If RESEND_API_KEY set, also fires the standard reset-link email (defense in depth).
   handlers['POST /api/users/:id/reset-password'] = requireAuth(async function (req, res, params) {
     try {
-      if (!b36IsOwner(req)) return send403(res, { need_role: ['owner', 'admin', 'superadmin'], have_role: req.user.role });
+      var role = req.user && req.user.role;
+      if (!b36IsOwner(req) && role !== 'platform_owner') return send403(res, { need_role: ['owner', 'admin', 'superadmin', 'platform_owner'], have_role: req.user.role });
       if (!isUuid(params.id)) return sendValidation(res, 'invalid id', 'id');
       var tnt = b36Tenant(req);
       if (!rateLimit('users:reset:' + tnt, 30, 60000)) {
@@ -23147,7 +23152,7 @@ if (process.env.NODE_ENV === 'test') {
       var existing = await supabaseRequest('GET',
         '/pos_users?id=eq.' + encodeURIComponent(params.id) + '&select=id,tenant_id,email,notes');
       if (!existing || !existing.length) return send404(res, 'pos_users', params.id);
-      if (!b36IsSuperadmin(req) && existing[0].tenant_id !== tnt) {
+      if (!b36IsPlatformAdmin(req) && existing[0].tenant_id !== tnt) {
         return send404(res, 'pos_users', params.id);
       }
       // Generate a 12-char alphanumeric password (no ambiguous chars)
@@ -23165,6 +23170,7 @@ if (process.env.NODE_ENV === 'test') {
       await supabaseRequest('PATCH', '/pos_users?id=eq.' + encodeURIComponent(params.id), {
         password_hash: passwordHash,
         notes: typeof existing[0].notes === 'string' ? JSON.stringify(notesObj) : notesObj,
+        must_change_password: true,
         last_login_at: null,
         updated_at: new Date().toISOString()
       });

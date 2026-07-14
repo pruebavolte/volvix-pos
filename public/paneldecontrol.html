@@ -11000,7 +11000,7 @@
       { label: 'Sesión en',   w: 130  },   // 🪟 Windows · 2 min
       { label: 'URL landing', w: 180  },
       { label: 'URL acceso',  w: 200  },
-      { label: '',            w: 210  }    // acciones: 5 botones x ~36px + margenes
+      { label: '',            w: 290  }    // acciones compactas + boton "Contrasena"
     ];
     // Barra de acciones masivas (oculta hasta que haya selección)
     const bulkBar = '<div id="pv14-users-bulk" style="display:none;padding:8px 14px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;margin-bottom:8px;font-size:13px;color:#9a3412;align-items:center;gap:10px;flex-wrap:wrap;">'
@@ -11174,11 +11174,12 @@
       // - Quitamos ✏️ Editar: las celdas ya son editables tipo Excel (click → escribir)
       // - 👁‍🗨 Ver como y 🖥 Control remoto siempre visibles (si no hay email del owner,
       //   usamos el tenant_id como proxy — abre el portal del tenant impersonado)
-      const inlineTenantActions = (tid, email) => '<td class="u-actions">'
+      const inlineTenantActions = (tid, email, userId) => '<td class="u-actions">'
         + '<button data-pv14-diff-tenant="' + escapeAttr(tid) + '" title="Ver qué cambia si aplico el giro de la fila">👁</button>'
         + '<button data-pv14-apply-tenant="' + escapeAttr(tid) + '" title="Aplicar preset del giro de esta fila">⚡</button>'
         + '<button data-pv14-view-as="' + escapeAttr(email || '') + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Ver como este usuario (abrir su portal sin password)" style="color:#7c3aed;">👁‍🗨</button>'
         + '<button data-pv14-remote="' + escapeAttr(email || '') + '" data-pv14-tid="' + escapeAttr(tid) + '" title="Control remoto · soporte técnico con consentimiento" style="color:#2563EB;">🖥</button>'
+        + (userId ? '<button data-pv14-reset-password="' + escapeAttr(userId) + '" data-pv14-reset-email="' + escapeAttr(email || '') + '" title="Resetear contraseña temporal y exigir cambio al próximo inicio" style="color:#b45309;">🔑 Contraseña</button>' : '')
         + '<button data-pv14-delete="' + escapeAttr(tid) + '" data-pv14-deltype="tenant" data-pv14-dellabel="' + escapeAttr((t.name||tid)) + '" title="Eliminar tenant + sus usuarios" style="color:#DC2626;">🗑</button>'
         + '</td>';
 
@@ -11198,7 +11199,7 @@
           + '<td>' + _DASH + '</td>'
           + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
           + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
-          + inlineTenantActions(t.tenant_id, '')
+          + inlineTenantActions(t.tenant_id, '', '')
           + '</tr>';
       }
       ownersFilt.forEach((o, idx) => {
@@ -11237,11 +11238,12 @@
           + '<td><a class="u-url" href="https://' + escapeAttr(landing) + '" target="_blank" rel="noopener">' + escapeText(landing) + '</a></td>'
           + '<td><a class="u-url" href="https://' + escapeAttr(acceso) + '" target="_blank" rel="noopener">' + escapeText(acceso) + '</a></td>'
           + (isFirstOfTenant
-              ? inlineTenantActions(t.tenant_id, o.email || '')
+              ? inlineTenantActions(t.tenant_id, o.email || '', realUid || '')
               : '<td class="u-actions">'
                   + '<button data-pv14-view-as="' + escapeAttr(o.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Ver como">👁‍🗨</button>'
                   + '<button data-pv14-add-override="' + escapeAttr(o.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Override">+</button>'
                   + '<button data-pv14-remote="' + escapeAttr(o.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Control remoto" style="color:#2563EB;">🖥</button>'
+                  + '<button data-pv14-reset-password="' + escapeAttr(realUid || '') + '" data-pv14-reset-email="' + escapeAttr(o.email || '') + '" title="Resetear contraseña temporal y exigir cambio al próximo inicio" style="color:#b45309;">🔑 Contraseña</button>'
                   + '<button data-pv14-delete="' + escapeAttr(realUid || o.email) + '" data-pv14-deltype="user" data-pv14-dellabel="' + escapeAttr(o.email || '') + '" title="Eliminar usuario" style="color:#DC2626;">🗑</button>'
                 + '</td>')
           + '</tr>';
@@ -11279,6 +11281,7 @@
           +   '<button data-pv14-view-as="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Ver como">👁‍🗨</button>'
           +   '<button data-pv14-add-override="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Override">+</button>'
           +   '<button data-pv14-remote="' + escapeAttr(e.email || '') + '" data-pv14-tid="' + escapeAttr(t.tenant_id) + '" title="Control remoto" style="color:#2563EB;">🖥</button>'
+          +   '<button data-pv14-reset-password="' + escapeAttr(empUid || '') + '" data-pv14-reset-email="' + escapeAttr(e.email || '') + '" title="Resetear contraseña temporal y exigir cambio al próximo inicio" style="color:#b45309;">🔑 Contraseña</button>'
           +   '<button data-pv14-delete="' + escapeAttr(empUid || e.email) + '" data-pv14-deltype="user" data-pv14-dellabel="' + escapeAttr(e.email || '') + '" title="Eliminar empleado" style="color:#DC2626;">🗑</button>'
           + '</td>'
           + '</tr>';
@@ -12099,6 +12102,51 @@
           alert('Error: ' + e.message);
         } finally {
           btn.disabled = false; btn.textContent = origLabel;
+        }
+      });
+    });
+    wrap.querySelectorAll('button[data-pv14-reset-password]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const uid = btn.dataset.pv14ResetPassword;
+        const email = btn.dataset.pv14ResetEmail || 'este usuario';
+        if (!uid) { alert('Esta fila no tiene id de usuario valido para resetear contrasena.'); return; }
+        const ok = await permv14Modal({
+          title: 'Resetear contrasena',
+          body: 'Se generara una contrasena temporal para ' + email + '.\n\nEn su proximo inicio de sesion el sistema le pedira crear una contrasena nueva.',
+          confirmLabel: 'Resetear',
+          cancelLabel: 'Cancelar'
+        });
+        if (!ok) return;
+        const original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = '...';
+        try {
+          const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken');
+          const r = await fetch('/api/users/' + encodeURIComponent(uid) + '/reset-password', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason: 'paneldecontrol_reset_password' })
+          });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok || !j.ok) {
+            alert('No se pudo resetear la contrasena: ' + (j.error || r.status));
+            return;
+          }
+          const temp = j.temporary_password || '';
+          try { if (temp && navigator.clipboard) await navigator.clipboard.writeText(temp); } catch (_) {}
+          await permv14Modal({
+            title: 'Contrasena temporal generada',
+            body: 'Usuario: ' + (j.email || email) + '\n\nContrasena temporal:\n' + temp + '\n\nCopiala y entregala al usuario. Al iniciar sesion debera cambiarla por una nueva.',
+            confirmLabel: 'Entendido'
+          });
+          if (window.toast) window.toast('Contrasena temporal generada para ' + email, 'ok');
+          _usersHierarchyCache = null;
+          renderUsersUnified();
+        } catch (e) {
+          alert('Error: ' + e.message);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = original;
         }
       });
     });
