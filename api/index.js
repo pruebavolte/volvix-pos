@@ -8848,7 +8848,7 @@ handlers['GET /api/auth/oauth/google/start'] = async (req, res) => {
   const host = (req.headers.host || 'systeminternational.app').replace(/:\d+$/, '');
   const appUrl = process.env.APP_URL || `https://${host}`;
   const callbackUrl = encodeURIComponent(`${appUrl}/auth-callback.html`);
-  const oauthUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${callbackUrl}`;
+  const oauthUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${callbackUrl}&prompt=select_account`;
   res.writeHead(302, { Location: oauthUrl, 'Cache-Control': 'no-store' });
   res.end();
 };
