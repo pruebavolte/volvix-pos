@@ -1830,7 +1830,7 @@ const handlers = {
       } catch (_) { /* fail-open if table missing */ }
 
       const users = await supabaseRequest('GET',
-        `/pos_users?email=eq.${encodeURIComponent(email)}&select=id,email,password_hash,role,plan,full_name,company_id,notes,is_active,mfa_enabled`);
+        `/pos_users?email=eq.${encodeURIComponent(email)}&select=id,email,password_hash,role,plan,full_name,company_id,notes,is_active,mfa_enabled,must_change_password,last_login_at`);
 
       const failLogin = async (msg) => {
         recordLoginFail(email);
@@ -1954,8 +1954,10 @@ const handlers = {
         logAudit(fakeReq, 'auth.login_success', 'pos_users', { id: user.id });
       } catch(_){}
 
-      // First-login / forced-change detection
-      const mustChangePassword = !!(notes && notes.must_change_password) || !user.last_login_at;
+      // Forced-change detection: only admin reset / explicit DB flag should force it.
+      // Do not infer from last_login_at; first-login detection made every login look temporary
+      // when the selected payload omitted last_login_at.
+      const mustChangePassword = !!(notes && notes.must_change_password) || user.must_change_password === true;
       // 2026-05-09: incluir business_type en la session response para que el
       // cliente aplique terminologías y campos extras del giro al cargar el POS.
       const businessType = (notes && notes.business_type) || (user.giro) || null;
@@ -1977,6 +1979,42 @@ const handlers = {
       if (newIpWarning) resp.security_alert = newIpWarning;
       if (existingSessionWarning) resp.warning = existingSessionWarning;
       sendJSON(res, resp);
+    } catch (err) {
+      sendError(res, err);
+    }
+  },
+
+  'POST /api/auth/check': async (req, res) => {
+    try {
+      const ip = clientIp(req);
+      if (!rateLimit('auth-check:ip:' + ip, 60, 15 * 60 * 1000)) {
+        return send429(res, 60000, 'Demasiadas consultas, intenta más tarde');
+      }
+
+      const body = await readBody(req, { maxBytes: 4 * 1024 });
+      if (checkBodyError(req, res)) return;
+
+      const email = String(body.email || '').toLowerCase().trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return sendJSON(res, { error: 'Correo inválido' }, 400);
+      }
+
+      const rows = await supabaseRequest('GET',
+        `/pos_users?email=eq.${encodeURIComponent(email)}&select=id,email,full_name,is_active,password_hash,notes,must_change_password&limit=1`);
+      const user = Array.isArray(rows) && rows.length ? rows[0] : null;
+      if (!user) {
+        return sendJSON(res, { exists: false, hasPassword: false, nombre: '', bloqueado: false });
+      }
+
+      const notes = parseNotes(user.notes);
+      return sendJSON(res, {
+        exists: true,
+        hasPassword: !!user.password_hash,
+        nombre: user.full_name || notes.full_name || '',
+        bloqueado: user.is_active === false,
+        must_change_password: !!(notes && notes.must_change_password) || user.must_change_password === true,
+        source: 'systeminternational'
+      });
     } catch (err) {
       sendError(res, err);
     }

@@ -842,8 +842,9 @@ async function handleLogin(event) {
       throw new Error(result.error || 'Sesión no válida');
     }
 
-    // Guardar sesión (legacy)
+    // Guardar sesión en ambas llaves usadas por la app.
     localStorage.setItem('volvixSession', JSON.stringify(result.session));
+    localStorage.setItem('volvix:session', JSON.stringify(result.session));
 
     // 2026-05-06: agregar a remembered users para quick-pick en proximo login.
     try {
