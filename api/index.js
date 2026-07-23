@@ -8916,19 +8916,34 @@ handlers['POST /api/auth/oauth/google/exchange'] = async (req, res) => {
       }
     }
 
-    const tenantId = user.tenant_id || user.company_id || '';
+    // Mantener Google OAuth alineado con el login por contraseña. Los usuarios
+    // legacy guardan el tenant comercial y el rol real dentro de notes.
+    const notes = parseNotes(user.notes);
+    const roleMap = {
+      owner: 'owner',
+      admin: 'admin',
+      superadmin: 'superadmin',
+      manager: 'manager',
+      gerente: 'manager',
+      cashier: 'cajero',
+      cajero: 'cajero',
+      ADMIN: 'superadmin',
+      OWNER: 'owner',
+    };
+    const volvixRole = notes.volvix_role || roleMap[user.role] || user.role || 'owner';
+    const tenantId = notes.tenant_id || user.tenant_id || user.company_id || '';
     const token = signJWT({
       sub: user.id, id: user.id, email,
       tenant_id: tenantId, company_id: tenantId,
-      role: user.role || 'owner',
+      role: volvixRole,
       auth_provider: 'google',
     });
 
     sendJSON(res, {
       ok: true, token,
-      user: { id: user.id, email, role: user.role || 'owner', tenant_id: tenantId },
+      user: { id: user.id, email, role: volvixRole, tenant_id: tenantId },
       tenant: { id: tenantId },
-      redirect: (user.role === 'superadmin' || user.role === 'platform_owner')
+      redirect: (volvixRole === 'superadmin' || volvixRole === 'platform_owner')
         ? '/volvix-launcher.html' : '/salvadorex-pos.html',
     });
   } catch (err) {
@@ -42588,16 +42603,24 @@ if (process.env.NODE_ENV === 'test') {
     return result;
   }
 
+  function canManageAllProductImports(req) {
+    const role = String(req && req.user && req.user.role || '').toLowerCase();
+    return role === 'superadmin' || role === 'platform_owner';
+  }
+
   // Listas recibidas por WhatsApp, ya clasificadas y extraidas por el ALMA.
-  // Solo se exponen al mismo tenant del JWT. Nada entra al inventario hasta
-  // que el usuario revisa la tabla y presiona Guardar.
+  // Un tenant solo ve las suyas; el dueño de plataforma puede revisarlas
+  // todas. Nada entra al inventario hasta que se presiona Guardar.
   handlers['GET /api/product-import/pending'] = requireAuth(async function (req, res) {
     try {
       const tnt = resolveTenant(req);
+      const tenantFilter = canManageAllProductImports(req)
+        ? ''
+        : '&target_tenant_id=eq.' + encodeURIComponent(tnt);
       const rows = await supabaseRequest('GET',
-        '/product_import_batches?target_tenant_id=eq.' + encodeURIComponent(tnt) +
-        '&status=in.(pending,processing,needs_review,ready,error)' +
-        '&select=id,source_file_name,source_mime_type,status,total_items,valid_items,duplicate_items,extraction_method,provider,error,created_at,updated_at' +
+        '/product_import_batches?status=in.(pending,processing,needs_review,ready,error)' +
+        tenantFilter +
+        '&select=id,target_tenant_id,source_file_name,source_mime_type,status,total_items,valid_items,duplicate_items,extraction_method,provider,error,created_at,updated_at' +
         '&order=created_at.desc&limit=50'
       ).catch(() => []);
       sendJSON(res, { ok: true, batches: Array.isArray(rows) ? rows : [] });
@@ -42609,10 +42632,13 @@ if (process.env.NODE_ENV === 'test') {
       const tnt = resolveTenant(req);
       const id = String(params.id || '').trim();
       if (!/^[0-9a-f-]{36}$/i.test(id)) return sendJSON(res, { error: 'batch_id_invalido' }, 400);
+      const tenantFilter = canManageAllProductImports(req)
+        ? ''
+        : '&target_tenant_id=eq.' + encodeURIComponent(tnt);
       const batches = await supabaseRequest('GET',
         '/product_import_batches?id=eq.' + encodeURIComponent(id) +
-        '&target_tenant_id=eq.' + encodeURIComponent(tnt) +
-        '&select=id,source_file_name,source_mime_type,status,total_items,valid_items,duplicate_items,extraction_method,provider,error,created_at&limit=1'
+        tenantFilter +
+        '&select=id,target_tenant_id,source_file_name,source_mime_type,status,total_items,valid_items,duplicate_items,extraction_method,provider,error,created_at&limit=1'
       ).catch(() => []);
       if (!Array.isArray(batches) || !batches.length) {
         return sendJSON(res, { error: 'batch_not_found' }, 404);
@@ -42681,19 +42707,23 @@ if (process.env.NODE_ENV === 'test') {
     try {
       const body = await readBody(req, { maxBytes: 6 * 1024 * 1024 }).catch(() => ({}));
       if (checkBodyError && checkBodyError(req, res)) return;
-      const tnt = (req.user && (req.user.tenant_id || req.user.tnt)) || '';
-      if (!tnt) return sendJSON(res, { error: 'tenant_required' }, 400);
+      const callerTenant = (req.user && (req.user.tenant_id || req.user.tnt)) || '';
+      if (!callerTenant) return sendJSON(res, { error: 'tenant_required' }, 400);
       const items = Array.isArray(body.items) ? body.items : [];
       if (!items.length) return sendJSON(res, { error: 'sin_items' }, 400);
       if (items.length > 5000) return sendJSON(res, { error: 'demasiados_items', max: 5000 }, 400);
       const batchId = String(body.batch_id || '').trim();
       let batchContext = null;
+      let targetTenant = callerTenant;
       if (batchId) {
         if (!/^[0-9a-f-]{36}$/i.test(batchId)) return sendJSON(res, { error: 'batch_id_invalido' }, 400);
+        const tenantFilter = canManageAllProductImports(req)
+          ? ''
+          : '&target_tenant_id=eq.' + encodeURIComponent(callerTenant);
         const batches = await supabaseRequest('GET',
           '/product_import_batches?id=eq.' + encodeURIComponent(batchId) +
-          '&target_tenant_id=eq.' + encodeURIComponent(tnt) +
-          '&select=id,status&limit=1'
+          tenantFilter +
+          '&select=id,status,target_tenant_id&limit=1'
         ).catch(() => []);
         if (!Array.isArray(batches) || !batches.length) {
           return sendJSON(res, { error: 'batch_not_found_or_wrong_tenant' }, 403);
@@ -42702,12 +42732,22 @@ if (process.env.NODE_ENV === 'test') {
           return sendJSON(res, { error: 'batch_already_imported' }, 409);
         }
         batchContext = batches[0];
+        targetTenant = String(batchContext.target_tenant_id || callerTenant);
       }
 
       // 2026-05-10 fix: la tabla destino es pos_products (text tenant_id, pos_user_id NOT NULL)
       // — la antigua /products usa tenant_id uuid y exige sku NOT NULL → todos los inserts fallaban silenciosamente.
-      const userId = req.user && req.user.id;
-      if (!userId) return sendJSON(res, { error: 'user_required' }, 400);
+      let targetUserId = req.user && req.user.id;
+      if (batchContext && targetTenant !== callerTenant && canManageAllProductImports(req)) {
+        const companies = await supabaseRequest('GET',
+          '/pos_companies?tenant_id=eq.' + encodeURIComponent(targetTenant) +
+          '&select=owner_user_id&limit=1'
+        ).catch(() => []);
+        targetUserId = Array.isArray(companies) && companies[0]
+          ? companies[0].owner_user_id
+          : null;
+      }
+      if (!targetUserId) return sendJSON(res, { error: 'target_user_required' }, 400);
 
       // Sanitizar cada item
       const cleaned = [];
@@ -42721,8 +42761,8 @@ if (process.env.NODE_ENV === 'test') {
         const codeRaw = String(it.code || '').trim().slice(0, 64);
         const code = codeRaw || ('IMP-' + Date.now().toString(36).toUpperCase().slice(-4) + '-' + i);
         cleaned.push({
-          tenant_id: tnt,
-          pos_user_id: userId,
+          tenant_id: targetTenant,
+          pos_user_id: targetUserId,
           name,
           code,
           barcode: String(it.barcode || codeRaw || '').trim().slice(0, 64) || null,
@@ -42746,7 +42786,7 @@ if (process.env.NODE_ENV === 'test') {
           // PostgREST: filtrar por code IN (...) y tenant_id=eq
           const codesEnc = allCodes.map(c => '"' + String(c).replace(/"/g,'\\"') + '"').join(',');
           const existing = await supabaseRequest('GET',
-            '/pos_products?tenant_id=eq.' + encodeURIComponent(tnt) +
+            '/pos_products?tenant_id=eq.' + encodeURIComponent(targetTenant) +
             '&code=in.(' + encodeURIComponent(codesEnc) +
             ')&select=id,code&limit=' + (allCodes.length + 10));
           if (Array.isArray(existing)) {
@@ -42843,7 +42883,7 @@ if (process.env.NODE_ENV === 'test') {
         }
         await supabaseRequest('PATCH',
           '/product_import_batches?id=eq.' + encodeURIComponent(batchId) +
-          '&target_tenant_id=eq.' + encodeURIComponent(tnt),
+          '&target_tenant_id=eq.' + encodeURIComponent(targetTenant),
           { status: 'imported', imported_at: nowIso, updated_at: nowIso },
           { 'Prefer': 'return=minimal' }
         );
