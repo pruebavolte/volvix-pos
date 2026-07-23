@@ -42569,6 +42569,106 @@ if (process.env.NODE_ENV === 'test') {
     } catch (err) { sendError(res, err); }
   });
 
+  async function callAlmaProductExtractor(payload) {
+    const response = await fetch(SUPABASE_URL + '/functions/v1/extract-product-price-list', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + SUPABASE_SERVICE_KEY,
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload || {}),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || result.success === false) {
+      const err = new Error(result.error || ('extract-product-price-list ' + response.status));
+      err.statusCode = response.status >= 400 && response.status < 500 ? response.status : 502;
+      throw err;
+    }
+    return result;
+  }
+
+  // Listas recibidas por WhatsApp, ya clasificadas y extraidas por el ALMA.
+  // Solo se exponen al mismo tenant del JWT. Nada entra al inventario hasta
+  // que el usuario revisa la tabla y presiona Guardar.
+  handlers['GET /api/product-import/pending'] = requireAuth(async function (req, res) {
+    try {
+      const tnt = resolveTenant(req);
+      const rows = await supabaseRequest('GET',
+        '/product_import_batches?target_tenant_id=eq.' + encodeURIComponent(tnt) +
+        '&status=in.(pending,processing,needs_review,ready,error)' +
+        '&select=id,source_file_name,source_mime_type,status,total_items,valid_items,duplicate_items,extraction_method,provider,error,created_at,updated_at' +
+        '&order=created_at.desc&limit=50'
+      ).catch(() => []);
+      sendJSON(res, { ok: true, batches: Array.isArray(rows) ? rows : [] });
+    } catch (err) { sendError(res, err); }
+  });
+
+  handlers['GET /api/product-import/batch/:id'] = requireAuth(async function (req, res, params) {
+    try {
+      const tnt = resolveTenant(req);
+      const id = String(params.id || '').trim();
+      if (!/^[0-9a-f-]{36}$/i.test(id)) return sendJSON(res, { error: 'batch_id_invalido' }, 400);
+      const batches = await supabaseRequest('GET',
+        '/product_import_batches?id=eq.' + encodeURIComponent(id) +
+        '&target_tenant_id=eq.' + encodeURIComponent(tnt) +
+        '&select=id,source_file_name,source_mime_type,status,total_items,valid_items,duplicate_items,extraction_method,provider,error,created_at&limit=1'
+      ).catch(() => []);
+      if (!Array.isArray(batches) || !batches.length) {
+        return sendJSON(res, { error: 'batch_not_found' }, 404);
+      }
+      const items = await supabaseRequest('GET',
+        '/product_import_items?batch_id=eq.' + encodeURIComponent(id) +
+        '&select=id,row_number,name,description,suggested_code,barcode,category,unit,price,cost,stock,confidence,status,source_sheet,source_row' +
+        '&order=row_number.asc&limit=5000'
+      ).catch(() => []);
+      sendJSON(res, {
+        ok: true,
+        batch: batches[0],
+        items: Array.isArray(items) ? items : [],
+      });
+    } catch (err) { sendError(res, err); }
+  });
+
+  handlers['POST /api/product-import/normalize'] = requireAuth(async function (req, res) {
+    try {
+      resolveTenant(req);
+      const body = await readBody(req, { maxBytes: 6 * 1024 * 1024 }).catch(() => ({}));
+      if (checkBodyError && checkBodyError(req, res)) return;
+      const candidates = Array.isArray(body.items) ? body.items.slice(0, 5000) : [];
+      if (!candidates.length) return sendJSON(res, { error: 'sin_items' }, 400);
+      const result = await callAlmaProductExtractor({ candidates });
+      sendJSON(res, {
+        ok: true,
+        items: Array.isArray(result.products) ? result.products : [],
+        provider: result.provider || null,
+      });
+    } catch (err) { sendError(res, err); }
+  });
+
+  handlers['POST /api/product-import/digitalize-image'] = requireAuth(async function (req, res) {
+    try {
+      resolveTenant(req);
+      const body = await readBody(req, { maxBytes: 12 * 1024 * 1024 }).catch(() => ({}));
+      if (checkBodyError && checkBodyError(req, res)) return;
+      const imageUrl = String(body.imageData || body.image_url || '');
+      if (!/^data:image\/(?:jpeg|jpg|png|webp);base64,/i.test(imageUrl)) {
+        return sendJSON(res, { error: 'imagen_invalida' }, 400);
+      }
+      const result = await callAlmaProductExtractor({
+        imageUrl,
+        fileName: String(body.fileName || 'imagen.jpg').slice(0, 200),
+        mimeType: String(body.mimeType || 'image/jpeg').slice(0, 100),
+      });
+      sendJSON(res, {
+        ok: true,
+        items: Array.isArray(result.products) ? result.products : [],
+        provider: result.provider || null,
+        extraction_method: result.extraction_method || null,
+      });
+    } catch (err) { sendError(res, err); }
+  });
+
   // ─────────────────────────────────────────────────────────────────────
   // 2026-05-10 Wizard de migración: bulk-import desde Excel/PDF/imagen/etc.
   // POST /api/products/bulk-import {items:[{name,code,price,cost,stock,category}]}
@@ -42579,13 +42679,30 @@ if (process.env.NODE_ENV === 'test') {
   // ─────────────────────────────────────────────────────────────────────
   handlers['POST /api/products/bulk-import'] = requireAuth(async function (req, res) {
     try {
-      const body = await readBody(req).catch(() => ({}));
+      const body = await readBody(req, { maxBytes: 6 * 1024 * 1024 }).catch(() => ({}));
       if (checkBodyError && checkBodyError(req, res)) return;
       const tnt = (req.user && (req.user.tenant_id || req.user.tnt)) || '';
       if (!tnt) return sendJSON(res, { error: 'tenant_required' }, 400);
       const items = Array.isArray(body.items) ? body.items : [];
       if (!items.length) return sendJSON(res, { error: 'sin_items' }, 400);
       if (items.length > 5000) return sendJSON(res, { error: 'demasiados_items', max: 5000 }, 400);
+      const batchId = String(body.batch_id || '').trim();
+      let batchContext = null;
+      if (batchId) {
+        if (!/^[0-9a-f-]{36}$/i.test(batchId)) return sendJSON(res, { error: 'batch_id_invalido' }, 400);
+        const batches = await supabaseRequest('GET',
+          '/product_import_batches?id=eq.' + encodeURIComponent(batchId) +
+          '&target_tenant_id=eq.' + encodeURIComponent(tnt) +
+          '&select=id,status&limit=1'
+        ).catch(() => []);
+        if (!Array.isArray(batches) || !batches.length) {
+          return sendJSON(res, { error: 'batch_not_found_or_wrong_tenant' }, 403);
+        }
+        if (batches[0].status === 'imported') {
+          return sendJSON(res, { error: 'batch_already_imported' }, 409);
+        }
+        batchContext = batches[0];
+      }
 
       // 2026-05-10 fix: la tabla destino es pos_products (text tenant_id, pos_user_id NOT NULL)
       // — la antigua /products usa tenant_id uuid y exige sku NOT NULL → todos los inserts fallaban silenciosamente.
@@ -42703,12 +42820,43 @@ if (process.env.NODE_ENV === 'test') {
         }
       }
 
+      let batchImported = false;
+      if (batchContext && failed === 0) {
+        const nowIso = new Date().toISOString();
+        await supabaseRequest('PATCH',
+          '/product_import_items?batch_id=eq.' + encodeURIComponent(batchId) +
+          '&status=in.(ready,needs_review)',
+          { status: 'skipped', updated_at: nowIso },
+          { 'Prefer': 'return=minimal' }
+        ).catch(() => {});
+        const selectedIds = (Array.isArray(body.batch_item_ids) ? body.batch_item_ids : [])
+          .map((value) => String(value || '').trim())
+          .filter((value) => /^[0-9a-f-]{36}$/i.test(value))
+          .slice(0, 5000);
+        if (selectedIds.length) {
+          await supabaseRequest('PATCH',
+            '/product_import_items?batch_id=eq.' + encodeURIComponent(batchId) +
+            '&id=in.(' + selectedIds.join(',') + ')',
+            { status: 'imported', updated_at: nowIso },
+            { 'Prefer': 'return=minimal' }
+          );
+        }
+        await supabaseRequest('PATCH',
+          '/product_import_batches?id=eq.' + encodeURIComponent(batchId) +
+          '&target_tenant_id=eq.' + encodeURIComponent(tnt),
+          { status: 'imported', imported_at: nowIso, updated_at: nowIso },
+          { 'Prefer': 'return=minimal' }
+        );
+        batchImported = true;
+      }
+
       sendJSON(res, {
         ok: true,
         inserted,
         updated,
         failed,
         skipped: items.length - cleaned.length,
+        batch_imported: batchImported,
         errors: errors.slice(0, 50)
       });
     } catch (err) { sendError(res, err); }

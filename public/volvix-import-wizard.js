@@ -23,7 +23,9 @@
 (function (global) {
   'use strict';
 
-  const MAX_FILE_BYTES = 50 * 1024 * 1024; // 50 MB
+  // No es un limite de carga. A partir de este umbral solo optimizamos
+  // imagenes para no agotar la memoria del navegador.
+  const IMAGE_OPTIMIZATION_THRESHOLD_BYTES = 50 * 1024 * 1024;
   const MAX_ROWS = 5000; // hard cap
 
   // Headers comunes a buscar (case-insensitive, normalizado sin acentos/espacios)
@@ -520,7 +522,7 @@
   //  - No es restricción del SERVER (todo es client-side, nunca se sube original)
   //  - Es restricción de RECURSOS DEL DISPOSITIVO (RAM + CPU del browser)
   async function _autoCompressIfBig(file) {
-    if (file.size <= MAX_FILE_BYTES) return file;
+    if (file.size <= IMAGE_OPTIMIZATION_THRESHOLD_BYTES) return file;
     const type = (file.type || '').toLowerCase();
     const ext = String(file.name || '').toLowerCase().split('.').pop();
     const isImage = type.startsWith('image/') || ['jpg','jpeg','png','webp','heic','heif'].includes(ext);
@@ -686,7 +688,157 @@
   // ────────────────────────────────────────────────────────────────────
   // UI MODAL
   // ────────────────────────────────────────────────────────────────────
-  let _state = { products: [], file: null, parsing: false };
+  let _state = {
+    products: [],
+    file: null,
+    parsing: false,
+    activeBatchId: null,
+    sourceLabel: ''
+  };
+
+  function _authHeaders(extra) {
+    const tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
+    return Object.assign(
+      tok ? { 'Authorization': 'Bearer ' + tok } : {},
+      extra || {}
+    );
+  }
+
+  function _asWizardProduct(item, index) {
+    return {
+      name: String(item && item.name || '').trim(),
+      code: String(item && (item.code || item.suggested_code || item.barcode) || '').trim(),
+      barcode: String(item && item.barcode || '').trim(),
+      price: _toNum(item && item.price),
+      cost: _toNum(item && item.cost),
+      stock: Math.max(0, Math.round(_toNum(item && item.stock))),
+      category: String(item && item.category || '').trim(),
+      description: String(item && item.description || '').trim(),
+      _row: Number(item && (item.row_number || item.source_row)) || index + 1,
+      _importItemId: item && item.id ? String(item.id) : null
+    };
+  }
+
+  async function _normalizeProductsWithAI(products) {
+    if (!Array.isArray(products) || !products.length) return [];
+    const response = await fetch('/api/product-import/normalize', {
+      method: 'POST',
+      headers: _authHeaders({ 'Content-Type': 'application/json' }),
+      credentials: 'include',
+      body: JSON.stringify({ items: products })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || ('normalizacion_ia_' + response.status));
+    }
+    return (Array.isArray(result.items) ? result.items : []).map(_asWizardProduct);
+  }
+
+  async function _imageDataUrlForAI(file) {
+    const optimized = await _autoCompressIfBig(file);
+    const bitmap = await createImageBitmap(optimized);
+    const maxSide = 2200;
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    if (typeof bitmap.close === 'function') bitmap.close();
+    return canvas.toDataURL('image/jpeg', 0.86);
+  }
+
+  async function _digitalizeImageWithAI(file) {
+    const imageData = await _imageDataUrlForAI(file);
+    const response = await fetch('/api/product-import/digitalize-image', {
+      method: 'POST',
+      headers: _authHeaders({ 'Content-Type': 'application/json' }),
+      credentials: 'include',
+      body: JSON.stringify({
+        imageData,
+        fileName: String(file.name || 'menu.jpg'),
+        mimeType: 'image/jpeg'
+      })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || ('digitalizacion_ia_' + response.status));
+    }
+    return (Array.isArray(result.items) ? result.items : []).map(_asWizardProduct);
+  }
+
+  function _pendingBatchLabel(batch) {
+    const total = Number(batch.valid_items || batch.total_items || 0);
+    const source = String(batch.source_file_name || 'Lista recibida por WhatsApp');
+    return source + (total ? ' · ' + total + ' productos' : '');
+  }
+
+  async function _loadPendingBatches() {
+    const host = document.getElementById('volvix-whatsapp-imports');
+    if (!host) return;
+    host.innerHTML = '<div class="volvix-pending-loading">Buscando listas recibidas por WhatsApp...</div>';
+    try {
+      const response = await fetch('/api/product-import/pending', {
+        headers: _authHeaders(),
+        credentials: 'include'
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok) throw new Error(result.error || String(response.status));
+      const batches = Array.isArray(result.batches) ? result.batches : [];
+      if (!batches.length) {
+        host.innerHTML = '';
+        return;
+      }
+      host.innerHTML = `
+        <div class="volvix-pending">
+          <div class="volvix-pending-title">Listas recibidas por WhatsApp</div>
+          <div class="volvix-pending-sub">Revísalas antes de agregarlas al inventario.</div>
+          <div class="volvix-pending-list">
+            ${batches.map(batch => `
+              <button type="button" class="volvix-pending-item" data-batch="${_esc(batch.id)}">
+                <span>${_esc(_pendingBatchLabel(batch))}</span>
+                <small>${_esc(String(batch.status || 'pendiente').replace(/_/g, ' '))}</small>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      host.querySelectorAll('[data-batch]').forEach(button => {
+        button.addEventListener('click', () => _loadPendingBatch(button.dataset.batch));
+      });
+    } catch (error) {
+      host.innerHTML = '<div class="volvix-msg err">No pudimos consultar las listas de WhatsApp: ' + _esc(error.message) + '</div>';
+    }
+  }
+
+  async function _loadPendingBatch(batchId) {
+    if (!batchId) return;
+    renderParsing();
+    try {
+      const response = await fetch('/api/product-import/batch/' + encodeURIComponent(batchId), {
+        headers: _authHeaders(),
+        credentials: 'include'
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok) throw new Error(result.error || String(response.status));
+      const items = (Array.isArray(result.items) ? result.items : [])
+        .filter(item => !['duplicate', 'skipped', 'imported'].includes(String(item.status || '')))
+        .map(_asWizardProduct)
+        .filter(item => item.name);
+      _state.activeBatchId = batchId;
+      _state.sourceLabel = String(result.batch && result.batch.source_file_name || 'WhatsApp');
+      renderEditTable(items);
+      if (items.length) {
+        _showMsg('Lista de WhatsApp cargada como borrador. Revisa y presiona Guardar para importarla.', 'ok');
+      }
+    } catch (error) {
+      _state.activeBatchId = null;
+      renderEditTable([]);
+      _showMsg('No pudimos abrir la lista de WhatsApp: ' + error.message, 'err');
+    }
+  }
 
   function _injectStyles() {
     if (document.getElementById('vlx-import-styles')) return;
@@ -735,13 +887,27 @@
       .volvix-msg{margin-top:10px;padding:8px 12px;border-radius:6px;font-size:12.5px}
       .volvix-msg.err{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
       .volvix-msg.ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+      .volvix-pending{margin:0 0 18px;padding:14px;border:1px solid #bfdbfe;border-radius:10px;background:#eff6ff}
+      .volvix-pending-title{font-size:14px;font-weight:700;color:#1e3a8a}
+      .volvix-pending-sub,.volvix-pending-loading{font-size:12px;color:#64748b;margin:3px 0 9px}
+      .volvix-pending-list{display:grid;gap:7px}
+      .volvix-pending-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 11px;border:1px solid #bfdbfe;border-radius:8px;background:#fff;color:#0f172a;text-align:left;cursor:pointer}
+      .volvix-pending-item:hover{border-color:#2563eb;background:#f8fbff}
+      .volvix-pending-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600}
+      .volvix-pending-item small{flex:none;color:#1d4ed8;text-transform:capitalize}
     `;
     document.head.appendChild(s);
   }
 
   function openWizard() {
     _injectStyles();
-    _state = { products: [], file: null, parsing: false };
+    _state = {
+      products: [],
+      file: null,
+      parsing: false,
+      activeBatchId: null,
+      sourceLabel: ''
+    };
     let modal = document.getElementById('volvix-import-modal');
     if (modal) modal.remove();
     modal = document.createElement('div');
@@ -757,7 +923,7 @@
         </div>
         <div class="volvix-imp-body" id="volvix-imp-body"></div>
         <div class="volvix-imp-foot">
-          <div class="info" id="volvix-imp-info">Solo lectura · nunca ejecutamos el archivo · auto-comprime imágenes &gt; 50MB</div>
+          <div class="info" id="volvix-imp-info">Solo lectura · nunca ejecutamos el archivo · sin límite fijo de 50 MB</div>
           <div id="volvix-imp-actions"></div>
         </div>
       </div>
@@ -800,9 +966,12 @@
 
   // STEP 1: pick source (file or camera)
   function renderStep1() {
+    _state.activeBatchId = null;
+    _state.sourceLabel = '';
     const body = document.getElementById('volvix-imp-body');
     const acts = document.getElementById('volvix-imp-actions');
     body.innerHTML = `
+      <div id="volvix-whatsapp-imports"></div>
       <div class="volvix-imp-2cards">
         <div class="volvix-imp-card-opt" id="volvix-opt-file" tabindex="0">
           <div class="volvix-imp-card-ico">📁</div>
@@ -813,9 +982,9 @@
         </div>
         <div class="volvix-imp-card-opt" id="volvix-opt-cam" tabindex="0">
           <div class="volvix-imp-card-ico">📷</div>
-          <div class="volvix-imp-card-t">Tomar fotografía</div>
+          <div class="volvix-imp-card-t">Digitalizar con IA</div>
           <div class="volvix-imp-card-d">Apunta tu cámara al menú o lista de precios</div>
-          <div class="volvix-imp-formats">OCR español + inglés · funciona offline</div>
+          <div class="volvix-imp-formats">IA central + OCR español/inglés · respaldo offline</div>
         </div>
         <div class="volvix-imp-card-opt" id="volvix-opt-template" tabindex="0">
           <div class="volvix-imp-card-ico">✨</div>
@@ -855,10 +1024,13 @@
     camCard.addEventListener('click', renderCamera);
     tplCard.addEventListener('click', _useBaseTemplate);
     if (blankCard) blankCard.addEventListener('click', _startBlank);
+    _loadPendingBatches();
   }
 
   // 2026-05-10: empezar en blanco con 1 fila vacía editable
   function _startBlank() {
+    _state.activeBatchId = null;
+    _state.sourceLabel = 'Captura manual';
     const blank = [{
       name: '', code: '', price: 0, cost: 0, stock: 0, category: '', _row: 1
     }];
@@ -873,6 +1045,8 @@
   //   2. /api/app/config?t=<tenant> giro.slug (fetch on-demand si no existe)
   //   3. fallback 'general'
   async function _useBaseTemplate() {
+    _state.activeBatchId = null;
+    _state.sourceLabel = 'Plantilla del giro';
     const TEMPLATES = {
       abarrotes: [
         ['Bebidas', 'Coca Cola 600ml', 12, 18, 50],
@@ -1318,6 +1492,7 @@
     body.innerHTML = `
       <div class="volvix-imp-stat">
         <div><b>${products.length}</b> productos detectados</div>
+        ${_state.sourceLabel ? `<div>· Fuente: <b>${_esc(_state.sourceLabel)}</b></div>` : ''}
         <div>· Edita cualquier celda como Excel</div>
         <div>· Borra los que no quieras</div>
       </div>
@@ -1517,8 +1692,16 @@
       try {
         const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.9));
         const file = new File([blob], 'camera.jpg', { type: 'image/jpeg' });
-        const rows = await parseImageOCR(file);
-        const products = rowsToProducts(rows);
+        _state.activeBatchId = null;
+        _state.sourceLabel = 'Fotografía de cámara';
+        let products = [];
+        try {
+          products = await _digitalizeImageWithAI(file);
+        } catch (aiError) {
+          console.warn('[VolvixImport] IA central no disponible, usando OCR local:', aiError.message);
+          const rows = await parseImageOCR(file);
+          products = rowsToProducts(rows);
+        }
         renderEditTable(products);
       } catch (e) {
         renderEditTable([]);
@@ -1539,10 +1722,32 @@
   // FILE handler
   async function handleFile(file) {
     _state.file = file;
+    _state.activeBatchId = null;
+    _state.sourceLabel = String(file.name || 'Archivo local');
     renderParsing();
     try {
+      const type = String(file.type || '').toLowerCase();
+      const ext = String(file.name || '').toLowerCase().split('.').pop();
+      const isImage = type.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'].includes(ext);
+      if (isImage) {
+        try {
+          const aiProducts = await _digitalizeImageWithAI(file);
+          if (aiProducts.length) {
+            renderEditTable(aiProducts);
+            _showMsg('Productos extraídos con la IA central. Revisa antes de guardar.', 'ok');
+            return;
+          }
+        } catch (aiError) {
+          console.warn('[VolvixImport] IA central no disponible, usando parser local:', aiError.message);
+        }
+      }
       const rows = await parseFile(file);
-      const products = rowsToProducts(rows);
+      let products = rowsToProducts(rows);
+      try {
+        products = await _normalizeProductsWithAI(products);
+      } catch (aiError) {
+        console.warn('[VolvixImport] Normalización IA no disponible, conservando extracción local:', aiError.message);
+      }
       renderEditTable(products);
     } catch (e) {
       console.error('[VolvixImport] parse error', e);
@@ -1561,11 +1766,16 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
         credentials: 'include',
-        body: JSON.stringify({ items: _state.products })
+        body: JSON.stringify({
+          items: _state.products,
+          batch_id: _state.activeBatchId,
+          batch_item_ids: _state.products.map(item => item._importItemId).filter(Boolean)
+        })
       });
       const j = await r.json().catch(() => ({}));
       if (r.ok && j.ok) {
-        _showMsg('✅ ' + (j.inserted || _state.products.length) + ' productos guardados', 'ok');
+        const saved = Number(j.inserted || 0) + Number(j.updated || 0);
+        _showMsg('✅ ' + (saved || _state.products.length) + ' productos guardados' + (j.batch_imported ? ' · lista de WhatsApp completada' : ''), 'ok');
         // Recargar CATALOG si existe loadCatalogReal
         if (typeof window.loadCatalogReal === 'function') {
           try { await window.loadCatalogReal(); } catch (_) {}
@@ -1623,6 +1833,7 @@
     closeWizard,
     parseFile,
     rowsToProducts,
+    loadPendingBatch: _loadPendingBatch,
     _state
   };
 })(typeof window !== 'undefined' ? window : this);
