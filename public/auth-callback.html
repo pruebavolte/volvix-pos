@@ -67,25 +67,63 @@
       return qs.get(name);
     }
 
-    const accessToken = getParam('access_token');
+    let accessToken = getParam('access_token');
+    const tokenHash = getParam('token_hash');
+    const verificationType = getParam('type') || 'magiclink';
+    const redirectParam = new URLSearchParams(location.search).get('redirect');
     const errorParam  = getParam('error') || getParam('error_description');
 
     if (errorParam) {
       return showError('Google rechazó el acceso: ' + decodeURIComponent(errorParam));
     }
 
-    if (!accessToken) {
-      return showError('No se recibió token de autenticación. Intenta de nuevo.');
-    }
-
     document.getElementById('title').textContent = 'Iniciando sesión…';
     document.getElementById('subtitle').textContent = 'Creando tu sesión segura.';
 
-    fetch('/api/auth/oauth/google/exchange', {
+    function exchangeForPos(token) {
+      return fetch('/api/auth/oauth/google/exchange', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ access_token: accessToken }),
-    })
+      body: JSON.stringify({ access_token: token }),
+      });
+    }
+
+    async function verifyMagicLink(hash, type) {
+      const configResponse = await fetch('/api/config/public', { cache: 'no-store' });
+      const config = await configResponse.json();
+      if (!configResponse.ok || !config.supabase_url || !config.supabase_anon_key) {
+        throw new Error('No se pudo cargar la configuración segura de acceso.');
+      }
+      const verifyResponse = await fetch(config.supabase_url + '/auth/v1/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': config.supabase_anon_key,
+        },
+        body: JSON.stringify({ token_hash: hash, type: type }),
+      });
+      const verified = await verifyResponse.json();
+      if (!verifyResponse.ok || !verified.access_token) {
+        throw new Error(verified.error_description || verified.msg || 'El acceso de un solo uso expiró o ya fue utilizado.');
+      }
+      return verified.access_token;
+    }
+
+    async function start() {
+      if (!accessToken && tokenHash) {
+        accessToken = await verifyMagicLink(tokenHash, verificationType);
+      }
+      if (!accessToken) {
+        throw new Error('No se recibió token de autenticación. Intenta de nuevo.');
+      }
+
+      // Retirar credenciales de un solo uso de la barra del navegador.
+      history.replaceState(null, '', location.pathname);
+
+      return exchangeForPos(accessToken);
+    }
+
+    start()
       .then(r => r.json())
       .then(data => {
         if (!data.ok || !data.token) {
@@ -104,7 +142,7 @@
 
         // Respetar ?redirect= si viene de auth-gate
         try {
-          const r = new URLSearchParams(location.search).get('redirect');
+          const r = redirectParam;
           if (r && r.startsWith('/') && !r.startsWith('//') && !r.includes(':')) {
             dest = decodeURIComponent(r);
           }
@@ -113,7 +151,7 @@
         document.getElementById('title').textContent = '¡Listo! Entrando…';
         setTimeout(() => { location.replace(dest); }, 500);
       })
-      .catch(err => showError('Error de red: ' + err.message));
+      .catch(err => showError(err.message || 'Error de red al iniciar sesión.'));
   })();
   </script>
 </body>
