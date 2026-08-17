@@ -92,7 +92,11 @@ const __sbKeepAliveAgent = new https.Agent({
   maxFreeSockets: 10
 });
 
+let __testSupabaseRequestOverride = null;
 function supabaseRequest(method, path, body, extraHeaders) {
+  if (process.env.NODE_ENV === 'test' && typeof __testSupabaseRequestOverride === 'function') {
+    return Promise.resolve().then(() => __testSupabaseRequestOverride(method, path, body, extraHeaders));
+  }
   return new Promise((resolve, reject) => {
     const fullUrl = SUPABASE_URL + '/rest/v1' + path;
     const u = new URL(fullUrl);
@@ -933,8 +937,152 @@ function send429(res, retry_after_ms, message) {
 }
 
 function parseNotes(notesStr) {
+  if (notesStr && typeof notesStr === 'object' && !Array.isArray(notesStr)) return Object.assign({}, notesStr);
   try { return JSON.parse(notesStr || '{}'); }
   catch { return {}; }
+}
+
+function isSupportedScryptHash(passwordHash) {
+  if (typeof passwordHash !== 'string') return false;
+  const match = /^scrypt\$([0-9a-fA-F]+)\$([0-9a-fA-F]+)$/.exec(passwordHash);
+  if (!match) return false;
+  return match[1].length === 32 && (match[2].length === 64 || match[2].length === 128);
+}
+
+function hasUsablePasswordLogin(notes, passwordHash) {
+  if (!isSupportedScryptHash(passwordHash)) return false;
+  const parsed = parseNotes(notes);
+  if (parsed.password_login_enabled === false) return false;
+  if (parsed.source === 'negocio_persona_link') return parsed.password_login_enabled === true;
+  return true;
+}
+
+function canAuthenticatePasswordLogin(user, plainPassword) {
+  return !!user
+    && hasUsablePasswordLogin(user.notes, user.password_hash)
+    && verifyPassword(plainPassword, user.password_hash);
+}
+
+function mergeNotesPreservingFormat(notes, updates) {
+  const patch = updates && typeof updates === 'object' && !Array.isArray(updates) ? updates : {};
+  if (notes && typeof notes === 'object' && !Array.isArray(notes)) {
+    return Object.assign({}, notes, patch);
+  }
+  if (typeof notes === 'string' && notes.trim()) {
+    try {
+      const parsed = JSON.parse(notes);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return notes;
+      return JSON.stringify(Object.assign({}, parsed, patch));
+    } catch {
+      return notes;
+    }
+  }
+  return JSON.stringify(patch);
+}
+
+function markPasswordLoginEnabled(notes) {
+  return mergeNotesPreservingFormat(notes, { password_login_enabled: true });
+}
+
+function effectiveUserTenantId(user) {
+  if (!user) return null;
+  const notes = parseNotes(user.notes);
+  return notes.tenant_id || user.tenant_id || user.company_id || null;
+}
+
+function normalizeGtinBarcode(value) {
+  const digits = String(value || '').trim();
+  if (!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(digits)) return null;
+  let sum = 0;
+  let weight = 3;
+  for (let index = digits.length - 2; index >= 0; index -= 1) {
+    sum += Number(digits[index]) * weight;
+    weight = weight === 3 ? 1 : 3;
+  }
+  const expected = (10 - (sum % 10)) % 10;
+  return expected === Number(digits[digits.length - 1]) ? digits : null;
+}
+
+function uniqueBulkImportName(rawName, code, seenNames) {
+  const base = String(rawName || '').trim().slice(0, 200);
+  if (!base) return '';
+  const registry = seenNames || new Set();
+  let candidate = base;
+  let key = candidate.toLocaleLowerCase('es-MX');
+  if (registry.has(key)) {
+    const kind = normalizeGtinBarcode(code) ? 'EAN' : 'SKU';
+    const suffix = ` - ${kind} ${code}`;
+    candidate = `${base.slice(0, Math.max(1, 200 - suffix.length)).trimEnd()}${suffix}`;
+    key = candidate.toLocaleLowerCase('es-MX');
+  }
+  let discriminator = 2;
+  while (registry.has(key)) {
+    const suffix = ` - ${code} (${discriminator})`;
+    candidate = `${base.slice(0, Math.max(1, 200 - suffix.length)).trimEnd()}${suffix}`;
+    key = candidate.toLocaleLowerCase('es-MX');
+    discriminator += 1;
+  }
+  registry.add(key);
+  return candidate;
+}
+
+function mergeBulkImportDescription(rawName, explicitDescription, finalName) {
+  const originalName = String(rawName || '').trim();
+  const explicit = String(explicitDescription || '').trim();
+  const parts = [];
+  if (originalName && finalName !== originalName) parts.push(originalName);
+  if (explicit && !parts.includes(explicit)) parts.push(explicit);
+  return parts.join('\n\n').slice(0, 8000) || null;
+}
+
+function buildBulkImportProduct(item, index, targetTenant, targetUserId, seenNames) {
+  const rawName = String(item && item.name || '').trim();
+  if (!rawName) return { error: 'nombre_vacio' };
+  const codeRaw = String(item.code || '').trim().slice(0, 64);
+  const code = codeRaw || ('IMP-' + Date.now().toString(36).toUpperCase().slice(-4) + '-' + index);
+  const explicitBarcode = String(item.barcode || '').trim();
+  const categoryRaw = String(item.category || '').trim().slice(0, 100);
+  const barcodeFromCode = normalizeGtinBarcode(codeRaw);
+  const name = uniqueBulkImportName(rawName, code, seenNames);
+  const description = mergeBulkImportDescription(rawName, item.description, name);
+  const price = Number(item.price);
+  const cost = Number(item.cost);
+  const stock = parseInt(item.stock, 10);
+  return {
+    product: {
+      tenant_id: targetTenant,
+      pos_user_id: targetUserId,
+      name,
+      description,
+      code,
+      barcode: normalizeGtinBarcode(explicitBarcode) || barcodeFromCode,
+      price: isFinite(price) && price >= 0 ? price : 0,
+      cost: isFinite(cost) && cost >= 0 ? cost : 0,
+      stock: isFinite(stock) && stock >= 0 ? stock : 0,
+      category: categoryRaw || 'Sin departamento',
+      source: 'wizard_import',
+    },
+    updateFields: {
+      description: !!description,
+      barcode: !!explicitBarcode || !!barcodeFromCode,
+      category: !!categoryRaw,
+    },
+  };
+}
+
+function buildBulkImportUpdatePayload(item) {
+  const fields = item._importFields || {};
+  const payload = {
+    name: item.name,
+    price: item.price,
+    cost: item.cost,
+    stock: item.stock,
+    updated_at: new Date().toISOString(),
+  };
+  if (fields.description) payload.description = item.description;
+  if (fields.barcode) payload.barcode = item.barcode;
+  if (fields.category) payload.category = item.category;
+  return payload;
 }
 
 // =============================================================
@@ -1846,7 +1994,7 @@ const handlers = {
       if (!users || users.length === 0) return failLogin();
 
       const user = users[0];
-      if (!verifyPassword(password, user.password_hash)) {
+      if (!canAuthenticatePasswordLogin(user, password)) {
         return failLogin();
       }
       if (!user.is_active) {
@@ -2009,7 +2157,7 @@ const handlers = {
       const notes = parseNotes(user.notes);
       return sendJSON(res, {
         exists: true,
-        hasPassword: !!user.password_hash,
+        hasPassword: hasUsablePasswordLogin(user.notes, user.password_hash),
         nombre: user.full_name || notes.full_name || '',
         bloqueado: user.is_active === false,
         must_change_password: !!(notes && notes.must_change_password) || user.must_change_password === true,
@@ -9000,9 +9148,11 @@ handlers['POST /api/auth/password-reset/confirm'] = async (req, res) => {
     const hash = crypto.scryptSync(newPwd, salt, 64);
     const passwordHash = `scrypt$${salt.toString('hex')}$${hash.toString('hex')}`;
 
-    await supabaseRequest('PATCH', `/pos_users?id=eq.${payload.sub}`, {
-      password_hash: passwordHash
-    });
+    const resetUsers = await supabaseRequest('GET',
+      `/pos_users?id=eq.${payload.sub}&select=notes&limit=1`);
+    const resetPatch = { password_hash: passwordHash };
+    if (resetUsers && resetUsers[0]) resetPatch.notes = markPasswordLoginEnabled(resetUsers[0].notes);
+    await supabaseRequest('PATCH', `/pos_users?id=eq.${payload.sub}`, resetPatch);
     sendJSON(res, { ok: true, message: 'Contraseña actualizada' });
   } catch (err) { sendError(res, err); }
 };
@@ -11881,10 +12031,14 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const salt = crypto.randomBytes(16);
       const hash = crypto.scryptSync(newPassword, salt, 64);
       const passwordHash = `scrypt$${salt.toString('hex')}$${hash.toString('hex')}`;
-      await supabaseRequest('PATCH', `/pos_users?id=eq.${matched.user_id}`, {
+      const resetUsers = await supabaseRequest('GET',
+        `/pos_users?id=eq.${matched.user_id}&select=notes&limit=1`);
+      const resetPatch = {
         password_hash: passwordHash,
         updated_at: new Date().toISOString()
-      });
+      };
+      if (resetUsers && resetUsers[0]) resetPatch.notes = markPasswordLoginEnabled(resetUsers[0].notes);
+      await supabaseRequest('PATCH', `/pos_users?id=eq.${matched.user_id}`, resetPatch);
 
       // Mark token used
       await supabaseRequest('PATCH', `/pos_password_reset_tokens?id=eq.${matched.id}`, {
@@ -20069,6 +20223,18 @@ if (process.env.NODE_ENV === 'test') {
     signJWT,
     verifyJWT,
     verifyPassword,
+    isSupportedScryptHash,
+    hasUsablePasswordLogin,
+    canAuthenticatePasswordLogin,
+    markPasswordLoginEnabled,
+    effectiveUserTenantId,
+    normalizeGtinBarcode,
+    uniqueBulkImportName,
+    mergeBulkImportDescription,
+    buildBulkImportProduct,
+    buildBulkImportUpdatePayload,
+    handlers,
+    setSupabaseRequestForTest(fn) { __testSupabaseRequestOverride = typeof fn === 'function' ? fn : null; },
     rateLimit,
     rateBuckets,
     isUuid,
@@ -23203,9 +23369,10 @@ if (process.env.NODE_ENV === 'test') {
         return send429(res, rateLimitRetryMs('users:reset:' + tnt, 60000));
       }
       var existing = await supabaseRequest('GET',
-        '/pos_users?id=eq.' + encodeURIComponent(params.id) + '&select=id,tenant_id,email,notes');
+        '/pos_users?id=eq.' + encodeURIComponent(params.id) + '&select=id,tenant_id,company_id,email,notes');
       if (!existing || !existing.length) return send404(res, 'pos_users', params.id);
-      if (!b36IsPlatformAdmin(req) && existing[0].tenant_id !== tnt) {
+      var targetTenant = effectiveUserTenantId(existing[0]);
+      if (!b36IsPlatformAdmin(req) && targetTenant !== tnt) {
         return send404(res, 'pos_users', params.id);
       }
       // Generate a 12-char alphanumeric password (no ambiguous chars)
@@ -23215,14 +23382,15 @@ if (process.env.NODE_ENV === 'test') {
       for (var i = 0; i < 12; i++) newPwd += alphabet[raw[i] % alphabet.length];
       var passwordHash = b36Hash(newPwd);
       // Mark must_change_password=true in notes so first-login flow can pick it up
-      var notesObj = {};
-      try { notesObj = existing[0].notes ? (typeof existing[0].notes === 'string' ? JSON.parse(existing[0].notes) : existing[0].notes) : {}; } catch (_) { notesObj = {}; }
-      notesObj.must_change_password = true;
-      notesObj.password_reset_at = new Date().toISOString();
-      notesObj.password_reset_by = req.user.id || null;
+      var resetNotes = mergeNotesPreservingFormat(existing[0].notes, {
+        must_change_password: true,
+        password_login_enabled: true,
+        password_reset_at: new Date().toISOString(),
+        password_reset_by: req.user.id || null
+      });
       await supabaseRequest('PATCH', '/pos_users?id=eq.' + encodeURIComponent(params.id), {
         password_hash: passwordHash,
-        notes: typeof existing[0].notes === 'string' ? JSON.stringify(notesObj) : notesObj,
+        notes: resetNotes,
         must_change_password: true,
         last_login_at: null,
         updated_at: new Date().toISOString()
@@ -23236,7 +23404,7 @@ if (process.env.NODE_ENV === 'test') {
       try {
         await supabaseRequest('POST', '/pos_user_session_invalidations', {
           user_id: params.id,
-          tenant_id: existing[0].tenant_id || tnt,
+          tenant_id: targetTenant || tnt,
           invalidated_at: new Date().toISOString(),
           reason: 'admin_password_reset',
           triggered_by: req.user.id || null
@@ -23276,17 +23444,18 @@ if (process.env.NODE_ENV === 'test') {
         '/pos_users?id=eq.' + encodeURIComponent(uid) + '&select=id,password_hash,notes,tenant_id');
       if (!rows || !rows.length) return send404(res, 'pos_users', uid);
       var u = rows[0];
-      if (!verifyPassword(current, u.password_hash)) {
+      if (!canAuthenticatePasswordLogin(u, current)) {
         return sendJSON(res, { ok: false, error: 'contraseña actual inválida', error_code: 'INVALID_CURRENT_PASSWORD' }, 401);
       }
       var passwordHash = b36Hash(next);
-      var notesObj = {};
-      try { notesObj = u.notes ? (typeof u.notes === 'string' ? JSON.parse(u.notes) : u.notes) : {}; } catch (_) { notesObj = {}; }
-      notesObj.must_change_password = false;
-      notesObj.password_changed_at = new Date().toISOString();
+      var changedNotes = mergeNotesPreservingFormat(u.notes, {
+        must_change_password: false,
+        password_login_enabled: true,
+        password_changed_at: new Date().toISOString()
+      });
       await supabaseRequest('PATCH', '/pos_users?id=eq.' + encodeURIComponent(uid), {
         password_hash: passwordHash,
-        notes: typeof u.notes === 'string' ? JSON.stringify(notesObj) : notesObj,
+        notes: changedNotes,
         must_change_password: false,
         last_login_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -42752,26 +42921,11 @@ if (process.env.NODE_ENV === 'test') {
       // Sanitizar cada item
       const cleaned = [];
       const errors = [];
+      const seenNames = new Set();
       items.forEach((it, i) => {
-        const name = String(it.name || '').trim().slice(0, 200);
-        if (!name) { errors.push({ row: i + 1, reason: 'nombre_vacio' }); return; }
-        const price = Number(it.price);
-        const cost = Number(it.cost);
-        const stock = parseInt(it.stock, 10);
-        const codeRaw = String(it.code || '').trim().slice(0, 64);
-        const code = codeRaw || ('IMP-' + Date.now().toString(36).toUpperCase().slice(-4) + '-' + i);
-        cleaned.push({
-          tenant_id: targetTenant,
-          pos_user_id: targetUserId,
-          name,
-          code,
-          barcode: String(it.barcode || codeRaw || '').trim().slice(0, 64) || null,
-          price: isFinite(price) && price >= 0 ? price : 0,
-          cost:  isFinite(cost)  && cost  >= 0 ? cost  : 0,
-          stock: isFinite(stock) && stock >= 0 ? stock : 0,
-          category: String(it.category || '').trim().slice(0, 100) || null,
-          source: 'wizard_import',
-        });
+        const built = buildBulkImportProduct(it, i, targetTenant, targetUserId, seenNames);
+        if (built.error) { errors.push({ row: i + 1, reason: built.error }); return; }
+        cleaned.push({ ...built.product, _importFields: built.updateFields });
       });
 
       if (!cleaned.length) return sendJSON(res, { error: 'todos_invalidos', errors }, 400);
@@ -42810,15 +42964,7 @@ if (process.env.NODE_ENV === 'test') {
       // UPDATE existentes (uno por uno por simplicidad — son los menos comunes)
       for (const item of updateItems) {
         const existingId = item._existingId;
-        const patchPayload = {
-          name: item.name,
-          barcode: item.barcode,
-          price: item.price,
-          cost: item.cost,
-          stock: item.stock,
-          category: item.category,
-          updated_at: new Date().toISOString()
-        };
+        const patchPayload = buildBulkImportUpdatePayload(item);
         try {
           await supabaseRequest('PATCH',
             '/pos_products?id=eq.' + existingId,
@@ -42835,7 +42981,7 @@ if (process.env.NODE_ENV === 'test') {
       const CHUNK = 100;
       for (let i = 0; i < newItems.length; i += CHUNK) {
         const chunk = newItems.slice(i, i + CHUNK).map(it => {
-          const { _existingId, _origIdx, ...rest } = it; return rest;
+          const { _existingId, _origIdx, _importFields, ...rest } = it; return rest;
         });
         try {
           await supabaseRequest('POST', '/pos_products', chunk, {
