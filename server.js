@@ -36,11 +36,15 @@ const { exec } = require('child_process');
 // Handler serverless completo (api/index.js). Cuando una request /api/* no
 // matchea ninguna ruta de este archivo, se delega a este handler que tiene
 // /api/log/client, /api/owner/low-stock, /api/sales/latest, /api/login, etc.
+const MUST_LOAD_CANONICAL_API = process.env.NODE_ENV === 'production'
+  || !!process.env.VERCEL
+  || !!process.env.RAILWAY_ENVIRONMENT;
 let apiIndexHandler = null;
 try {
   apiIndexHandler = require('./api/index.js');
 } catch (err) {
   console.error('[server.js] No se pudo cargar api/index.js:', err && err.message);
+  if (MUST_LOAD_CANONICAL_API) throw err;
 }
 
 // ============================================================

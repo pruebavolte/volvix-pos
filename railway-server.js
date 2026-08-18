@@ -19,106 +19,9 @@ const PUBLIC_DIR = path.resolve(process.env.PUBLIC_DIR || './public');
 // api/index.js exporta un único handler (req, res) tipo serverless con TODOS los
 // endpoints (/api/log/client, /api/owner/low-stock, /api/sales/latest, login,
 // register, etc.). Lo importamos aquí para que Railway sirva la API completa.
-let apiHandler = null;
-try {
-  apiHandler = require('./api/index.js');
-} catch (err) {
-  console.error('[railway-server] No se pudo cargar api/index.js:', err.message);
-}
-
-// ============================================================
-// SUPABASE + AUTH (duplicado mínimo de api/index.js)
-// ============================================================
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://cd6936c4-d884-4d4d-ad42-0d74f02aa106.supabase.co';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
-
-async function supabaseRequest(method, path, body) {
-  return new Promise((resolve, reject) => {
-    if (!SUPABASE_SERVICE_KEY) return reject(new Error('SUPABASE_SERVICE_KEY not configured'));
-
-    const https = require('https');
-    const u = new URL(SUPABASE_URL + '/rest/v1' + path);
-    const data = body ? JSON.stringify(body) : null;
-
-    const r = https.request({
-      hostname: u.hostname,
-      path: u.pathname + (u.search || ''),
-      method,
-      headers: {
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: 'Bearer ' + SUPABASE_SERVICE_KEY,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        ...(data ? { 'Content-Length': Buffer.byteLength(data) } : {}),
-      },
-    }, (resp) => {
-      let buf = '';
-      resp.on('data', (c) => (buf += c));
-      resp.on('end', () => {
-        if (resp.statusCode >= 400) return reject(new Error(`SB ${resp.statusCode}: ${buf.slice(0, 200)}`));
-        try { resolve(JSON.parse(buf || '[]')); } catch { resolve([]); }
-      });
-    });
-    r.on('error', reject);
-    if (data) r.write(data);
-    r.end();
-  });
-}
-
-// ============================================================
-// MINI REGISTER-SIMPLE ENDPOINT (sin Cloudflare CAPTCHA)
-// ============================================================
-async function handleRegisterSimple(req, body, res) {
-  try {
-    const { email, business_name, giro, password, phone } = body || {};
-
-    if (!email || !business_name || !giro || !password) {
-      return sendJSON(res, { ok: false, error: 'email, business_name, giro, password required' }, 400);
-    }
-
-    // 1. Crear tenant
-    const tenantId = 'TNT-' + Date.now().toString(36).toUpperCase();
-    const tenant = await supabaseRequest('POST', '/pos_tenants', {
-      id: tenantId,
-      business_name,
-      business_type: giro,
-      status: 'active',
-      created_at: new Date().toISOString(),
-    });
-
-    // 2. Crear usuario
-    const userId = 'USR-' + Date.now().toString(36).toUpperCase();
-    const user = await supabaseRequest('POST', '/pos_users', {
-      id: userId,
-      tenant_id: tenantId,
-      email: email.toLowerCase(),
-      password: password, // En prod: hashear con bcrypt
-      role: 'owner',
-      status: 'active',
-      created_at: new Date().toISOString(),
-    });
-
-    // 3. JWT simple (en prod: usar algoritmo correcto)
-    const token = Buffer.from(JSON.stringify({
-      sub: userId,
-      email: email,
-      tenant_id: tenantId,
-      role: 'owner',
-      iat: Date.now(),
-    })).toString('base64');
-
-    return sendJSON(res, {
-      ok: true,
-      user: { id: userId, email, tenant_id: tenantId, role: 'owner' },
-      tenant: { id: tenantId, business_name, business_type: giro },
-      token,
-      message: 'Cuenta creada. Redirigiendo...',
-    });
-  } catch (err) {
-    console.error('[register-simple]', err.message);
-    return sendJSON(res, { ok: false, error: 'Error al registrar: ' + err.message }, 500);
-  }
-}
+// No hay backend alterno: si la configuración/handler canónico falla, el
+// proceso debe abortar para evitar escribir en otro proyecto o emitir IDs legacy.
+const apiHandler = require('./api/index.js');
 
 // ============================================================
 // UTILIDADES
@@ -206,32 +109,15 @@ const server = http.createServer(async (req, res) => {
 
   // API routes — delegamos al handler completo de api/index.js
   if (pathname.startsWith('/api/')) {
-    if (apiHandler) {
-      try {
-        return await apiHandler(req, res);
-      } catch (err) {
-        console.error('[railway-server] apiHandler error:', err);
-        if (!res.headersSent) {
-          return sendJSON(res, { ok: false, error: 'Internal server error' }, 500);
-        }
-        return;
+    try {
+      return await apiHandler(req, res);
+    } catch (err) {
+      console.error('[railway-server] apiHandler error:', err);
+      if (!res.headersSent) {
+        return sendJSON(res, { ok: false, error: 'Internal server error' }, 500);
       }
-    }
-    // Fallback solo si api/index.js no pudo cargarse
-    if (req.method === 'POST' && pathname === '/api/auth/register-simple') {
-      let body = '';
-      req.on('data', (chunk) => (body += chunk));
-      req.on('end', async () => {
-        try {
-          const data = JSON.parse(body);
-          await handleRegisterSimple(req, data, res);
-        } catch (e) {
-          sendJSON(res, { ok: false, error: 'Invalid JSON' }, 400);
-        }
-      });
       return;
     }
-    return sendJSON(res, { error: 'endpoint not found' }, 404);
   }
 
   // Static files
@@ -249,5 +135,5 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, HOST, () => {
   console.log(`\n✓ Volvix API servidor en http://${HOST}:${PORT}`);
   console.log(`✓ Static files: ${PUBLIC_DIR}`);
-  console.log(`✓ Endpoints disponibles: handler completo de api/index.js ${apiHandler ? '(cargado)' : '(NO cargado — solo register-simple fallback)'}\n`);
+  console.log('✓ Endpoints disponibles: handler canónico de api/index.js (cargado)\n');
 });

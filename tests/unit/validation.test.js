@@ -1,7 +1,14 @@
 'use strict';
 const assert = require('node:assert/strict');
 const { __test } = require('../../api/index.js');
-const { isUuid, isInt, pickFields, ALLOWED_FIELDS_PRODUCTS, ALLOWED_FIELDS_USERS } = __test;
+const {
+  isUuid,
+  isInt,
+  pickFields,
+  sanitizeProductOptionalTextFields,
+  ALLOWED_FIELDS_PRODUCTS,
+  ALLOWED_FIELDS_USERS,
+} = __test;
 
 describe('isUuid', () => {
   test('accepts canonical UUIDs', () => {
@@ -38,11 +45,15 @@ describe('pickFields (input sanitization)', () => {
   test('keeps only allowed product fields', () => {
     const body = {
       code: 'P1', name: 'Coke', price: 20,
+      barcode: '7500000000007', description: 'Refresco', unit: 'pieza',
+      image_url: 'https://images.example.com/coke.png',
       __proto__: { polluted: true },
       isAdmin: true, role: 'admin', cost: 10,
     };
     const out = pickFields(body, ALLOWED_FIELDS_PRODUCTS);
-    assert.deepEqual(Object.keys(out).sort(), ['code', 'cost', 'name', 'price']);
+    assert.deepEqual(Object.keys(out).sort(), [
+      'barcode', 'code', 'cost', 'description', 'image_url', 'name', 'price', 'unit',
+    ]);
     assert.equal(out.isAdmin, undefined);
     assert.equal(out.role, undefined);
   });
@@ -67,5 +78,17 @@ describe('pickFields (input sanitization)', () => {
   test('does not invent fields not present in body', () => {
     const out = pickFields({ name: 'X' }, ALLOWED_FIELDS_PRODUCTS);
     assert.deepEqual(out, { name: 'X' });
+  });
+
+  test('sanitizes and caps optional product text without inventing omitted fields', () => {
+    const out = sanitizeProductOptionalTextFields({
+      barcode: `  ${'1'.repeat(100)}  `,
+      description: '<b>Descripción</b>',
+      unit: ' caja ',
+    }, false);
+    assert.equal(out.barcode.length, 80);
+    assert.equal(out.description, 'Descripción');
+    assert.equal(out.unit, 'caja');
+    assert.equal(Object.hasOwn(out, 'image_url'), false);
   });
 });

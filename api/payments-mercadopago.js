@@ -388,7 +388,7 @@ async function handleWebhook(req, res, ctx) {
       console.error('[MP Webhook] Error updating pos_payment_verifications:', e.message);
     }
 
-    const supabaseUrl = process.env.SUPABASE_URL || 'https://zhvwmzkcqngcaqpdxtwr.supabase.co';
+    const supabaseUrl = (process.env.SUPABASE_URL || '').trim();
     const supabaseKey = process.env.SUPABASE_SERVICE_KEY || '';
     await broadcastPaymentUpdate(supabaseUrl, supabaseKey, {
       sale_id: saleId,

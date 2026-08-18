@@ -350,9 +350,24 @@ document.querySelectorAll('[data-section]').forEach(el => {
 });
 
 // REALTIME via Supabase (reemplaza WebSocket — compatible con Vercel serverless)
-function connectWS() {
-  const SUPA_URL = 'https://zhvwmzkcqngcaqpdxtwr.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpodndtemtjcW5nY2FxcGR4dHdyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNjcwMTgsImV4cCI6MjA3OTc0MzAxOH0.ygTc754INgqYJEMD0wc_CzRCzRxUfp4hq3rYvJRpjkk';
+async function connectWS() {
+  const expectedSupabaseUrl = 'https://vnruooisqnbqguavrdvd.supabase.co';
+  let runtimeConfig;
+  try {
+    const response = await fetch('/api/config/public', { cache: 'no-store' });
+    runtimeConfig = await response.json();
+    if (!response.ok ||
+        runtimeConfig.supabase_url !== expectedSupabaseUrl ||
+        !runtimeConfig.supabase_anon_key) {
+      throw new Error('Configuración Supabase no canónica');
+    }
+  } catch (_) {
+    document.getElementById('wsBadge').textContent = '● Realtime no disponible';
+    document.getElementById('wsBadge').className = 'badge-ws ws-off';
+    return;
+  }
+  const SUPA_URL = runtimeConfig.supabase_url;
+  const SUPA_KEY = runtimeConfig.supabase_anon_key;
 
   const script = document.createElement('script');
   script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';

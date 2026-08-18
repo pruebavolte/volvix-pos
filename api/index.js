@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const https = require('https');
+const net = require('net');
 const crypto = require('crypto'); // FIX R13: para JWT, scrypt, timingSafeEqual
 const emailTemplates = require('./email-templates'); // R14
 const handleMercadoPago = require('./payments-mercadopago');
@@ -42,7 +43,30 @@ const __apiRateLimiter = rateLimitMiddleware({
 // =============================================================
 // CONFIG SUPABASE
 // =============================================================
-const SUPABASE_URL = (process.env.SUPABASE_URL || 'https://zhvwmzkcqngcaqpdxtwr.supabase.co').trim();
+const EXPECTED_SUPABASE_PROJECT_REF = 'vnruooisqnbqguavrdvd';
+function isExpectedSupabaseUrl(value) {
+  try {
+    const parsed = new URL(String(value || '').trim());
+    return parsed.protocol === 'https:'
+      && !parsed.username
+      && !parsed.password
+      && !parsed.port
+      && parsed.hostname.toLowerCase() === `${EXPECTED_SUPABASE_PROJECT_REF}.supabase.co`
+      && (parsed.pathname === '' || parsed.pathname === '/')
+      && !parsed.search
+      && !parsed.hash;
+  } catch (_) {
+    return false;
+  }
+}
+
+const SUPABASE_URL = (process.env.SUPABASE_URL || '').trim().replace(/\/+$/, '');
+if (process.env.NODE_ENV !== 'test' && !isExpectedSupabaseUrl(SUPABASE_URL)) {
+  throw new Error(`FATAL: SUPABASE_URL debe apuntar al proyecto canónico ${EXPECTED_SUPABASE_PROJECT_REF}. Abortando boot.`);
+}
+if (process.env.NODE_ENV === 'test' && !/^https:\/\/[^/]+\/?$/i.test(SUPABASE_URL)) {
+  throw new Error('FATAL: SUPABASE_URL de pruebas debe ser una URL HTTPS base.');
+}
 
 // FIX R13 (#1): SUPABASE_SERVICE_KEY sin fallback hardcodeado. Throw si falta.
 const SUPABASE_SERVICE_KEY = (process.env.SUPABASE_SERVICE_KEY || '').trim().replace(/[\r\n]+/g, '');
@@ -93,6 +117,7 @@ const __sbKeepAliveAgent = new https.Agent({
 });
 
 let __testSupabaseRequestOverride = null;
+let __testSupabaseAuthUserOverride = null;
 function supabaseRequest(method, path, body, extraHeaders) {
   if (process.env.NODE_ENV === 'test' && typeof __testSupabaseRequestOverride === 'function') {
     return Promise.resolve().then(() => __testSupabaseRequestOverride(method, path, body, extraHeaders));
@@ -439,7 +464,61 @@ const TENANT_SLUG_RE = /^[A-Z][A-Z0-9_-]{2,40}$/;
 function isTenantId(s) { return typeof s === 'string' && (UUID_RE.test(s) || TENANT_SLUG_RE.test(s)); }
 
 // FIX R13 (#9): Whitelists de campos
-const ALLOWED_FIELDS_PRODUCTS = ['code', 'name', 'category', 'cost', 'price', 'stock', 'icon', 'industry_fields'];
+const ALLOWED_FIELDS_PRODUCTS = [
+  'code', 'barcode', 'name', 'description', 'category', 'unit',
+  'cost', 'price', 'stock', 'icon', 'image_url', 'industry_fields',
+];
+const PRODUCT_TEXT_LIMITS = Object.freeze({ barcode: 80, description: 8000, unit: 40 });
+function isPrivateOrLocalHostname(value) {
+  const hostname = String(value || '').trim().toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
+  const ipVersion = net.isIP(hostname);
+  if (!hostname || hostname === 'localhost'
+      || (ipVersion === 0 && !hostname.includes('.'))
+      || /\.(?:localhost|local|lan|home|internal)$/.test(hostname)) return true;
+  if (ipVersion === 4) {
+    const [a, b, c] = hostname.split('.').map(Number);
+    return a === 0 || a === 10 || a === 127 || a >= 224
+      || (a === 100 && b >= 64 && b <= 127)
+      || (a === 169 && b === 254)
+      || (a === 172 && b >= 16 && b <= 31)
+      || (a === 192 && b === 168)
+      || (a === 192 && b === 0 && (c === 0 || c === 2))
+      || (a === 198 && (b === 18 || b === 19 || (b === 51 && c === 100)))
+      || (a === 203 && b === 0 && c === 113);
+  }
+  if (ipVersion === 6) {
+    return hostname === '::' || hostname === '::1' || hostname.startsWith('::ffff:')
+      || /^(?:fc|fd)/.test(hostname) || /^fe[89ab]/.test(hostname)
+      || /^ff/.test(hostname) || /^2001:db8(?::|$)/.test(hostname);
+  }
+  return false;
+}
+function normalizeHttpsImageUrl(value) {
+  if (value === null || value === undefined) return null;
+  const raw = String(value).trim();
+  if (!raw || raw.length > 2048 || /[\u0000-\u001f\u007f]/.test(raw)) return null;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== 'https:' || !parsed.hostname || parsed.username || parsed.password
+        || isPrivateOrLocalHostname(parsed.hostname)) return null;
+    return parsed.toString();
+  } catch (_) {
+    return null;
+  }
+}
+function sanitizeProductOptionalTextFields(fields, allowExplicitNull) {
+  for (const [field, maxLength] of Object.entries(PRODUCT_TEXT_LIMITS)) {
+    if (!Object.hasOwn(fields, field)) continue;
+    const raw = fields[field];
+    const cleaned = raw === null || raw === undefined
+      ? ''
+      : String(sanitizeText(raw) || '').replace(/[\u0000\u007f]/g, '').trim().slice(0, maxLength);
+    if (cleaned) fields[field] = cleaned;
+    else if (allowExplicitNull) fields[field] = null;
+    else delete fields[field];
+  }
+  return fields;
+}
 // 2026-07-07: campos extra por giro (product_fields). Se guardan como jsonb en
 // pos_products.industry_fields. Aceptar solo objeto plano de primitivos, cap 40
 // claves y 500 chars por valor. Devuelve null si no hay nada válido.
@@ -942,6 +1021,48 @@ function parseNotes(notesStr) {
   catch { return {}; }
 }
 
+function parseCanonicalAccountNotes(notes) {
+  if (notes === null || notes === undefined || notes === '') return {};
+  if (notes && typeof notes === 'object' && !Array.isArray(notes)) return Object.assign({}, notes);
+  if (typeof notes === 'string' && !notes.trim()) return {};
+  if (typeof notes === 'string') {
+    try {
+      const parsed = JSON.parse(notes);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+    } catch (_) {}
+  }
+  throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La cuenta POS tiene metadatos incompatibles');
+}
+
+function resolveCanonicalTenantSignals(user) {
+  const notes = parseCanonicalAccountNotes(user && user.notes);
+  const directTenantId = String(user && user.tenant_id || '').trim() || null;
+  const notesTenantId = String(notes.tenant_id || '').trim() || null;
+  if (directTenantId && !isTenantId(directTenantId)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El tenant directo de la cuenta POS no es válido');
+  }
+  if (notesTenantId && !isTenantId(notesTenantId)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El tenant de los metadatos POS no es válido');
+  }
+  if (directTenantId && notesTenantId && directTenantId !== notesTenantId) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La cuenta POS contiene tenants contradictorios');
+  }
+  return { notes, directTenantId, notesTenantId, userTenantId: notesTenantId || directTenantId };
+}
+
+const CANONICAL_POS_ROLE_MAP = Object.freeze({
+  owner: 'owner', admin: 'admin', superadmin: 'superadmin', manager: 'manager', gerente: 'manager',
+  cashier: 'cajero', cajero: 'cajero', ADMIN: 'superadmin', OWNER: 'owner', USER: 'cajero',
+});
+
+function resolveCanonicalPosRole(user, notes, fallbackRole) {
+  return (notes && notes.volvix_role)
+    || CANONICAL_POS_ROLE_MAP[user && user.role]
+    || (user && user.role)
+    || fallbackRole
+    || 'cajero';
+}
+
 function isSupportedScryptHash(passwordHash) {
   if (typeof passwordHash !== 'string') return false;
   const match = /^scrypt\$([0-9a-fA-F]+)\$([0-9a-fA-F]+)$/.exec(passwordHash);
@@ -990,6 +1111,481 @@ function effectiveUserTenantId(user) {
   return notes.tenant_id || user.tenant_id || user.company_id || null;
 }
 
+function googleOAuthError(code, statusCode, message) {
+  const error = new Error(message || code);
+  error.code = code;
+  error.statusCode = statusCode;
+  return error;
+}
+
+function canonicalGoogleEmail(value) {
+  const email = String(value || '').trim().toLowerCase();
+  if (!email || email.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
+  return email;
+}
+
+function escapePostgrestLikePattern(value) {
+  return String(value || '').replace(/[\\%_*]/g, '\\$&');
+}
+
+function assertConfirmedSupabaseUser(supabaseUser) {
+  const id = String(supabaseUser && supabaseUser.id || '').trim();
+  const email = canonicalGoogleEmail(supabaseUser && supabaseUser.email);
+  if (!isUuid(id) || !email) {
+    throw googleOAuthError('SUPABASE_IDENTITY_INVALID', 401, 'Identidad de Google inválida');
+  }
+  if (!supabaseUser.email_confirmed_at && !supabaseUser.confirmed_at) {
+    throw googleOAuthError('SUPABASE_EMAIL_UNCONFIRMED', 403, 'El correo de Google no está confirmado');
+  }
+  return { id, email };
+}
+
+function canonicalGoogleTenantId(authUserId) {
+  return `TNT-${String(authUserId).replace(/-/g, '').toUpperCase()}`;
+}
+
+function disabledGooglePasswordHash() {
+  const salt = crypto.randomBytes(16);
+  const hash = crypto.scryptSync(crypto.randomBytes(48), salt, 64);
+  return `scrypt$${salt.toString('hex')}$${hash.toString('hex')}`;
+}
+
+function googleAccountDisplayName(supabaseUser, email) {
+  const metadata = supabaseUser && supabaseUser.user_metadata && typeof supabaseUser.user_metadata === 'object'
+    ? supabaseUser.user_metadata : {};
+  return sanitizeName(metadata.full_name || metadata.name || email.split('@')[0]) || 'Mi negocio';
+}
+
+function mergeGoogleAccountNotes(notes, updates) {
+  parseCanonicalAccountNotes(notes);
+  return mergeNotesPreservingFormat(notes, updates);
+}
+
+async function fetchSupabaseAuthUser(accessToken) {
+  if (process.env.NODE_ENV === 'test' && typeof __testSupabaseAuthUserOverride === 'function') {
+    return __testSupabaseAuthUserOverride(accessToken);
+  }
+  return new Promise((resolve, reject) => {
+    const u = new URL(SUPABASE_URL + '/auth/v1/user');
+    const request = https.request({
+      hostname: u.hostname,
+      path: u.pathname,
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_SERVICE_KEY || '',
+        'Authorization': 'Bearer ' + accessToken,
+        'Accept': 'application/json',
+      },
+      agent: __sbKeepAliveAgent,
+    }, (response) => {
+      let data = '';
+      response.on('data', (chunk) => { data += chunk; });
+      response.on('end', () => {
+        let parsed = null;
+        try { parsed = data ? JSON.parse(data) : null; }
+        catch (_) {
+          return reject(googleOAuthError('SUPABASE_TOKEN_INVALID', 401, 'Token inválido o expirado'));
+        }
+        if (response.statusCode < 200 || response.statusCode >= 300) {
+          return reject(googleOAuthError('SUPABASE_TOKEN_INVALID', 401, 'Token inválido o expirado'));
+        }
+        resolve(parsed);
+      });
+    });
+    request.on('error', () => reject(googleOAuthError(
+      'SUPABASE_AUTH_UNAVAILABLE', 503, 'No se pudo verificar la identidad de Google',
+    )));
+    request.setTimeout(10_000, () => request.destroy(new Error('supabase auth timeout')));
+    request.end();
+  });
+}
+
+async function findCanonicalGooglePosUser(authUserId, email) {
+  const [idRows, emailRows] = await Promise.all([
+    supabaseRequest('GET', `/pos_users?id=eq.${encodeURIComponent(authUserId)}&select=*&limit=2`),
+    supabaseRequest('GET', `/pos_users?email=ilike.${encodeURIComponent(escapePostgrestLikePattern(email))}&select=*&limit=20`),
+  ]);
+  const byId = Array.isArray(idRows) ? idRows : [];
+  const byEmail = (Array.isArray(emailRows) ? emailRows : [])
+    .filter((row) => canonicalGoogleEmail(row && row.email) === email);
+  if (byId.length > 1 || byEmail.length > 1) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'Hay más de una cuenta POS para esta identidad');
+  }
+  const idMatch = byId[0] || null;
+  const emailMatch = byEmail[0] || null;
+  if (idMatch && canonicalGoogleEmail(idMatch.email) !== email) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El UUID de Google ya pertenece a otro correo');
+  }
+  if (emailMatch && String(emailMatch.id || '') !== authUserId) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El correo ya pertenece a otro UUID POS');
+  }
+  if (idMatch && emailMatch && String(idMatch.id) !== String(emailMatch.id)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La identidad POS es ambigua');
+  }
+  return idMatch || emailMatch;
+}
+
+async function loadGoogleCompanyCandidates(user, authUserId) {
+  const explicitCompanyId = String(user.company_id || '').trim() || null;
+  if (explicitCompanyId && !isUuid(explicitCompanyId)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa POS no tiene UUID válido');
+  }
+  const rowsById = explicitCompanyId
+    ? await supabaseRequest('GET', `/pos_companies?id=eq.${encodeURIComponent(explicitCompanyId)}&select=id,tenant_id,owner_user_id,is_active,name&limit=2`)
+    : [];
+  if (explicitCompanyId && (!Array.isArray(rowsById) || rowsById.length === 0)) {
+    throw googleOAuthError('POS_COMPANY_NOT_FOUND', 409, 'La empresa POS vinculada no existe');
+  }
+  const rowsByOwner = explicitCompanyId ? [] : await supabaseRequest('GET',
+    `/pos_companies?owner_user_id=eq.${encodeURIComponent(authUserId)}&select=id,tenant_id,owner_user_id,is_active,name&limit=3`);
+  const unique = new Map();
+  for (const company of [...(rowsById || []), ...(rowsByOwner || [])]) {
+    if (company && company.id) unique.set(String(company.id), company);
+  }
+  if (unique.size > 1) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La cuenta POS está asociada a varias empresas');
+  }
+  const company = unique.values().next().value || null;
+  if (company && explicitCompanyId && String(company.id) !== explicitCompanyId) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa POS no coincide con la cuenta');
+  }
+  if (company && !explicitCompanyId && company.owner_user_id && String(company.owner_user_id) !== authUserId) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa POS pertenece a otro usuario');
+  }
+  return company;
+}
+
+async function loadUniqueActiveCompanyByTenant(tenantId) {
+  if (!isTenantId(tenantId)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El tenant POS no es válido');
+  }
+  const tenantCompanies = await supabaseRequest('GET',
+    `/pos_companies?tenant_id=eq.${encodeURIComponent(tenantId)}` +
+    '&is_active=eq.true&select=id,tenant_id,owner_user_id,is_active,name&limit=2');
+  if (Array.isArray(tenantCompanies) && tenantCompanies.length > 1) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El tenant POS está asociado a varias empresas');
+  }
+  return Array.isArray(tenantCompanies) && tenantCompanies.length === 1 ? tenantCompanies[0] : null;
+}
+
+async function resolveCanonicalExistingPosIdentity(user) {
+  const userId = String(user && user.id || '').trim();
+  const email = canonicalGoogleEmail(user && user.email);
+  if (!isUuid(userId) || !email) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La cuenta POS no tiene una identidad canónica');
+  }
+  if (user.is_active === false) {
+    throw googleOAuthError('POS_USER_INACTIVE', 403, 'La cuenta POS está inactiva');
+  }
+
+  const tenantSignals = resolveCanonicalTenantSignals(user);
+  const role = resolveCanonicalPosRole(user, tenantSignals.notes, 'cajero');
+  const isPlatformRole = ['superadmin', 'platform_owner'].includes(String(role).toLowerCase());
+  const explicitCompanyId = String(user.company_id || '').trim() || null;
+  if (isPlatformRole && !explicitCompanyId && !tenantSignals.userTenantId) {
+    return {
+      userId,
+      email,
+      role,
+      tenantId: null,
+      companyId: null,
+      ownerUserId: null,
+      tenantName: 'Plataforma',
+      notes: tenantSignals.notes,
+      platformOnly: true,
+    };
+  }
+
+  let company = await loadGoogleCompanyCandidates(user, userId);
+  if (!company && !explicitCompanyId && tenantSignals.userTenantId) {
+    company = await loadUniqueActiveCompanyByTenant(tenantSignals.userTenantId);
+  }
+  if (!company) {
+    throw googleOAuthError('POS_COMPANY_NOT_FOUND', 409, 'La empresa POS vinculada no existe');
+  }
+  const companyId = String(company.id || '').trim();
+  const companyTenantId = String(company.tenant_id || '').trim() || null;
+  const ownerUserId = String(company.owner_user_id || '').trim() || null;
+  if (!isUuid(companyId) || (explicitCompanyId && companyId !== explicitCompanyId)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa POS no coincide con la cuenta');
+  }
+  if (company.is_active === false) {
+    throw googleOAuthError('POS_COMPANY_INACTIVE', 403, 'La empresa POS está inactiva');
+  }
+  if (!companyTenantId || !isTenantId(companyTenantId)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa POS no tiene un tenant válido');
+  }
+  if (tenantSignals.userTenantId && tenantSignals.userTenantId !== companyTenantId) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El tenant del usuario no coincide con su empresa');
+  }
+  if (!isUuid(ownerUserId)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa POS no tiene un dueño UUID válido');
+  }
+
+  if (ownerUserId !== userId && ['owner', 'business_owner'].includes(String(role).toLowerCase())) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El rol POS no coincide con el dueño de la empresa');
+  }
+  return {
+    userId,
+    email,
+    role,
+    tenantId: companyTenantId,
+    companyId,
+    ownerUserId,
+    tenantName: String(tenantSignals.notes.tenant_name || company.name || 'Mi Negocio'),
+    notes: tenantSignals.notes,
+  };
+}
+
+function canonicalPosSessionClaims(identity, authProvider, extraClaims) {
+  if (!identity || !isUuid(identity.userId) || !canonicalGoogleEmail(identity.email)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La sesión POS no tiene identidad canónica');
+  }
+  const baseClaims = {
+    sub: identity.userId,
+    id: identity.userId,
+    email: canonicalGoogleEmail(identity.email),
+    role: identity.role,
+    auth_provider: authProvider,
+  };
+  if (identity.platformOnly === true) {
+    if (!['superadmin', 'platform_owner'].includes(String(identity.role).toLowerCase())
+        || identity.tenantId || identity.companyId || identity.ownerUserId) {
+      throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La sesión de plataforma contiene claims de catálogo');
+    }
+    return Object.assign(baseClaims, {
+      tenant_id: null,
+      company_id: null,
+      owner_user_id: null,
+    }, extraClaims || {});
+  }
+  if (!isTenantId(identity.tenantId) || !isUuid(identity.companyId) || !isUuid(identity.ownerUserId)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La sesión POS no tiene empresa canónica');
+  }
+  return Object.assign(baseClaims, {
+    tenant_id: identity.tenantId,
+    company_id: identity.companyId,
+    owner_user_id: identity.ownerUserId,
+  }, extraClaims || {});
+}
+
+async function ensureCanonicalGoogleCompany(user, supabaseUser, wasCreated) {
+  const { id: authUserId, email } = assertConfirmedSupabaseUser(supabaseUser);
+  if (!user || String(user.id || '') !== authUserId || canonicalGoogleEmail(user.email) !== email) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La cuenta POS no coincide con Google');
+  }
+  if (user.is_active === false) {
+    throw googleOAuthError('POS_USER_INACTIVE', 403, 'La cuenta POS está inactiva');
+  }
+
+  let company = await loadGoogleCompanyCandidates(user, authUserId);
+  const tenantSignals = resolveCanonicalTenantSignals(user);
+  const userTenantId = tenantSignals.userTenantId;
+  let adoptedTenantCompany = false;
+  if (!company && !user.company_id && userTenantId && !wasCreated) {
+    company = await loadUniqueActiveCompanyByTenant(userTenantId);
+    adoptedTenantCompany = !!company;
+  }
+  const companyTenantId = String(company && company.tenant_id || '').trim() || null;
+  if (userTenantId && companyTenantId && userTenantId !== companyTenantId) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El tenant del usuario no coincide con su empresa');
+  }
+  const existingOwnerUserId = String(company && company.owner_user_id || '').trim() || null;
+  if (company && !isUuid(existingOwnerUserId)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa POS no tiene un dueño UUID válido');
+  }
+  const ownerUserId = existingOwnerUserId || authUserId;
+  const tenantId = userTenantId || companyTenantId || canonicalGoogleTenantId(ownerUserId);
+  if (!isTenantId(tenantId)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El tenant POS no es válido');
+  }
+
+  let companyId = company && String(company.id || '') || String(user.company_id || '') || authUserId;
+  if (!isUuid(companyId)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa POS no tiene UUID válido');
+  }
+  const displayName = googleAccountDisplayName(supabaseUser, email);
+
+  if (!company) {
+    try {
+      const createdRows = await supabaseRequest('POST', '/pos_companies', {
+        id: companyId,
+        name: displayName,
+        owner_user_id: authUserId,
+        tenant_id: tenantId,
+        plan: 'trial',
+        status: 'active',
+        is_active: true,
+      });
+      company = Array.isArray(createdRows) ? createdRows[0] : createdRows;
+    } catch (_) {
+      const retryRows = await supabaseRequest('GET',
+        `/pos_companies?id=eq.${encodeURIComponent(companyId)}&select=id,tenant_id,owner_user_id,is_active,name&limit=2`);
+      company = Array.isArray(retryRows) ? retryRows[0] : null;
+    }
+    if (!company || String(company.id || '') !== companyId) {
+      throw googleOAuthError('POS_PROVISION_FAILED', 503, 'No se pudo crear la empresa POS');
+    }
+  }
+  if (company.is_active === false) {
+    throw googleOAuthError('POS_COMPANY_INACTIVE', 403, 'La empresa POS está inactiva');
+  }
+  const savedOwnerUserId = String(company.owner_user_id || '').trim();
+  if (!isUuid(savedOwnerUserId)) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa POS no tiene un dueño UUID válido');
+  }
+  const existingRole = resolveCanonicalPosRole(user, tenantSignals.notes, 'cajero');
+  if (!user.company_id && savedOwnerUserId !== authUserId
+      && (!adoptedTenantCompany || ['owner', 'business_owner'].includes(String(existingRole).toLowerCase()))) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa POS pertenece a otro usuario');
+  }
+  if (company.tenant_id && String(company.tenant_id) !== tenantId) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El tenant POS cambió durante el acceso');
+  }
+
+  const companyPatch = {};
+  if (!company.tenant_id) companyPatch.tenant_id = tenantId;
+  if (Object.keys(companyPatch).length) {
+    // CAS: another request may have linked this company after our snapshot.
+    // Only fill an empty tenant, then trust the read-back rather than the
+    // response of a potentially ambiguous PATCH.
+    await supabaseRequest('PATCH',
+      `/pos_companies?id=eq.${encodeURIComponent(companyId)}&tenant_id=is.null`, companyPatch);
+    const companyRows = await supabaseRequest('GET',
+      `/pos_companies?id=eq.${encodeURIComponent(companyId)}&select=id,tenant_id,owner_user_id,is_active,name&limit=2`);
+    const savedCompany = Array.isArray(companyRows) && companyRows.length === 1 ? companyRows[0] : null;
+    if (!savedCompany || String(savedCompany.id || '') !== companyId
+        || String(savedCompany.tenant_id || '') !== tenantId
+        || String(savedCompany.owner_user_id || '') !== savedOwnerUserId
+        || savedCompany.is_active === false) {
+      throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa POS cambió durante el acceso');
+    }
+    company = savedCompany;
+  }
+
+  const userPatch = {};
+  if (!user.company_id) userPatch.company_id = companyId;
+  else if (String(user.company_id) !== companyId) {
+    throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa del usuario cambió durante el acceso');
+  }
+  if (!userTenantId) {
+    userPatch.notes = mergeGoogleAccountNotes(user.notes, {
+      tenant_id: tenantId,
+      tenant_name: displayName,
+      auth_user_id: authUserId,
+      ...(wasCreated ? {
+        volvix_role: 'owner',
+        source: 'google_oauth',
+        password_login_enabled: false,
+      } : {}),
+    });
+  }
+  if (Object.keys(userPatch).length) {
+    // Compare-and-set both identity signals used by this patch. If a
+    // concurrent request already wrote the same canonical values the
+    // read-back below accepts them; a different company/tenant fails closed.
+    const companySnapshotFilter = user.company_id == null || String(user.company_id).trim() === ''
+      ? '&company_id=is.null'
+      : `&company_id=eq.${encodeURIComponent(String(user.company_id))}`;
+    const notesSnapshotFilter = Object.hasOwn(userPatch, 'notes')
+      ? (user.notes == null
+        ? '&notes=is.null'
+        : `&notes=eq.${encodeURIComponent(
+          typeof user.notes === 'object' ? JSON.stringify(user.notes) : String(user.notes)
+        )}`)
+      : '';
+    await supabaseRequest('PATCH',
+      `/pos_users?id=eq.${encodeURIComponent(authUserId)}${companySnapshotFilter}${notesSnapshotFilter}`,
+      userPatch);
+    const userRows = await supabaseRequest('GET',
+      `/pos_users?id=eq.${encodeURIComponent(authUserId)}`
+      + '&select=id,email,role,company_id,tenant_id,is_active,notes&limit=2');
+    const savedUser = Array.isArray(userRows) && userRows.length === 1 ? userRows[0] : null;
+    if (!savedUser || String(savedUser.id || '') !== authUserId
+        || canonicalGoogleEmail(savedUser.email) !== email
+        || savedUser.is_active === false
+        || String(savedUser.company_id || '') !== companyId) {
+      throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa del usuario cambió durante el acceso');
+    }
+    const savedSignals = resolveCanonicalTenantSignals(savedUser);
+    if (savedSignals.userTenantId !== tenantId) {
+      throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El tenant del usuario cambió durante el acceso');
+    }
+    const savedRole = resolveCanonicalPosRole(savedUser, savedSignals.notes, 'cajero');
+    if (savedOwnerUserId !== authUserId
+        && ['owner', 'business_owner'].includes(String(savedRole).toLowerCase())) {
+      throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El rol POS cambió durante el acceso');
+    }
+    user = savedUser;
+  }
+  return { user, tenantId, companyId, ownerUserId: savedOwnerUserId, created: !!wasCreated };
+}
+
+async function resolveOrProvisionGooglePosUser(supabaseUser) {
+  const { id: authUserId, email } = assertConfirmedSupabaseUser(supabaseUser);
+  let user = await findCanonicalGooglePosUser(authUserId, email);
+  let created = false;
+  if (user) {
+    const tenantSignals = resolveCanonicalTenantSignals(user);
+    const role = resolveCanonicalPosRole(user, tenantSignals.notes, 'cajero');
+    const explicitCompanyId = String(user.company_id || '').trim() || null;
+    if (['superadmin', 'platform_owner'].includes(String(role).toLowerCase())
+        && !explicitCompanyId && !tenantSignals.userTenantId) {
+      const identity = await resolveCanonicalExistingPosIdentity(user);
+      return {
+        user,
+        tenantId: null,
+        companyId: null,
+        ownerUserId: null,
+        platformOnly: true,
+        identity,
+        created: false,
+      };
+    }
+  }
+  if (!user) {
+    const tenantId = canonicalGoogleTenantId(authUserId);
+    const displayName = googleAccountDisplayName(supabaseUser, email);
+    const notes = JSON.stringify({
+      volvix_role: 'owner',
+      tenant_id: tenantId,
+      tenant_name: displayName,
+      source: 'google_oauth',
+      auth_user_id: authUserId,
+      password_login_enabled: false,
+    });
+    try {
+      const rows = await supabaseRequest('POST', '/pos_users', {
+        id: authUserId,
+        email,
+        phone: `pending:${authUserId}`,
+        whatsapp: null,
+        password_hash: disabledGooglePasswordHash(),
+        full_name: displayName,
+        role: 'USER',
+        plan: 'trial',
+        is_active: true,
+        email_verified: true,
+        phone_verified: false,
+        mfa_enabled: false,
+        mfa_backup_codes: [],
+        platform_signup: 'google',
+        last_platform: 'google',
+        auth_provider: 'google',
+        notes,
+      });
+      user = (Array.isArray(rows) && rows[0]) || (rows && !Array.isArray(rows) ? rows : null);
+      created = true;
+    } catch (_) {
+      user = await findCanonicalGooglePosUser(authUserId, email);
+    }
+    if (!user) {
+      throw googleOAuthError('POS_PROVISION_FAILED', 503, 'No se pudo crear la cuenta POS');
+    }
+  }
+  return ensureCanonicalGoogleCompany(user, supabaseUser, created);
+}
+
 function normalizeGtinBarcode(value) {
   const digits = String(value || '').trim();
   if (!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(digits)) return null;
@@ -1027,8 +1623,8 @@ function uniqueBulkImportName(rawName, code, seenNames) {
 }
 
 function mergeBulkImportDescription(rawName, explicitDescription, finalName) {
-  const originalName = String(rawName || '').trim();
-  const explicit = String(explicitDescription || '').trim();
+  const originalName = String(sanitizeText(rawName) || '').replace(/[\u0000\u007f]/g, '').trim();
+  const explicit = String(sanitizeText(explicitDescription) || '').replace(/[\u0000\u007f]/g, '').trim();
   const parts = [];
   if (originalName && finalName !== originalName) parts.push(originalName);
   if (explicit && !parts.includes(explicit)) parts.push(explicit);
@@ -1036,7 +1632,7 @@ function mergeBulkImportDescription(rawName, explicitDescription, finalName) {
 }
 
 function buildBulkImportProduct(item, index, targetTenant, targetUserId, seenNames) {
-  const rawName = String(item && item.name || '').trim();
+  const rawName = String(sanitizeText(item && item.name) || '').replace(/[\u0000\u007f]/g, '').trim();
   if (!rawName) return { error: 'nombre_vacio' };
   const codeRaw = String(item.code || '').trim().slice(0, 64);
   const code = codeRaw || ('IMP-' + Date.now().toString(36).toUpperCase().slice(-4) + '-' + index);
@@ -1046,26 +1642,38 @@ function buildBulkImportProduct(item, index, targetTenant, targetUserId, seenNam
   const name = uniqueBulkImportName(rawName, code, seenNames);
   const description = mergeBulkImportDescription(rawName, item.description, name);
   const price = Number(item.price);
-  const cost = Number(item.cost);
+  const hasCost = item.cost !== undefined && item.cost !== null && String(item.cost).trim() !== '';
+  const cost = hasCost ? Number(item.cost) : null;
+  if (hasCost && (!Number.isFinite(cost) || cost < 0)) return { error: 'costo_invalido' };
   const stock = parseInt(item.stock, 10);
+  const imageUrl = normalizeHttpsImageUrl(item.image_url);
+  const unitRaw = item.unit !== undefined && item.unit !== null
+    ? String(sanitizeText(item.unit) || '').replace(/[\u0000\u007f]/g, '').trim().slice(0, PRODUCT_TEXT_LIMITS.unit)
+    : '';
+  const product = {
+    tenant_id: targetTenant,
+    pos_user_id: targetUserId,
+    name,
+    description,
+    code,
+    barcode: normalizeGtinBarcode(explicitBarcode) || barcodeFromCode,
+    price: isFinite(price) && price >= 0 ? price : 0,
+    cost: hasCost && isFinite(cost) && cost >= 0 ? cost : null,
+    stock: isFinite(stock) && stock >= 0 ? stock : 0,
+    category: categoryRaw || 'Sin departamento',
+    unit: unitRaw || 'pieza',
+    source: 'wizard_import',
+  };
+  if (imageUrl) product.image_url = imageUrl;
   return {
-    product: {
-      tenant_id: targetTenant,
-      pos_user_id: targetUserId,
-      name,
-      description,
-      code,
-      barcode: normalizeGtinBarcode(explicitBarcode) || barcodeFromCode,
-      price: isFinite(price) && price >= 0 ? price : 0,
-      cost: isFinite(cost) && cost >= 0 ? cost : 0,
-      stock: isFinite(stock) && stock >= 0 ? stock : 0,
-      category: categoryRaw || 'Sin departamento',
-      source: 'wizard_import',
-    },
+    product,
     updateFields: {
       description: !!description,
       barcode: !!explicitBarcode || !!barcodeFromCode,
       category: !!categoryRaw,
+      image_url: !!imageUrl,
+      cost: hasCost && isFinite(cost) && cost >= 0,
+      unit: !!unitRaw,
     },
   };
 }
@@ -1075,13 +1683,15 @@ function buildBulkImportUpdatePayload(item) {
   const payload = {
     name: item.name,
     price: item.price,
-    cost: item.cost,
     stock: item.stock,
     updated_at: new Date().toISOString(),
   };
   if (fields.description) payload.description = item.description;
   if (fields.barcode) payload.barcode = item.barcode;
   if (fields.category) payload.category = item.category;
+  if (fields.image_url) payload.image_url = item.image_url;
+  if (fields.cost) payload.cost = item.cost;
+  if (fields.unit) payload.unit = item.unit;
   return payload;
 }
 
@@ -1223,6 +1833,9 @@ function requireAuth(handler, requiredRoles) {
     req.user = {
       id: payload.id, email: payload.email,
       role: payload.role, tenant_id: payload.tenant_id, via: 'jwt',
+      company_id: payload.company_id || null,
+      owner_user_id: payload.owner_user_id || null,
+      auth_provider: payload.auth_provider || null,
       iat: payload.iat,
       jti: payload.jti,  // R8b FIX-R2: heartbeat necesita jti para PATCH last_seen_at
       is_impersonation: payload.is_impersonation === true,
@@ -1233,7 +1846,11 @@ function requireAuth(handler, requiredRoles) {
     // viejo mapa hardcodeado. Solo owner/admin/superadmin (el dueño), no cajeros.
     try {
       const _r = String(payload.role || '').toLowerCase();
-      if (payload.id && payload.tenant_id && !payload.is_impersonation &&
+      const claimedOwnerId = isUuid(String(payload.owner_user_id || ''))
+        ? String(payload.owner_user_id) : null;
+      if (payload.tenant_id && !payload.is_impersonation && claimedOwnerId) {
+        rememberTenantOwner(payload.tenant_id, claimedOwnerId);
+      } else if (payload.id && payload.tenant_id && !payload.is_impersonation &&
           (_r === 'owner' || _r === 'admin' || _r === 'superadmin' || _r === 'platform_owner' || _r === 'business_owner')) {
         rememberTenantOwner(payload.tenant_id, payload.id);
       }
@@ -1338,18 +1955,39 @@ function logAudit(req, action, resource, details) {
   } catch (_) {}
 }
 
-// B7: resolvePosUserId — preferir el ID del JWT (real) sobre el mapeo legacy hardcoded.
-// Si req.user.id existe y es UUID, lo usamos directamente (cada user ve sus propios datos).
-// Sino, fallback al mapeo TNT001/TNT002 → user-A/user-B (compatibilidad con sesiones antiguas).
+// Catálogo compartido: un miembro conserva su UUID de sesión, pero productos e
+// inventario pertenecen al owner UUID canónico de la empresa. Solo se acepta el
+// owner_user_id firmado cuando tenant/company/UUID son coherentes.
 function resolvePosUserId(req, tenantId) {
   const u = req.user || {};
-  // Si JWT trae un UUID válido, eso es la verdad
-  if (u.id && typeof u.id === 'string' && /^[0-9a-fA-F-]{32,36}$/.test(u.id.replace(/-/g,''))) {
-    return u.id;
+  const userId = String(u.id || '').trim();
+  const requestedTenantId = String(tenantId || '').trim();
+  const authTenantId = String(u.tenant_id || '').trim();
+  const claimedOwnerId = String(u.owner_user_id || '').trim();
+  if (claimedOwnerId) {
+    if (!isUuid(userId) || !isUuid(claimedOwnerId) || !isUuid(String(u.company_id || '').trim())
+        || !isTenantId(authTenantId) || requestedTenantId !== authTenantId) {
+      throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'Los claims de catálogo POS no son coherentes');
+    }
+    const role = String(u.role || '').toLowerCase();
+    if (claimedOwnerId !== userId && (role === 'owner' || role === 'business_owner')) {
+      throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El rol POS no coincide con el dueño del catálogo');
+    }
+    // A legacy seed is only a last-resort compatibility fallback. A signed
+    // canonical session (created after validating pos_user + pos_company) must
+    // not be rejected because an old deploy still carries a stale seed.
+    const rememberedOwnerId = __tenantOwnerCache[requestedTenantId] || null;
+    if (rememberedOwnerId && rememberedOwnerId !== claimedOwnerId) {
+      throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El dueño del catálogo contradice el tenant activo');
+    }
+    rememberTenantOwner(requestedTenantId, claimedOwnerId);
+    return claimedOwnerId;
   }
-  // Fallback legacy
-  if (tenantId === 'TNT002') return 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1';
-  return 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+  if (isUuid(userId)) {
+    return userId;
+  }
+  // Compatibilidad solo para seeds explícitos; un tenant desconocido falla cerrado.
+  return KNOWN_TENANT_OWNERS[requestedTenantId] || null;
 }
 
 // B42 FIX MVP-9: resolveOwnerPosUserId returns the TENANT OWNER's pos_user_id
@@ -1372,15 +2010,15 @@ function resolvePosUserId(req, tenantId) {
 // registro. El proceso Railway es persistente, asi que el mapeo sobrevive.
 const KNOWN_TENANT_OWNERS = {
   'TNT001': 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',
-  'TNT002': 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1',
   'TNT-P5E74': 'fd4c05db-cde2-45bb-a7b0-b1a3391921bd',
 };
 const __tenantOwnerCache = Object.create(null);
 // Registrar mapeo tenant->owner (llamado desde requireAuth y registro).
 function rememberTenantOwner(tenantId, posUserId) {
-  if (!tenantId || !posUserId) return;
-  if (KNOWN_TENANT_OWNERS[tenantId]) return; // no pisar seeds
+  if (!isTenantId(tenantId) || !isUuid(posUserId)) return false;
+  if (__tenantOwnerCache[tenantId] && __tenantOwnerCache[tenantId] !== posUserId) return false;
   __tenantOwnerCache[tenantId] = posUserId;
+  return true;
 }
 // FIX 2026-07-06 RBAC: helper — ¿el usuario es cajero/vendedor (rol de baja
 // autoridad que NO gestiona inventario ni config)? Usado por guards en el
@@ -1391,8 +2029,8 @@ function __vlxIsCashier(req) {
 }
 function resolveOwnerPosUserId(tenantId) {
   if (!tenantId) return null;
-  if (KNOWN_TENANT_OWNERS[tenantId]) return KNOWN_TENANT_OWNERS[tenantId];
   if (__tenantOwnerCache[tenantId]) return __tenantOwnerCache[tenantId];
+  if (KNOWN_TENANT_OWNERS[tenantId]) return KNOWN_TENANT_OWNERS[tenantId];
   try {
     console.warn('[resolveOwnerPosUserId] tenant sin owner en cache:', String(tenantId).slice(0, 40));
   } catch (_) {}
@@ -1978,7 +2616,7 @@ const handlers = {
       } catch (_) { /* fail-open if table missing */ }
 
       const users = await supabaseRequest('GET',
-        `/pos_users?email=eq.${encodeURIComponent(email)}&select=id,email,password_hash,role,plan,full_name,company_id,notes,is_active,mfa_enabled,must_change_password,last_login_at`);
+        `/pos_users?email=eq.${encodeURIComponent(email)}&select=id,email,password_hash,role,plan,full_name,company_id,tenant_id,notes,is_active,mfa_enabled,must_change_password,last_login_at`);
 
       const failLogin = async (msg) => {
         recordLoginFail(email);
@@ -2006,17 +2644,21 @@ const handlers = {
       }
       clearLoginFails(email);
 
+      // Contraseña y Google deben producir exactamente la misma identidad POS.
+      // No se permite inventar TNT001 ni usar company_id como si fuera tenant_id.
+      const identity = await resolveCanonicalExistingPosIdentity(user);
+
       // R14 MFA: si está habilitado, no emitir session todavía (skip si columna no existe)
       if (user.mfa_enabled) {
         const mfa_token = signMfaToken(user.id);
         return sendJSON(res, { ok: true, requires_mfa: true, mfa_token, expires_in: 300 });
       }
 
-      const notes = parseNotes(user.notes);
-      const _roleMap = { owner:'owner',admin:'admin',superadmin:'superadmin',manager:'manager',gerente:'manager',cashier:'cajero',cajero:'cajero',ADMIN:'superadmin',OWNER:'owner' };
-      const volvixRole = notes.volvix_role || _roleMap[user.role] || user.role || 'cajero';
-      const tenantId = notes.tenant_id || user.company_id || 'TNT001';
-      const tenantName = notes.tenant_name || 'Mi Negocio';
+      const notes = identity.notes;
+      const volvixRole = identity.role;
+      const tenantId = identity.tenantId;
+      const tenantName = identity.tenantName;
+      rememberTenantOwner(tenantId, identity.ownerUserId);
 
       supabaseRequest('PATCH', `/pos_users?id=eq.${user.id}`, {
         last_login_at: new Date().toISOString()
@@ -2082,11 +2724,7 @@ const handlers = {
 
       // FIX R13 (#3): emitir JWT (con jti único — R6a GAP-L2)
       const jti = crypto.randomBytes(16).toString('hex');
-      const token = signJWT({
-        id: user.id, email: user.email,
-        role: volvixRole, tenant_id: tenantId,
-        jti
-      });
+      const token = signJWT(canonicalPosSessionClaims(identity, 'password', { jti }));
 
       // R6a GAP-L2: register the active session
       supabaseRequest('POST', '/pos_active_sessions', {
@@ -2098,7 +2736,10 @@ const handlers = {
 
       // B13: registrar evento auth.login_success en audit-log
       try {
-        const fakeReq = { user: { id: user.id, email: user.email, role: volvixRole, tenant_id: tenantId } };
+        const fakeReq = { user: {
+          id: identity.userId, email: identity.email, role: volvixRole, tenant_id: tenantId,
+          company_id: identity.companyId, owner_user_id: identity.ownerUserId,
+        } };
         logAudit(fakeReq, 'auth.login_success', 'pos_users', { id: user.id });
       } catch(_){}
 
@@ -2116,7 +2757,8 @@ const handlers = {
           user_id: user.id, email: user.email, role: volvixRole,
           tenant_id: tenantId, tenant_name: tenantName,
           business_type: businessType,
-          full_name: user.full_name, company_id: user.company_id,
+          full_name: user.full_name, company_id: identity.companyId,
+          owner_user_id: identity.ownerUserId,
           expires_at: Date.now() + (JWT_EXPIRES_SECONDS * 1000), plan: user.plan,
           jti,
           must_change_password: mustChangePassword
@@ -2128,7 +2770,8 @@ const handlers = {
       if (existingSessionWarning) resp.warning = existingSessionWarning;
       sendJSON(res, resp);
     } catch (err) {
-      sendError(res, err);
+      const statusCode = Number(err && err.statusCode);
+      sendError(res, err, [400, 401, 403, 409, 503].includes(statusCode) ? statusCode : 500);
     }
   },
 
@@ -2548,7 +3191,7 @@ const handlers = {
       // 2026-05-06 fix: tenants nuevos sin provisionar deben recibir 200 con lista
       // vacia (no 404), si no el global fetch interceptor en volvix-ui-errors.js
       // muestra un overlay bloqueante "Pagina no encontrada" en el primer load del POS.
-      let posUserId = resolveOwnerPosUserId(tenantId);
+      let posUserId = resolvePosUserId(req, tenantId);
       if (!posUserId) {
         return sendJSON(res, {
           products: [],
@@ -2604,6 +3247,7 @@ const handlers = {
 
       let mapped = (products || []).map(p => ({
         id: p.id, code: p.code, barcode: p.barcode, name: p.name, category: p.category,
+        description: p.description || null, unit: p.unit || 'pieza',
         price: parseFloat(p.price), cost: parseFloat(p.cost),
         stock: p.stock, min_stock: p.min_stock, icon: p.icon,
         // V10.1 — multimedia + info extendida para Quick-pick visual + sidebar
@@ -2699,6 +3343,7 @@ const handlers = {
       safe.name = sanitizeName(safe.name);
       safe.code = sanitizeName(safe.code);
       if (safe.category !== undefined) safe.category = sanitizeName(safe.category);
+      sanitizeProductOptionalTextFields(safe, false);
       if (!safe.name || !safe.name.length) return sendValidation(res, 'name requerido', 'name');
       if (safe.name.length > 200) return sendValidation(res, 'name max 200 chars', 'name');
       // R22.4 BUG 3: precio numérico finito y >= 0.
@@ -2719,6 +3364,14 @@ const handlers = {
       if (!Number.isFinite(costNum) || costNum < 0) {
         return sendValidation(res, 'cost debe ser número >= 0', 'cost');
       }
+      if (safe.image_url !== undefined) {
+        const imageUrl = normalizeHttpsImageUrl(safe.image_url);
+        if (safe.image_url !== null && String(safe.image_url).trim() && !imageUrl) {
+          return sendValidation(res, 'image_url debe ser una URL HTTPS válida', 'image_url');
+        }
+        if (imageUrl) safe.image_url = imageUrl;
+        else delete safe.image_url;
+      }
       // FIX slice_38: pos_user_id derivado del JWT, NUNCA del body (impide cross-tenant write)
       const tenantId = resolveTenant(req);
       const ownerUserId = resolvePosUserId(req, tenantId);
@@ -2733,7 +3386,7 @@ const handlers = {
           const dup = await supabaseRequest('GET',
             '/pos_products?pos_user_id=eq.' + encodeURIComponent(ownerUserId) +
             '&or=(code.eq.' + encodeURIComponent(safe.code) +
-            (body.barcode ? ',barcode.eq.' + encodeURIComponent(String(body.barcode)) : '') +
+            (safe.barcode ? ',barcode.eq.' + encodeURIComponent(safe.barcode) : '') +
             ')&select=id,name,version&limit=1');
           if (Array.isArray(dup) && dup.length > 0) {
             return sendJSON(res, {
@@ -2759,7 +3412,11 @@ const handlers = {
         cost: costNum, price: safe.price, stock: Number(safe.stock || 0),
         icon: safe.icon || '📦'
       };
+      for (const field of ['barcode', 'description', 'unit']) {
+        if (safe[field] !== undefined) insertRow[field] = safe[field];
+      }
       if (industryFields) insertRow.industry_fields = industryFields;
+      if (safe.image_url) insertRow.image_url = safe.image_url;
       const result = await supabaseRequest('POST', '/pos_products', insertRow);
       const created = result && (result[0] || result);
       try { logAudit(req, 'product.created', 'pos_products', { id: created && created.id, after: { name: safe.name } }); } catch(_){}
@@ -2804,6 +3461,7 @@ const handlers = {
         }
         safe.code = sanitizeName(safe.code);
       }
+      sanitizeProductOptionalTextFields(safe, true);
       if (safe.price !== undefined) {
         const priceNum = Number(safe.price);
         if (!Number.isFinite(priceNum) || priceNum < 0) {
@@ -2811,12 +3469,28 @@ const handlers = {
         }
         safe.price = priceNum;
       }
+      if (safe.cost !== undefined && safe.cost !== null) {
+        const costNum = Number(safe.cost);
+        if (!Number.isFinite(costNum) || costNum < 0) {
+          return sendValidation(res, 'cost debe ser número >= 0', 'cost');
+        }
+        safe.cost = costNum;
+      }
       if (safe.stock !== undefined && safe.stock !== null) {
         const stockNum = Number(safe.stock);
         if (!Number.isFinite(stockNum) || stockNum < 0 || !Number.isInteger(stockNum)) {
           return sendValidation(res, 'stock debe ser entero >= 0', 'stock');
         }
         safe.stock = stockNum;
+      }
+      if (safe.image_url !== undefined) {
+        if (safe.image_url === null || String(safe.image_url).trim() === '') {
+          safe.image_url = null;
+        } else {
+          const imageUrl = normalizeHttpsImageUrl(safe.image_url);
+          if (!imageUrl) return sendValidation(res, 'image_url debe ser una URL HTTPS válida', 'image_url');
+          safe.image_url = imageUrl;
+        }
       }
       // 2026-07-07: sanea industry_fields (jsonb) si viene en el PATCH. Si queda
       // sin datos se OMITE la clave (deploy-safe: no depende de la columna R39).
@@ -4920,10 +5594,11 @@ const handlers = {
       if (!payload) return sendJSON(res, { error: 'mfa_token inválido o expirado' }, 401);
 
       const rows = await supabaseRequest('GET',
-        `/pos_users?id=eq.${payload.sub}&select=id,email,role,plan,full_name,company_id,notes,is_active,mfa_enabled,mfa_secret,mfa_backup_codes`);
+        `/pos_users?id=eq.${payload.sub}&select=id,email,role,plan,full_name,company_id,tenant_id,notes,is_active,mfa_enabled,mfa_secret,mfa_backup_codes`);
       if (!rows || !rows.length) return sendJSON(res, { error: 'user not found' }, 404);
       const user = rows[0];
       if (!user.is_active || !user.mfa_enabled) return sendJSON(res, { error: 'forbidden' }, 403);
+      const identity = await resolveCanonicalExistingPosIdentity(user);
 
       const codeStr = String(code || '').trim();
       let ok = false;
@@ -4948,11 +5623,10 @@ const handlers = {
 
       if (!ok) return sendJSON(res, { error: 'código inválido' }, 401);
 
-      const notes = parseNotes(user.notes);
-      const _roleMap = { owner:'owner',admin:'admin',superadmin:'superadmin',manager:'manager',gerente:'manager',cashier:'cajero',cajero:'cajero',ADMIN:'superadmin',OWNER:'owner' };
-      const volvixRole = notes.volvix_role || _roleMap[user.role] || user.role || 'cajero';
-      const tenantId = notes.tenant_id || user.company_id || 'TNT001';
-      const tenantName = notes.tenant_name || 'Mi Negocio';
+      const volvixRole = identity.role;
+      const tenantId = identity.tenantId;
+      const tenantName = identity.tenantName;
+      rememberTenantOwner(tenantId, identity.ownerUserId);
 
       supabaseRequest('PATCH', `/pos_users?id=eq.${user.id}`,
         { last_login_at: new Date().toISOString() }).catch(() => {});
@@ -4960,20 +5634,21 @@ const handlers = {
         pos_user_id: user.id, platform: 'web-mfa', ip: clientIp(req)
       }).catch(() => {});
 
-      const token = signJWT({
-        id: user.id, email: user.email,
-        role: volvixRole, tenant_id: tenantId
-      });
+      const token = signJWT(canonicalPosSessionClaims(identity, 'password'));
       sendJSON(res, {
         ok: true, token, used_backup: usedBackup,
         session: {
           user_id: user.id, email: user.email, role: volvixRole,
           tenant_id: tenantId, tenant_name: tenantName,
-          full_name: user.full_name, company_id: user.company_id,
+          full_name: user.full_name, company_id: identity.companyId,
+          owner_user_id: identity.ownerUserId,
           expires_at: Date.now() + (JWT_EXPIRES_SECONDS * 1000), plan: user.plan
         }
       });
-    } catch (err) { sendError(res, err); }
+    } catch (err) {
+      const statusCode = Number(err && err.statusCode);
+      sendError(res, err, [400, 401, 403, 409, 503].includes(statusCode) ? statusCode : 500);
+    }
   },
 
   // POST /api/mfa/disable — auth: requiere password actual
@@ -9007,96 +9682,64 @@ handlers['POST /api/auth/oauth/google/exchange'] = async (req, res) => {
     const accessToken = String(body.access_token || body.token || '').trim();
     if (!accessToken) return sendJSON(res, { ok: false, error: 'access_token requerido' }, 400);
 
-    // Verificar token con Supabase Auth API
-    const supabaseUser = await new Promise((resolve, reject) => {
-      const https = require('https');
-      const u = new URL(SUPABASE_URL + '/auth/v1/user');
-      const r = https.request({
-        hostname: u.hostname,
-        path: u.pathname,
-        method: 'GET',
-        headers: {
-          'apikey': SUPABASE_SERVICE_KEY || '',
-          'Authorization': 'Bearer ' + accessToken,
-          'Accept': 'application/json',
-        },
-      }, (resp) => {
-        let buf = '';
-        resp.on('data', c => buf += c);
-        resp.on('end', () => { try { resolve(JSON.parse(buf)); } catch { reject(new Error('invalid json')); } });
-      });
-      r.on('error', reject);
-      r.end();
-    });
-
-    if (!supabaseUser || !supabaseUser.email) {
-      return sendJSON(res, { ok: false, error: 'Token inválido o expirado' }, 401);
-    }
-
-    const email = supabaseUser.email.toLowerCase();
-
-    // Buscar usuario en pos_users por email
-    let user = null;
-    try {
-      const users = await supabaseRequest('GET', `/pos_users?email=eq.${encodeURIComponent(email)}&select=*&limit=1`);
-      user = users && users[0];
-    } catch (e) { console.error('[oauth/exchange] lookup error:', e.message); }
-
-    // Si no existe, crear tenant + usuario
-    if (!user) {
-      const tenantId = 'TNT-' + Date.now().toString(36).toUpperCase();
-      const userId = 'USR-' + Date.now().toString(36).toUpperCase();
-      const now = new Date().toISOString();
-      try {
-        await supabaseRequest('POST', '/pos_tenants', {
-          id: tenantId, business_name: email.split('@')[0], business_type: 'general',
-          status: 'active', created_at: now,
-        });
-      } catch (e) {}
-      try {
-        const rows = await supabaseRequest('POST', '/pos_users', {
-          id: userId, tenant_id: tenantId, email, role: 'owner',
-          is_active: true, created_at: now, auth_provider: 'google',
-        });
-        user = (rows && rows[0]) || { id: userId, tenant_id: tenantId, email, role: 'owner' };
-      } catch (e) {
-        user = { id: userId, tenant_id: tenantId, email, role: 'owner' };
-      }
-    }
+    const supabaseUser = await fetchSupabaseAuthUser(accessToken);
+    const resolved = await resolveOrProvisionGooglePosUser(supabaseUser);
+    const user = resolved.user;
+    const email = canonicalGoogleEmail(user.email);
 
     // Mantener Google OAuth alineado con el login por contraseña. Los usuarios
     // legacy guardan el tenant comercial y el rol real dentro de notes.
-    const notes = parseNotes(user.notes);
-    const roleMap = {
-      owner: 'owner',
-      admin: 'admin',
-      superadmin: 'superadmin',
-      manager: 'manager',
-      gerente: 'manager',
-      cashier: 'cajero',
-      cajero: 'cajero',
-      ADMIN: 'superadmin',
-      OWNER: 'owner',
-    };
-    const volvixRole = notes.volvix_role || roleMap[user.role] || user.role || 'owner';
-    const tenantId = notes.tenant_id || user.tenant_id || user.company_id || '';
-    const token = signJWT({
-      sub: user.id, id: user.id, email,
-      tenant_id: tenantId, company_id: tenantId,
+    const notes = parseCanonicalAccountNotes(user.notes);
+    const volvixRole = resolveCanonicalPosRole(user, notes, 'owner');
+    const tenantId = resolved.tenantId;
+    if (!isUuid(user.id) || !email) {
+      throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La sesión POS no tiene identidad canónica');
+    }
+    if (resolved.platformOnly === true) {
+      if (!['superadmin', 'platform_owner'].includes(String(volvixRole).toLowerCase())
+          || tenantId || resolved.companyId || resolved.ownerUserId) {
+        throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La sesión de plataforma contiene claims de catálogo');
+      }
+    } else {
+      if (!isTenantId(tenantId) || !isUuid(resolved.ownerUserId)) {
+        throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'La empresa POS no tiene un dueño canónico');
+      }
+      if (resolved.ownerUserId !== user.id && ['owner', 'business_owner'].includes(String(volvixRole).toLowerCase())) {
+        throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El rol POS no coincide con el dueño de la empresa');
+      }
+      rememberTenantOwner(tenantId, resolved.ownerUserId);
+    }
+    const identity = {
+      userId: user.id,
+      email,
       role: volvixRole,
-      auth_provider: 'google',
-    });
+      tenantId,
+      companyId: resolved.companyId,
+      ownerUserId: resolved.ownerUserId,
+      platformOnly: resolved.platformOnly === true,
+    };
+    const token = signJWT(canonicalPosSessionClaims(identity, 'google'));
 
     sendJSON(res, {
       ok: true, token,
-      user: { id: user.id, email, role: volvixRole, tenant_id: tenantId },
-      tenant: { id: tenantId },
+      user: {
+        id: user.id, email, role: volvixRole, tenant_id: tenantId,
+        company_id: resolved.companyId, owner_user_id: resolved.ownerUserId,
+      },
+      tenant: resolved.platformOnly === true ? null : { id: tenantId },
       redirect: (volvixRole === 'superadmin' || volvixRole === 'platform_owner')
         ? '/volvix-launcher.html' : '/salvadorex-pos.html',
     });
   } catch (err) {
-    console.error('[oauth/google/exchange]', err.message);
-    sendJSON(res, { ok: false, error: err.message || 'Error interno' }, 500);
+    const statusCode = Number(err && err.statusCode);
+    const safeStatus = [400, 401, 403, 409, 503].includes(statusCode) ? statusCode : 500;
+    const errorCode = err && err.code ? String(err.code) : 'OAUTH_EXCHANGE_FAILED';
+    console.error('[oauth/google/exchange]', errorCode);
+    sendJSON(res, {
+      ok: false,
+      error: safeStatus === 500 ? 'Error interno al crear la sesión' : String(err.message || 'No se pudo iniciar sesión'),
+      error_code: errorCode,
+    }, safeStatus);
   }
 };
 
@@ -12380,7 +13023,15 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const tok = auth.replace(/^Bearer\s+/i, '');
       const payload = tok ? verifyJWT(tok) : null;
       if (!payload) return sendJSON(res, { ok: false, error: 'token inválido' }, 401);
-      const fresh = signJWT({ id: payload.id, email: payload.email, role: payload.role, tenant_id: payload.tenant_id });
+      const fresh = signJWT({
+        id: payload.id,
+        email: payload.email,
+        role: payload.role,
+        tenant_id: payload.tenant_id,
+        company_id: payload.company_id || null,
+        owner_user_id: payload.owner_user_id || null,
+        auth_provider: payload.auth_provider || null,
+      });
       sendJSON(res, { ok: true, token: fresh });
     } catch (err) { sendJSON(res, { ok: false, error: 'no se pudo refrescar' }, 401); }
   };
@@ -20228,6 +20879,20 @@ if (process.env.NODE_ENV === 'test') {
     canAuthenticatePasswordLogin,
     markPasswordLoginEnabled,
     effectiveUserTenantId,
+    parseCanonicalAccountNotes,
+    resolveCanonicalTenantSignals,
+    resolveCanonicalExistingPosIdentity,
+    canonicalPosSessionClaims,
+    resolveCanonicalPosRole,
+    canonicalGoogleEmail,
+    assertConfirmedSupabaseUser,
+    canonicalGoogleTenantId,
+    isExpectedSupabaseUrl,
+    EXPECTED_SUPABASE_PROJECT_REF,
+    resolveOrProvisionGooglePosUser,
+    normalizeHttpsImageUrl,
+    isPrivateOrLocalHostname,
+    sanitizeProductOptionalTextFields,
     normalizeGtinBarcode,
     uniqueBulkImportName,
     mergeBulkImportDescription,
@@ -20235,6 +20900,7 @@ if (process.env.NODE_ENV === 'test') {
     buildBulkImportUpdatePayload,
     handlers,
     setSupabaseRequestForTest(fn) { __testSupabaseRequestOverride = typeof fn === 'function' ? fn : null; },
+    setSupabaseAuthUserForTest(fn) { __testSupabaseAuthUserOverride = typeof fn === 'function' ? fn : null; },
     rateLimit,
     rateBuckets,
     isUuid,
@@ -20243,6 +20909,7 @@ if (process.env.NODE_ENV === 'test') {
     setSecurityHeaders,
     applyCorsHeaders,
     requireAuth,
+    resolvePosUserId,
     ALLOWED_ORIGINS,
     ALLOWED_FIELDS_PRODUCTS,
     ALLOWED_FIELDS_CUSTOMERS,
@@ -20281,7 +20948,7 @@ if (process.env.NODE_ENV === 'test') {
       const body = JSON.stringify({ query: finalSql });
       const opts = {
         hostname: 'api.supabase.com',
-        path: '/v1/projects/zhvwmzkcqngcaqpdxtwr/database/query',
+        path: `/v1/projects/${EXPECTED_SUPABASE_PROJECT_REF}/database/query`,
         method: 'POST',
         headers: { 'Authorization': `Bearer ${SUPABASE_PAT}`, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
         timeout: 15000,
@@ -21906,7 +22573,7 @@ if (process.env.NODE_ENV === 'test') {
         const body = JSON.stringify({ query: finalSql });
         const opts = {
           hostname: 'api.supabase.com',
-          path: '/v1/projects/zhvwmzkcqngcaqpdxtwr/database/query',
+          path: `/v1/projects/${EXPECTED_SUPABASE_PROJECT_REF}/database/query`,
           method: 'POST',
           headers: { 'Authorization': `Bearer ${SUPABASE_PAT}`, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
           timeout: 15000,
@@ -22415,6 +23082,7 @@ if (process.env.NODE_ENV === 'test') {
               looksLikeSqlInjection(rawName) || looksLikeSqlInjection(rawCode)) {
             errors.push({ index: i, error: 'invalid_chars', sku: rawCode }); continue;
           }
+          sanitizeProductOptionalTextFields(safe, false);
           var name = sanitizeName(rawName);
           var code = sanitizeName(rawCode);
           if (!name) { errors.push({ index: i, error: 'name_required' }); continue; }
@@ -22422,11 +23090,19 @@ if (process.env.NODE_ENV === 'test') {
           if (!Number.isFinite(priceNum) || priceNum < 0) {
             errors.push({ index: i, sku: code, error: 'invalid_price' }); continue;
           }
-          var costNum = Number(safe.cost != null ? safe.cost : (p.cost != null ? p.cost : 0));
-          if (!Number.isFinite(costNum) || costNum < 0) costNum = 0;
+          var hasCost = safe.cost !== undefined && safe.cost !== null && String(safe.cost).trim() !== '';
+          var costNum = hasCost ? Number(safe.cost) : null;
+          if (hasCost && (!Number.isFinite(costNum) || costNum < 0)) {
+            errors.push({ index: i, sku: code, error: 'invalid_cost' }); continue;
+          }
           var stockNum = Number(safe.stock != null ? safe.stock : (p.stock != null ? p.stock : 0));
           if (!Number.isFinite(stockNum) || stockNum < 0 || !Number.isInteger(stockNum)) stockNum = 0;
           var category = safe.category ? sanitizeName(safe.category) : (p.category ? sanitizeName(p.category) : 'general');
+          var imageUrl = null;
+          if (safe.image_url !== undefined && safe.image_url !== null && String(safe.image_url).trim()) {
+            imageUrl = normalizeHttpsImageUrl(safe.image_url);
+            if (!imageUrl) { errors.push({ index: i, sku: code, error: 'invalid_image_url' }); continue; }
+          }
           // Upsert by (pos_user_id, code) — try update, fallback insert.
           var existing = null;
           if (code) {
@@ -22441,17 +23117,21 @@ if (process.env.NODE_ENV === 'test') {
             code: code || null,
             name: name,
             category: category || 'general',
-            cost: costNum,
             price: priceNum,
             stock: stockNum,
             icon: safe.icon || '📦'
           };
+          if (hasCost) payload.cost = costNum;
+          for (var optionalField of ['barcode', 'description', 'unit']) {
+            if (safe[optionalField] !== undefined) payload[optionalField] = safe[optionalField];
+          }
+          if (imageUrl) payload.image_url = imageUrl;
           if (existing && existing.length) {
             await supabaseRequest('PATCH',
               '/pos_products?id=eq.' + encodeURIComponent(existing[0].id), payload);
             updated++;
           } else {
-            await supabaseRequest('POST', '/pos_products', payload);
+            await supabaseRequest('POST', '/pos_products', { ...payload, cost: hasCost ? costNum : null });
             created++;
           }
         } catch (e) {
@@ -29517,6 +30197,12 @@ if (process.env.NODE_ENV === 'test') {
     var _orig_import = handlers['POST /api/products/import'];
     handlers['POST /api/products/import'] = requireAuth(async function (req, res) {
       try {
+        if (__vlxIsCashier(req)) {
+          return send403(res, {
+            need_role: ['owner', 'admin', 'manager', 'superadmin'],
+            have_role: req.user && req.user.role,
+          });
+        }
         var body;
         try { body = await readBody(req, { maxBytes: 4 * 1024 * 1024, strictJson: true }); }
         catch (_) { body = null; }
@@ -29548,19 +30234,29 @@ if (process.env.NODE_ENV === 'test') {
             var sn = Number(p.stock);
             if (!Number.isFinite(sn) || sn < 0) rowErrors.push({ row: i + 1, field: 'stock', error: 'stock must be >= 0' });
           }
+          var imageUrl = null;
+          if (p.image_url !== undefined && p.image_url !== null && String(p.image_url).trim()) {
+            imageUrl = normalizeHttpsImageUrl(p.image_url);
+            if (!imageUrl) rowErrors.push({ row: i + 1, field: 'image_url', error: 'image_url must use https' });
+          }
           if (rowErrors.length) {
             validationErrors = validationErrors.concat(rowErrors);
           } else {
-            clean.push({
+            var optionalText = pickFields(p, ['barcode', 'description', 'unit']);
+            sanitizeProductOptionalTextFields(optionalText, false);
+            var cleanRow = {
               idx: i,
               code: p.code || ('IMP_' + Date.now() + '_' + i),
               name: name,
               category: p.category || 'general',
-              cost: Number(p.cost || 0),
+              cost: p.cost === undefined || p.cost === null || p.cost === '' ? null : Number(p.cost),
               price: Number(p.price),
               stock: Number(p.stock || 0),
-              icon: p.icon || '📦'
-            });
+              icon: p.icon || '📦',
+              ...optionalText,
+            };
+            if (imageUrl) cleanRow.image_url = imageUrl;
+            clean.push(cleanRow);
           }
         }
 
@@ -29576,7 +30272,11 @@ if (process.env.NODE_ENV === 'test') {
         }
 
         // PHASE 2: all rows pre-validated. Now insert with rollback-on-fail.
-        var posUserId = (req.user && req.user.id) || 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+        var importTenantId = resolveTenant(req);
+        var posUserId = resolvePosUserId(req, importTenantId);
+        if (!isUuid(posUserId)) {
+          throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'No se pudo resolver el dueño del catálogo');
+        }
         var insertedIds = [];
         var imported = 0, skipped = 0;
         try {
@@ -29589,7 +30289,7 @@ if (process.env.NODE_ENV === 'test') {
                 '&pos_user_id=eq.' + encodeURIComponent(posUserId) + '&select=id');
             } catch (_) {}
             if (existing && existing.length) { skipped++; continue; }
-            var inserted = await supabaseRequest('POST', '/pos_products', {
+            var insertPayload = {
               pos_user_id: posUserId,
               code: c.code,
               name: c.name,
@@ -29598,7 +30298,12 @@ if (process.env.NODE_ENV === 'test') {
               price: c.price,
               stock: c.stock,
               icon: c.icon
-            });
+            };
+            for (var textField of ['barcode', 'description', 'unit']) {
+              if (c[textField] !== undefined) insertPayload[textField] = c[textField];
+            }
+            if (c.image_url) insertPayload.image_url = c.image_url;
+            var inserted = await supabaseRequest('POST', '/pos_products', insertPayload);
             var newId = Array.isArray(inserted) && inserted[0] && inserted[0].id ? inserted[0].id : (inserted && inserted.id);
             if (newId) insertedIds.push(newId);
             imported++;
@@ -40808,7 +41513,15 @@ if (process.env.NODE_ENV === 'test') {
   if (!handlers['POST /api/refresh']) {
     handlers['POST /api/refresh'] = requireAuth(async function (req, res) {
       try {
-        const token = signJWT({ id: req.user.id, email: req.user.email, role: req.user.role, tenant_id: req.user.tenant_id });
+        const token = signJWT({
+          id: req.user.id,
+          email: req.user.email,
+          role: req.user.role,
+          tenant_id: req.user.tenant_id,
+          company_id: req.user.company_id || null,
+          owner_user_id: req.user.owner_user_id || null,
+          auth_provider: req.user.auth_provider || null,
+        });
         sendJSON(res, { token });
       } catch (err) { sendError(res, err); }
     });
@@ -42874,10 +43587,17 @@ if (process.env.NODE_ENV === 'test') {
   // ─────────────────────────────────────────────────────────────────────
   handlers['POST /api/products/bulk-import'] = requireAuth(async function (req, res) {
     try {
+      // Mantener el mismo RBAC que el alta/edición individual: el catálogo es
+      // compartido con el owner, pero un cajero no puede cambiarlo por la ruta masiva.
+      if (__vlxIsCashier(req)) {
+        return send403(res, {
+          need_role: ['owner', 'admin', 'manager', 'superadmin'],
+          have_role: req.user && req.user.role,
+        });
+      }
       const body = await readBody(req, { maxBytes: 6 * 1024 * 1024 }).catch(() => ({}));
       if (checkBodyError && checkBodyError(req, res)) return;
-      const callerTenant = (req.user && (req.user.tenant_id || req.user.tnt)) || '';
-      if (!callerTenant) return sendJSON(res, { error: 'tenant_required' }, 400);
+      const callerTenant = resolveTenant(req);
       const items = Array.isArray(body.items) ? body.items : [];
       if (!items.length) return sendJSON(res, { error: 'sin_items' }, 400);
       if (items.length > 5000) return sendJSON(res, { error: 'demasiados_items', max: 5000 }, 400);
@@ -42903,20 +43623,28 @@ if (process.env.NODE_ENV === 'test') {
         batchContext = batches[0];
         targetTenant = String(batchContext.target_tenant_id || callerTenant);
       }
+      if (!isTenantId(targetTenant)) {
+        throw googleOAuthError('POS_IDENTITY_CONFLICT', 409, 'El tenant destino de la importación no es válido');
+      }
 
       // 2026-05-10 fix: la tabla destino es pos_products (text tenant_id, pos_user_id NOT NULL)
       // — la antigua /products usa tenant_id uuid y exige sku NOT NULL → todos los inserts fallaban silenciosamente.
-      let targetUserId = req.user && req.user.id;
-      if (batchContext && targetTenant !== callerTenant && canManageAllProductImports(req)) {
+      let targetUserId = null;
+      if (targetTenant === callerTenant) {
+        targetUserId = resolvePosUserId(req, callerTenant);
+      } else if (batchContext && canManageAllProductImports(req)) {
         const companies = await supabaseRequest('GET',
           '/pos_companies?tenant_id=eq.' + encodeURIComponent(targetTenant) +
-          '&select=owner_user_id&limit=1'
+          '&is_active=eq.true&select=id,tenant_id,owner_user_id&limit=2'
         ).catch(() => []);
-        targetUserId = Array.isArray(companies) && companies[0]
-          ? companies[0].owner_user_id
+        const targetCompany = Array.isArray(companies) && companies.length === 1 ? companies[0] : null;
+        targetUserId = targetCompany && String(targetCompany.tenant_id) === targetTenant
+          ? String(targetCompany.owner_user_id || '')
           : null;
+      } else {
+        return sendJSON(res, { error: 'batch_not_found_or_wrong_tenant' }, 403);
       }
-      if (!targetUserId) return sendJSON(res, { error: 'target_user_required' }, 400);
+      if (!isUuid(targetUserId)) return sendJSON(res, { error: 'target_user_required' }, 409);
 
       // Sanitizar cada item
       const cleaned = [];
@@ -42941,6 +43669,7 @@ if (process.env.NODE_ENV === 'test') {
           const codesEnc = allCodes.map(c => '"' + String(c).replace(/"/g,'\\"') + '"').join(',');
           const existing = await supabaseRequest('GET',
             '/pos_products?tenant_id=eq.' + encodeURIComponent(targetTenant) +
+            '&pos_user_id=eq.' + encodeURIComponent(targetUserId) +
             '&code=in.(' + encodeURIComponent(codesEnc) +
             ')&select=id,code&limit=' + (allCodes.length + 10));
           if (Array.isArray(existing)) {
@@ -42967,7 +43696,7 @@ if (process.env.NODE_ENV === 'test') {
         const patchPayload = buildBulkImportUpdatePayload(item);
         try {
           await supabaseRequest('PATCH',
-            '/pos_products?id=eq.' + existingId,
+            '/pos_products?id=eq.' + existingId + '&pos_user_id=eq.' + encodeURIComponent(targetUserId),
             patchPayload,
             { 'Prefer': 'return=minimal' });
           updated++;
