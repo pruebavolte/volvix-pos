@@ -3,6 +3,9 @@ const assert = require('node:assert/strict');
 const api = require('../../api/index.js');
 const {
   normalizeHttpsImageUrl,
+  normalizeProductImportInput,
+  sanitizeProductImageProvenance,
+  productImageJson,
   normalizeGtinBarcode,
   uniqueBulkImportName,
   mergeBulkImportDescription,
@@ -31,6 +34,50 @@ describe('bulk product import sanitization', () => {
     ]) {
       assert.equal(normalizeHttpsImageUrl(unsafe), null, unsafe);
     }
+  });
+
+  test('normalizes Spanish CSV aliases and flat image provenance fields', () => {
+    const normalized = normalizeProductImportInput({
+      codigo: 'DOC-IMG-01',
+      nombre: 'Producto con foto',
+      precio: '25.50',
+      imagen_url: 'https://cdn.example.com/producto.jpg',
+      fuente_imagen_url: 'https://tienda.example.com/producto',
+      proveedor_imagen: 'tienda_ejemplo',
+      licencia_imagen: 'publicada_por_comercio',
+    });
+    assert.equal(normalized.code, 'DOC-IMG-01');
+    assert.equal(normalized.name, 'Producto con foto');
+    assert.equal(normalized.price, '25.50');
+    assert.equal(normalized.image_url, 'https://cdn.example.com/producto.jpg');
+    assert.deepEqual(normalized.image_provenance, {
+      source_url: 'https://tienda.example.com/producto',
+      provider: 'tienda_ejemplo',
+      license: 'publicada_por_comercio',
+    });
+  });
+
+  test('persists remote-link provenance and drops an unsafe provenance source URL', () => {
+    const safe = sanitizeProductImageProvenance({
+      source_url: 'https://169.254.169.254/latest/meta-data',
+      provider: ' catálogo externo ',
+      matched_by: 'barcode',
+      exact_match: true,
+      verified_at: '2026-08-18T12:00:00Z',
+    }, 'https://cdn.example.com/producto.jpg');
+    assert.deepEqual(safe, {
+      url: 'https://cdn.example.com/producto.jpg',
+      storage: 'remote_link',
+      provider: 'catálogo externo',
+      matched_by: 'barcode',
+      exact_match: true,
+      verified_at: '2026-08-18T12:00:00.000Z',
+    });
+    assert.deepEqual(productImageJson({ provider: 'catalog' }, 'https://cdn.example.com/producto.jpg'), [{
+      url: 'https://cdn.example.com/producto.jpg',
+      storage: 'remote_link',
+      provider: 'catalog',
+    }]);
   });
 
   test('keeps only valid GTIN-8/12/13/14 barcodes', () => {
@@ -176,32 +223,46 @@ describe('bulk product import sanitization', () => {
       name: 'Filtro con imagen',
       code: '087295151013',
       image_url: 'https://images.example.com/filtro.jpg',
+      image_provenance: {
+        source_url: 'https://shop.example.com/filtro',
+        provider: 'shop',
+        matched_by: 'document_exact_sku',
+        exact_match: true,
+      },
     }, 0, 'TNT-1', 'user-1', new Set());
     const withoutImage = buildBulkImportProduct({
       name: 'Filtro sin imagen nueva',
       code: '744926070722',
     }, 1, 'TNT-1', 'user-1', new Set());
     assert.equal(withImage.product.image_url, 'https://images.example.com/filtro.jpg');
-    assert.equal(buildBulkImportUpdatePayload({ ...withImage.product, _importFields: withImage.updateFields }).image_url,
-      'https://images.example.com/filtro.jpg');
+    assert.deepEqual(withImage.product.images, [{
+      url: 'https://images.example.com/filtro.jpg',
+      storage: 'remote_link',
+      source_url: 'https://shop.example.com/filtro',
+      provider: 'shop',
+      matched_by: 'document_exact_sku',
+      exact_match: true,
+    }]);
+    const imagePatch = buildBulkImportUpdatePayload({ ...withImage.product, _importFields: withImage.updateFields });
+    assert.equal(imagePatch.image_url, 'https://images.example.com/filtro.jpg');
+    assert.deepEqual(imagePatch.images, withImage.product.images);
     assert.equal(Object.hasOwn(withoutImage.product, 'image_url'), false);
     assert.equal(Object.hasOwn(
       buildBulkImportUpdatePayload({ ...withoutImage.product, _importFields: withoutImage.updateFields }),
       'image_url',
     ), false);
+    assert.equal(Object.hasOwn(
+      buildBulkImportUpdatePayload({ ...withoutImage.product, _importFields: withoutImage.updateFields }),
+      'images',
+    ), false);
   });
 
-  test('drops unsafe image schemes without dropping the product', () => {
+  test('rejects unsafe image schemes instead of silently importing without the image', () => {
     const built = buildBulkImportProduct({
       name: 'Producto seguro',
       code: '087295151013',
       image_url: 'data:image/png;base64,AA==',
     }, 0, 'TNT-1', 'user-1', new Set());
-    assert.equal(built.error, undefined);
-    assert.equal(Object.hasOwn(built.product, 'image_url'), false);
-    assert.equal(Object.hasOwn(
-      buildBulkImportUpdatePayload({ ...built.product, _importFields: built.updateFields }),
-      'image_url',
-    ), false);
+    assert.equal(built.error, 'imagen_url_invalida');
   });
 });

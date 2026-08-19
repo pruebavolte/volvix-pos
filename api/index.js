@@ -466,7 +466,7 @@ function isTenantId(s) { return typeof s === 'string' && (UUID_RE.test(s) || TEN
 // FIX R13 (#9): Whitelists de campos
 const ALLOWED_FIELDS_PRODUCTS = [
   'code', 'barcode', 'name', 'description', 'category', 'unit',
-  'cost', 'price', 'stock', 'icon', 'image_url', 'industry_fields',
+  'cost', 'price', 'stock', 'icon', 'image_url', 'image_provenance', 'industry_fields',
 ];
 const PRODUCT_TEXT_LIMITS = Object.freeze({ barcode: 80, description: 8000, unit: 40 });
 function isPrivateOrLocalHostname(value) {
@@ -505,6 +505,65 @@ function normalizeHttpsImageUrl(value) {
   } catch (_) {
     return null;
   }
+}
+function normalizeProductImportInput(value) {
+  const item = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const normalized = { ...item };
+  const aliases = {
+    code: ['codigo', 'sku'],
+    barcode: ['codigo_barras', 'ean'],
+    name: ['nombre'],
+    description: ['descripcion'],
+    category: ['categoria'],
+    unit: ['unidad'],
+    cost: ['costo'],
+    price: ['precio'],
+    image_url: ['imagen_url', 'imagen'],
+  };
+  for (const [target, candidates] of Object.entries(aliases)) {
+    if (normalized[target] !== undefined) continue;
+    const alias = candidates.find((candidate) => item[candidate] !== undefined);
+    if (alias) normalized[target] = item[alias];
+  }
+  if (normalized.image_provenance === undefined) {
+    const provenance = {};
+    const provenanceAliases = {
+      source_url: ['image_source_url', 'fuente_imagen_url', 'source_url'],
+      provider: ['image_provider', 'proveedor_imagen'],
+      license: ['image_license', 'licencia_imagen'],
+      matched_by: ['image_matched_by', 'imagen_vinculada_por'],
+      exact_match: ['image_exact_match', 'imagen_coincidencia_exacta'],
+      verified_at: ['image_verified_at', 'imagen_verificada_en'],
+    };
+    for (const [target, candidates] of Object.entries(provenanceAliases)) {
+      const alias = candidates.find((candidate) => item[candidate] !== undefined);
+      if (alias) provenance[target] = item[alias];
+    }
+    if (Object.keys(provenance).length) normalized.image_provenance = provenance;
+  }
+  return normalized;
+}
+function sanitizeProductImageProvenance(value, imageUrl) {
+  const normalizedImageUrl = normalizeHttpsImageUrl(imageUrl);
+  if (!normalizedImageUrl) return null;
+  const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const record = { url: normalizedImageUrl, storage: 'remote_link' };
+  const sourceUrl = normalizeHttpsImageUrl(input.source_url || input.page_url || input.product_url);
+  if (sourceUrl) record.source_url = sourceUrl;
+  for (const [field, maxLength] of [['provider', 120], ['license', 160], ['matched_by', 80]]) {
+    const cleaned = String(sanitizeText(input[field]) || '').replace(/[\u0000\u007f]/g, '').trim().slice(0, maxLength);
+    if (cleaned) record[field] = cleaned;
+  }
+  if (typeof input.exact_match === 'boolean') record.exact_match = input.exact_match;
+  if (input.verified_at) {
+    const verifiedAt = new Date(input.verified_at);
+    if (Number.isFinite(verifiedAt.getTime())) record.verified_at = verifiedAt.toISOString();
+  }
+  return record;
+}
+function productImageJson(value, imageUrl) {
+  const record = sanitizeProductImageProvenance(value, imageUrl);
+  return record ? [record] : [];
 }
 function sanitizeProductOptionalTextFields(fields, allowExplicitNull) {
   for (const [field, maxLength] of Object.entries(PRODUCT_TEXT_LIMITS)) {
@@ -1632,6 +1691,7 @@ function mergeBulkImportDescription(rawName, explicitDescription, finalName) {
 }
 
 function buildBulkImportProduct(item, index, targetTenant, targetUserId, seenNames) {
+  item = normalizeProductImportInput(item);
   const rawName = String(sanitizeText(item && item.name) || '').replace(/[\u0000\u007f]/g, '').trim();
   if (!rawName) return { error: 'nombre_vacio' };
   const codeRaw = String(item.code || '').trim().slice(0, 64);
@@ -1646,7 +1706,10 @@ function buildBulkImportProduct(item, index, targetTenant, targetUserId, seenNam
   const cost = hasCost ? Number(item.cost) : null;
   if (hasCost && (!Number.isFinite(cost) || cost < 0)) return { error: 'costo_invalido' };
   const stock = parseInt(item.stock, 10);
+  const hasImageUrl = item.image_url !== undefined && item.image_url !== null && String(item.image_url).trim() !== '';
   const imageUrl = normalizeHttpsImageUrl(item.image_url);
+  if (hasImageUrl && !imageUrl) return { error: 'imagen_url_invalida' };
+  if (item.image_provenance != null && !imageUrl) return { error: 'imagen_url_requerida_para_provenance' };
   const unitRaw = item.unit !== undefined && item.unit !== null
     ? String(sanitizeText(item.unit) || '').replace(/[\u0000\u007f]/g, '').trim().slice(0, PRODUCT_TEXT_LIMITS.unit)
     : '';
@@ -1664,7 +1727,10 @@ function buildBulkImportProduct(item, index, targetTenant, targetUserId, seenNam
     unit: unitRaw || 'pieza',
     source: 'wizard_import',
   };
-  if (imageUrl) product.image_url = imageUrl;
+  if (imageUrl) {
+    product.image_url = imageUrl;
+    product.images = productImageJson(item.image_provenance, imageUrl);
+  }
   return {
     product,
     updateFields: {
@@ -1689,7 +1755,10 @@ function buildBulkImportUpdatePayload(item) {
   if (fields.description) payload.description = item.description;
   if (fields.barcode) payload.barcode = item.barcode;
   if (fields.category) payload.category = item.category;
-  if (fields.image_url) payload.image_url = item.image_url;
+  if (fields.image_url) {
+    payload.image_url = item.image_url;
+    payload.images = Array.isArray(item.images) ? item.images : productImageJson(null, item.image_url);
+  }
   if (fields.cost) payload.cost = item.cost;
   if (fields.unit) payload.unit = item.unit;
   return payload;
@@ -3256,6 +3325,7 @@ const handlers = {
         videos: Array.isArray(p.videos) ? p.videos : (p.videos || []),
         description_long: p.description_long || null,
         tech_info: p.tech_info || {},
+        version: Number(p.version || 1),
         // 2026-07-07: industry_fields (campos por giro) para que el modal de edición
         // pre-llene y un re-guardado parcial NO borre valores no re-capturados.
         industry_fields: p.industry_fields || null,
@@ -3300,8 +3370,17 @@ const handlers = {
       }
 
       if (exportCsv) {
-        const head = 'id,code,name,category,price,cost,stock\n';
-        const rows = mapped.map(p => [p.id, p.code, JSON.stringify(p.name||''), p.category||'', p.price, p.cost, p.stock].join(',')).join('\n');
+        const head = 'id,code,name,category,price,cost,stock,image_url,image_source_url,image_provider,image_license\n';
+        const csvCell = (value) => '"' + String(value == null ? '' : value).replace(/"/g, '""') + '"';
+        const rows = mapped.map(p => {
+          const firstImage = Array.isArray(p.images) && p.images[0] && typeof p.images[0] === 'object'
+            ? p.images[0]
+            : {};
+          return [
+            p.id, p.code, p.name, p.category, p.price, p.cost, p.stock,
+            p.image_url, firstImage.source_url, firstImage.provider, firstImage.license,
+          ].map(csvCell).join(',');
+        }).join('\n');
         res.writeHead(200, {
           'Content-Type': 'text/csv; charset=utf-8',
           'Content-Disposition': 'attachment; filename="products.csv"'
@@ -3329,6 +3408,8 @@ const handlers = {
       const body = await readBody(req, { maxBytes: 100 * 1024, strictJson: true });
       if (checkBodyError(req, res)) return;
       const safe = pickFields(body, ALLOWED_FIELDS_PRODUCTS); // FIX R13 (#9)
+      const imageProvenance = safe.image_provenance;
+      delete safe.image_provenance;
       // R22.4 BUG 2: rechazar el INPUT ORIGINAL si contiene XSS/JS handlers (NO sanear-y-guardar).
       const rawName = typeof safe.name === 'string' ? safe.name : '';
       const rawCode = typeof safe.code === 'string' ? safe.code : '';
@@ -3369,8 +3450,14 @@ const handlers = {
         if (safe.image_url !== null && String(safe.image_url).trim() && !imageUrl) {
           return sendValidation(res, 'image_url debe ser una URL HTTPS válida', 'image_url');
         }
-        if (imageUrl) safe.image_url = imageUrl;
+        if (imageUrl) {
+          safe.image_url = imageUrl;
+          safe.images = productImageJson(imageProvenance, imageUrl);
+        }
         else delete safe.image_url;
+      }
+      if (imageProvenance != null && !safe.image_url) {
+        return sendValidation(res, 'image_url HTTPS requerido con image_provenance', 'image_url');
       }
       // FIX slice_38: pos_user_id derivado del JWT, NUNCA del body (impide cross-tenant write)
       const tenantId = resolveTenant(req);
@@ -3416,7 +3503,10 @@ const handlers = {
         if (safe[field] !== undefined) insertRow[field] = safe[field];
       }
       if (industryFields) insertRow.industry_fields = industryFields;
-      if (safe.image_url) insertRow.image_url = safe.image_url;
+      if (safe.image_url) {
+        insertRow.image_url = safe.image_url;
+        insertRow.images = safe.images;
+      }
       const result = await supabaseRequest('POST', '/pos_products', insertRow);
       const created = result && (result[0] || result);
       try { logAudit(req, 'product.created', 'pos_products', { id: created && created.id, after: { name: safe.name } }); } catch(_){}
@@ -3436,6 +3526,8 @@ const handlers = {
         return sendJSON(res, { error: 'version_required', message: 'Header If-Match o body.version requerido' }, 400);
       }
       const safe = pickFields(body, ALLOWED_FIELDS_PRODUCTS); // FIX R13 (#9)
+      const imageProvenance = safe.image_provenance;
+      delete safe.image_provenance;
       // FIX v340: existence check before patch
       const existing = await supabaseRequest('GET', `/pos_products?id=eq.${params.id}&select=id,pos_user_id,version`);
       if (!existing || existing.length === 0) return sendJSON(res, { error: 'not found' }, 404);
@@ -3486,11 +3578,16 @@ const handlers = {
       if (safe.image_url !== undefined) {
         if (safe.image_url === null || String(safe.image_url).trim() === '') {
           safe.image_url = null;
+          safe.images = [];
         } else {
           const imageUrl = normalizeHttpsImageUrl(safe.image_url);
           if (!imageUrl) return sendValidation(res, 'image_url debe ser una URL HTTPS válida', 'image_url');
           safe.image_url = imageUrl;
+          safe.images = productImageJson(imageProvenance, imageUrl);
         }
+      }
+      if (imageProvenance != null && safe.image_url === undefined) {
+        return sendValidation(res, 'image_url HTTPS requerido con image_provenance', 'image_url');
       }
       // 2026-07-07: sanea industry_fields (jsonb) si viene en el PATCH. Si queda
       // sin datos se OMITE la clave (deploy-safe: no depende de la columna R39).
@@ -9430,8 +9527,26 @@ function matchRoute(method, pathname) {
 const SENDGRID_API_KEY = (process.env.SENDGRID_API_KEY || '').trim();
 const SENDGRID_FROM = (process.env.SENDGRID_FROM || 'no-reply@volvix-pos.app').trim();
 const SENDGRID_FROM_NAME = (process.env.SENDGRID_FROM_NAME || 'Volvix POS').trim();
-const PASSWORD_RESET_BASE_URL = (process.env.PASSWORD_RESET_BASE_URL ||
-  (ALLOWED_ORIGINS[0] || 'https://salvadorexoficial.com')).trim();
+function normalizePasswordResetBaseUrl(value) {
+  try {
+    const parsed = new URL(String(value || '').trim());
+    if (parsed.protocol !== 'https:' || !parsed.hostname || parsed.username || parsed.password) return null;
+    parsed.pathname = parsed.pathname.replace(/\/+$/, '');
+    parsed.search = '';
+    parsed.hash = '';
+    return parsed.toString().replace(/\/$/, '');
+  } catch (_) {
+    return null;
+  }
+}
+const PASSWORD_RESET_BASE_URL = normalizePasswordResetBaseUrl(
+  process.env.PASSWORD_RESET_BASE_URL || process.env.APP_URL || 'https://systeminternational.app',
+) || 'https://systeminternational.app';
+function buildPasswordResetLink(token, baseUrl) {
+  const base = normalizePasswordResetBaseUrl(baseUrl || PASSWORD_RESET_BASE_URL)
+    || 'https://systeminternational.app';
+  return `${base}/reset-password.html?token=${encodeURIComponent(String(token || ''))}`;
+}
 
 async function logEmail(row) {
   try {
@@ -9763,7 +9878,7 @@ handlers['POST /api/auth/password-reset/request'] = async (req, res) => {
     if (users && users[0] && users[0].is_active) {
       const u = users[0];
       const token = signResetToken(u.id, u.email);
-      const link = `${PASSWORD_RESET_BASE_URL}/reset-password.html?token=${encodeURIComponent(token)}`;
+      const link = buildPasswordResetLink(token);
       const tpl = emailTemplates.passwordResetTemplate(link);
       sendEmail({ to: u.email, subject: tpl.subject, html: tpl.html, text: tpl.text, template: 'password_reset' })
         .catch(() => {});
@@ -9781,7 +9896,9 @@ handlers['POST /api/auth/password-reset/confirm'] = async (req, res) => {
     const token = String(body.token || '');
     const newPwd = String(body.new_password || '');
     if (!token || !newPwd) return sendJSON(res, { error: 'token y new_password requeridos' }, 400);
-    if (newPwd.length < 8) return sendJSON(res, { error: 'password debe tener al menos 8 caracteres' }, 400);
+    if (newPwd.length < 8 || newPwd.length > 128) {
+      return sendJSON(res, { error: 'password debe tener entre 8 y 128 caracteres' }, 400);
+    }
 
     const payload = verifyResetToken(token);
     if (!payload) return sendJSON(res, { error: 'token inválido o expirado' }, 401);
@@ -9792,10 +9909,31 @@ handlers['POST /api/auth/password-reset/confirm'] = async (req, res) => {
     const passwordHash = `scrypt$${salt.toString('hex')}$${hash.toString('hex')}`;
 
     const resetUsers = await supabaseRequest('GET',
-      `/pos_users?id=eq.${payload.sub}&select=notes&limit=1`);
-    const resetPatch = { password_hash: passwordHash };
-    if (resetUsers && resetUsers[0]) resetPatch.notes = markPasswordLoginEnabled(resetUsers[0].notes);
+      `/pos_users?id=eq.${payload.sub}&select=id,notes,tenant_id,company_id&limit=1`);
+    if (!resetUsers || !resetUsers[0] || String(resetUsers[0].id) !== payload.sub) {
+      return sendJSON(res, { error: 'token inválido o expirado' }, 401);
+    }
+    const resetPatch = {
+      password_hash: passwordHash,
+      notes: mergeNotesPreservingFormat(resetUsers[0].notes, {
+        password_login_enabled: true,
+        must_change_password: false,
+        password_changed_at: new Date().toISOString(),
+      }),
+      must_change_password: false,
+      updated_at: new Date().toISOString(),
+    };
     await supabaseRequest('PATCH', `/pos_users?id=eq.${payload.sub}`, resetPatch);
+    await supabaseRequest('PATCH',
+      `/pos_active_sessions?user_id=eq.${payload.sub}&revoked_at=is.null`,
+      { revoked_at: new Date().toISOString(), revoked_reason: 'password_reset' },
+    ).catch(() => {});
+    await supabaseRequest('POST', '/pos_user_session_invalidations', {
+      user_id: payload.sub,
+      tenant_id: effectiveUserTenantId(resetUsers[0]),
+      invalidated_at: new Date().toISOString(),
+      reason: 'password_reset',
+    }).catch(() => {});
     sendJSON(res, { ok: true, message: 'Contraseña actualizada' });
   } catch (err) { sendError(res, err); }
 };
@@ -12599,7 +12737,7 @@ handlers['GET /api/config/public'] = async (req, res) => {
 
         // Try to send email via existing infrastructure
         try {
-          const link = `${(typeof PASSWORD_RESET_BASE_URL !== 'undefined' && PASSWORD_RESET_BASE_URL) || 'https://salvadorexoficial.com'}/reset-password.html?token=${encodeURIComponent(rawToken)}`;
+          const link = buildPasswordResetLink(rawToken);
           if (typeof emailTemplates !== 'undefined' && typeof sendEmail === 'function') {
             const tpl = emailTemplates.passwordResetTemplate(link);
             sendEmail({ to: u.email, subject: tpl.subject, html: tpl.html, text: tpl.text, template: 'password_reset' })
@@ -12642,8 +12780,8 @@ handlers['GET /api/config/public'] = async (req, res) => {
       if (!token || !newPassword) {
         return sendJSON(res, { ok: false, error: 'token y new_password requeridos' }, 400);
       }
-      if (newPassword.length < 8) {
-        return sendJSON(res, { ok: false, error: 'La contraseña debe tener al menos 8 caracteres' }, 400);
+      if (newPassword.length < 8 || newPassword.length > 128) {
+        return sendJSON(res, { ok: false, error: 'La contraseña debe tener entre 8 y 128 caracteres' }, 400);
       }
 
       // Find unused, unexpired tokens and verify
@@ -12675,12 +12813,20 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const hash = crypto.scryptSync(newPassword, salt, 64);
       const passwordHash = `scrypt$${salt.toString('hex')}$${hash.toString('hex')}`;
       const resetUsers = await supabaseRequest('GET',
-        `/pos_users?id=eq.${matched.user_id}&select=notes&limit=1`);
+        `/pos_users?id=eq.${matched.user_id}&select=id,notes,tenant_id,company_id&limit=1`);
+      if (!resetUsers || !resetUsers[0] || String(resetUsers[0].id) !== String(matched.user_id)) {
+        return sendJSON(res, { ok: false, error: 'token inválido o expirado', error_code: 'INVALID_TOKEN' }, 401);
+      }
       const resetPatch = {
         password_hash: passwordHash,
+        notes: mergeNotesPreservingFormat(resetUsers[0].notes, {
+          password_login_enabled: true,
+          must_change_password: false,
+          password_changed_at: new Date().toISOString()
+        }),
+        must_change_password: false,
         updated_at: new Date().toISOString()
       };
-      if (resetUsers && resetUsers[0]) resetPatch.notes = markPasswordLoginEnabled(resetUsers[0].notes);
       await supabaseRequest('PATCH', `/pos_users?id=eq.${matched.user_id}`, resetPatch);
 
       // Mark token used
@@ -12697,6 +12843,8 @@ handlers['GET /api/config/public'] = async (req, res) => {
       // Insert R5b session-invalidation row (force re-login on all open tabs)
       await supabaseRequest('POST', '/pos_user_session_invalidations', {
         user_id: matched.user_id,
+        tenant_id: effectiveUserTenantId(resetUsers[0]),
+        invalidated_at: new Date().toISOString(),
         reason: 'password_reset'
       }).catch(() => {});
 
@@ -20878,6 +21026,10 @@ if (process.env.NODE_ENV === 'test') {
     hasUsablePasswordLogin,
     canAuthenticatePasswordLogin,
     markPasswordLoginEnabled,
+    normalizePasswordResetBaseUrl,
+    buildPasswordResetLink,
+    signResetToken,
+    verifyResetToken,
     effectiveUserTenantId,
     parseCanonicalAccountNotes,
     resolveCanonicalTenantSignals,
@@ -20892,6 +21044,9 @@ if (process.env.NODE_ENV === 'test') {
     resolveOrProvisionGooglePosUser,
     normalizeHttpsImageUrl,
     isPrivateOrLocalHostname,
+    normalizeProductImportInput,
+    sanitizeProductImageProvenance,
+    productImageJson,
     sanitizeProductOptionalTextFields,
     normalizeGtinBarcode,
     uniqueBulkImportName,
@@ -23059,6 +23214,12 @@ if (process.env.NODE_ENV === 'test') {
   // =========================================================================
   handlers['POST /api/products/bulk'] = requireAuth(withIdempotency('products.bulk', async function (req, res) {
     try {
+      if (__vlxIsCashier(req)) {
+        return send403(res, {
+          need_role: ['owner', 'admin', 'manager', 'superadmin'],
+          have_role: req.user && req.user.role,
+        });
+      }
       var tnt = b36Tenant(req);
       if (!tnt) return sendJSON(res, { error: 'tenant_required' }, 400);
       if (!rateLimit('products:bulk:' + tnt, 10, 60000)) {
@@ -23066,16 +23227,19 @@ if (process.env.NODE_ENV === 'test') {
       }
       var body = await readBody(req, { maxBytes: 2 * 1024 * 1024, strictJson: true });
       if (checkBodyError(req, res)) return;
-      if (!Array.isArray(body.products) || !body.products.length) {
-        return sendValidation(res, 'products[] requerido', 'products');
+      var productList = Array.isArray(body.products) ? body.products : (Array.isArray(body.items) ? body.items : []);
+      if (!productList.length) {
+        return sendValidation(res, 'products[] o items[] requerido', 'products');
       }
-      if (body.products.length > 5000) return sendValidation(res, 'max 5000 productos por lote', 'products');
+      if (productList.length > 5000) return sendValidation(res, 'max 5000 productos por lote', 'products');
       var ownerUserId = resolvePosUserId(req, tnt);
       var created = 0, updated = 0, errors = [];
-      for (var i = 0; i < body.products.length; i++) {
-        var p = body.products[i] || {};
+      for (var i = 0; i < productList.length; i++) {
+        var p = normalizeProductImportInput(productList[i]);
         try {
           var safe = pickFields(p, ALLOWED_FIELDS_PRODUCTS);
+          var imageProvenance = safe.image_provenance;
+          delete safe.image_provenance;
           var rawName = typeof safe.name === 'string' ? safe.name : '';
           var rawCode = typeof safe.code === 'string' ? safe.code : (typeof p.sku === 'string' ? p.sku : '');
           if (hasUnsafeChars(rawName) || hasUnsafeChars(rawCode) ||
@@ -23099,9 +23263,13 @@ if (process.env.NODE_ENV === 'test') {
           if (!Number.isFinite(stockNum) || stockNum < 0 || !Number.isInteger(stockNum)) stockNum = 0;
           var category = safe.category ? sanitizeName(safe.category) : (p.category ? sanitizeName(p.category) : 'general');
           var imageUrl = null;
+          var imageJson = null;
           if (safe.image_url !== undefined && safe.image_url !== null && String(safe.image_url).trim()) {
             imageUrl = normalizeHttpsImageUrl(safe.image_url);
             if (!imageUrl) { errors.push({ index: i, sku: code, error: 'invalid_image_url' }); continue; }
+            imageJson = productImageJson(imageProvenance, imageUrl);
+          } else if (imageProvenance != null) {
+            errors.push({ index: i, sku: code, error: 'image_url_required_for_provenance' }); continue;
           }
           // Upsert by (pos_user_id, code) — try update, fallback insert.
           var existing = null;
@@ -23125,7 +23293,10 @@ if (process.env.NODE_ENV === 'test') {
           for (var optionalField of ['barcode', 'description', 'unit']) {
             if (safe[optionalField] !== undefined) payload[optionalField] = safe[optionalField];
           }
-          if (imageUrl) payload.image_url = imageUrl;
+          if (imageUrl) {
+            payload.image_url = imageUrl;
+            payload.images = imageJson;
+          }
           if (existing && existing.length) {
             await supabaseRequest('PATCH',
               '/pos_products?id=eq.' + encodeURIComponent(existing[0].id), payload);
@@ -24118,7 +24289,9 @@ if (process.env.NODE_ENV === 'test') {
       if (checkBodyError(req, res)) return;
       var current = String((body && (body.current_password || body.old_password)) || '');
       var next = String((body && (body.new_password || body.password)) || '');
-      if (!next || next.length < 8) return sendValidation(res, 'new_password mínimo 8 caracteres', 'new_password');
+      if (!next || next.length < 8 || next.length > 128) {
+        return sendValidation(res, 'new_password debe tener entre 8 y 128 caracteres', 'new_password');
+      }
       if (current === next) return sendValidation(res, 'la nueva contraseña no puede ser igual a la actual', 'new_password');
       var rows = await supabaseRequest('GET',
         '/pos_users?id=eq.' + encodeURIComponent(uid) + '&select=id,password_hash,notes,tenant_id');
@@ -30207,14 +30380,18 @@ if (process.env.NODE_ENV === 'test') {
         try { body = await readBody(req, { maxBytes: 4 * 1024 * 1024, strictJson: true }); }
         catch (_) { body = null; }
         if (checkBodyError && checkBodyError(req, res)) return;
-        var list = Array.isArray(body) ? body : (body && Array.isArray(body.products) ? body.products : []);
+        var list = Array.isArray(body)
+          ? body
+          : (body && Array.isArray(body.products)
+            ? body.products
+            : (body && Array.isArray(body.items) ? body.items : []));
         if (!list.length) return sendJSON(res, { ok: true, imported: 0, errors: [], skipped: 0, message: 'empty list' });
 
         // PHASE 1: validate ALL rows strictly. NO insert yet.
         var validationErrors = [];
         var clean = [];
         for (var i = 0; i < list.length; i++) {
-          var p = list[i] || {};
+          var p = normalizeProductImportInput(list[i]);
           var rowErrors = [];
           var nameRaw = p.name == null ? '' : String(p.name);
           var name = nameRaw.replace(/<[^>]*>/g, '').trim();
@@ -30235,9 +30412,13 @@ if (process.env.NODE_ENV === 'test') {
             if (!Number.isFinite(sn) || sn < 0) rowErrors.push({ row: i + 1, field: 'stock', error: 'stock must be >= 0' });
           }
           var imageUrl = null;
+          var imageJson = null;
           if (p.image_url !== undefined && p.image_url !== null && String(p.image_url).trim()) {
             imageUrl = normalizeHttpsImageUrl(p.image_url);
             if (!imageUrl) rowErrors.push({ row: i + 1, field: 'image_url', error: 'image_url must use https' });
+            else imageJson = productImageJson(p.image_provenance, imageUrl);
+          } else if (p.image_provenance != null) {
+            rowErrors.push({ row: i + 1, field: 'image_url', error: 'image_url is required with image_provenance' });
           }
           if (rowErrors.length) {
             validationErrors = validationErrors.concat(rowErrors);
@@ -30255,7 +30436,10 @@ if (process.env.NODE_ENV === 'test') {
               icon: p.icon || '📦',
               ...optionalText,
             };
-            if (imageUrl) cleanRow.image_url = imageUrl;
+            if (imageUrl) {
+              cleanRow.image_url = imageUrl;
+              cleanRow.images = imageJson;
+            }
             clean.push(cleanRow);
           }
         }
@@ -30302,7 +30486,10 @@ if (process.env.NODE_ENV === 'test') {
             for (var textField of ['barcode', 'description', 'unit']) {
               if (c[textField] !== undefined) insertPayload[textField] = c[textField];
             }
-            if (c.image_url) insertPayload.image_url = c.image_url;
+            if (c.image_url) {
+              insertPayload.image_url = c.image_url;
+              insertPayload.images = c.images;
+            }
             var inserted = await supabaseRequest('POST', '/pos_products', insertPayload);
             var newId = Array.isArray(inserted) && inserted[0] && inserted[0].id ? inserted[0].id : (inserted && inserted.id);
             if (newId) insertedIds.push(newId);

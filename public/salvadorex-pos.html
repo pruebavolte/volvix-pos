@@ -7845,8 +7845,12 @@
         icon: p.icon || __iconForCategory(p.category || ''),
         name: p.name || p.title || 'Producto sin nombre',
         price: Number(p.price || p.unit_price || p.precio_venta || 0),
+        cost: Number(p.cost || 0),
         code: String(p.code || p.sku || p.barcode || p.id || ''),
         stock: Number(p.stock || p.qty || p.cantidad || 0),
+        min_stock: Number(p.min_stock || 0),
+        unit: p.unit || 'pieza',
+        version: Number(p.version || 1),
         // V10.1 — multimedia + info extendida (G2/G3)
         image_url: p.image_url || (Array.isArray(p.images) && p.images[0] && p.images[0].url) || null,
         images: Array.isArray(p.images) ? p.images : [],
@@ -8675,6 +8679,8 @@
   async function _importProductToTenant(g) {
     try {
       const tnt = (typeof _vTenant === 'function') ? _vTenant() : 'TNT001';
+      const linkedImageUrl = safeRemoteProductImageUrl(g.image_url || '');
+      const linkedSourceUrl = safeRemoteProductImageUrl(g.source_url || g.product_url || '');
       const payload = {
         tenant_id: tnt,
         name: g.name || g.nombre,
@@ -8684,8 +8690,14 @@
         cost: Number(g.cost || 0),
         stock: 1,
         category: g.category || 'General',
-        image_url: g.image_url || null,
-        source: 'owner_global'
+        image_url: linkedImageUrl || undefined,
+        image_provenance: linkedImageUrl ? {
+          source_url: linkedSourceUrl || undefined,
+          provider: 'owner_global',
+          matched_by: 'barcode',
+          exact_match: true,
+          verified_at: new Date().toISOString(),
+        } : undefined,
       };
       const r = await fetch('/api/products', {
         method: 'POST',
@@ -11024,7 +11036,10 @@
         window.open(url, '_blank');
       } else {
         // Fallback: generar CSV en cliente
-        const rows = [['code','name','price','cost','stock']].concat(CATALOG.map(p => [p.code,p.name,p.price,p.cost||0,p.stock||0]));
+        const rows = [['code','name','price','cost','stock','image_url','image_source_url','image_provider','image_license']].concat(CATALOG.map(p => {
+          const firstImage = Array.isArray(p.images) && p.images[0] && typeof p.images[0] === 'object' ? p.images[0] : {};
+          return [p.code,p.name,p.price,p.cost||0,p.stock||0,p.image_url||'',firstImage.source_url||'',firstImage.provider||'',firstImage.license||''];
+        }));
         const csv = rows.map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
         const blob = new Blob([csv], { type:'text/csv' });
         const a = document.createElement('a');
@@ -11048,7 +11063,21 @@
     const text = await file.text();
     const rows = _parseCSV(text);
     if (!rows.length) { showToast('CSV vacío','error'); return; }
-    const items = rows.map(r => ({ code:r.code||r['código']||'', name:r.name||r.nombre||'', price:Number(r.price||r.precio||0), cost:Number(r.cost||r.costo||0), stock:Number(r.stock||0) })).filter(p => p.code && p.name);
+    const items = rows.map(r => {
+      const imageUrl = r.image_url || r.imagen_url || r.imagen || '';
+      return {
+        code:r.code||r.codigo||r['código']||'', name:r.name||r.nombre||'',
+        category:r.category||r.categoria||'', price:Number(r.price||r.precio||0),
+        cost:Number(r.cost||r.costo||0), stock:Number(r.stock||0),
+        image_url:imageUrl||undefined,
+        image_provenance:imageUrl ? {
+          source_url:r.image_source_url||r.fuente_imagen_url||undefined,
+          provider:r.image_provider||r.proveedor_imagen||undefined,
+          license:r.image_license||r.licencia_imagen||undefined,
+          matched_by:'csv_import',
+        } : undefined,
+      };
+    }).filter(p => p.code && p.name);
     try {
       const _importTok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || '';
       const _importHeaders = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _importTok };
@@ -13434,6 +13463,33 @@
     renderCategories();
     renderQuickPick();
   }
+  function safeRemoteProductImageUrl(value) {
+    try {
+      const parsed = new URL(String(value || '').trim(), window.location.href);
+      const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
+      if (parsed.protocol !== 'https:' || parsed.username || parsed.password || !host) return '';
+      if (host === 'localhost' || !host.includes('.') || /\.(?:localhost|local|lan|home|internal)$/.test(host)) return '';
+      const ipv4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+      if (ipv4) {
+        const a = Number(ipv4[1]), b = Number(ipv4[2]), c = Number(ipv4[3]);
+        if ([a,b,c,Number(ipv4[4])].some(part => part > 255)
+            || a === 0 || a === 10 || a === 127 || a >= 224
+            || (a === 100 && b >= 64 && b <= 127)
+            || (a === 169 && b === 254)
+            || (a === 172 && b >= 16 && b <= 31)
+            || (a === 192 && b === 168)
+            || (a === 192 && b === 0 && (c === 0 || c === 2))
+            || (a === 198 && (b === 18 || b === 19 || (b === 51 && c === 100)))
+            || (a === 203 && b === 0 && c === 113)) return '';
+      }
+      return parsed.href;
+    } catch (_) {
+      return '';
+    }
+  }
+  function imageUrlAttr(value) {
+    return safeRemoteProductImageUrl(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  }
   function renderQuickPick() {
     const grid = $('#qp-grid');
     if (!grid) return;
@@ -13448,8 +13504,9 @@
           // V10.1: si hay image_url usar <img>, sino fallback al emoji
           const safeCode = String(p.code).replace(/'/g, "\\'");
           const safeName = String(p.name || '').replace(/"/g, '&quot;');
-          const imgHtml = p.image_url
-            ? `<img class="qp-img" src="${p.image_url}" alt="${safeName}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><div class="qp-icon" style="display:none">${p.icon}</div>`
+          const imageUrl = imageUrlAttr(p.image_url);
+          const imgHtml = imageUrl
+            ? `<img class="qp-img" src="${imageUrl}" alt="${safeName}" loading="lazy" referrerpolicy="no-referrer" onerror="this.dataset.loadFailed='1';this.style.display='none';this.nextElementSibling.style.display='block';"><div class="qp-icon" style="display:none">${p.icon}</div>`
             : `<div class="qp-icon">${p.icon}</div>`;
           return `
         <button class="qp-card" onclick="addQuickPick('${safeCode}'); showProductSidebar('${safeCode}')" oncontextmenu="event.preventDefault(); showProductSidebar('${safeCode}'); return false;" aria-label="${safeName} - ${fmt(p.price)}" title="${safeName} - ${fmt(p.price)} — click derecho para ver detalle">
@@ -13468,7 +13525,11 @@
     if (!p) return;
     const target = document.getElementById('vlx-product-pane-body');
     if (!target) return; // panel anclado no existe — DOM viejo, abortar (no fallback)
-    const images = (p.images && p.images.length) ? p.images : (p.image_url ? [{url: p.image_url, alt: p.name}] : []);
+    const rawImages = (p.images && p.images.length) ? p.images : (p.image_url ? [{url: p.image_url, alt: p.name}] : []);
+    const images = rawImages.map(img => ({
+      ...img,
+      url: imageUrlAttr(img && img.url),
+    })).filter(img => img.url);
     const videos = p.videos || [];
     const tech = p.tech_info || {};
     const techRows = Object.entries(tech).map(([k,v]) => `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed #eee;font-size:11px"><span style="color:#666;text-transform:capitalize">${String(k).replace(/_/g,' ')}</span><strong style="color:#222">${v}</strong></div>`).join('');
@@ -13483,8 +13544,9 @@
     const mainImg = images[0] || null;
     target.innerHTML = `
       <div style="font-weight:700;font-size:14px;color:#2D5F8F;margin-bottom:8px;line-height:1.2">${p.name}</div>
-      ${mainImg ? `<img id="vlx-pane-main-img" src="${mainImg.url}" alt="${mainImg.alt || p.name}" data-title="${(mainImg.alt || p.name).replace(/"/g,'')}" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;margin-bottom:8px;border:1px solid #e0e6ec;cursor:zoom-in;background:#f0f0f0" onclick="window.vlxOpenMediaLightbox(this.src,this.getAttribute('data-title'))">` : ''}
-      ${allMedia.length > 1 ? `<div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin">${allMedia.slice(0,12).map(m => m.type === 'img' ? `<img src="${m.url}" alt="${m.alt||''}" style="width:62px;height:62px;flex:0 0 62px;object-fit:cover;border-radius:5px;cursor:pointer;border:2px solid transparent" onclick="(function(s){var mn=document.getElementById('vlx-pane-main-img');if(mn){mn.src=s;}window.vlxOpenMediaLightbox(s);})(this.src);this.style.borderColor='#2D5F8F'" onerror="this.style.opacity=0.3" title="${(m.alt||'').replace(/"/g,'')}">` : `<a href="${m.url}" target="_blank" rel="noopener" style="display:flex;width:62px;height:62px;flex:0 0 62px;background:#0a0a0a;color:#fff;border-radius:5px;align-items:center;justify-content:center;text-decoration:none;font-size:11px;border:2px solid transparent" title="${(m.title||'Video').replace(/"/g,'')}">▶</a>`).join('')}</div>` : ''}
+      ${mainImg ? `<img id="vlx-pane-main-img" src="${mainImg.url}" alt="${mainImg.alt || p.name}" data-title="${(mainImg.alt || p.name).replace(/"/g,'')}" loading="lazy" referrerpolicy="no-referrer" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;margin-bottom:8px;border:1px solid #e0e6ec;cursor:zoom-in;background:#f0f0f0" onclick="window.vlxOpenMediaLightbox(this.src,this.getAttribute('data-title'))" onerror="this.dataset.loadFailed='1';this.style.setProperty('display','none','important');this.nextElementSibling.style.display='flex'">` : ''}
+      <div class="qp-icon" style="${mainImg ? 'display:none' : 'display:flex'};width:100%;aspect-ratio:4/3;align-items:center;justify-content:center;border-radius:8px;margin-bottom:8px;background:#f0f0f0;font-size:42px">${p.icon || '📦'}</div>
+      ${allMedia.length > 1 ? `<div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin">${allMedia.slice(0,12).map(m => m.type === 'img' ? `<img src="${m.url}" alt="${m.alt||''}" loading="lazy" referrerpolicy="no-referrer" style="width:62px;height:62px;flex:0 0 62px;object-fit:cover;border-radius:5px;cursor:pointer;border:2px solid transparent" onclick="(function(s){var mn=document.getElementById('vlx-pane-main-img');if(mn){mn.src=s;}window.vlxOpenMediaLightbox(s);})(this.src);this.style.borderColor='#2D5F8F'" onerror="this.dataset.loadFailed='1';this.style.opacity=0.3" title="${(m.alt||'').replace(/"/g,'')}">` : `<a href="${m.url}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" style="display:flex;width:62px;height:62px;flex:0 0 62px;background:#0a0a0a;color:#fff;border-radius:5px;align-items:center;justify-content:center;text-decoration:none;font-size:11px;border:2px solid transparent" title="${(m.title||'Video').replace(/"/g,'')}">▶</a>`).join('')}</div>` : ''}
       <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 8px;padding:6px 8px;background:#f7f9fb;border-radius:4px">
         <span style="font-size:18px;font-weight:700;color:#2D5F8F">${fmt(p.price)}</span>
         <span style="font-size:11px;color:#888">Stock: <strong style="color:${p.stock>5?'#0a0':'#c00'}">${p.stock}</strong></span>
@@ -13495,6 +13557,7 @@
     // V10.4.3 — MutationObserver que mantiene las imágenes visibles aunque
     // algún wiring trate de ocultarlas con display:none!important.
     const forceVis = (img) => {
+      if (img.dataset && img.dataset.loadFailed === '1') return;
       img.style.setProperty('display', 'block', 'important');
       img.style.setProperty('visibility', 'visible', 'important');
       img.style.setProperty('opacity', '1', 'important');
@@ -13523,6 +13586,7 @@
 
   // V10.4 — Modal lightbox para imagen fullscreen
   window.vlxOpenMediaLightbox = function(src, title) {
+    src = imageUrlAttr(src);
     if (!src) return;
     let lb = document.getElementById('vlx-media-lightbox');
     if (!lb) {
@@ -13538,7 +13602,7 @@
     lb.innerHTML = `
       <button onclick="document.getElementById('vlx-media-lightbox').remove()" style="position:absolute;top:18px;right:24px;background:transparent;border:0;color:#fff;font-size:36px;cursor:pointer;line-height:1;font-family:inherit" aria-label="Cerrar">×</button>
       ${title ? `<div style="position:absolute;top:24px;left:24px;color:#fff;font-size:15px;font-weight:600;font-family:inherit">${title}</div>` : ''}
-      <img src="${src}" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.5);cursor:default" onclick="event.stopPropagation()">
+      <img src="${src}" loading="lazy" referrerpolicy="no-referrer" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.5);cursor:default" onclick="event.stopPropagation()" onerror="this.dataset.loadFailed='1';this.style.display='none'">
       <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);color:#fff;opacity:.6;font-size:12px;font-family:inherit">Click fuera de la imagen o Esc para cerrar</div>
     `;
     lb.onclick = (e) => { if (e.target === lb) lb.remove(); };
@@ -21755,7 +21819,7 @@ window.addEventListener('volvix:version-loaded', function(e){
         <div style="margin-top:12px">
           <div class="form-group">
             <label class="form-label">Imagen principal (URL)</label>
-            <input class="form-input" id="pImageUrl" placeholder="https://... — pega aquí URL de imagen principal">
+            <input class="form-input" id="pImageUrl" placeholder="https://... — pega aquí URL de imagen principal" oninput="this.dataset.provenance=''">
             <div class="form-hint">Esta es la imagen que aparece en el Quick-pick y panel del producto</div>
           </div>
           <div class="form-group">
@@ -21842,7 +21906,7 @@ window.addEventListener('volvix:version-loaded', function(e){
       </div>
       <div style="background:var(--bg-2,#f5f5f4);border-radius:8px;padding:12px;font-size:11.5px;margin-bottom:10px">
         <strong>Formato esperado del CSV:</strong><br>
-        <code style="font-size:10.5px">nombre,codigo,categoria,precio,costo,stock,minimo</code><br><br>
+        <code style="font-size:10.5px">nombre,codigo,categoria,precio,costo,stock,minimo,image_url,image_source_url,image_provider,image_license</code><br><br>
         <a href="#" onclick="downloadTemplate();return false" style="color:var(--navy,#1a237e)">⬇ Descargar plantilla CSV</a>
       </div>
       <div id="csvPreview"></div>
@@ -21924,7 +21988,13 @@ window.addEventListener('volvix:version-loaded', function(e){
         minimo:   Number(prod.minimo || 5),
         unit:     prod.unidad || 'pieza',
         supplier: prod.proveedor || '',
-        notes:    prod.notas || ''
+        notes:    prod.notas || '',
+        image_url: prod.image_url || null,
+        images:   Array.isArray(prod.images) ? prod.images : [],
+        videos:   Array.isArray(prod.videos) ? prod.videos : [],
+        description_long: prod.description_long || null,
+        tech_info: prod.tech_info || {},
+        version:  Number(prod.version || 1),
       };
       if (idx >= 0) C[idx] = Object.assign({}, C[idx], row);
       else C.push(row);
@@ -21943,9 +22013,11 @@ window.addEventListener('volvix:version-loaded', function(e){
     editingId = null;
     const tEl = document.getElementById('modalTitle'); if (tEl) tEl.textContent = '+ Nuevo producto';
     const bEl = document.getElementById('btnGuardar'); if (bEl) bEl.textContent = '✓ Guardar';
-    ['pNombre','pCodigo','pSku','pPrecio','pCosto','pStock','pMin','pProveedor','pNotas'].forEach(id => {
+    ['pNombre','pCodigo','pSku','pPrecio','pCosto','pStock','pMin','pProveedor','pNotas',
+      'pImageUrl','pImagesExtra','pVideosUrls','pDescriptionLong','pTechInfo'].forEach(id => {
       const el = document.getElementById(id); if (el) el.value = '';
     });
+    const newImage = document.getElementById('pImageUrl'); if (newImage) newImage.dataset.provenance = '';
     const cat = document.getElementById('pCategoria'); if (cat) cat.value = '';
     const uni = document.getElementById('pUnidad');    if (uni) uni.value = 'pieza';
     const min = document.getElementById('pMin');       if (min) min.value = '5';
@@ -21966,7 +22038,13 @@ window.addEventListener('volvix:version-loaded', function(e){
           categoria: c.category || c.categoria || '', unidad: c.unit || 'pieza',
           precio: c.price, costo: c.cost, stock: c.stock,
           minimo: c.min_stock || c.minimo || 5,
-          proveedor: c.supplier || '', notas: c.notes || ''
+          proveedor: c.supplier || '', notas: c.notes || '',
+          image_url: c.image_url || null,
+          images: Array.isArray(c.images) ? c.images : [],
+          videos: Array.isArray(c.videos) ? c.videos : [],
+          description_long: c.description_long || null,
+          tech_info: c.tech_info || {},
+          version: Number(c.version || 1),
         };
       }
     }
@@ -21980,6 +22058,25 @@ window.addEventListener('volvix:version-loaded', function(e){
     set('pPrecio', p.precio); set('pCosto', p.costo);
     set('pStock', p.stock);   set('pMin',   p.minimo);
     set('pProveedor', p.proveedor); set('pNotas', p.notas);
+    set('pImageUrl', p.image_url || '');
+    set('pImagesExtra', Array.isArray(p.images) ? p.images.slice(1).map(img => img && img.url).filter(Boolean).join('\n') : '');
+    set('pVideosUrls', Array.isArray(p.videos) ? p.videos.map(video => video && video.url).filter(Boolean).join('\n') : '');
+    set('pDescriptionLong', p.description_long || p.description || '');
+    set('pTechInfo', p.tech_info && typeof p.tech_info === 'object'
+      ? Object.entries(p.tech_info).map(([key, value]) => key + ': ' + value).join('\n')
+      : '');
+    const editImage = document.getElementById('pImageUrl');
+    if (editImage) {
+      const firstImage = Array.isArray(p.images) && p.images[0] && typeof p.images[0] === 'object' ? p.images[0] : null;
+      editImage.dataset.provenance = firstImage ? JSON.stringify({
+        source_url: firstImage.source_url,
+        provider: firstImage.provider,
+        license: firstImage.license,
+        matched_by: firstImage.matched_by,
+        exact_match: firstImage.exact_match,
+        verified_at: firstImage.verified_at,
+      }) : '';
+    }
     updateMargen(); recalcStockBadge();
     openInvModal('modalProducto');
     setTimeout(() => document.getElementById('pNombre')?.focus(), 80);
@@ -22029,15 +22126,30 @@ window.addEventListener('volvix:version-loaded', function(e){
     if (!(precio > 0)) { invToast('El precio debe ser mayor a 0', 'err'); document.getElementById('pPrecio')?.focus(); return; }
 
     // V10.2 — leer campos multimedia + descripción + ficha técnica
-    const imgUrlMain = (document.getElementById('pImageUrl')?.value || '').trim();
+    const imageInput = document.getElementById('pImageUrl');
+    const imgUrlRaw = (imageInput?.value || '').trim();
+    const imgUrlMain = imgUrlRaw ? safeRemoteProductImageUrl(imgUrlRaw) : '';
+    if (imgUrlRaw && !imgUrlMain) {
+      invToast('La imagen debe ser un enlace HTTPS público', 'err');
+      imageInput?.focus();
+      return;
+    }
     const imgsExtraRaw = (document.getElementById('pImagesExtra')?.value || '').split('\n').map(s=>s.trim()).filter(Boolean);
     const videosRaw = (document.getElementById('pVideosUrls')?.value || '').split('\n').map(s=>s.trim()).filter(Boolean);
     const descLong = (document.getElementById('pDescriptionLong')?.value || '').trim();
     const techInfoRaw = (document.getElementById('pTechInfo')?.value || '').split('\n').map(s=>s.trim()).filter(Boolean);
     // Construir arrays JSONB
+    let imageProvenance = null;
+    if (imgUrlMain && imageInput?.dataset.provenance) {
+      try { imageProvenance = JSON.parse(imageInput.dataset.provenance); } catch (_) { imageProvenance = null; }
+    }
+    if (imgUrlMain && (!imageProvenance || typeof imageProvenance !== 'object')) {
+      imageProvenance = { matched_by: 'manual_url' };
+    }
     const imgsArr = [];
-    if (imgUrlMain) imgsArr.push({ url: imgUrlMain, alt: nombre });
-    imgsExtraRaw.forEach((u,i) => imgsArr.push({ url: u, alt: nombre + ' ' + (i+2) }));
+    if (imgUrlMain) imgsArr.push(Object.assign({ url: imgUrlMain, storage: 'remote_link', alt: nombre }, imageProvenance || {}));
+    imgsExtraRaw.map(safeRemoteProductImageUrl).filter(Boolean)
+      .forEach((u,i) => imgsArr.push({ url: u, storage: 'remote_link', alt: nombre + ' ' + (i+2) }));
     const videosArr = videosRaw.map(u => ({ url: u, title: nombre }));
     const techObj = {};
     techInfoRaw.forEach(line => {
@@ -22069,24 +22181,46 @@ window.addEventListener('volvix:version-loaded', function(e){
       tech_info: techObj,
       updated_at:new Date().toISOString(),
     };
+    const apiProduct = {
+      code: producto.codigo,
+      name: producto.nombre,
+      category: producto.categoria || 'general',
+      unit: producto.unidad || 'pieza',
+      cost: producto.costo,
+      price: producto.precio,
+      stock: producto.stock,
+      description: producto.description_long || undefined,
+      image_url: imgUrlMain || null,
+      image_provenance: imgUrlMain ? imageProvenance : undefined,
+    };
 
     const btn = document.getElementById('btnGuardar');
     if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
 
     try {
       let savedId = editingId;
+      let savedVersion = 1;
       if (window.volvix?.sync?.execute) {
         if (editingId) {
-          await window.volvix.sync.execute({
+          const currentVersion = Number((allProducts.find(p => p.id === editingId) || {}).version
+            || (Array.isArray(window.CATALOG) && (window.CATALOG.find(p => p.id === editingId) || {}).version)
+            || 1);
+          const updateResult = await window.volvix.sync.execute({
             type:'update', table:'productos', id: editingId, data: producto,
-            endpoint: '/api/productos/' + editingId, body: producto,
+            endpoint: '/api/productos/' + editingId, body: Object.assign({}, apiProduct, {
+              version: currentVersion,
+            }),
           });
+          const updatedRow = Array.isArray(updateResult?.result) ? updateResult.result[0] : updateResult?.result;
+          savedVersion = Number(updatedRow?.version || (currentVersion + 1));
         } else {
           const result = await window.volvix.sync.execute({
             type:'create', table:'productos', data: producto,
-            endpoint: '/api/productos', body: producto,
+            endpoint: '/api/productos', body: apiProduct,
           });
-          savedId = result?.result?.id || ('local-' + Date.now());
+          const createdRow = Array.isArray(result?.result) ? result.result[0] : result?.result;
+          savedId = createdRow?.id || ('local-' + Date.now());
+          savedVersion = Number(createdRow?.version || 1);
         }
       } else {
         // Fallback offline: solo memoria + localStorage
@@ -22100,6 +22234,7 @@ window.addEventListener('volvix:version-loaded', function(e){
           localStorage.setItem('volvix:productos', JSON.stringify(ls));
         } catch(_) {}
       }
+      producto.version = savedVersion;
 
       // Mantener allProducts sincronizado
       if (editingId) {
@@ -22229,6 +22364,26 @@ window.addEventListener('volvix:version-loaded', function(e){
             }
           }
         }
+        const firstImage = Array.isArray(p.images) && p.images[0] && typeof p.images[0] === 'object' ? p.images[0] : {};
+        const imageUrl = safeRemoteProductImageUrl(p.image_url || p.imagen || p.image_front_url || firstImage.url || '');
+        if (imageUrl) {
+          const imageInput = document.getElementById('pImageUrl');
+          const sourceCandidate = firstImage.source_url || p.image_source_url || p.source_url
+            || (data.source === 'openfoodfacts' ? ('https://world.openfoodfacts.org/product/' + encodeURIComponent(codigo)) : '');
+          const sourceUrl = safeRemoteProductImageUrl(sourceCandidate);
+          const provenance = {
+            provider: firstImage.provider || data.source || 'barcode_catalog',
+            license: firstImage.license || undefined,
+            matched_by: 'barcode',
+            exact_match: true,
+            verified_at: new Date().toISOString(),
+          };
+          if (sourceUrl) provenance.source_url = sourceUrl;
+          if (imageInput) {
+            imageInput.value = imageUrl;
+            imageInput.dataset.provenance = JSON.stringify(provenance);
+          }
+        }
         const source = data.source === 'local' ? '✅ Encontrado en tu inventario' : '✅ Encontrado en Open Food Facts';
         if (hint) hint.textContent = source + (p.marca ? (' · ' + p.marca) : '');
         invToast('✅ Producto encontrado: ' + (p.nombre || p.name), 'ok');
@@ -22249,19 +22404,26 @@ window.addEventListener('volvix:version-loaded', function(e){
     const reader = new FileReader();
     reader.onload = (e) => {
       const text  = e.target.result;
-      const lines = String(text).split('\n').filter(l => l.trim());
-      if (!lines.length) return;
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-      csvParsed = lines.slice(1).map(line => {
-        const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g,''));
+      const rows = typeof _parseCSV === 'function' ? _parseCSV(String(text)) : [];
+      if (!rows.length) return;
+      csvParsed = rows.map(row => {
+        const imageUrl = row.image_url || row.imagen_url || row.imagen || '';
+        const imageProvenance = imageUrl ? {
+          source_url: row.image_source_url || row.fuente_imagen_url || undefined,
+          provider: row.image_provider || row.proveedor_imagen || undefined,
+          license: row.image_license || row.licencia_imagen || undefined,
+          matched_by: 'csv_import',
+        } : undefined;
         return {
-          nombre:    vals[headers.indexOf('nombre')]    || '',
-          codigo:    vals[headers.indexOf('codigo')]    || '',
-          categoria: vals[headers.indexOf('categoria')] || '',
-          precio:    parseFloat(vals[headers.indexOf('precio')]    || 0),
-          costo:     parseFloat(vals[headers.indexOf('costo')]     || 0),
-          stock:     parseInt(  vals[headers.indexOf('stock')]     || 0),
-          minimo:    parseInt(  vals[headers.indexOf('minimo')]    || 5),
+          nombre: row.nombre || row.name || '',
+          codigo: row.codigo || row['código'] || row.code || row.sku || '',
+          categoria: row.categoria || row.category || '',
+          precio: parseFloat(row.precio || row.price || 0),
+          costo: parseFloat(row.costo || row.cost || 0),
+          stock: parseInt(row.stock || 0, 10),
+          minimo: parseInt(row.minimo || row.min_stock || 5, 10),
+          image_url: imageUrl || undefined,
+          image_provenance: imageProvenance,
         };
       }).filter(p => p.nombre);
       const preview = document.getElementById('csvPreview');
@@ -22291,8 +22453,18 @@ window.addEventListener('volvix:version-loaded', function(e){
       // Fallback: uno-a-uno + CATALOG
       for (const p of csvParsed) {
         try {
+          const apiRow = {
+            code: p.codigo,
+            name: p.nombre,
+            category: p.categoria || 'general',
+            price: p.precio,
+            cost: p.costo,
+            stock: p.stock,
+            image_url: p.image_url,
+            image_provenance: p.image_provenance,
+          };
           if (window.volvix?.sync?.execute) {
-            await window.volvix.sync.execute({ type:'create', table:'productos', data:p, endpoint:'/api/productos', body:p });
+            await window.volvix.sync.execute({ type:'create', table:'productos', data:p, endpoint:'/api/productos', body:apiRow });
           }
           const id = 'csv-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
           allProducts.push(Object.assign({ id }, p));
@@ -22307,7 +22479,7 @@ window.addEventListener('volvix:version-loaded', function(e){
     csvParsed = [];
   }
   function downloadTemplate() {
-    const csv = 'nombre,codigo,categoria,precio,costo,stock,minimo\nCoca-Cola 600ml,7501055303045,Bebidas,25,15,100,20\nPan dulce,,Panadería,8.5,4,50,10';
+    const csv = 'nombre,codigo,categoria,precio,costo,stock,minimo,image_url,image_source_url,image_provider,image_license\nCoca-Cola 600ml,7501055303045,Bebidas,25,15,100,20,,,,\nPan dulce,,Panadería,8.5,4,50,10,,,,';
     const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
@@ -22324,14 +22496,17 @@ window.addEventListener('volvix:version-loaded', function(e){
       ? window.CATALOG.map(c => ({
           nombre:c.name, codigo:c.code, categoria:c.category||c.categoria||'',
           precio:c.price, costo:c.cost, stock:c.stock, minimo:c.min_stock||c.minimo||5,
-          unidad:c.unit||'pieza', proveedor:c.supplier||''
+          unidad:c.unit||'pieza', proveedor:c.supplier||'', image_url:c.image_url||'',
+          image_source_url:Array.isArray(c.images)&&c.images[0]&&c.images[0].source_url||'',
+          image_provider:Array.isArray(c.images)&&c.images[0]&&c.images[0].provider||'',
+          image_license:Array.isArray(c.images)&&c.images[0]&&c.images[0].license||''
         }))
       : []);
     if (!prods.length) { invToast('No hay productos para exportar', 'warn'); return; }
-    const headers = ['nombre','codigo','categoria','precio','costo','stock','minimo','unidad','proveedor'];
+    const headers = ['nombre','codigo','categoria','precio','costo','stock','minimo','unidad','proveedor','image_url','image_source_url','image_provider','image_license'];
     const rows = prods.map(p => headers.map(h => {
       const v = p[h] ?? '';
-      return typeof v === 'string' && v.includes(',') ? ('"' + v + '"') : v;
+      return '"' + String(v).replace(/"/g,'""') + '"';
     }).join(','));
     const csv  = [headers.join(','), ...rows].join('\n');
     const blob = new Blob(['﻿' + csv], { type:'text/csv;charset=utf-8;' });

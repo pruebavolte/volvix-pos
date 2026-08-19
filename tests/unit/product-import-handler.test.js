@@ -37,12 +37,27 @@ async function invoke(route, payload, extraHeaders, token = memberToken()) {
   return res;
 }
 
+async function invokeProductPatch(id, payload, token = memberToken()) {
+  const req = Readable.from([JSON.stringify(payload)]);
+  req.method = 'PATCH';
+  req.url = `/api/products/${id}`;
+  req.headers = {
+    authorization: `Bearer ${token}`,
+    'content-type': 'application/json',
+  };
+  req.socket = { remoteAddress: '127.0.0.2' };
+  const res = mockResponse();
+  await handlers['PATCH /api/products/:id'](req, res, { id });
+  return res;
+}
+
 function mockResponse() {
   let body = '';
   return {
     statusCode: 200,
     headers: {},
     setHeader(name, value) { this.headers[name] = value; },
+    on() {},
     end(chunk) { if (chunk) body += String(chunk); },
     json() { return JSON.parse(body || '{}'); },
   };
@@ -81,14 +96,18 @@ describe('transactional product import handler', () => {
     });
 
     const req = Readable.from([JSON.stringify({
-      products: [{
-        code: 'DOC-001',
-        name: 'Producto desde documento',
-        barcode: '7500000000007',
-        description: '<b>Descripción importada</b>',
-        unit: ' caja ',
-        price: 99,
-        image_url: 'https://images.example.com/doc-001.jpg',
+      items: [{
+        codigo: 'DOC-001',
+        nombre: 'Producto desde documento',
+        codigo_barras: '7500000000007',
+        descripcion: '<b>Descripción importada</b>',
+        unidad: ' caja ',
+        precio: 99,
+        imagen_url: 'https://images.example.com/doc-001.jpg',
+        fuente_imagen_url: 'https://shop.example.com/doc-001',
+        proveedor_imagen: 'shop',
+        image_matched_by: 'document_exact_sku',
+        image_exact_match: true,
       }],
     })]);
     req.method = 'POST';
@@ -112,6 +131,14 @@ describe('transactional product import handler', () => {
       assert.equal(inserted[0].description, 'Descripción importada');
       assert.equal(inserted[0].unit, 'caja');
       assert.equal(inserted[0].image_url, 'https://images.example.com/doc-001.jpg');
+      assert.deepEqual(inserted[0].images, [{
+        url: 'https://images.example.com/doc-001.jpg',
+        storage: 'remote_link',
+        source_url: 'https://shop.example.com/doc-001',
+        provider: 'shop',
+        matched_by: 'document_exact_sku',
+        exact_match: true,
+      }]);
     } finally {
       setSupabaseRequestForTest(null);
     }
@@ -136,11 +163,25 @@ describe('transactional product import handler', () => {
         code: 'MEMBER-001',
         name: 'Producto compartido',
         price: 25,
+        image_url: 'https://cdn.example.com/member-001.jpg',
+        image_provenance: {
+          source_url: 'https://shop.example.com/member-001',
+          provider: 'shop',
+          matched_by: 'manual_url',
+        },
       }, { 'x-allow-duplicate': '1' });
       assert.equal(res.statusCode, 200);
       assert.equal(inserted.length, 1);
       assert.equal(inserted[0].pos_user_id, OWNER_ID);
       assert.notEqual(inserted[0].pos_user_id, MEMBER_ID);
+      assert.equal(inserted[0].image_url, 'https://cdn.example.com/member-001.jpg');
+      assert.deepEqual(inserted[0].images, [{
+        url: 'https://cdn.example.com/member-001.jpg',
+        storage: 'remote_link',
+        source_url: 'https://shop.example.com/member-001',
+        provider: 'shop',
+        matched_by: 'manual_url',
+      }]);
     } finally {
       setSupabaseRequestForTest(null);
     }
@@ -180,6 +221,109 @@ describe('transactional product import handler', () => {
     }
   });
 
+  test('generic bulk accepts items aliases, persists provenance and preserves omitted images on update', async () => {
+    const writes = [];
+    setSupabaseRequestForTest(async (method, path, body) => {
+      if (method === 'GET' && path.startsWith('/subscriptions?')) return [];
+      if (method === 'GET' && path.startsWith('/pos_user_session_invalidations')) return [];
+      if (method === 'GET' && path.startsWith('/pos_active_sessions')) return [];
+      if (method === 'GET' && path.startsWith('/idempotency_keys?')) return [];
+      if (method === 'GET' && path.includes('&code=eq.KEEP-IMAGE&')) {
+        return [{ id: '77777777-7777-4777-8777-777777777777' }];
+      }
+      if (method === 'GET' && path.includes('&code=eq.NEW-IMAGE&')) return [];
+      if (method === 'PATCH' || (method === 'POST' && path === '/pos_products')) {
+        writes.push({ method, path, body });
+        return method === 'POST' ? [{ id: '88888888-8888-4888-8888-888888888888', ...body }] : [{ ...body }];
+      }
+      return [];
+    });
+
+    try {
+      const res = await invoke('POST /api/products/bulk', {
+        items: [
+          { codigo: 'KEEP-IMAGE', nombre: 'Conservar imagen', precio: 15, stock: 2 },
+          {
+            codigo: 'NEW-IMAGE', nombre: 'Imagen nueva', precio: 20, stock: 3,
+            imagen_url: 'https://cdn.example.com/new-image.jpg',
+            fuente_imagen_url: 'https://shop.example.com/new-image',
+            proveedor_imagen: 'shop',
+            image_matched_by: 'document_exact_sku',
+            image_exact_match: true,
+          },
+        ],
+      }, { 'idempotency-key': 'test-products-bulk-image-1' });
+      assert.equal(res.statusCode, 200);
+      assert.equal(res.json().updated, 1);
+      assert.equal(res.json().created, 1);
+      const updated = writes.find(write => write.method === 'PATCH');
+      const inserted = writes.find(write => write.method === 'POST');
+      assert.equal(Object.hasOwn(updated.body, 'image_url'), false);
+      assert.equal(Object.hasOwn(updated.body, 'images'), false);
+      assert.equal(inserted.body.pos_user_id, OWNER_ID);
+      assert.equal(inserted.body.image_url, 'https://cdn.example.com/new-image.jpg');
+      assert.deepEqual(inserted.body.images, [{
+        url: 'https://cdn.example.com/new-image.jpg',
+        storage: 'remote_link',
+        source_url: 'https://shop.example.com/new-image',
+        provider: 'shop',
+        matched_by: 'document_exact_sku',
+        exact_match: true,
+      }]);
+    } finally {
+      setSupabaseRequestForTest(null);
+    }
+  });
+
+  test('normal product PATCH preserves an omitted image and keeps image writes under CAS', async () => {
+    const productId = '99999999-9999-4999-8999-999999999999';
+    const writes = [];
+    let currentVersion = 7;
+    setSupabaseRequestForTest(async (method, path, body) => {
+      if (method === 'GET' && path.startsWith('/pos_user_session_invalidations')) return [];
+      if (method === 'GET' && path.startsWith('/pos_active_sessions')) return [];
+      if (method === 'GET' && path.startsWith(`/pos_products?id=eq.${productId}&select=id,pos_user_id,version`)) {
+        return [{ id: productId, pos_user_id: OWNER_ID, version: currentVersion }];
+      }
+      if (method === 'PATCH' && path.startsWith(`/pos_products?id=eq.${productId}&version=eq.`)) {
+        writes.push({ method, path, body });
+        currentVersion += 1;
+        return [{ id: productId, version: currentVersion, ...body }];
+      }
+      return [];
+    });
+
+    try {
+      const withoutImage = await invokeProductPatch(productId, { name: 'Nombre nuevo', version: 7 });
+      assert.equal(withoutImage.statusCode, 200);
+      assert.equal(writes[0].path, `/pos_products?id=eq.${productId}&version=eq.7`);
+      assert.equal(Object.hasOwn(writes[0].body, 'image_url'), false);
+      assert.equal(Object.hasOwn(writes[0].body, 'images'), false);
+
+      const withImage = await invokeProductPatch(productId, {
+        version: 8,
+        image_url: 'https://cdn.example.com/updated.jpg',
+        image_provenance: {
+          source_url: 'https://shop.example.com/updated',
+          provider: 'shop',
+          matched_by: 'manual_url',
+        },
+      });
+      assert.equal(withImage.statusCode, 200);
+      assert.equal(writes[1].path, `/pos_products?id=eq.${productId}&version=eq.8`);
+      assert.equal(writes[1].body.image_url, 'https://cdn.example.com/updated.jpg');
+      assert.deepEqual(writes[1].body.images, [{
+        url: 'https://cdn.example.com/updated.jpg',
+        storage: 'remote_link',
+        source_url: 'https://shop.example.com/updated',
+        provider: 'shop',
+        matched_by: 'manual_url',
+      }]);
+    } finally {
+      setSupabaseRequestForTest(null);
+    }
+  });
+
   test('transactional and bulk imports reject cashier, vendor and kiosk roles before mutation', async () => {
     const writes = [];
     setSupabaseRequestForTest(async (method, path, body) => {
@@ -200,6 +344,11 @@ describe('transactional product import handler', () => {
           items: [{ code: `BULK-BLOCKED-${role}`, name: 'No permitido', price: 10 }],
         }, undefined, memberToken(role));
         assert.equal(bulkRes.statusCode, 403, `products/bulk-import role=${role}`);
+
+        const genericBulkRes = await invoke('POST /api/products/bulk', {
+          items: [{ code: `GENERIC-BLOCKED-${role}`, name: 'No permitido', price: 10 }],
+        }, { 'idempotency-key': `blocked-generic-${role}` }, memberToken(role));
+        assert.equal(genericBulkRes.statusCode, 403, `products/bulk role=${role}`);
       }
       assert.equal(writes.length, 0);
     } finally {
