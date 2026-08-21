@@ -2562,35 +2562,36 @@ const handlers = {
       const q = String(parsed.query.q || '').replace(/\s+/g, ' ').trim().slice(0, 140);
       if (q.length < 2) return sendJSON(res, { images: [] });
       const seen = new Set();
-      const market = [], other = [];
-      const add = (raw) => {
+      const market = [], openv = [], other = [];
+      const add = (raw, bucket) => {
         const u = sanitizeImageUrl(raw);
         if (!u || seen.has(u)) return;
         seen.add(u);
-        (MARKET.test(u) ? market : other).push(u);
+        if (bucket === 'openv') openv.push(u);
+        else (MARKET.test(u) ? market : other).push(u);
       };
       // 1) Bing Images (navegador simulado, keyless): extraer los murl del HTML.
+      // OJO: desde IP de datacenter los buscadores suelen degradar/bloquear el
+      // scraping, así que las de marketplace se priorizan y el resto va al final.
       try {
         const r = await fetch('https://www.bing.com/images/search?q=' + encodeURIComponent(q) + '&count=30&safeSearch=Off&setlang=es', { headers: { 'User-Agent': UA, 'Accept-Language': 'es-MX,es;q=0.9' } });
         if (r.ok) {
           const html = await r.text();
           const re = /murl&quot;:&quot;(.*?)&quot;/g;
           let m, n = 0;
-          while ((m = re.exec(html)) && n < 60) { add(m[1].replace(/&amp;/g, '&')); n++; }
+          while ((m = re.exec(html)) && n < 60) { add(m[1].replace(/&amp;/g, '&'), 'bing'); n++; }
         }
       } catch (_) { /* seguimos con lo que haya */ }
-      // 2) Openverse (CC) como respaldo si Bing trajo poco.
-      if (market.length + other.length < 6) {
-        try {
-          const r = await fetch('https://api.openverse.org/v1/images/?q=' + encodeURIComponent(q) + '&page_size=12', { headers: { accept: 'application/json' } });
-          if (r.ok) {
-            const j = await r.json();
-            (Array.isArray(j.results) ? j.results : []).forEach((x) => add(x && x.url));
-          }
-        } catch (_) { /* ignore */ }
-      }
-      // Marketplace primero (más probable la imagen exacta del producto).
-      const images = market.concat(other).slice(0, 15);
+      // 2) Openverse (CC, keyless, no bloquea a servidores) — relevante-ish.
+      try {
+        const r = await fetch('https://api.openverse.org/v1/images/?q=' + encodeURIComponent(q) + '&page_size=12', { headers: { accept: 'application/json' } });
+        if (r.ok) {
+          const j = await r.json();
+          (Array.isArray(j.results) ? j.results : []).forEach((x) => add(x && x.url, 'openv'));
+        }
+      } catch (_) { /* ignore */ }
+      // Orden: marketplace real (Bing) → Openverse → resto (posible ruido) al final.
+      const images = market.concat(openv).concat(other).slice(0, 15);
       return sendJSON(res, { images });
     } catch (e) {
       return sendJSON(res, { images: [], error: 'candidates_failed' }, 200);
