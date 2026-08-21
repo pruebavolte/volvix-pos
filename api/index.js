@@ -439,7 +439,7 @@ const TENANT_SLUG_RE = /^[A-Z][A-Z0-9_-]{2,40}$/;
 function isTenantId(s) { return typeof s === 'string' && (UUID_RE.test(s) || TENANT_SLUG_RE.test(s)); }
 
 // FIX R13 (#9): Whitelists de campos
-const ALLOWED_FIELDS_PRODUCTS = ['code', 'name', 'category', 'cost', 'price', 'stock', 'icon', 'industry_fields'];
+const ALLOWED_FIELDS_PRODUCTS = ['code', 'name', 'category', 'cost', 'price', 'stock', 'icon', 'industry_fields', 'image_url'];
 // 2026-07-07: campos extra por giro (product_fields). Se guardan como jsonb en
 // pos_products.industry_fields. Aceptar solo objeto plano de primitivos, cap 40
 // claves y 500 chars por valor. Devuelve null si no hay nada válido.
