@@ -2546,6 +2546,29 @@ const handlers = {
   // Estrategia: normalizamos el query (lower + strip acentos + strip no-alfa-num) y comparamos
   // contra la versión normalizada del nombre/código en JS si PostgREST no encontró nada.
   // Eso cubre: espacios, acentos, mayúsculas, guiones, etc., sin requerir pg_trgm/unaccent en el server.
+  // Candidatas de imagen para un producto (el sistema decide). Proxy server-side
+  // a Openverse (CC, sin API key) para evitar CORS; devuelve URLs https limpias.
+  'GET /api/product-image-candidates': requireAuth(async (req, res) => {
+    try {
+      const parsed = url.parse(req.url, true);
+      const q = String(parsed.query.q || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+      if (q.length < 2) return sendJSON(res, { images: [] });
+      let images = [];
+      try {
+        const r = await fetch('https://api.openverse.org/v1/images/?q=' + encodeURIComponent(q) + '&page_size=14', { headers: { accept: 'application/json' } });
+        if (r.ok) {
+          const j = await r.json();
+          images = (Array.isArray(j.results) ? j.results : [])
+            .map((x) => sanitizeImageUrl(x && x.url))
+            .filter(Boolean);
+        }
+      } catch (_) { /* red: devolver lo que haya */ }
+      images = Array.from(new Set(images)).slice(0, 12);
+      return sendJSON(res, { images });
+    } catch (e) {
+      return sendJSON(res, { images: [], error: 'candidates_failed' }, 200);
+    }
+  }),
   'GET /api/products': requireAuth(async (req, res) => {
     try {
       const parsed = url.parse(req.url, true);

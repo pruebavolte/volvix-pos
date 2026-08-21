@@ -10756,7 +10756,7 @@
           : '<span class="chip ok"><span class="dot"></span>OK</span>';
         const checked = INV_BULK_SELECT.has(p.id || p.code) ? ' checked' : '';
         return `
-        <tr style="${rowStyle}">
+        <tr style="${rowStyle}" class="inv-prod-row" tabindex="0" data-prod-id="${idAttr}" data-prod-code="${codeAttr}" data-prod-name="${escapeAttr(p.name||'')}" data-prod-img="${escapeAttr(p.image_url||'')}">
           <td><input type="checkbox" class="inv-row-check" data-rowid="${idAttr}"${checked}></td>
           <td class="mono" style="font-size: 11px; color: var(--text-3);">${escapeHtml(p.code||'')}</td>
           <td class="primary-col">${escapeHtml(p.name||'')}</td>
@@ -10963,6 +10963,110 @@
       }
     } catch (_) {}
   }
+  // ── Panel de imagen del inventario (el sistema decide en primera instancia).
+  // Flechas ↑/↓ del teclado = cambiar de producto (la caja muestra su imagen).
+  // Botones ◀ ▶ (o ←/→) = cambiar entre imágenes encontradas. "Aplicar" = guardar.
+  // El usuario NO elige la fuente; el sistema trae las candidatas automáticamente.
+  (function vlxInvImagePanel(){
+    let panel, imgEl, nameEl, counterEl, statusEl, applyBtn;
+    let activeRow = null, candidates = [], idx = 0, fetchSeq = 0;
+    function build(){
+      if (panel) return;
+      panel = document.createElement('div');
+      panel.id = 'vlx-inv-image-panel';
+      panel.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:9000;width:230px;max-width:calc(100vw - 24px);background:#fff;border:1px solid #E5E5EA;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.18);padding:12px;display:none;color:#1C1917';
+      panel.innerHTML = ''
+        + '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:6px">'
+        +   '<div id="vlx-imgp-name" style="font-size:12px;font-weight:600;color:#0B0B0F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>'
+        +   '<button id="vlx-imgp-close" title="Cerrar" style="flex:none;border:none;background:none;font-size:16px;color:#9CA3AF;cursor:pointer;line-height:1">×</button>'
+        + '</div>'
+        + '<div style="width:100%;aspect-ratio:1/1;background:#f5f5f4;border:1px solid #eee;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:8px">'
+        +   '<img id="vlx-imgp-img" alt="" style="max-width:100%;max-height:100%;object-fit:contain;display:none">'
+        +   '<span id="vlx-imgp-status" style="font-size:11px;color:#9CA3AF;text-align:center;padding:0 8px">Usa ↑ ↓ para elegir un producto</span>'
+        + '</div>'
+        + '<div style="display:flex;align-items:center;gap:6px">'
+        +   '<button id="vlx-imgp-prev" title="Imagen anterior (←)" style="flex:none;width:36px;height:36px;border:1px solid #E5E5EA;background:#fff;border-radius:8px;cursor:pointer;font-size:15px">◀</button>'
+        +   '<span id="vlx-imgp-counter" style="flex:1;text-align:center;font-size:11px;color:#6B7280">0 / 0</span>'
+        +   '<button id="vlx-imgp-next" title="Imagen siguiente (→)" style="flex:none;width:36px;height:36px;border:1px solid #E5E5EA;background:#fff;border-radius:8px;cursor:pointer;font-size:15px">▶</button>'
+        + '</div>'
+        + '<button id="vlx-imgp-apply" style="width:100%;margin-top:8px;padding:9px;border:none;background:#0B0B0F;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px">Aplicar imagen</button>';
+      document.body.appendChild(panel);
+      imgEl = panel.querySelector('#vlx-imgp-img');
+      nameEl = panel.querySelector('#vlx-imgp-name');
+      counterEl = panel.querySelector('#vlx-imgp-counter');
+      statusEl = panel.querySelector('#vlx-imgp-status');
+      applyBtn = panel.querySelector('#vlx-imgp-apply');
+      panel.querySelector('#vlx-imgp-prev').onclick = function(){ cycle(-1); };
+      panel.querySelector('#vlx-imgp-next').onclick = function(){ cycle(1); };
+      panel.querySelector('#vlx-imgp-close').onclick = function(){ hide(); };
+      applyBtn.onclick = apply;
+      // Ocultar automáticamente al salir de inventario.
+      const inv = document.getElementById('screen-inventario');
+      if (inv && window.MutationObserver) {
+        new MutationObserver(function(){ if (inv.classList.contains('hidden')) hide(); })
+          .observe(inv, { attributes:true, attributeFilter:['class'] });
+      }
+    }
+    function hide(){ if (panel) panel.style.display='none'; if (activeRow){ activeRow.style.outline=''; } }
+    function render(){
+      if (!candidates.length){ imgEl.style.display='none'; statusEl.style.display=''; counterEl.textContent='0 / 0'; return; }
+      idx = Math.max(0, Math.min(idx, candidates.length-1));
+      imgEl.src = candidates[idx]; imgEl.style.display=''; statusEl.style.display='none';
+      counterEl.textContent = (idx+1)+' / '+candidates.length;
+    }
+    function cycle(d){ if (!candidates.length) return; idx = (idx + d + candidates.length) % candidates.length; render(); }
+    async function selectRow(tr){
+      if (!tr) return; build();
+      if (activeRow && activeRow !== tr) activeRow.style.outline='';
+      activeRow = tr; tr.style.outline='2px solid #2D5F8F';
+      try { tr.scrollIntoView({ block:'nearest' }); } catch(_){}
+      panel.style.display='block';
+      const name = tr.getAttribute('data-prod-name') || '';
+      const existing = tr.getAttribute('data-prod-img') || '';
+      nameEl.textContent = name || '(sin nombre)';
+      candidates = existing ? [existing] : []; idx = 0;
+      if (!candidates.length){ statusEl.textContent='Buscando imagen…'; }
+      render();
+      if (name.length < 2) { statusEl.textContent='Sin nombre para buscar'; return; }
+      const seq = ++fetchSeq;
+      try {
+        const r = await _authFetch('/api/product-image-candidates?q=' + encodeURIComponent(name));
+        if (seq !== fetchSeq) return;
+        const j = await r.json().catch(function(){ return {}; });
+        const seen = new Set(), merged = [];
+        (existing ? [existing] : []).concat(Array.isArray(j.images) ? j.images : []).forEach(function(u){ if (u && !seen.has(u)){ seen.add(u); merged.push(u); } });
+        candidates = merged; if (idx >= candidates.length) idx = 0; render();
+        if (!candidates.length){ statusEl.style.display=''; statusEl.textContent='Sin imágenes encontradas'; }
+      } catch(_) { if (seq===fetchSeq && !candidates.length){ statusEl.style.display=''; statusEl.textContent='Sin conexión'; } }
+    }
+    async function apply(){
+      if (!activeRow || !candidates.length) return;
+      const id = activeRow.getAttribute('data-prod-id'); const chosen = candidates[idx];
+      applyBtn.disabled=true; const prevTxt=applyBtn.textContent; applyBtn.textContent='Aplicando…';
+      try { const ok = await saveProduct({ image_url: chosen }, id); if (ok && activeRow){ activeRow.setAttribute('data-prod-img', chosen); } }
+      catch(_){}
+      applyBtn.disabled=false; applyBtn.textContent=prevTxt;
+    }
+    function rows(){ const b=document.getElementById('inv-body'); return b ? Array.prototype.slice.call(b.querySelectorAll('tr.inv-prod-row')) : []; }
+    function move(d){ const rs=rows(); if(!rs.length) return; let i = activeRow ? rs.indexOf(activeRow) : -1; i = i<0 ? (d>0?0:rs.length-1) : (i+d+rs.length)%rs.length; selectRow(rs[i]); }
+    document.addEventListener('click', function(e){
+      const tr = e.target.closest && e.target.closest('tr.inv-prod-row');
+      if (tr && !e.target.closest('button, input, a, .inv-row-check')) selectRow(tr);
+    });
+    document.addEventListener('keydown', function(e){
+      const inv = document.getElementById('screen-inventario');
+      if (!inv || inv.classList.contains('hidden')) return;
+      const t=e.target, tag=(t&&t.tagName||'').toUpperCase();
+      if (tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable)) return;
+      const open = panel && panel.style.display!=='none';
+      if (e.key==='ArrowDown'){ e.preventDefault(); move(1); }
+      else if (e.key==='ArrowUp'){ e.preventDefault(); move(-1); }
+      else if (e.key==='ArrowRight' && open){ e.preventDefault(); cycle(1); }
+      else if (e.key==='ArrowLeft' && open){ e.preventDefault(); cycle(-1); }
+      else if (e.key==='Enter' && open && activeRow){ e.preventDefault(); apply(); }
+    });
+  })();
+
   async function saveProduct(data, productId){
     const url = productId ? '/api/products/' + encodeURIComponent(productId) : '/api/products';
     // Use PATCH for update (per spec), POST for create
