@@ -523,6 +523,19 @@ function hasUnsafeChars(s) {
 function hasCrlf(v) {
   return typeof v === 'string' && /[\r\n]/.test(v);
 }
+// image_url es editable por el usuario (buscador de imagen en inventario) y se
+// renderiza dentro de <img src>. Solo permitir una URL http(s) limpia; cualquier
+// otra cosa -> null. Evita XSS almacenado (comillas/eventos/esquemas raros).
+function sanitizeImageUrl(v) {
+  if (v == null || v === '') return null;
+  const s = String(v).trim();
+  if (!s || s.length > 2048) return null;
+  if (hasUnsafeChars(s) || hasCrlf(s) || /["'`\\<>\s]/.test(s)) return null;
+  let u;
+  try { u = new URL(s); } catch (_) { return null; }
+  if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+  return u.toString();
+}
 
 // =============================================================
 // UTILIDADES
@@ -2685,6 +2698,7 @@ const handlers = {
       const body = await readBody(req, { maxBytes: 100 * 1024, strictJson: true });
       if (checkBodyError(req, res)) return;
       const safe = pickFields(body, ALLOWED_FIELDS_PRODUCTS); // FIX R13 (#9)
+      if ('image_url' in safe) safe.image_url = sanitizeImageUrl(safe.image_url);
       // R22.4 BUG 2: rechazar el INPUT ORIGINAL si contiene XSS/JS handlers (NO sanear-y-guardar).
       const rawName = typeof safe.name === 'string' ? safe.name : '';
       const rawCode = typeof safe.code === 'string' ? safe.code : '';
@@ -2779,6 +2793,7 @@ const handlers = {
         return sendJSON(res, { error: 'version_required', message: 'Header If-Match o body.version requerido' }, 400);
       }
       const safe = pickFields(body, ALLOWED_FIELDS_PRODUCTS); // FIX R13 (#9)
+      if ('image_url' in safe) safe.image_url = sanitizeImageUrl(safe.image_url);
       // FIX v340: existence check before patch
       const existing = await supabaseRequest('GET', `/pos_products?id=eq.${params.id}&select=id,pos_user_id,version`);
       if (!existing || existing.length === 0) return sendJSON(res, { error: 'not found' }, 404);
