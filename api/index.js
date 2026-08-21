@@ -2546,24 +2546,51 @@ const handlers = {
   // Estrategia: normalizamos el query (lower + strip acentos + strip no-alfa-num) y comparamos
   // contra la versión normalizada del nombre/código en JS si PostgREST no encontró nada.
   // Eso cubre: espacios, acentos, mayúsculas, guiones, etc., sin requerir pg_trgm/unaccent en el server.
-  // Candidatas de imagen para un producto (el sistema decide). Proxy server-side
-  // a Openverse (CC, sin API key) para evitar CORS; devuelve URLs https limpias.
+  // Candidatas de imagen para un producto (el sistema decide en primera instancia).
+  // SIN API key ni pago: hacemos la búsqueda como un navegador y extraemos SOLO
+  // los LINKS de las imágenes (no las descargamos). Fuente principal Bing Images
+  // (su HTML sí trae las URLs reales de marketplace: Mercado Libre, Amazon, etc.);
+  // Openverse (CC) como respaldo. Google Imágenes no sirve server-side: entrega
+  // una página que carga las imágenes por JavaScript (requeriría un navegador
+  // real/headless, pesado y bloqueable) — misma razón por la que una API de pago
+  // da resultados estables; aquí priorizamos $0 y el usuario elige con ◀ ▶.
   'GET /api/product-image-candidates': requireAuth(async (req, res) => {
+    const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+    const MARKET = /mlstatic\.com|mercadolibre|media-amazon|amazon\.|walmart|liverpool|coppel|homedepot|chedraui|soriana|autozone|refacc/i;
     try {
       const parsed = url.parse(req.url, true);
-      const q = String(parsed.query.q || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+      const q = String(parsed.query.q || '').replace(/\s+/g, ' ').trim().slice(0, 140);
       if (q.length < 2) return sendJSON(res, { images: [] });
-      let images = [];
+      const seen = new Set();
+      const market = [], other = [];
+      const add = (raw) => {
+        const u = sanitizeImageUrl(raw);
+        if (!u || seen.has(u)) return;
+        seen.add(u);
+        (MARKET.test(u) ? market : other).push(u);
+      };
+      // 1) Bing Images (navegador simulado, keyless): extraer los murl del HTML.
       try {
-        const r = await fetch('https://api.openverse.org/v1/images/?q=' + encodeURIComponent(q) + '&page_size=14', { headers: { accept: 'application/json' } });
+        const r = await fetch('https://www.bing.com/images/search?q=' + encodeURIComponent(q) + '&count=30&safeSearch=Off&setlang=es', { headers: { 'User-Agent': UA, 'Accept-Language': 'es-MX,es;q=0.9' } });
         if (r.ok) {
-          const j = await r.json();
-          images = (Array.isArray(j.results) ? j.results : [])
-            .map((x) => sanitizeImageUrl(x && x.url))
-            .filter(Boolean);
+          const html = await r.text();
+          const re = /murl&quot;:&quot;(.*?)&quot;/g;
+          let m, n = 0;
+          while ((m = re.exec(html)) && n < 60) { add(m[1].replace(/&amp;/g, '&')); n++; }
         }
-      } catch (_) { /* red: devolver lo que haya */ }
-      images = Array.from(new Set(images)).slice(0, 12);
+      } catch (_) { /* seguimos con lo que haya */ }
+      // 2) Openverse (CC) como respaldo si Bing trajo poco.
+      if (market.length + other.length < 6) {
+        try {
+          const r = await fetch('https://api.openverse.org/v1/images/?q=' + encodeURIComponent(q) + '&page_size=12', { headers: { accept: 'application/json' } });
+          if (r.ok) {
+            const j = await r.json();
+            (Array.isArray(j.results) ? j.results : []).forEach((x) => add(x && x.url));
+          }
+        } catch (_) { /* ignore */ }
+      }
+      // Marketplace primero (más probable la imagen exacta del producto).
+      const images = market.concat(other).slice(0, 15);
       return sendJSON(res, { images });
     } catch (e) {
       return sendJSON(res, { images: [], error: 'candidates_failed' }, 200);
