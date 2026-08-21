@@ -11377,10 +11377,17 @@
         if (!searchBox || !imgInput) return;
         const SITES = [
           { label: '🔍 Google Imágenes', url: (t) => 'https://www.google.com/search?udm=2&q=' + encodeURIComponent(t) },
+          { label: '🛍️ Google Shopping', url: (t) => 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(t) },
           { label: '🛒 Mercado Libre', url: (t) => 'https://listado.mercadolibre.com.mx/' + encodeURIComponent(t) },
           { label: '📦 Amazon', url: (t) => 'https://www.amazon.com.mx/s?k=' + encodeURIComponent(t) },
           { label: '🏬 Walmart', url: (t) => 'https://www.walmart.com.mx/search?q=' + encodeURIComponent(t) },
-          { label: '🛍️ Google Shopping', url: (t) => 'https://www.google.com/search?tbm=shop&q=' + encodeURIComponent(t) },
+          { label: '🛒 Chedraui', url: (t) => 'https://www.chedraui.com.mx/search?q=' + encodeURIComponent(t) },
+          { label: '🛒 Soriana', url: (t) => 'https://www.soriana.com/buscar?q=' + encodeURIComponent(t) },
+          { label: '💊 Farmacias GDL', url: (t) => 'https://www.farmaciasguadalajara.com/search?q=' + encodeURIComponent(t) },
+          { label: '🔧 Home Depot', url: (t) => 'https://www.homedepot.com.mx/search?q=' + encodeURIComponent(t) },
+          { label: '🔩 Refacción (ML)', url: (t) => 'https://listado.mercadolibre.com.mx/' + encodeURIComponent(t + ' refaccion') },
+          { label: '🛍️ Liverpool', url: (t) => 'https://www.liverpool.com.mx/tienda?s=' + encodeURIComponent(t) },
+          { label: '🏢 Coppel', url: (t) => 'https://www.coppel.com/search?q=' + encodeURIComponent(t) },
         ];
         SITES.forEach((s) => {
           const b = document.createElement('button');
