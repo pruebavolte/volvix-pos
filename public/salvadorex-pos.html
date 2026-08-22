@@ -10982,6 +10982,9 @@
       return { get:get, put:put };
     })();
     function isOnline(){ return (typeof navigator === 'undefined') || navigator.onLine !== false; }
+    // Mapa {code: image_url} de la BD, cacheado 1 vez por sesion (el renderer no expone la url en la fila).
+    var urlMapP = null, urlMap = {};
+    function getUrlMap(){ if (urlMapP) return urlMapP; urlMapP = _authFetch('/api/products?limit=5000').then(function(r){ return r.json(); }).then(function(j){ var list = Array.isArray(j) ? j : ((j && j.products) || []); var m = {}; list.forEach(function(p){ if (p && p.code && p.image_url) m[String(p.code)] = p.image_url; }); urlMap = m; return m; }).catch(function(){ return {}; }); return urlMapP; }
     function revokeBlob(){ if (curBlobUrl){ try { URL.revokeObjectURL(curBlobUrl); } catch(_){} } curBlobUrl = null; blobForUrl = ''; }
     function setImgEl(src){ if (!bigImg) return; bigImg.onerror = function(){ bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent = isOnline() ? '(imagen no cargó)' : '(sin conexión)'; } }; bigImg.onload = function(){ bigImg.style.display=''; if (statusEl) statusEl.style.display='none'; }; bigImg.src = src; }
     function showBlobFor(url, objectUrl){ revokeBlob(); curBlobUrl = objectUrl; blobForUrl = url; setImgEl(objectUrl); }
@@ -10999,13 +11002,20 @@
           try { showBlobFor(rec.url, URL.createObjectURL(rec.blob)); } catch(_e){ setImgEl(rec.url); }
           return; // servido local, sin internet
         }
-        if (dbUrl){
-          items = [dbUrl]; idx = 0; setCounter(); revokeBlob(); setImgEl(dbUrl);
-          fetchAndCache(code, dbUrl, [dbUrl]).then(function(ou){ if (token === loadToken && ou){ showBlobFor(dbUrl, ou); } });
+        var known = dbUrl || urlMap[String(code)] || '';
+        if (known){
+          items = [known]; idx = 0; setCounter(); revokeBlob(); setImgEl(known);
+          fetchAndCache(code, known, [known]).then(function(ou){ if (token === loadToken && ou){ showBlobFor(known, ou); } });
           return;
         }
         if (!isOnline()){ items = []; idx = 0; if (bigImg) bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent='Sin imagen (sin conexión)'; } setCounter(); return; }
-        autoSaveCode = code; if (name && name.length >= 2){ showBusy(); execQuery(name); } else showEmpty();
+        // Sin url en fila/mapa: consulta el mapa de la BD (1 sola vez) antes de decidir buscar.
+        getUrlMap().then(function(m){
+          if (token !== loadToken) return;
+          var u = m[String(code)];
+          if (u){ items = [u]; idx = 0; setCounter(); revokeBlob(); setImgEl(u); fetchAndCache(code, u, [u]).then(function(ou){ if (token === loadToken && ou) showBlobFor(u, ou); }); return; }
+          autoSaveCode = code; if (name && name.length >= 2){ showBusy(); execQuery(name); } else showEmpty();
+        });
       });
     }
     // Tras una búsqueda automática (producto sin url): guarda la 1a imagen (url→BD, bytes→cache local).
@@ -11013,7 +11023,7 @@
       if (!autoSaveCode || !items.length) return;
       var code = autoSaveCode, first = items[0], cands = items.slice(0,30); autoSaveCode = '';
       fetchAndCache(code, first, cands).then(function(ou){ if (curCode === code && ou) showBlobFor(first, ou); });
-      try { saveImageToProduct(code, first).then(function(ok){ if (ok && activeRow && activeRow.getAttribute('data-prod-code') === code) activeRow.setAttribute('data-prod-img', first); if (ok && typeof vlxUpdateUrlCell === 'function') vlxUpdateUrlCell(code, first); }); } catch(_e){}
+      try { saveImageToProduct(code, first).then(function(ok){ if (ok){ urlMap[String(code)] = first; if (activeRow && activeRow.getAttribute('data-prod-code') === code) activeRow.setAttribute('data-prod-img', first); if (typeof vlxUpdateUrlCell === 'function') vlxUpdateUrlCell(code, first); } }); } catch(_e){}
     }
     function loadCse(){
       if (window.__vlxGcseLoading) return;
@@ -11143,7 +11153,7 @@
       saveImageToProduct(code, chosen).then(function(ok){
         if (ok && rowRef) rowRef.setAttribute('data-prod-img', chosen);
         applyBtn.textContent = ok ? '✓ Aplicada' : 'Error';
-        if (ok){ fetchAndCache(code, chosen, items.slice(0,30)).then(function(ou){ if (curCode === code && ou) showBlobFor(chosen, ou); }); if (typeof vlxUpdateUrlCell === 'function') vlxUpdateUrlCell(code, chosen); }
+        if (ok){ urlMap[String(code)] = chosen; fetchAndCache(code, chosen, items.slice(0,30)).then(function(ou){ if (curCode === code && ou) showBlobFor(chosen, ou); }); if (typeof vlxUpdateUrlCell === 'function') vlxUpdateUrlCell(code, chosen); }
         try { if (typeof showToast === 'function') showToast(ok ? '✓ Imagen aplicada' : 'No se pudo aplicar la imagen', ok ? undefined : 'error'); } catch(_e){}
       }).catch(function(){ applyBtn.textContent = 'Error'; }).then(function(){
         applyResetTimer = setTimeout(function(){ applyBtn.disabled = false; applyBtn.textContent = 'Aplicar'; }, 1400);
