@@ -10969,8 +10969,9 @@
   // El usuario NO elige la fuente; el sistema trae las candidatas automáticamente.
   (function vlxInvImagePanel(){
     var CX = '8517759c2626540e5';
-    var panel, gcseDiv, nameEl, urlInput, statusEl;
-    var activeRow = null, curName = '', rendered = false, lastExec = '';
+    var panel, gcseDiv, nameEl, addrWrap, addrInput, bodyEl, compactCard, bigImg, statusEl, counterEl, applyBtn, expandBtn;
+    var activeRow = null, curName = '', curQuery = '', rendered = false, expanded = false;
+    var items = [], idx = 0, scrapeTimer = null, applyResetTimer = null;
     function loadCse(){
       if (window.__vlxGcseLoading) return;
       window.__vlxGcseLoading = true;
@@ -10992,36 +10993,120 @@
           attributes: { enableImageSearch: 'true', defaultToImageSearch: 'true', disableWebSearch: 'false', imageSearchLayout: 'column', linkTarget: '_blank', enableHistory: 'false', enableOrderBy: 'false' }
         });
         rendered = true;
-        if (curName) execQuery(curName);
+        if (curQuery) execQuery(curQuery);
       } catch (e) {}
     }
     function execQuery(q){
       q = String(q || '').trim();
       if (!q) return;
+      curQuery = q;
       if (!pseReady()){ loadCse(); return; }
-      if (!rendered){ tryRender(); }
+      if (!rendered){ tryRender(); return; }
       try {
         var el = window.google.search.cse.element.getElement('vlxgcse');
-        if (el){ if (statusEl) statusEl.style.display='none'; lastExec = q; el.execute(q); }
-        else { tryRender(); setTimeout(function(){ var e2 = window.google.search.cse.element.getElement('vlxgcse'); if (e2){ lastExec=q; e2.execute(q); } }, 500); }
+        if (el){ showBusy(); el.execute(q); scheduleScrape(); }
+        else { tryRender(); }
       } catch (e) {}
+    }
+    function showBusy(){ items = []; idx = 0; if (bigImg){ bigImg.style.display='none'; } if (statusEl){ statusEl.style.display=''; statusEl.textContent='Buscando imágenes…'; } if (counterEl){ counterEl.textContent='…'; } }
+    function showEmpty(){ items = []; if (bigImg){ bigImg.style.display='none'; } if (statusEl){ statusEl.style.display=''; statusEl.textContent='Sin imágenes'; } if (counterEl){ counterEl.textContent='0 / 0'; } }
+    function scheduleScrape(){
+      var token = curQuery, tries = 0;
+      if (scrapeTimer){ clearInterval(scrapeTimer); scrapeTimer = null; }
+      scrapeTimer = setInterval(function(){
+        if (curQuery !== token){ clearInterval(scrapeTimer); scrapeTimer = null; return; }
+        tries++;
+        var ok = scrapeImages();
+        if (ok || tries >= 16){ clearInterval(scrapeTimer); scrapeTimer = null; if (!ok) showEmpty(); }
+      }, 300);
+    }
+    function scrapeImages(){
+      if (!gcseDiv) return false;
+      var nodes = gcseDiv.querySelectorAll('.gsc-imageResult img'), seen = {}, list = [];
+      for (var i=0;i<nodes.length;i++){
+        var u = nodes[i].src || '';
+        if (/^https?:\/\//.test(u) && u.length <= 2000 && !seen[u]){ seen[u] = 1; list.push(u); }
+      }
+      if (!list.length) return false;
+      items = list; if (idx >= items.length) idx = 0; renderCompact(); return true;
+    }
+    function renderCompact(){
+      if (!bigImg) return;
+      if (!items.length){ showEmpty(); return; }
+      idx = Math.max(0, Math.min(idx, items.length-1));
+      bigImg.onerror = function(){ bigImg.style.display='none'; if(statusEl){ statusEl.style.display=''; statusEl.textContent='(imagen no cargó — usa ▶)'; } };
+      bigImg.onload = function(){ bigImg.style.display=''; if(statusEl) statusEl.style.display='none'; };
+      bigImg.src = items[idx];
+      counterEl.textContent = (idx+1) + ' / ' + items.length;
+    }
+    function cycle(d){ if (!items.length) return; idx = (idx + d + items.length) % items.length; renderCompact(); }
+    function googleUrl(q){ return 'https://www.google.com/search?udm=2&q=' + encodeURIComponent(q); }
+    function looksLikeUrl(v){ if (/\s/.test(v)) return false; return /^https?:\/\//i.test(v) || /^[a-z0-9-]+(\.[a-z0-9-]+)+([\/?#].*)?$/i.test(v); }
+    function queryFromSearchUrl(v){
+      if (!/^https?:\/\//i.test(v)) return null;
+      try { var u = new URL(v); if (/(^|\.)(google|bing)\./i.test(u.hostname) && /search|images|imgres/i.test(u.pathname + u.search)){ return u.searchParams.get('q'); } } catch(e){}
+      return null;
+    }
+    function setName(q){ curName = q; if (nameEl) nameEl.textContent = q || '(sin nombre)'; if (addrInput) addrInput.value = googleUrl(q); }
+    function submitAddr(){
+      var v = (addrInput.value || '').trim(); if (!v) return;
+      var q = queryFromSearchUrl(v);
+      if (q){ setName(q); execQuery(q); return; }
+      if (looksLikeUrl(v)){ var u = /^https?:\/\//i.test(v) ? v : ('https://' + v); try { window.open(u, '_blank', 'noopener'); } catch(e){} return; }
+      setName(v); execQuery(v);
+    }
+    function setExpanded(on){
+      expanded = on; if (!panel) return;
+      bodyEl.style.height = on ? '58vh' : '300px';
+      bodyEl.style.maxHeight = on ? '520px' : '300px';
+      compactCard.style.display = on ? 'none' : 'flex';
+      addrWrap.style.display = on ? 'flex' : 'none';
+      if (expandBtn) expandBtn.textContent = on ? '▾ Contraer' : '⤢ Expandir';
+    }
+    function apply(){
+      if (!activeRow || !items.length){ return; }
+      var id = activeRow.getAttribute('data-prod-id'), chosen = items[idx];
+      if (!id || !chosen) return;
+      applyBtn.disabled = true; applyBtn.textContent = 'Aplicando…';
+      if (applyResetTimer){ clearTimeout(applyResetTimer); applyResetTimer = null; }
+      Promise.resolve().then(function(){ return saveProduct({ image_url: chosen }, id); }).then(function(ok){
+        if (ok && activeRow) activeRow.setAttribute('data-prod-img', chosen);
+        applyBtn.textContent = ok ? '✓ Aplicada' : 'Error';
+      }).catch(function(){ applyBtn.textContent = 'Error'; }).then(function(){
+        applyResetTimer = setTimeout(function(){ applyBtn.disabled = false; applyBtn.textContent = 'Aplicar'; }, 1300);
+      });
     }
     function build(){
       if (panel) return;
       panel = document.createElement('div');
       panel.id = 'vlx-inv-image-panel';
-      panel.style.cssText = 'position:fixed;right:12px;bottom:12px;z-index:9000;width:580px;max-width:97vw;height:72vh;max-height:660px;background:#fff;border:1px solid #E5E5EA;border-radius:12px;box-shadow:0 14px 46px rgba(0,0,0,.24);display:none;flex-direction:column;color:#1C1917;overflow:hidden';
+      panel.style.cssText = 'position:fixed;right:12px;bottom:12px;z-index:9000;width:560px;max-width:97vw;background:#fff;border:1px solid #E5E5EA;border-radius:12px;box-shadow:0 14px 46px rgba(0,0,0,.24);display:none;flex-direction:column;color:#1C1917;overflow:hidden';
       panel.innerHTML =
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #eee;flex:none">'
-        + '<div id="vlx-imgp-name" style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Imágenes del producto</div>'
+        + '<div id="vlx-imgp-name" style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Imagen del producto</div>'
         + '<button id="vlx-imgp-close" title="Cerrar" style="border:none;background:none;font-size:18px;color:#9CA3AF;cursor:pointer">&times;</button>'
         + '</div>'
-        + '<div style="padding:8px 12px;display:flex;gap:6px;border-bottom:1px solid #f2f2f2;flex:none">'
-        + '<input id="vlx-imgp-url" type="text" placeholder="Buscar otra cosa en Google…" style="flex:1;padding:8px 10px;border:1px solid #E5E5EA;border-radius:8px;font-size:12px"/>'
+        + '<div id="vlx-imgp-addr" style="display:none;gap:6px;padding:8px 12px;border-bottom:1px solid #f2f2f2;flex:none">'
+        + '<input id="vlx-imgp-url" type="text" spellcheck="false" placeholder="Producto o URL (ej. amazon.com.mx) — Enter" style="flex:1;padding:8px 10px;border:1px solid #E5E5EA;border-radius:8px;font-size:12px"/>'
         + '<button id="vlx-imgp-go" style="border:none;background:#2D5F8F;color:#fff;border-radius:8px;padding:8px 14px;font-weight:600;font-size:12px;cursor:pointer">Buscar</button>'
         + '</div>'
-        + '<div id="vlx-imgp-gcse" style="flex:1;overflow:auto;padding:6px 10px">'
-        +   '<div id="vlx-imgp-status" style="color:#9CA3AF;font-size:12px;padding:12px;text-align:center">Cargando buscador de Google…</div>'
+        + '<div id="vlx-imgp-body" style="position:relative;height:300px;overflow:hidden;flex:none">'
+        +   '<div id="vlx-imgp-gcse" style="position:absolute;inset:0;overflow:auto;padding:6px 10px"></div>'
+        +   '<div id="vlx-imgp-compact" style="position:absolute;inset:0;background:#fff;display:flex;flex-direction:column">'
+        +     '<div style="flex:1;display:flex;align-items:center;justify-content:center;background:#f5f5f4;overflow:hidden;min-height:0">'
+        +       '<img id="vlx-imgp-img" alt="" style="max-width:100%;max-height:100%;object-fit:contain;display:none"/>'
+        +       '<span id="vlx-imgp-status" style="color:#9CA3AF;font-size:12px;padding:12px;text-align:center">Cargando buscador de Google…</span>'
+        +     '</div>'
+        +     '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-top:1px solid #f2f2f2;flex:none">'
+        +       '<button id="vlx-imgp-prev" title="Anterior (←)" style="flex:none;width:42px;height:38px;border:1px solid #E5E5EA;background:#fff;border-radius:8px;cursor:pointer;font-size:15px">&#9664;</button>'
+        +       '<span id="vlx-imgp-counter" style="flex:1;text-align:center;font-size:12px;color:#6B7280">0 / 0</span>'
+        +       '<button id="vlx-imgp-next" title="Siguiente (→)" style="flex:none;width:42px;height:38px;border:1px solid #E5E5EA;background:#fff;border-radius:8px;cursor:pointer;font-size:15px">&#9654;</button>'
+        +     '</div>'
+        +   '</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;padding:10px 12px;border-top:1px solid #eee;flex:none">'
+        +   '<button id="vlx-imgp-apply" title="Guardar esta imagen (Enter)" style="flex:1;padding:10px;border:none;background:#0B0B0F;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px">Aplicar</button>'
+        +   '<button id="vlx-imgp-expand" title="Ver todas las imágenes de Google" style="flex:none;padding:10px 14px;border:none;background:#2D5F8F;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px">&#10530; Expandir</button>'
         + '</div>';
       document.body.appendChild(panel);
       if (!document.getElementById('vlx-gcse-style')){
@@ -11038,14 +11123,25 @@
       }
       gcseDiv = panel.querySelector('#vlx-imgp-gcse');
       nameEl = panel.querySelector('#vlx-imgp-name');
-      urlInput = panel.querySelector('#vlx-imgp-url');
+      addrWrap = panel.querySelector('#vlx-imgp-addr');
+      addrInput = panel.querySelector('#vlx-imgp-url');
+      bodyEl = panel.querySelector('#vlx-imgp-body');
+      compactCard = panel.querySelector('#vlx-imgp-compact');
+      bigImg = panel.querySelector('#vlx-imgp-img');
       statusEl = panel.querySelector('#vlx-imgp-status');
+      counterEl = panel.querySelector('#vlx-imgp-counter');
+      applyBtn = panel.querySelector('#vlx-imgp-apply');
+      expandBtn = panel.querySelector('#vlx-imgp-expand');
       panel.querySelector('#vlx-imgp-close').onclick = function(){ panel.style.display='none'; if(activeRow) activeRow.style.outline=''; };
-      var go = function(){ var q=(urlInput.value||'').trim(); if(q){ curName=q; nameEl.textContent=q; execQuery(q); } };
-      panel.querySelector('#vlx-imgp-go').onclick = go;
-      urlInput.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } e.stopPropagation(); });
+      panel.querySelector('#vlx-imgp-prev').onclick = function(){ cycle(-1); };
+      panel.querySelector('#vlx-imgp-next').onclick = function(){ cycle(1); };
+      applyBtn.onclick = apply;
+      expandBtn.onclick = function(){ setExpanded(!expanded); };
+      panel.querySelector('#vlx-imgp-go').onclick = submitAddr;
+      addrInput.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); submitAddr(); } e.stopPropagation(); });
       var inv = document.getElementById('screen-inventario');
       if (inv && window.MutationObserver){ new MutationObserver(function(){ if (inv.classList.contains('hidden')) panel.style.display='none'; }).observe(inv, { attributes:true, attributeFilter:['class'] }); }
+      setExpanded(false);
       loadCse(); tryRender();
     }
     function selectRow(tr){
@@ -11054,10 +11150,9 @@
       activeRow = tr; tr.style.outline='2px solid #2D5F8F';
       try { tr.scrollIntoView({ block:'nearest' }); } catch(_){}
       panel.style.display='flex';
-      var name = tr.getAttribute('data-prod-name') || '';
-      curName = name; nameEl.textContent = name || '(sin nombre)';
-      if (urlInput) urlInput.value = name;
-      if (name.length >= 2) execQuery(name);
+      var name = (tr.getAttribute('data-prod-name') || '').trim();
+      setName(name);
+      if (name.length >= 2){ showBusy(); execQuery(name); } else { showEmpty(); }
     }
     function rows(){ var b=document.getElementById('inv-body'); return b ? Array.prototype.slice.call(b.querySelectorAll('tr.inv-prod-row')) : []; }
     function move(d){ var rs=rows(); if(!rs.length) return; var i=activeRow?rs.indexOf(activeRow):-1; i=i<0?(d>0?0:rs.length-1):(i+d+rs.length)%rs.length; selectRow(rs[i]); }
@@ -11066,8 +11161,12 @@
       var inv=document.getElementById('screen-inventario'); if(!inv||inv.classList.contains('hidden')) return;
       var t=e.target, tag=(t&&t.tagName||'').toUpperCase();
       if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable)) return;
+      var open = panel && panel.style.display !== 'none';
       if(e.key==='ArrowDown'){ e.preventDefault(); move(1); }
       else if(e.key==='ArrowUp'){ e.preventDefault(); move(-1); }
+      else if(open && e.key==='ArrowRight'){ e.preventDefault(); cycle(1); }
+      else if(open && e.key==='ArrowLeft'){ e.preventDefault(); cycle(-1); }
+      else if(open && e.key==='Enter'){ e.preventDefault(); apply(); }
     });
   })();
 
