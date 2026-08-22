@@ -10972,6 +10972,49 @@
     var panel, gcseDiv, nameEl, addrWrap, addrInput, bodyEl, compactCard, bigImg, statusEl, counterEl, applyBtn, expandBtn;
     var activeRow = null, curName = '', curQuery = '', rendered = false, expanded = false, panelUserOpen = false;
     var items = [], idx = 0, scrapeTimer = null, applyResetTimer = null, lastExec = '';
+    var curCode = '', loadToken = 0, autoSaveCode = '', curBlobUrl = null, blobForUrl = '';
+    // ===== CACHE OFFLINE-FIRST DE IMAGENES (IndexedDB, 100% local, sin servidor/BD) =====
+    var VLXImgDB = (function(){
+      var DBP = null;
+      function open(){ if (DBP) return DBP; DBP = new Promise(function(res, rej){ try { var rq = indexedDB.open('vlxImgCache', 1); rq.onupgradeneeded = function(e){ var db = e.target.result; if (!db.objectStoreNames.contains('imgs')) db.createObjectStore('imgs', { keyPath:'code' }); }; rq.onsuccess = function(e){ res(e.target.result); }; rq.onerror = function(){ rej(rq.error); }; } catch(e){ rej(e); } }); return DBP; }
+      function get(code){ return open().then(function(db){ return new Promise(function(res){ try { var rq = db.transaction('imgs','readonly').objectStore('imgs').get(String(code)); rq.onsuccess = function(){ res(rq.result || null); }; rq.onerror = function(){ res(null); }; } catch(e){ res(null); } }); }).catch(function(){ return null; }); }
+      function put(rec){ return open().then(function(db){ return new Promise(function(res){ try { var tx = db.transaction('imgs','readwrite'); tx.objectStore('imgs').put(rec); tx.oncomplete = function(){ res(true); }; tx.onerror = function(){ res(false); }; } catch(e){ res(false); } }); }).catch(function(){ return false; }); }
+      return { get:get, put:put };
+    })();
+    function isOnline(){ return (typeof navigator === 'undefined') || navigator.onLine !== false; }
+    function revokeBlob(){ if (curBlobUrl){ try { URL.revokeObjectURL(curBlobUrl); } catch(_){} } curBlobUrl = null; blobForUrl = ''; }
+    function setImgEl(src){ if (!bigImg) return; bigImg.onerror = function(){ bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent = isOnline() ? '(imagen no cargó)' : '(sin conexión)'; } }; bigImg.onload = function(){ bigImg.style.display=''; if (statusEl) statusEl.style.display='none'; }; bigImg.src = src; }
+    function showBlobFor(url, objectUrl){ revokeBlob(); curBlobUrl = objectUrl; blobForUrl = url; setImgEl(objectUrl); }
+    function setCounter(){ if (counterEl) counterEl.textContent = items.length ? ((idx+1) + ' / ' + items.length) : '0 / 0'; }
+    // Baja los bytes (gstatic permite CORS) y los cachea en IndexedDB; devuelve objectURL o null.
+    function fetchAndCache(code, url, candidates){ if (!isOnline() || !url) return Promise.resolve(null); return fetch(url, { mode:'cors' }).then(function(r){ if (!r.ok) throw 0; return r.blob(); }).then(function(b){ if (!b || b.size < 200) throw 0; VLXImgDB.put({ code:String(code), url:url, blob:b, candidates:(candidates || [url]).slice(0,30), ts:Date.now() }); return URL.createObjectURL(b); }).catch(function(){ return null; }); }
+    // Cache-first para un producto: 1) blob local (offline)  2) url conocida (baja+cachea)  3) busca 1 vez (solo online)
+    function loadForProduct(code, name, dbUrl){
+      var token = ++loadToken; curCode = code; autoSaveCode = '';
+      if (scrapeTimer){ clearInterval(scrapeTimer); scrapeTimer = null; }
+      VLXImgDB.get(code).then(function(rec){
+        if (token !== loadToken) return;
+        if (rec && rec.blob){
+          items = (rec.candidates && rec.candidates.length) ? rec.candidates : [rec.url]; idx = 0; setCounter();
+          try { showBlobFor(rec.url, URL.createObjectURL(rec.blob)); } catch(_e){ setImgEl(rec.url); }
+          return; // servido local, sin internet
+        }
+        if (dbUrl){
+          items = [dbUrl]; idx = 0; setCounter(); revokeBlob(); setImgEl(dbUrl);
+          fetchAndCache(code, dbUrl, [dbUrl]).then(function(ou){ if (token === loadToken && ou){ showBlobFor(dbUrl, ou); } });
+          return;
+        }
+        if (!isOnline()){ items = []; idx = 0; if (bigImg) bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent='Sin imagen (sin conexión)'; } setCounter(); return; }
+        autoSaveCode = code; if (name && name.length >= 2){ showBusy(); execQuery(name); } else showEmpty();
+      });
+    }
+    // Tras una búsqueda automática (producto sin url): guarda la 1a imagen (url→BD, bytes→cache local).
+    function maybeAutoSaveFirst(){
+      if (!autoSaveCode || !items.length) return;
+      var code = autoSaveCode, first = items[0], cands = items.slice(0,30); autoSaveCode = '';
+      fetchAndCache(code, first, cands).then(function(ou){ if (curCode === code && ou) showBlobFor(first, ou); });
+      try { saveImageToProduct(code, first).then(function(ok){ if (ok && activeRow && activeRow.getAttribute('data-prod-code') === code) activeRow.setAttribute('data-prod-img', first); if (ok && typeof vlxUpdateUrlCell === 'function') vlxUpdateUrlCell(code, first); }); } catch(_e){}
+    }
     function loadCse(){
       if (window.__vlxGcseLoading) return;
       window.__vlxGcseLoading = true;
@@ -11033,6 +11076,7 @@
         prevKey = key;
         if (list.length && tries >= 2 && stable >= 1){
           items = list; if (idx >= items.length) idx = 0; renderCompact();
+          maybeAutoSaveFirst();
           clearInterval(scrapeTimer); scrapeTimer = null; return;
         }
         if (tries >= 18){ clearInterval(scrapeTimer); scrapeTimer = null; if (!items.length) showEmpty(); }
@@ -11042,10 +11086,10 @@
       if (!bigImg) return;
       if (!items.length){ showEmpty(); return; }
       idx = Math.max(0, Math.min(idx, items.length-1));
-      bigImg.onerror = function(){ bigImg.style.display='none'; if(statusEl){ statusEl.style.display=''; statusEl.textContent='(imagen no cargó — usa ▶)'; } };
-      bigImg.onload = function(){ bigImg.style.display=''; if(statusEl) statusEl.style.display='none'; };
-      bigImg.src = items[idx];
-      counterEl.textContent = (idx+1) + ' / ' + items.length;
+      var u = items[idx];
+      if (blobForUrl && u === blobForUrl && curBlobUrl){ setImgEl(curBlobUrl); }
+      else { setImgEl(u); }
+      setCounter();
     }
     function cycle(d){ if (!items.length) return; idx = (idx + d + items.length) % items.length; renderCompact(); }
     function googleUrl(q){ return 'https://www.google.com/search?udm=2&q=' + encodeURIComponent(q); }
@@ -11070,6 +11114,7 @@
       compactCard.style.display = on ? 'none' : 'flex';
       addrWrap.style.display = on ? 'flex' : 'none';
       if (expandBtn) expandBtn.textContent = on ? '▾ Contraer' : '⤢ Expandir';
+      if (on && curName && lastExec !== curName){ execQuery(curName); }
     }
     // El row expone el CODIGO en data-prod-id/-code (no el UUID) y el PATCH exige
     // el UUID + version (optimistic lock). Resolvemos codigo->UUID por el GET y
@@ -11098,6 +11143,7 @@
       saveImageToProduct(code, chosen).then(function(ok){
         if (ok && rowRef) rowRef.setAttribute('data-prod-img', chosen);
         applyBtn.textContent = ok ? '✓ Aplicada' : 'Error';
+        if (ok){ fetchAndCache(code, chosen, items.slice(0,30)).then(function(ou){ if (curCode === code && ou) showBlobFor(chosen, ou); }); if (typeof vlxUpdateUrlCell === 'function') vlxUpdateUrlCell(code, chosen); }
         try { if (typeof showToast === 'function') showToast(ok ? '✓ Imagen aplicada' : 'No se pudo aplicar la imagen', ok ? undefined : 'error'); } catch(_e){}
       }).catch(function(){ applyBtn.textContent = 'Error'; }).then(function(){
         applyResetTimer = setTimeout(function(){ applyBtn.disabled = false; applyBtn.textContent = 'Aplicar'; }, 1400);
@@ -11181,8 +11227,11 @@
       try { tr.scrollIntoView({ block:'nearest' }); } catch(_){}
       panel.style.display='flex'; panelUserOpen = true;
       var name = (tr.getAttribute('data-prod-name') || '').trim();
+      var code = (tr.getAttribute('data-prod-code') || tr.getAttribute('data-prod-id') || '').trim();
+      var dbUrl = (tr.getAttribute('data-prod-img') || '').trim();
       setName(name);
-      if (name.length >= 2){ showBusy(); execQuery(name); } else { showEmpty(); }
+      showBusy();
+      loadForProduct(code, name, dbUrl);
     }
     function rows(){ var b=document.getElementById('inv-body'); return b ? Array.prototype.slice.call(b.querySelectorAll('tr.inv-prod-row')) : []; }
     function move(d){ var rs=rows(); if(!rs.length) return; var i=activeRow?rs.indexOf(activeRow):-1; i=i<0?(d>0?0:rs.length-1):(i+d+rs.length)%rs.length; selectRow(rs[i]); }
