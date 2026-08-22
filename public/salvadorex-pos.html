@@ -4581,7 +4581,7 @@
               <th>Código</th><th>Producto</th><th>Categoría</th>
               <th class="num">Costo</th><th class="num">Precio</th>
               <th class="num">Stock</th><th class="num">Mín</th>
-              <th>Estado</th><th></th></tr></thead>
+              <th>Estado</th><th>URL de imagen</th><th></th></tr></thead>
             <tbody id="inv-body"></tbody>
           </table>
         </div>
@@ -10736,7 +10736,7 @@
     const body = $('#inv-body');
     if (!body) return;
     if (!list.length) {
-      body.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-3);">Sin productos para mostrar</td></tr>';
+      body.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--text-3);">Sin productos para mostrar</td></tr>';
     } else {
       body.innerHTML = list.map((p) => {
         const minSt = Number(p.min_stock || p.minimo || 20);
@@ -10766,6 +10766,7 @@
           <td class="num"><strong>${stock}</strong></td>
           <td class="num" style="color:var(--text-3);font-size:11px;">${minSt}</td>
           <td>${stateChip}</td>
+          <td class="vlx-url-cell" data-url-code="${codeAttr}" title="${escapeAttr(p.image_url||'')}" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--text-3);">${p.image_url ? escapeHtml(p.image_url) : '—'}</td>
           <td style="text-align: right; white-space: nowrap;">
             <button class="btn sm" data-action="quick-add" data-code="${codeAttr}" data-id="${idAttr}" title="Sumar stock" aria-label="Sumar stock">+Stock</button>
             <button class="btn sm" data-action="quick-sub" data-code="${codeAttr}" data-id="${idAttr}" title="Restar stock" aria-label="Restar stock">−Stock</button>
@@ -10984,7 +10985,21 @@
     function isOnline(){ return (typeof navigator === 'undefined') || navigator.onLine !== false; }
     // Mapa {code: image_url} de la BD, cacheado 1 vez por sesion (el renderer no expone la url en la fila).
     var urlMapP = null, urlMap = {};
-    function getUrlMap(){ if (urlMapP) return urlMapP; urlMapP = _authFetch('/api/products?limit=5000').then(function(r){ return r.json(); }).then(function(j){ var list = Array.isArray(j) ? j : ((j && j.products) || []); var m = {}; list.forEach(function(p){ if (p && p.code && p.image_url) m[String(p.code)] = p.image_url; }); urlMap = m; return m; }).catch(function(){ return {}; }); return urlMapP; }
+    function getUrlMap(){ if (urlMapP) return urlMapP; if (typeof _authFetch !== 'function') return Promise.resolve({}); urlMapP = _authFetch('/api/products?limit=5000').then(function(r){ return r.json(); }).then(function(j){ var list = Array.isArray(j) ? j : ((j && j.products) || []); var m = {}; list.forEach(function(p){ if (p && p.code && p.image_url) m[String(p.code)] = p.image_url; }); urlMap = m; return m; }).catch(function(){ return {}; }); return urlMapP; }
+    // ===== COLUMNA "URL de imagen" (se llena del mapa BD + marca ✓ si el byte está en cache local) =====
+    function truncMid(s){ s = String(s || ''); return s.length > 58 ? (s.slice(0,32) + '…' + s.slice(-18)) : s; }
+    function setUrlCell(cell, url, cached){ if (!cell) return; if (url){ cell.textContent = (cached ? '✓ ' : '') + truncMid(url); cell.title = url; cell.style.color = cached ? '#15803D' : ''; } else { cell.textContent = '—'; cell.title = ''; cell.style.color = ''; } }
+    function selCode(code){ try { return (window.CSS && CSS.escape) ? CSS.escape(String(code)) : String(code).replace(/"/g,''); } catch(_){ return String(code); } }
+    function vlxUpdateUrlCell(code, url){ var cells = document.querySelectorAll('.vlx-url-cell[data-url-code="' + selCode(code) + '"]'); for (var i=0;i<cells.length;i++) setUrlCell(cells[i], url, false); }
+    function fillUrlColumn(){
+      var cells = document.querySelectorAll('#inv-body .vlx-url-cell'); if (!cells.length) return;
+      for (var i=0;i<cells.length;i++){ (function(cell){
+        var code = cell.getAttribute('data-url-code'); var u = urlMap[String(code)];
+        if (u){ setUrlCell(cell, u, false); VLXImgDB.get(code).then(function(rec){ if (rec && rec.blob) setUrlCell(cell, rec.url || u, true); }); }
+        else { VLXImgDB.get(code).then(function(rec){ if (rec && rec.url) setUrlCell(cell, rec.url, !!rec.blob); }); }
+      })(cells[i]); }
+    }
+    function ensureUrlColumn(){ getUrlMap().then(function(){ fillUrlColumn(); }); }
     function revokeBlob(){ if (curBlobUrl){ try { URL.revokeObjectURL(curBlobUrl); } catch(_){} } curBlobUrl = null; blobForUrl = ''; }
     function setImgEl(src){ if (!bigImg) return; bigImg.onerror = function(){ bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent = isOnline() ? '(imagen no cargó)' : '(sin conexión)'; } }; bigImg.onload = function(){ bigImg.style.display=''; if (statusEl) statusEl.style.display='none'; }; bigImg.src = src; }
     function showBlobFor(url, objectUrl){ revokeBlob(); curBlobUrl = objectUrl; blobForUrl = url; setImgEl(objectUrl); }
@@ -11258,6 +11273,17 @@
       else if(e.key==='ArrowLeft'){ e.preventDefault(); cycle(-1); }
       else if(e.key==='Enter'){ e.preventDefault(); apply(); }
     });
+    // Llena la columna "URL de imagen" en cuanto se renderiza la tabla (sin abrir el panel).
+    (function initUrlColumn(){
+      function hook(){
+        var b = document.getElementById('inv-body');
+        if (!b){ setTimeout(hook, 800); return; }
+        var deb = null;
+        try { new MutationObserver(function(){ if (deb) clearTimeout(deb); deb = setTimeout(fillUrlColumn, 150); }).observe(b, { childList:true }); } catch(_){}
+        ensureUrlColumn();
+      }
+      hook();
+    })();
   })();
 
   async function saveProduct(data, productId){
