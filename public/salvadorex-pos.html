@@ -11071,17 +11071,36 @@
       addrWrap.style.display = on ? 'flex' : 'none';
       if (expandBtn) expandBtn.textContent = on ? '▾ Contraer' : '⤢ Expandir';
     }
+    // El row expone el CODIGO en data-prod-id/-code (no el UUID) y el PATCH exige
+    // el UUID + version (optimistic lock). Resolvemos codigo->UUID por el GET y
+    // reintentamos con current_version si hay 409.
+    function saveImageToProduct(code, imageUrl){
+      var ten = (typeof _vTenant === 'function') ? _vTenant() : null;
+      return _authFetch('/api/products?q=' + encodeURIComponent(code)).then(function(r){ return r.json(); }).then(function(j){
+        var list = Array.isArray(j) ? j : ((j && j.products) || []);
+        var prod = list.filter(function(p){ return String(p.code) === String(code); })[0];
+        if (!prod || !prod.id) return false;
+        function once(ver){ return _authFetch('/api/products/' + encodeURIComponent(prod.id), { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ tenant_id: ten, image_url: imageUrl, version: ver }) }); }
+        return once(1).then(function(r1){
+          if (r1.ok) return true;
+          if (r1.status === 409){ return r1.json().then(function(jj){ var cv = jj && jj.current_version; if (cv == null) return false; return once(cv).then(function(r2){ return r2.ok; }); }); }
+          return false;
+        });
+      }).catch(function(){ return false; });
+    }
     function apply(){
       if (!activeRow || !items.length || (applyBtn && applyBtn.disabled)){ return; }
-      var id = activeRow.getAttribute('data-prod-id'), chosen = items[idx];
-      if (!id || !chosen) return;
+      var code = activeRow.getAttribute('data-prod-code') || activeRow.getAttribute('data-prod-id') || '';
+      var chosen = items[idx], rowRef = activeRow;
+      if (!code || !chosen) return;
       applyBtn.disabled = true; applyBtn.textContent = 'Aplicando…';
       if (applyResetTimer){ clearTimeout(applyResetTimer); applyResetTimer = null; }
-      Promise.resolve().then(function(){ return saveProduct({ image_url: chosen }, id); }).then(function(ok){
-        if (ok && activeRow) activeRow.setAttribute('data-prod-img', chosen);
+      saveImageToProduct(code, chosen).then(function(ok){
+        if (ok && rowRef) rowRef.setAttribute('data-prod-img', chosen);
         applyBtn.textContent = ok ? '✓ Aplicada' : 'Error';
+        try { if (typeof showToast === 'function') showToast(ok ? '✓ Imagen aplicada' : 'No se pudo aplicar la imagen', ok ? undefined : 'error'); } catch(_e){}
       }).catch(function(){ applyBtn.textContent = 'Error'; }).then(function(){
-        applyResetTimer = setTimeout(function(){ applyBtn.disabled = false; applyBtn.textContent = 'Aplicar'; }, 1300);
+        applyResetTimer = setTimeout(function(){ applyBtn.disabled = false; applyBtn.textContent = 'Aplicar'; }, 1400);
       });
     }
     function build(){
