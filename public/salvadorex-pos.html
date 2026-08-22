@@ -10968,120 +10968,130 @@
   // Botones ◀ ▶ (o ←/→) = cambiar entre imágenes encontradas. "Aplicar" = guardar.
   // El usuario NO elige la fuente; el sistema trae las candidatas automáticamente.
   (function vlxInvImagePanel(){
-    let panel, imgEl, nameEl, counterEl, statusEl, applyBtn, srcEl, queryEl, glinkEl, blinkEl;
-    let activeRow = null, candidates = [], items = [], idx = 0, fetchSeq = 0;
+    let panel, imgEl, nameEl, counterEl, statusEl, applyBtn, srcEl, urlInput, histEl;
+    let activeRow=null, candidates=[], items=[], idx=0, fetchSeq=0, curName='', gUrl='', bUrl='';
+    function esc(s){ return String(s||'').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
     function build(){
-      if (panel) return;
-      panel = document.createElement('div');
-      panel.id = 'vlx-inv-image-panel';
-      panel.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:9000;width:230px;max-width:calc(100vw - 24px);background:#fff;border:1px solid #E5E5EA;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.18);padding:12px;display:none;color:#1C1917';
-      panel.innerHTML = ''
-        + '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:6px">'
-        +   '<div id="vlx-imgp-name" style="font-size:12px;font-weight:600;color:#0B0B0F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>'
-        +   '<button id="vlx-imgp-close" title="Cerrar" style="flex:none;border:none;background:none;font-size:16px;color:#9CA3AF;cursor:pointer;line-height:1">×</button>'
+      if(panel) return;
+      panel=document.createElement('div');
+      panel.id='vlx-inv-image-panel';
+      panel.style.cssText='position:fixed;right:14px;bottom:14px;z-index:9000;width:560px;max-width:97vw;background:#fff;border:1px solid #E5E5EA;border-radius:12px;box-shadow:0 14px 46px rgba(0,0,0,.22);padding:12px;display:none;color:#1C1917';
+      panel.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">'
+        + '<div id="vlx-imgp-name" style="font-size:13px;font-weight:700;color:#0B0B0F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>'
+        + '<button id="vlx-imgp-close" title="Cerrar" style="flex:none;border:none;background:none;font-size:18px;color:#9CA3AF;cursor:pointer">&times;</button>'
         + '</div>'
-        + '<div style="width:100%;aspect-ratio:1/1;background:#f5f5f4;border:1px solid #eee;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:8px">'
-        +   '<img id="vlx-imgp-img" alt="" style="max-width:100%;max-height:100%;object-fit:contain;display:none">'
-        +   '<span id="vlx-imgp-status" style="font-size:11px;color:#9CA3AF;text-align:center;padding:0 8px">Usa ↑ ↓ para elegir un producto</span>'
+        + '<div style="display:flex;gap:6px;margin-bottom:10px">'
+        + '<input id="vlx-imgp-url" type="text" placeholder="URL del buscador (edítala y presiona Ir)" style="flex:1;padding:8px 10px;border:1px solid #E5E5EA;border-radius:8px;font-size:12px" />'
+        + '<button id="vlx-imgp-go" style="flex:none;padding:8px 14px;border:none;background:#2D5F8F;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px">Ir &#9654;</button>'
         + '</div>'
-        + '<div style="display:flex;align-items:center;gap:6px">'
-        +   '<button id="vlx-imgp-prev" title="Imagen anterior (←)" style="flex:none;width:36px;height:36px;border:1px solid #E5E5EA;background:#fff;border-radius:8px;cursor:pointer;font-size:15px">◀</button>'
-        +   '<span id="vlx-imgp-counter" style="flex:1;text-align:center;font-size:11px;color:#6B7280">0 / 0</span>'
-        +   '<button id="vlx-imgp-next" title="Imagen siguiente (→)" style="flex:none;width:36px;height:36px;border:1px solid #E5E5EA;background:#fff;border-radius:8px;cursor:pointer;font-size:15px">▶</button>'
-        + '</div>'
-        + '<div id="vlx-imgp-src" style="font-size:10.5px;color:#6B7280;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">fuente: —</div>'
-        + '<div id="vlx-imgp-query" style="font-size:10.5px;color:#9CA3AF;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="">buscado: —</div>'
-        + '<div style="display:flex;gap:6px;margin-top:6px">'
-        +   '<a id="vlx-imgp-glink" href="#" target="_blank" rel="noopener" style="flex:1;text-align:center;font-size:11px;padding:6px;border:1px solid #E5E5EA;border-radius:7px;text-decoration:none;color:#2D5F8F">🔍 Google</a>'
-        +   '<a id="vlx-imgp-blink" href="#" target="_blank" rel="noopener" style="flex:1;text-align:center;font-size:11px;padding:6px;border:1px solid #E5E5EA;border-radius:7px;text-decoration:none;color:#2D5F8F">Bing</a>'
-        + '</div>'
-        + '<button id="vlx-imgp-apply" style="width:100%;margin-top:8px;padding:9px;border:none;background:#0B0B0F;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px">Aplicar imagen</button>';
+        + '<div style="display:flex;gap:12px;align-items:stretch">'
+        +   '<div style="flex:1;min-width:0">'
+        +     '<div style="width:100%;aspect-ratio:1/1;background:#f5f5f4;border:1px solid #eee;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden">'
+        +       '<img id="vlx-imgp-img" alt="" style="max-width:100%;max-height:100%;object-fit:contain;display:none">'
+        +       '<span id="vlx-imgp-status" style="font-size:11px;color:#9CA3AF;text-align:center;padding:0 8px">Elige un producto (&#8593; &#8595;)</span>'
+        +     '</div>'
+        +     '<div style="display:flex;align-items:center;gap:6px;margin-top:8px">'
+        +       '<button id="vlx-imgp-prev" title="Anterior (&#8592;)" style="flex:none;width:40px;height:40px;border:1px solid #E5E5EA;background:#fff;border-radius:8px;cursor:pointer;font-size:16px">&#9664;</button>'
+        +       '<span id="vlx-imgp-counter" style="flex:1;text-align:center;font-size:12px;color:#6B7280">0 / 0</span>'
+        +       '<button id="vlx-imgp-next" title="Siguiente (&#8594;)" style="flex:none;width:40px;height:40px;border:1px solid #E5E5EA;background:#fff;border-radius:8px;cursor:pointer;font-size:16px">&#9654;</button>'
+        +     '</div>'
+        +     '<div id="vlx-imgp-src" style="font-size:10.5px;color:#6B7280;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">fuente: &mdash;</div>'
+        +     '<button id="vlx-imgp-apply" style="width:100%;margin-top:8px;padding:10px;border:none;background:#0B0B0F;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px">Aplicar imagen</button>'
+        +   '</div>'
+        +   '<div style="width:220px;flex:none;border-left:1px solid #eee;padding-left:12px;display:flex;flex-direction:column">'
+        +     '<div style="font-size:11px;font-weight:700;color:#0B0B0F;margin-bottom:6px">Donde busque (clic para abrir)</div>'
+        +     '<div id="vlx-imgp-hist" style="flex:1;overflow-y:auto;max-height:280px;font-size:11px;line-height:1.5"></div>'
+        +   '</div>'
+        + '</div>';
       document.body.appendChild(panel);
-      imgEl = panel.querySelector('#vlx-imgp-img');
-      nameEl = panel.querySelector('#vlx-imgp-name');
-      counterEl = panel.querySelector('#vlx-imgp-counter');
-      statusEl = panel.querySelector('#vlx-imgp-status');
-      applyBtn = panel.querySelector('#vlx-imgp-apply');
-      srcEl = panel.querySelector('#vlx-imgp-src');
-      queryEl = panel.querySelector('#vlx-imgp-query');
-      glinkEl = panel.querySelector('#vlx-imgp-glink');
-      blinkEl = panel.querySelector('#vlx-imgp-blink');
-      panel.querySelector('#vlx-imgp-prev').onclick = function(){ cycle(-1); };
-      panel.querySelector('#vlx-imgp-next').onclick = function(){ cycle(1); };
-      panel.querySelector('#vlx-imgp-close').onclick = function(){ hide(); };
-      applyBtn.onclick = apply;
-      // Ocultar automáticamente al salir de inventario.
-      const inv = document.getElementById('screen-inventario');
-      if (inv && window.MutationObserver) {
-        new MutationObserver(function(){ if (inv.classList.contains('hidden')) hide(); })
-          .observe(inv, { attributes:true, attributeFilter:['class'] });
-      }
+      imgEl=panel.querySelector('#vlx-imgp-img'); nameEl=panel.querySelector('#vlx-imgp-name');
+      counterEl=panel.querySelector('#vlx-imgp-counter'); statusEl=panel.querySelector('#vlx-imgp-status');
+      applyBtn=panel.querySelector('#vlx-imgp-apply'); srcEl=panel.querySelector('#vlx-imgp-src');
+      urlInput=panel.querySelector('#vlx-imgp-url'); histEl=panel.querySelector('#vlx-imgp-hist');
+      panel.querySelector('#vlx-imgp-prev').onclick=function(){cycle(-1)};
+      panel.querySelector('#vlx-imgp-next').onclick=function(){cycle(1)};
+      panel.querySelector('#vlx-imgp-close').onclick=hide;
+      applyBtn.onclick=apply;
+      var go=function(){ var u=(urlInput.value||'').trim(); if(/^https?:\/\//i.test(u)) window.open(u,'_blank','noopener'); };
+      panel.querySelector('#vlx-imgp-go').onclick=go;
+      urlInput.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } e.stopPropagation(); });
+      var inv=document.getElementById('screen-inventario');
+      if(inv&&window.MutationObserver){ new MutationObserver(function(){ if(inv.classList.contains('hidden')) hide(); }).observe(inv,{attributes:true,attributeFilter:['class']}); }
     }
-    function hide(){ if (panel) panel.style.display='none'; if (activeRow){ activeRow.style.outline=''; } }
+    function hide(){ if(panel) panel.style.display='none'; if(activeRow) activeRow.style.outline=''; }
     function render(){
-      if (!candidates.length){ imgEl.style.display='none'; statusEl.style.display=''; counterEl.textContent='0 / 0'; if(srcEl) srcEl.textContent='fuente: —'; return; }
-      idx = Math.max(0, Math.min(idx, candidates.length-1));
-      imgEl.src = candidates[idx]; imgEl.style.display=''; statusEl.style.display='none';
-      counterEl.textContent = (idx+1)+' / '+candidates.length;
-      if (srcEl){ const it = items[idx] || {}; srcEl.textContent = 'fuente: ' + (it.source || it.host || '—'); srcEl.title = candidates[idx] || ''; }
+      if(!candidates.length){ imgEl.style.display='none'; statusEl.style.display=''; counterEl.textContent='0 / 0'; if(srcEl)srcEl.textContent='fuente: —'; return; }
+      idx=Math.max(0,Math.min(idx,candidates.length-1));
+      imgEl.src=candidates[idx]; imgEl.style.display=''; statusEl.style.display='none';
+      counterEl.textContent=(idx+1)+' / '+candidates.length;
+      if(srcEl){ var it=items[idx]||{}; srcEl.textContent='fuente: '+(it.source||it.host||'—'); srcEl.title=candidates[idx]||''; }
     }
-    function cycle(d){ if (!candidates.length) return; idx = (idx + d + candidates.length) % candidates.length; render(); }
+    function cycle(d){ if(!candidates.length) return; idx=(idx+d+candidates.length)%candidates.length; render(); }
+    function setHistory(){
+      if(!histEl) return;
+      var rows=[
+        {label:'🔍 Google Imagenes', url:gUrl},
+        {label:'🅱️ Bing Imagenes', url:bUrl},
+        {label:'🛒 Mercado Libre', url:'https://listado.mercadolibre.com.mx/'+encodeURIComponent(curName)},
+        {label:'📦 Amazon MX', url:'https://www.amazon.com.mx/s?k='+encodeURIComponent(curName)},
+        {label:'🔧 AutoZone MX', url:'https://www.autozone.com.mx/search?text='+encodeURIComponent(curName)},
+        {label:'🏬 Walmart MX', url:'https://www.walmart.com.mx/search?q='+encodeURIComponent(curName)}
+      ];
+      var html='<div style="color:#9CA3AF;margin-bottom:6px;word-break:break-word">buscando: <b>'+esc(curName||'—')+'</b></div>';
+      html+=rows.map(function(r){ return '<div style="margin-bottom:6px"><a href="'+esc(r.url)+'" target="_blank" rel="noopener" style="color:#2D5F8F;text-decoration:none">'+r.label+'</a></div>'; }).join('');
+      histEl.innerHTML=html;
+    }
     async function selectRow(tr){
-      if (!tr) return; build();
-      if (activeRow && activeRow !== tr) activeRow.style.outline='';
-      activeRow = tr; tr.style.outline='2px solid #2D5F8F';
-      try { tr.scrollIntoView({ block:'nearest' }); } catch(_){}
+      if(!tr) return; build();
+      if(activeRow&&activeRow!==tr) activeRow.style.outline='';
+      activeRow=tr; tr.style.outline='2px solid #2D5F8F';
+      try{tr.scrollIntoView({block:'nearest'})}catch(_){}
       panel.style.display='block';
-      const name = tr.getAttribute('data-prod-name') || '';
-      const existing = tr.getAttribute('data-prod-img') || '';
-      nameEl.textContent = name || '(sin nombre)';
-      if (queryEl){ queryEl.textContent = 'buscado: ' + (name || '—'); queryEl.title = name; }
-      if (glinkEl) glinkEl.href = 'https://www.google.com/search?udm=2&q=' + encodeURIComponent(name);
-      if (blinkEl) blinkEl.href = 'https://www.bing.com/images/search?q=' + encodeURIComponent(name);
-      items = existing ? [{ url: existing, source: 'actual del producto', host: '' }] : [];
-      candidates = items.map(function(it){ return it.url; }); idx = 0;
-      if (!candidates.length){ statusEl.textContent='Buscando imagen…'; }
+      var name=tr.getAttribute('data-prod-name')||''; var existing=tr.getAttribute('data-prod-img')||'';
+      curName=name; nameEl.textContent=name||'(sin nombre)';
+      gUrl='https://www.google.com/search?udm=2&q='+encodeURIComponent(name);
+      bUrl='https://www.bing.com/images/search?q='+encodeURIComponent(name);
+      if(urlInput) urlInput.value=gUrl;
+      setHistory();
+      items=existing?[{url:existing,source:'actual del producto',host:''}]:[];
+      candidates=items.map(function(it){return it.url}); idx=0;
+      if(!candidates.length) statusEl.textContent='Buscando imagenes…';
       render();
-      if (name.length < 2) { statusEl.textContent='Sin nombre para buscar'; return; }
-      const seq = ++fetchSeq;
-      try {
-        const r = await _authFetch('/api/product-image-candidates?q=' + encodeURIComponent(name));
-        if (seq !== fetchSeq) return;
-        const j = await r.json().catch(function(){ return {}; });
-        const seen = new Set(), merged = [];
-        (existing ? [{ url: existing, source: 'actual del producto', host: '' }] : [])
-          .concat(Array.isArray(j.items) ? j.items : [])
-          .forEach(function(it){ if (it && it.url && !seen.has(it.url)){ seen.add(it.url); merged.push(it); } });
-        items = merged; candidates = items.map(function(it){ return it.url; });
-        if (idx >= candidates.length) idx = 0; render();
-        if (!candidates.length){ statusEl.style.display=''; statusEl.textContent='Sin imágenes — usa 🔍 Google'; }
-      } catch(_) { if (seq===fetchSeq && !candidates.length){ statusEl.style.display=''; statusEl.textContent='Sin conexión'; } }
+      if(name.length<2){ statusEl.textContent='Sin nombre'; return; }
+      var seq=++fetchSeq;
+      try{
+        var r=await _authFetch('/api/product-image-candidates?q='+encodeURIComponent(name));
+        if(seq!==fetchSeq) return;
+        var j=await r.json().catch(function(){return{}});
+        if(j.google) gUrl=j.google; if(j.bing) bUrl=j.bing; setHistory();
+        if(urlInput && document.activeElement!==urlInput) urlInput.value=gUrl;
+        var seen=new Set(), merged=[];
+        (existing?[{url:existing,source:'actual del producto',host:''}]:[]).concat(Array.isArray(j.items)?j.items:[]).forEach(function(it){ if(it&&it.url&&!seen.has(it.url)){seen.add(it.url);merged.push(it);} });
+        items=merged; candidates=items.map(function(it){return it.url}); if(idx>=candidates.length)idx=0; render();
+        if(!candidates.length){ statusEl.style.display=''; statusEl.textContent='Sin imagenes — abre Google →'; }
+      }catch(_){ if(seq===fetchSeq&&!candidates.length){ statusEl.style.display=''; statusEl.textContent='Sin conexion'; } }
     }
     async function apply(){
-      if (!activeRow || !candidates.length) return;
-      const id = activeRow.getAttribute('data-prod-id'); const chosen = candidates[idx];
-      applyBtn.disabled=true; const prevTxt=applyBtn.textContent; applyBtn.textContent='Aplicando…';
-      try { const ok = await saveProduct({ image_url: chosen }, id); if (ok && activeRow){ activeRow.setAttribute('data-prod-img', chosen); } }
-      catch(_){}
-      applyBtn.disabled=false; applyBtn.textContent=prevTxt;
+      if(!activeRow||!candidates.length) return;
+      var id=activeRow.getAttribute('data-prod-id'); var chosen=candidates[idx];
+      applyBtn.disabled=true; var t=applyBtn.textContent; applyBtn.textContent='Aplicando…';
+      try{ var ok=await saveProduct({image_url:chosen},id); if(ok&&activeRow) activeRow.setAttribute('data-prod-img',chosen); }catch(_){}
+      applyBtn.disabled=false; applyBtn.textContent=t;
     }
-    function rows(){ const b=document.getElementById('inv-body'); return b ? Array.prototype.slice.call(b.querySelectorAll('tr.inv-prod-row')) : []; }
-    function move(d){ const rs=rows(); if(!rs.length) return; let i = activeRow ? rs.indexOf(activeRow) : -1; i = i<0 ? (d>0?0:rs.length-1) : (i+d+rs.length)%rs.length; selectRow(rs[i]); }
-    document.addEventListener('click', function(e){
-      const tr = e.target.closest && e.target.closest('tr.inv-prod-row');
-      if (tr && !e.target.closest('button, input, a, .inv-row-check')) selectRow(tr);
-    });
-    document.addEventListener('keydown', function(e){
-      const inv = document.getElementById('screen-inventario');
-      if (!inv || inv.classList.contains('hidden')) return;
-      const t=e.target, tag=(t&&t.tagName||'').toUpperCase();
-      if (tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable)) return;
-      const open = panel && panel.style.display!=='none';
-      if (e.key==='ArrowDown'){ e.preventDefault(); move(1); }
-      else if (e.key==='ArrowUp'){ e.preventDefault(); move(-1); }
-      else if (e.key==='ArrowRight' && open){ e.preventDefault(); cycle(1); }
-      else if (e.key==='ArrowLeft' && open){ e.preventDefault(); cycle(-1); }
-      else if (e.key==='Enter' && open && activeRow){ e.preventDefault(); apply(); }
+    function rows(){ var b=document.getElementById('inv-body'); return b?Array.prototype.slice.call(b.querySelectorAll('tr.inv-prod-row')):[]; }
+    function move(d){ var rs=rows(); if(!rs.length)return; var i=activeRow?rs.indexOf(activeRow):-1; i=i<0?(d>0?0:rs.length-1):(i+d+rs.length)%rs.length; selectRow(rs[i]); }
+    document.addEventListener('click',function(e){ var tr=e.target.closest&&e.target.closest('tr.inv-prod-row'); if(tr&&!e.target.closest('button,input,a,.inv-row-check')) selectRow(tr); });
+    document.addEventListener('keydown',function(e){
+      var inv=document.getElementById('screen-inventario'); if(!inv||inv.classList.contains('hidden')) return;
+      var t=e.target, tag=(t&&t.tagName||'').toUpperCase();
+      if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable)) return;
+      var open=panel&&panel.style.display!=='none';
+      if(e.key==='ArrowDown'){e.preventDefault();move(1);}
+      else if(e.key==='ArrowUp'){e.preventDefault();move(-1);}
+      else if(e.key==='ArrowRight'&&open){e.preventDefault();cycle(1);}
+      else if(e.key==='ArrowLeft'&&open){e.preventDefault();cycle(-1);}
+      else if(e.key==='Enter'&&open&&activeRow){e.preventDefault();apply();}
     });
   })();
 
