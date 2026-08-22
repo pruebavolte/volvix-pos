@@ -10970,7 +10970,7 @@
   (function vlxInvImagePanel(){
     var CX = '8517759c2626540e5';
     var panel, gcseDiv, nameEl, addrWrap, addrInput, bodyEl, compactCard, bigImg, statusEl, counterEl, applyBtn, expandBtn;
-    var activeRow = null, curName = '', curQuery = '', rendered = false, expanded = false;
+    var activeRow = null, curName = '', curQuery = '', rendered = false, expanded = false, panelUserOpen = false;
     var items = [], idx = 0, scrapeTimer = null, applyResetTimer = null, lastExec = '';
     function loadCse(){
       if (window.__vlxGcseLoading) return;
@@ -11140,7 +11140,7 @@
       counterEl = panel.querySelector('#vlx-imgp-counter');
       applyBtn = panel.querySelector('#vlx-imgp-apply');
       expandBtn = panel.querySelector('#vlx-imgp-expand');
-      panel.querySelector('#vlx-imgp-close').onclick = function(){ panel.style.display='none'; if(activeRow) activeRow.style.outline=''; };
+      panel.querySelector('#vlx-imgp-close').onclick = function(){ panelUserOpen=false; panel.style.display='none'; if(activeRow) activeRow.style.outline=''; };
       panel.querySelector('#vlx-imgp-prev').onclick = function(){ cycle(-1); };
       panel.querySelector('#vlx-imgp-next').onclick = function(){ cycle(1); };
       applyBtn.onclick = apply;
@@ -11148,7 +11148,10 @@
       panel.querySelector('#vlx-imgp-go').onclick = submitAddr;
       addrInput.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); submitAddr(); } e.stopPropagation(); });
       var inv = document.getElementById('screen-inventario');
-      if (inv && window.MutationObserver){ new MutationObserver(function(){ if (inv.classList.contains('hidden')) panel.style.display='none'; }).observe(inv, { attributes:true, attributeFilter:['class'] }); }
+      if (inv && window.MutationObserver){ new MutationObserver(function(){
+        if (inv.classList.contains('hidden')){ if (panel.style.display !== 'none') panel.style.display='none'; }
+        else if (panelUserOpen && activeRow){ panel.style.display='flex'; }
+      }).observe(inv, { attributes:true, attributeFilter:['class'] }); }
       setExpanded(false);
       loadCse(); tryRender();
     }
@@ -11157,7 +11160,7 @@
       if (activeRow && activeRow !== tr) activeRow.style.outline='';
       activeRow = tr; tr.style.outline='2px solid #2D5F8F';
       try { tr.scrollIntoView({ block:'nearest' }); } catch(_){}
-      panel.style.display='flex';
+      panel.style.display='flex'; panelUserOpen = true;
       var name = (tr.getAttribute('data-prod-name') || '').trim();
       setName(name);
       if (name.length >= 2){ showBusy(); execQuery(name); } else { showEmpty(); }
