@@ -11024,6 +11024,18 @@
         +   '<div id="vlx-imgp-status" style="color:#9CA3AF;font-size:12px;padding:12px;text-align:center">Cargando buscador de Google…</div>'
         + '</div>';
       document.body.appendChild(panel);
+      if (!document.getElementById('vlx-gcse-style')){
+        var st = document.createElement('style'); st.id = 'vlx-gcse-style';
+        st.textContent =
+          '#vlx-imgp-gcse .gsc-results-wrapper-overlay,#vlx-imgp-gcse .gsc-results-wrapper-visible{position:static!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:none!important;margin:0!important;padding:0!important;transform:none!important;box-shadow:none!important;border:none!important;background:transparent!important;visibility:visible!important;opacity:1!important;z-index:auto!important}'
+        + '.gsc-modal-background-image,.gsc-modal-background-image-visible{display:none!important}'
+        + '#vlx-imgp-gcse .gsc-control-cse{padding:0!important;border:none!important;background:transparent!important}'
+        + '#vlx-imgp-gcse .gsc-results,#vlx-imgp-gcse table.gsc-results,#vlx-imgp-gcse .gsc-tabsArea{width:100%!important}'
+        + '#vlx-imgp-gcse .gsc-imageResult,#vlx-imgp-gcse .gsc-webResult .gsc-result{max-width:100%!important}'
+        + '#vlx-imgp-gcse .gsc-refinementsArea,#vlx-imgp-gcse .gsc-adBlock{display:none!important}'
+        + '#vlx-imgp-gcse img{max-width:100%!important}';
+        (document.head||document.body).appendChild(st);
+      }
       gcseDiv = panel.querySelector('#vlx-imgp-gcse');
       nameEl = panel.querySelector('#vlx-imgp-name');
       urlInput = panel.querySelector('#vlx-imgp-url');
