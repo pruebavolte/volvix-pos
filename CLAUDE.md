@@ -26,7 +26,7 @@
 - **Backend:** Node serverless en `api/index.js` (handlers map). Funciones edge en Supabase.
 - **Base de datos:** Supabase Postgres (project id `cd6936c4-d884-4d4d-ad42-0d74f02aa106`).
 - **Auth:** Custom JWT firmado en backend + email OTP (`/api/auth/register-simple`, `/api/auth/verify-simple`, `/api/login`).
-- **Deploy:** Vercel — auto-deploy en push a `main`.
+- **Deploy:** Railway (Server: railway-hikari) — auto-deploy en push a `main` vía GitHub. NO es Vercel.
 - **Repo:** `pruebavolte/volvix-pos` — branch principal: `main`.
 - **Producción:** https://systeminternational.app/
 - **Staging:** N/A (deploy directo a producción).
@@ -145,7 +145,7 @@ BASE_DE_DATOS=Supabase Postgres (cd6936c4-d884-4d4d-ad42-0d74f02aa106)
 AUTH_PROVIDER=Custom JWT + email OTP
 IDENTIFICADOR_TENANT=tenant_id
 TABLA_CONFIGURACION=giros_modulos, giros_terminologia, giros_campos
-DEPLOY_AUTOMATICO=sí — push a main dispara deploy en Vercel
+DEPLOY_AUTOMATICO=sí — push a main (GitHub) dispara deploy en Railway
 ```
 
 ---
