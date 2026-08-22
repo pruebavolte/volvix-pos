@@ -11004,34 +11004,39 @@
       if (!rendered){ tryRender(); return; }
       try {
         var el = window.google.search.cse.element.getElement('vlxgcse');
-        if (el){
-          if (q !== lastExec){ try { var old = gcseDiv.querySelectorAll('.gsc-imageResult'); for (var k=0;k<old.length;k++) old[k].remove(); } catch(_e){} }
-          lastExec = q; showBusy(); el.execute(q); scheduleScrape();
-        }
+        if (el){ lastExec = q; showBusy(); el.execute(q); scheduleScrape(); }
         else { tryRender(); }
       } catch (e) {}
     }
     function showBusy(){ items = []; idx = 0; if (bigImg){ bigImg.style.display='none'; } if (statusEl){ statusEl.style.display=''; statusEl.textContent='Buscando imágenes…'; } if (counterEl){ counterEl.textContent='…'; } }
     function showEmpty(){ items = []; if (bigImg){ bigImg.style.display='none'; } if (statusEl){ statusEl.style.display=''; statusEl.textContent='Sin imágenes'; } if (counterEl){ counterEl.textContent='0 / 0'; } }
-    function scheduleScrape(){
-      var token = curQuery, tries = 0;
-      if (scrapeTimer){ clearInterval(scrapeTimer); scrapeTimer = null; }
-      scrapeTimer = setInterval(function(){
-        if (curQuery !== token){ clearInterval(scrapeTimer); scrapeTimer = null; return; }
-        tries++;
-        var ok = scrapeImages();
-        if (ok || tries >= 16){ clearInterval(scrapeTimer); scrapeTimer = null; if (!ok) showEmpty(); }
-      }, 300);
-    }
-    function scrapeImages(){
-      if (!gcseDiv) return false;
+    function collectImages(){
+      if (!gcseDiv) return [];
       var nodes = gcseDiv.querySelectorAll('.gsc-imageResult img'), seen = {}, list = [];
       for (var i=0;i<nodes.length;i++){
         var u = nodes[i].src || '';
         if (/^https:\/\/[^/]*\.(gstatic\.com|googleusercontent\.com)\//i.test(u) && u.length <= 2000 && !seen[u]){ seen[u] = 1; list.push(u); }
       }
-      if (!list.length) return false;
-      items = list; if (idx >= items.length) idx = 0; renderCompact(); return true;
+      return list;
+    }
+    // F2: acepta imagenes solo cuando el set se ESTABILIZA (2 ticks iguales) — evita
+    // capturar los resultados del producto anterior aun en transicion, sin tocar el DOM de la CSE.
+    function scheduleScrape(){
+      var token = curQuery, tries = 0, prevKey = ' ', stable = 0;
+      if (scrapeTimer){ clearInterval(scrapeTimer); scrapeTimer = null; }
+      scrapeTimer = setInterval(function(){
+        if (curQuery !== token){ clearInterval(scrapeTimer); scrapeTimer = null; return; }
+        tries++;
+        var list = collectImages();
+        var key = list.length ? (list.length + '|' + list[0]) : '';
+        stable = (list.length && key === prevKey) ? (stable + 1) : 0;
+        prevKey = key;
+        if (list.length && tries >= 2 && stable >= 1){
+          items = list; if (idx >= items.length) idx = 0; renderCompact();
+          clearInterval(scrapeTimer); scrapeTimer = null; return;
+        }
+        if (tries >= 18){ clearInterval(scrapeTimer); scrapeTimer = null; if (!items.length) showEmpty(); }
+      }, 300);
     }
     function renderCompact(){
       if (!bigImg) return;
