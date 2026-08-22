@@ -2563,12 +2563,15 @@ const handlers = {
       if (q.length < 2) return sendJSON(res, { images: [] });
       const seen = new Set();
       const market = [], openv = [], other = [];
+      const hostOf = (u) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (_) { return ''; } };
       const add = (raw, bucket) => {
         const u = sanitizeImageUrl(raw);
         if (!u || seen.has(u)) return;
         seen.add(u);
-        if (bucket === 'openv') openv.push(u);
-        else (MARKET.test(u) ? market : other).push(u);
+        const host = hostOf(u);
+        if (bucket === 'openv') openv.push({ url: u, source: 'Openverse (CC, genérica)', host, engine: 'openverse' });
+        else if (MARKET.test(u)) market.push({ url: u, source: host, host, engine: 'bing' });
+        else other.push({ url: u, source: 'Bing · ' + host, host, engine: 'bing' });
       };
       // 1) Bing Images (navegador simulado, keyless): extraer los murl del HTML.
       // OJO: desde IP de datacenter los buscadores suelen degradar/bloquear el
@@ -2591,8 +2594,15 @@ const handlers = {
         }
       } catch (_) { /* ignore */ }
       // Orden: marketplace real (Bing) → Openverse → resto (posible ruido) al final.
-      const images = market.concat(openv).concat(other).slice(0, 15);
-      return sendJSON(res, { images });
+      const items = market.concat(openv).concat(other).slice(0, 15);
+      // images: compat (solo URLs). items: con fuente/host para mostrar y revisar.
+      return sendJSON(res, {
+        query: q,
+        google: 'https://www.google.com/search?udm=2&q=' + encodeURIComponent(q),
+        bing: 'https://www.bing.com/images/search?q=' + encodeURIComponent(q),
+        items,
+        images: items.map((it) => it.url),
+      });
     } catch (e) {
       return sendJSON(res, { images: [], error: 'candidates_failed' }, 200);
     }

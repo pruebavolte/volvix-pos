@@ -10968,8 +10968,8 @@
   // Botones ◀ ▶ (o ←/→) = cambiar entre imágenes encontradas. "Aplicar" = guardar.
   // El usuario NO elige la fuente; el sistema trae las candidatas automáticamente.
   (function vlxInvImagePanel(){
-    let panel, imgEl, nameEl, counterEl, statusEl, applyBtn;
-    let activeRow = null, candidates = [], idx = 0, fetchSeq = 0;
+    let panel, imgEl, nameEl, counterEl, statusEl, applyBtn, srcEl, queryEl, glinkEl, blinkEl;
+    let activeRow = null, candidates = [], items = [], idx = 0, fetchSeq = 0;
     function build(){
       if (panel) return;
       panel = document.createElement('div');
@@ -10989,6 +10989,12 @@
         +   '<span id="vlx-imgp-counter" style="flex:1;text-align:center;font-size:11px;color:#6B7280">0 / 0</span>'
         +   '<button id="vlx-imgp-next" title="Imagen siguiente (→)" style="flex:none;width:36px;height:36px;border:1px solid #E5E5EA;background:#fff;border-radius:8px;cursor:pointer;font-size:15px">▶</button>'
         + '</div>'
+        + '<div id="vlx-imgp-src" style="font-size:10.5px;color:#6B7280;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">fuente: —</div>'
+        + '<div id="vlx-imgp-query" style="font-size:10.5px;color:#9CA3AF;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="">buscado: —</div>'
+        + '<div style="display:flex;gap:6px;margin-top:6px">'
+        +   '<a id="vlx-imgp-glink" href="#" target="_blank" rel="noopener" style="flex:1;text-align:center;font-size:11px;padding:6px;border:1px solid #E5E5EA;border-radius:7px;text-decoration:none;color:#2D5F8F">🔍 Google</a>'
+        +   '<a id="vlx-imgp-blink" href="#" target="_blank" rel="noopener" style="flex:1;text-align:center;font-size:11px;padding:6px;border:1px solid #E5E5EA;border-radius:7px;text-decoration:none;color:#2D5F8F">Bing</a>'
+        + '</div>'
         + '<button id="vlx-imgp-apply" style="width:100%;margin-top:8px;padding:9px;border:none;background:#0B0B0F;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px">Aplicar imagen</button>';
       document.body.appendChild(panel);
       imgEl = panel.querySelector('#vlx-imgp-img');
@@ -10996,6 +11002,10 @@
       counterEl = panel.querySelector('#vlx-imgp-counter');
       statusEl = panel.querySelector('#vlx-imgp-status');
       applyBtn = panel.querySelector('#vlx-imgp-apply');
+      srcEl = panel.querySelector('#vlx-imgp-src');
+      queryEl = panel.querySelector('#vlx-imgp-query');
+      glinkEl = panel.querySelector('#vlx-imgp-glink');
+      blinkEl = panel.querySelector('#vlx-imgp-blink');
       panel.querySelector('#vlx-imgp-prev').onclick = function(){ cycle(-1); };
       panel.querySelector('#vlx-imgp-next').onclick = function(){ cycle(1); };
       panel.querySelector('#vlx-imgp-close').onclick = function(){ hide(); };
@@ -11009,10 +11019,11 @@
     }
     function hide(){ if (panel) panel.style.display='none'; if (activeRow){ activeRow.style.outline=''; } }
     function render(){
-      if (!candidates.length){ imgEl.style.display='none'; statusEl.style.display=''; counterEl.textContent='0 / 0'; return; }
+      if (!candidates.length){ imgEl.style.display='none'; statusEl.style.display=''; counterEl.textContent='0 / 0'; if(srcEl) srcEl.textContent='fuente: —'; return; }
       idx = Math.max(0, Math.min(idx, candidates.length-1));
       imgEl.src = candidates[idx]; imgEl.style.display=''; statusEl.style.display='none';
       counterEl.textContent = (idx+1)+' / '+candidates.length;
+      if (srcEl){ const it = items[idx] || {}; srcEl.textContent = 'fuente: ' + (it.source || it.host || '—'); srcEl.title = candidates[idx] || ''; }
     }
     function cycle(d){ if (!candidates.length) return; idx = (idx + d + candidates.length) % candidates.length; render(); }
     async function selectRow(tr){
@@ -11024,7 +11035,11 @@
       const name = tr.getAttribute('data-prod-name') || '';
       const existing = tr.getAttribute('data-prod-img') || '';
       nameEl.textContent = name || '(sin nombre)';
-      candidates = existing ? [existing] : []; idx = 0;
+      if (queryEl){ queryEl.textContent = 'buscado: ' + (name || '—'); queryEl.title = name; }
+      if (glinkEl) glinkEl.href = 'https://www.google.com/search?udm=2&q=' + encodeURIComponent(name);
+      if (blinkEl) blinkEl.href = 'https://www.bing.com/images/search?q=' + encodeURIComponent(name);
+      items = existing ? [{ url: existing, source: 'actual del producto', host: '' }] : [];
+      candidates = items.map(function(it){ return it.url; }); idx = 0;
       if (!candidates.length){ statusEl.textContent='Buscando imagen…'; }
       render();
       if (name.length < 2) { statusEl.textContent='Sin nombre para buscar'; return; }
@@ -11034,9 +11049,12 @@
         if (seq !== fetchSeq) return;
         const j = await r.json().catch(function(){ return {}; });
         const seen = new Set(), merged = [];
-        (existing ? [existing] : []).concat(Array.isArray(j.images) ? j.images : []).forEach(function(u){ if (u && !seen.has(u)){ seen.add(u); merged.push(u); } });
-        candidates = merged; if (idx >= candidates.length) idx = 0; render();
-        if (!candidates.length){ statusEl.style.display=''; statusEl.textContent='Sin imágenes encontradas'; }
+        (existing ? [{ url: existing, source: 'actual del producto', host: '' }] : [])
+          .concat(Array.isArray(j.items) ? j.items : [])
+          .forEach(function(it){ if (it && it.url && !seen.has(it.url)){ seen.add(it.url); merged.push(it); } });
+        items = merged; candidates = items.map(function(it){ return it.url; });
+        if (idx >= candidates.length) idx = 0; render();
+        if (!candidates.length){ statusEl.style.display=''; statusEl.textContent='Sin imágenes — usa 🔍 Google'; }
       } catch(_) { if (seq===fetchSeq && !candidates.length){ statusEl.style.display=''; statusEl.textContent='Sin conexión'; } }
     }
     async function apply(){
