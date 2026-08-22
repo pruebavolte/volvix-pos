@@ -10968,130 +10968,94 @@
   // Botones ◀ ▶ (o ←/→) = cambiar entre imágenes encontradas. "Aplicar" = guardar.
   // El usuario NO elige la fuente; el sistema trae las candidatas automáticamente.
   (function vlxInvImagePanel(){
-    let panel, imgEl, nameEl, counterEl, statusEl, applyBtn, srcEl, urlInput, histEl;
-    let activeRow=null, candidates=[], items=[], idx=0, fetchSeq=0, curName='', gUrl='', bUrl='';
-    function esc(s){ return String(s||'').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
+    var CX = '8517759c2626540e5';
+    var panel, gcseDiv, nameEl, urlInput, statusEl;
+    var activeRow = null, curName = '', rendered = false, lastExec = '';
+    function loadCse(){
+      if (window.__vlxGcseLoading) return;
+      window.__vlxGcseLoading = true;
+      window.__gcse = window.__gcse || {};
+      window.__gcse.parsetags = 'explicit';
+      window.__gcse.callback = function(){ tryRender(); };
+      var s = document.createElement('script');
+      s.async = true; s.src = 'https://cse.google.com/cse.js?cx=' + CX;
+      (document.head || document.body).appendChild(s);
+    }
+    function pseReady(){ return !!(window.google && window.google.search && window.google.search.cse && window.google.search.cse.element); }
+    function tryRender(){
+      if (rendered || !gcseDiv || !pseReady()) return;
+      try {
+        window.google.search.cse.element.render({
+          div: gcseDiv,
+          tag: 'searchresults-only',
+          gname: 'vlxgcse',
+          attributes: { enableImageSearch: 'true', defaultToImageSearch: 'true', disableWebSearch: 'false', imageSearchLayout: 'column', linkTarget: '_blank' }
+        });
+        rendered = true;
+        if (curName) execQuery(curName);
+      } catch (e) {}
+    }
+    function execQuery(q){
+      q = String(q || '').trim();
+      if (!q) return;
+      if (!pseReady()){ loadCse(); return; }
+      if (!rendered){ tryRender(); }
+      try {
+        var el = window.google.search.cse.element.getElement('vlxgcse');
+        if (el){ if (statusEl) statusEl.style.display='none'; lastExec = q; el.execute(q); }
+        else { tryRender(); setTimeout(function(){ var e2 = window.google.search.cse.element.getElement('vlxgcse'); if (e2){ lastExec=q; e2.execute(q); } }, 500); }
+      } catch (e) {}
+    }
     function build(){
-      if(panel) return;
-      panel=document.createElement('div');
-      panel.id='vlx-inv-image-panel';
-      panel.style.cssText='position:fixed;right:14px;bottom:14px;z-index:9000;width:560px;max-width:97vw;background:#fff;border:1px solid #E5E5EA;border-radius:12px;box-shadow:0 14px 46px rgba(0,0,0,.22);padding:12px;display:none;color:#1C1917';
+      if (panel) return;
+      panel = document.createElement('div');
+      panel.id = 'vlx-inv-image-panel';
+      panel.style.cssText = 'position:fixed;right:12px;bottom:12px;z-index:9000;width:580px;max-width:97vw;height:72vh;max-height:660px;background:#fff;border:1px solid #E5E5EA;border-radius:12px;box-shadow:0 14px 46px rgba(0,0,0,.24);display:none;flex-direction:column;color:#1C1917;overflow:hidden';
       panel.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">'
-        + '<div id="vlx-imgp-name" style="font-size:13px;font-weight:700;color:#0B0B0F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>'
-        + '<button id="vlx-imgp-close" title="Cerrar" style="flex:none;border:none;background:none;font-size:18px;color:#9CA3AF;cursor:pointer">&times;</button>'
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #eee;flex:none">'
+        + '<div id="vlx-imgp-name" style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Imágenes del producto</div>'
+        + '<button id="vlx-imgp-close" title="Cerrar" style="border:none;background:none;font-size:18px;color:#9CA3AF;cursor:pointer">&times;</button>'
         + '</div>'
-        + '<div style="display:flex;gap:6px;margin-bottom:10px">'
-        + '<input id="vlx-imgp-url" type="text" placeholder="URL del buscador (edítala y presiona Ir)" style="flex:1;padding:8px 10px;border:1px solid #E5E5EA;border-radius:8px;font-size:12px" />'
-        + '<button id="vlx-imgp-go" style="flex:none;padding:8px 14px;border:none;background:#2D5F8F;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px">Ir &#9654;</button>'
+        + '<div style="padding:8px 12px;display:flex;gap:6px;border-bottom:1px solid #f2f2f2;flex:none">'
+        + '<input id="vlx-imgp-url" type="text" placeholder="Buscar otra cosa en Google…" style="flex:1;padding:8px 10px;border:1px solid #E5E5EA;border-radius:8px;font-size:12px"/>'
+        + '<button id="vlx-imgp-go" style="border:none;background:#2D5F8F;color:#fff;border-radius:8px;padding:8px 14px;font-weight:600;font-size:12px;cursor:pointer">Buscar</button>'
         + '</div>'
-        + '<div style="display:flex;gap:12px;align-items:stretch">'
-        +   '<div style="flex:1;min-width:0">'
-        +     '<div style="width:100%;aspect-ratio:1/1;background:#f5f5f4;border:1px solid #eee;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden">'
-        +       '<img id="vlx-imgp-img" alt="" style="max-width:100%;max-height:100%;object-fit:contain;display:none">'
-        +       '<span id="vlx-imgp-status" style="font-size:11px;color:#9CA3AF;text-align:center;padding:0 8px">Elige un producto (&#8593; &#8595;)</span>'
-        +     '</div>'
-        +     '<div style="display:flex;align-items:center;gap:6px;margin-top:8px">'
-        +       '<button id="vlx-imgp-prev" title="Anterior (&#8592;)" style="flex:none;width:40px;height:40px;border:1px solid #E5E5EA;background:#fff;border-radius:8px;cursor:pointer;font-size:16px">&#9664;</button>'
-        +       '<span id="vlx-imgp-counter" style="flex:1;text-align:center;font-size:12px;color:#6B7280">0 / 0</span>'
-        +       '<button id="vlx-imgp-next" title="Siguiente (&#8594;)" style="flex:none;width:40px;height:40px;border:1px solid #E5E5EA;background:#fff;border-radius:8px;cursor:pointer;font-size:16px">&#9654;</button>'
-        +     '</div>'
-        +     '<div id="vlx-imgp-src" style="font-size:10.5px;color:#6B7280;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">fuente: &mdash;</div>'
-        +     '<button id="vlx-imgp-apply" style="width:100%;margin-top:8px;padding:10px;border:none;background:#0B0B0F;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px">Aplicar imagen</button>'
-        +   '</div>'
-        +   '<div style="width:220px;flex:none;border-left:1px solid #eee;padding-left:12px;display:flex;flex-direction:column">'
-        +     '<div style="font-size:11px;font-weight:700;color:#0B0B0F;margin-bottom:6px">Donde busque (clic para abrir)</div>'
-        +     '<div id="vlx-imgp-hist" style="flex:1;overflow-y:auto;max-height:280px;font-size:11px;line-height:1.5"></div>'
-        +   '</div>'
+        + '<div id="vlx-imgp-gcse" style="flex:1;overflow:auto;padding:6px 10px">'
+        +   '<div id="vlx-imgp-status" style="color:#9CA3AF;font-size:12px;padding:12px;text-align:center">Cargando buscador de Google…</div>'
         + '</div>';
       document.body.appendChild(panel);
-      imgEl=panel.querySelector('#vlx-imgp-img'); nameEl=panel.querySelector('#vlx-imgp-name');
-      counterEl=panel.querySelector('#vlx-imgp-counter'); statusEl=panel.querySelector('#vlx-imgp-status');
-      applyBtn=panel.querySelector('#vlx-imgp-apply'); srcEl=panel.querySelector('#vlx-imgp-src');
-      urlInput=panel.querySelector('#vlx-imgp-url'); histEl=panel.querySelector('#vlx-imgp-hist');
-      panel.querySelector('#vlx-imgp-prev').onclick=function(){cycle(-1)};
-      panel.querySelector('#vlx-imgp-next').onclick=function(){cycle(1)};
-      panel.querySelector('#vlx-imgp-close').onclick=hide;
-      applyBtn.onclick=apply;
-      var go=function(){ var u=(urlInput.value||'').trim(); if(/^https?:\/\//i.test(u)) window.open(u,'_blank','noopener'); };
-      panel.querySelector('#vlx-imgp-go').onclick=go;
-      urlInput.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } e.stopPropagation(); });
-      var inv=document.getElementById('screen-inventario');
-      if(inv&&window.MutationObserver){ new MutationObserver(function(){ if(inv.classList.contains('hidden')) hide(); }).observe(inv,{attributes:true,attributeFilter:['class']}); }
+      gcseDiv = panel.querySelector('#vlx-imgp-gcse');
+      nameEl = panel.querySelector('#vlx-imgp-name');
+      urlInput = panel.querySelector('#vlx-imgp-url');
+      statusEl = panel.querySelector('#vlx-imgp-status');
+      panel.querySelector('#vlx-imgp-close').onclick = function(){ panel.style.display='none'; if(activeRow) activeRow.style.outline=''; };
+      var go = function(){ var q=(urlInput.value||'').trim(); if(q){ curName=q; nameEl.textContent=q; execQuery(q); } };
+      panel.querySelector('#vlx-imgp-go').onclick = go;
+      urlInput.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } e.stopPropagation(); });
+      var inv = document.getElementById('screen-inventario');
+      if (inv && window.MutationObserver){ new MutationObserver(function(){ if (inv.classList.contains('hidden')) panel.style.display='none'; }).observe(inv, { attributes:true, attributeFilter:['class'] }); }
+      loadCse(); tryRender();
     }
-    function hide(){ if(panel) panel.style.display='none'; if(activeRow) activeRow.style.outline=''; }
-    function render(){
-      if(!candidates.length){ imgEl.style.display='none'; statusEl.style.display=''; counterEl.textContent='0 / 0'; if(srcEl)srcEl.textContent='fuente: —'; return; }
-      idx=Math.max(0,Math.min(idx,candidates.length-1));
-      imgEl.src=candidates[idx]; imgEl.style.display=''; statusEl.style.display='none';
-      counterEl.textContent=(idx+1)+' / '+candidates.length;
-      if(srcEl){ var it=items[idx]||{}; srcEl.textContent='fuente: '+(it.source||it.host||'—'); srcEl.title=candidates[idx]||''; }
+    function selectRow(tr){
+      if (!tr) return; build();
+      if (activeRow && activeRow !== tr) activeRow.style.outline='';
+      activeRow = tr; tr.style.outline='2px solid #2D5F8F';
+      try { tr.scrollIntoView({ block:'nearest' }); } catch(_){}
+      panel.style.display='flex';
+      var name = tr.getAttribute('data-prod-name') || '';
+      curName = name; nameEl.textContent = name || '(sin nombre)';
+      if (urlInput) urlInput.value = name;
+      if (name.length >= 2) execQuery(name);
     }
-    function cycle(d){ if(!candidates.length) return; idx=(idx+d+candidates.length)%candidates.length; render(); }
-    function setHistory(){
-      if(!histEl) return;
-      var rows=[
-        {label:'🔍 Google Imagenes', url:gUrl},
-        {label:'🅱️ Bing Imagenes', url:bUrl},
-        {label:'🛒 Mercado Libre', url:'https://listado.mercadolibre.com.mx/'+encodeURIComponent(curName)},
-        {label:'📦 Amazon MX', url:'https://www.amazon.com.mx/s?k='+encodeURIComponent(curName)},
-        {label:'🔧 AutoZone MX', url:'https://www.autozone.com.mx/search?text='+encodeURIComponent(curName)},
-        {label:'🏬 Walmart MX', url:'https://www.walmart.com.mx/search?q='+encodeURIComponent(curName)}
-      ];
-      var html='<div style="color:#9CA3AF;margin-bottom:6px;word-break:break-word">buscando: <b>'+esc(curName||'—')+'</b></div>';
-      html+=rows.map(function(r){ return '<div style="margin-bottom:6px"><a href="'+esc(r.url)+'" target="_blank" rel="noopener" style="color:#2D5F8F;text-decoration:none">'+r.label+'</a></div>'; }).join('');
-      histEl.innerHTML=html;
-    }
-    async function selectRow(tr){
-      if(!tr) return; build();
-      if(activeRow&&activeRow!==tr) activeRow.style.outline='';
-      activeRow=tr; tr.style.outline='2px solid #2D5F8F';
-      try{tr.scrollIntoView({block:'nearest'})}catch(_){}
-      panel.style.display='block';
-      var name=tr.getAttribute('data-prod-name')||''; var existing=tr.getAttribute('data-prod-img')||'';
-      curName=name; nameEl.textContent=name||'(sin nombre)';
-      gUrl='https://www.google.com/search?udm=2&q='+encodeURIComponent(name);
-      bUrl='https://www.bing.com/images/search?q='+encodeURIComponent(name);
-      if(urlInput) urlInput.value=gUrl;
-      setHistory();
-      items=existing?[{url:existing,source:'actual del producto',host:''}]:[];
-      candidates=items.map(function(it){return it.url}); idx=0;
-      if(!candidates.length) statusEl.textContent='Buscando imagenes…';
-      render();
-      if(name.length<2){ statusEl.textContent='Sin nombre'; return; }
-      var seq=++fetchSeq;
-      try{
-        var r=await _authFetch('/api/product-image-candidates?q='+encodeURIComponent(name));
-        if(seq!==fetchSeq) return;
-        var j=await r.json().catch(function(){return{}});
-        if(j.google) gUrl=j.google; if(j.bing) bUrl=j.bing; setHistory();
-        if(urlInput && document.activeElement!==urlInput) urlInput.value=gUrl;
-        var seen=new Set(), merged=[];
-        (existing?[{url:existing,source:'actual del producto',host:''}]:[]).concat(Array.isArray(j.items)?j.items:[]).forEach(function(it){ if(it&&it.url&&!seen.has(it.url)){seen.add(it.url);merged.push(it);} });
-        items=merged; candidates=items.map(function(it){return it.url}); if(idx>=candidates.length)idx=0; render();
-        if(!candidates.length){ statusEl.style.display=''; statusEl.textContent='Sin imagenes — abre Google →'; }
-      }catch(_){ if(seq===fetchSeq&&!candidates.length){ statusEl.style.display=''; statusEl.textContent='Sin conexion'; } }
-    }
-    async function apply(){
-      if(!activeRow||!candidates.length) return;
-      var id=activeRow.getAttribute('data-prod-id'); var chosen=candidates[idx];
-      applyBtn.disabled=true; var t=applyBtn.textContent; applyBtn.textContent='Aplicando…';
-      try{ var ok=await saveProduct({image_url:chosen},id); if(ok&&activeRow) activeRow.setAttribute('data-prod-img',chosen); }catch(_){}
-      applyBtn.disabled=false; applyBtn.textContent=t;
-    }
-    function rows(){ var b=document.getElementById('inv-body'); return b?Array.prototype.slice.call(b.querySelectorAll('tr.inv-prod-row')):[]; }
-    function move(d){ var rs=rows(); if(!rs.length)return; var i=activeRow?rs.indexOf(activeRow):-1; i=i<0?(d>0?0:rs.length-1):(i+d+rs.length)%rs.length; selectRow(rs[i]); }
-    document.addEventListener('click',function(e){ var tr=e.target.closest&&e.target.closest('tr.inv-prod-row'); if(tr&&!e.target.closest('button,input,a,.inv-row-check')) selectRow(tr); });
-    document.addEventListener('keydown',function(e){
+    function rows(){ var b=document.getElementById('inv-body'); return b ? Array.prototype.slice.call(b.querySelectorAll('tr.inv-prod-row')) : []; }
+    function move(d){ var rs=rows(); if(!rs.length) return; var i=activeRow?rs.indexOf(activeRow):-1; i=i<0?(d>0?0:rs.length-1):(i+d+rs.length)%rs.length; selectRow(rs[i]); }
+    document.addEventListener('click', function(e){ var tr=e.target.closest && e.target.closest('tr.inv-prod-row'); if(tr && !e.target.closest('button,input,a,.inv-row-check')) selectRow(tr); });
+    document.addEventListener('keydown', function(e){
       var inv=document.getElementById('screen-inventario'); if(!inv||inv.classList.contains('hidden')) return;
       var t=e.target, tag=(t&&t.tagName||'').toUpperCase();
       if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable)) return;
-      var open=panel&&panel.style.display!=='none';
-      if(e.key==='ArrowDown'){e.preventDefault();move(1);}
-      else if(e.key==='ArrowUp'){e.preventDefault();move(-1);}
-      else if(e.key==='ArrowRight'&&open){e.preventDefault();cycle(1);}
-      else if(e.key==='ArrowLeft'&&open){e.preventDefault();cycle(-1);}
-      else if(e.key==='Enter'&&open&&activeRow){e.preventDefault();apply();}
+      if(e.key==='ArrowDown'){ e.preventDefault(); move(1); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); move(-1); }
     });
   })();
 
