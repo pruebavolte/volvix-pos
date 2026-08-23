@@ -11008,7 +11008,7 @@
     function fetchAndCache(code, url, candidates){ if (!isOnline() || !url) return Promise.resolve(null); return fetch(url, { mode:'cors' }).then(function(r){ if (!r.ok) throw 0; return r.blob(); }).then(function(b){ if (!b || b.size < 200) throw 0; VLXImgDB.put({ code:String(code), url:url, blob:b, candidates:(candidates || [url]).slice(0,30), ts:Date.now() }); return URL.createObjectURL(b); }).catch(function(){ return null; }); }
     // Cache-first para un producto: 1) blob local (offline)  2) url conocida (baja+cachea)  3) busca 1 vez (solo online)
     function loadForProduct(code, name, dbUrl){
-      var token = ++loadToken; curCode = code; autoSaveCode = '';
+      var token = ++loadToken; curCode = code; autoSaveCode = ''; curQuery = '';
       if (scrapeTimer){ clearInterval(scrapeTimer); scrapeTimer = null; }
       VLXImgDB.get(code).then(function(rec){
         if (token !== loadToken) return;
@@ -11257,7 +11257,7 @@
       var code = (tr.getAttribute('data-prod-code') || tr.getAttribute('data-prod-id') || '').trim();
       var dbUrl = (tr.getAttribute('data-prod-img') || '').trim();
       setName(name);
-      showBusy();
+      if (statusEl){ statusEl.style.display=''; statusEl.textContent='Cargando…'; }
       loadForProduct(code, name, dbUrl);
     }
     function rows(){ var b=document.getElementById('inv-body'); return b ? Array.prototype.slice.call(b.querySelectorAll('tr.inv-prod-row')) : []; }
