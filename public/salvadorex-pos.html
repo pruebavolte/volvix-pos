@@ -11002,7 +11002,7 @@
       for (var i=0;i<cells.length;i++){ (function(cell){
         var code = cell.getAttribute('data-url-code'); var u = urlMap[String(code)];
         if (u){ setUrlCell(cell, u, false); VLXImgDB.get(code).then(function(rec){ if (rec && rec.dataUrl) setUrlCell(cell, rec.url || u, true); }); }
-        else { VLXImgDB.get(code).then(function(rec){ if (rec && rec.url) setUrlCell(cell, rec.url, !!rec.dataUrl); }); }
+        else { VLXImgDB.get(code).then(function(rec){ if (rec && rec.url) setUrlCell(cell, rec.url, !!rec.dataUrl); else setUrlCell(cell, null); }); }
       })(cells[i]); }
     }
     function ensureUrlColumn(){ getUrlMap().then(function(){ fillUrlColumn(); setTimeout(fillUrlColumn, 400); }); }
