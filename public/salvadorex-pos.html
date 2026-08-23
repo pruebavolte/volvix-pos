@@ -11008,7 +11008,15 @@
     function ensureUrlColumn(){ getUrlMap().then(function(){ fillUrlColumn(); setTimeout(fillUrlColumn, 400); }); }
     function _imgOk(){ if (bigImg) bigImg.style.display=''; if (statusEl) statusEl.style.display='none'; }
     function _imgFail(){ if (bigImg) bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent = isOnline() ? '(sin imagen)' : '(sin conexión)'; } }
-    function setImgEl(src, onFail){ if (!bigImg) return; var done = false, fail = onFail || _imgFail; bigImg.style.display = ''; if (statusEl) statusEl.style.display = 'none'; bigImg.onload = function(){ if (done) return; done = true; _imgOk(); }; bigImg.onerror = function(){ if (done) return; done = true; fail(); }; bigImg.src = src; if (/^https?:/i.test(src)){ setTimeout(function(){ if (!done && bigImg.src === src && !bigImg.naturalWidth){ done = true; fail(); } }, 5000); } }
+    // Precarga en un Image() detached (que SIEMPRE carga, sin el bug de img oculto) y luego copia el src al <img> visible (ya cacheado -> instantáneo).
+    function setImgEl(src, onFail){
+      if (!bigImg) return; var done = false, fail = onFail || _imgFail;
+      var loader = new Image();
+      loader.onload = function(){ if (done) return; done = true; bigImg.src = src; bigImg.style.display = ''; _imgOk(); };
+      loader.onerror = function(){ if (done) return; done = true; bigImg.style.display = 'none'; fail(); };
+      loader.src = src;
+      if (/^https?:/i.test(src)){ setTimeout(function(){ if (!done){ done = true; bigImg.style.display = 'none'; fail(); } }, 5000); }
+    }
     function redisplay(){ if (items.length) renderCompact(); }
     function setCounter(){ if (counterEl) counterEl.textContent = items.length ? ((idx+1) + ' / ' + items.length) : '0 / 0'; }
     function blobToDataURL(blob){ return new Promise(function(res, rej){ try { var fr = new FileReader(); fr.onload = function(){ res(fr.result); }; fr.onerror = function(){ rej(0); }; fr.readAsDataURL(blob); } catch(e){ rej(e); } }); }
