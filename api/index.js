@@ -2842,6 +2842,23 @@ const handlers = {
     } catch (err) { sendError(res, err); }
   }),
 
+  // CACHE COMPARTIDA: dado un lote de códigos, devuelve la image_url que YA tenga cualquier cliente (cross-tenant).
+  // Evita re-buscar en internet productos que otro usuario ya resolvió. Solo devuelve URLs (texto público), no datos sensibles.
+  'GET /api/products/shared-images': requireAuth(async (req, res) => {
+    try {
+      const parsed = url.parse(req.url, true);
+      const raw = String(parsed.query.codes || '');
+      const codes = raw.split(',').map(c => c.trim()).filter(c => /^[A-Za-z0-9._\-]{1,64}$/.test(c)).slice(0, 400);
+      if (!codes.length) return sendJSON(res, { images: {} });
+      const uniq = Array.from(new Set(codes));
+      const inList = uniq.map(c => encodeURIComponent(c)).join(',');
+      const rows = await supabaseRequest('GET', `/pos_products?code=in.(${inList})&image_url=not.is.null&select=code,image_url&limit=5000`);
+      const map = {};
+      (rows || []).forEach(r => { if (r && r.code && r.image_url && !map[String(r.code)]) map[String(r.code)] = r.image_url; });
+      sendJSON(res, { images: map });
+    } catch (err) { sendError(res, err); }
+  }),
+
   'PATCH /api/products/:id': requireAuth(async (req, res, params) => {
     try {
       if (__vlxIsCashier(req)) return send403(res, { need_role: ['owner','admin','manager','superadmin'], have_role: req.user && req.user.role });
