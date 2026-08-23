@@ -45,5 +45,9 @@ Fecha: 2026-08-23 · Estado: PROPUESTA VERIFICADA (descubrimiento por 7 agentes 
 ## 4. Lo que NO se hace (objeciones aceptadas de la revisión)
 - NO proxy por prefijo `/pos/*`; NO "SSO por cookie"; NO verificar JWT Supabase dentro de `verifyJWT/requireAuth`; NO reutilizar X-API-Key para SSO; NO apagar `POST /api/login`; NO renumerar `pos_users.id`; NO migrar password_hash (imposible).
 
-## 5. Gate de autorización del dueño (decisión 2026-08-23) — EN DISEÑO (workflow)
+## 5. Gate de autorización del dueño (decisión 2026-08-23) — IMPLEMENTADO Y DESPLEGADO
 Regla: alta nueva → `pos_companies.status='awaiting_approval'` → sin acceso (403 TENANT_AWAITING_APPROVAL, pero login OK para mostrar pantalla de espera) → dueño Aprueba (status='active' + expires_at=+Ndías trial) o Rechaza (status='rejected'). NO tocar los 138 tenants actuales (97 active + 41 pending + 0 bloqueantes): solo altas NUEVAS reciben awaiting_approval; pending/active/null se mantienen con acceso (grandfather). Enforcement ya existe en requireAuth (bloquea suspended/revoked/expired) → sumar awaiting_approval y rejected. Pagos = fase posterior.
+
+
+### 5.1 Implementación (2026-08-23, commits 3cfdf40/412c36f + R41)
+DESPLEGADO en POS. TRAMPA encontrada al verificar: `pos_companies.status` tenía un CHECK constraint (solo pending/active/suspended/deleted) — el workflow asumió 'sin CHECK'. Ampliado (R41) con awaiting_approval/rejected/revoked/expired antes de que los PATCH funcionaran. Verificado E2E por DB: alta→awaiting_approval, authorize→active+expires, reject→rejected. Distribución intacta (97 active + 41 pending). Endpoints vivos: POST /api/admin/tenant/:tid/authorize|reject, GET /api/tenant/gate-status (sin rol, para el poll). Pantalla public/esperando-autorizacion.html. Panel: opciones nuevas en datalist + edición inline de status invalida cache. Camino OAuth Google queda inerte (id USR no-uuid + owner_user_id NOT NULL) — gatear cuando se arregle. verify-otp DUPLICADO (register-tenant) inserta sin owner_user_id → ese flujo alterno ya estaba roto (no es regresión).
