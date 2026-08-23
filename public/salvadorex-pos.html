@@ -11132,6 +11132,8 @@
       if (looksLikeUrl(v)){ var u = /^https?:\/\//i.test(v) ? v : ('https://' + v); try { window.open(u, '_blank', 'noopener'); } catch(e){} return; }
       setName(v); execQuery(v);
     }
+    // Ancla el visor fijo arriba-derecha, alineado con la fila de pestañas (debajo de "+ Nuevo producto").
+    function dockPanel(){ if (!panel) return; var a = document.querySelector('#screen-inventario .config-tabs') || document.getElementById('inv-tab-stock'); if (a){ var t = a.getBoundingClientRect().top; if (t > 40 && t < (window.innerHeight - 140)) panel.style.top = Math.round(t) + 'px'; } }
     function setExpanded(on){
       expanded = on; if (!panel) return;
       bodyEl.style.height = on ? '58vh' : '300px';
@@ -11178,7 +11180,7 @@
       if (panel) return;
       panel = document.createElement('div');
       panel.id = 'vlx-inv-image-panel';
-      panel.style.cssText = 'position:fixed;right:12px;bottom:82px;z-index:9000;width:560px;max-width:97vw;background:#fff;border:1px solid #E5E5EA;border-radius:12px;box-shadow:0 14px 46px rgba(0,0,0,.24);display:none;flex-direction:column;color:#1C1917;overflow:hidden';
+      panel.style.cssText = 'position:fixed;right:16px;top:150px;z-index:9000;width:520px;max-width:97vw;background:#fff;border:1px solid #E5E5EA;border-radius:12px;box-shadow:0 14px 46px rgba(0,0,0,.24);display:none;flex-direction:column;color:#1C1917;overflow:hidden';
       panel.innerHTML =
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #eee;flex:none">'
         + '<div id="vlx-imgp-name" style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Imagen del producto</div>'
@@ -11250,7 +11252,7 @@
       if (activeRow && activeRow !== tr) activeRow.style.outline='';
       activeRow = tr; tr.style.outline='2px solid #2D5F8F';
       try { tr.scrollIntoView({ block:'nearest' }); } catch(_){}
-      panel.style.display='flex'; panelUserOpen = true;
+      panel.style.display='flex'; panelUserOpen = true; dockPanel();
       var name = (tr.getAttribute('data-prod-name') || '').trim();
       var code = (tr.getAttribute('data-prod-code') || tr.getAttribute('data-prod-id') || '').trim();
       var dbUrl = (tr.getAttribute('data-prod-img') || '').trim();
