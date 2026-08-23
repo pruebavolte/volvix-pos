@@ -10994,7 +10994,7 @@
     function getUrlMap(){ if (urlMapP) return urlMapP; if (typeof _authFetch !== 'function') return Promise.resolve({}); urlMapP = _authFetch('/api/products?limit=5000').then(function(r){ return r.json(); }).then(function(j){ var list = Array.isArray(j) ? j : ((j && j.products) || []); var m = {}; list.forEach(function(p){ if (p && p.code){ if (p.image_url) m[String(p.code)] = p.image_url; if (p.id) codeIdMap[String(p.code)] = p.id; } }); urlMap = m; return m; }).catch(function(){ return {}; }); return urlMapP; }
     // ===== COLUMNA "URL de imagen" (se llena del mapa BD + marca ✓ si el byte está en cache local) =====
     function truncMid(s){ s = String(s || ''); return s.length > 58 ? (s.slice(0,32) + '…' + s.slice(-18)) : s; }
-    function setUrlCell(cell, url, cached){ if (!cell) return; if (url){ cell.textContent = (cached ? '✓ ' : '') + truncMid(url); cell.title = url; cell.style.color = cached ? '#15803D' : ''; } else { cell.textContent = '—'; cell.title = ''; cell.style.color = ''; } }
+    function setUrlCell(cell, url, cached){ if (!cell) return; if (url){ cell.textContent = (cached ? '✓ ' : '') + truncMid(url); cell.title = url; cell.style.color = cached ? '#15803D' : ''; } else { cell.innerHTML = '<button type="button" class="vlx-suggest-btn" title="Buscar imagen para este producto" style="border:1px solid #E5E5EA;background:#fff;color:#2D5F8F;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;white-space:nowrap">🔍 Sugerir imagen</button>'; cell.title = ''; cell.style.color = ''; } }
     function selCode(code){ try { return (window.CSS && CSS.escape) ? CSS.escape(String(code)) : String(code).replace(/"/g,''); } catch(_){ return String(code); } }
     function vlxUpdateUrlCell(code, url){ var cells = document.querySelectorAll('.vlx-url-cell[data-url-code="' + selCode(code) + '"]'); for (var i=0;i<cells.length;i++) setUrlCell(cells[i], url, false); }
     function fillUrlColumn(){
@@ -11359,6 +11359,8 @@
     function rows(){ var b=document.getElementById('inv-body'); return b ? Array.prototype.slice.call(b.querySelectorAll('tr.inv-prod-row')) : []; }
     function move(d){ var rs=rows(); if(!rs.length) return; var i=activeRow?rs.indexOf(activeRow):-1; i=i<0?(d>0?0:rs.length-1):(i+d+rs.length)%rs.length; selectRow(rs[i]); }
     document.addEventListener('click', function(e){ var inv=document.getElementById('screen-inventario'); if(!inv||inv.classList.contains('hidden')) return; var tr=e.target.closest && e.target.closest('tr.inv-prod-row'); if(tr && !e.target.closest('button,input,a,.inv-row-check')) selectRow(tr); });
+    // Botón "Sugerir imagen" en la columna URL: busca/reutiliza solo ese producto.
+    document.addEventListener('click', function(e){ var btn=e.target && e.target.closest && e.target.closest('.vlx-suggest-btn'); if(!btn) return; e.preventDefault(); e.stopPropagation(); var tr=btn.closest('tr.inv-prod-row'); if(tr) selectRow(tr); });
     document.addEventListener('keydown', function(e){
       var inv=document.getElementById('screen-inventario'); if(!inv||inv.classList.contains('hidden')) return;
       if(!activeRow) return;
