@@ -11246,6 +11246,10 @@
         if (inv.classList.contains('hidden')){ if (panel.style.display !== 'none') panel.style.display='none'; }
         else if (panelUserOpen && activeRow){ panel.style.display='flex'; redisplay(); }
       }).observe(inv, { attributes:true, attributeFilter:['class'] }); }
+      // Autodefensa: si un handler global oculta el panel mientras debe estar abierto (inventario visible), re-mostrarlo al instante.
+      if (window.MutationObserver){ new MutationObserver(function(){
+        if (panelUserOpen && panel.style.display === 'none'){ var i2 = document.getElementById('screen-inventario'); if (i2 && !i2.classList.contains('hidden')){ panel.style.display='flex'; redisplay(); } }
+      }).observe(panel, { attributes:true, attributeFilter:['style'] }); }
       setExpanded(false);
       loadCse(); tryRender();
     }
