@@ -41368,7 +41368,7 @@ if (process.env.NODE_ENV === 'test') {
       try {
         const tenantId = req.user.tenant_id;
         const rows = await supabaseRequest('GET',
-          `/pos_companies?tenant_id=eq.${encodeURIComponent(tenantId)}&select=id,tenant_id,plan,status,is_active,trial_ends_at,created_at&order=created_at.desc&limit=1`
+          `/pos_companies?tenant_id=eq.${encodeURIComponent(tenantId)}&select=id,tenant_id,plan,status,is_active,expires_at,created_at&order=created_at.desc&limit=1`
         ).catch(() => []);
         const company = rows && rows[0];
         sendJSON(res, {
@@ -41379,7 +41379,8 @@ if (process.env.NODE_ENV === 'test') {
             plan: company.plan || 'free',
             status: company.status || null,
             activa: company.is_active !== false,
-            trial_ends_at: company.trial_ends_at,
+            expires_at: company.expires_at || null,
+            trial_ends_at: company.expires_at || null,
             created_at: company.created_at
           }] : [],
           plan: company ? company.plan : 'free',
