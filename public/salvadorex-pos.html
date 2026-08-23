@@ -11001,10 +11001,11 @@
     }
     function ensureUrlColumn(){ getUrlMap().then(function(){ fillUrlColumn(); setTimeout(fillUrlColumn, 400); }); }
     function revokeBlob(){ var old = curBlobUrl; curBlobUrl = null; blobForUrl = ''; curBlob = null; if (old){ setTimeout(function(){ try { URL.revokeObjectURL(old); } catch(_){} }, 4000); } }
-    function setImgEl(src){ if (!bigImg) return; bigImg.onerror = function(){ bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent = isOnline() ? '(imagen no cargó)' : '(sin conexión)'; } }; bigImg.onload = function(){ bigImg.style.display=''; if (statusEl) statusEl.style.display='none'; }; bigImg.src = src; }
-    function showBlobFrom(url, blob){ revokeBlob(); curBlob = blob; blobForUrl = url; curBlobUrl = URL.createObjectURL(blob); setImgEl(curBlobUrl); }
-    // Re-crea el objectURL desde el blob retenido (p.ej. al re-mostrar el panel; un objectURL viejo puede estar revocado o no cargó estando oculto).
-    function redisplay(){ if (curBlob){ showBlobFrom(blobForUrl || '', curBlob); } }
+    function _imgOk(){ if (bigImg) bigImg.style.display=''; if (statusEl) statusEl.style.display='none'; }
+    function _imgFail(){ if (bigImg) bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent = isOnline() ? '(imagen no disponible)' : '(sin conexión)'; } }
+    // Muestra por URL http (confiable en esta página); si falla (offline o imagen borrada) cae al blob local cacheado.
+    function setImgEl(src){ if (!bigImg) return; bigImg.onload = _imgOk; bigImg.onerror = function(){ if (curBlob){ try { curBlobUrl = URL.createObjectURL(curBlob); bigImg.onload = _imgOk; bigImg.onerror = _imgFail; bigImg.src = curBlobUrl; return; } catch(_){} } _imgFail(); }; bigImg.src = src; }
+    function redisplay(){ if (items.length) renderCompact(); }
     function setCounter(){ if (counterEl) counterEl.textContent = items.length ? ((idx+1) + ' / ' + items.length) : '0 / 0'; }
     // Baja los bytes (gstatic permite CORS) y los cachea en IndexedDB; devuelve objectURL o null.
     function fetchAndCache(code, url, candidates){ if (!isOnline() || !url) return Promise.resolve(null); return fetch(url, { mode:'cors' }).then(function(r){ if (!r.ok) throw 0; return r.blob(); }).then(function(b){ if (!b || b.size < 200) throw 0; VLXImgDB.put({ code:String(code), url:url, blob:b, candidates:(candidates || [url]).slice(0,30), ts:Date.now() }); return b; }).catch(function(){ return null; }); }
@@ -11016,13 +11017,13 @@
         if (token !== loadToken) return;
         if (rec && rec.blob){
           items = (rec.candidates && rec.candidates.length) ? rec.candidates : [rec.url]; idx = 0; setCounter();
-          try { showBlobFrom(rec.url, rec.blob); } catch(_e){ setImgEl(rec.url); }
-          return; // servido local, sin internet
+          curBlob = rec.blob; blobForUrl = rec.url; setImgEl(rec.url); // http si hay red; cae al blob si offline
+          return;
         }
         var known = dbUrl || urlMap[String(code)] || '';
         if (known){
           items = [known]; idx = 0; setCounter(); revokeBlob(); setImgEl(known);
-          fetchAndCache(code, known, [known]).then(function(b){ if (token === loadToken && b){ showBlobFrom(known, b); } });
+          fetchAndCache(code, known, [known]).then(function(b){ if (token === loadToken && b){ curBlob = b; blobForUrl = known; } });
           return;
         }
         if (!isOnline()){ items = []; idx = 0; if (bigImg) bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent='Sin imagen (sin conexión)'; } setCounter(); return; }
@@ -11030,7 +11031,7 @@
         getUrlMap().then(function(m){
           if (token !== loadToken) return;
           var u = m[String(code)];
-          if (u){ items = [u]; idx = 0; setCounter(); revokeBlob(); setImgEl(u); fetchAndCache(code, u, [u]).then(function(b){ if (token === loadToken && b) showBlobFrom(u, b); }); return; }
+          if (u){ items = [u]; idx = 0; setCounter(); revokeBlob(); blobForUrl = u; setImgEl(u); fetchAndCache(code, u, [u]).then(function(b){ if (token === loadToken && b){ curBlob = b; blobForUrl = u; } }); return; }
           autoSaveCode = code; if (name && name.length >= 2){ showBusy(); execQuery(name); } else showEmpty();
         });
       });
@@ -11039,7 +11040,7 @@
     function maybeAutoSaveFirst(){
       if (!autoSaveCode || !items.length) return;
       var code = autoSaveCode, first = items[0], cands = items.slice(0,30); autoSaveCode = '';
-      fetchAndCache(code, first, cands).then(function(b){ if (curCode === code && b) showBlobFrom(first, b); });
+      fetchAndCache(code, first, cands).then(function(b){ if (curCode === code && b){ curBlob = b; blobForUrl = first; } });
       try { saveImageToProduct(code, first).then(function(ok){ if (ok){ urlMap[String(code)] = first; if (activeRow && activeRow.getAttribute('data-prod-code') === code) activeRow.setAttribute('data-prod-img', first); if (typeof vlxUpdateUrlCell === 'function') vlxUpdateUrlCell(code, first); } }); } catch(_e){}
     }
     function loadCse(){
@@ -11113,9 +11114,7 @@
       if (!bigImg) return;
       if (!items.length){ showEmpty(); return; }
       idx = Math.max(0, Math.min(idx, items.length-1));
-      var u = items[idx];
-      if (u && u === blobForUrl && curBlob){ showBlobFrom(u, curBlob); }
-      else { setImgEl(u); }
+      setImgEl(items[idx]);
       setCounter();
     }
     function cycle(d){ if (!items.length) return; idx = (idx + d + items.length) % items.length; renderCompact(); }
@@ -11172,7 +11171,7 @@
       saveImageToProduct(code, chosen).then(function(ok){
         if (ok && rowRef) rowRef.setAttribute('data-prod-img', chosen);
         applyBtn.textContent = ok ? '✓ Aplicada' : 'Error';
-        if (ok){ urlMap[String(code)] = chosen; fetchAndCache(code, chosen, items.slice(0,30)).then(function(b){ if (curCode === code && b) showBlobFrom(chosen, b); }); if (typeof vlxUpdateUrlCell === 'function') vlxUpdateUrlCell(code, chosen); }
+        if (ok){ urlMap[String(code)] = chosen; blobForUrl = chosen; fetchAndCache(code, chosen, items.slice(0,30)).then(function(b){ if (curCode === code && b){ curBlob = b; blobForUrl = chosen; } }); if (typeof vlxUpdateUrlCell === 'function') vlxUpdateUrlCell(code, chosen); }
         try { if (typeof showToast === 'function') showToast(ok ? '✓ Imagen aplicada' : 'No se pudo aplicar la imagen', ok ? undefined : 'error'); } catch(_e){}
       }).catch(function(){ applyBtn.textContent = 'Error'; }).then(function(){
         applyResetTimer = setTimeout(function(){ applyBtn.disabled = false; applyBtn.textContent = 'Aplicar'; }, 1400);
