@@ -10999,7 +10999,7 @@
         else { VLXImgDB.get(code).then(function(rec){ if (rec && rec.url) setUrlCell(cell, rec.url, !!rec.blob); }); }
       })(cells[i]); }
     }
-    function ensureUrlColumn(){ getUrlMap().then(function(){ fillUrlColumn(); }); }
+    function ensureUrlColumn(){ getUrlMap().then(function(){ fillUrlColumn(); setTimeout(fillUrlColumn, 400); }); }
     function revokeBlob(){ if (curBlobUrl){ try { URL.revokeObjectURL(curBlobUrl); } catch(_){} } curBlobUrl = null; blobForUrl = ''; }
     function setImgEl(src){ if (!bigImg) return; bigImg.onerror = function(){ bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent = isOnline() ? '(imagen no cargó)' : '(sin conexión)'; } }; bigImg.onload = function(){ bigImg.style.display=''; if (statusEl) statusEl.style.display='none'; }; bigImg.src = src; }
     function showBlobFor(url, objectUrl){ revokeBlob(); curBlobUrl = objectUrl; blobForUrl = url; setImgEl(objectUrl); }
@@ -11279,8 +11279,9 @@
         var b = document.getElementById('inv-body');
         if (!b){ setTimeout(hook, 800); return; }
         var deb = null;
-        try { new MutationObserver(function(){ if (deb) clearTimeout(deb); deb = setTimeout(fillUrlColumn, 150); }).observe(b, { childList:true }); } catch(_){}
+        try { new MutationObserver(function(){ if (deb) clearTimeout(deb); deb = setTimeout(ensureUrlColumn, 200); }).observe(b, { childList:true }); } catch(_){}
         ensureUrlColumn();
+        setTimeout(ensureUrlColumn, 1800); setTimeout(ensureUrlColumn, 4000);
       }
       hook();
     })();
