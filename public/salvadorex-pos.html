@@ -11068,7 +11068,19 @@
     // "Llenar todas": para cada producto SIN url, busca 1 vez (throttled), guarda url en BD y cachea data:URL.
     // Robusto: timeout por paso (nunca se cuelga) + se detiene solo si Google empieza a bloquear (CAPTCHA).
     function withTimeout(p, ms){ return Promise.race([ Promise.resolve(p), new Promise(function(res){ setTimeout(function(){ res(null); }, ms); }) ]); }
-    var FILL_MAX_PER_RUN = 8;   // tanda chica para NO disparar el CAPTCHA de Google
+    // Fuentes de imagen SIN key y con CORS (solo estas 3 son viables desde el navegador; Bing/Yahoo bloquean por CORS/X-Frame).
+    function srcGoogle(name){ return searchOnce(name); } // CSE (mejor para productos, pero puede pedir CAPTCHA si se abusa)
+    function srcOpenverse(name){ return fetch('https://api.openverse.org/v1/images/?q=' + encodeURIComponent(name) + '&page_size=5').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ if (!j || !j.results) return null; for (var i=0;i<j.results.length;i++){ var u = j.results[i].url; if (u && /^https?:\/\//.test(u)) return u; } return null; }).catch(function(){ return null; }); }
+    function srcWikimedia(name){ return fetch('https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=' + encodeURIComponent(name) + '&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url&iiurlwidth=500&format=json&origin=*').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ try { var pages = j.query.pages; for (var k in pages){ var ii = pages[k].imageinfo; if (ii && ii[0]){ var u = ii[0].thumburl || ii[0].url; if (u && /^https?:\/\//.test(u) && /\.(jpe?g|png|webp|gif)$/i.test((u.split('?')[0]||''))) return u; } } } catch(e){} return null; }).catch(function(){ return null; }); }
+    var FILL_SOURCES = [srcGoogle, srcOpenverse, srcWikimedia];
+    var fillSeq = 0;
+    // Rotación: reparte la carga (Google solo ~1/3) y hace fallback a las otras si la asignada no da imagen.
+    function searchRotating(name){
+      var start = (fillSeq++) % FILL_SOURCES.length;
+      function tryAt(k){ if (k >= FILL_SOURCES.length) return Promise.resolve(null); var fn = FILL_SOURCES[(start + k) % FILL_SOURCES.length]; return withTimeout(fn(name), 8000).then(function(u){ return u || tryAt(k + 1); }); }
+      return tryAt(0);
+    }
+    var FILL_MAX_PER_RUN = 12;   // con rotación Google recibe ~1/3, así que se puede una tanda mayor sin CAPTCHA
     function fillAllImages(progressCb){
       if (!isOnline()) return Promise.resolve({ filled:0, total:0, remaining:0, offline:true });
       return getUrlMap().then(function(m){
@@ -11082,7 +11094,7 @@
         function next(i){
           if (blocked || i >= todo.length) return Promise.resolve({ filled:filled, total:total, remaining: Math.max(0, pend - processed), blocked:blocked });
           var it = todo[i]; if (progressCb) progressCb(i+1, total, it.name);
-          return Promise.resolve().then(function(){ setName(it.name); return withTimeout(searchOnce(it.name), 8000); }).then(function(url){
+          return Promise.resolve().then(function(){ setName(it.name); return searchRotating(it.name); }).then(function(url){
             processed++;
             if (url){
               consecEmpty = 0;
@@ -11098,7 +11110,7 @@
             return null;
           }).catch(function(){ return null; }).then(function(){
             if (blocked) return { filled:filled, total:total, remaining: Math.max(0, pend - processed), blocked:true };
-            return new Promise(function(r){ setTimeout(r, 3500); }).then(function(){ return next(i+1); });
+            return new Promise(function(r){ setTimeout(r, 1500); }).then(function(){ return next(i+1); });
           });
         }
         return next(0);
