@@ -1130,6 +1130,27 @@ function methodToScope(method) {
 // FIX R13 (#4): Middleware requireAuth
 // R14: ahora acepta también `X-API-Key: vlx_xxx`
 // =============================================================
+// FUSION F1: estado del tenant (pos_companies.status) con cache corto. Fail-open: cualquier error => null.
+const _tenantStatusCache = new Map();
+async function getTenantStatusCached(tenantId) {
+  const key = String(tenantId || '');
+  if (!key) return null;
+  const hit = _tenantStatusCache.get(key);
+  const now = Date.now();
+  if (hit && (now - hit.at) < 60000) return hit.status;
+  let status = null;
+  try {
+    const rows = await supabaseRequest('GET',
+      '/pos_companies?tenant_id=eq.' + encodeURIComponent(key) + '&select=status&order=created_at.desc&limit=1');
+    if (Array.isArray(rows) && rows.length && rows[0] && typeof rows[0].status === 'string') {
+      status = rows[0].status.toLowerCase();
+    }
+  } catch (_) { status = null; }
+  _tenantStatusCache.set(key, { status, at: now });
+  if (_tenantStatusCache.size > 5000) _tenantStatusCache.clear();
+  return status;
+}
+
 function requireAuth(handler, requiredRoles) {
   return async (req, res, params) => {
     // 1) X-API-Key tiene prioridad si está presente
@@ -1233,6 +1254,21 @@ function requireAuth(handler, requiredRoles) {
         // (legacy tokens stay valid until they expire).
       } catch (_) { /* fail-open: keep auth working if table missing or PostgREST errors */ }
     }
+    // FUSION F1 (2026-08-23): kill switch SERVER-SIDE por tenant con regla FAIL-OPEN.
+    // Bloquea SOLO si pos_companies.status es explicitamente suspended/revoked/expired.
+    // Sin fila, error de red o 5xx => NO bloquear. Cache 60s por tenant. Plataforma exenta.
+    try {
+      const _rolePlat = String(payload.role || '').toLowerCase();
+      if (payload.tenant_id && !payload.is_impersonation && _rolePlat !== 'superadmin' && _rolePlat !== 'platform_owner') {
+        const st = await getTenantStatusCached(payload.tenant_id);
+        if (st === 'suspended' || st === 'revoked' || st === 'expired') {
+          return sendJSON(res, {
+            error: 'forbidden', error_code: 'TENANT_' + st.toUpperCase(),
+            hint: 'La cuenta del negocio esta ' + (st === 'suspended' ? 'suspendida' : st === 'revoked' ? 'revocada' : 'vencida') + '. Contacta a soporte.'
+          }, 403);
+        }
+      }
+    } catch (_) { /* fail-open */ }
     req.user = {
       id: payload.id, email: payload.email,
       role: payload.role, tenant_id: payload.tenant_id, via: 'jwt',
@@ -13686,7 +13722,14 @@ handlers['GET /api/config/public'] = async (req, res) => {
       const tid = decodeURIComponent(params.tid);
       const body = await readBody(req);
       const reason = String(body.reason || 'admin_suspend').slice(0, 200);
-      // 1. Marcar suspended (tabla pos_tenants si existe)
+      // 1. Marcar suspended en pos_companies (FUENTE DE VERDAD; pos_tenants esta vacia/legacy)
+      try {
+        await supabaseRequest('PATCH',
+          '/pos_companies?tenant_id=eq.' + encodeURIComponent(tid),
+          { status: 'suspended', is_active: false, updated_at: new Date().toISOString() });
+      } catch (e) { /* tolerar */ }
+      try { _tenantStatusCache.delete(tid); } catch (_) {}
+      // 1b. Legacy: pos_tenants (vacia; se mantiene por compatibilidad)
       try {
         await supabaseRequest('PATCH',
           '/pos_tenants?tenant_id=eq.' + encodeURIComponent(tid),
@@ -13713,6 +13756,33 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: true, tenant_id: tid, suspended: true });
     } catch (e) {
       sendJSON(res, { ok: false, error: e.message || 'suspend-failed' }, 500);
+    }
+  });
+
+  // POST /api/admin/tenant/:tid/reactivate — revierte la suspension (pos_companies.status=active)
+  handlers['POST /api/admin/tenant/:tid/reactivate'] = requireAuth(async (req, res, params) => {
+    try {
+      const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+      if (role !== 'superadmin' && role !== 'platform_owner') {
+        return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
+      }
+      const tid = decodeURIComponent(params.tid);
+      try {
+        await supabaseRequest('PATCH',
+          '/pos_companies?tenant_id=eq.' + encodeURIComponent(tid),
+          { status: 'active', is_active: true, updated_at: new Date().toISOString() });
+      } catch (e) { return sendJSON(res, { ok: false, error: 'reactivate-failed' }, 500); }
+      try { _tenantStatusCache.delete(tid); } catch (_) {}
+      try { await supabaseRequest('PATCH', '/pos_tenants?tenant_id=eq.' + encodeURIComponent(tid), { status: 'active', suspended_at: null }); } catch (_) {}
+      try {
+        await supabaseRequest('POST', '/pos_app_config_versions?on_conflict=tenant_id',
+          { tenant_id: tid, version: Date.now(), updated_at: new Date().toISOString() },
+          { 'Prefer': 'resolution=merge-duplicates' });
+      } catch (e) { /* tolerar */ }
+      try { logAudit(req, 'tenant.reactivated', 'pos_companies', { tenant_id: tid }); } catch (_) {}
+      sendJSON(res, { ok: true, tenant_id: tid, suspended: false });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'reactivate-failed' }, 500);
     }
   });
 
