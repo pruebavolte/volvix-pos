@@ -1816,7 +1816,9 @@
     let attempts = 0;
     const poll = setInterval(async () => {
       attempts++;
-      const empty = !window.CATALOG || (Array.isArray(window.CATALOG) && window.CATALOG.length === 0);
+      const catEmpty = !window.CATALOG || (Array.isArray(window.CATALOG) && window.CATALOG.length === 0);
+      const realEmpty = !window.PRODUCTS_REAL || (Array.isArray(window.PRODUCTS_REAL) && window.PRODUCTS_REAL.length === 0);
+      const empty = catEmpty && realEmpty;
       if (empty && attempts >= 5) {
         clearInterval(poll);
         // CRÍTICO: verificar BD ANTES de abrir, no solo CATALOG local
