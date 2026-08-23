@@ -10990,7 +10990,7 @@
     })();
     function isOnline(){ return (typeof navigator === 'undefined') || navigator.onLine !== false; }
     // Mapa {code: image_url} de la BD, cacheado 1 vez por sesion (el renderer no expone la url en la fila).
-    var urlMapP = null, urlMap = {}, codeIdMap = {};
+    var urlMapP = null, urlMap = {}, codeIdMap = {}, triedEmpty = {};
     function getUrlMap(){ if (urlMapP) return urlMapP; if (typeof _authFetch !== 'function') return Promise.resolve({}); urlMapP = _authFetch('/api/products?limit=5000').then(function(r){ return r.json(); }).then(function(j){ var list = Array.isArray(j) ? j : ((j && j.products) || []); var m = {}; list.forEach(function(p){ if (p && p.code){ if (p.image_url) m[String(p.code)] = p.image_url; if (p.id) codeIdMap[String(p.code)] = p.id; } }); urlMap = m; return m; }).catch(function(){ return {}; }); return urlMapP; }
     // ===== COLUMNA "URL de imagen" (se llena del mapa BD + marca ✓ si el byte está en cache local) =====
     function truncMid(s){ s = String(s || ''); return s.length > 58 ? (s.slice(0,32) + '…' + s.slice(-18)) : s; }
@@ -11068,19 +11068,22 @@
     // "Llenar todas": para cada producto SIN url, busca 1 vez (throttled), guarda url en BD y cachea data:URL.
     // Robusto: timeout por paso (nunca se cuelga) + se detiene solo si Google empieza a bloquear (CAPTCHA).
     function withTimeout(p, ms){ return Promise.race([ Promise.resolve(p), new Promise(function(res){ setTimeout(function(){ res(null); }, ms); }) ]); }
+    var FILL_MAX_PER_RUN = 8;   // tanda chica para NO disparar el CAPTCHA de Google
     function fillAllImages(progressCb){
-      if (!isOnline()) return Promise.resolve({ filled:0, total:0, offline:true });
+      if (!isOnline()) return Promise.resolve({ filled:0, total:0, remaining:0, offline:true });
       return getUrlMap().then(function(m){
-        var todo = rows().map(function(r){ return { code:(r.getAttribute('data-prod-code')||r.getAttribute('data-prod-id')||'').trim(), name:(r.getAttribute('data-prod-name')||'').trim() }; })
-          .filter(function(x){ return x.code && x.name && x.name.length >= 2 && !m[String(x.code)]; });
-        var total = todo.length, filled = 0, consecEmpty = 0, blocked = false;
-        if (!total){ if (progressCb) progressCb(0, 0); return { filled:0, total:0 }; }
+        var allTodo = rows().map(function(r){ return { code:(r.getAttribute('data-prod-code')||r.getAttribute('data-prod-id')||'').trim(), name:(r.getAttribute('data-prod-name')||'').trim() }; })
+          .filter(function(x){ return x.code && x.name && x.name.length >= 2 && !m[String(x.code)] && !triedEmpty[String(x.code)]; });
+        var pend = allTodo.length;
+        if (!pend){ if (progressCb) progressCb(0, 0); return { filled:0, total:0, remaining:0 }; }
+        var todo = allTodo.slice(0, FILL_MAX_PER_RUN);
+        var total = todo.length, filled = 0, consecEmpty = 0, blocked = false, processed = 0;
         build();
         function next(i){
-          if (blocked) return Promise.resolve({ filled:filled, total:total, blocked:true });
-          if (i >= todo.length) return Promise.resolve({ filled:filled, total:total });
+          if (blocked || i >= todo.length) return Promise.resolve({ filled:filled, total:total, remaining: Math.max(0, pend - processed), blocked:blocked });
           var it = todo[i]; if (progressCb) progressCb(i+1, total, it.name);
           return Promise.resolve().then(function(){ setName(it.name); return withTimeout(searchOnce(it.name), 8000); }).then(function(url){
+            processed++;
             if (url){
               consecEmpty = 0;
               urlMap[String(it.code)] = url; items=[url]; idx=0; setCounter(); setImgEl(url);
@@ -11088,17 +11091,18 @@
               filled++;
               return withTimeout(saveImageToProduct(it.code, url), 8000).then(function(){ return withTimeout(fetchAndCache(it.code, url, [url]), 8000); });
             } else {
+              triedEmpty[String(it.code)] = 1;  // no reintentar en esta sesión
               consecEmpty++;
-              if (consecEmpty >= 6) blocked = true; // 6 seguidas sin imagen = Google probablemente pide CAPTCHA -> parar
+              if (consecEmpty >= 5) blocked = true; // 5 seguidas vacías = Google probablemente pide CAPTCHA -> parar tanda
             }
             return null;
           }).catch(function(){ return null; }).then(function(){
-            if (blocked) return { filled:filled, total:total, blocked:true };
-            return new Promise(function(r){ setTimeout(r, 2500); }).then(function(){ return next(i+1); });
+            if (blocked) return { filled:filled, total:total, remaining: Math.max(0, pend - processed), blocked:true };
+            return new Promise(function(r){ setTimeout(r, 3500); }).then(function(){ return next(i+1); });
           });
         }
         return next(0);
-      }).catch(function(){ return { filled:0, total:0, error:true }; });
+      }).catch(function(){ return { filled:0, total:0, remaining:0, error:true }; });
     }
     window.__vlxFillAll = fillAllImages;
     function loadCse(){
@@ -12110,13 +12114,15 @@
         const orig = btnFill.textContent; btnFill.disabled = true;
         window.__vlxFillAll((i, total) => { btnFill.textContent = total ? ('⏳ Llenando ' + i + '/' + total + '…') : '✓ Nada que llenar'; })
           .then((r) => {
-            let msg;
-            if (r.offline) msg = 'Sin conexión — reintenta con internet';
-            else if (r.blocked) msg = '⚠️ Google pausó las búsquedas (posible CAPTCHA). Se llenaron ' + (r.filled || 0) + '. Reintenta más tarde.';
-            else msg = '✓ ' + (r.filled || 0) + ' de ' + (r.total || 0) + ' imágenes cacheadas';
-            btnFill.textContent = r.blocked ? ('⚠️ ' + (r.filled || 0) + ' (pausado)') : ('✓ ' + (r.filled || 0) + ' imágenes');
+            const rem = r.remaining || 0;
+            let msg, label;
+            if (r.offline) { msg = 'Sin conexión — reintenta con internet'; label = orig; }
+            else if (r.blocked) { msg = '⚠️ Google pausó (posible CAPTCHA). Se llenaron ' + (r.filled || 0) + '. Espera 1-2 min y dale otra vez.'; label = '⚠️ pausado · faltan ' + rem; }
+            else if (rem > 0) { msg = '✓ ' + (r.filled || 0) + ' llenadas en esta tanda. Faltan ' + rem + ' — dale otra vez en un momento (para no saturar Google).'; label = '🖼️ Llenar (faltan ' + rem + ')'; }
+            else { msg = '✓ Listo: ' + (r.filled || 0) + ' llenadas. No quedan pendientes.'; label = '✓ Imágenes al día'; }
+            btnFill.textContent = label;
             try { if (typeof showToast === 'function') showToast(msg, (r.offline || r.blocked) ? 'error' : undefined); } catch(_){}
-            setTimeout(() => { btnFill.disabled = false; btnFill.textContent = orig; }, 3500);
+            setTimeout(() => { btnFill.disabled = false; if (rem <= 0 && !r.blocked && !r.offline) btnFill.textContent = '🖼️ Llenar imágenes'; else btnFill.textContent = label; }, 4000);
           })
           .catch(() => { btnFill.disabled = false; btnFill.textContent = orig; });
       });
