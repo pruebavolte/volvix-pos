@@ -36,11 +36,14 @@ Fecha: 2026-08-23 · Estado: PROPUESTA VERIFICADA (descubrimiento por 7 agentes 
 
 ## 3. Decisiones del dueño
 1. ✅ DECIDIDO (2026-08-23): **los DOS dominios sobreviven y siguen funcionando** (`systeminternational.app` = POS, `negocio.international` = negocio), los 3 sitios sobre la misma DB vnru. Consecuencias: NO hay 301 ni dominio perdedor; NO hace falta `pos.<raíz>` (el host del POS ya es systeminternational.app); la fusión = identidad única (SSO por handoff de token entre dominios) + licencias coherentes + puentes ya existentes endurecidos. F2 se reduce a: Redirect URLs de Supabase Auth + ALLOWED_ORIGINS si negocio llama al API del POS desde el navegador (hoy es server-to-server).
-2. Marca única: "Volvix" vs "SalvadoreX".
-3. Modelo comercial: ¿sigue el trial gratis de registro.html o toda alta pasa por preventa/pago? ¿Licencia única por transferencia (negocio) vs suscripción Stripe (POS)? ¿Qué `plan` escribe una licencia comprada?
+2. ✅ DECIDIDO (2026-08-23): **Marca de producto = "SalvadoreX"** (cara al cliente). "Volvix" = nombre de la empresa/plataforma (GrupoVolvix), no del producto. Consecuencia (F5): unificar DEFAULT_TENANT_STATE.brand, index.html, brands.config.js, tokens visibles → SalvadoreX; internals volvix_* pueden quedarse.
+3. ✅ DECIDIDO (2026-08-23): **Modelo = registro abierto + AUTORIZACIÓN MANUAL DEL DUEÑO**. Cualquiera se registra gratis, pero NO entra automáticamente: queda en espera hasta que el dueño (desde su espacio) lo **autorice** (activa su prueba) o lo rechace. Sin autorización = sin acceso. Pagos (transferencia/SPEI, depósito, Mercado Pago, Stripe, etc.) se agregan **después** como paso adicional. → Requiere: status nuevo `awaiting_approval` para altas nuevas (NO reusar `pending`: 41 tenants vivos lo usan); enforcement lo bloquea; panel del dueño Aprobar/Rechazar; pantalla "esperando autorización" para el registrado. Ver §5.
 4. Nativos del POS (184): aceptar reset de contraseña al primer login en la raíz (único camino técnico).
 5. Canal WhatsApp oficial (bridge del dueño vs Meta/Wasender/Twilio del POS).
 6. Admin único: OWNER_EMAIL (negocio) ↔ superadmin/@systeminternational.app (POS).
 
 ## 4. Lo que NO se hace (objeciones aceptadas de la revisión)
 - NO proxy por prefijo `/pos/*`; NO "SSO por cookie"; NO verificar JWT Supabase dentro de `verifyJWT/requireAuth`; NO reutilizar X-API-Key para SSO; NO apagar `POST /api/login`; NO renumerar `pos_users.id`; NO migrar password_hash (imposible).
+
+## 5. Gate de autorización del dueño (decisión 2026-08-23) — EN DISEÑO (workflow)
+Regla: alta nueva → `pos_companies.status='awaiting_approval'` → sin acceso (403 TENANT_AWAITING_APPROVAL, pero login OK para mostrar pantalla de espera) → dueño Aprueba (status='active' + expires_at=+Ndías trial) o Rechaza (status='rejected'). NO tocar los 138 tenants actuales (97 active + 41 pending + 0 bloqueantes): solo altas NUEVAS reciben awaiting_approval; pending/active/null se mantienen con acceso (grandfather). Enforcement ya existe en requireAuth (bloquea suspended/revoked/expired) → sumar awaiting_approval y rejected. Pagos = fase posterior.
