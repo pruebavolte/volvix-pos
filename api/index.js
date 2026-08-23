@@ -9189,14 +9189,9 @@ handlers['POST /api/auth/oauth/google/exchange'] = async (req, res) => {
           status: 'active', created_at: now,
         });
       } catch (e) {}
-      // FUSION gate (2026-08-23): alta Google self-service tambien pasa por autorizacion del dueno.
-      // requireAuth lee pos_companies.status; sin fila = fail-open. Insertamos awaiting_approval para gatear.
-      try {
-        await supabaseRequest('POST', '/pos_companies', {
-          tenant_id: tenantId, name: email.split('@')[0], plan: 'trial',
-          status: 'awaiting_approval', is_active: false, created_at: now,
-        });
-      } catch (e) {}
+      // NOTA gate: el alta Google self-service NO crea pos_companies (owner_user_id es NOT NULL y el id
+      // generado aqui es 'USR-...' no-uuid => requireAuth ya la rechaza por id invalido, 401). Camino inerte;
+      // cuando se arregle el id a uuid, gatear aqui creando pos_companies status='awaiting_approval'.
       try {
         const rows = await supabaseRequest('POST', '/pos_users', {
           id: userId, tenant_id: tenantId, email, role: 'owner',
