@@ -962,6 +962,8 @@
     if (m) m.remove();
     document.removeEventListener('keydown', _escHandler);
     try { _stopCamera(); } catch (_) {}
+    // Si el usuario lo cierra, no volver a auto-abrirlo (sigue disponible por el botón Importar).
+    try { localStorage.setItem('volvix_wizard_dismissed', 'true'); } catch (_) {}
   }
 
   // STEP 1: pick source (file or camera)
@@ -1794,10 +1796,12 @@
   // 2026-05-11: chequear si el tenant tiene productos en la BD (no solo CATALOG)
   async function tenantHasProductsInDB() {
     try {
-      const r = await fetch('/api/productos?select=id&limit=1', { credentials: 'include' });
+      var headers = {};
+      try { var s = JSON.parse(localStorage.getItem('volvixSession') || '{}') || {}; var tok = s.token || s.access_token || localStorage.getItem('volvix_token'); if (tok) headers['Authorization'] = 'Bearer ' + tok; } catch (_) {}
+      const r = await fetch('/api/products?limit=1', { credentials: 'include', headers: headers });
       if (!r.ok) return false;
       const j = await r.json();
-      const items = (j && (j.items || j.data)) || [];
+      const items = Array.isArray(j) ? j : ((j && (j.products || j.items || j.data)) || []);
       return items.length > 0;
     } catch (_) { return false; }
   }

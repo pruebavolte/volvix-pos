@@ -11000,7 +11000,7 @@
       })(cells[i]); }
     }
     function ensureUrlColumn(){ getUrlMap().then(function(){ fillUrlColumn(); setTimeout(fillUrlColumn, 400); }); }
-    function revokeBlob(){ if (curBlobUrl){ try { URL.revokeObjectURL(curBlobUrl); } catch(_){} } curBlobUrl = null; blobForUrl = ''; }
+    function revokeBlob(){ var old = curBlobUrl; curBlobUrl = null; blobForUrl = ''; if (old){ setTimeout(function(){ try { URL.revokeObjectURL(old); } catch(_){} }, 4000); } }
     function setImgEl(src){ if (!bigImg) return; bigImg.onerror = function(){ bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent = isOnline() ? '(imagen no cargó)' : '(sin conexión)'; } }; bigImg.onload = function(){ bigImg.style.display=''; if (statusEl) statusEl.style.display='none'; }; bigImg.src = src; }
     function showBlobFor(url, objectUrl){ revokeBlob(); curBlobUrl = objectUrl; blobForUrl = url; setImgEl(objectUrl); }
     function setCounter(){ if (counterEl) counterEl.textContent = items.length ? ((idx+1) + ' / ' + items.length) : '0 / 0'; }
