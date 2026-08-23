@@ -512,15 +512,16 @@ async function activateAI(tenant_id, tipo_negocio) {
 // LICENCIAS
 async function loadLicencias() {
   const r = await fetch('/api/licencias');
-  const data = await r.json();
+  const raw = await r.json();
+  const data = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.licencias) ? raw.licencias : []);
   if (!Array.isArray(data) || !data.length) { document.getElementById('licenciasTable').innerHTML = '<p style="color:var(--muted)">Sin licencias.</p>'; return; }
   document.getElementById('licenciasTable').innerHTML = `<table>
     <thead><tr><th>Clave</th><th>Plan</th><th>Estado</th><th>Vence</th></tr></thead>
     <tbody>${data.map(l => `<tr>
-      <td style="font-family:monospace">${l.clave||'—'}</td>
+      <td style="font-family:monospace">${l.clave||l.tenant_id||'—'}</td>
       <td><span class="chip chip-blue">${l.plan||'—'}</span></td>
-      <td><span class="chip ${l.activo?'chip-green':'chip-red'}">${l.activo?'Activa':'Vencida'}</span></td>
-      <td>${l.fecha_vencimiento ? new Date(l.fecha_vencimiento).toLocaleDateString() : '—'}</td>
+      <td><span class="chip ${(l.activo??l.activa)?'chip-green':'chip-red'}">${(l.activo??l.activa)?'Activa':'Vencida'}</span></td>
+      <td>${(l.fecha_vencimiento||l.trial_ends_at) ? new Date(l.fecha_vencimiento||l.trial_ends_at).toLocaleDateString() : '—'}</td>
     </tr>`).join('')}</tbody>
   </table>`;
 }
