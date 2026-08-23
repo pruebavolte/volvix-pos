@@ -41368,14 +41368,16 @@ if (process.env.NODE_ENV === 'test') {
       try {
         const tenantId = req.user.tenant_id;
         const rows = await supabaseRequest('GET',
-          `/pos_companies?id=eq.${tenantId}&select=id,plan,is_active,trial_ends_at,created_at`
+          `/pos_companies?tenant_id=eq.${encodeURIComponent(tenantId)}&select=id,tenant_id,plan,status,is_active,trial_ends_at,created_at&order=created_at.desc&limit=1`
         ).catch(() => []);
         const company = rows && rows[0];
         sendJSON(res, {
           ok: true,
           licencias: company ? [{
             id: company.id,
+            tenant_id: company.tenant_id,
             plan: company.plan || 'free',
+            status: company.status || null,
             activa: company.is_active !== false,
             trial_ends_at: company.trial_ends_at,
             created_at: company.created_at
