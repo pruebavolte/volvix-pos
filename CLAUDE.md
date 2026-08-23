@@ -24,7 +24,7 @@
 
 - **Frontend:** HTML vanilla + JS modular (sin framework). Archivos en `public/`.
 - **Backend:** Node serverless en `api/index.js` (handlers map). Funciones edge en Supabase.
-- **Base de datos:** Supabase Postgres (project id `cd6936c4-d884-4d4d-ad42-0d74f02aa106`).
+- **Base de datos:** Supabase Postgres — **`vnruooisqnbqguavrdvd` (estructuraorganizacional), la DB ÚNICA de los 3 sitios** (verificado 2026-08-23 por runtime: el UUID de productos vivos solo existe ahí). El SUPABASE_URL real vive en la env de Railway. Refs viejos `zhvwmzkcqngcaqpdxtwr` (salvadorexoficial) y `cd6936c4-...` son LEGACY — no usar.
 - **Auth:** Custom JWT firmado en backend + email OTP (`/api/auth/register-simple`, `/api/auth/verify-simple`, `/api/login`).
 - **Deploy:** Railway (Server: railway-hikari) — auto-deploy en push a `main` vía GitHub. NO es Vercel.
 - **Repo:** `pruebavolte/volvix-pos` — branch principal: `main`.
@@ -141,7 +141,7 @@ REPO=pruebavolte/volvix-pos
 BRANCH_PRINCIPAL=main
 URL_PRODUCCION=https://systeminternational.app/
 URL_STAGING=N/A
-BASE_DE_DATOS=Supabase Postgres (cd6936c4-d884-4d4d-ad42-0d74f02aa106)
+BASE_DE_DATOS=Supabase Postgres vnruooisqnbqguavrdvd (DB única de los 3 sitios; legacy: zhvwmzkcqngcaqpdxtwr, bynvjmcamkzazykjbzba)
 AUTH_PROVIDER=Custom JWT + email OTP
 IDENTIFICADOR_TENANT=tenant_id
 TABLA_CONFIGURACION=giros_modulos, giros_terminologia, giros_campos
