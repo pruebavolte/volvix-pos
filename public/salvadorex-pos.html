@@ -10995,52 +10995,45 @@
       var cells = document.querySelectorAll('#inv-body .vlx-url-cell'); if (!cells.length) return;
       for (var i=0;i<cells.length;i++){ (function(cell){
         var code = cell.getAttribute('data-url-code'); var u = urlMap[String(code)];
-        if (u){ setUrlCell(cell, u, false); VLXImgDB.get(code).then(function(rec){ if (rec && rec.blob) setUrlCell(cell, rec.url || u, true); }); }
-        else { VLXImgDB.get(code).then(function(rec){ if (rec && rec.url) setUrlCell(cell, rec.url, !!rec.blob); }); }
+        if (u){ setUrlCell(cell, u, false); VLXImgDB.get(code).then(function(rec){ if (rec && rec.dataUrl) setUrlCell(cell, rec.url || u, true); }); }
+        else { VLXImgDB.get(code).then(function(rec){ if (rec && rec.url) setUrlCell(cell, rec.url, !!rec.dataUrl); }); }
       })(cells[i]); }
     }
     function ensureUrlColumn(){ getUrlMap().then(function(){ fillUrlColumn(); setTimeout(fillUrlColumn, 400); }); }
-    function revokeBlob(){ var old = curBlobUrl; curBlobUrl = null; blobForUrl = ''; curBlob = null; if (old){ setTimeout(function(){ try { URL.revokeObjectURL(old); } catch(_){} }, 4000); } }
     function _imgOk(){ if (bigImg) bigImg.style.display=''; if (statusEl) statusEl.style.display='none'; }
-    function _imgFail(){ if (bigImg) bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent = isOnline() ? '(imagen no disponible)' : '(sin conexión)'; } }
-    // Muestra por URL http (confiable en esta página); si falla (offline o imagen borrada) cae al blob local cacheado.
-    function setImgEl(src){ if (!bigImg) return; bigImg.onload = _imgOk; bigImg.onerror = function(){ if (curBlob){ try { curBlobUrl = URL.createObjectURL(curBlob); bigImg.onload = _imgOk; bigImg.onerror = _imgFail; bigImg.src = curBlobUrl; return; } catch(_){} } _imgFail(); }; bigImg.src = src; }
+    function _imgFail(){ if (bigImg) bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent = isOnline() ? '(sin imagen)' : '(sin conexión)'; } }
+    function setImgEl(src, onFail){ if (!bigImg) return; bigImg.onload = _imgOk; bigImg.onerror = onFail || _imgFail; bigImg.src = src; }
     function redisplay(){ if (items.length) renderCompact(); }
     function setCounter(){ if (counterEl) counterEl.textContent = items.length ? ((idx+1) + ' / ' + items.length) : '0 / 0'; }
-    // Baja los bytes (gstatic permite CORS) y los cachea en IndexedDB; devuelve objectURL o null.
-    function fetchAndCache(code, url, candidates){ if (!isOnline() || !url) return Promise.resolve(null); return fetch(url, { mode:'cors' }).then(function(r){ if (!r.ok) throw 0; return r.blob(); }).then(function(b){ if (!b || b.size < 200) throw 0; VLXImgDB.put({ code:String(code), url:url, blob:b, candidates:(candidates || [url]).slice(0,30), ts:Date.now() }); return b; }).catch(function(){ return null; }); }
-    // Cache-first para un producto: 1) blob local (offline)  2) url conocida (baja+cachea)  3) busca 1 vez (solo online)
+    function blobToDataURL(blob){ return new Promise(function(res, rej){ try { var fr = new FileReader(); fr.onload = function(){ res(fr.result); }; fr.onerror = function(){ rej(0); }; fr.readAsDataURL(blob); } catch(e){ rej(e); } }); }
+    // Baja los bytes (gstatic permite CORS), los convierte a data:URL (se muestra confiable, sin expiry) y los cachea. Devuelve el data:URL o null.
+    function fetchAndCache(code, url, candidates){ if (!isOnline() || !url) return Promise.resolve(null); return fetch(url, { mode:'cors' }).then(function(r){ if (!r.ok) throw 0; return r.blob(); }).then(function(b){ if (!b || b.size < 200) throw 0; return blobToDataURL(b); }).then(function(du){ VLXImgDB.put({ code:String(code), url:url, dataUrl:du, candidates:(candidates || [url]).slice(0,30), ts:Date.now() }); return du; }).catch(function(){ return null; }); }
+    // Si la url cacheada murió (gstatic expira), re-busca 1 vez y re-cachea (auto-reparación, solo online).
+    function repair(code, name, token){ if (token !== loadToken) return; if (!isOnline()){ _imgFail(); return; } autoSaveCode = code; showBusy(); execQuery(name); }
+    // Cache-first: 1) data:URL local (offline, sin expiry)  2) url conocida (muestra + cachea; si murió, repara)  3) busca 1 vez
     function loadForProduct(code, name, dbUrl){
       var token = ++loadToken; curCode = code; autoSaveCode = ''; curQuery = '';
       if (scrapeTimer){ clearInterval(scrapeTimer); scrapeTimer = null; }
       VLXImgDB.get(code).then(function(rec){
         if (token !== loadToken) return;
-        if (rec && rec.blob){
-          items = (rec.candidates && rec.candidates.length) ? rec.candidates : [rec.url]; idx = 0; setCounter();
-          curBlob = rec.blob; blobForUrl = rec.url; setImgEl(rec.url); // http si hay red; cae al blob si offline
-          return;
-        }
+        if (rec && rec.dataUrl){ items = (rec.candidates && rec.candidates.length) ? rec.candidates : [rec.url]; idx = 0; setCounter(); setImgEl(rec.dataUrl); return; }
+        if (rec && rec.blob){ items = (rec.candidates && rec.candidates.length) ? rec.candidates : [rec.url]; idx = 0; setCounter(); blobToDataURL(rec.blob).then(function(du){ if (token === loadToken){ setImgEl(du); VLXImgDB.put({ code:String(code), url:rec.url, dataUrl:du, candidates:rec.candidates || [rec.url], ts:Date.now() }); } }).catch(function(){ if (token === loadToken) setImgEl(rec.url, function(){ repair(code, name, token); }); }); return; }
         var known = dbUrl || urlMap[String(code)] || '';
-        if (known){
-          items = [known]; idx = 0; setCounter(); revokeBlob(); setImgEl(known);
-          fetchAndCache(code, known, [known]).then(function(b){ if (token === loadToken && b){ curBlob = b; blobForUrl = known; } });
-          return;
-        }
+        if (known){ items = [known]; idx = 0; setCounter(); setImgEl(known, function(){ repair(code, name, token); }); fetchAndCache(code, known, [known]); return; }
         if (!isOnline()){ items = []; idx = 0; if (bigImg) bigImg.style.display='none'; if (statusEl){ statusEl.style.display=''; statusEl.textContent='Sin imagen (sin conexión)'; } setCounter(); return; }
-        // Sin url en fila/mapa: consulta el mapa de la BD (1 sola vez) antes de decidir buscar.
         getUrlMap().then(function(m){
           if (token !== loadToken) return;
           var u = m[String(code)];
-          if (u){ items = [u]; idx = 0; setCounter(); revokeBlob(); blobForUrl = u; setImgEl(u); fetchAndCache(code, u, [u]).then(function(b){ if (token === loadToken && b){ curBlob = b; blobForUrl = u; } }); return; }
+          if (u){ items = [u]; idx = 0; setCounter(); setImgEl(u, function(){ repair(code, name, token); }); fetchAndCache(code, u, [u]); return; }
           autoSaveCode = code; if (name && name.length >= 2){ showBusy(); execQuery(name); } else showEmpty();
         });
       });
     }
-    // Tras una búsqueda automática (producto sin url): guarda la 1a imagen (url→BD, bytes→cache local).
+    // Tras una búsqueda (producto sin url o reparación): guarda la 1a imagen (url→BD, data:URL→cache local) y la muestra.
     function maybeAutoSaveFirst(){
       if (!autoSaveCode || !items.length) return;
       var code = autoSaveCode, first = items[0], cands = items.slice(0,30); autoSaveCode = '';
-      fetchAndCache(code, first, cands).then(function(b){ if (curCode === code && b){ curBlob = b; blobForUrl = first; } });
+      fetchAndCache(code, first, cands).then(function(du){ if (curCode === code && du) setImgEl(du); });
       try { saveImageToProduct(code, first).then(function(ok){ if (ok){ urlMap[String(code)] = first; if (activeRow && activeRow.getAttribute('data-prod-code') === code) activeRow.setAttribute('data-prod-img', first); if (typeof vlxUpdateUrlCell === 'function') vlxUpdateUrlCell(code, first); } }); } catch(_e){}
     }
     function loadCse(){
@@ -11265,7 +11258,7 @@
       if (statusEl){ statusEl.style.display=''; statusEl.textContent='Cargando…'; }
       loadForProduct(code, name, dbUrl);
       // Salvavidas: si algo ocultó el panel o la imagen no cargó (subtree oculto), re-afirmar y re-mostrar.
-      setTimeout(function(){ if (panelUserOpen && activeRow && panel){ if (panel.style.display === 'none') panel.style.display = 'flex'; if (bigImg && curBlob && !bigImg.naturalWidth) redisplay(); } }, 700);
+      setTimeout(function(){ if (panelUserOpen && activeRow && panel){ if (panel.style.display === 'none') panel.style.display = 'flex'; if (bigImg && items.length && !bigImg.naturalWidth) redisplay(); } }, 700);
     }
     function rows(){ var b=document.getElementById('inv-body'); return b ? Array.prototype.slice.call(b.querySelectorAll('tr.inv-prod-row')) : []; }
     function move(d){ var rs=rows(); if(!rs.length) return; var i=activeRow?rs.indexOf(activeRow):-1; i=i<0?(d>0?0:rs.length-1):(i+d+rs.length)%rs.length; selectRow(rs[i]); }
