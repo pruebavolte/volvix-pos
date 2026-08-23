@@ -992,7 +992,7 @@
             } catch (_) {}
           }
           $('#tenantIdBox').textContent = state.tenant_id || 'TNT-XXXXX';
-          state._redirect = res.body.redirect || '/salvadorex-pos.html';
+          state._redirect = '/esperando-autorizacion.html'; // FUSION gate: alta nueva espera autorizacion del dueno
           setStep(3);
           // 2026-05-13 UX FIX: auto-login INMEDIATO. Usuario pidio que NO tenga que
           // presionar 'Entrar a mi POS' tras crear cuenta — token YA esta guardado,

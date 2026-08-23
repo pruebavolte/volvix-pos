@@ -1261,10 +1261,17 @@ function requireAuth(handler, requiredRoles) {
       const _rolePlat = String(payload.role || '').toLowerCase();
       if (payload.tenant_id && !payload.is_impersonation && _rolePlat !== 'superadmin' && _rolePlat !== 'platform_owner') {
         const st = await getTenantStatusCached(payload.tenant_id);
-        if (st === 'suspended' || st === 'revoked' || st === 'expired') {
+        if (st === 'suspended' || st === 'revoked' || st === 'expired' || st === 'awaiting_approval' || st === 'rejected') {
+          const _hints = {
+            suspended: 'La cuenta del negocio esta suspendida. Contacta a soporte.',
+            revoked: 'La cuenta del negocio fue revocada. Contacta a soporte.',
+            expired: 'La cuenta del negocio esta vencida. Contacta a soporte.',
+            awaiting_approval: 'Tu cuenta esta pendiente de autorizacion del administrador.',
+            rejected: 'Tu registro fue rechazado. Contacta a soporte.'
+          };
           return sendJSON(res, {
             error: 'forbidden', error_code: 'TENANT_' + st.toUpperCase(),
-            hint: 'La cuenta del negocio esta ' + (st === 'suspended' ? 'suspendida' : st === 'revoked' ? 'revocada' : 'vencida') + '. Contacta a soporte.'
+            hint: _hints[st] || 'Acceso no autorizado. Contacta a soporte.'
           }, 403);
         }
       }
@@ -9182,6 +9189,14 @@ handlers['POST /api/auth/oauth/google/exchange'] = async (req, res) => {
           status: 'active', created_at: now,
         });
       } catch (e) {}
+      // FUSION gate (2026-08-23): alta Google self-service tambien pasa por autorizacion del dueno.
+      // requireAuth lee pos_companies.status; sin fila = fail-open. Insertamos awaiting_approval para gatear.
+      try {
+        await supabaseRequest('POST', '/pos_companies', {
+          tenant_id: tenantId, name: email.split('@')[0], plan: 'trial',
+          status: 'awaiting_approval', is_active: false, created_at: now,
+        });
+      } catch (e) {}
       try {
         const rows = await supabaseRequest('POST', '/pos_users', {
           id: userId, tenant_id: tenantId, email, role: 'owner',
@@ -13783,6 +13798,79 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: true, tenant_id: tid, suspended: false });
     } catch (e) {
       sendJSON(res, { ok: false, error: e.message || 'reactivate-failed' }, 500);
+    }
+  });
+
+  // GET /api/tenant/gate-status — endpoint barato SIN rol para que la pantalla de espera sondee el gate.
+  // requireAuth (sin requiredRoles) => si el tenant esta awaiting_approval/rejected/etc el gate responde 403
+  // con error_code; si esta active, cae aqui y responde 200. Independiente del rol del usuario.
+  handlers['GET /api/tenant/gate-status'] = requireAuth(async (req, res) => {
+    sendJSON(res, { ok: true, tenant_id: (req.user && req.user.tenant_id) || null, status: 'active' });
+  });
+
+  // POST /api/admin/tenant/:tid/authorize — AUTORIZAR alta pendiente (awaiting_approval|rejected -> active) + arranca trial
+  handlers['POST /api/admin/tenant/:tid/authorize'] = requireAuth(async (req, res, params) => {
+    try {
+      const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+      if (role !== 'superadmin' && role !== 'platform_owner') {
+        return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
+      }
+      const tid = decodeURIComponent(params.tid);
+      const TRIAL_DIAS = parseInt(process.env.TRIAL_DIAS || '15', 10);
+      const nowMs = Date.now();
+      const expiresAt = new Date(nowMs + TRIAL_DIAS * 86400000).toISOString();
+      try {
+        await supabaseRequest('PATCH',
+          '/pos_companies?tenant_id=eq.' + encodeURIComponent(tid),
+          { status: 'active', is_active: true, expires_at: expiresAt, updated_at: new Date().toISOString() });
+      } catch (e) { return sendJSON(res, { ok: false, error: 'authorize-failed' }, 500); }
+      try { _tenantStatusCache.delete(tid); } catch (_) {}
+      try { await supabaseRequest('PATCH', '/pos_tenants?tenant_id=eq.' + encodeURIComponent(tid), { status: 'active' }); } catch (_) {}
+      try {
+        await supabaseRequest('POST', '/pos_app_config_versions?on_conflict=tenant_id',
+          { tenant_id: tid, version: Date.now(), updated_at: new Date().toISOString() },
+          { 'Prefer': 'resolution=merge-duplicates' });
+      } catch (e) { /* tolerar */ }
+      try { logAudit(req, 'tenant.authorized', 'pos_companies', { tenant_id: tid, expires_at: expiresAt }); } catch (_) {}
+      sendJSON(res, { ok: true, tenant_id: tid, authorized: true, expires_at: expiresAt });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'authorize-failed' }, 500);
+    }
+  });
+
+  // POST /api/admin/tenant/:tid/reject — RECHAZAR alta pendiente (-> rejected, revoca sesiones)
+  handlers['POST /api/admin/tenant/:tid/reject'] = requireAuth(async (req, res, params) => {
+    try {
+      const role = String((req.user && (req.user.role || req.user.rol)) || '').toLowerCase();
+      if (role !== 'superadmin' && role !== 'platform_owner') {
+        return sendJSON(res, { ok: false, error: 'forbidden' }, 403);
+      }
+      const tid = decodeURIComponent(params.tid);
+      const body = await readBody(req).catch(() => ({}));
+      const reason = String((body && body.reason) || 'admin_reject').slice(0, 200);
+      try {
+        await supabaseRequest('PATCH',
+          '/pos_companies?tenant_id=eq.' + encodeURIComponent(tid),
+          { status: 'rejected', is_active: false, updated_at: new Date().toISOString() });
+      } catch (e) { return sendJSON(res, { ok: false, error: 'reject-failed' }, 500); }
+      try { _tenantStatusCache.delete(tid); } catch (_) {}
+      try {
+        await supabaseRequest('POST', '/pos_revoked_tokens', {
+          jti: 'tenant_reject:' + tid + ':' + Date.now(),
+          tenant_id: tid, reason: 'tenant_rejected:' + reason,
+          revoked_by: req.user.email || req.user.user_id,
+          expires_at: new Date(Date.now() + 30 * 86400000).toISOString()
+        });
+      } catch (e) { /* tolerar */ }
+      try {
+        await supabaseRequest('POST', '/pos_app_config_versions?on_conflict=tenant_id',
+          { tenant_id: tid, version: Date.now(), updated_at: new Date().toISOString() },
+          { 'Prefer': 'resolution=merge-duplicates' });
+      } catch (e) { /* tolerar */ }
+      try { logAudit(req, 'tenant.rejected', 'pos_companies', { tenant_id: tid, reason }); } catch (_) {}
+      sendJSON(res, { ok: true, tenant_id: tid, rejected: true });
+    } catch (e) {
+      sendJSON(res, { ok: false, error: e.message || 'reject-failed' }, 500);
     }
   });
 
@@ -37809,7 +37897,7 @@ if (process.env.NODE_ENV === 'test') {
       try {
         await supabaseRequest('PATCH',
           '/pos_companies?id=eq.' + encodeURIComponent(user.company_id),
-          { status: 'active', is_active: true, updated_at: nowIso });
+          { status: 'awaiting_approval', is_active: false, updated_at: nowIso });
       } catch (_) {}
 
       // ---- Bootstrap demo data ----
@@ -38848,7 +38936,7 @@ if (process.env.NODE_ENV === 'test') {
         });
         if (match.user.company_id) {
           await supabaseRequest('PATCH', '/pos_companies?id=eq.' + encodeURIComponent(match.user.company_id),
-            { status: 'active', is_active: true, updated_at: new Date().toISOString() }).catch(() => {});
+            { status: 'awaiting_approval', is_active: false, updated_at: new Date().toISOString() }).catch(() => {});
         }
       } catch (_) { /* no-fatal */ }
       // Redirect a la página de verificación con flag OK
@@ -39025,7 +39113,7 @@ if (process.env.NODE_ENV === 'test') {
       try {
         await supabaseRequest('PATCH',
           '/pos_companies?id=eq.' + encodeURIComponent(user.company_id),
-          { status: 'active', is_active: true, updated_at: nowIso });
+          { status: 'awaiting_approval', is_active: false, updated_at: nowIso });
       } catch (_) {}
 
       // Bootstrap demo data
@@ -41127,7 +41215,8 @@ if (process.env.NODE_ENV === 'test') {
           name: nombre_negocio,
           giro: giro,
           plan: 'trial',
-          is_active: true
+          status: 'awaiting_approval',
+          is_active: false
         });
         const tenantId = (Array.isArray(company) ? company[0] : company) && (Array.isArray(company) ? company[0].id : company.id);
         if (!tenantId) {
@@ -44046,7 +44135,7 @@ if (process.env.NODE_ENV === 'test') {
       // 2026-05-09 fix(HIGH-1+6): server-side allowlists para enums.
       // datalist HTML5 no constraina input — el frontend acepta cualquier
       // string, así que validar AQUÍ es la única defensa.
-      const ALLOWED_STATUS = new Set(['active','suspended','revoked','expired','pending']);
+      const ALLOWED_STATUS = new Set(['active','suspended','revoked','expired','pending','awaiting_approval','rejected']);
       const ALLOWED_PLANS = new Set(['trial','pro','enterprise','marca_blanca']);
       // Cargar slugs válidos de business_type desde verticals (cache 60s).
       let allowedGiros = handlers.__giros_cache && (Date.now() - handlers.__giros_cache_ts < 60000)
@@ -44123,6 +44212,8 @@ if (process.env.NODE_ENV === 'test') {
           // Patch by id (the row's primary key, resolved above)
           await supabaseRequest('PATCH',
             `/pos_companies?id=eq.${encodeURIComponent(exists[0].id)}`, patch);
+          // FUSION gate: si cambia status via edicion inline, invalidar cache del kill-switch (efecto inmediato)
+          try { if (patch.status !== undefined && typeof _tenantStatusCache !== 'undefined') _tenantStatusCache.delete(tid); } catch (_) {}
           try { logAudit(req, 'tenant.bulk_updated', 'pos_companies', { id: tid, after: patch }); } catch (_) {}
           const rowOut = { tenant_id: tid, ok: true };
           if (bizTypeWarning) rowOut.warning = bizTypeWarning;

@@ -31,7 +31,8 @@
     '/volvix-grand-tour.html',
     '/marketplace.html',
     '/volvix-customer-portal.html',
-    '/salvadorex-pos.html'
+    '/salvadorex-pos.html',
+    '/esperando-autorizacion.html'
   ];
   // Patrones públicos (cualquier landing-* y landing_*)
   const PUBLIC_PATTERNS = [

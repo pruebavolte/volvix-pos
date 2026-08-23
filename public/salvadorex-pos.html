@@ -180,6 +180,27 @@
               return resp;
             });
           }
+          if (_url.indexOf('/api/') !== -1) {
+            return _p.then(function(resp){
+              try {
+                if (resp && resp.status === 403 && !window.__vlxTenantGateHandled) {
+                  var ct = (resp.headers && resp.headers.get('content-type')) || '';
+                  if (ct.indexOf('json') !== -1) {
+                    return resp.clone().json().then(function(j){
+                      var ec = j && j.error_code;
+                      if (ec === 'TENANT_AWAITING_APPROVAL' || ec === 'TENANT_REJECTED') {
+                        window.__vlxTenantGateHandled = true;
+                        try { sessionStorage.setItem('vlx_gate', ec); } catch(_){}
+                        setTimeout(function(){ location.replace('/esperando-autorizacion.html'); }, 300);
+                      }
+                      return resp;
+                    }).catch(function(){ return resp; });
+                  }
+                }
+              } catch(_){}
+              return resp;
+            });
+          }
         } catch(_){}
         return _p;
       };
