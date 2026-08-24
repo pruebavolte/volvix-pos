@@ -8,6 +8,7 @@ const path = require('path');
 const url = require('url');
 const https = require('https');
 const crypto = require('crypto'); // FIX R13: para JWT, scrypt, timingSafeEqual
+const dns = require('dns'); // FIX 2026-08-23: cache DNS con fallback a IP conocida (DNS Railway intermitente)
 const emailTemplates = require('./email-templates'); // R14
 const handleMercadoPago = require('./payments-mercadopago');
 const handleSTP = require('./payments-stp');
@@ -92,6 +93,38 @@ const __sbKeepAliveAgent = new https.Agent({
   maxFreeSockets: 10
 });
 
+// FIX 2026-08-23: DNS de Railway falla intermitentemente al RESOLVER hosts nuevos
+// (getaddrinfo ENOTFOUND vnru...supabase.co) aunque el host es válido y resuelve en
+// todos lados. Cacheamos la última IP buena por hostname y, si una resolución falla,
+// caemos a esa IP conocida => las conexiones nuevas siguen funcionando durante el
+// incidente de DNS. Se re-resuelve y refresca cuando el DNS vuelve a estar sano.
+const __dnsGoodCache = new Map(); // hostname -> { address, family }
+function __sbLookup(hostname, options, callback) {
+  if (typeof options === 'function') { callback = options; options = {}; }
+  dns.lookup(hostname, options || {}, (err, address, family) => {
+    if (!err && address) {
+      __dnsGoodCache.set(hostname, { address: address, family: family });
+      return callback(null, address, family);
+    }
+    const good = __dnsGoodCache.get(hostname);
+    if (good && good.address) {
+      // DNS caído: usar la última IP buena conocida (evita el 500 ENOTFOUND)
+      return callback(null, good.address, good.family);
+    }
+    return callback(err, address, family);
+  });
+}
+// Sembrar la cache al boot (cuando el DNS suele estar sano) + refresco periódico.
+(function __seedSbDns(){
+  try {
+    const _h = new URL(SUPABASE_URL).hostname;
+    const _resolve = function(){ try { dns.lookup(_h, { all: false }, function(e,a,f){ if (!e && a) __dnsGoodCache.set(_h, { address:a, family:f }); }); } catch(_){} };
+    _resolve();
+    const _iv = setInterval(_resolve, 60000);
+    if (_iv && _iv.unref) _iv.unref();
+  } catch(_){}
+})();
+
 let __testSupabaseRequestOverride = null;
 // FIX 2026-08-23: DNS de Railway intermitente => algunas conexiones nuevas fallan
 // `getaddrinfo ENOTFOUND vnru...supabase.co` mientras las sockets keep-alive vivas
@@ -144,7 +177,8 @@ function __supabaseRequestOnce(method, path, body, extraHeaders) {
       hostname: u.hostname, port: 443,
       path: u.pathname + u.search, method: method,
       headers: baseHeaders,
-      agent: __sbKeepAliveAgent // PERF 2026-07-10: reusar conexiones TLS
+      agent: __sbKeepAliveAgent, // PERF 2026-07-10: reusar conexiones TLS
+      lookup: __sbLookup // FIX 2026-08-23: fallback a IP conocida si el DNS falla
     };
 
     const req = https.request(opts, (res) => {
