@@ -11068,9 +11068,9 @@
             autoSaveCode = code;
             if (name && name.length >= 2){
               showBusy();
-              smartSearch(name, catMap[String(code)]).then(function(found){
+              smartSearchList(name, catMap[String(code)]).then(function(list){
                 if (token !== loadToken) return;
-                if (found){ items = [found]; idx = 0; setCounter(); setImgEl(found); maybeAutoSaveFirst(); }
+                if (list && list.length){ items = list; idx = 0; setCounter(); setImgEl(items[0]); maybeAutoSaveFirst(); }
                 else { execQuery(name); }
               }).catch(function(){ if (token === loadToken) execQuery(name); });
             } else showEmpty();
@@ -11174,6 +11174,29 @@
     function smartSearch(name, cat){
       var qs = buildQueries(name, cat);
       function tryAt(i){ if (i>=qs.length) return Promise.resolve(null); return withTimeout(searchRotating(qs[i]), 7000).then(function(u){ return u || tryAt(i+1); }); }
+      return tryAt(0);
+    }
+    // Lista de candidatas (varias URLs) para poder VER ◀▶ y elegir la correcta. Bing server (marketplace), sin Openverse.
+    function serverBingCandidates(q){
+      if (typeof _authFetch !== 'function' || !q) return Promise.resolve([]);
+      return _authFetch('/api/product-image-candidates?q=' + encodeURIComponent(q))
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(j){
+          if (!j || !j.items) return [];
+          return j.items.filter(function(x){ return x && x.engine !== 'openverse' && x.url && /^https?:\/\//.test(x.url); }).map(function(x){ return x.url; });
+        }).catch(function(){ return []; });
+    }
+    // Prueba las variantes del termino (offset rota cual va primero, para "Sugerir nueva"); devuelve la 1a LISTA no vacia.
+    function smartSearchList(name, cat, offset){
+      var qs = buildQueries(name, cat);
+      if (offset){ offset = offset % qs.length; qs = qs.slice(offset).concat(qs.slice(0, offset)); }
+      function tryAt(i){
+        if (i>=qs.length) return Promise.resolve([]);
+        return serverBingCandidates(qs[i]).then(function(list){
+          if (list && list.length) return list;
+          return withTimeout(searchOnce(qs[i]), 7000).then(function(u){ return u ? [u] : tryAt(i+1); });
+        });
+      }
       return tryAt(0);
     }
     var FILL_MAX_PER_RUN = 12;
@@ -11363,6 +11386,20 @@
         applyResetTimer = setTimeout(function(){ applyBtn.disabled = false; applyBtn.textContent = 'Aplicar'; }, 1400);
       });
     }
+    var suggestSeq = 0;
+    // Boton "Sugerir nueva imagen": re-busca el producto activo con otra variante del termino y
+    // carga candidatas nuevas SIN guardar (el usuario elige con ◀▶ y da Aplicar).
+    function suggestNew(){
+      if (!curCode) return; suggestSeq++;
+      var nm = (activeRow && (activeRow.getAttribute('data-prod-name')||'').trim()) || (nameEl && nameEl.textContent) || '';
+      if (!nm || nm.length < 2){ return; }
+      var token = ++loadToken; autoSaveCode = ''; showBusy();
+      smartSearchList(nm, catMap[String(curCode)], suggestSeq).then(function(list){
+        if (token !== loadToken) return;
+        if (list && list.length){ items = list; idx = 0; setCounter(); setImgEl(items[0]); }
+        else { showEmpty(); }
+      }).catch(function(){ if (token === loadToken) showEmpty(); });
+    }
     function build(){
       if (panel) return;
       panel = document.createElement('div');
@@ -11392,6 +11429,7 @@
         +   '</div>'
         + '</div>'
         + '<div style="display:flex;gap:8px;padding:10px 12px;border-top:1px solid #eee;flex:none">'
+        +   '<button id="vlx-imgp-suggest" title="Buscar otras imagenes para este producto" style="flex:none;padding:10px 12px;border:1px solid #E5E5EA;background:#fff;color:#2D5F8F;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px">&#128260; Sugerir nueva</button>'
         +   '<button id="vlx-imgp-apply" title="Guardar esta imagen (Enter)" style="flex:1;padding:10px;border:none;background:#0B0B0F;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px">Aplicar</button>'
         +   '<button id="vlx-imgp-expand" title="Ver todas las imágenes de Google" style="flex:none;padding:10px 14px;border:none;background:#2D5F8F;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px">&#10530; Expandir</button>'
         + '</div>';
@@ -11423,6 +11461,7 @@
       panel.querySelector('#vlx-imgp-prev').onclick = function(){ cycle(-1); };
       panel.querySelector('#vlx-imgp-next').onclick = function(){ cycle(1); };
       applyBtn.onclick = apply;
+      var sBtn = panel.querySelector('#vlx-imgp-suggest'); if (sBtn) sBtn.onclick = suggestNew;
       expandBtn.onclick = function(){ setExpanded(!expanded); };
       panel.querySelector('#vlx-imgp-go').onclick = submitAddr;
       addrInput.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); submitAddr(); } e.stopPropagation(); });
