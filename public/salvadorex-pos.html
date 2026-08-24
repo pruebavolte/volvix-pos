@@ -11070,7 +11070,7 @@
               showBusy();
               smartSearchList(name, catMap[String(code)]).then(function(list){
                 if (token !== loadToken) return;
-                if (list && list.length){ items = list; idx = 0; setCounter(); setImgEl(items[0]); maybeAutoSaveFirst(); }
+                if (list && list.length){ items = list; idx = 0; setCounter(); setImgEl(items[0]); /* NO auto-guardar: el usuario revisa con ◀▶ y da Aplicar (evita guardar imagen equivocada) */ }
                 else { execQuery(name); }
               }).catch(function(){ if (token === loadToken) execQuery(name); });
             } else showEmpty();
@@ -11183,7 +11183,10 @@
         .then(function(r){ return r.ok ? r.json() : null; })
         .then(function(j){
           if (!j || !j.items) return [];
-          return j.items.filter(function(x){ return x && x.engine !== 'openverse' && x.url && /^https?:\/\//.test(x.url); }).map(function(x){ return x.url; });
+          var MKT = /mlstatic|mercadolibre|media-amazon|amazon|walmart|liverpool|coppel|homedepot|chedraui|soriana|autozone|refacc|gonher|apotheke|mirefaccion/i;
+          var ok = j.items.filter(function(x){ return x && x.engine !== 'openverse' && x.url && /^https?:\/\//.test(x.url); });
+          var mk = ok.filter(function(x){ return MKT.test(x.host || ''); });
+          return (mk.length ? mk : ok).map(function(x){ return x.url; });
         }).catch(function(){ return []; });
     }
     // Prueba las variantes del termino (offset rota cual va primero, para "Sugerir nueva"); devuelve la 1a LISTA no vacia.
@@ -11237,9 +11240,11 @@
               return null;
             }).catch(function(){ return null; }).then(function(){ if (blocked) return; return new Promise(function(r){ setTimeout(r, 1500); }).then(function(){ return doSearch(i+1); }); });
           }
-          return doReuse(0).then(function(){ return doSearch(0); }).then(function(){
-            var remaining = Math.max(0, toSearch.length - (blocked ? searched : tanda.length));
-            return { filled:filled, reused:reused, total:pend, remaining:remaining, blocked:blocked };
+          // Solo REUSA imagenes que otros clientes YA confirmaron (cross-tenant, confiable).
+          // NO busca en la web de forma masiva (eso guardaba imagenes equivocadas). El resto se
+          // llena a mano por producto con "Sugerir imagen" + Aplicar (con revision humana).
+          return doReuse(0).then(function(){
+            return { filled:filled, reused:reused, total:pend, remaining:toSearch.length, blocked:false, manual:toSearch.length };
           });
         });
       }).catch(function(){ return { filled:0, reused:0, total:0, remaining:0, error:true }; });
