@@ -11071,8 +11071,8 @@
               smartSearchList(name, catMap[String(code)]).then(function(list){
                 if (token !== loadToken) return;
                 if (list && list.length){ items = list; idx = 0; setCounter(); setImgEl(items[0]); /* NO auto-guardar: el usuario revisa con ◀▶ y da Aplicar (evita guardar imagen equivocada) */ }
-                else { execQuery(name); }
-              }).catch(function(){ if (token === loadToken) execQuery(name); });
+                else { showEmpty(); } // vacío = mostrar "sin imagen" (usar "Sugerir nueva"), NUNCA CSE basura
+              }).catch(function(){ if (token === loadToken) showEmpty(); });
             } else showEmpty();
           });
         });
@@ -11201,7 +11201,9 @@
         if (i>=qs.length) return Promise.resolve([]);
         return serverBingCandidates(qs[i]).then(function(list){
           if (list && list.length) return list;
-          return withTimeout(searchOnce(qs[i]), 7000).then(function(u){ return u ? [u] : tryAt(i+1); });
+          // NO usar searchOnce/CSE de fallback: devolvía basura (geocities, youtube, logos).
+          // Solo marketplace (server). Si esta variante no dio, probar la siguiente.
+          return tryAt(i+1);
         });
       }
       return tryAt(0);
