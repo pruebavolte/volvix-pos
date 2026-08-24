@@ -2670,6 +2670,36 @@ const handlers = {
         else if (MARKET.test(u)) market.push({ url: u, source: host, host, engine: 'bing' });
         else other.push({ url: u, source: 'Bing · ' + host, host, engine: 'bing' });
       };
+      // 0) MercadoLibre MX (scrape del listado con UA de navegador): imágenes REALES de
+      //    producto de marketplace. Es la fuente MÁS confiable desde datacenter — Bing/Google
+      //    degradan y devuelven ruido (logos, revistas), ML no. Lidera los resultados.
+      try {
+        const slug = q.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+          .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+        if (slug) {
+          const r = await fetch('https://listado.mercadolibre.com.mx/' + slug, {
+            headers: { 'User-Agent': UA, 'Accept-Language': 'es-MX,es;q=0.9' }, redirect: 'follow',
+          });
+          if (r.ok) {
+            const html = await r.text();
+            // Imágenes de producto del grid: http2.mlstatic.com/D_..<seller>-ML?<itemId>_<fecha>-<V>.webp
+            const re = /https:\/\/http2\.mlstatic\.com\/D_[A-Z0-9_]*\d+-ML[ABCMU]\d+_\d+-[A-Z]\.(?:webp|jpg)/g;
+            const byItem = new Map();
+            let m, n = 0;
+            while ((m = re.exec(html)) && n < 150) {
+              n++;
+              const u0 = m[0];
+              const idm = u0.match(/-ML[ABCMU]\d+/);
+              if (!idm) continue;
+              if (byItem.has(idm[0])) continue;
+              // normaliza a imagen grande (-O = original) para buena calidad
+              byItem.set(idm[0], u0.replace(/-[A-Z]\.(webp|jpg)$/, '-O.webp'));
+            }
+            let added = 0;
+            for (const u of byItem.values()) { if (added >= 12) break; add(u, 'bing'); added++; }
+          }
+        }
+      } catch (_) { /* seguimos con Bing/Openverse */ }
       // 1) Bing Images (navegador simulado, keyless): extraer los murl del HTML.
       // OJO: desde IP de datacenter los buscadores suelen degradar/bloquear el
       // scraping, así que las de marketplace se priorizan y el resto va al final.
