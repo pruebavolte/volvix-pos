@@ -93,10 +93,30 @@ const __sbKeepAliveAgent = new https.Agent({
 });
 
 let __testSupabaseRequestOverride = null;
+// FIX 2026-08-23: DNS de Railway intermitente => algunas conexiones nuevas fallan
+// `getaddrinfo ENOTFOUND vnru...supabase.co` mientras las sockets keep-alive vivas
+// siguen sirviendo (por eso unos endpoints daban 500 y otros 200 a la vez). Reintentamos
+// SOLO ante errores de fase-DNS (ENOTFOUND/EAI_AGAIN), que ocurren ANTES de enviar el
+// request => reintentar es seguro incluso para POST/PATCH (no hay escritura parcial).
+const __SB_DNS_RETRY_CODES = new Set(['ENOTFOUND', 'EAI_AGAIN']);
 function supabaseRequest(method, path, body, extraHeaders) {
   if (process.env.NODE_ENV === 'test' && typeof __testSupabaseRequestOverride === 'function') {
     return Promise.resolve().then(() => __testSupabaseRequestOverride(method, path, body, extraHeaders));
   }
+  const maxAttempts = 4; // 1 intento + 3 reintentos
+  function attempt(n) {
+    return __supabaseRequestOnce(method, path, body, extraHeaders).catch((err) => {
+      const code = err && err.code;
+      if (n < maxAttempts && code && __SB_DNS_RETRY_CODES.has(code)) {
+        const delay = 100 * n + Math.floor(80 * n); // ~180ms, 360ms, 540ms
+        return new Promise((r) => setTimeout(r, delay)).then(() => attempt(n + 1));
+      }
+      throw err;
+    });
+  }
+  return attempt(1);
+}
+function __supabaseRequestOnce(method, path, body, extraHeaders) {
   return new Promise((resolve, reject) => {
     const fullUrl = SUPABASE_URL + '/rest/v1' + path;
     const u = new URL(fullUrl);
