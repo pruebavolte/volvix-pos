@@ -11112,12 +11112,26 @@
     }
     // Buscadores SIN key y con CORS viables desde el navegador: Google CSE + Wikimedia. (Bing/Yahoo bloquean por CORS/X-Frame; no Openverse ni API keys.)
     function srcWikimedia(name){ return fetch('https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=' + encodeURIComponent(name) + '&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url&iiurlwidth=500&format=json&origin=*').then(function(r){ return r.ok ? r.json() : null; }).then(function(j){ try { var pages = j.query.pages; for (var k in pages){ var ii = pages[k].imageinfo; if (ii && ii[0]){ var u = ii[0].thumburl || ii[0].url; if (u && /^https?:\/\//.test(u) && /\.(jpe?g|png|webp|gif)$/i.test((u.split('?')[0]||''))) return u; } } } catch(e){} return null; }).catch(function(){ return null; }); }
-    var FILL_SOURCES = [ function(n){ return searchOnce(n); }, srcWikimedia ]; // Google, luego Wikimedia
+    // Fuente PRIMARIA sin CAPTCHA: Bing scrapeado en el SERVIDOR (prioriza imagenes de
+    // marketplace: MercadoLibre/Amazon/Walmart). No usa la ventana del cliente => no se bloquea
+    // como el Google CSE. Filtramos Openverse (preferencia del dueno).
+    function srcServerBing(name){
+      if (typeof _authFetch !== 'function') return Promise.resolve(null);
+      return _authFetch('/api/product-image-candidates?q=' + encodeURIComponent(name))
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(j){
+          if (!j || !j.items || !j.items.length) return null;
+          var bing = j.items.filter(function(x){ return x.engine === 'bing'; });
+          var pick = (bing[0] || j.items.find(function(x){ return x.engine !== 'openverse'; })) || null;
+          var u = pick && pick.url;
+          return (u && /^https?:\/\//.test(u)) ? u : null;
+        }).catch(function(){ return null; });
+    }
+    // Orden FIJO por confiabilidad: 1) Bing server (sin CAPTCHA), 2) Google CSE, 3) Wikimedia.
+    var FILL_SOURCES = [ srcServerBing, function(n){ return searchOnce(n); }, srcWikimedia ];
     var fillSeq = 0;
-    // Rotación con fallback (6s por fuente para NO llegar al bloqueo/CAPTCHA de ~10s).
     function searchRotating(name){
-      var start = (fillSeq++) % FILL_SOURCES.length;
-      function tryAt(k){ if (k >= FILL_SOURCES.length) return Promise.resolve(null); var fn = FILL_SOURCES[(start + k) % FILL_SOURCES.length]; return withTimeout(fn(name), 6000).then(function(u){ return u || tryAt(k + 1); }); }
+      function tryAt(k){ if (k >= FILL_SOURCES.length) return Promise.resolve(null); return withTimeout(FILL_SOURCES[k](name), 7000).then(function(u){ return u || tryAt(k + 1); }); }
       return tryAt(0);
     }
     // === Consulta INTELIGENTE de imagen: nombres de refaccion/abarrote suelen ser basura para
