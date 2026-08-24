@@ -11178,8 +11178,12 @@
     }
     // Lista de candidatas (varias URLs) para poder VER ◀▶ y elegir la correcta. Bing server (marketplace), sin Openverse.
     function serverBingCandidates(q){
-      if (typeof _authFetch !== 'function' || !q) return Promise.resolve([]);
-      return _authFetch('/api/product-image-candidates?q=' + encodeURIComponent(q))
+      if (!q) return Promise.resolve([]);
+      // fetch directo con token (no depender de _authFetch: en este closure a veces no está
+      // disponible y devolvía [] siempre → el visor caía al CSE bloqueado y se quedaba "Cargando").
+      var _tok = '';
+      try { _tok = localStorage.getItem('volvix_token') || localStorage.getItem('volvixAuthToken') || ''; } catch (_e) {}
+      return fetch('/api/product-image-candidates?q=' + encodeURIComponent(q), { headers: _tok ? { 'Authorization': 'Bearer ' + _tok } : {}, cache: 'no-store' })
         .then(function(r){ return r.ok ? r.json() : null; })
         .then(function(j){
           if (!j || !j.items) return [];
