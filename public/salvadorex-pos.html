@@ -11011,8 +11011,8 @@
     })();
     function isOnline(){ return (typeof navigator === 'undefined') || navigator.onLine !== false; }
     // Mapa {code: image_url} de la BD, cacheado 1 vez por sesion (el renderer no expone la url en la fila).
-    var urlMapP = null, urlMap = {}, codeIdMap = {}, triedEmpty = {};
-    function getUrlMap(){ if (urlMapP) return urlMapP; if (typeof _authFetch !== 'function') return Promise.resolve({}); urlMapP = _authFetch('/api/products?limit=5000').then(function(r){ return r.json(); }).then(function(j){ var list = Array.isArray(j) ? j : ((j && j.products) || []); var m = {}; list.forEach(function(p){ if (p && p.code){ if (p.image_url) m[String(p.code)] = p.image_url; if (p.id) codeIdMap[String(p.code)] = p.id; } }); urlMap = m; return m; }).catch(function(){ return {}; }); return urlMapP; }
+    var urlMapP = null, urlMap = {}, codeIdMap = {}, catMap = {}, triedEmpty = {};
+    function getUrlMap(){ if (urlMapP) return urlMapP; if (typeof _authFetch !== 'function') return Promise.resolve({}); urlMapP = _authFetch('/api/products?limit=5000').then(function(r){ return r.json(); }).then(function(j){ var list = Array.isArray(j) ? j : ((j && j.products) || []); var m = {}; list.forEach(function(p){ if (p && p.code){ if (p.image_url) m[String(p.code)] = p.image_url; if (p.id) codeIdMap[String(p.code)] = p.id; if (p.category) catMap[String(p.code)] = p.category; } }); urlMap = m; return m; }).catch(function(){ return {}; }); return urlMapP; }
     // ===== COLUMNA "URL de imagen" (se llena del mapa BD + marca ✓ si el byte está en cache local) =====
     function truncMid(s){ s = String(s || ''); return s.length > 58 ? (s.slice(0,32) + '…' + s.slice(-18)) : s; }
     function setUrlCell(cell, url, cached){ if (!cell) return; if (url){ cell.textContent = (cached ? '✓ ' : '') + truncMid(url); cell.title = url; cell.style.color = cached ? '#15803D' : ''; } else { cell.innerHTML = '<button type="button" class="vlx-suggest-btn" data-action="vlx-suggest-image" title="Buscar imagen para este producto" style="border:1px solid #E5E5EA;background:#fff;color:#2D5F8F;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;white-space:nowrap">🔍 Sugerir imagen</button>'; cell.title = ''; cell.style.color = ''; } }
@@ -11065,7 +11065,15 @@
             if (token !== loadToken) return;
             var su = sh[String(code)];
             if (su){ urlMap[String(code)] = su; items = [su]; idx = 0; setCounter(); setImgEl(su, function(){ repair(code, name, token); }); fetchAndCache(code, su, [su]); try { saveImageToProduct(code, su); if (typeof vlxUpdateUrlCell === 'function') vlxUpdateUrlCell(code, su); } catch(_){} return; }
-            autoSaveCode = code; if (name && name.length >= 2){ showBusy(); execQuery(name); } else showEmpty();
+            autoSaveCode = code;
+            if (name && name.length >= 2){
+              showBusy();
+              smartSearch(name, catMap[String(code)]).then(function(found){
+                if (token !== loadToken) return;
+                if (found){ items = [found]; idx = 0; setCounter(); setImgEl(found); maybeAutoSaveFirst(); }
+                else { execQuery(name); }
+              }).catch(function(){ if (token === loadToken) execQuery(name); });
+            } else showEmpty();
           });
         });
       });
@@ -11112,6 +11120,48 @@
       function tryAt(k){ if (k >= FILL_SOURCES.length) return Promise.resolve(null); var fn = FILL_SOURCES[(start + k) % FILL_SOURCES.length]; return withTimeout(fn(name), 6000).then(function(u){ return u || tryAt(k + 1); }); }
       return tryAt(0);
     }
+    // === Consulta INTELIGENTE de imagen: nombres de refaccion/abarrote suelen ser basura para
+    // buscar (listas de compatibilidad, sufijos '- EAN 750...', medidas). Limpiamos + probamos
+    // varias variantes (numero de parte -> nombre limpio -> categoria) para que SIEMPRE encuentre algo.
+    // Consulta INTELIGENTE de imagen: los nombres (refaccion/abarrote) suelen ser malos para
+    // buscar (compatibilidades, sufijo "- EAN 750...", medidas). Limpiamos + probamos variantes
+    // (numero de parte -> nombre limpio -> categoria) para que SIEMPRE encuentre algo.
+    function cleanQuery(name){
+      var s = ' ' + String(name||'') + ' ';
+      s = s.replace(/\s[-–]\s*EAN\s*\d+/ig,' ');
+      s = s.replace(/\bEAN\s*\d{6,}\b/ig,' ');
+      s = s.replace(/\b\d{6,}\b/g,' ');
+      s = s.replace(/\b\d{2,4}\s*[-\/]\s*\d{2,4}\b/g,' ');
+      s = s.replace(/\b\d\.\d[LTt]?\b/g,' ');
+      s = s.replace(/\b\d+\s?(?:ML|LT|LTS|GR|KG|OZ|CC)\b/ig,' ');
+      s = s.replace(/\bSAE\s*\d+\b/ig,' ');
+      s = s.replace(/\bT\/[MA]\b/ig,' ');
+      s = s.replace(/\b\d+\s?CIL\b/ig,' ');
+      s = s.replace(/[().,#]/g,' ').replace(/\s+/g,' ').trim();
+      var toks = s.split(' ').filter(function(w){ return w.length>=2; });
+      return toks.slice(0,6).join(' ').trim();
+    }
+    function extractPartNo(name){
+      var m = String(name||'').match(/\b[A-Za-z]{1,4}[- ]?\d{2,6}[A-Za-z0-9]{0,4}\b/);
+      if (m){ var pn = m[0].replace(/ /g,'').trim(); if (/\d/.test(pn) && pn.length>=4 && pn.length<=12) return pn; }
+      return '';
+    }
+    function buildQueries(name, cat){
+      var qs = [], seen = {};
+      function add(q){ q=(q||'').trim(); if(q && q.length>=2 && !seen[q.toLowerCase()]){ seen[q.toLowerCase()]=1; qs.push(q); } }
+      var pn = extractPartNo(name); var cleaned = cleanQuery(name);
+      add(cleaned);
+      if (pn) add(pn);
+      if (cat) add(String(cat) + ' producto');
+      add(name);
+      return qs.slice(0,4);
+    }
+    // Prueba las variantes en orden; la 1a que devuelva imagen gana (Google CSE + Wikimedia c/u).
+    function smartSearch(name, cat){
+      var qs = buildQueries(name, cat);
+      function tryAt(i){ if (i>=qs.length) return Promise.resolve(null); return withTimeout(searchRotating(qs[i]), 7000).then(function(u){ return u || tryAt(i+1); }); }
+      return tryAt(0);
+    }
     var FILL_MAX_PER_RUN = 12;
     function fillAllImages(progressCb){
       if (!isOnline()) return Promise.resolve({ filled:0, reused:0, total:0, remaining:0, offline:true });
@@ -11143,7 +11193,7 @@
           function doSearch(i){
             if (blocked || i >= tanda.length) return Promise.resolve();
             var it = tanda[i]; if (progressCb) progressCb(filled + 1, pend, 'buscando: ' + it.name);
-            return Promise.resolve().then(function(){ setName(it.name); return searchRotating(it.name); }).then(function(url){
+            return Promise.resolve().then(function(){ setName(it.name); return smartSearch(it.name, catMap[String(it.code)]); }).then(function(url){
               searched++;
               if (url){ consecEmpty = 0; filled++; return assignFound(it.code, it.name, url); }
               triedEmpty[String(it.code)] = 1; consecEmpty++; if (consecEmpty >= 5) blocked = true;
