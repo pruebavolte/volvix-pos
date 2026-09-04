@@ -21475,6 +21475,7 @@
     qps.forEach(function(qp, i) {
       var nameEl = qp.querySelector('.qp-card-name');
       var name = (nameEl ? nameEl.textContent : qp.textContent.split('$')[0]).trim();
+      name = name.replace(/^[\s️←-➿⬀-⯿\u{1F000}-\u{1FAFF}]+/u, '').trim(); // quita emoji/📦 inicial (look Loyverse limpio)
       var priceMatch = qp.textContent.match(/\$[\d.,]+/);
       var price = priceMatch ? priceMatch[0] : '';
       var color = lvColors[i % lvColors.length];
