@@ -2317,6 +2317,7 @@
      Loyverse (z-8500) en modo venta → cobro/editar/cliente/búsqueda invisibles. Los subimos
      por encima del shell en Vista 2 para que el flujo de cobro funcione. */
   body[data-vista="2"] .modal-backdrop { z-index: 12000 !important; }
+  body[data-vista="3"] .modal-backdrop { z-index: 12000 !important; }
 
   /* ======= VISTA 2 : Loyverse Full Layout Clone (overlay) ======= */
   #vista2-loyverse-shell {
@@ -2383,6 +2384,16 @@
   #lv-drawer .lv-dw-ico { width: 22px; text-align: center; font-size: 18px; flex: none; }
   #lv-drawer .lv-dw-switch { border-top: 1px solid #eee; margin-top: 4px; }
   #lv-drawer .lv-dw-switch .lv-dw-item { color: #4338CA; font-weight: 700; }
+
+  /* Escape de vista para Vista 3 (OXXO): su switcher nativo queda tapado por el shell */
+  #oxxo-vista-switch { display: none; }
+  body[data-vista="3"] #oxxo-vista-switch {
+    display: inline-flex; align-items: center; gap: 6px; position: fixed; top: 9px; right: 12px;
+    z-index: 9600; background: rgba(0,0,0,.6); color: #fff; border: 1px solid rgba(255,255,255,.4);
+    padding: 7px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer;
+    font-family: system-ui, "Segoe UI", sans-serif;
+  }
+  body[data-vista="3"] #oxxo-vista-switch:hover { background: rgba(0,0,0,.8); }
 
   .lv-header {
     background: #26A65B;
@@ -21844,7 +21855,9 @@
   function stripEmoji(s){ try{ return String(s||'').replace(/^[^\p{L}\p{N}]+/u,'').trim(); }catch(_){ return String(s||'').replace(/^[^a-zA-Z0-9]+/,'').trim(); } }
   var ICONS = { pos:'🛒', quickpos:'⚡', inventario:'📦', clientes:'👥', credito:'💳', ventas:'🧾', reportes:'📊', corte:'🧮', dashboard:'📈', config:'⚙️', usuarios:'🧑‍💼', kardex:'📒', proveedores:'🚚', facturacion:'📄', cotizaciones:'📝', devoluciones:'↩️', recargas:'📱', servicios:'🧰', promociones:'🏷️', departamentos:'🗂️', actualizador:'🔄', rentas:'🏠', reservaciones:'📅', mapa:'🗺️', kds:'🍳', cds:'🖥️', apertura:'🔓', tarjetas:'💳', sugeridas:'🧠' };
   function activeScreen(){ var s=document.querySelector('section[id^="screen-"]:not(.hidden)'); return s ? s.id.replace('screen-','') : 'pos'; }
-  function labelFor(key){ var b=document.querySelector('.menubar .menu-btn[data-menu="'+key+'"] span'); return b ? stripEmoji(b.textContent) : ''; }
+  function cap(s){ s=String(s||'').replace(/-/g,' '); return s ? s.charAt(0).toUpperCase()+s.slice(1) : ''; }
+  function labelFor(key){ if(!key) return ''; var b=document.querySelector('.menu-btn[data-menu="'+key+'"] span, [data-menu="'+key+'"] span'); return b ? stripEmoji(b.textContent) : ''; }
+  function setTitle(txt){ var t=document.getElementById('lv-appbar-title'); if(t) t.textContent = txt; }
 
   function buildDrawer(){
     var nav = document.getElementById('lv-dw-nav'); if(!nav) return;
@@ -21865,7 +21878,7 @@
     markActive();
   }
   function markActive(){ var cur=activeScreen(); var it=document.querySelectorAll('#lv-dw-nav .lv-dw-item[data-key]'); for(var i=0;i<it.length;i++){ it[i].classList.toggle('active', it[i].getAttribute('data-key')===cur); } }
-  function updateTitle(){ var t=document.getElementById('lv-appbar-title'); if(!t) return; var cur=activeScreen(); if(cur==='pos'){ t.textContent='Punto de venta'; return; } var l=labelFor(cur); t.textContent = l || biz(); }
+  function updateTitle(){ var cur=activeScreen(); if(cur==='pos'){ setTitle('Punto de venta'); return; } setTitle(labelFor(cur) || cap(cur) || biz()); }
 
   window.__lvOpenDrawer = function(){ buildDrawer(); var b=document.getElementById('lv-drawer-backdrop'), d=document.getElementById('lv-drawer'); if(b)b.classList.add('open'); if(d)d.classList.add('open'); };
   window.__lvCloseDrawer = function(){ var b=document.getElementById('lv-drawer-backdrop'), d=document.getElementById('lv-drawer'); if(b)b.classList.remove('open'); if(d)d.classList.remove('open'); };
@@ -21880,9 +21893,11 @@
     var item = e.target.closest('#lv-dw-nav .lv-dw-item[data-key]');
     if(item){
       var oc = item.getAttribute('data-oc'); var key = item.getAttribute('data-key');
+      var lbl = item.querySelector('span:last-child'); var lblTxt = lbl ? lbl.textContent.trim() : '';
       window.__lvCloseDrawer();
       if(oc){ try{ (new Function(oc)).call(window); } catch(err){ if(key && window.showScreen){ try{ window.showScreen(key); }catch(_){}} } }
       else if(key && window.showScreen){ try{ window.showScreen(key); }catch(_){} }
+      if(key==='pos') setTitle('Punto de venta'); else if(lblTxt) setTitle(lblTxt);
       setTimeout(function(){ updateTitle(); markActive(); }, 60);
       return;
     }
@@ -21904,6 +21919,7 @@
 </script>
 
 <!-- ============ VISTA 3 OXXO OVERLAY (clone) ============ -->
+<button id="oxxo-vista-switch" type="button" onclick="toggleVista()" title="Cambiar de vista">⇄ Cambiar vista</button>
 <div id="vista3-oxxo-shell" aria-hidden="true">
   <div class="oxxo-header">
     <div class="oxxo-store">
