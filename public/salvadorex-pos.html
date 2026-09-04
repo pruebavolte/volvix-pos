@@ -12562,7 +12562,7 @@
         <td class="num" style="color: ${c[3]>0?'var(--danger)':'inherit'};">${fmt(c[3])}</td>
         <td class="num">${escapeHtml(String(c[4]||''))}</td>
         <td style="color: var(--text-3); font-size: 11px;">${escapeHtml(c[5]||'')}</td>
-        <td style="text-align: right;"><button class="btn sm" onclick="verHistorialCliente(${JSON.stringify(c[0])},${JSON.stringify(c[1])})">Ver historial</button></td>
+        <td style="text-align: right;"><button class="btn sm" onclick="verHistorialCliente(${htmlEsc(JSON.stringify(c[0]))},${htmlEsc(JSON.stringify(c[1]))})">Ver historial</button></td>
       </tr>`).join('');
     // 2026-05: mantener contador sincronizado en cada render — antes solo
     // se actualizaba dentro del fetch try-catch, dejando "0 clientes" si
@@ -12851,7 +12851,7 @@
         <td class="num" style="color: var(--success);">${fmt(c[3])}</td>
         <td style="color: var(--text-3); font-size: 11px;">${c[4]}</td>
         <td><span class="chip ${chip}"><span class="dot"></span>${lbl}</span></td>
-        <td style="text-align: right;"><button class="btn sm" onclick="abonarCredito(${JSON.stringify(c[0])},${JSON.stringify(c[5])})">💵 Abonar</button></td>
+        <td style="text-align: right;"><button class="btn sm" onclick="abonarCredito(${htmlEsc(JSON.stringify(c[0]))},${htmlEsc(JSON.stringify(c[5]))})">💵 Abonar</button></td>
       </tr>`;
     }).join('');
   }
