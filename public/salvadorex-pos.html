@@ -2385,45 +2385,54 @@
     align-content: start;
     min-height: 0;
   }
+  /* Mosaico estilo Loyverse: toda la tarjeta es color (o foto), texto blanco */
   .lv-product-card {
-    background: #fff;
+    background: var(--lv-c, #26A65B);
     border: none;
     cursor: pointer;
-    padding: 12px 8px 10px;
+    padding: 10px 10px 8px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 6px;
     position: relative;
-    min-height: 130px;
+    overflow: hidden;
+    min-height: 104px;
+    color: #fff;
+    text-align: left;
     font-family: inherit;
     transition: transform .1s, box-shadow .15s;
   }
-  .lv-product-card:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,.18); z-index: 1; }
+  .lv-product-card:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,.28); z-index: 1; }
   .lv-product-card:active { transform: scale(.97); }
-  .lv-product-img {
-    width: 72px;
-    height: 72px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    color: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  /* foto real del producto de fondo (si existe) */
+  .lv-product-photo {
+    position: absolute; inset: 0; z-index: 0;
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+  }
+  /* velo para que el texto blanco sea legible sobre foto o color */
+  .lv-product-card::after {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.02) 40%, rgba(0,0,0,.45) 100%);
   }
   .lv-product-name {
-    font-size: 12px;
-    color: #333;
-    text-align: center;
-    font-weight: 500;
-    line-height: 1.25;
+    position: relative; z-index: 2;
+    font-size: 12.5px;
+    color: #fff;
+    text-align: left;
+    font-weight: 600;
+    line-height: 1.2;
     word-break: break-word;
+    max-height: 3.6em; overflow: hidden;
+    text-shadow: 0 1px 2px rgba(0,0,0,.4);
   }
   .lv-product-price {
-    font-size: 11.5px;
-    color: #757575;
-    font-weight: 500;
+    position: relative; z-index: 2;
+    margin-top: auto;
+    font-size: 13px;
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,.45);
   }
   .lv-product-empty {
     grid-column: 1/-1;
@@ -2527,17 +2536,20 @@
   }
   .lv-ticket-row {
     display: grid;
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr auto;
     gap: 12px;
-    padding: 12px 18px;
+    padding: 11px 18px;
     font-size: 14px;
     color: #333;
     border-bottom: 1px solid #f5f5f5;
     align-items: center;
+    cursor: pointer;
   }
-  .lv-row-name { font-weight: 400; }
-  .lv-row-qty { color: #9e9e9e; font-size: 13px; }
-  .lv-row-price { font-weight: 500; min-width: 60px; text-align: right; }
+  .lv-ticket-row:hover { background: #fafafa; }
+  .lv-row-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .lv-row-name { font-weight: 400; color: #212121; }
+  .lv-row-sub { color: #9e9e9e; font-size: 12.5px; }
+  .lv-row-price { font-weight: 500; min-width: 60px; text-align: right; color: #212121; }
   .lv-ticket-empty { padding: 32px 18px; text-align: center; color: #9e9e9e; font-size: 13px; }
   .lv-ticket-tax {
     display: flex;
@@ -21435,10 +21447,12 @@
       var priceMatch = qp.textContent.match(/\$[\d.,]+/);
       var price = priceMatch ? priceMatch[0] : '';
       var color = lvColors[i % lvColors.length];
-      var icon = pickIcon(name);
       var oc = qp.getAttribute('onclick') || '';
-      html += '<button type="button" class="lv-product-card" data-lv-onclick="'+escapeAttr(oc)+'">'
-        + '<div class="lv-product-img" style="background:'+color+'">'+icon+'</div>'
+      var imgEl = qp.querySelector('.qp-img');
+      var imgSrc = imgEl ? (imgEl.getAttribute('src') || imgEl.src || '') : '';
+      var photo = imgSrc ? '<span class="lv-product-photo" style="background-image:url('+escapeAttr(imgSrc)+')"></span>' : '';
+      html += '<button type="button" class="lv-product-card" style="--lv-c:'+color+'" data-lv-onclick="'+escapeAttr(oc)+'">'
+        + photo
         + '<div class="lv-product-name">'+escapeHtml(name)+'</div>'
         + '<div class="lv-product-price">'+escapeHtml(price)+'</div>'
         + '</button>';
@@ -21475,11 +21489,14 @@
     var items = document.getElementById('lv-ticket-items');
     var totalEl = document.getElementById('lv-ticket-total');
     if (!items || !totalEl) return;
+    var chargeBtn = document.getElementById('lv-btn-charge');
+    function setCharge(t){ if (chargeBtn) chargeBtn.textContent = (t && t !== '$0.00') ? ('Cobrar ' + t) : 'Cobrar'; }
     var rows = document.querySelectorAll('#cart-body tr');
     if (!rows.length) {
       items.innerHTML = '<div class="lv-ticket-empty">Selecciona productos</div>';
       var origTotal0 = document.getElementById('total-big');
-      totalEl.textContent = origTotal0 ? origTotal0.textContent.trim() : '$0.00';
+      var t0 = origTotal0 ? origTotal0.textContent.trim() : '$0.00';
+      totalEl.textContent = t0; setCharge('');
       return;
     }
     var html = '';
@@ -21487,17 +21504,20 @@
       var tds = tr.querySelectorAll('td');
       if (tds.length < 5) return;
       var desc = (tds[1] && tds[1].textContent || '').trim();
+      var unit = (tds[2] && tds[2].textContent || '').trim();
       var qty = (tds[3] && tds[3].textContent || '').trim();
       var importe = (tds[4] && tds[4].textContent || '').trim();
+      var sub = qty + (unit ? (' × ' + unit) : '');
       html += '<div class="lv-ticket-row">'
-        + '<span class="lv-row-name">'+escapeHtml(desc)+'</span>'
-        + '<span class="lv-row-qty">x '+escapeHtml(qty)+'</span>'
+        + '<div class="lv-row-main"><span class="lv-row-name">'+escapeHtml(desc)+'</span>'
+        +   '<span class="lv-row-sub">'+escapeHtml(sub)+'</span></div>'
         + '<span class="lv-row-price">'+escapeHtml(importe)+'</span>'
         + '</div>';
     });
     items.innerHTML = html;
     var origTotal = document.getElementById('total-big');
-    if (origTotal) totalEl.textContent = origTotal.textContent.trim();
+    var tt = origTotal ? origTotal.textContent.trim() : totalEl.textContent.trim();
+    totalEl.textContent = tt; setCharge(tt);
   }
 
   function syncAll() { syncLvCats(); syncLvProducts(); syncLvTicket(); }
