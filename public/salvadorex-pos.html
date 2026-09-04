@@ -2402,7 +2402,9 @@
   }
   /* Mosaico estilo Loyverse: toda la tarjeta es color (o foto), texto blanco */
   .lv-product-card {
-    background: var(--lv-c, #26A65B);
+    /* !important: una regla de tema global [class*="card"] fuerza surface blanco; el mosaico
+       Loyverse debe conservar su color/foto, así que gana aquí. */
+    background: var(--lv-c, #26A65B) !important;
     border: none;
     cursor: pointer;
     padding: 10px 10px 8px;
