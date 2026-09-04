@@ -21857,7 +21857,7 @@
       var label = stripEmoji(sp ? sp.textContent : b.textContent) || key || '—';
       var oc = b.getAttribute('onclick') || '';
       var ico = ICONS[key] || '•';
-      html += '<button type="button" class="lv-dw-item" data-key="'+key.replace(/"/g,'')+'" data-oc="'+String(oc).replace(/"/g,'&quot;')+'"><span class="lv-dw-ico">'+ico+'</span><span>'+label.replace(/[<>]/g,'')+'</span></button>';
+      html += '<button type="button" class="lv-dw-item" data-action="lv-nav" data-key="'+key.replace(/"/g,'')+'" data-oc="'+String(oc).replace(/"/g,'&quot;')+'"><span class="lv-dw-ico">'+ico+'</span><span>'+label.replace(/[<>]/g,'')+'</span></button>';
     });
     html += '<div class="lv-dw-switch"><button type="button" class="lv-dw-item" id="lv-dw-switch-btn"><span class="lv-dw-ico">🔀</span><span>Cambiar de vista</span></button></div>';
     nav.innerHTML = html;
