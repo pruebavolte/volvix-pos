@@ -2422,6 +2422,9 @@
   }
   .lv-product-card:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,.28); z-index: 1; }
   .lv-product-card:active { transform: scale(.97); }
+  /* Especificidad con el id del shell para ganarle SIEMPRE a la regla de tema [class*="card"]
+     (misma especificidad pero definida después). Así el mosaico conserva su color/foto. */
+  #vista2-loyverse-shell .lv-product-card { background: var(--lv-c, #26A65B) !important; }
   /* foto real del producto de fondo (si existe) */
   .lv-product-photo {
     position: absolute; inset: 0; z-index: 0;
