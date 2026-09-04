@@ -2318,13 +2318,16 @@
     flex-direction: column;
     overflow: hidden;
   }
-  body[data-vista="2"] #vista2-loyverse-shell { display: flex; }
-  body[data-vista="2"] .topbar,
-  body[data-vista="2"] .menubar,
-  body[data-vista="2"] .main,
-  body[data-vista="2"] #volvix-reports-fab,
-  body[data-vista="2"] #connection-status,
-  body[data-vista="2"] .volvix-transcript { display: none !important; }
+  /* El shell de venta y el ocultamiento del app real aplican SOLO en modo venta (.lv-sale).
+     Fuera de venta (dashboard, inventario, etc.) se muestra el app real ya re-tematizado
+     verde Loyverse + su menú, para tener el look Loyverse en TODAS las pantallas. */
+  body[data-vista="2"].lv-sale #vista2-loyverse-shell { display: flex; }
+  body[data-vista="2"].lv-sale .topbar,
+  body[data-vista="2"].lv-sale .menubar,
+  body[data-vista="2"].lv-sale .main,
+  body[data-vista="2"].lv-sale #volvix-reports-fab,
+  body[data-vista="2"].lv-sale #connection-status,
+  body[data-vista="2"].lv-sale .volvix-transcript { display: none !important; }
   body[data-vista="2"] #vista-fab { z-index: 9500; top: 12px; right: 14px; left: auto; transform: none; }
 
   .lv-header {
@@ -21534,12 +21537,30 @@
 
   function syncAll() { syncLvCats(); syncLvProducts(); syncLvTicket(); }
 
+  function isSaleScreen(){
+    var p = document.getElementById('screen-pos');
+    if (p && !p.classList.contains('hidden')) return true;
+    return !document.querySelector('section[id^="screen-"]:not(.hidden)');
+  }
+  function updateSaleMode(){
+    var sale = vistaIs(2) && isSaleScreen();
+    document.body.classList.toggle('lv-sale', sale);
+    if (sale) syncAll();
+  }
   var bodyMo = new MutationObserver(function(muts) {
     muts.forEach(function(m){
-      if (m.attributeName === 'data-vista' && vistaIs(2)) syncAll();
+      if (m.attributeName === 'data-vista') { updateSaleMode(); if (vistaIs(2)) syncAll(); }
     });
   });
   bodyMo.observe(document.body, {attributes: true, attributeFilter: ['data-vista']});
+  // Observa cambios de pantalla activa → muestra/oculta el shell de venta segun la screen.
+  (function(){
+    var scr = document.getElementById('screen-pos');
+    var host = (scr && scr.parentElement) || document.querySelector('.main') || document.body;
+    try { new MutationObserver(function(){ if (vistaIs(2)) updateSaleMode(); })
+      .observe(host, { attributes:true, attributeFilter:['class'], subtree:true }); } catch(_){}
+  })();
+  updateSaleMode();
   if (vistaIs(2)) syncAll();
 
   function setupObservers() {
@@ -21597,13 +21618,11 @@
       return;
     }
     if (e.target.closest('#lv-burger')) {
-      // Burger → switch back to Vista 1 (full menu)
-      document.body.setAttribute('data-vista','1');
-      try { localStorage.setItem('salvx_vista','1'); } catch(_){}
-      var lab = document.getElementById('vista-label');
-      var fab = document.getElementById('vista-fab-label');
-      if (lab) lab.textContent = 'Vista ①';
-      if (fab) fab.textContent = 'Vista ①';
+      // Burger → salir del modo venta y mostrar el app real (ya verde Loyverse) con su menú,
+      // SIN salir de Vista 2 (antes brincaba a Vista 1 y se perdía el look Loyverse en todo).
+      document.body.classList.remove('lv-sale');
+      try { if (window.showScreen) window.showScreen('dashboard'); } catch(_){}
+      updateSaleMode();
       return;
     }
   }, false);
