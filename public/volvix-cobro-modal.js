@@ -1202,6 +1202,7 @@
       // ─── FASE 5: cierre INSTANTÁNEO del modal + limpieza UI ───
       try {
         if (typeof window.closeModal === 'function') window.closeModal('modal-pay');
+        try { window.__vlxCartSnapshot = (window.CART||[]).map(function(i){ return { id:i.id, code:i.code, name:i.name, price:i.price, qty:i.qty }; }); } catch(_){}
         if (Array.isArray(window.CART)) window.CART.length = 0;
         if (typeof window.renderCart === 'function') window.renderCart();
         if (typeof window.__volvixResetCartToken === 'function') window.__volvixResetCartToken();
@@ -1286,9 +1287,9 @@
         var token = getAuthToken();
         var folio = ($('#currentFolio') && $('#currentFolio').textContent) || '';
         var ticketNum = 'TKT-' + folio;
-        var items = (window.CART || []).map(function (i) {
-          return { id: i.id, code: i.code, name: i.name, price: i.price, qty: i.qty };
-        });
+        var items = (window.CART && window.CART.length)
+          ? window.CART.map(function (i) { return { id: i.id, code: i.code, name: i.name, price: i.price, qty: i.qty }; })
+          : (window.__vlxCartSnapshot || []);
 
         var payload = {
           tenant_id: session && session.tenant_id || null,
