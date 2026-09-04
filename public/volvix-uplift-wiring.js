@@ -376,8 +376,11 @@
     var rescued = 0;
     btns.forEach(function (b) {
       // Skip si ya tiene handler real (onclick attr, listener, type=submit, id, data-action)
-      if (b.onclick) return;
+      // OJO: leer b.onclick lanza "Failed to read the 'onclick' property" si el atributo
+      // inline tiene sintaxis inválida (dato con apóstrofo/comilla sin escapar). Por eso
+      // primero se revisa el ATRIBUTO (no compila el handler) y luego se blinda la propiedad.
       if (b.hasAttribute('onclick')) return;
+      try { if (b.onclick) return; } catch (_e) { return; }
       if (b.hasAttribute('data-action')) return;
       if (b.id && b.id.length > 1) return;
       if (b.type === 'submit' || b.closest('form')) return;
