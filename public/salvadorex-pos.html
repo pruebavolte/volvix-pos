@@ -13312,8 +13312,10 @@
       var saved = isImpersonating
         ? sessionStorage.getItem('salvx_vista')
         : localStorage.getItem('salvx_vista');
-      if (saved && ['1','2','3'].includes(saved)) _applyVista(saved);
-    } catch(_) {}
+      // DEFAULT = Vista 2 (Loyverse verde) para todos: si no hay preferencia válida guardada,
+      // arranca en '2'. Quien ya eligió otra vista, la conserva.
+      _applyVista((saved && ['1','2','3'].includes(saved)) ? saved : '2');
+    } catch(_) { _applyVista('2'); }
   })();
 
   /* ============ OWNER PANEL ============ */
