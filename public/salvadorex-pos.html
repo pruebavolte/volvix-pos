@@ -2307,6 +2307,12 @@
     .oxxo-total-val { font-size: 22px; }
   }
 
+  /* Tabs/botones activos con azul hardcodeado en pantallas de feature → verde Loyverse.
+     (colores semánticos rojo/ámbar de alertas y de estado/calendario se conservan). */
+  body[data-vista="2"] .mkt-plat-tab.active,
+  body[data-vista="2"] .mkt-tono-btn.active,
+  body[data-vista="2"] .ing-tab.active { background: #26A65B !important; border-color: #26A65B !important; color: #fff !important; }
+
   /* ======= VISTA 2 : Loyverse Full Layout Clone (overlay) ======= */
   #vista2-loyverse-shell {
     display: none;
