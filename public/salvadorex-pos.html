@@ -4102,6 +4102,11 @@
       <span>🔐 Corte</span>
     </button>
 
+    <button class="menu-btn" data-menu="kds" onclick="showScreen('kds')" title="Pantalla de cocina — comandas / tickets abiertos">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2"><path d="M8 3v3M12 3v3M16 3v3M4 9h16M6 9v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9"/></svg>
+      <span>🍳 Cocina</span>
+    </button>
+
     <div class="menubar-divider"></div>
 
     <!-- TERTIARY: Gestión -->
@@ -4479,6 +4484,56 @@
     </section>
 
     <!-- ============ DASHBOARD ============ -->
+    <style>
+      #screen-kds .kds-card{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px; display:flex; flex-direction:column; box-shadow:var(--shadow-sm); min-height:140px; }
+      #screen-kds .kds-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+      #screen-kds .kds-ref{ font-weight:800; font-size:15px; color:var(--text); }
+      #screen-kds .kds-time{ font-size:12px; font-weight:700; }
+      #screen-kds .kds-lines{ flex:1; display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
+      #screen-kds .kds-line{ display:flex; gap:8px; align-items:flex-start; font-size:13.5px; color:var(--text); }
+      #screen-kds .kds-q{ min-width:24px; height:22px; padding:0 6px; background:var(--eleventa-blue); color:#fff; border-radius:6px; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center; flex:none; }
+      #screen-kds .kds-done{ border:none; background:#26A65B; color:#fff; padding:10px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px; text-transform:uppercase; letter-spacing:.4px; }
+      #screen-kds .kds-done:hover{ background:#1F8A4C; }
+    </style>
+    <section id="screen-kds" class="screen-pad hidden">
+      <div class="btn-row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <h1 style="margin:0">🍳 Cocina</h1>
+          <div style="color:var(--text-3);font-size:12px" id="kds-sub">Comandas / tickets abiertos en tiempo real</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="renderKDS(true)">🔄 Actualizar</button>
+          <label class="btn" style="display:inline-flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="kds-auto" checked onchange="kdsToggleAuto(this.checked)"> Auto</label>
+        </div>
+      </div>
+      <div id="kds-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:14px;align-content:start">
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">Cargando comandas…</div>
+      </div>
+    </section>
+    <script>
+    (function(){
+      var kdsTimer=null;
+      function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});}
+      function waitInfo(savedAt){ var ms=Date.now()-(Number(savedAt)||Date.now()); var min=Math.max(0,Math.floor(ms/60000)); var color=min<5?'#26A65B':(min<10?'#F59E0B':'#DC2626'); return {min:min,color:color,label:min<1?'recién':(min+' min')}; }
+      window.renderKDS=async function(){ var grid=document.getElementById('kds-grid'); if(!grid) return; var af=(typeof _authFetch==='function')?_authFetch:function(u,o){return fetch(u,o);};
+        try{ var r=await af('/api/sales/pending'); if(!r.ok){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">No se pudieron cargar las comandas.</div>'; return; }
+          var data=await r.json(); var items=(data&&data.items)||(Array.isArray(data)?data:[]);
+          var sub=document.getElementById('kds-sub');
+          if(!items.length){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-3)"><div style="font-size:40px">🍽️</div>Sin comandas pendientes.<br><span style="font-size:12px">Las ventas guardadas como pendientes (F6) aparecen aquí para cocina.</span></div>'; if(sub)sub.textContent='0 comandas activas'; return; }
+          grid.innerHTML=items.map(function(t,idx){ var w=waitInfo(t.saved_at);
+            var lines=(t.items||[]).map(function(it){ return '<div class="kds-line"><span class="kds-q">'+(Number(it.qty)||1)+'</span><span class="kds-n">'+esc(it.name||it.code||'—')+'</span></div>'; }).join('');
+            var ref=String(t.id||t.reference||('#'+(idx+1))).slice(-6);
+            return '<div class="kds-card" style="border-top:4px solid '+w.color+'"><div class="kds-head"><span class="kds-ref">#'+esc(ref)+'</span><span class="kds-time" style="color:'+w.color+'">⏱ '+w.label+'</span></div><div class="kds-lines">'+lines+'</div><button class="kds-done" onclick="kdsMarkDone(\''+esc(String(t.id||''))+'\',this)">✓ Listo</button></div>';
+          }).join('');
+          if(sub)sub.textContent=items.length+' comanda'+(items.length!==1?'s':'')+' activa'+(items.length!==1?'s':'');
+        }catch(e){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">Error al cargar comandas.</div>'; } };
+      window.kdsMarkDone=async function(id,btn){ if(btn){btn.disabled=true;btn.textContent='…';} var af=(typeof _authFetch==='function')?_authFetch:function(u,o){return fetch(u,o);}; if(id){ try{ await af('/api/sales/pending/'+encodeURIComponent(id),{method:'DELETE'}); }catch(e){} } if(btn){ var c=btn.closest('.kds-card'); if(c){ c.style.opacity='.4'; setTimeout(function(){c.remove();},250); } } try{ if(typeof showToast==='function') showToast('✓ Comanda lista'); }catch(_){} };
+      function kdsStart(){ if(kdsTimer)clearInterval(kdsTimer); kdsTimer=setInterval(function(){ var s=document.getElementById('screen-kds'); if(s&&!s.classList.contains('hidden')) window.renderKDS(); else { clearInterval(kdsTimer); kdsTimer=null; } },12000); }
+      window.kdsToggleAuto=function(on){ if(on)kdsStart(); else if(kdsTimer){clearInterval(kdsTimer);kdsTimer=null;} };
+      function hook(){ if(typeof window.showScreen==='function' && !window.showScreen.__kdsHooked){ var orig=window.showScreen; window.showScreen=function(name){ var r=orig.apply(this,arguments); if(name==='kds'){ setTimeout(function(){ window.renderKDS(); var a=document.getElementById('kds-auto'); if(!a||a.checked) kdsStart(); },60); } return r; }; window.showScreen.__kdsHooked=true; } }
+      hook(); setTimeout(hook,1500); setTimeout(hook,4000);
+    })();
+    </script>
     <section id="screen-dashboard" class="screen-pad hidden">
       <div class="page-head">
         <div>
