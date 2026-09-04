@@ -2313,6 +2313,11 @@
   body[data-vista="2"] .mkt-tono-btn.active,
   body[data-vista="2"] .ing-tab.active { background: #26A65B !important; border-color: #26A65B !important; color: #fff !important; }
 
+  /* FIX CRÍTICO: los modales (.modal-backdrop, z-index base 100) quedaban DETRÁS del shell
+     Loyverse (z-8500) en modo venta → cobro/editar/cliente/búsqueda invisibles. Los subimos
+     por encima del shell en Vista 2 para que el flujo de cobro funcione. */
+  body[data-vista="2"] .modal-backdrop { z-index: 12000 !important; }
+
   /* ======= VISTA 2 : Loyverse Full Layout Clone (overlay) ======= */
   #vista2-loyverse-shell {
     display: none;
@@ -21529,9 +21534,10 @@
     rows.forEach(function(tr) {
       var tds = tr.querySelectorAll('td');
       if (tds.length < 5) return;
-      var desc = (tds[1] && tds[1].textContent || '').trim();
+      var desc = (tds[1] && tds[1].textContent || '').trim().replace(/\s+/g,' ');
       var unit = (tds[2] && tds[2].textContent || '').trim();
-      var qty = (tds[3] && tds[3].textContent || '').trim();
+      var qtyRaw = (tds[3] && tds[3].textContent || '');
+      var qty = ((qtyRaw.match(/[\d]+(?:[.,]\d+)?/) || [qtyRaw.trim()])[0]); // solo el número (sin los botones − +)
       var importe = (tds[4] && tds[4].textContent || '').trim();
       var sub = qty + (unit ? (' × ' + unit) : '');
       html += '<div class="lv-ticket-row">'
