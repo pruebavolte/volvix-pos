@@ -4106,6 +4106,10 @@
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2"><path d="M8 3v3M12 3v3M16 3v3M4 9h16M6 9v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9"/></svg>
       <span>🍳 Cocina</span>
     </button>
+    <button class="menu-btn" data-menu="cds" onclick="showScreen('cds')" title="Pantalla al cliente — muestra el ticket en un 2do monitor">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#26A65B" stroke-width="2"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      <span>🖥️ Cliente</span>
+    </button>
 
     <div class="menubar-divider"></div>
 
@@ -4531,6 +4535,62 @@
       function kdsStart(){ if(kdsTimer)clearInterval(kdsTimer); kdsTimer=setInterval(function(){ var s=document.getElementById('screen-kds'); if(s&&!s.classList.contains('hidden')) window.renderKDS(); else { clearInterval(kdsTimer); kdsTimer=null; } },12000); }
       window.kdsToggleAuto=function(on){ if(on)kdsStart(); else if(kdsTimer){clearInterval(kdsTimer);kdsTimer=null;} };
       function hook(){ if(typeof window.showScreen==='function' && !window.showScreen.__kdsHooked){ var orig=window.showScreen; window.showScreen=function(name){ var r=orig.apply(this,arguments); if(name==='kds'){ setTimeout(function(){ window.renderKDS(); var a=document.getElementById('kds-auto'); if(!a||a.checked) kdsStart(); },60); } return r; }; window.showScreen.__kdsHooked=true; } }
+      hook(); setTimeout(hook,1500); setTimeout(hook,4000);
+    })();
+    </script>
+    <style>
+      #screen-cds .cds-stage{ background:#0b3d24; color:#fff; border-radius:14px; overflow:hidden; display:flex; flex-direction:column; min-height:70vh; margin-top:14px; box-shadow:var(--shadow); }
+      #screen-cds .cds-head{ background:#26A65B; padding:18px 26px; font-size:26px; font-weight:800; letter-spacing:.5px; }
+      #screen-cds .cds-items{ flex:1; padding:12px 26px; display:flex; flex-direction:column; overflow:auto; }
+      #screen-cds .cds-row{ display:flex; justify-content:space-between; align-items:baseline; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.12); font-size:22px; }
+      #screen-cds .cds-row .r-name{ font-weight:700; }
+      #screen-cds .cds-row .r-sub{ font-size:15px; opacity:.7; margin-left:10px; font-weight:400; }
+      #screen-cds .cds-row .r-amt{ font-weight:800; font-variant-numeric:tabular-nums; }
+      #screen-cds .cds-empty{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; opacity:.9; }
+      #screen-cds .cds-empty .big{ font-size:64px; }
+      #screen-cds .cds-empty .msg{ font-size:30px; font-weight:800; }
+      #screen-cds .cds-foot{ background:#0a2e1b; padding:22px 26px; display:flex; justify-content:space-between; align-items:center; font-size:40px; font-weight:900; }
+      #screen-cds .cds-foot .lbl{ font-size:24px; letter-spacing:2px; opacity:.8; }
+      #screen-cds .cds-stage:fullscreen{ min-height:100vh; border-radius:0; }
+    </style>
+    <section id="screen-cds" class="screen-pad hidden">
+      <div class="btn-row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <h1 style="margin:0">🖥️ Pantalla al cliente</h1>
+          <div style="color:var(--text-3);font-size:12px">Refleja el ticket en vivo. Úsala en un 2do monitor o ventana aparte.</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="cdsFullscreen()">⛶ Pantalla completa</button>
+          <button class="btn" onclick="cdsPopout()">🪟 Ventana aparte</button>
+        </div>
+      </div>
+      <div id="cds-stage" class="cds-stage">
+        <div class="cds-head" id="cds-biz">Mi negocio</div>
+        <div class="cds-items" id="cds-items"></div>
+        <div class="cds-foot"><span class="lbl">TOTAL</span><span id="cds-total">$0.00</span></div>
+      </div>
+    </section>
+    <script>
+    (function(){
+      var cdsTimer=null, cdsWin=null;
+      function money(n){ n=Number(n)||0; return '$'+n.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+      function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});}
+      function bizName(){ try{ if(typeof __deriveTenantNameFromToken==='function') return __deriveTenantNameFromToken(); }catch(_){} return 'Mi negocio'; }
+      function readCart(){ try{ if(Array.isArray(window.CART)) return window.CART.map(function(it){return {name:it.name||it.code||'—',qty:Number(it.qty)||1,price:Number(it.price)||0};}); }catch(_){} return []; }
+      function readTotal(){ var el=document.getElementById('total-big'); if(el&&el.textContent.trim()) return el.textContent.trim(); var c=readCart(); return money(c.reduce(function(a,it){return a+it.price*it.qty;},0)); }
+      window.renderCDS=function(){ var stage=document.getElementById('cds-stage'); var cart=readCart(), total=readTotal(), biz=bizName();
+        if(stage){ var bz=document.getElementById('cds-biz'); if(bz)bz.textContent=biz; var tt=document.getElementById('cds-total'); if(tt)tt.textContent=total;
+          var it=document.getElementById('cds-items');
+          if(it){ if(!cart.length){ it.innerHTML='<div class="cds-empty"><div class="big">🛒</div><div class="msg">Bienvenido</div><div style="opacity:.7">Gracias por su compra</div></div>'; }
+            else { it.innerHTML=cart.map(function(x){ return '<div class="cds-row"><span><span class="r-name">'+esc(x.name)+'</span><span class="r-sub">'+x.qty+' × '+money(x.price)+'</span></span><span class="r-amt">'+money(x.price*x.qty)+'</span></div>'; }).join(''); } }
+        }
+        if(cdsWin && !cdsWin.closed){ try{ cdsWin.__cdsUpdate(cart,total,biz); }catch(_){} } };
+      function cdsStart(){ if(cdsTimer)clearInterval(cdsTimer); cdsTimer=setInterval(function(){ var s=document.getElementById('screen-cds'); if((s&&!s.classList.contains('hidden'))||(cdsWin&&!cdsWin.closed)) window.renderCDS(); else { clearInterval(cdsTimer); cdsTimer=null; } },700); }
+      window.cdsFullscreen=function(){ var el=document.getElementById('cds-stage'); if(!el)return; try{ if(!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen).call(el); } else { (document.exitFullscreen||document.webkitExitFullscreen).call(document); } }catch(e){ if(typeof showToast==='function')showToast('Pantalla completa no disponible'); } };
+      window.cdsPopout=function(){ try{ cdsWin=window.open('','volvix_cds','width=860,height=640'); if(!cdsWin){ if(typeof showToast==='function')showToast('El navegador bloqueó la ventana'); return; }
+        cdsWin.document.write('<!doctype html><meta charset="utf-8"><title>Pantalla al cliente</title><style>*{margin:0;box-sizing:border-box;font-family:system-ui,Segoe UI,sans-serif}body{background:#0b3d24;color:#fff;height:100vh;display:flex;flex-direction:column}.h{background:#26A65B;padding:18px 26px;font-size:28px;font-weight:800}.it{flex:1;padding:12px 26px;overflow:auto}.row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:24px}.sub{font-size:16px;opacity:.7;margin-left:10px}.amt{font-weight:800}.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}.big{font-size:72px}.msg{font-size:34px;font-weight:800}.f{background:#0a2e1b;padding:24px 26px;display:flex;justify-content:space-between;align-items:center;font-size:46px;font-weight:900}.f .l{font-size:26px;letter-spacing:2px;opacity:.8}</style><div class="h" id="b">Mi negocio</div><div class="it" id="i"></div><div class="f"><span class="l">TOTAL</span><span id="t">$0.00</span></div><scr'+'ipt>function money(n){return "$"+(Number(n)||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});}window.__cdsUpdate=function(cart,total,biz){document.getElementById("b").textContent=biz;document.getElementById("t").textContent=total;var i=document.getElementById("i");if(!cart.length){i.innerHTML="<div class=\\"empty\\"><div class=\\"big\\">🛒</div><div class=\\"msg\\">Bienvenido</div></div>";return;}i.innerHTML=cart.map(function(x){return "<div class=\\"row\\"><span><b>"+x.name+"</b><span class=\\"sub\\">"+x.qty+" × "+money(x.price)+"</span></span><span class=\\"amt\\">"+money(x.price*x.qty)+"</span></div>";}).join("");};<'+'/scr'+'ipt>');
+        cdsWin.document.close(); cdsStart(); window.renderCDS(); }catch(e){ if(typeof showToast==='function')showToast('No se pudo abrir la ventana'); } };
+      function hook(){ if(typeof window.showScreen==='function' && !window.showScreen.__cdsHooked){ var prev=window.showScreen; window.showScreen=function(name){ var r=prev.apply(this,arguments); if(name==='cds'){ setTimeout(function(){ window.renderCDS(); cdsStart(); },60); } return r; }; window.showScreen.__cdsHooked=true; } }
       hook(); setTimeout(hook,1500); setTimeout(hook,4000);
     })();
     </script>
