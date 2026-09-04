@@ -2329,17 +2329,60 @@
     flex-direction: column;
     overflow: hidden;
   }
-  /* El shell de venta y el ocultamiento del app real aplican SOLO en modo venta (.lv-sale).
-     Fuera de venta (dashboard, inventario, etc.) se muestra el app real ya re-tematizado
-     verde Loyverse + su menú, para tener el look Loyverse en TODAS las pantallas. */
-  body[data-vista="2"].lv-sale #vista2-loyverse-shell { display: flex; }
-  body[data-vista="2"].lv-sale .topbar,
-  body[data-vista="2"].lv-sale .menubar,
-  body[data-vista="2"].lv-sale .main,
-  body[data-vista="2"].lv-sale #volvix-reports-fab,
-  body[data-vista="2"].lv-sale #connection-status,
-  body[data-vista="2"].lv-sale .volvix-transcript { display: none !important; }
-  body[data-vista="2"] #vista-fab { z-index: 9500; top: 12px; right: 14px; left: auto; transform: none; }
+  /* El shell de venta aparece SOLO en modo venta (.lv-sale) y bajo el appbar (top:56px). */
+  body[data-vista="2"].lv-sale #vista2-loyverse-shell { display: flex; top: 56px; }
+  body[data-vista="2"] #vista2-loyverse-shell .lv-header { display: none; }
+  /* Chrome viejo (topbar/menubar/fabs) OCULTO en TODA la Vista 2, no solo en venta:
+     el look Loyverse (appbar verde + drawer lateral) es persistente en cada pantalla.
+     La navegacion vive en el drawer (☰). El cambio de vista es EXCLUSIVO del boton
+     "Cambiar de vista" dentro del drawer. */
+  body[data-vista="2"] .topbar,
+  body[data-vista="2"] .menubar,
+  body[data-vista="2"] #volvix-reports-fab,
+  body[data-vista="2"] #connection-status,
+  body[data-vista="2"] .volvix-transcript { display: none !important; }
+  /* .main se oculta SOLO en venta (ahi manda el shell); fuera de venta se ve la pantalla
+     real empujada bajo el appbar. */
+  body[data-vista="2"].lv-sale .main { display: none !important; }
+  body[data-vista="2"] .main { padding-top: 56px; }
+
+  /* ===== Appbar Loyverse persistente ===== */
+  #lv-appbar { display: none; }
+  body[data-vista="2"] #lv-appbar {
+    display: flex; position: fixed; top: 0; left: 0; right: 0; height: 56px;
+    background: #26A65B; color: #fff; align-items: center; gap: 6px; padding: 0 8px 0 4px;
+    z-index: 9000; box-shadow: 0 2px 4px rgba(0,0,0,.15);
+    font-family: Roboto, -apple-system, system-ui, "Segoe UI", sans-serif;
+  }
+  #lv-appbar .lv-ab-title { font-size: 20px; font-weight: 500; flex: 1; letter-spacing: .15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #lv-appbar .lv-ab-btn {
+    background: transparent; border: none; color: #fff; font-size: 21px; cursor: pointer;
+    width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    position: relative; transition: background .15s; flex: none;
+  }
+  #lv-appbar .lv-ab-btn:hover { background: rgba(255,255,255,.18); }
+  #lv-appbar .lv-ab-badge { position: absolute; top: 3px; right: 3px; background: #FF5722; color: #fff; font-size: 10px; padding: 1px 5px; border-radius: 10px; font-weight: 700; min-width: 16px; text-align: center; pointer-events: none; }
+
+  /* ===== Drawer lateral Loyverse (☰) ===== */
+  #lv-drawer-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 10000; }
+  #lv-drawer-backdrop.open { display: block; }
+  #lv-drawer {
+    position: fixed; top: 0; left: 0; bottom: 0; width: 292px; max-width: 84vw;
+    background: #fff; z-index: 10001; transform: translateX(-100%); transition: transform .22s ease;
+    display: flex; flex-direction: column; box-shadow: 2px 0 18px rgba(0,0,0,.25);
+    font-family: Roboto, -apple-system, system-ui, "Segoe UI", sans-serif;
+  }
+  #lv-drawer.open { transform: translateX(0); }
+  #lv-drawer .lv-dw-head { background: #26A65B; color: #fff; padding: 22px 18px; }
+  #lv-drawer .lv-dw-biz { font-size: 18px; font-weight: 700; line-height: 1.2; }
+  #lv-drawer .lv-dw-sub { font-size: 12px; opacity: .85; margin-top: 3px; }
+  #lv-drawer .lv-dw-nav { flex: 1; overflow-y: auto; padding: 6px 0; }
+  #lv-drawer .lv-dw-item { display: flex; align-items: center; gap: 14px; padding: 12px 18px; cursor: pointer; color: #222; font-size: 14.5px; border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
+  #lv-drawer .lv-dw-item:hover { background: #F1FBF4; }
+  #lv-drawer .lv-dw-item.active { background: #E8F5E9; color: #1F8A4C; font-weight: 700; box-shadow: inset 3px 0 0 #26A65B; }
+  #lv-drawer .lv-dw-ico { width: 22px; text-align: center; font-size: 18px; flex: none; }
+  #lv-drawer .lv-dw-switch { border-top: 1px solid #eee; margin-top: 4px; }
+  #lv-drawer .lv-dw-switch .lv-dw-item { color: #4338CA; font-weight: 700; }
 
   .lv-header {
     background: #26A65B;
@@ -4518,20 +4561,20 @@
     (function(){
       var kdsTimer=null;
       function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);});}
-      function waitInfo(savedAt){ var ms=Date.now()-(Number(savedAt)||Date.now()); var min=Math.max(0,Math.floor(ms/60000)); var color=min<5?'#26A65B':(min<10?'#F59E0B':'#DC2626'); return {min:min,color:color,label:min<1?'recién':(min+' min')}; }
+      function waitInfo(savedAt){ var n; if(typeof savedAt==='number'){ n = savedAt<1e11 ? savedAt*1000 : savedAt; } else if(savedAt){ n = Date.parse(savedAt); } var ms=(n && isFinite(n)) ? (Date.now()-n) : 0; if(ms<0) ms=0; var min=Math.max(0,Math.floor(ms/60000)); var color=min<5?'#26A65B':(min<10?'#F59E0B':'#DC2626'); return {min:min,color:color,label:min<1?'recién':(min+' min')}; }
       window.renderKDS=async function(){ var grid=document.getElementById('kds-grid'); if(!grid) return; var af=(typeof _authFetch==='function')?_authFetch:function(u,o){return fetch(u,o);};
         try{ var r=await af('/api/sales/pending'); if(!r.ok){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">No se pudieron cargar las comandas.</div>'; return; }
           var data=await r.json(); var items=(data&&data.items)||(Array.isArray(data)?data:[]);
           var sub=document.getElementById('kds-sub');
           if(!items.length){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-3)"><div style="font-size:40px">🍽️</div>Sin comandas pendientes.<br><span style="font-size:12px">Las ventas guardadas como pendientes (F6) aparecen aquí para cocina.</span></div>'; if(sub)sub.textContent='0 comandas activas'; return; }
-          grid.innerHTML=items.map(function(t,idx){ var w=waitInfo(t.saved_at);
+          grid.innerHTML=items.map(function(t,idx){ var w=waitInfo(t.saved_at||t.created_at);
             var lines=(t.items||[]).map(function(it){ return '<div class="kds-line"><span class="kds-q">'+(Number(it.qty)||1)+'</span><span class="kds-n">'+esc(it.name||it.code||'—')+'</span></div>'; }).join('');
             var ref=String(t.id||t.reference||('#'+(idx+1))).slice(-6);
             return '<div class="kds-card" style="border-top:4px solid '+w.color+'"><div class="kds-head"><span class="kds-ref">#'+esc(ref)+'</span><span class="kds-time" style="color:'+w.color+'">⏱ '+w.label+'</span></div><div class="kds-lines">'+lines+'</div><button class="kds-done" onclick="kdsMarkDone(\''+esc(String(t.id||''))+'\',this)">✓ Listo</button></div>';
           }).join('');
           if(sub)sub.textContent=items.length+' comanda'+(items.length!==1?'s':'')+' activa'+(items.length!==1?'s':'');
         }catch(e){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">Error al cargar comandas.</div>'; } };
-      window.kdsMarkDone=async function(id,btn){ if(btn){btn.disabled=true;btn.textContent='…';} var af=(typeof _authFetch==='function')?_authFetch:function(u,o){return fetch(u,o);}; if(id){ try{ await af('/api/sales/pending/'+encodeURIComponent(id),{method:'DELETE'}); }catch(e){} } if(btn){ var c=btn.closest('.kds-card'); if(c){ c.style.opacity='.4'; setTimeout(function(){c.remove();},250); } } try{ if(typeof showToast==='function') showToast('✓ Comanda lista'); }catch(_){} };
+      window.kdsMarkDone=async function(id,btn){ if(!id){ if(typeof showToast==='function')showToast('Comanda sin folio: no se puede cerrar'); return; } if(btn){btn.disabled=true;btn.textContent='…';} var af=(typeof _authFetch==='function')?_authFetch:function(u,o){return fetch(u,o);}; var ok=false; try{ var r=await af('/api/sales/pending/'+encodeURIComponent(id),{method:'DELETE'}); ok=!!(r&&(r.ok||r.status===404)); }catch(e){ ok=false; } if(!ok){ if(btn){btn.disabled=false;btn.textContent='✓ Listo';} if(typeof showToast==='function')showToast('No se pudo cerrar la comanda'); return; } if(btn){ var c=btn.closest('.kds-card'); if(c){ c.style.opacity='.4'; setTimeout(function(){c.remove();},250); } } try{ if(typeof showToast==='function') showToast('✓ Comanda lista'); }catch(_){} };
       function kdsStart(){ if(kdsTimer)clearInterval(kdsTimer); kdsTimer=setInterval(function(){ var s=document.getElementById('screen-kds'); if(s&&!s.classList.contains('hidden')) window.renderKDS(); else { clearInterval(kdsTimer); kdsTimer=null; } },12000); }
       window.kdsToggleAuto=function(on){ if(on)kdsStart(); else if(kdsTimer){clearInterval(kdsTimer);kdsTimer=null;} };
       function hook(){ if(typeof window.showScreen==='function' && !window.showScreen.__kdsHooked){ var orig=window.showScreen; window.showScreen=function(name){ var r=orig.apply(this,arguments); if(name==='kds'){ setTimeout(function(){ window.renderKDS(); var a=document.getElementById('kds-auto'); if(!a||a.checked) kdsStart(); },60); } return r; }; window.showScreen.__kdsHooked=true; } }
@@ -4586,9 +4629,9 @@
         }
         if(cdsWin && !cdsWin.closed){ try{ cdsWin.__cdsUpdate(cart,total,biz); }catch(_){} } };
       function cdsStart(){ if(cdsTimer)clearInterval(cdsTimer); cdsTimer=setInterval(function(){ var s=document.getElementById('screen-cds'); if((s&&!s.classList.contains('hidden'))||(cdsWin&&!cdsWin.closed)) window.renderCDS(); else { clearInterval(cdsTimer); cdsTimer=null; } },700); }
-      window.cdsFullscreen=function(){ var el=document.getElementById('cds-stage'); if(!el)return; try{ if(!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen).call(el); } else { (document.exitFullscreen||document.webkitExitFullscreen).call(document); } }catch(e){ if(typeof showToast==='function')showToast('Pantalla completa no disponible'); } };
+      window.cdsFullscreen=function(){ var el=document.getElementById('cds-stage'); if(!el)return; try{ if(!(document.fullscreenElement||document.webkitFullscreenElement)){ (el.requestFullscreen||el.webkitRequestFullscreen).call(el); } else { (document.exitFullscreen||document.webkitExitFullscreen).call(document); } }catch(e){ if(typeof showToast==='function')showToast('Pantalla completa no disponible'); } };
       window.cdsPopout=function(){ try{ cdsWin=window.open('','volvix_cds','width=860,height=640'); if(!cdsWin){ if(typeof showToast==='function')showToast('El navegador bloqueó la ventana'); return; }
-        cdsWin.document.write('<!doctype html><meta charset="utf-8"><title>Pantalla al cliente</title><style>*{margin:0;box-sizing:border-box;font-family:system-ui,Segoe UI,sans-serif}body{background:#0b3d24;color:#fff;height:100vh;display:flex;flex-direction:column}.h{background:#26A65B;padding:18px 26px;font-size:28px;font-weight:800}.it{flex:1;padding:12px 26px;overflow:auto}.row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:24px}.sub{font-size:16px;opacity:.7;margin-left:10px}.amt{font-weight:800}.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}.big{font-size:72px}.msg{font-size:34px;font-weight:800}.f{background:#0a2e1b;padding:24px 26px;display:flex;justify-content:space-between;align-items:center;font-size:46px;font-weight:900}.f .l{font-size:26px;letter-spacing:2px;opacity:.8}</style><div class="h" id="b">Mi negocio</div><div class="it" id="i"></div><div class="f"><span class="l">TOTAL</span><span id="t">$0.00</span></div><scr'+'ipt>function money(n){return "$"+(Number(n)||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});}window.__cdsUpdate=function(cart,total,biz){document.getElementById("b").textContent=biz;document.getElementById("t").textContent=total;var i=document.getElementById("i");if(!cart.length){i.innerHTML="<div class=\\"empty\\"><div class=\\"big\\">🛒</div><div class=\\"msg\\">Bienvenido</div></div>";return;}i.innerHTML=cart.map(function(x){return "<div class=\\"row\\"><span><b>"+x.name+"</b><span class=\\"sub\\">"+x.qty+" × "+money(x.price)+"</span></span><span class=\\"amt\\">"+money(x.price*x.qty)+"</span></div>";}).join("");};<'+'/scr'+'ipt>');
+        cdsWin.document.write('<!doctype html><meta charset="utf-8"><title>Pantalla al cliente</title><style>*{margin:0;box-sizing:border-box;font-family:system-ui,Segoe UI,sans-serif}body{background:#0b3d24;color:#fff;height:100vh;display:flex;flex-direction:column}.h{background:#26A65B;padding:18px 26px;font-size:28px;font-weight:800}.it{flex:1;padding:12px 26px;overflow:auto}.row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:24px}.sub{font-size:16px;opacity:.7;margin-left:10px}.amt{font-weight:800}.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}.big{font-size:72px}.msg{font-size:34px;font-weight:800}.f{background:#0a2e1b;padding:24px 26px;display:flex;justify-content:space-between;align-items:center;font-size:46px;font-weight:900}.f .l{font-size:26px;letter-spacing:2px;opacity:.8}</style><div class="h" id="b">Mi negocio</div><div class="it" id="i"></div><div class="f"><span class="l">TOTAL</span><span id="t">$0.00</span></div><scr'+'ipt>function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){var m={"&":"&amp;","<":"&lt;",">":"&gt;"};return m[c]||"&quot;";});}function money(n){return "$"+(Number(n)||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});}window.__cdsUpdate=function(cart,total,biz){document.getElementById("b").textContent=biz;document.getElementById("t").textContent=total;var i=document.getElementById("i");if(!cart.length){i.innerHTML="<div class=\\"empty\\"><div class=\\"big\\">🛒</div><div class=\\"msg\\">Bienvenido</div></div>";return;}i.innerHTML=cart.map(function(x){return "<div class=\\"row\\"><span><b>"+esc(x.name)+"</b><span class=\\"sub\\">"+x.qty+" × "+money(x.price)+"</span></span><span class=\\"amt\\">"+money(x.price*x.qty)+"</span></div>";}).join("");};<'+'/scr'+'ipt>');
         cdsWin.document.close(); cdsStart(); window.renderCDS(); }catch(e){ if(typeof showToast==='function')showToast('No se pudo abrir la ventana'); } };
       function hook(){ if(typeof window.showScreen==='function' && !window.showScreen.__cdsHooked){ var prev=window.showScreen; window.showScreen=function(name){ var r=prev.apply(this,arguments); if(name==='cds'){ setTimeout(function(){ window.renderCDS(); cdsStart(); },60); } return r; }; window.showScreen.__cdsHooked=true; } }
       hook(); setTimeout(hook,1500); setTimeout(hook,4000);
@@ -21512,7 +21555,23 @@
 </script>
 
 <!-- ============ VISTA 2 LOYVERSE OVERLAY (clone) ============ -->
-<div id="vista2-loyverse-shell" aria-hidden="true">
+<!-- ===== Appbar Loyverse persistente (Vista 2, todas las pantallas) ===== -->
+<div id="lv-appbar">
+  <button class="lv-ab-btn" id="lv-appbar-burger" type="button" aria-label="Menú">☰</button>
+  <span class="lv-ab-title" id="lv-appbar-title">Punto de venta</span>
+  <button class="lv-ab-btn" id="lv-appbar-search" type="button" aria-label="Buscar">🔍</button>
+  <button class="lv-ab-btn" id="lv-appbar-bell" type="button" aria-label="Notificaciones">🔔<span class="lv-ab-badge" id="lv-appbar-badge" hidden></span></button>
+</div>
+<div id="lv-drawer-backdrop"></div>
+<nav id="lv-drawer" aria-label="Menú">
+  <div class="lv-dw-head">
+    <div class="lv-dw-biz" id="lv-dw-biz">Mi negocio</div>
+    <div class="lv-dw-sub">Volvix POS · Punto de venta</div>
+  </div>
+  <div class="lv-dw-nav" id="lv-dw-nav"></div>
+</nav>
+
+<div id="vista2-loyverse-shell">
   <div class="lv-header">
     <button class="lv-burger" type="button" id="lv-burger" aria-label="Menú">☰</button>
     <span class="lv-title" id="lv-title">Punto de venta</span>
@@ -21753,14 +21812,94 @@
       return;
     }
     if (e.target.closest('#lv-burger')) {
-      // Burger → salir del modo venta y mostrar el app real (ya verde Loyverse) con su menú,
-      // SIN salir de Vista 2 (antes brincaba a Vista 1 y se perdía el look Loyverse en todo).
-      document.body.classList.remove('lv-sale');
-      try { if (window.showScreen) window.showScreen('dashboard'); } catch(_){}
-      updateSaleMode();
+      // Burger → abre el drawer Loyverse (NO sale del look Loyverse).
+      if (window.__lvOpenDrawer) window.__lvOpenDrawer();
+      return;
+    }
+    if (e.target.closest('#lv-more')) {
+      if (typeof window.openVarios === 'function') { try { window.openVarios(); } catch(_){} }
+      return;
+    }
+    if (e.target.closest('#lv-bell')) {
+      if (typeof window.openNotificationsPanel === 'function') { try { window.openNotificationsPanel(); } catch(_){} }
+      return;
+    }
+    var din = e.target.closest('#lv-dinein');
+    if (din) {
+      var here = din.getAttribute('data-mode') === 'here';
+      din.setAttribute('data-mode', here ? 'away' : 'here');
+      var lbl = din.querySelector('span'); if (lbl) lbl.textContent = here ? 'Para llevar' : 'Comer aquí';
       return;
     }
   }, false);
+})();
+</script>
+
+<script>
+/* ===== Drawer + Appbar Loyverse (Vista 2) ===== */
+(function(){
+  'use strict';
+  function v2(){ return document.body.getAttribute('data-vista')==='2'; }
+  function biz(){ try{ if(typeof __deriveTenantNameFromToken==='function') return __deriveTenantNameFromToken(); }catch(_){} return 'Mi negocio'; }
+  function stripEmoji(s){ try{ return String(s||'').replace(/^[^\p{L}\p{N}]+/u,'').trim(); }catch(_){ return String(s||'').replace(/^[^a-zA-Z0-9]+/,'').trim(); } }
+  var ICONS = { pos:'🛒', quickpos:'⚡', inventario:'📦', clientes:'👥', credito:'💳', ventas:'🧾', reportes:'📊', corte:'🧮', dashboard:'📈', config:'⚙️', usuarios:'🧑‍💼', kardex:'📒', proveedores:'🚚', facturacion:'📄', cotizaciones:'📝', devoluciones:'↩️', recargas:'📱', servicios:'🧰', promociones:'🏷️', departamentos:'🗂️', actualizador:'🔄', rentas:'🏠', reservaciones:'📅', mapa:'🗺️', kds:'🍳', cds:'🖥️', apertura:'🔓', tarjetas:'💳', sugeridas:'🧠' };
+  function activeScreen(){ var s=document.querySelector('section[id^="screen-"]:not(.hidden)'); return s ? s.id.replace('screen-','') : 'pos'; }
+  function labelFor(key){ var b=document.querySelector('.menubar .menu-btn[data-menu="'+key+'"] span'); return b ? stripEmoji(b.textContent) : ''; }
+
+  function buildDrawer(){
+    var nav = document.getElementById('lv-dw-nav'); if(!nav) return;
+    var btns = document.querySelectorAll('.menubar .menu-btn, .menubar button[data-menu]');
+    var html = '';
+    btns.forEach(function(b){
+      if (b.id === 'vista-menu-btn') return; // el cambio de vista va aparte, abajo
+      var key = b.getAttribute('data-menu') || '';
+      var sp = b.querySelector('span');
+      var label = stripEmoji(sp ? sp.textContent : b.textContent) || key || '—';
+      var oc = b.getAttribute('onclick') || '';
+      var ico = ICONS[key] || '•';
+      html += '<button type="button" class="lv-dw-item" data-key="'+key.replace(/"/g,'')+'" data-oc="'+String(oc).replace(/"/g,'&quot;')+'"><span class="lv-dw-ico">'+ico+'</span><span>'+label.replace(/[<>]/g,'')+'</span></button>';
+    });
+    html += '<div class="lv-dw-switch"><button type="button" class="lv-dw-item" id="lv-dw-switch-btn"><span class="lv-dw-ico">🔀</span><span>Cambiar de vista</span></button></div>';
+    nav.innerHTML = html;
+    var bz = document.getElementById('lv-dw-biz'); if(bz) bz.textContent = biz();
+    markActive();
+  }
+  function markActive(){ var cur=activeScreen(); var it=document.querySelectorAll('#lv-dw-nav .lv-dw-item[data-key]'); for(var i=0;i<it.length;i++){ it[i].classList.toggle('active', it[i].getAttribute('data-key')===cur); } }
+  function updateTitle(){ var t=document.getElementById('lv-appbar-title'); if(!t) return; var cur=activeScreen(); if(cur==='pos'){ t.textContent='Punto de venta'; return; } var l=labelFor(cur); t.textContent = l || biz(); }
+
+  window.__lvOpenDrawer = function(){ buildDrawer(); var b=document.getElementById('lv-drawer-backdrop'), d=document.getElementById('lv-drawer'); if(b)b.classList.add('open'); if(d)d.classList.add('open'); };
+  window.__lvCloseDrawer = function(){ var b=document.getElementById('lv-drawer-backdrop'), d=document.getElementById('lv-drawer'); if(b)b.classList.remove('open'); if(d)d.classList.remove('open'); };
+
+  document.addEventListener('click', function(e){
+    if(!v2()) return;
+    if(e.target.closest('#lv-appbar-burger')){ window.__lvOpenDrawer(); return; }
+    if(e.target.closest('#lv-appbar-search')){ if(typeof window.openSearch==='function'){ try{window.openSearch();}catch(_){}} return; }
+    if(e.target.closest('#lv-appbar-bell')){ if(typeof window.openNotificationsPanel==='function'){ try{window.openNotificationsPanel();}catch(_){}} return; }
+    if(e.target.closest('#lv-drawer-backdrop')){ window.__lvCloseDrawer(); return; }
+    if(e.target.closest('#lv-dw-switch-btn')){ window.__lvCloseDrawer(); if(typeof window.toggleVista==='function'){ try{window.toggleVista();}catch(_){}} return; }
+    var item = e.target.closest('#lv-dw-nav .lv-dw-item[data-key]');
+    if(item){
+      var oc = item.getAttribute('data-oc'); var key = item.getAttribute('data-key');
+      window.__lvCloseDrawer();
+      if(oc){ try{ (new Function(oc)).call(window); } catch(err){ if(key && window.showScreen){ try{ window.showScreen(key); }catch(_){}} } }
+      else if(key && window.showScreen){ try{ window.showScreen(key); }catch(_){} }
+      setTimeout(function(){ updateTitle(); markActive(); }, 60);
+      return;
+    }
+  }, false);
+
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') window.__lvCloseDrawer(); });
+
+  try {
+    var mainEl = document.querySelector('.main') || document.body;
+    new MutationObserver(function(){ if(v2()){ updateTitle(); markActive(); } })
+      .observe(mainEl, { attributes:true, attributeFilter:['class'], subtree:true });
+    new MutationObserver(function(){ if(v2()){ updateTitle(); } })
+      .observe(document.body, { attributes:true, attributeFilter:['data-vista'] });
+  } catch(_){}
+
+  function init(){ if(document.getElementById('lv-dw-nav')){ buildDrawer(); updateTitle(); } }
+  init(); setTimeout(init, 1200); setTimeout(init, 3500);
 })();
 </script>
 
