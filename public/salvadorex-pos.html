@@ -2622,17 +2622,35 @@
     min-height: 0;
   }
   .lv-ticket-row {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid #f5f5f5;
+    touch-action: pan-y;
+  }
+  .lv-row-content {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 12px;
     padding: 11px 18px;
     font-size: 14px;
     color: #333;
-    border-bottom: 1px solid #f5f5f5;
     align-items: center;
     cursor: pointer;
+    background: #fff;
+    transition: transform .18s ease;
+    will-change: transform;
+    position: relative;
+    z-index: 1;
   }
-  .lv-ticket-row:hover { background: #fafafa; }
+  .lv-ticket-row.lv-open .lv-row-content { transform: translateX(76px); }
+  .lv-ticket-row:hover .lv-row-content { background: #fafafa; }
+  .lv-row-del {
+    position: absolute; top: 0; left: 0; width: 76px; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: #DC2626; color: #fff; border: none; cursor: pointer; font-size: 22px;
+    z-index: 0;
+  }
+  .lv-row-del:active { background: #b91c1c; }
   .lv-row-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .lv-row-name { font-weight: 400; color: #212121; }
   .lv-row-sub { color: #9e9e9e; font-size: 12.5px; }
@@ -21730,19 +21748,24 @@
       return;
     }
     var html = '';
-    rows.forEach(function(tr) {
+    rows.forEach(function(tr, i) {
       var tds = tr.querySelectorAll('td');
       if (tds.length < 5) return;
+      var m = (tr.getAttribute('onclick') || '').match(/selectCartRow\((\d+)\)/);
+      var cartIdx = m ? m[1] : String(i);
       var desc = (tds[1] && tds[1].textContent || '').trim().replace(/\s+/g,' ');
       var unit = (tds[2] && tds[2].textContent || '').trim();
       var qtyRaw = (tds[3] && tds[3].textContent || '');
       var qty = ((qtyRaw.match(/[\d]+(?:[.,]\d+)?/) || [qtyRaw.trim()])[0]); // solo el número (sin los botones − +)
       var importe = (tds[4] && tds[4].textContent || '').trim();
       var sub = qty + (unit ? (' × ' + unit) : '');
-      html += '<div class="lv-ticket-row">'
-        + '<div class="lv-row-main"><span class="lv-row-name">'+escapeHtml(desc)+'</span>'
-        +   '<span class="lv-row-sub">'+escapeHtml(sub)+'</span></div>'
-        + '<span class="lv-row-price">'+escapeHtml(importe)+'</span>'
+      html += '<div class="lv-ticket-row" data-idx="'+cartIdx+'">'
+        + '<button class="lv-row-del" type="button" aria-label="Eliminar" tabindex="-1">🗑</button>'
+        + '<div class="lv-row-content">'
+        +   '<div class="lv-row-main"><span class="lv-row-name">'+escapeHtml(desc)+'</span>'
+        +     '<span class="lv-row-sub">'+escapeHtml(sub)+'</span></div>'
+        +   '<span class="lv-row-price">'+escapeHtml(importe)+'</span>'
+        + '</div>'
         + '</div>';
     });
     items.innerHTML = html;
@@ -21752,6 +21775,51 @@
   }
 
   function syncAll() { syncLvCats(); syncLvProducts(); syncLvTicket(); }
+
+  // Swipe-para-borrar en renglones del ticket (gesto estilo Loyverse): deslizar el
+  // renglon a la derecha revela un boton de basura para eliminarlo del carrito.
+  (function(){
+    var items = document.getElementById('lv-ticket-items');
+    if (!items) return;
+    var sx=0, sy=0, dragging=false, row=null, moved=false;
+    items.addEventListener('pointerdown', function(e){
+      var r = e.target.closest('.lv-ticket-row'); if(!r) return;
+      if (e.target.closest('.lv-row-del')) return;
+      row=r; sx=e.clientX; sy=e.clientY; dragging=true; moved=false;
+      var c=r.querySelector('.lv-row-content'); if(c) c.style.transition='none';
+    });
+    items.addEventListener('pointermove', function(e){
+      if(!dragging||!row) return;
+      var dx=e.clientX-sx, dy=e.clientY-sy;
+      if(Math.abs(dy)>Math.abs(dx)) return; // scroll vertical: no es swipe
+      moved=true;
+      var c=row.querySelector('.lv-row-content'); if(!c) return;
+      c.style.transform='translateX('+Math.max(0, Math.min(76, dx))+'px)';
+    });
+    function endDrag(e){
+      if(!dragging||!row){ dragging=false; row=null; return; }
+      var c=row.querySelector('.lv-row-content');
+      var dx=((e && e.clientX)||sx)-sx;
+      if(c){ c.style.transition=''; c.style.transform=''; }
+      if(moved && dx>38){
+        Array.prototype.forEach.call(items.querySelectorAll('.lv-ticket-row.lv-open'), function(o){ if(o!==row) o.classList.remove('lv-open'); });
+        row.classList.add('lv-open');
+      } else if(moved && dx<-10){ row.classList.remove('lv-open'); }
+      dragging=false; row=null;
+    }
+    items.addEventListener('pointerup', endDrag);
+    items.addEventListener('pointercancel', function(){ if(row){ var c=row.querySelector('.lv-row-content'); if(c){ c.style.transition=''; c.style.transform=''; } } dragging=false; row=null; });
+    items.addEventListener('click', function(e){
+      var del=e.target.closest('.lv-row-del');
+      if(del){
+        var r=del.closest('.lv-ticket-row'); var idx=r?parseInt(r.getAttribute('data-idx'),10):-1;
+        if(idx>=0 && typeof window.removeFromCart==='function'){ try{ window.removeFromCart(idx); }catch(_){} }
+        return;
+      }
+      var openRow=e.target.closest('.lv-ticket-row.lv-open');
+      if(openRow){ openRow.classList.remove('lv-open'); }
+    });
+  })();
 
   function isSaleScreen(){
     var p = document.getElementById('screen-pos');
