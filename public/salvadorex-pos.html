@@ -2384,6 +2384,8 @@
   #lv-drawer .lv-dw-ico { width: 22px; text-align: center; font-size: 18px; flex: none; }
   #lv-drawer .lv-dw-switch { border-top: 1px solid #eee; margin-top: 4px; }
   #lv-drawer .lv-dw-switch .lv-dw-item { color: #4338CA; font-weight: 700; }
+  #lv-drawer .lv-dw-switch .lv-dw-logout { color: #DC2626; }
+  #lv-drawer .lv-dw-switch .lv-dw-logout:hover { background: #FEF2F2; }
 
   /* Escape de vista para Vista 3 (OXXO): su switcher nativo queda tapado por el shell */
   #oxxo-vista-switch { display: none; }
@@ -21881,7 +21883,16 @@
       var ico = ICONS[key] || '•';
       html += '<button type="button" class="lv-dw-item" data-action="lv-nav" data-key="'+key.replace(/"/g,'')+'" data-oc="'+String(oc).replace(/"/g,'&quot;')+'"><span class="lv-dw-ico">'+ico+'</span><span>'+label.replace(/[<>]/g,'')+'</span></button>';
     });
-    html += '<div class="lv-dw-switch"><button type="button" class="lv-dw-item" id="lv-dw-switch-btn"><span class="lv-dw-ico">🔀</span><span>Cambiar de vista</span></button></div>';
+    // Acciones que antes vivian SOLO en la topbar (oculta en toda la Vista 2): perfil/ayuda/salud
+    [['perfil','👤','Mi perfil'],['ayuda','❓','Ayuda'],['salud','🩺','Salud del sistema']].forEach(function(x){
+      if(document.getElementById('screen-'+x[0]) && !document.querySelector('.menubar .menu-btn[data-menu="'+x[0]+'"]')){
+        html += '<button type="button" class="lv-dw-item" data-action="lv-nav" data-key="'+x[0]+'" data-oc="showScreen(&quot;'+x[0]+'&quot;)"><span class="lv-dw-ico">'+x[1]+'</span><span>'+x[2]+'</span></button>';
+      }
+    });
+    html += '<div class="lv-dw-switch">'
+          + '<button type="button" class="lv-dw-item" id="lv-dw-switch-btn"><span class="lv-dw-ico">🔀</span><span>Cambiar de vista</span></button>'
+          + '<button type="button" class="lv-dw-item lv-dw-logout" data-action="lv-nav" data-key="" data-oc="doLogout()"><span class="lv-dw-ico">🚪</span><span>Cerrar sesión</span></button>'
+          + '</div>';
     nav.innerHTML = html;
     var bz = document.getElementById('lv-dw-biz'); if(bz) bz.textContent = biz();
     markActive();
