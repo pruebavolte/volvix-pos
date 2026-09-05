@@ -4570,6 +4570,7 @@
       #screen-kds .kds-lines{ flex:1; display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
       #screen-kds .kds-line{ display:flex; gap:8px; align-items:flex-start; font-size:13.5px; color:var(--text); }
       #screen-kds .kds-q{ min-width:24px; height:22px; padding:0 6px; background:var(--eleventa-blue); color:#fff; border-radius:6px; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center; flex:none; }
+      #screen-kds .kds-note{ background:#FEF3C7; color:#92400E; border-radius:6px; padding:6px 8px; font-size:12.5px; margin-bottom:8px; line-height:1.3; }
       #screen-kds .kds-done{ border:none; background:#26A65B; color:#fff; padding:10px; border-radius:8px; font-weight:700; cursor:pointer; font-size:13px; text-transform:uppercase; letter-spacing:.4px; }
       #screen-kds .kds-done:hover{ background:#1F8A4C; }
     </style>
@@ -4601,7 +4602,7 @@
           grid.innerHTML=items.map(function(t,idx){ var w=waitInfo(t.saved_at||t.created_at);
             var lines=(t.items||[]).map(function(it){ return '<div class="kds-line"><span class="kds-q">'+(Number(it.qty)||1)+'</span><span class="kds-n">'+esc(it.name||it.code||'—')+'</span></div>'; }).join('');
             var ref=String(t.id||t.reference||('#'+(idx+1))).slice(-6);
-            return '<div class="kds-card" style="border-top:4px solid '+w.color+'"><div class="kds-head"><span class="kds-ref">#'+esc(ref)+'</span><span class="kds-time" style="color:'+w.color+'">⏱ '+w.label+'</span></div><div class="kds-lines">'+lines+'</div><button class="kds-done" onclick="kdsMarkDone(\''+esc(String(t.id||''))+'\',this)">✓ Listo</button></div>';
+            return '<div class="kds-card" style="border-top:4px solid '+w.color+'"><div class="kds-head"><span class="kds-ref">#'+esc(ref)+'</span><span class="kds-time" style="color:'+w.color+'">⏱ '+w.label+'</span></div><div class="kds-lines">'+lines+'</div>'+((t.note||t.notes)?'<div class="kds-note">📝 '+esc(t.note||t.notes)+'</div>':'')+'<button class="kds-done" onclick="kdsMarkDone(\''+esc(String(t.id||''))+'\',this)">✓ Listo</button></div>';
           }).join('');
           if(sub)sub.textContent=items.length+' comanda'+(items.length!==1?'s':'')+' activa'+(items.length!==1?'s':'');
         }catch(e){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">Error al cargar comandas.</div>'; } };
@@ -18117,6 +18118,8 @@
       user_id: session.user_id || session.id || null,
       items: CART.map(i => ({ product_id: i.id || null, code: i.code, name: i.name, price: i.price, qty: i.qty })),
       total: CART.reduce((s,i) => s + i.price * i.qty, 0),
+      note: window.__vlxTicketNote || '',
+      notes: window.__vlxTicketNote || '',
       saved_at: Date.now()
     };
     try {
@@ -18131,6 +18134,8 @@
         const ref = (saved && (saved.id || saved.reference)) || ('LOCAL-' + Date.now().toString(36));
         try { localStorage.setItem('volvix:last_pending_id', String(ref)); } catch(e){}
         CART.length = 0; renderCart();
+        window.__vlxTicketNote = '';
+        try { var _nb = document.getElementById('lv-note'); if (_nb) { _nb.style.color = ''; _nb.title = 'Nota del ticket'; } } catch(_){}
         showToast('✓ Venta pendiente guardada · Ref: ' + ref);
       } else {
         // fallback to local idb queue — si falla, NO limpiar carrito ni fingir exito
@@ -21631,6 +21636,7 @@
       <div class="lv-ticket-head">
         <span class="lv-ticket-title">Ticket</span>
         <button class="lv-ticket-icon" type="button" aria-label="Cliente" id="lv-customer">👤</button>
+        <button class="lv-ticket-icon" type="button" id="lv-note" aria-label="Nota del ticket" title="Nota del ticket">📝</button>
         <button class="lv-ticket-icon" type="button" id="lv-more" aria-label="Más">⋮</button>
       </div>
       <div class="lv-dinein" id="lv-dinein">
@@ -21904,6 +21910,18 @@
     if (e.target.closest('#lv-burger')) {
       // Burger → abre el drawer Loyverse (NO sale del look Loyverse).
       if (window.__lvOpenDrawer) window.__lvOpenDrawer();
+      return;
+    }
+    if (e.target.closest('#lv-note')) {
+      var prevNote = window.__vlxTicketNote || '';
+      var n = null;
+      try { n = window.prompt('Nota del ticket:', prevNote); } catch(_) { n = prevNote; }
+      if (n !== null) {
+        window.__vlxTicketNote = String(n).trim();
+        var nb = document.getElementById('lv-note');
+        if (nb) { nb.style.color = window.__vlxTicketNote ? '#26A65B' : ''; nb.title = window.__vlxTicketNote ? ('Nota: ' + window.__vlxTicketNote) : 'Nota del ticket'; }
+        if (typeof window.showToast === 'function') window.showToast(window.__vlxTicketNote ? '📝 Nota agregada al ticket' : 'Nota quitada');
+      }
       return;
     }
     if (e.target.closest('#lv-more')) {

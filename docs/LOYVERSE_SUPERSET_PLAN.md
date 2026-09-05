@@ -1,0 +1,367 @@
+# Loyverse Superset — Roadmap de gaps
+
+> Generado por gap-analysis multi-agente vs help.loyverse.com. 220 funciones de Loyverse mapeadas, 121 gaps.
+> Objetivo: conservar TODO lo actual + agregar TODAS las funciones/vistas/gestos de Loyverse (superset).
+
+**Estado:** ✅ hecho · ⬜ pendiente · 🟡 parcial (existe pero incompleto)
+
+## Resumen
+Plan por fases para convertir Volvix POS (D:\github\volvix-pos\public\salvadorex-pos.html, ~25.8k lineas + ~120 modulos volvix-*.js) en un superset de Loyverse: se conserva todo lo actual (fiado/CFDI/IEPS/giros/telefonia) y se cierran ~90 gaps vs help.loyverse.com. Anclajes verificados: pantalla de venta estilo Loyverse en 'vista2-loyverse-shell' (L21614) con handler delegado de clicks en L21865 y ticket en #lv-ticket-items; toggle dining binario L21917-21922; savePendingSale L18112 / restorePendingSale L18157; applyDiscount L15565 reparte % a TODOS los items; openVarios L15599 (menu tres puntos); KDS renderKDS L4596 hace polling a /api/sales/pending cada 12s (L4609) y kdsMarkDone L4608 hace DELETE sin estados intermedios; REPORT_DEFS L17618; posNuevoUsuario L13168 y __posRoleSelect L13161 (roles hardcodeados); modulos existentes pero NO cargados: volvix-bi-wiring.js y volvix-charts-wiring.js. Orden por impacto: F1 venta core, F2 items avanzados, F3 inventario avanzado, F4 empleados/permisos/reloj, F5 lealtad/clientes, F6 reportes+ajustes+hardware+KDS/CDS. Atacar primero lo marcado prioridad alta en cada fase.
+
+
+## Fase 1 - Flujo de venta core y quick wins
+_Igualar la pantalla de venta de Loyverse: gestos, descuentos/notas por linea, dining options reales y el ciclo completo de tickets abiertos (guardar/nombrar/listar/split/merge/mover)._
+
+- ✅ **GESTO: swipe en renglon revela Borrar/Editar** _(no)_
+  - Loyverse: Deslizar el renglon del ticket muestra el icono de basura para eliminarlo por gesto tactil.
+  - Impl: En el render de #lv-ticket-items envolver cada renglon en contenedor con translateX; touchstart/move/end sobre '.lv-ticket-item' que revele un boton .lv-row-del al deslizar >40px y dispare removeCartItem(idx). No colisionar con el touchstart de inactividad de L9961.
+- 🟡 **Descuento por linea (articulo individual)** _(parcial)_
+  - Loyverse: Aplicar un descuento (% o monto) a un solo articulo del ticket.
+  - Impl: applyDiscount (L15565-15593) reparte a todo el carrito. En tap/long-press del renglon abrir mini-modal que setee item.discount (el campo ya existe) solo en ese indice y recalcular total por linea; tachar el precio.
+- 🟡 **Nota/comentario del ticket en la pantalla de venta** _(parcial)_
+  - Loyverse: Boton para anadir una nota/observacion al ticket ANTES de cobrar.
+  - Impl: Ya hay seccion 'Notas' en el modal de cobro (L7139/7220). Exponer boton de nota junto a #lv-more (L21634) que abra textarea y guarde en currentSale.note; persistir con el pendiente y pintar en recibo y KDS.
+- 🟡 **Dining options configurables (Comer aqui/Para llevar/Domicilio + custom)** _(parcial)_
+  - Loyverse: Lista configurable de tipos de servicio; el elegido se adjunta al ticket y se imprime.
+  - Impl: El toggle #lv-dinein (L21917) solo alterna 2 estados. Convertirlo en dropdown poblado desde lista editable (nueva tabla dining_options/giros_campos); guardar la opcion en el ticket y propagarla a savePendingSale, recibo y payload del KDS.
+- 🟡 **Precio abierto (articulo marcable como open price)** _(parcial)_
+  - Loyverse: Un articulo tipo 'open price' pide el precio al agregarlo al ticket.
+  - Impl: Ya hay equivalentes (openVarios 'Otro' L15599, addCommonProduct L15670, openGranel L4406). Anadir flag producto.precio_abierto en el alta; al tocar su tile disparar prompt de precio en vez de usar price fijo.
+- 🟡 **Guardar ticket abierto (park/open ticket completo)** _(parcial)_
+  - Loyverse: Save guarda el ticket sin cobrar, limpia la pantalla y lo sincroniza entre dispositivos.
+  - Impl: savePendingSale (L18112, boton lv-btn-save L21648/21892) existe pero es 1 carrito. Soportar N tickets: cada Guardar crea pendiente con id/nombre y LIMPIA el carrito; usar /api/sales/pending (recordar header Idempotency-Key en el POST, ver MEMORY).
+- ⬜ **Nombrar/comentar el ticket al guardarlo** _(no)_
+  - Loyverse: Al guardar pide nombre del ticket (default = hora) y comentario opcional.
+  - Impl: Antes de savePendingSale (L18112) abrir mini-modal con input nombre (prellenar HH:MM) + comentario; guardar en el payload pendiente (name/comment) para la lista de tickets abiertos y el KDS.
+- 🟡 **Lista de tickets abiertos (Open Tickets) ordenable y buscable** _(parcial)_
+  - Loyverse: Boton 'Open tickets' abre lista de tickets guardados, ordenable por nombre/total/hora/empleado y buscable.
+  - Impl: restorePendingSale (L18157) solo lista basico. Crear modal 'Tickets abiertos' que consuma GET /api/sales/pending y renderice tarjetas con nombre/total/hora/mesero, con buscador (filter JS) y selector de orden; al tocar una cargar sus items.
+- 🟡 **Predefined open tickets (nombres de mesa predefinidos)** _(parcial)_
+  - Loyverse: Toggle 'Use predefined tickets' con nombres preestablecidos (Mesa 1, Mesa 2...).
+  - Impl: Reutilizar seedDefaultTables (volvix-tables-wiring.js:111-134) como fuente de nombres pero exponerlos como chips en la pantalla de venta generica para crear un ticket abierto con ese nombre en un tap.
+- 🟡 **Split ticket por articulo (dividir cuenta)** _(parcial)_
+  - Loyverse: Menu tres puntos > Split ticket: mover articulos a tickets nuevos (hasta 20).
+  - Impl: Ya existe TablesAPI.splitBill (volvix-tables-wiring.js:319). Exponerlo desde openVarios (L15599/21910) con checkboxes por renglon que armen grupos y generen pendientes nuevos via /api/sales/pending.
+- 🟡 **Split equal (dividir en N partes iguales)** _(parcial)_
+  - Loyverse: Dividir el total del ticket en N partes iguales para pagar por separado.
+  - Impl: TablesAPI.splitEqual (volvix-tables-wiring.js:342) ya calcula; en el modal de cobro anadir 'Dividir en N' que llame splitEqual y genere N pagos secuenciales.
+- 🟡 **Merge tickets (combinar)** _(parcial)_
+  - Loyverse: Seleccionar varios tickets abiertos y fusionarlos en uno.
+  - Impl: TablesAPI.mergeOrder (volvix-tables-wiring.js:298) existe. En la lista de tickets abiertos anadir seleccion multiple + boton Merge que combine items en un pendiente y borre los origen.
+- 🟡 **Mover/transferir ticket entre mesas o meseros** _(parcial)_
+  - Loyverse: Mover items o reasignar un ticket a otra mesa/empleado.
+  - Impl: TablesAPI.transferTable (volvix-tables-wiring.js:280) cubre mesa-a-mesa; agregar en el menu tres puntos 'Mover a...' que reasigne mesa y/o mesero del pendiente.
+- 🟡 **Split payment (pago dividido en partes iguales)** _(parcial)_
+  - Loyverse: En Charge, dividir el importe en partes (igual o manual) y cobrar cada una con su metodo.
+  - Impl: __vlxOpenMixtoBreakdown/__vlxMixtoAddRow (volvix-cobro-modal.js:101/113) ya reparten manual. Anadir boton 'Igual en N' que precargue N filas del breakdown con total/N cada una.
+- 🟡 **Multiples tickets simultaneos (pestanas vivas)** _(parcial)_
+  - Loyverse: Trabajar varios tickets a la vez y cambiar entre ellos.
+  - Impl: Existen pos-tabs (L4429) y currentFolio (L4341) pero se apoya en pendientes. Mantener un array de carritos en memoria por folio; las pestanas hacen swap del carrito activo sin ir al backend en cada cambio.
+- 🟡 **Cambio de mesero/empleado en el ticket** _(parcial)_
+  - Loyverse: Reasignar el empleado/mesero responsable del ticket.
+  - Impl: El campo waiter/assignOrder existe (volvix-tables-wiring.js:230). Exponer en el menu tres puntos 'Cambiar mesero' con selector de empleados (depende del PIN por empleado de F4).
+
+## Fase 2 - Articulos / Items avanzados
+_Back-office real de modifiers y variantes universales, distincion SKU vs codigo de barras, y produccion/ensamble de compuestos por adelantado._
+
+- 🟡 **Modifiers back-office (crear sets y asignarlos por articulo)** _(parcial)_
+  - Loyverse: En Items>Modifiers creas sets con opciones y precios y los asignas por checkbox a items; en POS aparece el dialogo.
+  - Impl: ModifiersAPI (volvix-modifiers-wiring.js) tiene modal en POS pero DEFAULT_* hardcodeados (L47-74). Crear pantalla back-office 'Modificadores' (CRUD de sets con priceDelta/requireSize/maxExtras) en BD; en el alta de producto un multiselect para asignar sets; el modal POS lee los sets del producto real.
+- 🟡 **Variants (variantes talla/color) universales** _(parcial)_
+  - Loyverse: 'Add variants': hasta 3 opciones, genera combinaciones con precio/costo/SKU/barcode/stock por variante y dialogo en POS.
+  - Impl: La matriz existe solo en vertical ropa (volvix-vertical-ropa.js:80-120). Generalizar: seccion 'Variantes' en el formulario universal que genere el producto cartesiano (usar _generarSku como base) y un dialogo de seleccion de variante generico en POS.
+- 🟡 **SKU y codigo de barras como campos distintos** _(parcial)_
+  - Loyverse: SKU (auto/custom, unico, max 40) y Barcode (opcional) son campos separados.
+  - Impl: El formulario universal unifica codigo=barcode; la busqueda ya dice 'Nombre, codigo o SKU' (L7464). Separar en el alta: SKU (auto-generar unico, validar longitud) + Barcode opcional; indexar ambos en busqueda y en volvix-barcode-resolver.js.
+- 🟡 **Produccion / ensamble de compuestos (Production + Disassembly)** _(parcial)_
+  - Loyverse: Documento de Produccion que sube el stock del compuesto y baja componentes ANTES de vender, con costo; y Desensamble que revierte.
+  - Impl: Existe BOM (ingApp recetas L6538-6615) y kits que consumen al VENDER (volvix-inventory-pro-wiring.js assembleOnSale). Crear documento de Produccion: UI que reciba N compuestos a fabricar, suba su stock y baje componentes (reusar defineKit/explodeKit) creando movimiento 'produccion' y su reverso 'desensamble'.
+- 🟡 **Quick sale / favoritos paginados con tile de color** _(parcial)_
+  - Loyverse: Arreglar la pantalla de venta con botones favoritos en paginas y color de tile configurable.
+  - Impl: Existe grid QUICKPICK (L769-885) y 'pinned'. Anadir paginado y que el orden/tile lo configure el usuario (drag o pantalla de arreglo), guardando layout en localStorage/BD por tenant.
+- ⬜ **Color/forma para el mosaico del item sin imagen** _(no)_
+  - Loyverse: Elegir color + forma para el tile del item cuando no hay imagen.
+  - Impl: Ya hay paleta lvColors (L21663) usada por indice. Anadir color-picker en el alta (producto.tile_color/tile_shape) y en syncLvProducts (L21702) usar ese color/forma en vez del modulo por indice.
+- ⬜ **Duplicar articulo** _(no)_
+  - Loyverse: Duplicar un item existente para crear uno similar rapido.
+  - Impl: En la fila de la lista de inventario (junto a btn-dedupe-prod L4801) anadir 'Duplicar' que clone el producto, limpie id/SKU/barcode y abra el modal de alta prellenado.
+
+## Fase 3 - Inventario avanzado
+_Completar valuacion, costeo (costo promedio al recibir + landed cost), proveedor principal y exportacion/etiquetado por documento._
+
+- 🟡 **Recalculo de costo promedio al recibir mercancia** _(parcial)_
+  - Loyverse: Al recibir una OC, stock y COSTO PROMEDIO del item se actualizan con el precio recibido.
+  - Impl: receiveGoods (volvix-purchase-wiring.js L207-276) actualiza qtyReceived pero no el costo. costo_prom_nuevo = (stock*costo + qty_recib*costo_recep)/(stock+qty_recib); persistir en el producto y alimentar la columna costo_prom del kardex (L16841).
+- 🟡 **Reporte de valuacion de inventario completo** _(parcial)_
+  - Loyverse: Valor total al costo, Valor total al menudeo (precio*stock) y Ganancia potencial (menudeo-costo).
+  - Impl: valuationReport() (pro-wiring L406) ya suma qty*cost y hay KPI 'Valor inventario al costo' (L4791). Anadir columnas valor_menudeo=precio*stock y ganancia_potencial=menudeo-costo al mismo reporte.
+- ⬜ **Costos adicionales en la OC (landed cost)** _(no)_
+  - Loyverse: Costos extra (flete, empaque, aduana; puede ser negativo) prorrateados entre items recibidos, afectando el costo promedio.
+  - Impl: En la UI de OC anadir seccion 'Costos adicionales' (concepto+monto). Al recibir, prorratear cada costo proporcional al subtotal de cada linea y sumarlo al costo unitario antes del recalculo de costo promedio.
+- 🟡 **Proveedor principal por articulo (Primary supplier)** _(parcial)_
+  - Loyverse: Asignar proveedor por defecto al item (con Track stock) usado al sugerir/crear OC.
+  - Impl: El form de ingrediente tiene 'Proveedor' (ing-proveedor L6594). Anadir producto.proveedor_principal_id a nivel de producto y que la creacion de OC autopoble lineas por proveedor.
+- 🟡 **Exportar/Imprimir documentos PDF/CSV por documento** _(parcial)_
+  - Loyverse: Cada documento (OC, traspaso, ajuste, conteo, produccion) se descarga como PDF o CSV desde 'More'.
+  - Impl: Ya hay export CSV amplio (kardex L16841, movimientos L4849) e impresion de conteo (L16705). Anadir boton 'Exportar' por-documento en cada vista de OC/traspaso/ajuste que arme CSV del doc y use print-hub para el PDF.
+- 🟡 **Impresion de etiquetas de articulos desde la lista** _(parcial)_
+  - Loyverse: Imprimir etiquetas con codigo de barras desde la lista de items, con contenido personalizable.
+  - Impl: Existe volvix-barcode-print.js + resolver + print-hub. Anadir seleccion multiple en la lista de inventario + boton 'Imprimir etiquetas' que arme la plantilla (nombre/precio/barcode) y la mande a barcode-print.
+
+## Fase 4 - Empleados, permisos y reloj checador
+_Introducir identidad por empleado (PIN), matriz de permisos granular, switch de empleado en el POS y Time Clock con reportes de horas._
+
+- ⬜ **PIN de acceso por empleado (4 digitos, identidad en POS)** _(no)_
+  - Loyverse: Cada usuario tiene un PIN unico de 4 digitos; la pantalla de PIN aparece al entrar, cambiar de usuario y despertar del sleep.
+  - Impl: Hoy el unico PIN es bloqueo por inactividad del dispositivo (L5290/5843) y PIN owner del cajon (L14160). Anadir campo pin (hash) por usuario en posNuevoUsuario (L13168) y un pinpad de identidad que resuelva el empleado activo. Base de casi todo lo demas de esta fase.
+- ⬜ **Access rights granulares POS (14 toggles)** _(no)_
+  - Loyverse: Por rol se activan permisos POS: ver recibos, descuentos, cambiar impuestos, aceptar pagos, devoluciones, gestionar tickets abiertos, anular items, ver corte, abrir cajon sin venta, reimprimir, gestionar items, ver costo, cambiar ajustes, chat.
+  - Impl: Hoy solo gating por nombre de rol (L8440); #permisos es feature-flags del SaaS (L5902). Crear role.permissions{} (14 booleanos), UI de toggles por rol y helper can(permiso) que oculte/inhabilite botones (descuento, corte, cajon, reimpresion...).
+- ⬜ **Switch de empleado en el POS abierto** _(no)_
+  - Loyverse: Icono de candado cierra al usuario actual y abre un pinpad para el siguiente, sin cerrar la app; muestra el nombre activo en el header.
+  - Impl: Hoy solo doLogout borra token (L8377). Anadir boton candado en el header/drawer que abra el pinpad y cambie window.CURRENT_EMPLOYEE sin cerrar el JWT; actualizar el nombre en L4035/5987.
+- ⬜ **Time Clock: clock in / clock out** _(no)_
+  - Loyverse: En la pantalla de login el empleado mete PIN y marca Clock In/Out; registra timestamps.
+  - Impl: No existe reloj checador. Anadir boton 'Reloj' en la pantalla de PIN/login que registre eventos clock_in/clock_out (nueva tabla timecards) por empleado; distinto del corte de caja (screen-apertura L5917).
+- ⬜ **Access rights granulares Back Office (16 toggles)** _(no)_
+  - Loyverse: Por rol: ver reportes, cancelar recibos, gestionar items/inventario/empleados/clientes, editar ajustes, billing, tipos de pago, lealtad, impuestos, impresoras cocina, dining, POS devices.
+  - Impl: Extender role.permissions{} con los 16 toggles de back office y aplicar can() a la navegacion del drawer/menus para mostrar/ocultar modulos por permiso, no por rol fijo.
+- ⬜ **Crear roles personalizados (+ Add role)** _(no)_
+  - Loyverse: Boton '+ Add role' para crear grupos de permisos a la medida.
+  - Impl: __posRoleSelect (L13161) usa lista fija. Persistir roles en BD y anadir UI '+ Nuevo rol' con nombre + los toggles anteriores; poblar el select desde esa tabla.
+- 🟡 **Agregar empleado con PIN y tiendas** _(parcial)_
+  - Loyverse: Add employee: Name, Email, Phone, Role, PIN y Stores.
+  - Impl: posNuevoUsuario (L13168) pide nombre/email/tel/rol pero no PIN ni tiendas; genera contrasena temporal. Anadir campo PIN y multiselect de tiendas (depende de Stores en F6).
+- 🟡 **Editar empleado (incluye PIN)** _(parcial)_
+  - Loyverse: Editar campos del empleado incluyendo PIN.
+  - Impl: posEditUsuario (L13180-13203) edita nombre/email/rol; anadir edicion de PIN y tiendas.
+- 🟡 **Eliminar empleado (borrado real)** _(parcial)_
+  - Loyverse: Delete employee elimina definitivamente al empleado.
+  - Impl: Solo hay desactivacion soft (DELETE /api/users/:id L13207). Exponer borrado definitivo con confirmacion fuerte (accion destructiva -> confirmacion explicita).
+- ⬜ **Time Clock: calculo automatico de horas** _(no)_
+  - Loyverse: Calcula automaticamente las horas trabajadas (fracciones decimales) a partir de los marcajes.
+  - Impl: Derivar horas = suma de (clock_out-clock_in) por empleado y periodo desde la tabla timecards.
+- ⬜ **Reporte total de horas trabajadas por empleado** _(no)_
+  - Loyverse: Resumen de horas totales por empleado en el periodo.
+  - Impl: Anadir a REPORT_DEFS (L17618) un reporte 'Horas por empleado' que agregue timecards por periodo.
+- ⬜ **Timecards editable + alta manual** _(no)_
+  - Loyverse: Lista detallada de cada clock-in/out; editable y con alta manual.
+  - Impl: UI que liste registros de timecards con edicion inline y boton 'Agregar timecard manual'.
+- ⬜ **Toggle Time Clock en Settings > Features** _(no)_
+  - Loyverse: Toggle para prender el reloj checador (requiere PIN por empleado).
+  - Impl: Anadir el feature al arbol ff-tree (L5752) para activar/desactivar el reloj.
+- 🟡 **Propinas por empleado (registro y atribucion)** _(parcial)_
+  - Loyverse: Las propinas quedan asociadas al empleado que cobro y se reportan por empleado.
+  - Impl: Existe propina en el ticket (L7161-7170) pero sin atribucion. Guardar employee_id junto a la propina en la venta y desglosarla en el reporte by-cashier.
+- 🟡 **Nombre del empleado activo visible dinamico en el POS** _(parcial)_
+  - Loyverse: El header muestra el empleado con sesion activa.
+  - Impl: Hoy 'Le atiende: Administrador' es estatico (L4035/5987). Enlazarlo a window.CURRENT_EMPLOYEE del switch por PIN.
+- 🟡 **Ultima conexion real del empleado** _(parcial)_
+  - Loyverse: El back office refleja la actividad reciente del empleado.
+  - Impl: La columna muestra 'Alta <fecha>' (created_at, L13091/13104). Guardar last_login_at en cada autenticacion/PIN y mostrarlo.
+- 🟡 **POS access via login con email + PIN** _(parcial)_
+  - Loyverse: Back Office access + Manage POS devices habilita login por email; luego el empleado usa PIN al re-entrar.
+  - Impl: El login email+contrasena ya existe (JWT+OTP). Combinar: login email para back office y PIN para el POS del dispositivo, gobernado por los toggles de permisos.
+- ⬜ **Asignar empleado a tiendas/sucursales** _(no)_
+  - Loyverse: Elegir a que stores tiene acceso cada empleado.
+  - Impl: Depende de Stores (F6): multiselect de tiendas en el alta/edicion de usuario, guardado en user.store_ids.
+
+## Fase 5 - Lealtad y clientes
+_Integrar el programa de lealtad al flujo de venta (acumular/canjear puntos en el cobro) y completar el perfil e historial del cliente._
+
+- ⬜ **Acumulacion automatica de puntos al cobrar** _(no)_
+  - Loyverse: Con cliente en el ticket, al cobrar gana puntos automaticamente segun el % configurado.
+  - Impl: loyalty-wiring.js:511 solo escucha DOMContentLoaded. Enganchar en el evento de venta completada del cobro (volvix-cobro-modal.js/volvix-cobro-state.js): si hay cliente, calcular puntos = total * tasa y sumarlos al cliente.
+- ⬜ **Canjear puntos por descuento en la venta (Redeem points)** _(no)_
+  - Loyverse: Tras seleccionar cliente, 'Redeem points' convierte puntos en descuento visible en Discounts.
+  - Impl: En el modal de cobro, con cliente asignado, anadir boton 'Canjear puntos' que reste puntos (catalogo REWARDS loyalty-wiring.js:25-34 / POINT_VALUE) y aplique el descuento equivalente al total.
+- 🟡 **Activar Programa de Lealtad en Ajustes** _(parcial)_
+  - Loyverse: Toggle en ajustes que enciende la acumulacion de puntos para toda la cuenta.
+  - Impl: Existe volvix-loyalty-wiring.js + volvix-loyalty-admin.html como modulo aparte. Anadir toggle 'Lealtad' en Ajustes/Features (ff-tree L5752) que active la integracion con la venta.
+- 🟡 **Tasa de recompensa configurable (%)** _(parcial)_
+  - Loyverse: Campo de % de recompensa (default 1 pto por 100) y canje 1 pto = 1 de moneda.
+  - Impl: CFG.POINTS_PER_DOLLAR/POINT_VALUE_USD estan hardcodeados (loyalty-wiring.js:11-13). Exponer inputs en Ajustes>Lealtad y leer los valores desde BD/config.
+- 🟡 **Saldo de puntos visible al anadir el cliente en el POS** _(parcial)_
+  - Loyverse: Al agregar el cliente a la venta se muestran sus puntos disponibles.
+  - Impl: Hay columna 'Puntos' en la tabla de clientes (L5025) pero no en openCustomerSelector. Mostrar el saldo al seleccionar cliente y en el panel del ticket.
+- 🟡 **Campos del cliente: Codigo de cliente y Direccion** _(parcial)_
+  - Loyverse: Perfil con Name, Phone, Email, Customer code, Address, Note.
+  - Impl: El modal (L8532-8556) tiene name/phone/email/rfc/credit/notes. Anadir customer_code y address (conservar RFC/credito que Loyverse no tiene).
+- ⬜ **Escanear codigo de barras / tarjeta de lealtad del cliente** _(no)_
+  - Loyverse: Se escanea el customer code para anadir el cliente al recibo rapido.
+  - Impl: Anadir campo 'Codigo de cliente' (barcode) al modal (L8532) y extender volvix-barcode-resolver.js para resolver tambien clientes por ese codigo y asignarlo al ticket.
+- 🟡 **Historial de compras del cliente (perfil)** _(parcial)_
+  - Loyverse: El perfil del cliente muestra sus tickets anteriores.
+  - Impl: Hay 'Ultima compra' (L5025) e Historial con columna Cliente (L5091). Anadir en la ficha del cliente una lista de sus ventas filtrando el historial por customer_id.
+- 🟡 **Editar/ajustar saldo de puntos manualmente** _(parcial)_
+  - Loyverse: Menu 'More' > 'Edit points balance' fija el saldo a mano.
+  - Impl: En la ficha del cliente anadir 'Editar puntos' que setee el saldo y registre el ajuste (reutilizar volvix-loyalty-admin.html).
+- ⬜ **Puntos ganados/saldo impresos y enviados en el recibo** _(no)_
+  - Loyverse: Los puntos aparecen en el recibo impreso y por email.
+  - Impl: Tras integrar la acumulacion, anadir al render del recibo (print-hub) y al recibo por email los puntos ganados y el saldo.
+- 🟡 **Puntos/lealtad multi-tienda** _(parcial)_
+  - Loyverse: Los puntos se comparten entre todas las tiendas de la cuenta.
+  - Impl: Existe volvix-multistore-wiring.js; al integrar lealtad, guardar puntos a nivel tenant (no por tienda) para que ganar/canjear funcione en cualquier sucursal.
+- 🟡 **Eliminar cliente** _(parcial)_
+  - Loyverse: Borrar cliente desde el menu 'More'.
+  - Impl: Hay columna de acciones por fila (L5025). Confirmar/anadir accion borrar con confirmacion.
+- 🟡 **Store credit / monedero prepago (mas alla de Loyverse)** _(parcial)_
+  - Loyverse: Loyverse NO tiene store credit nativo; Volvix ya tiene fiado, que es el inverso.
+  - Impl: Baja prioridad y opcional: anadir monedero de saldo a favor sobre volvix-customer-credit.js con signo positivo, aplicable como metodo de pago.
+
+## Fase 6 - Reportes, Ajustes, Hardware y KDS/CDS
+_Cerrar la analitica (reportes consolidados y receipts navegables), la autoconfiguracion (tipos de pago, impuestos, dining, stores, moneda) y el hardware/pantallas (cocina y cliente) al nivel de Loyverse._
+
+- 🟡 **Sales summary (resumen de ventas consolidado)** _(parcial)_
+  - Loyverse: Vista unica con gross sales, refunds, discounts, net sales, gross profit y taxes, con filtro periodo/tienda/empleado, chart y desglose diario.
+  - Impl: Hoy hay KPIs sueltos (L4673) y 'Ventas por dia' (L17601). Crear un REPORT_DEFS 'resumen' (L17618) que arme las filas gross/refunds/discounts/net/gross profit/taxes desde el backend, con filtros y chart.
+- 🟡 **Sales by category (ventas por categoria)** _(parcial)_
+  - Loyverse: Tabla por categoria: items vendidos, ventas netas, ganancia bruta + grafica.
+  - Impl: BIAPI.salesByCategory ya existe (volvix-bi-wiring.js L221-233) pero ese archivo NO se carga. Anadir script src volvix-bi-wiring.js y volvix-charts-wiring.js, y exponer el reporte en Reportes.
+- 🟡 **Receipts / historial de recibos navegable + CSV** _(parcial)_
+  - Loyverse: Lista cronologica de TODOS los recibos, filtro fecha/tipo, clic abre detalle completo y exporta CSV.
+  - Impl: Hoy hay 'Buscar venta' por filtros (L20599-20668) pero no listado cronologico. Anadir vista 'Recibos' paginada por fecha con detalle al clic (reusar reimprimir COPIA existente) y export CSV del listado.
+- 🟡 **Dashboard en tiempo real (grafica + top categorias/empleados)** _(parcial)_
+  - Loyverse: Panel live: recibos, ventas netas, ticket promedio, vs dia anterior, grafica y top items/categorias/empleados.
+  - Impl: El dashboard tiene 4 KPIs + vs anterior + top productos (L4653-4748). Anadir grafica de ventas embebida (Chart.js ya presente) y tablas top categorias/empleados; opcional refresco live por poll.
+- 🟡 **Sales by payment type** _(parcial)_
+  - Loyverse: Tabla por tipo de pago: n transacciones, monto y devoluciones.
+  - Impl: El Corte ya desglosa efectivo/tarjeta/transferencia (L5221). Crear REPORT_DEFS 'por metodo de pago' agregando ventas por payment_method en el periodo.
+- ⬜ **Discounts report** _(no)_
+  - Loyverse: Tabla por descuento: veces aplicado y monto total.
+  - Impl: Nuevo REPORT_DEFS que agregue por tipo/nombre de descuento (requiere guardar el tipo de descuento en la venta).
+- ⬜ **Taxes report** _(no)_
+  - Loyverse: Tabla por impuesto: base gravable y monto recaudado.
+  - Impl: VolvixTax ya calcula IVA/IEPS por venta (L10241-10327). Nuevo reporte que agregue base y monto por impuesto en el periodo (relevante fiscal MX).
+- ⬜ **Sales by modifier** _(no)_
+  - Loyverse: Tabla por modificador: cantidad y ventas netas.
+  - Impl: Depende de que los modifiers (F2) se guarden en las lineas de venta; luego agregar por modificador.
+- 🟡 **Grafica con tipos (barra/linea/pie) y selector** _(parcial)_
+  - Loyverse: El chart se puede ver como barras, linea o pastel.
+  - Impl: Hay linea y barra (L17607-17656) y pie en volvix-charts-wiring.js (no cargado). Cargar ese archivo y anadir un selector de tipo de chart.
+- ⬜ **Agrupacion del chart (hora/dia/semana/mes/trimestre/ano)** _(no)_
+  - Loyverse: Selector para agrupar la grafica por distintos periodos.
+  - Impl: 'Ventas por dia' fija group_by=day (L17603). Anadir selector que pase group_by al backend.
+- 🟡 **Sales by hour (horas pico)** _(parcial)_
+  - Loyverse: Ventas agrupadas por hora del dia.
+  - Impl: BIAPI.hourlyHeatmap existe (volvix-bi-wiring.js L213) pero no esta enlazado. Exponerlo en Reportes al cargar el archivo.
+- 🟡 **Comparacion vs periodo anterior en reportes** _(parcial)_
+  - Loyverse: Cada metrica muestra su valor vs el periodo equivalente anterior.
+  - Impl: Solo el Dashboard compara (L4703). Extender los modales de reporte para pedir tambien el periodo previo y mostrar delta %.
+- 🟡 **Presets de periodo (Hoy/Ayer/Semana/Mes/Personalizado)** _(parcial)_
+  - Loyverse: Filtros rapidos Today/Yesterday/This week/This month + rango custom.
+  - Impl: El Dashboard tiene Hoy/Semana/Mes (L4662); los modales solo from/to (L17675). Anadir botones preset (falta 'Ayer') a los modales de reporte.
+- 🟡 **Filtro por empleado en reportes** _(parcial)_
+  - Loyverse: Filtrar el resumen por uno o varios empleados.
+  - Impl: 'Por cajero' desglosa (L17647) pero no filtra los demas. Anadir selector de empleado aplicable a sales-day/profit/etc.
+- 🟡 **Filtro por tienda (multi-store) en reportes** _(parcial)_
+  - Loyverse: Seleccionar una o varias tiendas para el reporte.
+  - Impl: Reportes usan tenant_id fijo (_vTenant L17603). Anadir selector de tienda (depende de Stores) que pase store_id.
+- ⬜ **Personalizar columnas de la tabla del reporte** _(no)_
+  - Loyverse: Icono para elegir que columnas se muestran.
+  - Impl: Las columnas son fijas por REPORT_DEFS.cols (L17604). Anadir un menu de columnas visibles guardado en localStorage.
+- 🟡 **Tipos de pago configurables (Ajustes > Payment types)** _(parcial)_
+  - Loyverse: 'Add payment type': elegir tipo, nombre custom que sale en reportes, renombrar/eliminar y disponibilidad por tienda; Cash default no editable.
+  - Impl: Hoy 10 metodos MX hardcodeados (HTML L7116-7130). Crear tab 'Tipos de pago' en Ajustes con CRUD persistido en BD; el modal de cobro debe leer los metodos activos de esa config en vez de la lista fija.
+- 🟡 **Impuestos: crear/editar/borrar (Ajustes > Taxes)** _(parcial)_
+  - Loyverse: Boton '+' para crear impuesto (Nombre, Tasa %, Tipo), borrar, por tienda.
+  - Impl: Hoy 2 impuestos estaticos (HTML L5322-5326). Crear lista editable de impuestos en BD que alimente VolvixTax (L10241) en vez de las constantes IVA/IEPS.
+- ⬜ **Impuesto inclusivo vs exclusivo** _(no)_
+  - Loyverse: Al crear impuesto eliges 'Included in the price' o 'Added to the price'; cambia el calculo del total.
+  - Impl: Anadir campo impuesto.modo (incluido/agregado) y ajustar VolvixTax: incluido -> tax = total - total/(1+tasa); agregado -> tax = subtotal*tasa.
+- ⬜ **Aplicar impuesto por producto (Apply to items)** _(no)_
+  - Loyverse: Elegir a que productos aplica cada impuesto y activar/desactivar por ficha.
+  - Impl: Anadir relacion producto-impuestos (array producto.tax_ids) y toggle en el alta; VolvixTax debe leer los impuestos del producto en vez de aplicar global.
+- ⬜ **Stores / multi-sucursal** _(no)_
+  - Loyverse: Crear/editar multiples tiendas (nombre, direccion, tel, RFC); muchos ajustes por tienda; cambiar de tienda.
+  - Impl: No existe gestion multi-sucursal (solo cfg-negocio L5313). Base para filtros por tienda y asignacion de empleados: crear tabla stores + selector de tienda activa. Apoyarse en volvix-multistore-wiring.js.
+- 🟡 **Dining options en Ajustes (crear/editar/reordenar, por tienda)** _(parcial)_
+  - Loyverse: Toggle 'Use dining options', presets Dine in/Takeout/Delivery, add/editar/reordenar, por tienda; se imprime y ajusta impuesto por opcion.
+  - Impl: Complementa F1: crear la pantalla de configuracion (lista editable/reordenable) que alimente el dropdown del ticket; opcion de impuesto por dining option.
+- 🟡 **Seccion Features self-serve** _(parcial)_
+  - Loyverse: El dueno del negocio prende/apaga funciones (shifts, dining, open tickets, kitchen printers, CDS, low/negative stock, time clock) desde su back office.
+  - Impl: El arbol ff-tree (L5752) es 'controlado por el propietario del SaaS'. Anadir un set de toggles self-serve por tenant (los que no impliquen billing) que el negocio cambie directo.
+- 🟡 **Propinas configurables por tipo de pago (Collect tip)** _(parcial)_
+  - Loyverse: En el tipo tarjeta: switch 'Collect tip' + % predefinidos + 'Allow custom tip'.
+  - Impl: Hoy la propina vive en la pantalla de venta (HTML L7186-7190). Mover la config a Ajustes ligada al tipo de pago (item payment types).
+- 🟡 **Gestion de dispositivos POS (crear/activar/desactivar cajas)** _(parcial)_
+  - Loyverse: Registrar caja con nombre, asignarla a tienda, activar/desactivar/eliminar.
+  - Impl: Hoy solo se ven seats por plataforma en Licencia (HTML L5764). Crear CRUD de dispositivos POS (nombre + tienda + estado) en BD.
+- 🟡 **Moneda cambiable** _(parcial)_
+  - Loyverse: El dueno puede cambiar la divisa de la cuenta; simbolo/formato afecta todo.
+  - Impl: El selector 'Moneda' (HTML L5298) tiene una sola opcion fija (MXN). Poblar con mas divisas y usar un formateador central (Intl.NumberFormat) que lea la config en toda la app.
+- ⬜ **Redondeo de efectivo (cash rounding)** _(no)_
+  - Loyverse: Redondear el total en pagos en efectivo al intervalo mas cercano; mostrar el ajuste en el recibo.
+  - Impl: Anadir config de intervalo de redondeo y aplicarla en el cobro cuando el metodo sea efectivo, mostrando la linea 'Redondeo' en el recibo.
+- 🟡 **Idioma de la app (i18n real)** _(parcial)_
+  - Loyverse: Cambiar idioma de la interfaz.
+  - Impl: Selector con una sola opcion (HTML L5297). Baja prioridad: introducir diccionario i18n; hoy solo hay terminologia por giro (giros_terminologia), no traduccion de UI.
+- 🟡 **Zona horaria cambiable** _(parcial)_
+  - Loyverse: Ajuste de zona horaria de la cuenta.
+  - Impl: Selector con una opcion fija America/Mexico_City (HTML L5299). Poblar con mas zonas y usarla al formatear fechas.
+- ⬜ **Print bill / pre-cuenta (restaurante)** _(no)_
+  - Loyverse: Menu tres puntos > 'Print bill' imprime la cuenta con 'Importe a pagar' (sin folio ni metodo) antes de cobrar.
+  - Impl: Anadir en el menu tres puntos (openVarios L15599) 'Imprimir cuenta' que arme un ticket de pre-cuenta con print-hub sin cerrar la venta.
+- 🟡 **Kitchen printers: ruteo por categoria (comida->cocina, bebida->barra)** _(parcial)_
+  - Loyverse: Printer groups por estacion, marcas categorias y activas 'Print orders' por impresora.
+  - Impl: Tab 'Ruteo Multi-Impresora' (L5476, vlxRoutingAdd) y __vlxBuildTicketCommands (L14536) existen. Falta el disparo real: al guardar el ticket, filtrar items por categoria y enviar cada grupo a su impresora.
+- ⬜ **Kitchen printers: disparo automatico + tickets de correccion** _(no)_
+  - Loyverse: Imprime comanda al completar/guardar el ticket y ticket de correccion al agregar/borrar items.
+  - Impl: Enganchar en savePendingSale/edicion del ticket: comparar estado previo vs actual y emitir comanda inicial + tickets de correccion (items anadidos/quitados) a la impresora de cocina.
+- ⬜ **Escaneo de codigo de barras con la camara del dispositivo** _(no)_
+  - Loyverse: Escanear sin lector fisico usando la camara.
+  - Impl: Anadir en la venta un boton 'Escanear' que abra getUserMedia + BarcodeDetector (fallback ZXing/QuaggaJS) y pase el codigo a volvix-barcode-resolver.js.
+- ⬜ **Codigos de barras con peso embebido (prefijo 20/02, balanza)** _(no)_
+  - Loyverse: Escanear un codigo con SKU+peso (prefijo 20/02 EAN13) agrega el producto pesado automaticamente.
+  - Impl: En volvix-barcode-resolver.js detectar prefijo 20/02: parsear digitos de SKU y de peso/precio y agregar el producto con esa cantidad. Clave para abarrotes/carniceria.
+- 🟡 **Customer Display emparejado por WiFi** _(parcial)_
+  - Loyverse: CDS en dispositivo aparte emparejado por WiFi que muestra el ticket al cliente.
+  - Impl: screen-cds (L4630) refleja carrito en fullscreen/popout pero en el mismo dispositivo. Para dispositivo separado, anadir canal en tiempo real (Supabase Realtime/WebSocket) que sincronice el carrito con una pantalla remota emparejada por codigo.
+- ⬜ **Impresora por opcion de servicio (printer per dining option)** _(no)_
+  - Loyverse: Asignar impresora/comportamiento segun la dining option.
+  - Impl: Extender el ruteo (L5476) para condicionar la impresora tambien por la dining option del ticket (F1).
+- 🟡 **KDS: ordenes instantaneas POS a cocina (push)** _(parcial)_
+  - Loyverse: El KDS recibe las ordenes al instante (push) con items, cantidades, modificadores y notas.
+  - Impl: renderKDS hace polling cada 12s (L4609) sobre /api/sales/pending. Migrar a push con Supabase Realtime (suscripcion a la tabla de pendientes); mantener el poll como fallback.
+- ⬜ **KDS: marcar item individual como cocido (tachado)** _(no)_
+  - Loyverse: Tocar un item lo deja tachado sin cerrar el ticket completo.
+  - Impl: kds-line (L4602) solo pinta cantidad+nombre. Hacer cada linea clicable, togglear clase 'done' (line-through) y persistir el estado del item en el pendiente.
+- ⬜ **KDS: recall de tickets completados (icono de reloj)** _(no)_
+  - Loyverse: Los completados se archivan; el icono de reloj permite reabrir uno cerrado.
+  - Impl: kdsMarkDone (L4608) hace DELETE definitivo. Cambiar a marcar estado='done' (no borrar) y anadir un icono reloj que liste los done y permita reabrirlos (estado='new').
+- ⬜ **KDS: sonido/alerta al llegar nueva orden** _(no)_
+  - Loyverse: Reproduce un sonido configurable al llegar una orden nueva.
+  - Impl: En renderKDS detectar ids nuevos vs el render anterior y reproducir un Audio(); anadir toggle y selector de sonido en la config del KDS.
+- ⬜ **KDS: mostrar modificadores y comentarios bajo cada item** _(no)_
+  - Loyverse: Los modificadores y comentarios se listan bajo el nombre del item.
+  - Impl: renderKDS (L4602) ignora modifiers/notas. Incluir it.modifiers e it.note en el payload del pendiente y renderizarlos como subtexto del renglon.
+- 🟡 **KDS: estados nuevo->en preparacion->completo (tocar header)** _(parcial)_
+  - Loyverse: Tocar el header marca el ticket completo; pasa por estados nuevo->prep->completo.
+  - Impl: Solo hay 'Listo' (L4604). Anadir estado intermedio 'prep' al tocar el header (guardado en el pendiente) y cambiar el estilo de la tarjeta por estado.
+- 🟡 **KDS: semaforo con umbrales configurables** _(parcial)_
+  - Loyverse: Verde->amarillo->rojo por tiempo, con umbrales configurables (default 4/7 min).
+  - Impl: waitInfo (L4595) tiene umbrales 5/10 hardcodeados. Leerlos de la config del KDS.
+- 🟡 **KDS: enrutamiento por categoria a estacion + multiples pantallas** _(parcial)_
+  - Loyverse: Cada pantalla KDS recibe solo las categorias de su estacion (cocina/barra), con varios dispositivos.
+  - Impl: renderKDS muestra todo (L4600). Anadir selector de estacion y filtrar los items del ticket por categoria segun la config de ruteo (L5478); permitir varios KDS cada uno con su estacion.
+- ⬜ **KDS: mesero/cajero en el header** _(no)_
+  - Loyverse: El header muestra el empleado que tomo la orden.
+  - Impl: kds-head (L4604) solo muestra folio+tiempo. Incluir el empleado en el pendiente (F4) y pintarlo en el header.
+- 🟡 **KDS: dining option en el ticket** _(parcial)_
+  - Loyverse: El ticket indica dine in/takeout/delivery.
+  - Impl: Pasar la dining option (F1) en el payload del pendiente y pintarla como badge en la tarjeta KDS.
+- ⬜ **KDS: Clear, items anulados en rojo, comentario en footer, tickets largos en columnas** _(no)_
+  - Loyverse: Detalles menores: Clear de completados, voided en rojo tachado, comentario del ticket en el footer, y partir tickets largos en columnas.
+  - Impl: Anadir boton 'Clear' sobre la lista de done; estilo rojo tachado para items voided; footer con t.comment; y CSS column-count para tickets con muchas lineas (kds-lines L4566).
+- ⬜ **CDS: total pagado y cambio despues de cobrar** _(no)_
+  - Loyverse: Tras cobrar, la pantalla del cliente muestra el total pagado y el cambio.
+  - Impl: renderCDS (L4655) solo refleja el carrito en curso. Anadir un estado post-cobro que muestre pagado/cambio (leer del resultado del cobro).
+- ⬜ **CDS: cliente asignado (nombre, email, puntos) y campo de email para e-recibo** _(no)_
+  - Loyverse: Muestra el cliente del ticket con su saldo de puntos y un campo para capturar email del recibo.
+  - Impl: readCart (L4653) solo extrae name/qty/price. Leer el cliente asignado (boton cliente L21633) y sus puntos (F5); anadir input de email que dispare el envio del recibo digital.
+- ⬜ **CDS: modificadores/descuentos/impuestos por item y del ticket** _(no)_
+  - Loyverse: El CDS muestra modificadores, descuentos e impuestos por item y del ticket.
+  - Impl: Extender readCart/renderCDS (L4653-4655) para leer tambien modifiers, item.discount e impuestos y mostrarlos.
+- 🟡 **CDS: nombre del cajero y publicidad/carrusel en reposo** _(parcial)_
+  - Loyverse: Muestra tienda + cajero, y un carrusel de imagenes en reposo.
+  - Impl: cds-biz ya muestra el negocio (L4656). Anadir nombre del cajero (F4) y un slideshow de imagenes configurable en el estado en reposo (hoy solo texto, L4658).
