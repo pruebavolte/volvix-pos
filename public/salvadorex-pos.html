@@ -2974,15 +2974,45 @@
 </head>
 <body>
 
-<!-- Soporte unificado: la solicitud web se atiende en Estructura sin retirar
-     el flujo remoto legado de Volvix, que queda como contingencia. -->
-<a id="systeminternational-remote-support-launcher"
-   href="https://www.estructuraorganizacional.com/soporte-remoto/solicitar?source=systeminternational-web"
-   target="_blank" rel="noopener noreferrer"
-   aria-label="Solicitar soporte remoto"
-   style="position:fixed;right:16px;bottom:16px;z-index:9997;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 16px;border:0;border-radius:8px;background:#0f766e;color:#fff;text-decoration:none;font:600 14px/1.2 system-ui,sans-serif;box-shadow:0 4px 14px rgba(15,23,42,.22);">
-  Solicitar soporte remoto
-</a>
+<!-- Soporte unificado: se abre dentro del POS actual; el flujo remoto legado
+     queda como contingencia y no se elimina. -->
+<div id="systeminternational-remote-support-modal" hidden role="dialog" aria-modal="true" aria-labelledby="systeminternational-remote-support-title"
+     style="position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:18px;">
+  <section style="background:#fff;color:#0f172a;width:min(680px,96vw);max-height:90vh;overflow:auto;border-radius:10px;padding:22px;box-shadow:0 16px 48px rgba(15,23,42,.32);">
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px;">
+      <h2 id="systeminternational-remote-support-title" style="margin:0;font-size:20px;">Soporte remoto</h2>
+      <button type="button" id="systeminternational-remote-support-close" aria-label="Cerrar soporte remoto" style="font-size:22px;line-height:1;padding:6px 10px;border-radius:6px;background:#f1f5f9;">×</button>
+    </header>
+    <div id="systeminternational-remote-support-widget"></div>
+  </section>
+</div>
+<script>
+(function(){
+  'use strict';
+  const modal = document.getElementById('systeminternational-remote-support-modal');
+  const mount = document.getElementById('systeminternational-remote-support-widget');
+  const close = document.getElementById('systeminternational-remote-support-close');
+  const supportHost = 'https://www.estructuraorganizacional.com';
+  let loaded = false;
+  function closeModal(){ modal.hidden = true; }
+  window.openSystemInternationalRemoteSupport = function(){
+    modal.hidden = false;
+    if (loaded) return;
+    loaded = true;
+    const script = document.createElement('script');
+    script.src = supportHost + '/remote-support-embed.js?v=0.6.3';
+    script.dataset.supportHost = supportHost;
+    script.dataset.container = '#systeminternational-remote-support-widget';
+    script.dataset.source = 'systeminternational-web';
+    script.dataset.fullAccess = 'true';
+    script.dataset.buttonId = 'systeminternational-remote-support-widget';
+    script.onerror = function(){ mount.textContent = 'El soporte remoto no está disponible en este momento.'; loaded = false; };
+    document.head.appendChild(script);
+  };
+  close.addEventListener('click', closeModal);
+  modal.addEventListener('click', function(event){ if(event.target === modal) closeModal(); });
+})();
+</script>
 
 <!-- ============ 2026-05-13 — REMOTE SUPPORT (consentimiento + codigo) ============
      Polea /api/remote-support/incoming cada 5s. Cuando hay solicitud pendiente,
@@ -6406,7 +6436,7 @@
     <section id="screen-ayuda" class="screen-pad hidden">
       <div class="page-head">
         <div><h1 class="page-title">❓ Centro de ayuda</h1><p class="page-sub">Documentación, tutoriales y soporte</p></div>
-        <div class="btn-row"><button class="btn primary" onclick="window.open('https://systeminternational.app/docs.html','_blank')">📖 Docs</button><a class="btn primary" href="https://www.estructuraorganizacional.com/soporte-remoto/solicitar?source=systeminternational-web" target="_blank" rel="noopener noreferrer">Soporte remoto</a><button class="btn" onclick="ayudaContacto()">💬 Contactar soporte</button></div>
+        <div class="btn-row"><button class="btn primary" onclick="window.open('https://systeminternational.app/docs.html','_blank')">📖 Docs</button><button class="btn primary" type="button" onclick="window.openSystemInternationalRemoteSupport()">Soporte remoto</button><button class="btn" onclick="ayudaContacto()">💬 Contactar soporte</button></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
         <div class="card" style="padding:18px;cursor:pointer" onclick="ayudaSeccion('inicio')"><div style="font-size:36px">🚀</div><h3 style="margin:6px 0">Empezar</h3><p style="color:#64748B;font-size:13px">Tu primera venta en 5 min</p></div>
