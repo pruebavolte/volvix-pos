@@ -2986,33 +2986,7 @@
     <div id="systeminternational-remote-support-widget"></div>
   </section>
 </div>
-<script>
-(function(){
-  'use strict';
-  const modal = document.getElementById('systeminternational-remote-support-modal');
-  const mount = document.getElementById('systeminternational-remote-support-widget');
-  const close = document.getElementById('systeminternational-remote-support-close');
-  const supportHost = 'https://remoto-soporte-production.up.railway.app';
-  let loaded = false;
-  function closeModal(){ modal.hidden = true; }
-  window.openSystemInternationalRemoteSupport = function(){
-    modal.hidden = false;
-    if (loaded) return;
-    loaded = true;
-    const script = document.createElement('script');
-    script.src = supportHost + '/remote-support-embed.js?v=0.6.3';
-    script.dataset.supportHost = supportHost;
-    script.dataset.container = '#systeminternational-remote-support-widget';
-    script.dataset.source = 'systeminternational-web';
-    script.dataset.fullAccess = 'true';
-    script.dataset.buttonId = 'systeminternational-remote-support-widget';
-    script.onerror = function(){ mount.textContent = 'El soporte remoto no está disponible en este momento.'; loaded = false; };
-    document.head.appendChild(script);
-  };
-  close.addEventListener('click', closeModal);
-  modal.addEventListener('click', function(event){ if(event.target === modal) closeModal(); });
-})();
-</script>
+<script src="/systeminternational-remote-support.js?v=0.6.3" defer></script>
 
 <!-- ============ 2026-05-13 — REMOTE SUPPORT (consentimiento + codigo) ============
      Polea /api/remote-support/incoming cada 5s. Cuando hay solicitud pendiente,
@@ -4177,7 +4151,7 @@
       <span>Ayuda</span>
     </button>
 
-    <button class="tb-btn remote-support" type="button" onclick="window.openSystemInternationalRemoteSupport()" aria-label="Solicitar soporte remoto" title="Solicitar soporte remoto">
+    <button class="tb-btn remote-support" type="button" data-remote-support-trigger aria-label="Solicitar soporte remoto" title="Solicitar soporte remoto">
       <span aria-hidden="true">🖥</span>
       <span>Soporte</span>
     </button>
@@ -6441,7 +6415,7 @@
     <section id="screen-ayuda" class="screen-pad hidden">
       <div class="page-head">
         <div><h1 class="page-title">❓ Centro de ayuda</h1><p class="page-sub">Documentación, tutoriales y soporte</p></div>
-        <div class="btn-row"><button class="btn primary" onclick="window.open('https://systeminternational.app/docs.html','_blank')">📖 Docs</button><button class="btn primary" type="button" onclick="window.openSystemInternationalRemoteSupport()">Soporte remoto</button><button class="btn" onclick="ayudaContacto()">💬 Contactar soporte</button></div>
+        <div class="btn-row"><button class="btn primary" onclick="window.open('https://systeminternational.app/docs.html','_blank')">📖 Docs</button><button class="btn primary" type="button" data-remote-support-trigger>Soporte remoto</button><button class="btn" onclick="ayudaContacto()">💬 Contactar soporte</button></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
         <div class="card" style="padding:18px;cursor:pointer" onclick="ayudaSeccion('inicio')"><div style="font-size:36px">🚀</div><h3 style="margin:6px 0">Empezar</h3><p style="color:#64748B;font-size:13px">Tu primera venta en 5 min</p></div>
