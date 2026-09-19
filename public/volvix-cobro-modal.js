@@ -726,11 +726,27 @@
           folio: realData.folio,
           qrUrl: 'https://volvix.app/t/' + (realData.folio || '')
         });
+        // 2026-09-19 COMANDAS: datos estructurados para que el Electron mande, además del
+        // ticket, una comanda a la impresora de cocina por red (si está configurada en el
+        // menú Volvix → "Impresora de comandas"). Versiones viejas del .exe ignoran el campo.
+        var comandaData = null;
+        try {
+          var dinEl = document.getElementById('lv-dinein');
+          comandaData = {
+            folio: realData.folio,
+            time: realData.time,
+            mode: dinEl ? (dinEl.getAttribute('data-mode') === 'away' ? 'PARA LLEVAR' : 'COMER AQUI') : '',
+            note: String(window.__vlxTicketNote || ''),
+            customer: realData.customer || '',
+            items: (realData.items || []).map(function (i) { return { qty: i.qty || 1, name: i.name || '' }; })
+          };
+        } catch (_) { comandaData = null; }
         result = await window.volvixElectron.printRawText({
           text: textForRaw,
           printerName: chosenPrinter,
           openDrawer: !!(cfgForRaw && cfgForRaw.autoOpenDrawer && realData.payment && /efectivo/i.test(realData.payment.method || '')),
-          cfg: rawCfg
+          cfg: rawCfg,
+          comanda: comandaData
         });
         log('autoPrint RAW result:', result, 'printer:', chosenPrinter);
         if (result && result.ok) return true;

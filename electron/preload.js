@@ -151,6 +151,17 @@ contextBridge.exposeInMainWorld('volvixElectron', {
     return await ipcRenderer.invoke('volvix:bt:print', opts || {});
   },
 
+  // 2026-09-19 — Impresora de COMANDAS (cocina) por red: config + prueba
+  comandaGet: async function () {
+    return await ipcRenderer.invoke('volvix:comanda:get');
+  },
+  comandaSave: async function (cfg) {
+    return await ipcRenderer.invoke('volvix:comanda:save', cfg || {});
+  },
+  comandaTest: async function (cfg) {
+    return await ipcRenderer.invoke('volvix:comanda:test', cfg || {});
+  },
+
   // 2026-05-15 — Network printing (TCP raw socket JetDirect 9100)
   // opts: { ip (required), port? (default 9100), html?, text?, bytes?, cut?, timeout? }
   printNetwork: async function (opts) {

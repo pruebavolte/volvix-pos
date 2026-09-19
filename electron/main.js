@@ -449,6 +449,20 @@ const menuTemplate = [
           }
         } catch (e) { console.error('[printer manual] error:', e.message); }
       }},
+      { label: 'Impresora de comandas (cocina)…', click: () => {
+        // 2026-09-19: mini ventana para IP/puerto de la impresora de cocina + prueba
+        if (!_comandaPrinter) return;
+        try {
+          const win = new BrowserWindow({
+            width: 560, height: 360, resizable: false, minimizable: false, maximizable: false,
+            parent: mainWindow || undefined, modal: false, title: 'Impresora de comandas',
+            autoHideMenuBar: true,
+            webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true }
+          });
+          const html = _comandaPrinter.configHtml(_comandaPrinter.load(app));
+          win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+        } catch (e) { console.error('[volvix] comanda config window:', e.message); }
+      }},
       { type: 'separator' },
       { label: 'Salir', accelerator: 'CmdOrCtrl+Q', click: () => app.quit() }
     ]
@@ -562,6 +576,29 @@ catch (e) { console.warn('[volvix] printer-bluetooth no disponible:', e.message)
 let _printerNetwork = null;
 try { _printerNetwork = require('./printer-network'); }
 catch (e) { console.warn('[volvix] printer-network no disponible:', e.message); }
+
+// 2026-09-19: COMANDAS de cocina por impresora de red (además del ticket)
+let _comandaPrinter = null;
+try { _comandaPrinter = require('./comanda-printer'); }
+catch (e) { console.warn('[volvix] comanda-printer no disponible:', e.message); }
+
+ipcMain.handle('volvix:comanda:get', async () => {
+  if (!_comandaPrinter) return { ok: false, error: 'módulo no disponible' };
+  return { ok: true, cfg: _comandaPrinter.load(app) };
+});
+ipcMain.handle('volvix:comanda:save', async (event, cfg) => {
+  if (!_comandaPrinter) return { ok: false, error: 'módulo no disponible' };
+  try { return { ok: true, cfg: _comandaPrinter.save(app, cfg || {}) }; }
+  catch (e) { return { ok: false, error: e.message }; }
+});
+ipcMain.handle('volvix:comanda:test', async (event, cfg) => {
+  if (!_comandaPrinter || !_printerNetwork) return { ok: false, error: 'módulo no disponible' };
+  const c = Object.assign({}, _comandaPrinter.load(app), cfg || {});
+  if (!c.ip) return { ok: false, error: 'falta la IP' };
+  try {
+    return await _printerNetwork.printToIP(c.ip, c.port || 9100, _comandaPrinter.buildEscPos(_comandaPrinter.sampleComanda(), c.width), { timeout: 8000 });
+  } catch (e) { return { ok: false, error: e.message }; }
+});
 
 // 2026-05-15: Discovery agresivo de impresoras (mDNS + SSDP + ARP + multi-subnet)
 let _printerDiscovery = null;
@@ -936,6 +973,14 @@ ipcMain.handle('volvix:printers:print-raw', async (event, opts) => {
   if (process.platform !== 'win32') return { ok: false, error: 'win32 only' };
   if (!opts) return { ok: false, error: 'opts required' };
   opts.text = opts.text || '';
+
+  // 2026-09-19 COMANDAS: en paralelo al ticket (no bloquea ni depende de que el ticket salga),
+  // si el usuario configuró impresora de cocina (menú Volvix) y el renderer mandó `comanda`.
+  if (opts.comanda && _comandaPrinter) {
+    _comandaPrinter.send(app, _printerNetwork, opts.comanda)
+      .then((r) => { if (r && !r.skipped) console.log('[volvix] comanda →', r.ok ? 'OK ' + r.bytesWritten + 'B' : 'ERROR ' + r.error); })
+      .catch((e) => console.warn('[volvix] comanda error:', e.message));
+  }
 
   // 2026-05-15: Auto-detect printer si no se proporciona (preferir Volvix-Thermal)
   if (!opts.printerName) {
