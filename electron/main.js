@@ -41,7 +41,9 @@ try {
   console.warn('[volvix] electron-updater no disponible:', e.message);
 }
 
-const PROD_BASE = 'https://volvix-pos.vercel.app';
+// FIX 2026-09-19: volvix-pos.vercel.app está DESHABILITADO (HTTP 402 DEPLOYMENT_DISABLED) → todo /api/*
+// fallaba con "Error al iniciar sesión". Producción real (Railway) = systeminternational.app.
+const PROD_BASE = 'https://systeminternational.app';
 const DEV_URL   = process.env.VOLVIX_DEV_URL || 'http://127.0.0.1:8765/salvadorex-pos.html';
 const isDev     = process.env.NODE_ENV === 'development' || process.argv.includes('--dev');
 
@@ -408,7 +410,7 @@ const menuTemplate = [
         await mainWindow.webContents.session.clearCache();
         mainWindow.reload();
       }},
-      { label: 'Abrir versión online (Vercel)', click: () => {
+      { label: 'Abrir versión online (systeminternational.app)', click: () => {
         if (mainWindow) mainWindow.loadURL(PROD_BASE + '/salvadorex-pos.html');
       }},
       { label: 'Buscar actualizaciones', click: async () => {
