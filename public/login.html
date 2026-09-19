@@ -731,7 +731,12 @@ body {
 (function revealTestCredsInDev(){
   try {
     const h = location.hostname;
-    const isDev = h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local') || h === '';
+    // FIX 2026-09-19: el .exe (Electron) sirve el POS desde http://127.0.0.1:<puerto aleatorio> y
+    // le mostraba las credenciales de prueba al CLIENTE. Dev real = localhost / *.local / 127.0.0.1:8765
+    // (VOLVIX_DEV_URL), y nunca dentro de Electron.
+    const isElectron = /Electron/i.test(navigator.userAgent || '');
+    const isDev = !isElectron && (h === 'localhost' || h.endsWith('.local') || h === '' ||
+      (h === '127.0.0.1' && location.port === '8765'));
     if (isDev) {
       const el = document.getElementById('testCreds');
       if (el) el.hidden = false;
