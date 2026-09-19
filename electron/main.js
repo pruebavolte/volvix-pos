@@ -296,17 +296,29 @@ function startLocalServer() {
       }
       serveStatic(req, res);
     });
-    // Puerto 0 = el SO asigna uno libre automáticamente
-    server.listen(0, '127.0.0.1', () => {
-      const addr = server.address();
-      localServerPort = addr.port;
-      console.log('[volvix] Local server arrancado en', 'http://127.0.0.1:' + localServerPort);
-      resolve(localServerPort);
-    });
-    server.on('error', (e) => {
-      console.error('[volvix] Local server error:', e.message);
-      resolve(0);
-    });
+    // FIX 2026-09-19: puerto FIJO. Con puerto aleatorio (listen(0)) el origin http://127.0.0.1:<puerto>
+    // cambiaba en cada arranque y el POS perdía TODO su localStorage: sesión (login cada vez),
+    // personalización del ticket (nombre del negocio), impresora elegida. Si el fijo está ocupado
+    // (otra instancia u otro programa) cae al aleatorio como antes.
+    const FIXED_PORT = 47321;
+    const tryListen = (port) => {
+      server.once('error', (e) => {
+        if (port !== 0 && e.code === 'EADDRINUSE') {
+          console.warn('[volvix] Puerto fijo', port, 'ocupado; usando puerto aleatorio');
+          tryListen(0);
+          return;
+        }
+        console.error('[volvix] Local server error:', e.message);
+        resolve(0);
+      });
+      server.listen(port, '127.0.0.1', () => {
+        const addr = server.address();
+        localServerPort = addr.port;
+        console.log('[volvix] Local server arrancado en', 'http://127.0.0.1:' + localServerPort);
+        resolve(localServerPort);
+      });
+    };
+    tryListen(FIXED_PORT);
   });
 }
 
