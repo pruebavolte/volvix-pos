@@ -177,7 +177,7 @@ function startLocalServer() {
       // 2026-05-15 DEBUG: direct local print-raw endpoint to test winspool
       // API without going through the renderer/SW caching layer.
       // POST /__local/print-raw  body: {text, printerName?}
-      if (req.url === '/__local/print-raw' && req.method === 'POST') {
+      if (isDev && req.url === '/__local/print-raw' && req.method === 'POST') {
         let body = '';
         req.on('data', (c) => body += c);
         req.on('end', async () => {
