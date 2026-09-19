@@ -162,8 +162,16 @@ function serveFile(filePath, res, stat) {
 function startLocalServer() {
   return new Promise((resolve) => {
     const server = http.createServer((req, res) => {
-      // CORS para fetch internos
-      res.setHeader('Access-Control-Allow-Origin', '*');
+      // FIX 2026-09-19: con puerto FIJO (47321) cualquier página web abierta en esta PC podría
+      // POSTear a http://127.0.0.1:47321/__local/print-raw (imprimir / abrir cajón). Solo se
+      // aceptan peticiones sin Origin (misma app, navegación) o con Origin = este servidor.
+      const origin = req.headers.origin;
+      const selfOrigin = 'http://127.0.0.1:' + localServerPort;
+      if (origin && origin !== selfOrigin) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ ok: false, error: 'origin not allowed' }));
+      }
+      res.setHeader('Access-Control-Allow-Origin', selfOrigin);
       if (req.method === 'OPTIONS') { res.writeHead(204); return res.end(); }
 
       // 2026-05-15 DEBUG: direct local print-raw endpoint to test winspool
