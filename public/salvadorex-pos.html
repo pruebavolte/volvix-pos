@@ -2976,6 +2976,8 @@
 
 <!-- Soporte unificado: se abre dentro del POS actual; el flujo remoto legado
      queda como contingencia y no se elimina. -->
+<!-- FIX 2026-09-19: el display:flex inline le ganaba al atributo hidden y el modal tapaba el POS desde la carga; ni la X ni Escape lo cerraban. -->
+<style>#systeminternational-remote-support-modal[hidden]{display:none!important}</style>
 <div id="systeminternational-remote-support-modal" hidden role="dialog" aria-modal="true" aria-labelledby="systeminternational-remote-support-title"
      style="position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:18px;">
   <section style="background:#fff;color:#0f172a;width:min(680px,96vw);max-height:90vh;overflow:auto;border-radius:10px;padding:22px;box-shadow:0 16px 48px rgba(15,23,42,.32);">
