@@ -5766,6 +5766,46 @@
               <button class="btn sm secondary" onclick="vlxPrinterSaveConfig()">💾 Guardar configuración</button>
             </div>
             <div id="cfg-printer-msg" style="font-size:12px; margin-top:8px; color:var(--text-2);"></div>
+
+            <!-- 2026-09-19 COMANDAS de cocina por red — solo visible en el .exe (Electron). El menú nativo
+                 está oculto (autoHideMenuBar) y no es alcanzable por remoto ni obvio para el cliente. -->
+            <div id="cfg-comanda-box" hidden style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border);">
+              <strong style="font-size:12.5px;">Impresora de comandas (cocina, por red)</strong>
+              <div style="font-size:12px; color:var(--text-2); margin:4px 0 8px;">Al cobrar, además del ticket, se manda la comanda (productos y cantidades, sin precios) a esta impresora.</div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <input id="cfg-comanda-ip" placeholder="IP (ej. 192.168.1.100)" style="width:170px;">
+                <input id="cfg-comanda-port" type="number" placeholder="Puerto 9100" style="width:110px;">
+                <input id="cfg-comanda-width" type="number" placeholder="Ancho 48" title="48 = 80mm, 32 = 58mm" style="width:100px;">
+                <label style="font-size:12.5px; display:flex; align-items:center; gap:5px;"><input id="cfg-comanda-on" type="checkbox"> Imprimir comanda al cobrar</label>
+              </div>
+              <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn sm" onclick="vlxComandaTest()">🍳 Probar comanda</button>
+                <button class="btn sm secondary" onclick="vlxComandaSave()">💾 Guardar comanda</button>
+              </div>
+              <div id="cfg-comanda-msg" style="font-size:12px; margin-top:6px; color:var(--text-2);"></div>
+            </div>
+            <script>
+            (function () {
+              var api = window.volvixElectron;
+              if (!api || typeof api.comandaGet !== 'function') return;
+              var box = document.getElementById('cfg-comanda-box'); if (!box) return;
+              box.hidden = false;
+              var $ = function (id) { return document.getElementById(id); };
+              function read() { return { ip: ($('cfg-comanda-ip').value || '').trim(), port: parseInt($('cfg-comanda-port').value, 10) || 9100, width: parseInt($('cfg-comanda-width').value, 10) || 48, enabled: $('cfg-comanda-on').checked }; }
+              function msg(t) { var m = $('cfg-comanda-msg'); if (m) m.textContent = t; }
+              api.comandaGet().then(function (r) {
+                if (!r || !r.ok) return; var c = r.cfg || {};
+                $('cfg-comanda-ip').value = c.ip || ''; $('cfg-comanda-port').value = c.port || 9100; $('cfg-comanda-width').value = c.width || 48; $('cfg-comanda-on').checked = !!c.enabled;
+              }).catch(function () {});
+              window.vlxComandaSave = function () {
+                api.comandaSave(read()).then(function (r) { msg(r && r.ok ? (r.cfg.enabled ? '✓ Comandas activas en ' + r.cfg.ip + ':' + r.cfg.port : '✓ Guardado (comandas desactivadas)') : '⚠️ ' + (r && r.error)); }).catch(function (e) { msg('⚠️ ' + e.message); });
+              };
+              window.vlxComandaTest = function () {
+                msg('Enviando comanda de prueba…');
+                api.comandaTest(read()).then(function (r) { msg(r && r.ok ? '✓ Comanda de prueba enviada (' + r.bytesWritten + ' bytes). Revisa la impresora de cocina.' : '⚠️ La impresora no respondió: ' + (r && r.error)); }).catch(function (e) { msg('⚠️ ' + e.message); });
+              };
+            })();
+            </script>
             </div><!-- fin perif-tab-printers -->
           </div>
 
