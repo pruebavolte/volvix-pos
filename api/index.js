@@ -32167,7 +32167,13 @@ if (process.env.NODE_ENV === 'test') {
         var name = (it && (it.name || it.product_name || it.descripcion)) || '';
         var qty = (it && it.qty) || 0;
         var price = (it && it.price) || 0;
-        return '<tr><td style="text-align:left">' + String(name).replace(/[<>&]/g, '') + '</td>' +
+        // FIX web/loyverse 2026-09-20: la reimpresion descartaba items[].modifiers e items[].note (persisten en pos_sales.items).
+        var _rpMods = (it && Array.isArray(it.modifiers) ? it.modifiers : []).map(function (m) {
+          return String((m && (m.label || m.name)) || m || '').replace(/[<>&]/g, '');
+        }).filter(Boolean).map(function (t) { return '+ ' + t; });
+        if (it && it.note) _rpMods.push('Nota: ' + String(it.note).replace(/[<>&]/g, ''));
+        var _rpSub = _rpMods.length ? '<div style="font-size:10px;color:#555">' + _rpMods.join(' &middot; ') + '</div>' : '';
+        return '<tr><td style="text-align:left">' + String(name).replace(/[<>&]/g, '') + _rpSub + '</td>' +
                '<td style="text-align:center">' + qty + '</td>' +
                '<td style="text-align:right">$' + Number(price).toFixed(2) + '</td></tr>';
       }).join('');

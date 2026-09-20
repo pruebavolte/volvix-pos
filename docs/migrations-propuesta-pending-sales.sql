@@ -54,3 +54,16 @@ NOTIFY pgrst, 'reload schema';
 --   ALTER TABLE public.pending_sales DROP COLUMN IF EXISTS name, DROP COLUMN IF EXISTS comment,
 --     DROP COLUMN IF EXISTS employee, DROP COLUMN IF EXISTS dining;
 --   DROP INDEX IF EXISTS public.idx_pendsales_tenant_created;
+
+-- ============================================================================================================
+-- BLOQUE B (OPCIONAL, NO APLICADA) — KDS web sin borrar el ticket abierto (ver docs/WEB_DEGRADACION.md §2.B)
+-- Hoy kdsMarkDone() hace DELETE /api/sales/pending/:id: al marcar "Listo" en cocina se pierde el ticket abierto que caja aun debe cobrar.
+-- Con estas columnas "Listo" pasa a PATCH kds_status='ready' y el ticket sigue abierto.
+-- ============================================================================================================
+-- BEGIN;
+-- ALTER TABLE public.pending_sales
+--   ADD COLUMN IF NOT EXISTS kds_status   text DEFAULT 'new',   -- new | preparing | ready
+--   ADD COLUMN IF NOT EXISTS kds_ready_at timestamptz,
+--   ADD COLUMN IF NOT EXISTS kds_sent_items jsonb;               -- lo ya enviado a cocina (para mandar solo el delta)
+-- COMMIT;
+-- NOTIFY pgrst, 'reload schema';
