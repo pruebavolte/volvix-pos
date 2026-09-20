@@ -94,7 +94,10 @@
     // 2026-05-13: motor visual de distribución (layout builder universal)
     'module.mapa':          { name: 'Mapa del lugar',     default_status: 'enabled' },
     // 2026-09-19 (T1.3): modificadores estilo Loyverse (dialogo en POS + back-office)
-    'module.modifiers':     { name: 'Modificadores',      default_status: 'enabled' }
+    'module.modifiers':     { name: 'Modificadores',      default_status: 'enabled' },
+    // 2026-09-19 (T1.1): tickets abiertos completos estilo Loyverse
+    'module.open_tickets':       { name: 'Tickets abiertos',            default_status: 'enabled' },
+    'module.predefined_tickets': { name: 'Tickets predefinidos (mesas)', default_status: 'enabled' }
   };
 
   function defaultMap() {

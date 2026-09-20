@@ -10308,7 +10308,7 @@
       ok = confirm('¿Eliminar toda la venta actual?');
     }
     if (!ok) return;
-    CART.length = 0; renderCart();
+    CART.length = 0; window.__vlxOpenTicket = null; renderCart();
     try { __r8aClearCartDraft(); } catch (_) {}
     try {
       $('#footer-pago').textContent = '$0.00';
@@ -10328,7 +10328,7 @@
       }
       if (!ok) return;
     }
-    CART.length = 0; renderCart();
+    CART.length = 0; window.__vlxOpenTicket = null; renderCart();
     try { __r8aClearCartDraft(); } catch (_) {}
     try {
       $('#footer-pago').textContent = '$0.00';
@@ -11006,6 +11006,7 @@
         }
       } catch (e) { console.warn('[AGENTE 7] stock decrement local fail', e); }
       CART.length = 0;
+      try { if (window.__vlxCloseOpenTicket) window.__vlxCloseOpenTicket(); } catch(_){}
       renderCart();
       // R8a FIX-H1: venta confirmada → borrar draft
       try { __r8aClearCartDraft(); } catch (_) {}
@@ -18262,40 +18263,97 @@
     return { delta: delta, markSent: markSent, reset: reset, onSave: onSave };
   })();
 
+  // ---- T1.1 Tickets abiertos (module.open_tickets / module.predefined_tickets) ----
+  window.__vlxOpenTicket = null; // {id,name,comment} del ticket abierto cargado; el siguiente Guardar lo ACTUALIZA
+  function _otOn(k) { try { return !window.VolvixFeatures || window.VolvixFeatures.isEnabled(k); } catch (_) { return true; } }
+  function _otCount(n) {
+    window.__vlxOTCount = n;
+    try { if (window.__vlxOTBtn) window.__vlxOTBtn(!CART.length); } catch (_) {}
+  }
+  async function _otFetch() {
+    const r = await _authFetch('/api/sales/pending');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const arr = (data && data.items) || (Array.isArray(data) ? data : []);
+    const rows = arr.map(window.VolvixOpenTickets.normRow);
+    _otCount(rows.length);
+    return rows;
+  }
+  async function _otPost(payload) {
+    const idemKey = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('pend-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10));
+    return _authFetch('/api/sales/pending', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idemKey }, body: JSON.stringify(payload) });
+  }
+  async function _otDelete(id) {
+    if (!id) return;
+    try { await _authFetch('/api/sales/pending/' + encodeURIComponent(id), { method: 'DELETE' }); } catch (e) {}
+  }
+  function _otCartItems() {
+    return CART.map(i => ({ product_id: i.id || null, code: i.code, name: i.name, price: i.price, qty: i.qty, modifiers: i.modifiers || [], note: i.note || '', base_price: i.base_price || null }));
+  }
+  window.__vlxOTRefresh = function () { if (window.VolvixOpenTickets) _otFetch().catch(function () {}); };
+  window.__vlxCloseOpenTicket = function () {
+    const t = window.__vlxOpenTicket; window.__vlxOpenTicket = null;
+    if (t && t.id) { _otDelete(t.id).then(function () { _otCount(Math.max(0, (window.__vlxOTCount || 1) - 1)); }); }
+  };
+
   window.savePendingSale = async function () {
-    if (!CART.length) { showToast('No hay productos para guardar'); return; }
+    if (!CART.length) {
+      if (_otOn('module.open_tickets') && window.VolvixOpenTickets) { return window.restorePendingSale(); }
+      showToast('No hay productos para guardar'); return;
+    }
     const session = JSON.parse(localStorage.getItem('volvixSession') || 'null') || {};
+    const tenant = session.tenant_id || _vTenant();
+    let meta = {};
+    const useOT = _otOn('module.open_tickets') && window.VolvixOpenTickets;
+    if (useOT) {
+      if (window.__vlxOpenTicket) {
+        meta = { name: window.__vlxOpenTicket.name, comment: window.__vlxOpenTicket.comment || '' };
+      } else {
+        meta = await window.VolvixOpenTickets.askSaveMeta({
+          tenant: tenant,
+          predefined: _otOn('module.predefined_tickets') ? window.VolvixOpenTickets.predefinedNames(tenant) : null
+        });
+        if (!meta) return; // cancelado
+      }
+    }
+    const din = document.getElementById('lv-dinein');
+    const prevOpen = window.__vlxOpenTicket;
     const payload = {
-      tenant_id: session.tenant_id || _vTenant(),
+      tenant_id: tenant,
       user_id: session.user_id || session.id || null,
-      items: CART.map(i => ({ product_id: i.id || null, code: i.code, name: i.name, price: i.price, qty: i.qty, modifiers: i.modifiers || [], note: i.note || '', base_price: i.base_price || null })),
+      items: _otCartItems(),
       total: CART.reduce((s,i) => s + i.price * i.qty, 0),
       note: window.__vlxTicketNote || '',
       notes: window.__vlxTicketNote || '',
+      name: meta.name || '',
+      comment: meta.comment || '',
+      employee: session.full_name || session.name || (session.email ? String(session.email).split('@')[0] : ''),
+      dining: din ? (din.getAttribute('data-mode') === 'away' ? 'Para llevar' : 'Comer aquí') : '',
       saved_at: Date.now()
     };
+    const clearAfter = function () {
+      window.__vlxOpenTicket = null;
+      CART.length = 0; renderCart();
+      window.__vlxTicketNote = '';
+      try { var _nb = document.getElementById('lv-note'); if (_nb) { _nb.style.color = ''; _nb.title = 'Nota del ticket'; } } catch(_){}
+    };
     try {
-      const idemKey = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('pend-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10));
-      const r = await _authFetch('/api/sales/pending', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idemKey },
-        body: JSON.stringify(payload)
-      });
+      const r = await _otPost(payload);
       if (r.ok) {
         const saved = await r.json();
         const ref = (saved && (saved.id || saved.reference)) || ('LOCAL-' + Date.now().toString(36));
         try { localStorage.setItem('volvix:last_pending_id', String(ref)); } catch(e){}
         try { window.VolvixComanda && window.VolvixComanda.onSave(CART); } catch(_){}
-          CART.length = 0; renderCart();
-        window.__vlxTicketNote = '';
-        try { var _nb = document.getElementById('lv-note'); if (_nb) { _nb.style.color = ''; _nb.title = 'Nota del ticket'; } } catch(_){}
-        showToast('✓ Venta pendiente guardada · Ref: ' + ref);
+        if (prevOpen && prevOpen.id) { await _otDelete(prevOpen.id); } // actualizar = reemplazar el ticket previo
+        else _otCount((window.__vlxOTCount || 0) + 1);
+        clearAfter();
+        showToast('✓ Ticket guardado' + (meta.name ? ' · ' + meta.name : '') + ' · Ref: ' + ref);
       } else {
         // fallback to local idb queue — si falla, NO limpiar carrito ni fingir exito
         try {
           await idbQueue('sales_pending', payload);
           try { window.VolvixComanda && window.VolvixComanda.onSave(CART); } catch(_){}
-          CART.length = 0; renderCart();
+          clearAfter();
           showToast('⚠ Pendiente guardada offline');
         } catch (qe) {
           console.warn('idbQueue pending failed:', qe);
@@ -18306,7 +18364,7 @@
       try {
         await idbQueue('sales_pending', payload);
         try { window.VolvixComanda && window.VolvixComanda.onSave(CART); } catch(_){}
-          CART.length = 0; renderCart();
+        clearAfter();
         showToast('⚠ Sin conexión - pendiente en cola');
       } catch (qe) {
         console.warn('idbQueue pending failed:', qe);
@@ -18316,23 +18374,43 @@
   };
   window.restorePendingSale = async function () {
     try {
-      const r = await _authFetch('/api/sales/pending');
-      if (!r.ok) { showToast('No se pudo cargar pendientes'); return; }
-      const data = await r.json();
-      const items = (data && data.items) || (Array.isArray(data) ? data : []);
-      if (!items.length) { showToast('No hay ventas pendientes'); return; }
-      const choice = items[0]; // load most recent; could open modal to choose
-      if (CART.length && !confirm('El carrito tiene productos. ¿Reemplazar con la venta pendiente?')) return;
-      CART = (choice.items || []).map(it => ({
-        id: it.product_id, code: it.code, name: it.name,
-        price: Number(it.price)||0, qty: Number(it.qty)||1, stock: 0,
-        modifiers: Array.isArray(it.modifiers) ? it.modifiers : [], note: it.note || '', base_price: it.base_price || null
-      }));
-      renderCart();
-      try { window.VolvixComanda && window.VolvixComanda.markSent(CART); } catch(_){}
-      showToast('✓ Venta pendiente recuperada · Ref: ' + (choice.id || ''));
-      // Optionally remove from server
-      if (choice.id) { try { await _authFetch('/api/sales/pending/' + encodeURIComponent(choice.id), { method: 'DELETE' }); } catch(e){} }
+      if (!window.VolvixOpenTickets) { showToast('Módulo de tickets no cargado'); return; }
+      let rows;
+      try { rows = await _otFetch(); } catch (e) { showToast('No se pudo cargar pendientes'); return; }
+      if (!rows.length) { showToast('No hay tickets abiertos'); return; }
+      window.VolvixOpenTickets.openList({
+        rows: rows,
+        onOpen: function (row) {
+          if (CART.length && !confirm('El carrito tiene productos. ¿Reemplazar con el ticket abierto?')) return;
+          CART.length = 0;
+          (row.items || []).forEach(it => CART.push({
+            id: it.product_id, code: it.code, name: it.name,
+            price: Number(it.price)||0, qty: Number(it.qty)||1, stock: 0,
+            modifiers: Array.isArray(it.modifiers) ? it.modifiers : [], note: it.note || '', base_price: it.base_price || null
+          }));
+          window.__vlxTicketNote = row.note || '';
+          renderCart();
+          try { window.VolvixComanda && window.VolvixComanda.markSent(CART); } catch(_){}
+          window.__vlxOpenTicket = { id: row.id, name: row.name, comment: row.comment };
+          showToast('✓ Ticket abierto · ' + row.name);
+        },
+        onMerge: async function (sel) {
+          const items = window.VolvixOpenTickets.mergeItems(sel);
+          const session = JSON.parse(localStorage.getItem('volvixSession') || 'null') || {};
+          const name = sel.map(s => s.name).join(' + ').slice(0, 80);
+          const payload = {
+            tenant_id: session.tenant_id || _vTenant(), user_id: session.user_id || session.id || null,
+            items: items, total: items.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.qty) || 1), 0),
+            note: '', notes: '', name: name, comment: sel.map(s => s.comment).filter(Boolean).join(' / ').slice(0, 200),
+            employee: sel[0].employee || '', dining: sel[0].dining || '', saved_at: Date.now()
+          };
+          const r = await _otPost(payload);
+          if (!r.ok) { showToast('No se pudo combinar los tickets'); return null; }
+          for (const s of sel) { await _otDelete(s.id); } // borrar origen solo si el combinado se guardó
+          showToast('✓ Tickets combinados');
+          return await _otFetch();
+        }
+      });
     } catch(e) { showToast('Error: ' + (e.message || e), 'error'); }
   };
 
@@ -20560,6 +20638,7 @@
 <script src="volvix-permissions-wiring.js" defer></script>
 <script src="volvix-pin-wiring.js" defer></script>
 <script src="volvix-modifiers-wiring.js" defer></script>
+<script src="volvix-open-tickets.js"></script>
 <script src="volvix-categories-wiring.js" defer></script>
 <script src="volvix-tags-wiring.js" defer></script>
 <script src="volvix-reminders-wiring.js" defer></script>
@@ -21808,7 +21887,7 @@
         <span id="lv-ticket-total">$0.00</span>
       </div>
       <div class="lv-action-bar">
-        <button class="lv-btn-save" type="button" id="lv-btn-save">Guardar</button>
+        <button class="lv-btn-save" type="button" id="lv-btn-save" data-feature="module.open_tickets">Guardar</button>
         <button class="lv-btn-charge" type="button" id="lv-btn-charge">Cobrar</button>
       </div>
     </div>
@@ -21895,6 +21974,18 @@
     if (titleEl) titleEl.textContent = activeCatName || 'Punto de venta';
   }
 
+  // T1.1: con carrito vacio, "Guardar" pasa a "Tickets abiertos (N)" como en Loyverse.
+  var __otLast = 0;
+  window.__vlxOTBtn = function (empty) {
+    var b = document.getElementById('lv-btn-save');
+    if (!b) return;
+    var on = true; try { on = !window.VolvixFeatures || window.VolvixFeatures.isEnabled('module.open_tickets'); } catch (_) {}
+    if (!on) { b.textContent = 'Guardar'; return; }
+    var n = window.__vlxOTCount;
+    b.textContent = empty ? ('Tickets abiertos' + (n ? ' (' + n + ')' : '')) : 'Guardar';
+    if (empty && Date.now() - __otLast > 20000 && window.__vlxOTRefresh) { __otLast = Date.now(); window.__vlxOTRefresh(); }
+  };
+
   function syncLvTicket() {
     if (!vistaIs(2)) return;
     var items = document.getElementById('lv-ticket-items');
@@ -21903,6 +21994,7 @@
     var chargeBtn = document.getElementById('lv-btn-charge');
     function setCharge(t){ if (chargeBtn) chargeBtn.textContent = (t && t !== '$0.00') ? ('Cobrar ' + t) : 'Cobrar'; }
     var rows = document.querySelectorAll('#cart-body tr');
+    try { if (window.__vlxOTBtn) window.__vlxOTBtn(!rows.length); } catch(_){}
     if (!rows.length) {
       items.innerHTML = '<div class="lv-ticket-empty">Selecciona productos</div>';
       var origTotal0 = document.getElementById('total-big');

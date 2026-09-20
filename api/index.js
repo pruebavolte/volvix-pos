@@ -25341,13 +25341,30 @@ if (process.env.NODE_ENV === 'test') {
         notes: body.notes ? sanitizeText(String(body.notes)).slice(0, 500) : null,
         created_at: new Date().toISOString()
       };
+      // T1.1: nombre/comentario/mesero/dining del ticket abierto (retrocompatible:
+      // si la tabla no tiene las columnas, viajan dentro de notes como VLXMETA:{json}).
+      var tName = body.name ? sanitizeText(String(body.name)).slice(0, 80) : '';
+      var tComment = body.comment ? sanitizeText(String(body.comment)).slice(0, 200) : '';
+      var tEmp = body.employee ? sanitizeText(String(body.employee)).slice(0, 80) : '';
+      var tDin = body.dining ? sanitizeText(String(body.dining)).slice(0, 40) : '';
+      var rowMeta = null;
+      if (tName || tComment || tEmp || tDin) {
+        rowMeta = Object.assign({}, row, { name: tName || null, comment: tComment || null, employee: tEmp || null, dining: tDin || null });
+      }
       var created = null;
       try {
-        var result = await supabaseRequest('POST', '/pending_sales', row);
+        var result;
+        try {
+          result = await supabaseRequest('POST', '/pending_sales', rowMeta || row);
+        } catch (e1) {
+          if (!rowMeta) throw e1;
+          var metaJson = JSON.stringify({ n: tName, c: tComment, e: tEmp, d: tDin, t: row.notes || '' });
+          result = await supabaseRequest('POST', '/pending_sales', Object.assign({}, row, { notes: ('VLXMETA:' + metaJson).slice(0, 500) }));
+        }
         created = (result && result[0]) || result;
       } catch (e) {
         // Fallback: synthesize id so the client gets a reference even if table missing
-        created = Object.assign({ id: 'PND-' + Date.now().toString(36) }, row);
+        created = Object.assign({ id: 'PND-' + Date.now().toString(36) }, rowMeta || row);
       }
       try { logAudit(req, 'sale.pending.saved', 'pending_sales', { id: created && created.id, total: total }); } catch (_) {}
       sendJSON(res, { ok: true, id: created && created.id, reference: created && created.id, sale: created }, 201);
