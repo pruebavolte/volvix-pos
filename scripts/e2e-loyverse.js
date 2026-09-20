@@ -24,7 +24,7 @@ const crypto = require('crypto');
 
 const args = process.argv.slice(2);
 const opt = (n, d) => { const i = args.indexOf(n); return i >= 0 && args[i + 1] ? args[i + 1] : d; };
-const TEST_TENANT = 'TNT-LOYV-TEST';
+let TEST_TENANT = 'TNT-LOYV-TEST'; // se sobreescribe con cred.tenant_id (negocio de PRUEBA que registre el dueno); NUNCA TNT-MATA8
 const MODULES = ['modifiers', 'open_tickets', 'predefined_tickets', 'dining_options', 'print_bill', 'kitchen_printers'];
 const STEPS = [
   '1. login por API (email+password del JSON local) y guarda: JWT debe ser del tenant ' + TEST_TENANT,
@@ -43,6 +43,7 @@ const credFile = opt('--cred', 'C:/tmp/openclaw-gateway/loyverse-test-cred.json'
 const outFile = opt('--out', path.join(__dirname, '..', 'docs', 'e2e-loyverse-results.json'));
 let cred;
 try { cred = JSON.parse(fs.readFileSync(credFile, 'utf8')); } catch (e) { console.error('No puedo leer ' + credFile + ' (' + e.message + '). Ver cabecera: lo crea el dueno.'); process.exit(2); }
+if (cred.tenant_id) { if (/MATA8/i.test(cred.tenant_id)) { console.error('Tenant real prohibido: ' + cred.tenant_id); process.exit(2); } if (cred.is_test_tenant !== true) { console.error('Falta "is_test_tenant": true en el JSON (confirmacion de que es un negocio de PRUEBA).'); process.exit(2); } TEST_TENANT = cred.tenant_id; }
 if (cred.tenant_id !== TEST_TENANT) { console.error('ABORTA: tenant_id del JSON debe ser ' + TEST_TENANT); process.exit(2); }
 const BASE = String(opt('--base', cred.base_url || 'https://systeminternational.app')).replace(/\/$/, '');
 
