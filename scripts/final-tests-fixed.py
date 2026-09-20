@@ -50,7 +50,7 @@ print("\n=== Login ===", flush=True)
 login = ev("""(async () => {
   try {
     const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email:'admin@volvix.test', password:'Volvix2026!'})});
+      body: JSON.stringify({email:'admin@volvix.test', password:'REDACTED_TEST_PASSWORD'})});
     const d = await r.json();
     if (d.token) localStorage.setItem('volvix_token', d.token);
     return { ok: !!d.token, len: d.token?.length };

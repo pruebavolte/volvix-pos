@@ -61,7 +61,7 @@ npx playwright show-report artifacts/html-report
 |-----|---------|-----|
 | `BASE_URL`   | `https://volvix-pos.vercel.app` | URL del POS |
 | `QA_EMAIL`   | `admin@volvix.test`             | Login |
-| `QA_PASSWORD`| `Volvix2026!`                   | Login |
+| `QA_PASSWORD`| `REDACTED_TEST_PASSWORD`                   | Login |
 | `QA_PIN`     | `1234`                          | PIN admin |
 
 ## Las 7 fases

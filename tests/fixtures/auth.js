@@ -3,9 +3,9 @@
 const { request: pwRequest } = require('@playwright/test');
 
 const USERS = {
-  admin:  { email: 'admin@volvix.test',  password: 'Volvix2026!', role: 'admin'  },
-  owner:  { email: 'owner@volvix.test',  password: 'Volvix2026!', role: 'owner'  },
-  cajero: { email: 'cajero@volvix.test', password: 'Volvix2026!', role: 'cajero' },
+  admin:  { email: 'admin@volvix.test',  password: process.env.TEST_USER_PASSWORD || '', role: 'admin'  },
+  owner:  { email: 'owner@volvix.test',  password: process.env.TEST_USER_PASSWORD || '', role: 'owner'  },
+  cajero: { email: 'cajero@volvix.test', password: process.env.TEST_USER_PASSWORD || '', role: 'cajero' },
 };
 
 const LOGIN_PATHS = ['/api/auth/login', '/api/login', '/api/v1/auth/login'];

@@ -124,7 +124,7 @@ login = eval_js("""
   try {
     const r = await fetch('/api/login', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email:'admin@volvix.test', password:'Volvix2026!'})
+      body: JSON.stringify({email:'admin@volvix.test', password:'REDACTED_TEST_PASSWORD'})
     });
     const d = await r.json();
     if (d.token) {
@@ -373,7 +373,7 @@ eval_js("""
   if (!localStorage.getItem('volvix_token')) {
     const r = await fetch('/api/login', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email:'admin@volvix.test', password:'Volvix2026!'})
+      body: JSON.stringify({email:'admin@volvix.test', password:'REDACTED_TEST_PASSWORD'})
     });
     const d = await r.json();
     if (d.token) localStorage.setItem('volvix_token', d.token);

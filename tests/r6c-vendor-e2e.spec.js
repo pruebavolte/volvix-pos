@@ -37,9 +37,9 @@ const PORTAL_PATH = '/volvix-vendor-portal.html';
 // Per B3 seed:
 //   admin@volvix.test → vendor "Distribuidora Don Chucho" (gold, verified, 5 POs)
 //   owner@volvix.test → vendor "Proveedora Los Compadres" (standard, 2 POs)
-// Both creds use Volvix2026!
-const VENDOR_A = { email: 'admin@volvix.test', password: 'Volvix2026!', expectedName: 'Distribuidora Don Chucho' };
-const VENDOR_B = { email: 'owner@volvix.test', password: 'Volvix2026!', expectedName: 'Proveedora Los Compadres' };
+// Both creds use REDACTED_TEST_PASSWORD
+const VENDOR_A = { email: 'admin@volvix.test', password: 'REDACTED_TEST_PASSWORD', expectedName: 'Distribuidora Don Chucho' };
+const VENDOR_B = { email: 'owner@volvix.test', password: 'REDACTED_TEST_PASSWORD', expectedName: 'Proveedora Los Compadres' };
 
 const RUN_TAG = String(Date.now()).slice(-8);
 const SCREENSHOT_DIR = path.join(__dirname, 'screenshots-r6c-vendor');

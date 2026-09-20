@@ -2,7 +2,7 @@
 # R16 Final Smoke Test
 BASE="https://volvix-pos.vercel.app"
 EMAIL="admin@volvix.test"
-PASS="Volvix2026!"
+PASS="REDACTED_TEST_PASSWORD"
 OUT="C:/Users/DELL/Downloads/verion 340/R16_FINAL_SMOKE.md"
 
 call() {

@@ -17,7 +17,7 @@ const SCREENSHOT_DIR = path.join(__dirname, 'screenshots-r3a-cartseeded');
 const REPORT_PATH = path.join(__dirname, '..', 'B43_POS_UI_CARTSEEDED_REPORT.md');
 const RESULTS_PATH = path.join(SCREENSHOT_DIR, 'audit-data.json');
 
-const CAJERO = { email: 'cajero@volvix.test', password: 'Volvix2026!' };
+const CAJERO = { email: 'cajero@volvix.test', password: 'REDACTED_TEST_PASSWORD' };
 
 if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
 

@@ -14,7 +14,7 @@ bold()  { printf "\033[1m%s\033[0m\n" "$*"; }
 
 # Login admin para obtener TOK_A
 TOK_A=$(curl -s -X POST "$PROD/api/login" -H "Content-Type: application/json" \
-  -d '{"email":"admin@volvix.test","password":"Volvix2026!"}' | python -c "import json,sys;print(json.load(sys.stdin).get('token',''))")
+  -d '{"email":"admin@volvix.test","password":"REDACTED_TEST_PASSWORD"}' | python -c "import json,sys;print(json.load(sys.stdin).get('token',''))")
 
 bold "[Test 6] Cambio dinámico: insertar venta \$999, refresh"
 

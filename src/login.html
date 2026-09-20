@@ -352,26 +352,10 @@ html, body {
         </div>
       </div>
 
-      <!-- Test credentials info (oculto en producción) -->
-      <div class="test-creds" id="testCreds" hidden>
-        <strong>Test:</strong> admin@volvix.test / Volvix2026!
-      </div>
     </div>
   </div>
 
   <script>
-// Mostrar credenciales de prueba sólo en dev (localhost / 127.0.0.1 / *.local)
-(function revealTestCredsInDev(){
-  try {
-    const h = location.hostname;
-    const isDev = h === 'localhost' || h === '127.0.0.1' || h.endsWith('.local') || h === '';
-    if (isDev) {
-      const el = document.getElementById('testCreds');
-      if (el) el.hidden = false;
-    }
-  } catch(e){}
-})();
-
 // Auto-redirect si ya hay sesión válida (evita login forzado tras F5)
 // R29: respetar parámetro ?redirect= si viene desde otra página protegida
 (function checkExistingSession(){

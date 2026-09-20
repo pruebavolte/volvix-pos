@@ -6,7 +6,7 @@
 set -u
 BASE="${BASE:-https://volvix-pos.vercel.app}"
 EMAIL="${EMAIL:-admin@volvix.test}"
-PASS="${PASS:-Volvix2026!}"
+PASS="${PASS:-REDACTED_TEST_PASSWORD}"
 
 echo "== Login =="
 TOKEN=$(curl -s -X POST "$BASE/api/auth/login" \

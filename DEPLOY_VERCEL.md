@@ -65,7 +65,7 @@ Vercel mostrará:
 ```
 URL: https://volvix-saas.vercel.app/login.html
 Email: admin@volvix.test
-Password: Volvix2026!
+Password: REDACTED_TEST_PASSWORD
 Esperado:
   ✅ Login exitoso
   ✅ Redirige a SalvadoreX
@@ -79,7 +79,7 @@ Esperado:
 ```
 URL: https://volvix-saas.vercel.app/login.html
 Email: owner@volvix.test
-Password: Volvix2026!
+Password: REDACTED_TEST_PASSWORD
 Esperado:
   ✅ Login exitoso
   ✅ Redirige a SalvadoreX
@@ -92,7 +92,7 @@ Esperado:
 ```
 URL: https://volvix-saas.vercel.app/login.html
 Email: cajero@volvix.test
-Password: Volvix2026!
+Password: REDACTED_TEST_PASSWORD
 Esperado:
   ✅ Login exitoso
   ✅ Redirige a SalvadoreX

@@ -17,9 +17,9 @@ const { test, expect, request } = require('@playwright/test');
 // -----------------------------------------------------------------------------
 const BASE = process.env.VOLVIX_BASE_URL || 'https://volvix-pos.vercel.app';
 
-const ADMIN  = { email: 'admin@volvix.test',  password: 'Volvix2026!' };  // superadmin TNT001
-const OWNER  = { email: 'owner@volvix.test',  password: 'Volvix2026!' };  // owner      TNT002
-const CAJERO = { email: 'cajero@volvix.test', password: 'Volvix2026!' };  // cajero     TNT001
+const ADMIN  = { email: 'admin@volvix.test',  password: 'REDACTED_TEST_PASSWORD' };  // superadmin TNT001
+const OWNER  = { email: 'owner@volvix.test',  password: 'REDACTED_TEST_PASSWORD' };  // owner      TNT002
+const CAJERO = { email: 'cajero@volvix.test', password: 'REDACTED_TEST_PASSWORD' };  // cajero     TNT001
 
 const RUN_TAG = String(Date.now()).slice(-8);
 const TEST_TENANT_NAME = 'Test Tenant Round2 ' + RUN_TAG;

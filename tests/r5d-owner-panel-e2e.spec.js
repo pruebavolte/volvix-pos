@@ -33,8 +33,8 @@ const crypto = require('crypto');
 const BASE = process.env.VOLVIX_BASE_URL || 'https://volvix-pos.vercel.app';
 const PANEL_PATH = '/volvix_owner_panel_v7.html';
 
-const ADMIN = { email: 'admin@volvix.test', password: 'Volvix2026!' };  // superadmin TNT001
-const OWNER = { email: 'owner@volvix.test', password: 'Volvix2026!' };  // owner TNT002
+const ADMIN = { email: 'admin@volvix.test', password: 'REDACTED_TEST_PASSWORD' };  // superadmin TNT001
+const OWNER = { email: 'owner@volvix.test', password: 'REDACTED_TEST_PASSWORD' };  // owner TNT002
 
 const RUN_TAG = String(Date.now()).slice(-8);
 const TEST_TENANT_NAME = 'R5D Owner E2E ' + RUN_TAG;

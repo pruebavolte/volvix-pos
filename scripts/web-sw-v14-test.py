@@ -71,7 +71,7 @@ report("SW v1.14.0 activo + controller",
 print("\n[2] Login + navegar a POS + esperar SW cache...")
 ev("""(async () => {
   const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({email:'admin@volvix.test', password:'Volvix2026!'})});
+    body: JSON.stringify({email:'admin@volvix.test', password:'REDACTED_TEST_PASSWORD'})});
   const d = await r.json();
   if (d.token) localStorage.setItem('volvix_token', d.token);
 })()""", ap=True)

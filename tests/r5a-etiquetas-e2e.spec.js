@@ -36,8 +36,8 @@ const path = require('path');
 
 // ── Test users ──────────────────────────────────────────────────────────────
 const USERS = {
-  admin: { email: 'admin@volvix.test', password: 'Volvix2026!', role: 'admin', tenant: 'TNT001' },
-  owner: { email: 'owner@volvix.test', password: 'Volvix2026!', role: 'owner', tenant: 'TNT002' },
+  admin: { email: 'admin@volvix.test', password: 'REDACTED_TEST_PASSWORD', role: 'admin', tenant: 'TNT001' },
+  owner: { email: 'owner@volvix.test', password: 'REDACTED_TEST_PASSWORD', role: 'owner', tenant: 'TNT002' },
 };
 
 const LOGIN_PATHS = ['/api/login', '/api/auth/login', '/api/v1/auth/login'];
