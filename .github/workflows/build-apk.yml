@@ -21,6 +21,11 @@ on:
       - 'package.json'
       - '.github/workflows/build-apk.yml'
   workflow_dispatch:
+    inputs:
+      release_dry_run:
+        description: 'Simulacro de publicacion: crea un release BORRADOR (sin tag v*), sube los 2 APK, lista los assets y lo borra'
+        type: boolean
+        default: false
 
 concurrency:
   group: build-apk-${{ github.ref }}
@@ -220,6 +225,38 @@ jobs:
           name: VolvixPOS-apk-${{ steps.version.outputs.version }}
           path: VolvixPOS*.apk
           retention-days: 90
+
+      # Simulacro (SOLO manual, input release_dry_run): ejercita permisos del GITHUB_TOKEN, `gh release create/upload`
+      # y los nombres de los assets con un release BORRADOR "apk-dryrun-<run>" (no es un tag v*, un borrador no crea tag
+      # ni es publico, y no dispara build-exe-release.yml). El paso siguiente lo borra siempre.
+      - name: Simulacro de publicacion en release (borrador)
+        if: github.event_name == 'workflow_dispatch' && inputs.release_dry_run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          VERSION="${{ steps.version.outputs.version }}"
+          T="apk-dryrun-${GITHUB_RUN_ID}"
+          gh release create "$T" "VolvixPOS-$VERSION.apk" --repo "$GITHUB_REPOSITORY" --draft --target "$GITHUB_SHA" \
+            --title "APK dry-run $GITHUB_RUN_ID" --notes "Simulacro del CI; se borra solo"
+          gh release upload "$T" "VolvixPOS.apk" --clobber --repo "$GITHUB_REPOSITORY"
+          gh release upload "$T" "VolvixPOS.apk" --clobber --repo "$GITHUB_REPOSITORY"   # 2a vez: prueba --clobber
+          ID=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate --jq ".[] | select(.tag_name==\"$T\") | .id" | head -1)
+          echo "release borrador id=$ID"
+          gh api "repos/$GITHUB_REPOSITORY/releases/$ID" --jq '"draft=\(.draft) prerelease=\(.prerelease)"'
+          gh api "repos/$GITHUB_REPOSITORY/releases/$ID" --jq '.assets[] | "asset: \(.name) \(.size) bytes"'
+          echo "OK: VolvixPOS-$VERSION.apk y VolvixPOS.apk quedaron en el release (borrador)"
+
+      - name: Borrar el release del simulacro
+        if: always() && github.event_name == 'workflow_dispatch' && inputs.release_dry_run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          T="apk-dryrun-${GITHUB_RUN_ID}"
+          for ID in $(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate --jq ".[] | select(.tag_name==\"$T\") | .id"); do
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/releases/$ID" && echo "borrado release $ID"
+          done
+          gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$T" 2>/dev/null || true
 
       # Solo en TAGS v*.*.*: el .exe (build-exe-release.yml) y este job corren en paralelo sobre el
       # mismo tag; el release lo crea quien llegue primero (--verify-tag: nunca crea tags).
