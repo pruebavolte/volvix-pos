@@ -2,7 +2,7 @@
  * volvix-print-universal.js — Wrapper de impresión multi-plataforma
  *
  * Soporta TODOS los entornos donde corre Volvix POS:
- *   1. ELECTRON (Windows/Mac/Linux .exe) — vía window.volvixElectron IPC
+ *   1. ELECTRON (Windows/Mac/Linux .exe) — vía VolvixPlatform.electronApi() IPC
  *      - USB (sistema), Bluetooth (SPP/COM), IP (TCP socket)
  *   2. CAPACITOR (Android APK / iOS) — vía Capacitor plugins
  *      - BluetoothLE plugin para BT
@@ -24,11 +24,12 @@
 
 (function (global) {
   'use strict';
+  function _vlxEl() { try { var P = globalThis.VolvixPlatform; return (P && P.electronApi && P.electronApi()) || null; } catch (_) { return null; } }
 
   // ─── DETECCIÓN DE PLATAFORMA ────────────────────────────────────────────
   function detectPlatform() {
     const ua = (global.navigator && global.navigator.userAgent) || '';
-    const isElectron = !!(global.volvixElectron && global.volvixElectron.isElectron);
+    const isElectron = !!(_vlxEl() && _vlxEl().isElectron);
     const isCapacitor = !!(global.Capacitor || /capacitor/i.test(ua));
     const isAndroid = /android/i.test(ua);
     const isIOS = /iphone|ipad|ipod/i.test(ua);
@@ -64,7 +65,7 @@
 
   // ─── PRINT VIA ELECTRON ─────────────────────────────────────────────────
   async function printElectron(opts) {
-    const ve = global.volvixElectron;
+    const ve = _vlxEl();
     const method = opts.method || 'auto';
 
     if (method === 'ip' || (method === 'auto' && opts.ip)) {
@@ -280,13 +281,13 @@
   async function testConnection(opts) {
     const det = detectPlatform();
     if (det.isElectron && opts.method === 'ip' && opts.ip) {
-      if (global.volvixElectron.pingNetworkPrinter) {
-        return await global.volvixElectron.pingNetworkPrinter(opts.ip, opts.port || 9100);
+      if (_vlxEl().pingNetworkPrinter) {
+        return await _vlxEl().pingNetworkPrinter(opts.ip, opts.port || 9100);
       }
     }
     if (det.isElectron && opts.method === 'bt') {
-      if (global.volvixElectron.listBluetoothPrinters) {
-        const list = await global.volvixElectron.listBluetoothPrinters();
+      if (_vlxEl().listBluetoothPrinters) {
+        const list = await _vlxEl().listBluetoothPrinters();
         const found = (list || []).find((p) => p.mac === opts.mac || p.name === opts.name);
         return { ok: !!found, found };
       }
@@ -296,8 +297,8 @@
 
   async function scanNetwork(subnet, opts) {
     const det = detectPlatform();
-    if (det.isElectron && global.volvixElectron.scanNetworkPrinters) {
-      return await global.volvixElectron.scanNetworkPrinters(subnet, opts);
+    if (det.isElectron && _vlxEl().scanNetworkPrinters) {
+      return await _vlxEl().scanNetworkPrinters(subnet, opts);
     }
     return { ok: false, error: 'Network scan only available on Electron' };
   }

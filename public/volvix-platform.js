@@ -249,6 +249,8 @@
     // Para el resto de public/: NADIE toca el objeto nativo directo (guardia check-paridad).
     isNative: kind === 'android',
     plugin: function (name) { return kind === 'android' ? capPlugin(name) : null; },
+    // Objeto nativo del .exe SOLO para adaptadores de impresion que aun necesitan su superficie completa (null fuera de Electron).
+    electronApi: function () { return kind === 'electron' ? (global.volvixElectron || null) : null; },
     // ¿hay camara/escaner disponible? (android: plugin del escaner; electron: si el .exe expone scanBarcode)
     canScan: function () {
       try {
