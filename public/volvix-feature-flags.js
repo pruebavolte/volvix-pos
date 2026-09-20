@@ -97,7 +97,9 @@
     'module.modifiers':     { name: 'Modificadores',      default_status: 'enabled' },
     // 2026-09-19 (T1.1): tickets abiertos completos estilo Loyverse
     'module.open_tickets':       { name: 'Tickets abiertos',            default_status: 'enabled' },
-    'module.predefined_tickets': { name: 'Tickets predefinidos (mesas)', default_status: 'enabled' }
+    'module.predefined_tickets': { name: 'Tickets predefinidos (mesas)', default_status: 'enabled' },
+    // 2026-09-19 (T1.2): opciones de consumo configurables
+    'module.dining_options': { name: 'Opciones de consumo', default_status: 'enabled' }
   };
 
   function defaultMap() {

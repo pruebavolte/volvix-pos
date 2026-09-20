@@ -30,7 +30,7 @@
     var c = {
       folio: folio,
       time: time,
-      mode: dinEl ? (dinEl.getAttribute('data-mode') === 'away' ? 'PARA LLEVAR' : 'COMER AQUI') : '',
+      mode: dinEl ? (window.VolvixDining ? window.VolvixDining.current().label.toUpperCase() : (dinEl.getAttribute('data-mode') === 'away' ? 'PARA LLEVAR' : 'COMER AQUI')) : '',
       note: String(window.__vlxTicketNote || ''),
       customer: customer || '',
       // Solo lo que cocina NO ha recibido
@@ -796,7 +796,7 @@
       var lines = [];
       if (businessName) lines.push(businessName);
       lines.push(nowStr);
-      lines.push('Ticket: ' + (saleNum || saleId.slice(0,8)));
+      lines.push('Ticket: ' + (saleNum || saleId.slice(0,8))); if (window.VolvixDining && window.VolvixDining.enabled()) { var _dn = window.VolvixDining.current().label; if (_dn) lines.push(_dn); }
       lines.push('--------------------------------');
       items.forEach(function (i) {
         var name = (i.name || '').slice(0, 22).padEnd(22);
@@ -839,7 +839,7 @@
       var lines = [];
       if (businessName) lines.push(businessName);
       lines.push(nowStr);
-      lines.push('Ticket: ' + (saleNum || saleId.slice(0,8)));
+      lines.push('Ticket: ' + (saleNum || saleId.slice(0,8))); if (window.VolvixDining && window.VolvixDining.enabled()) { var _dn = window.VolvixDining.current().label; if (_dn) lines.push(_dn); }
       lines.push('--------------------------------');
       items.forEach(function (i) {
         var name = (i.name || '').slice(0, 22).padEnd(22);
@@ -1335,6 +1335,7 @@
           rounding: { amount: window.__vlxRoundingAmount || 0, destination: null },
           delivery: { method: window.__vlxDeliveryMethod || 'PRINT', target: ($('#vlx-delivery-target') && $('#vlx-delivery-target').value || null) },
           notes: sanitizeFreeText($('#vlx-notes-text') && $('#vlx-notes-text').value || ''),
+          dining: window.VolvixDining ? window.VolvixDining.current().label : '',
           total: total
         };
         // Fix SEC-3: Idempotency-Key determinista
