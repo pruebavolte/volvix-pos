@@ -266,21 +266,6 @@ html, body {
   color: #60A5FA;
 }
 
-/* ── TEST CREDENTIALS ── */
-.test-creds {
-  background: rgba(59,130,246,0.1);
-  border: 1px solid rgba(59,130,246,0.3);
-  border-radius: 10px;
-  padding: 12px;
-  margin-top: 20px;
-  font-size: 11px;
-  color: #93C5FD;
-  line-height: 1.6;
-}
-.test-creds strong {
-  color: #FAFAF9;
-}
-
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .login-card { padding: 32px 24px; max-width: 92%; }
@@ -487,14 +472,6 @@ body {
 }
 .social-btn:hover { background: var(--vlx-paper-2) !important; }
 
-/* Test creds */
-.test-creds {
-  background: var(--vlx-paper-2) !important;
-  border: 1px solid var(--vlx-line) !important;
-  color: var(--vlx-ink-3) !important;
-}
-.test-creds strong { color: var(--vlx-ink) !important; }
-
 @media (max-width: 480px) {
   .login-card { padding: 32px 22px !important; }
   .login-title { font-size: 22px !important; }
@@ -580,10 +557,6 @@ body {
         </div>
       </div>
 
-      <!-- Test credentials info (oculto en producción) -->
-      <div class="test-creds" id="testCreds" hidden>
-        <strong>Test:</strong> admin@volvix.test / Volvix2026!
-      </div>
     </div>
   </div>
 
@@ -725,23 +698,6 @@ body {
 
   // Exponer API global para que handleLogin la use
   window.VolvixRememberedUsers = { add: addUser, render: renderRemembered, get: getRemembered, remove: removeUser };
-})();
-
-// Mostrar credenciales de prueba sólo en dev (localhost / 127.0.0.1 / *.local)
-(function revealTestCredsInDev(){
-  try {
-    const h = location.hostname;
-    // FIX 2026-09-19: el .exe (Electron) sirve el POS desde http://127.0.0.1:<puerto aleatorio> y
-    // le mostraba las credenciales de prueba al CLIENTE. Dev real = localhost / *.local / 127.0.0.1:8765
-    // (VOLVIX_DEV_URL), y nunca dentro de Electron.
-    const isElectron = /Electron/i.test(navigator.userAgent || '');
-    const isDev = !isElectron && (h === 'localhost' || h.endsWith('.local') || h === '' ||
-      (h === '127.0.0.1' && location.port === '8765'));
-    if (isDev) {
-      const el = document.getElementById('testCreds');
-      if (el) el.hidden = false;
-    }
-  } catch(e){}
 })();
 
 // Auto-redirect si ya hay sesión válida (evita login forzado tras F5)
