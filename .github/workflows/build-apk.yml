@@ -146,24 +146,29 @@ jobs:
               -dname "CN=Volvix POS, OU=Volvix, O=Volvix, L=Monterrey, ST=NL, C=MX"
           fi
 
-      - name: Update versionCode + versionName in build.gradle
+      - name: Derivar versionName / versionCode (package.json es la fuente; en tags, el tag)
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          # versionCode: convertir "1.0.172" a 1000172 (X*1000000 + Y*1000 + Z)
+          # versionCode = 1000000*mayor + 1000*menor + patch (1.0.344 -> 1000344)
           IFS='.' read -r MAJ MIN PATCH <<< "$VERSION"
           VCODE=$(( MAJ * 1000000 + MIN * 1000 + PATCH ))
-          echo "versionCode=$VCODE versionName=$VERSION"
-          sed -i "s|versionCode [0-9]\+|versionCode $VCODE|" android/app/build.gradle
-          sed -i "s|versionName \"[^\"]*\"|versionName \"$VERSION\"|" android/app/build.gradle
-          grep -E "versionCode|versionName" android/app/build.gradle | head -3
+          echo "VOLVIX_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$VCODE" >> "$GITHUB_ENV"
+          echo "versionName=$VERSION versionCode=$VCODE (android/app/build.gradle los lee de env/-P)"
 
       - name: Build release APK
         run: |
           cd android
-          ./gradlew assembleRelease --no-daemon --stacktrace \
-            -PVOLVIX_KEYSTORE_PASSWORD=volvix2026 \
-            -PVOLVIX_KEY_ALIAS=volvix-pos \
-            -PVOLVIX_KEY_PASSWORD=volvix2026
+          ./gradlew assembleRelease --no-daemon --stacktrace             -PVOLVIX_VERSION="$VOLVIX_VERSION" -PVERSION_CODE="$VERSION_CODE"             -PVOLVIX_KEYSTORE_PASSWORD=volvix2026             -PVOLVIX_KEY_ALIAS=volvix-pos             -PVOLVIX_KEY_PASSWORD=volvix2026
+
+      - name: Verificar versionName/versionCode dentro del APK
+        run: |
+          APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
+          AAPT2=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | tail -1)
+          INFO=$("$AAPT2" dump badging "$APK" | head -1)
+          echo "$INFO"
+          echo "$INFO" | grep -q "versionCode='$VERSION_CODE'" || { echo "::error::versionCode del APK != $VERSION_CODE"; exit 1; }
+          echo "$INFO" | grep -q "versionName='$VOLVIX_VERSION'" || { echo "::error::versionName del APK != $VOLVIX_VERSION"; exit 1; }
 
       - name: Locate APK
         id: locate
