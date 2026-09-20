@@ -1163,7 +1163,7 @@
 
       // ─── FASE 4: IMPRIMIR ticket (la venta YA está garantizada en local) ───
       try {
-        if (window.VolvixPlatform && window.VolvixPlatform.printTicket &&
+        if (window.VolvixPlatform && window.VolvixPlatform.kind === 'electron' && window.VolvixPlatform.printTicket &&
             window.VolvixTicketCustomizer && window.VolvixTicketCustomizer.renderText) {
           var fastText = window.VolvixTicketCustomizer.renderText({
             folio: fastFolio,
