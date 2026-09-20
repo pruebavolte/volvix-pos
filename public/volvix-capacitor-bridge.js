@@ -159,6 +159,29 @@
     }
   }
 
+  // 2026-09-20: WebView < 80 no entiende `?.` ni `??` que usa el POS -> el script principal falla y queda la
+  // pantalla vacia (verificado en emulador con WebView 74). Avisar en vez de dejar al cajero sin explicacion.
+  function checkWebView() {
+    try {
+      var m = /Chrome\/(\d+)/.exec(navigator.userAgent);
+      if (!m || parseInt(m[1], 10) >= 80) return;
+      var put = function () {
+        if (document.getElementById('vlx-webview-old')) return;
+        var b = document.createElement('div');
+        b.id = 'vlx-webview-old';
+        b.setAttribute('data-vlx-keep', '1');
+        b.setAttribute('data-vlx-system', 'webview');
+        b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483647;padding:14px 16px;background:#b91c1c;color:#fff;' +
+          'font:600 13px/1.35 system-ui,sans-serif;text-align:center';
+        b.textContent = 'Tu Android System WebView (v' + m[1] + ') es muy viejo y Volvix POS no puede iniciar. ' +
+          'Actualiza "Android System WebView" o Chrome en Google Play.';
+        (document.body || document.documentElement).appendChild(b);
+      };
+      if (document.body) put(); else document.addEventListener('DOMContentLoaded', put);
+    } catch (_) {}
+  }
+  checkWebView();
+
   // Chequear actualización 10s después del boot (no bloquear arranque)
   setTimeout(checkForUpdate, 10000);
 

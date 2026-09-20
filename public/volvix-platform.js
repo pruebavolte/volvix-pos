@@ -248,7 +248,15 @@
     kind: kind,
     // Para el resto de public/: NADIE toca el objeto nativo directo (guardia check-paridad).
     isNative: kind === 'android',
-    plugin: function (name) { return kind === 'android' ? capPlugin(name) : null; },   // plugin nativo por nombre (Camera, Share, ...) o null
+    plugin: function (name) { return kind === 'android' ? capPlugin(name) : null; },
+    // ¿hay camara/escaner disponible? (android: plugin del escaner; electron: si el .exe expone scanBarcode)
+    canScan: function () {
+      try {
+        if (kind === 'android') return !!capPlugin('BarcodeScanner');
+        if (kind === 'electron') return !!(global.volvixElectron && typeof global.volvixElectron.scanBarcode === 'function');
+      } catch (_) {}
+      return false;
+    },   // plugin nativo por nombre (Camera, Share, ...) o null
     printTicket: impl.printTicket,
     printComanda: impl.printComanda,
     comandaGet: impl.comandaGet,

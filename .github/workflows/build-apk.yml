@@ -134,16 +134,32 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      - name: Generate keystore (auto-sign)
+      # Firma ESTABLE: 4 secretos del repo (ANDROID_KEYSTORE_B64, ANDROID_KEYSTORE_PASS, ANDROID_KEY_ALIAS, ANDROID_KEY_PASS).
+      # Sin ellos el build sigue verde y firma con la clave DEBUG de Android (cada build firma distinto).
+      # Sin contrasenas por defecto en el repo. Los valores nunca se imprimen (los secretos van enmascarados).
+      - name: Configurar firma del APK
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASS }}
         run: |
-          cd android/app
-          if [ ! -f volvix-release.keystore ]; then
-            keytool -genkeypair -v \
-              -keystore volvix-release.keystore \
-              -alias volvix-pos \
-              -keyalg RSA -keysize 2048 -validity 10000 \
-              -storepass volvix2026 -keypass volvix2026 \
-              -dname "CN=Volvix POS, OU=Volvix, O=Volvix, L=Monterrey, ST=NL, C=MX"
+          if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ] && [ -n "$KS_ALIAS" ] && [ -n "$KEY_PASS" ]; then
+            echo "$KS_B64" | base64 -d > android/app/volvix-release.keystore
+            {
+              echo "ANDROID_KEYSTORE_PASS=$KS_PASS"
+              echo "ANDROID_KEY_ALIAS=$KS_ALIAS"
+              echo "ANDROID_KEY_PASS=$KEY_PASS"
+              echo "VLX_SIGNING=stable"
+            } >> "$GITHUB_ENV"
+            echo "Firma: keystore ESTABLE (secretos del repo)"
+          else
+            echo "VLX_SIGNING=debug" >> "$GITHUB_ENV"
+            if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+              echo "::warning::FALTAN los secretos ANDROID_KEYSTORE_B64/ANDROID_KEYSTORE_PASS/ANDROID_KEY_ALIAS/ANDROID_KEY_PASS: este APK de tag se firma con la clave DEBUG (no se instala encima de otro build). Ver docs/APK_ANDROID.md"
+            else
+              echo "Firma: clave debug (sin secretos de keystore)"
+            fi
           fi
 
       - name: Derivar versionName / versionCode (package.json es la fuente; en tags, el tag)
@@ -159,7 +175,7 @@ jobs:
       - name: Build release APK
         run: |
           cd android
-          ./gradlew assembleRelease --no-daemon --stacktrace             -PVOLVIX_VERSION="$VOLVIX_VERSION" -PVERSION_CODE="$VERSION_CODE"             -PVOLVIX_KEYSTORE_PASSWORD=volvix2026             -PVOLVIX_KEY_ALIAS=volvix-pos             -PVOLVIX_KEY_PASSWORD=volvix2026
+          ./gradlew assembleRelease --no-daemon --stacktrace             -PVOLVIX_VERSION="$VOLVIX_VERSION" -PVERSION_CODE="$VERSION_CODE"
 
       - name: Verificar versionName/versionCode dentro del APK
         run: |
@@ -169,6 +185,15 @@ jobs:
           echo "$INFO"
           echo "$INFO" | grep -q "versionCode='$VERSION_CODE'" || { echo "::error::versionCode del APK != $VERSION_CODE"; exit 1; }
           echo "$INFO" | grep -q "versionName='$VOLVIX_VERSION'" || { echo "::error::versionName del APK != $VOLVIX_VERSION"; exit 1; }
+
+      - name: Verificar firma del APK (huella SHA-256 publica)
+        run: |
+          APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | tail -1)
+          OUT=$("$APKSIGNER" verify --print-certs "$APK")
+          echo "$OUT" | grep -E "certificate (DN|SHA-256 digest)" || echo "$OUT"
+          FP=$(echo "$OUT" | grep -m1 "certificate SHA-256 digest" | sed 's/.*: //' || true)
+          echo "Firma: $VLX_SIGNING | SHA-256: $FP" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Locate APK
         id: locate

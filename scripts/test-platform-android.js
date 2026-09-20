@@ -49,6 +49,9 @@ function mkWindow(withPlugin) {
   t.calls.length = 0; r = await t.P.printTicket({ text: 'p', target: { t: 'net', host: '10.0.0.77', port: 9100 } }); assert.strictEqual(t.calls[0][1], '10.0.0.77'); n++;
   assert.strictEqual((await t.P.pingPrinter('10.0.0.9', 9100)).ok, true); assert.strictEqual((await t.P.pingPrinter('1.1.1.1', 9100)).ok, false); n++;
   assert.strictEqual((await t.P.listBluetoothPrinters()).devices[0].name, 'PT-210'); n++;
+  // 7b) canScan: android con plugin del escaner = true; sin plugin = false; isNative/plugin()
+  assert.strictEqual(t.P.canScan(), false); assert.strictEqual(t.P.isNative, true); assert.ok(t.P.plugin('VolvixPrinter')); n++;
+  t.win.Capacitor.Plugins.BarcodeScanner = {}; assert.strictEqual(t.P.canScan(), true); n++;
   // 8) modo usb en android -> aviso, no rompe
   t.store.volvix_printer_mode = 'usb'; r = await t.P.printTicket({ text: 'x' }); assert.strictEqual(r.unsupported, true); n++;
   console.log('OK platform android: ' + n + ' aserciones');
