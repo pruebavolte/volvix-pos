@@ -212,13 +212,17 @@
       ov.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483647;padding:16px;text-align:center;color:#fff;font:600 15px system-ui,sans-serif;background:linear-gradient(transparent,rgba(0,0,0,.7))';
       ov.innerHTML = '<div style="margin-bottom:10px">Apunta la camara al codigo de barras</div>' +
         '<button type="button" style="padding:12px 28px;border:0;border-radius:24px;font-size:15px;font-weight:700">Cancelar</button>';
-      ov.querySelector('button').onclick = function () { try { BS.stopScan(); } catch (_) {} };
       body.appendChild(ov);
       body.classList.add('vlx-scanning'); doc.documentElement.classList.add('vlx-scanning');
       try { BS.hideBackground(); } catch (_) {}
-      return Promise.resolve(BS.startScan()).then(function (r) {
-        cleanup();
-        return r && r.hasContent ? { ok: true, code: String(r.content), format: r.format } : { ok: false, cancelled: true };
+      // stopScan() NO resuelve la promesa de startScan (verificado en emulador): "Cancelar" cierra por su cuenta.
+      return new Promise(function (resolve) {
+        var done = false;
+        var finish = function (res) { if (done) return; done = true; cleanup(); resolve(res); };
+        ov.querySelector('button').onclick = function () { try { BS.stopScan(); } catch (_) {} finish({ ok: false, cancelled: true }); };
+        Promise.resolve(BS.startScan()).then(function (r) {
+          finish(r && r.hasContent ? { ok: true, code: String(r.content), format: r.format } : { ok: false, cancelled: true });
+        }, function (e) { finish(fail(e)); });
       });
     }).catch(function (e) { cleanup(); return fail(e); });
   }
