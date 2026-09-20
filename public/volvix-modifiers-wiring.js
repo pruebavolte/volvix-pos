@@ -524,18 +524,21 @@
   function fetchGroups(key) {
     const hit = _real.cache.get(key);
     if (hit && (Date.now() - hit.ts) < _real.TTL) return Promise.resolve(hit.groups);
+    // #6: si falla (red/timeout) NO se falla abierto en silencio: se usa la cache vencida si existe y se marca .failed
+    const stale = hit ? hit.groups : null;
+    const fail = function () { const g = stale ? stale.slice() : []; g.failed = true; g.stale = !!stale; return g; };
     const f = _real.fetcher || (typeof fetch === 'function' ? fetch.bind(global) : null);
-    if (!f) return Promise.resolve([]);
+    if (!f) return Promise.resolve(fail());
     const req = Promise.resolve(f('/api/products/modifiers?sku=' + encodeURIComponent(key)))
       .then(function (r) { return r && r.ok ? r.json() : null; })
       .then(function (j) {
-        if (!j) return [];
+        if (!j) return fail();
         const groups = groupize(j.modifiers || []);
         _real.cache.set(key, { ts: Date.now(), groups: groups });
         return groups;
       })
-      .catch(function () { return []; });
-    const timeout = new Promise(function (res) { setTimeout(function () { res([]); }, _real.TIMEOUT); });
+      .catch(fail);
+    const timeout = new Promise(function (res) { setTimeout(function () { res(fail()); }, _real.TIMEOUT); });
     return Promise.race([req, timeout]);
   }
   function invalidate(key) { if (key) _real.cache.delete(String(key)); else _real.cache.clear(); }
@@ -562,6 +565,9 @@
     const fresh = hit && (Date.now() - hit.ts) < _real.TTL;
     if (fresh && !hit.groups.length) return false;
     const go = function (groups) {
+      if (groups.failed) {
+        try { if (typeof global.showToast === 'function') global.showToast(groups.stale ? 'Sin conexion: modificadores guardados (pueden estar desactualizados)' : 'No se pudieron cargar los modificadores: revisa el producto antes de cobrar', 'error'); } catch (_) {}
+      }
       if (!groups.length) { cont(Object.assign({}, p, { _modsDone: true })); return; }
       openRealDialog(p, groups, function (res) { if (res) cont(applySelection(p, res)); });
     };
