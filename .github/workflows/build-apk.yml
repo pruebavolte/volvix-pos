@@ -191,8 +191,8 @@ jobs:
           APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
           APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | tail -1)
           OUT=$("$APKSIGNER" verify --print-certs "$APK")
-          echo "$OUT" | grep -E "Signer #1 certificate (DN|SHA-256)"
-          FP=$(echo "$OUT" | grep "Signer #1 certificate SHA-256" | sed 's/.*: //')
+          echo "$OUT" | grep -E "certificate (DN|SHA-256 digest)" || echo "$OUT"
+          FP=$(echo "$OUT" | grep -m1 "certificate SHA-256 digest" | sed 's/.*: //' || true)
           echo "Firma: $VLX_SIGNING | SHA-256: $FP" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Locate APK
