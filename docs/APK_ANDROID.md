@@ -51,3 +51,8 @@ Los bytes se arman en `public/volvix-escpos.js` (compartido; `scripts/test-escpo
 - Impresión USB directa: no soportada en Android (aviso claro). Logo/QR del ticket: no se imprimen en android (solo texto).
 - Falta un botón 📷 en la búsqueda/pantalla de venta que llame `VolvixPlatform.scanBarcode()` y meta el código al flujo de escaneo del POS (`salvadorex-pos.html`, área compartida: coordinar con exe/Unificación).
 - La política de firma del APK (keystore autogenerado en CI con contraseña fija) implica que **cada build tiene otra firma**: un APK nuevo no se instala sobre uno viejo sin desinstalar. Decisión de Vicky: guardar un keystore estable como secreto de GitHub.
+
+## 6. Deuda (a) de mi area migrada + version derivada (2026-09-20)
+
+- `volvix-capacitor-bridge.js`, `volvix-capacitor-api-rewrite.js`, `volvix-mobile-wiring.js`: 0 referencias directas a `Capacitor`; usan `VolvixPlatform.kind` / `isNative` / `plugin(nombre)` (nuevo en el bloque android de `volvix-platform.js`, idempotente). Si una pagina aun no carga `volvix-platform.js`, el bridge cae a la heuristica de WebView (localhost + UA movil) para no romper el APK. Se agrego 1 linea `<script src=volvix-platform.js>` antes del bridge/mobile-wiring en 8 paginas (commit aparte).
+- `android/app/build.gradle`: `versionName` = `-PVOLVIX_VERSION` / env / `package.json`; `versionCode` = `-PVERSION_CODE` / env / `1000000*mayor + 1000*menor + patch` (contiene el patch y sigue subiendo frente a los APK ya publicados, p. ej. v1.0.336 = 1000336). El CI verifica con `aapt2 dump badging` que el APK trae esa version. Guardia `check-paridad`: 0 nuevos, 5 mejorados.

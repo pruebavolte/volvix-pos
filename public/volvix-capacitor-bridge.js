@@ -1,15 +1,15 @@
 /**
  * volvix-capacitor-bridge.js — 2026-05-12 v1.0.173
  *
- * Cuando la app corre dentro del APK Android (Capacitor), los archivos HTML/CSS/JS
- * se sirven desde `https://localhost` (el server interno de Capacitor lee del
+ * Cuando la app corre dentro del APK Android (app nativa), los archivos HTML/CSS/JS
+ * se sirven desde `https://localhost` (el server interno de la app nativa lee del
  * webDir bundleado). Pero las llamadas `/api/*` necesitan ir a Vercel.
  *
  * Sin este bridge, `/api/productos` resolvería a `https://localhost/api/productos`
  * que NO existe en el bundle → 404. La app se rompe.
  *
  * Este script DEBE cargarse PRIMERO en el HTML (antes que cualquier otro script
- * que use fetch). Detecta Capacitor y override `window.fetch` + `XMLHttpRequest`
+ * que use fetch). Detecta la app nativa (VolvixPlatform.kind) y override `window.fetch` + `XMLHttpRequest`
  * para que `/api/*` se reescriba a `https://volvix-pos.vercel.app/api/*`.
  *
  * Offline behavior: si no hay internet, las llamadas a Vercel fallan rápido,
@@ -21,13 +21,20 @@
   if (window.__volvixCapacitorBridgeLoaded) return;
   window.__volvixCapacitorBridgeLoaded = true;
 
-  // Detectar si estamos dentro de Capacitor
-  var isCapacitor = !!(
-    window.Capacitor ||
-    (window.location && window.location.protocol === 'capacitor:') ||
-    (window.location && window.location.hostname === 'localhost' &&
-     navigator.userAgent.indexOf('Mobile') >= 0)
-  );
+  // Detectar si estamos dentro del APK: window.VolvixPlatform (public/volvix-platform.js) debe cargar
+  // ANTES que este script. Si la pagina aun no lo incluye, heuristica de WebView (localhost + UA movil).
+  var isCapacitor = false;   // nombre historico = "estamos dentro del APK"
+  try {
+    if (window.VolvixPlatform) {
+      isCapacitor = window.VolvixPlatform.kind === 'android';
+    } else {
+      isCapacitor = !!(
+        (window.location && window.location.protocol === 'capacitor:') ||
+        (window.location && window.location.hostname === 'localhost' &&
+         navigator.userAgent.indexOf('Mobile') >= 0)
+      );
+    }
+  } catch (_) {}
 
   if (!isCapacitor) {
     // Browser normal — no hacer nada

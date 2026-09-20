@@ -8,6 +8,7 @@
  */
 (function (global) {
   'use strict';
+  if (global.VolvixPlatform) return;   // idempotente: varias paginas lo cargan antes del bridge y otra vez mas abajo
 
   function detectKind() {
     try {
@@ -245,6 +246,9 @@
 
   global.VolvixPlatform = {
     kind: kind,
+    // Para el resto de public/: NADIE toca el objeto nativo directo (guardia check-paridad).
+    isNative: kind === 'android',
+    plugin: function (name) { return kind === 'android' ? capPlugin(name) : null; },   // plugin nativo por nombre (Camera, Share, ...) o null
     printTicket: impl.printTicket,
     printComanda: impl.printComanda,
     comandaGet: impl.comandaGet,
