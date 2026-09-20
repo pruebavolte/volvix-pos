@@ -7,6 +7,7 @@
        Sin este bridge, fetch('/api/login') resuelve a https://localhost/api/login
        (que no existe en el bundle, sirve index.html SPA fallback) en lugar de Vercel.
        MUST be loaded BEFORE any other script que use fetch. -->
+  <script src="/volvix-platform.js"></script>
   <script src="/volvix-capacitor-bridge.js"></script>
   <title>Iniciar sesión · Volvix</title>
   <meta name="theme-color" content="#0A0A0A">
