@@ -662,7 +662,7 @@
               name: i.name || '',
               price: i.price || 0,
               total: (i.price || 0) * (i.qty || 1),
-              modifiers: i.modifiers || [], note: i.note || '',
+              modifiers: i.modifiers || [], note: i.note || '', base_price: (i.base_price != null ? i.base_price : null),
               tax: 0
             };
           }),
@@ -1096,7 +1096,7 @@
           return { id: i.id, code: i.code || i.id, name: i.name || '',
                    qty: i.qty || 1, price: i.price || 0,
                    total: (i.price || 0) * (i.qty || 1), tax: 0,
-                   modifiers: i.modifiers || [], note: i.note || '' };
+                   modifiers: i.modifiers || [], note: i.note || '', base_price: (i.base_price != null ? i.base_price : null) };
         }),
         items_count: (window.CART || []).reduce(function(s,i){ return s + (i.qty || 1); }, 0),
         subtotal: fastSubtotal,
@@ -1326,7 +1326,7 @@
         var folio = ($('#currentFolio') && $('#currentFolio').textContent) || '';
         var ticketNum = 'TKT-' + folio;
         var items = (window.CART && window.CART.length)
-          ? window.CART.map(function (i) { return { id: i.id, code: i.code, name: i.name, price: i.price, qty: i.qty, modifiers: i.modifiers || [], note: i.note || '' }; })
+          ? window.CART.map(function (i) { return { id: i.id, code: i.code, name: i.name, price: i.price, qty: i.qty, modifiers: i.modifiers || [], note: i.note || '', base_price: (i.base_price != null ? i.base_price : null) }; })
           : (window.__vlxCartSnapshot || []);
 
         var payload = {
