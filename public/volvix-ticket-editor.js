@@ -15,6 +15,7 @@
 
 (function (global) {
   'use strict';
+  function _vlxEl() { try { var P = globalThis.VolvixPlatform; return (P && P.electronApi && P.electronApi()) || null; } catch (_) { return null; } }
 
   function el(tag, attrs, ...children) {
     const e = document.createElement(tag);
@@ -191,8 +192,8 @@
     sel.appendChild(el('option', { value: '' }, '— Usar impresora default del sistema —'));
 
     // Llenar dinámicamente
-    if (global.volvixElectron && global.volvixElectron.listSystemPrinters) {
-      global.volvixElectron.listSystemPrinters().then((list) => {
+    if (_vlxEl() && _vlxEl().listSystemPrinters) {
+      _vlxEl().listSystemPrinters().then((list) => {
         (list || []).forEach((p) => {
           const isDefault = p.isDefault ? ' (default)' : '';
           const opt = el('option', { value: p.name }, (p.displayName || p.name) + isDefault);
@@ -240,7 +241,7 @@
     const cfg = C.getConfig();
     const text = C.renderText(data, cfg);
 
-    if (!global.volvixElectron || !global.volvixElectron.printToSystem) {
+    if (!_vlxEl() || !_vlxEl().printToSystem) {
       if (typeof global.showToast === 'function') global.showToast('⚠ Solo disponible en la app .exe', 'warning');
       return;
     }
@@ -249,9 +250,9 @@
     // and if empty, query the printer list and pick Volvix-Thermal/default.
     let printerName = null;
     try { printerName = localStorage.getItem('volvix_system_printer') || null; } catch (_) {}
-    if (!printerName && global.volvixElectron.listSystemPrinters) {
+    if (!printerName && _vlxEl().listSystemPrinters) {
       try {
-        const list = await global.volvixElectron.listSystemPrinters();
+        const list = await _vlxEl().listSystemPrinters();
         if (list && list.length) {
           // Prefer Volvix-Thermal, then default, then first
           const vt = list.find(p => p.name === 'Volvix-Thermal' || /volvix.?thermal/i.test(p.name));
@@ -274,13 +275,13 @@
       qrUrl: data.qrUrl || ('https://volvix.app/t/' + data.folio)
     });
     let r;
-    const hasRaw = !!(global.volvixElectron && global.volvixElectron.printRawText);
+    const hasRaw = !!(_vlxEl() && _vlxEl().printRawText);
     // DEBUG: mostrar qué path tomamos
     if (typeof global.showToast === 'function') {
       global.showToast(hasRaw ? '⚙ Usando RAW path (printRawText)' : '⚙ Usando HTML path (NO hay printRawText)', hasRaw ? 'success' : 'warning', 2500);
     }
     if (hasRaw) {
-      r = await global.volvixElectron.printRawText({
+      r = await _vlxEl().printRawText({
         text: text,
         printerName: printerName,
         openDrawer: !!cfg.autoOpenDrawer,
@@ -291,7 +292,7 @@
       const html = '<!doctype html><html><body style="font-family:monospace;font-size:11px;white-space:pre-wrap;width:' + (cfg.paperWidth === 48 ? '80mm' : '58mm') + ';padding:0;margin:0">' +
         text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\n/g, '<br>') +
         '</body></html>';
-      r = await global.volvixElectron.printToSystem({
+      r = await _vlxEl().printToSystem({
         html: html,
         printerName: printerName,
         silent: true,

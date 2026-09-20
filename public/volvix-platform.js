@@ -72,6 +72,8 @@
 
   global.VolvixPlatform = {
     kind: kind,
+    // Objeto nativo del .exe SOLO para adaptadores de impresion que aun necesitan su superficie completa (null fuera de Electron).
+    electronApi: function () { return kind === 'electron' ? (global.volvixElectron || null) : null; },
     printTicket: impl.printTicket,
     printComanda: impl.printComanda,
     comandaGet: impl.comandaGet,

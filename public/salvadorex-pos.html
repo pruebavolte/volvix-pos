@@ -24668,7 +24668,7 @@ window.addEventListener('volvix:version-loaded', function(e){
     if (!ip) { if(st) st.textContent = '⚠️ Ingresa la IP'; return; }
     if (st)  st.textContent = 'Probando…';
     // Intento de ping vía fetch (solo válido si el servidor tiene proxy o CORS abierto)
-    fetch('http://' + ip + ':' + port, { method:'GET', signal: AbortSignal.timeout(3000) })
+    fetch('http://' + ip + ':' + port, { method:'GET', signal: (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(3000) : (function () { var c = new AbortController(); setTimeout(function () { c.abort(); }, 3000); return c.signal; })() })
       .then(function(){ if(st) st.textContent = '✅ Impresora alcanzable'; vlxPrinterSaveConfig(); })
       .catch(function(e){
         // TCP open pero CORS fallado = impresora alcanzable

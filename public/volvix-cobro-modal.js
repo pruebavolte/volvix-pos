@@ -16,6 +16,7 @@
 
 (function () {
   'use strict';
+  function _vlxEl() { try { var P = globalThis.VolvixPlatform; return (P && P.electronApi && P.electronApi()) || null; } catch (_) { return null; } }
   var VLX_DEBUG = false;
   var SAT_BASE = '/data/sat/';
 
@@ -544,7 +545,7 @@
   async function autoPrintTicket(cobroResult) {
     try {
       // Sólo si estamos en la app .exe Electron — en navegador web puro fallback a window.print
-      if (!window.volvixElectron || !window.volvixElectron.printToSystem) {
+      if (!_vlxEl() || !_vlxEl().printToSystem) {
         log('autoPrint skipped (no Electron) — use config to enable web print');
         return false;
       }
@@ -559,7 +560,7 @@
 
       // 2026-05-15: si modo 'ip' o ('auto' + IP configurada), probar IP primero
       if (printMode === 'ip' || (printMode === 'auto' && networkIP)) {
-        if (window.volvixElectron.printNetwork) {
+        if (_vlxEl().printNetwork) {
           try {
             var ipResult = await tryNetworkPrint(cobroResult, networkIP, networkPort);
             if (ipResult && ipResult.ok) {
@@ -581,9 +582,9 @@
       // 2026-05-14 v1.0.311: si modo es 'auto' Y hay impresora BT emparejada,
       // PROMOVER a 'bluetooth' exclusivo (NO caer a USB si BT falla).
       var btPrintersAvailable = [];
-      if (printMode === 'auto' && window.volvixElectron.listBluetoothPrinters) {
+      if (printMode === 'auto' && _vlxEl().listBluetoothPrinters) {
         try {
-          btPrintersAvailable = await window.volvixElectron.listBluetoothPrinters();
+          btPrintersAvailable = await _vlxEl().listBluetoothPrinters();
           var btPrinters = (btPrintersAvailable || []).filter(function (p) { return p && p.isPrinter; });
           if (btPrinters.length > 0) {
             printMode = 'bluetooth';
@@ -594,7 +595,7 @@
 
       // BT mode: probar Bluetooth primero si el modo lo permite
       if (printMode === 'bluetooth' || printMode === 'auto') {
-        if (window.volvixElectron.printBluetooth) {
+        if (_vlxEl().printBluetooth) {
           try {
             var btResult = await tryBluetoothPrint(cobroResult, btMac);
             if (btResult && btResult.ok) {
@@ -721,7 +722,7 @@
       // entornos muestra el diálogo de Electron — eso es lo que queremos evitar
       // (fricción con el cliente). Si printRawText falla, fallback a printToSystem.
       var result = null;
-      if (window.volvixElectron.printRawText &&
+      if (_vlxEl().printRawText &&
           window.VolvixTicketCustomizer && window.VolvixTicketCustomizer.renderText) {
         // Re-render text usando la cfg del usuario + data del cobro real
         var cfgForRaw = window.VolvixTicketCustomizer.getConfig();
@@ -732,7 +733,7 @@
         if (!chosenPrinter || /pos-?58/i.test(chosenPrinter)) {
           // Intentar Volvix-Thermal primero
           try {
-            var sysList = await window.volvixElectron.listSystemPrinters();
+            var sysList = await _vlxEl().listSystemPrinters();
             var vt = (sysList || []).find(function (p) { return /volvix.?thermal/i.test(p.name || ''); });
             if (vt && vt.name) {
               chosenPrinter = vt.name;
@@ -764,7 +765,7 @@
         log('RAW failed, falling back to printToSystem:', result && result.error);
       }
       // Fallback: HTML print (puede mostrar diálogo)
-      result = await window.volvixElectron.printToSystem({
+      result = await _vlxEl().printToSystem({
         html: ticketHtml,
         printerName: printerName || undefined,
         silent: true,
@@ -809,7 +810,7 @@
       lines.push('Gracias por su compra!');
       lines.push('Volvix POS');
 
-      return await window.volvixElectron.printNetwork({
+      return await _vlxEl().printNetwork({
         ip: ip,
         port: port || 9100,
         text: lines.join('\n'),
@@ -853,7 +854,7 @@
       lines.push('Volvix POS');
 
       var text = lines.join('\n');
-      return await window.volvixElectron.printBluetooth({
+      return await _vlxEl().printBluetooth({
         text: text,
         mac: preferredMac,
         baudRate: 9600
@@ -877,10 +878,10 @@
     log('Print failed (intento 1):', errorMsg);
 
     // ¿Es problema de Spooler/USB (no es BT ni IP)? → intentar reparar
-    var canRepairUSB = window.volvixElectron && window.volvixElectron.repairPrinter;
+    var canRepairUSB = _vlxEl() && _vlxEl().repairPrinter;
     if (canRepairUSB) {
       try {
-        var repair = await window.volvixElectron.repairPrinter();
+        var repair = await _vlxEl().repairPrinter();
         log('USB repair:', repair);
         if (repair && repair.success) {
           // Reintentar después de reparar
@@ -898,9 +899,9 @@
 
     // Aún falla — verificar status real para mensaje específico
     var statusError = null;
-    if (window.volvixElectron && window.volvixElectron.queryPrinterRealStatus) {
+    if (_vlxEl() && _vlxEl().queryPrinterRealStatus) {
       try {
-        var st = await window.volvixElectron.queryPrinterRealStatus();
+        var st = await _vlxEl().queryPrinterRealStatus();
         if (st && st.ok) {
           if (st.paperOut) statusError = 'NO_PAPER';
           else if (st.coverOpen) statusError = 'COVER_OPEN';
@@ -942,7 +943,7 @@
       var saleNum = cobroResult && cobroResult.sale_number;
       // 2026-05-14: AUTO-IMPRIMIR ticket sin que el adulto mayor haga nada.
       // 2026-05-15: con error handling completo + auto-repair USB.
-      if (typeof window.volvixElectron !== 'undefined') {
+      if (!!_vlxEl()) {
         autoPrintTicketWithErrorHandling(cobroResult)
           .catch(function (e) { console.warn('[vlx-cobro] autoPrint failed silently', e); });
       }
