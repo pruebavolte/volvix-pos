@@ -102,3 +102,14 @@ Secretos del repo (Settings → Secrets and variables → Actions; los carga el 
 - **Hecho y con evidencia (APK real de CI en `emulator-5556`):** impresion de ticket y comandas por TCP 9100 (ruteo por categoria a 2 impresoras, CP437, cajon), ping, Bluetooth con degradacion, boton/interruptor de camara, cuadricula de 3 columnas a 393 px, menu ⋮ por tacto, barra de estado, detector de WebView viejo.
 - **Bloqueado en ESTE emulador (no en el APK):** agregar producto, Tickets abiertos, modificadores y busqueda/teclado, porque su WebView es v74 (< 80) y el script principal del POS no corre; ademas el emulador dejo de responder a adb, la PC tiene poca RAM y poco disco (D: ~1.9 GB, C: ~0.8 GB). Actualizar el WebView necesita iniciar sesion en Google Play (accion humana) o una descarga grande.
 - Esas pantallas comparten `public/` con la web, donde ya pasaron el humo en navegador movil (WEB: 1.1, 2.3, 4.1). Para cerrarlas en APK hace falta un dispositivo/emulador con WebView >= 80.
+
+### Cierre de la columna APK (decision de Vicky, 2026-09-20)
+
+Se **cierra la columna APK** con la evidencia de arriba + el `public/` compartido con la web. Marca en la tabla de paridad:
+
+| Funcion | APK | Nota |
+|---|---|---|
+| Impresion ticket/comandas TCP, cajon, ping, Bluetooth (degradacion), camara, cuadricula 3 col, menu ⋮, firma estable, detector de WebView | ✅ | evidencia en emulador con el APK real de CI |
+| Tickets abiertos, modificadores, busqueda/teclado, agregar producto | 🔶 | codigo compartido, sin dispositivo con WebView >= 80 |
+
+La prueba en dispositivo real con WebView moderno queda como **paso posterior al release, con OK del dueño**. Sin Google Play ni descargas grandes (disco).
