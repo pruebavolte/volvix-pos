@@ -21,6 +21,59 @@
   if (window.__volvixCapacitorBridgeLoaded) return;
   window.__volvixCapacitorBridgeLoaded = true;
 
+  // ---------------------------------------------------------------------------------------------
+  // 2026-09-20 DETECTOR DE SINTAXIS MODERNA. El POS usa `?.` y `??` (Chrome/WebView >= 80, ver
+  // docs/APK_ANDROID.md §8 y scripts/scan-webview-min.js). En un WebView viejo el script principal falla con
+  // SyntaxError y quedaba la pantalla vacia sin explicacion. Aqui se PRUEBA la sintaxis con un <script> real
+  // (no eval: la CSP web no permite unsafe-eval) y, si no corre, se muestra una pantalla clara.
+  // Este archivo debe seguir siendo ES5. Si la pagina bloquea scripts dinamicos no se puede saber: no se bloquea nada.
+  function vlxProbe(code) {
+    try {
+      var s = document.createElement('script');
+      s.text = code;
+      (document.head || document.documentElement).appendChild(s);
+      s.parentNode.removeChild(s);
+    } catch (_) {}
+  }
+  function vlxModernSyntaxOk() {
+    window.__vlxProbeDyn = 0; window.__vlxProbeSyn = 0;
+    vlxProbe('window.__vlxProbeDyn=1;');
+    if (window.__vlxProbeDyn !== 1) return true;                     // scripts dinamicos bloqueados: sin veredicto
+    vlxProbe('var a={b:null};window.__vlxProbeSyn=(a?.b??7)===7?1:0;');
+    return window.__vlxProbeSyn === 1;
+  }
+  function vlxShowOldWebView() {
+    var put = function () {
+      if (document.getElementById('vlx-webview-old')) return;
+      var m = /Chrome\/(\d+)/.exec(navigator.userAgent || '');
+      var native = !!(window.VolvixPlatform && window.VolvixPlatform.kind === 'android') || /; wv\)/.test(navigator.userAgent || '');
+      var b = document.createElement('div');
+      b.id = 'vlx-webview-old';
+      b.setAttribute('data-vlx-keep', '1');
+      b.setAttribute('data-vlx-system', 'webview');
+      b.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483647;background:#0f172a;color:#fff;' +
+        'display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;' +
+        'font-family:system-ui,sans-serif';
+      var t = native ? 'Actualiza Android System WebView' : 'Actualiza tu navegador';
+      var d = native
+        ? 'Volvix POS necesita un WebView reciente (Chrome 80 o superior)' + (m ? ' y el de este equipo es la versi\u00f3n ' + m[1] : '') +
+          '. Abre Google Play, actualiza "Android System WebView" (y Chrome) y vuelve a abrir la app.'
+        : 'Volvix POS necesita un navegador reciente (Chrome 80 o superior)' + (m ? ' y este es la versi\u00f3n ' + m[1] : '') + '.';
+      b.innerHTML = '<div style="font-size:22px;font-weight:700;margin-bottom:12px"></div>' +
+        '<div style="font-size:15px;line-height:1.45;max-width:420px;opacity:.9;margin-bottom:22px"></div>' +
+        (native ? '<a href="market://details?id=com.google.android.webview" style="display:inline-block;background:#22c55e;color:#04210f;' +
+          'font-weight:700;padding:14px 26px;border-radius:28px;text-decoration:none;margin-bottom:12px">Abrir Play Store</a>' +
+          '<a href="market://details?id=com.android.chrome" style="color:#93c5fd;font-size:14px;margin-bottom:18px">o actualizar Chrome</a>' : '') +
+        '<button type="button" style="background:transparent;color:#fff;border:1px solid #64748b;border-radius:22px;padding:10px 22px;font-size:14px">Reintentar</button>';
+      b.children[0].textContent = t;
+      b.children[1].textContent = d;
+      b.querySelector('button').onclick = function () { window.location.reload(); };
+      (document.body || document.documentElement).appendChild(b);
+    };
+    if (document.body) put(); else document.addEventListener('DOMContentLoaded', put);
+  }
+  try { if (!vlxModernSyntaxOk()) vlxShowOldWebView(); } catch (_) {}
+
   // Detectar si estamos dentro del APK: window.VolvixPlatform (public/volvix-platform.js) debe cargar
   // ANTES que este script. Si la pagina aun no lo incluye, heuristica de WebView (localhost + UA movil).
   var isCapacitor = false;   // nombre historico = "estamos dentro del APK"
@@ -158,29 +211,6 @@
       });
     }
   }
-
-  // 2026-09-20: WebView < 80 no entiende `?.` ni `??` que usa el POS -> el script principal falla y queda la
-  // pantalla vacia (verificado en emulador con WebView 74). Avisar en vez de dejar al cajero sin explicacion.
-  function checkWebView() {
-    try {
-      var m = /Chrome\/(\d+)/.exec(navigator.userAgent);
-      if (!m || parseInt(m[1], 10) >= 80) return;
-      var put = function () {
-        if (document.getElementById('vlx-webview-old')) return;
-        var b = document.createElement('div');
-        b.id = 'vlx-webview-old';
-        b.setAttribute('data-vlx-keep', '1');
-        b.setAttribute('data-vlx-system', 'webview');
-        b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483647;padding:14px 16px;background:#b91c1c;color:#fff;' +
-          'font:600 13px/1.35 system-ui,sans-serif;text-align:center';
-        b.textContent = 'Tu Android System WebView (v' + m[1] + ') es muy viejo y Volvix POS no puede iniciar. ' +
-          'Actualiza "Android System WebView" o Chrome en Google Play.';
-        (document.body || document.documentElement).appendChild(b);
-      };
-      if (document.body) put(); else document.addEventListener('DOMContentLoaded', put);
-    } catch (_) {}
-  }
-  checkWebView();
 
   // Chequear actualización 10s después del boot (no bloquear arranque)
   setTimeout(checkForUpdate, 10000);
