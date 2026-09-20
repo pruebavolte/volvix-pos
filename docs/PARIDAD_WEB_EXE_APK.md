@@ -30,7 +30,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | # | Función | Loyverse (ref) | WEB | EXE | APK | Módulo (flag) | Evidencia |
 |---|---|---|---|---|---|---|---|
 | **1** | **Pantalla de venta** | | | | | | |
-| 1.1 | Artículos en cuadrícula (≥3 col. a 360 px) | lista (cuadrícula opcional) ✅ | 🟡 | 🟡 | 🟡 | — | base previa; falta medir columnas en 375x812 |
+| 1.1 | Artículos en cuadrícula (≥3 col. a 360 px) | lista (cuadrícula opcional) ✅ | ✅ | 🟡 | 🟡 | — | base previa; falta medir columnas en 375x812; WEB: 3 col a 375x812 y 5 col a 1024, sin scroll horizontal. Humo navegador en `integracion` 2026-09-20 (mock :8899). |
 | 1.2 | Toggle Lista/Cuadrícula (Config → General) | ✅ | ⬜ | ⬜ | ⬜ | — | pendiente (Ola 1b) |
 | 1.3 | Filtro Todos/Favoritos/Descuentos/categorías + búsqueda | ✅ | 🟡 | 🟡 | 🟡 | — | base previa; falta compararlo con la ref |
 | 1.4 | Contador de artículos + botón cliente (+persona) | ✅ | 🟡 | 🟡 | 🟡 | — | base previa; falta compararlo con la ref |
@@ -38,7 +38,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | **2** | **Ticket** | | | | | | |
 | 2.1 | Selector de tipo de venta (dining options configurables) | ✅ | 🟡 | 🟡 | 🟡 | `module.dining_options` | `228a50b` |
 | 2.2 | Renglón editable (cantidad ±, comentario, descuentos ✔, retirar) | ✅ | ⬜ | ⬜ | ⬜ | `module.line_discount` (no creado) | T1.4 pendiente |
-| 2.3 | Modificadores (diálogo opciones+cantidad+comentario; viajan a ticket/comanda/KDS) | ✅ | 🟡 | 🟡 | 🟡 | `module.modifiers` | `b8ae5d3` (+ `f6a578f` exención guardián) |
+| 2.3 | Modificadores (diálogo opciones+cantidad+comentario; viajan a ticket/comanda/KDS) | ✅ | ✅ | 🟡 | 🟡 | `module.modifiers` | `b8ae5d3` (+ `f6a578f` exención guardián); WEB: diálogo visible (guarnición obligatoria/extras/comentario/cantidad), línea "+ Arroz · + Queso extra" con precio $155, se restaura al reabrir. Humo navegador en `integracion` 2026-09-20 (mock :8899). |
 | 2.4 | Precio abierto · duplicar artículo · color/forma del mosaico | ✅ | ⬜ | ⬜ | ⬜ | `module.open_price`, `module.item_tiles` (no creados) | T1.5 pendiente |
 | 2.5 | Dividir ticket (split) | ✅ | ⬜ | ⬜ | ⬜ | `module.split_ticket` (no creado) | T1.8 pendiente |
 | 2.6 | Pre-cuenta ("Imprimir cuenta") | ➖ (no observado) | 🔶 | 🟡 | 🟡 | `module.print_bill` | `4cb5ee6`; imprime solo por `VolvixPlatform` |
@@ -48,7 +48,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 3.3 | Cobro y "Cobro rápido" imprimen ticket + comanda vía `VolvixPlatform` | ✅ | 🔶 | 🟡 | 🟡 | — | `b0a9e33`, `7ad0c63` |
 | 3.4 | Reembolso por `code` (bug: no emparejaba items) | ✅ | ✅ | 🟡 | 🟡 | — | `fdc1cf1` + web `d3b1e51`: `scripts/test-returns-match.js` 10/10 (antes 4/10). WEB ✅ = lógica de API con harness; EXE/APK usan la misma API, sin humo propio |
 | **4** | **Tickets abiertos** | | | | | | |
-| 4.1 | Guardar con nombre/comentario, N tickets, lista con buscador/orden, combinar | ✅ | 🟡 | 🟡 | 🟡 | `module.open_tickets` | `7e73888` |
+| 4.1 | Guardar con nombre/comentario, N tickets, lista con buscador/orden, combinar | ✅ | ✅ | 🟡 | 🟡 | `module.open_tickets` | `7e73888`; WEB: Guardar pide nombre/comentario/Mesas; POST /api/sales/pending; botón "Tickets abiertos (1)"; lista; abrir restaura con modificadores. Sin probar: Combinar, orden, buscador. Humo navegador en `integracion` 2026-09-20 (mock :8899). |
 | 4.2 | Tickets predefinidos (Mesa 1..N) | ➖ (superset) | 🟡 | 🟡 | 🟡 | `module.predefined_tickets` | `7e73888` |
 | 4.3 | Asignar / Mover ticket | ✅ | ⬜ | ⬜ | ⬜ | — | pendiente |
 | **5** | **Recibos** (lista + Buscar + detalle + reembolso + reimpresión) | ✅ | ⬜ | ⬜ | ⬜ | — | Ola 5 (subir de prioridad) |
@@ -75,7 +75,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | CI Android (`build-apk.yml`) | 🟡 | Rama `apk/loyverse` (`9c5e98f`, `f5efcd3`, `2b66f44`): sin `setup-android`, APK en el release por tag, build de prueba con `[emu-test]`. Falta un run verde en Actions y el link de `marketplace.html`. **Cero builds locales.** |
 | Panel de control | 🟡 | CORRECCIÓN: los 6 flags de Ola 1 (`open_tickets`, `predefined_tickets`, `dining_options`, `modifiers`, `print_bill`, `kitchen_printers`) SÍ están en `paneldecontrol.html` (etiquetas, defaults `true` y grupo "Módulos"; los agregó la sesión exe en sus commits T1.x) y en `volvix-feature-flags.js`. Antes los declaré ausentes por buscar solo el prefijo `module.`; la guardia (b) los cubre. Falta: confirmar que existan en la BD `feature_modules` (el panel lee `/api/admin/feature-modules`) y probar el on/off en un negocio de PRUEBA (Web). |
 | Login de pruebas expuesto (T0.5) | ✅ | `6c0fc91` (bloque `#testCreds` fuera). `admin@volvix.test` sigue decisión del dueño. |
-| Cuadrícula vertical 375x812 | 🟡 | Sin medir aún (usar `scripts/dev-mock-pos.js`). |
+| Cuadrícula vertical 375x812 | 🟡 | WEB ✅ (3 col / 5 col en escritorio, medido en navegador). EXE y APK usan el mismo `public/` pero sin medir en su WebView. |
 | Disco (D:) | ⚠️ | ~1.4–2.0 GB libres: worktrees ESPARSOS (`git sparse-checkout set --cone public api scripts docs electron android .github`), cero builds locales de Android/Electron (solo GitHub Actions). Avisar a Vicky si D: < 800 MB. |
 | Humo WEB `scripts/smoke-web.js --strict` | ✅ | `4924e1d`, re-corrido en `integracion`: TODO OK, 1 aviso (95 ids `vlx-*` estáticos preexistentes, no los oculta el guardián). Falta navegador: columnas 375x812, guardar→abrir, modificador, ⋮, consola. |
 | Persistencia `pending_sales` | ✅ | `3f83844`: `VLXMETA` siempre JSON válido (≤500); en producción falla con 503 (antes 201 con id falso `PND-*`). `test-pending-sales.js` 8/8. |
@@ -103,6 +103,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 2026-09-20 | Mezcladas en `integracion`: `origin/ola1/loyverse` @ `8456036` (doc de equipo) y `security/integrate-ola1` (`c5f4529`, 80 archivos: contraseña de prueba -> `REDACTED_TEST_PASSWORD`; `node --check` OK, guardia sin cambios). La contraseña sigue en el HISTORIAL git del repo público: falta desactivar/rotar `admin@volvix.test` (decide Vicky). |
 | 2026-09-20 | Decisión de Vicky: WEB imprime con `window.print()` sin comanda de red (🔶); APK con plugin TCP 9100 propio (tarea APK); `package.json` fuente única de versión. Filas 2.6, 3.3, 8.1, 8.2: WEB ⚠️ → 🔶. |
 | 2026-09-20 | Mezclados en `integracion`: `web/loyverse` @ `4924e1d` (sin conflictos) y `apk/loyverse` @ `2b66f44` (sin conflictos; toca 5 líneas de `salvadorex-pos.html` y `volvix-cobro-modal.js`). Guardia 0 nuevos; `a:volvix-print-config.js` bajó (baseline actualizado). |
+| 2026-09-20 | Humo en navegador (mock local, 375x812 y 1024): cuadrícula 3/5 col, modificadores, Guardar, Tickets abiertos, abrir ticket y menú ⋮ OK; 0 errores propios en consola (solo el script externo de soporte remoto, sin red). Filas 1.1, 2.3, 4.1 pasan a ✅ en WEB. Sin probar aún: tipos de venta (2.1), Mesas predefinidas (4.2), Combinar, EXE y APK reales. |
 
 ## 6. Anexo — deuda base (51 entradas; que exe/APK/Web la reduzcan por área)
 
@@ -182,7 +183,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | # | Riesgo | Dueño | Estado |
 |---|---|---|---|
 | 1 | La BD real de `pending_sales` NO tiene `name/comment/dining/employee`. Migración propuesta en `docs/migrations-propuesta-pending-sales.sql`: **NO se aplica**; el fallback `VLXMETA` basta. | Web | decidido: no migrar |
-| 2 | `/api/feature-flags` devuelve `modules` pero el cliente lee `flags`; `/volvix-feature-flags.css` da 404. No se toca hasta tener plan de compatibilidad (default ON) para no cambiar lo que ven los negocios. | Web | abierto |
+| 2 | `/api/feature-flags` devuelve `modules` pero el cliente lee `flags`; `/volvix-feature-flags.css` da 404 (también `/volvix-shared.css`, comprobado en el navegador). No se toca hasta tener plan de compatibilidad (default ON) para no cambiar lo que ven los negocios. | Web | abierto |
 | 3 | `kdsMarkDone` borra tickets abiertos. | exe | abierto |
 | 4 | La reimpresión descarta `modifiers` en 2 sitios del HTML de `salvadorex-pos.html`. | exe | abierto (Web corrigió el lado servidor, `4924e1d`) |
 | 5 | Probables modales ocultos por el guardián (anexo §6 (c)): `vlx-printer-error-modal`, `vlx-barcode-modal`, `vlx-lock-modal`. | exe | por confirmar en navegador |
