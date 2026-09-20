@@ -21100,6 +21100,23 @@
         '<div>📦 <strong>Items:</strong> ' + sale.item_count + '</div>' +
         cfdiInfo;
       if (items) items.innerHTML = '<em>Para ver detalle completo de items, click en "Reimprimir"</em>';
+      // Detalle con modificadores/nota (GET /api/sales/:id); si falla se queda el aviso de arriba
+      try {
+        const _tk = (typeof getToken === 'function' ? getToken() : '') || (window.session && window.session.token) || localStorage.getItem('volvix_token') || '';
+        fetch('/api/sales/' + encodeURIComponent(saleId), { headers: _tk ? { Authorization: 'Bearer ' + _tk } : {} })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (full) {
+            if (!full || !Array.isArray(full.items) || !full.items.length || !items) return;
+            items.innerHTML = full.items.map(function (it) {
+              var ex = (window.__vlxItemExtras ? window.__vlxItemExtras(it) : []).map(function (x) {
+                return '<div style="font-size:11px;color:var(--text-3);padding-left:14px">' + _esc(x) + '</div>';
+              }).join('');
+              return '<div style="padding:4px 0"><div style="display:flex;justify-content:space-between"><span>' +
+                (Number(it.qty) || 1) + 'x ' + _esc(it.name || it.code || 'Item') + '</span><span>$' +
+                ((Number(it.price) || 0) * (Number(it.qty) || 1)).toFixed(2) + '</span></div>' + ex + '</div>';
+            }).join('');
+          }).catch(function () {});
+      } catch (_) {}
       // 2026-07-07: desglose real de pago MIXTO en pantalla (antes solo "mixto")
       if (String(sale.payment_method || '').toLowerCase() === 'mixto') {
         try {
