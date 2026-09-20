@@ -139,6 +139,39 @@ proveedor principal, export por documento, etiquetas.
 
 Cada item de Olas 2–7 se ejecuta con la ficha del inventario (Loyverse + Impl) + reglas §0 + flag propia.
 
+## 6. Orden por USO (más usado → menos usado)
+
+> Criterio: frecuencia de uso diario de un comercio típico (venta/cobro se usan cada minuto; reportes, empleados
+> y apps se usan semanal/mensual). Es el orden de la estructura de Loyverse (menú lateral: Ventas, Recibos, Turno,
+> Artículos, Configuración, Back office, Apps). No son estadísticas publicadas por Loyverse: es criterio de uso real.
+
+| # | Bloque | Contenido Loyverse a igualar | Estado nuestro |
+|---|---|---|---|
+| 1 | **Pantalla de venta** | lista/cuadrícula de artículos, filtro "Todos los artículos / Favoritos / Descuentos / <categorías>", búsqueda, tocar = agregar, contador del ticket, botón COBRAR $ | base ✅; cuadrícula ✅ (default) |
+| 2 | **Ticket** | vista de ticket con renglones "NOMBRE x N  $", selector de tipo de venta, Total, GUARDAR / COBRAR; tocar renglón = editar (Cantidad ±, Comentario, Descuentos con check, RETIRAR DEL TICKET, GUARDAR); menú ⋮: Despejar, Editar, Asignar, Dividir, Mover, Sincronizar; botón cliente (+persona) | 🟡 T1.1/T1.4/T1.8 |
+| 3 | **Cobro** | pantalla "Importe total adeudado", campo "Efectivo recibido" editable, botones por tipo de pago (Efectivo / Por tarjeta / Transferencia…), DIVIDIR, cambio, recibo | 🟡 T1.8 + tipos de pago (Ola 5) |
+| 4 | **Tickets abiertos** | GUARDAR (nombre/comentario), lista TICKETS ABIERTOS, editar/asignar/dividir/mover | ⬜ T1.1 (en curso) |
+| 5 | **Recibos** | lista cronológica + Buscar, detalle, reembolso, reimpresión | ⬜ Ola 5 (subir) |
+| 6 | **Turno / caja** | Número de cierre, Fondo anterior, Cobros/Reembolsos en efectivo, Depositado, Pagos/Salidas, Efectivo teórico, Resumen de ventas (brutas/reembolsos/descuentos/netas), GESTIÓN DE TESORERÍA (monto + comentario → DEPOSITAR / PAGOS/SALIDAS), CERRAR EL TURNO | 🟡 tenemos Apertura/Corte; falta Tesorería y resumen igual (Ola 1b) |
+| 7 | **Artículos** | lista, Categorías (con conteo de artículos), Modificadores (grupos con opciones), Descuentos (% o $) | 🟡 T1.3 ✅ modificadores; categorías/descuentos por igualar |
+| 8 | **Configuración** | Impresoras (recibos y cocina), Pantalla para clientes, Impuestos, General (cámara para escanear, modo oscuro, distribución Lista/Cuadrícula, idioma), CERRAR SESIÓN | 🟡 T1.7 impresoras; resto Ola 5 |
+| 9 | **Back office (reportes/dashboard)** | ventas, artículos, categorías, empleados, pago, impuestos… | ⬜ Ola 5 |
+| 10 | **Inventario** | stock, costo, OC, ajustes, conteo | ⬜ Ola 7 |
+| 11 | **Empleados / permisos / reloj** | PIN, roles, timecards | ⬜ Ola 3 |
+| 12 | **Lealtad / clientes** | puntos, canje | ⬜ Ola 4 |
+| 13 | **Apps / integraciones / soporte** | marketplace de apps | ⬜ último |
+
+**Reordenamiento resultante:** después de lo que corre hoy (T0.*, T1.1–T1.3, T1.6, T1.7) el SIGUIENTE bloque es
+**Ola 1b = bloques 1–3 y 6 clonados exactos**: ajuste Lista/Cuadrícula, filtro por categoría/favoritos/descuentos,
+renglón editable idéntico (T1.4), pantalla de cobro idéntica con "Efectivo recibido" y tipos de pago (T1.8 + tipos
+de pago configurables), Turno con Gestión de tesorería (Depositar / Pagos-Salidas) y resumen de ventas, y Recibos
+con búsqueda. Luego Ola 2 (artículos/categorías/descuentos exactos) y así por la tabla.
+
+### Referencia observada en el Motorola (2026-09-19, Loyverse v2.74, cuenta "Kists Venta")
+Menú lateral: Ventas · Recibos · Turno · Artículos (Artículos/Categorías/Modificadores/Descuentos) · Configuración
+(Impresoras/Pantalla para clientes/Impuestos/General) · Back office · Apps · Soporte. Detalle de pantallas en
+`docs/LOYVERSE_REFERENCIA_MOTOROLA.md`.
+
 ## 4. Pruebas locales estándar (sin máquina del cliente)
 1. `node --check` de cada JS tocado; para scripts inline del HTML extraer el bloque y evaluarlo en un harness
    node con `window`/`document` falsos (patrón usado para `VolvixComanda`).
