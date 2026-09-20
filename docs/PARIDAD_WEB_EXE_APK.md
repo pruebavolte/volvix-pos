@@ -35,7 +35,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 1.3 | Filtro Todos/Favoritos/Descuentos/categorías + búsqueda | ✅ | 🟡 | 🟡 | 🟡 | — | base previa; falta compararlo con la ref |
 | 1.4 | Contador de artículos + botón cliente (+persona) | ✅ | 🟡 | 🟡 | 🟡 | — | base previa; falta compararlo con la ref |
 | 1.5 | Menú ⋮: Despejar / Editar / Asignar / Dividir / Mover / Sincronizar | ✅ | ⬜ | ⬜ | ⬜ | varios | solo existe "Imprimir cuenta" (1.9) |
-| 1.6 | Escaneo de código de barras con cámara (botón 📷 en la pantalla de venta + interruptor en Config → General) | ✅ | ⬜ | ⬜ | 🟡 | — | APK: `scanBarcode` en el adaptador, Cancelar del escáner corregido; falta el botón 📷 en la pantalla de venta (`salvadorex-pos.html`: exe) y probar cámara en equipo físico |
+| 1.6 | Escaneo de código de barras con cámara (botón 📷 en la pantalla de venta + interruptor en Config → General) | ✅ | ⬜ | ⬜ | ✅ | — | APK `0f8061c`/`e78b8da`: `public/volvix-scan-button.js` + `VolvixPlatform.canScan()`; interruptor `volvix_scan_camera` (default ON); probado en emulador con el APK real: aparece, el interruptor lo oculta/muestra, abre el escáner, Cancelar cierra. Falta cámara en equipo físico y `searchProduct(codigo)`. WEB/EXE: `canScan()` no aplica hoy (sin adaptador de cámara) |
 | **2** | **Ticket** | | | | | | |
 | 2.1 | Selector de tipo de venta (dining options configurables) | ✅ | 🟡 | 🟡 | 🟡 | `module.dining_options` | `228a50b` |
 | 2.2 | Renglón editable (cantidad ±, comentario, descuentos ✔, retirar) | ✅ | ⬜ | ⬜ | ⬜ | `module.line_discount` (no creado) | T1.4 pendiente |
@@ -78,7 +78,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | Login de pruebas expuesto (T0.5) | ✅ | `6c0fc91` (bloque `#testCreds` fuera). `admin@volvix.test` sigue decisión del dueño. |
 | Cuadrícula vertical 375x812 | 🟡 | WEB ✅ (3 col / 5 col en escritorio, medido en navegador). EXE y APK usan el mismo `public/` pero sin medir en su WebView. |
 | Disco (D:) | ⚠️ | ~1.4–2.0 GB libres: worktrees ESPARSOS (`git sparse-checkout set --cone public api scripts docs electron android .github`), cero builds locales de Android/Electron (solo GitHub Actions). Avisar a Vicky si D: < 800 MB. |
-| Keystore de firma Android | 🟡 | DECIDIDO (Vicky): keystore estable aleatorio fuera del repo + secretos `ANDROID_KEYSTORE_B64`/`PASS`/`KEY_ALIAS`/`KEY_PASS`, sin contraseñas por defecto en `build.gradle`, firma debug si faltan secretos (CI sigue verde). Ejecuta APK; la carga de secretos en GitHub la pide Vicky al dueño. Hasta entonces **ningún APK se distribuye**. |
+| Keystore de firma Android | 🟡 | Implementado (`ea0a2b2`, `492f2b7`): keystore estable fuera del repo, el workflow lee `ANDROID_KEYSTORE_B64`/`_PASS`/`ANDROID_KEY_ALIAS`/`_PASS`, sin `volvix2026` (verificado: 0 ocurrencias; ningún `.keystore/.jks/.p12` versionado), firma debug si faltan secretos y el CI imprime la huella SHA-256. **Falta cargar los 4 secretos en GitHub** (los pide Vicky al dueño; comandos en `docs/APK_ANDROID.md` §7). Hasta entonces ningún APK se distribuye. |
 | Humo WEB `scripts/smoke-web.js --strict` | ✅ | `4924e1d`, re-corrido en `integracion`: TODO OK, 1 aviso (95 ids `vlx-*` estáticos preexistentes, no los oculta el guardián). Falta navegador: columnas 375x812, guardar→abrir, modificador, ⋮, consola. |
 | Detalle de venta `GET /api/sales/:id` | ✅ | `83ec27a`: no existía (404 en prod); recibo y ESC/POS con modificadores; `scripts/test-sales-detail.js` 5/5. |
 | E2E real contra la API (`scripts/e2e-loyverse.js`) | ⬜ | 14/14 solo contra stub. Falta la cuenta de PRUEBA (`is_test_tenant`) que registra el dueño (ninguna IA crea cuentas). Sin esto el humo real (Guardar, un modificador, un cobro) sigue abierto. |
@@ -111,6 +111,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 2026-09-20 | Mezclados en `integracion`: `web/loyverse` @ `c390351` y `apk/loyverse` @ `def8107` (sin conflictos). Batería local OK: guardia 0 nuevos, smoke-web, sales-detail 5, returns 10, pending 8, escpos 16, platform-android 16. |
 | 2026-09-20 | Bloque 1 APK (`9c86d3f`, ya en `integracion`): filas 1.1, 8.1, 8.2 pasan a ✅ en APK con evidencia de emulador; CI del tag y keystore quedan como 🟡/⚠️. No concluyente aún en APK: agregar producto, Tickets abiertos, búsqueda/teclado, cámara física. |
 | 2026-09-20 | APK bloque 2 (`201e1cb`, ya en `integracion`): versión derivada de `package.json`/tag, deuda (a) migrada en 3 archivos, +1 línea `<script src=volvix-platform.js>` en 8 HTML (`e8e3dcd`; incluye `salvadorex-pos.html`: avisar a exe). Baseline baja a 46 (5 mejorados). |
+| 2026-09-20 | APK bloque 3 (`492f2b7`, ya en `integracion`): firma estable por secretos, botón 📷 (fila 1.6 ✅ APK), aviso de WebView < 80. Sin conflictos; guardia 0 nuevos. |
 
 ## 6. Anexo — deuda base (46 entradas; que exe/APK/Web la reduzcan por área)
 
@@ -185,3 +186,4 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 4 | La reimpresión descarta `modifiers`: `reimprimirUltimoTicket` (~l.8804-8818), ESC/POS de reimpresión (~l.8963-8968) y detalle de buscar-venta (~l.14286-14290); `printPreBill` (~l.18337) ya en manos de exe. Líneas aprox. | exe | abierto (Web corrigió el servidor: `4924e1d`, `83ec27a`) |
 | 5 | Probables modales ocultos por el guardián (anexo §6 (c)): `vlx-printer-error-modal`, `vlx-barcode-modal`, `vlx-lock-modal`. | exe | por confirmar en navegador |
 | 6 | Overrides de flags: 283 filas en 48 negocios (192 `disabled`). TNT-MATA8: impacto cero, pero aplicar defaults ON en otros negocios cambiaría lo que ven. Plan por fases en `docs/WEB_VERIFICACION.md`. **NO aplicar todavía.** | Web | abierto |
+| 7 | El script principal de `salvadorex-pos.html` usa `?.`/`??`: con Android WebView < 80 da SyntaxError y el POS no carga (el emulador trae WebView 74). El bridge muestra un aviso rojo si WebView < 80. Decidir el mínimo soportado (teléfonos con Play actualizan solo; tablets sin Play/viejas, no) y si se transpila. | Vicky | abierto |
