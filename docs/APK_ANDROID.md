@@ -113,3 +113,16 @@ Se **cierra la columna APK** con la evidencia de arriba + el `public/` compartid
 | Tickets abiertos, modificadores, busqueda/teclado, agregar producto | 🔶 | codigo compartido, sin dispositivo con WebView >= 80 |
 
 La prueba en dispositivo real con WebView moderno queda como **paso posterior al release, con OK del dueño**. Sin Google Play ni descargas grandes (disco).
+
+## 10. Primer tag: como se publica el APK (verificado con simulacro, 2026-09-20)
+
+**Simulacro sin tag** (run 35522103705, verde): `gh workflow run build-apk.yml --repo pruebavolte/volvix-pos --ref apk/loyverse -f release_dry_run=true`. Crea un release **borrador** `apk-dryrun-<run>` (no es tag `v*`, un borrador no crea tag ni es publico, no dispara `build-exe-release.yml`), sube `VolvixPOS-1.0.344.apk` y `VolvixPOS.apk` (30,119,703 bytes c/u; segunda subida con `--clobber` OK), lista los assets y lo borra siempre (comprobado: no quedo ningun release ni tag `apk-dryrun`; `v1.0.344` sigue como Latest). Eso prueba permisos del `GITHUB_TOKEN` (`contents: write`), `gh release create/upload` y nombres. Lo que NO ejercita es la rama `if: startsWith(github.ref,'refs/tags/v')` ni la carrera con el .exe: esa se estrena en el primer tag.
+
+**Paso exacto del primer tag** (lo hace solo Unificacion, con OK de Vicky/dueño):
+1. Precondiciones: `apk/loyverse` integrada en `main`; `package.json` version = el numero del tag (si difiere, el APK usa el tag y avisa con `::warning::`); `gh secret list` muestra los 4 `ANDROID_*` (ya estan).
+2. Cortar el tag desde el commit de `main` que se desplego: `git tag v1.0.N <sha>` y `git push origin v1.0.N`. Se disparan **en paralelo** `build-exe-release.yml` (~3 min) y `build-apk.yml` (~4 min).
+3. El job del APK compila, firma con el keystore estable, verifica version y firma, y en el paso "Attach APK to GitHub Release (tag)" reintenta hasta 6 veces `gh release view`; si el release aun no existe lo crea con `--verify-tag` (nunca crea tags) y sube `VolvixPOS-<ver>.apk` y `VolvixPOS.apk` con `--clobber`. Normalmente el .exe termina primero y el APK se adjunta a su release.
+4. Verificar: `gh release view v1.0.N --repo pruebavolte/volvix-pos --json assets --jq '[.assets[].name]'` debe traer `latest.yml`, `VolvixPOS-Setup-1.0.N.exe`, `...exe.blockmap`, `VolvixPOS-1.0.N.apk` y `VolvixPOS.apk`; el resumen del run del APK debe decir `Firma: stable | SHA-256: 36f7e0e7...d661c2`; y `curl -sIL https://github.com/pruebavolte/volvix-pos/releases/latest/download/VolvixPOS.apk` debe terminar en 200.
+5. Si falla solo el job del APK: `gh run rerun <id> --failed` (idempotente, `--clobber`); no afecta al .exe ni a la flota.
+
+**OJO con `marketplace.html`:** hoy `https://github.com/pruebavolte/volvix-pos/releases/latest/download/VolvixPOS.apk` da **404** (el release Latest `v1.0.344` se publico sin APK). Como la web se despliega al hacer merge a `main` y el APK solo aparece con el primer tag, hay una ventana en la que el boton "Descargar .apk" del marketplace no funciona. Recomendado: mantener el link fijo a `v1.0.336` en el merge inicial y pasarlo a `/releases/latest/download/VolvixPOS.apk` en un commit posterior, cuando el primer tag ya tenga el APK (paso 4).
