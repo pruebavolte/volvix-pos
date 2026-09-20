@@ -78,6 +78,8 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | Cuadrícula vertical 375x812 | 🟡 | WEB ✅ (3 col / 5 col en escritorio, medido en navegador). EXE y APK usan el mismo `public/` pero sin medir en su WebView. |
 | Disco (D:) | ⚠️ | ~1.4–2.0 GB libres: worktrees ESPARSOS (`git sparse-checkout set --cone public api scripts docs electron android .github`), cero builds locales de Android/Electron (solo GitHub Actions). Avisar a Vicky si D: < 800 MB. |
 | Humo WEB `scripts/smoke-web.js --strict` | ✅ | `4924e1d`, re-corrido en `integracion`: TODO OK, 1 aviso (95 ids `vlx-*` estáticos preexistentes, no los oculta el guardián). Falta navegador: columnas 375x812, guardar→abrir, modificador, ⋮, consola. |
+| Detalle de venta `GET /api/sales/:id` | ✅ | `83ec27a`: no existía (404 en prod); recibo y ESC/POS con modificadores; `scripts/test-sales-detail.js` 5/5. |
+| E2E real contra la API (`scripts/e2e-loyverse.js`) | ⬜ | 14/14 solo contra stub. Falta la cuenta de PRUEBA (`is_test_tenant`) que registra el dueño (ninguna IA crea cuentas). Sin esto el humo real (Guardar, un modificador, un cobro) sigue abierto. |
 | Persistencia `pending_sales` | ✅ | `3f83844`: `VLXMETA` siempre JSON válido (≤500); en producción falla con 503 (antes 201 con id falso `PND-*`). `test-pending-sales.js` 8/8. |
 | `VolvixFeatures.isEnabled` | ✅ | `4b0ac66`: no existía; apagar un módulo ahora sí detiene su lógica (antes solo se ocultaba). |
 
@@ -104,6 +106,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 2026-09-20 | Decisión de Vicky: WEB imprime con `window.print()` sin comanda de red (🔶); APK con plugin TCP 9100 propio (tarea APK); `package.json` fuente única de versión. Filas 2.6, 3.3, 8.1, 8.2: WEB ⚠️ → 🔶. |
 | 2026-09-20 | Mezclados en `integracion`: `web/loyverse` @ `4924e1d` (sin conflictos) y `apk/loyverse` @ `2b66f44` (sin conflictos; toca 5 líneas de `salvadorex-pos.html` y `volvix-cobro-modal.js`). Guardia 0 nuevos; `a:volvix-print-config.js` bajó (baseline actualizado). |
 | 2026-09-20 | Humo en navegador (mock local, 375x812 y 1024): cuadrícula 3/5 col, modificadores, Guardar, Tickets abiertos, abrir ticket y menú ⋮ OK; 0 errores propios en consola (solo el script externo de soporte remoto, sin red). Filas 1.1, 2.3, 4.1 pasan a ✅ en WEB. Sin probar aún: tipos de venta (2.1), Mesas predefinidas (4.2), Combinar, EXE y APK reales. |
+| 2026-09-20 | Mezclados en `integracion`: `web/loyverse` @ `c390351` y `apk/loyverse` @ `def8107` (sin conflictos). Batería local OK: guardia 0 nuevos, smoke-web, sales-detail 5, returns 10, pending 8, escpos 16, platform-android 16. |
 
 ## 6. Anexo — deuda base (51 entradas; que exe/APK/Web la reduzcan por área)
 
@@ -184,6 +187,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 |---|---|---|---|
 | 1 | La BD real de `pending_sales` NO tiene `name/comment/dining/employee`. Migración propuesta en `docs/migrations-propuesta-pending-sales.sql`: **NO se aplica**; el fallback `VLXMETA` basta. | Web | decidido: no migrar |
 | 2 | `/api/feature-flags` devuelve `modules` pero el cliente lee `flags`; `/volvix-feature-flags.css` da 404 (también `/volvix-shared.css`, comprobado en el navegador). No se toca hasta tener plan de compatibilidad (default ON) para no cambiar lo que ven los negocios. | Web | abierto |
-| 3 | `kdsMarkDone` borra tickets abiertos. | exe | abierto |
-| 4 | La reimpresión descarta `modifiers` en 2 sitios del HTML de `salvadorex-pos.html`. | exe | abierto (Web corrigió el lado servidor, `4924e1d`) |
+| 3 | `kdsMarkDone` borra tickets abiertos (`salvadorex-pos.html` ~l.4633). | exe | abierto |
+| 4 | La reimpresión descarta `modifiers`: `reimprimirUltimoTicket` (~l.8804-8818), ESC/POS de reimpresión (~l.8963-8968) y detalle de buscar-venta (~l.14286-14290); `printPreBill` (~l.18337) ya en manos de exe. Líneas aprox. | exe | abierto (Web corrigió el servidor: `4924e1d`, `83ec27a`) |
 | 5 | Probables modales ocultos por el guardián (anexo §6 (c)): `vlx-printer-error-modal`, `vlx-barcode-modal`, `vlx-lock-modal`. | exe | por confirmar en navegador |
+| 6 | Overrides de flags: 283 filas en 48 negocios (192 `disabled`). TNT-MATA8: impacto cero, pero aplicar defaults ON en otros negocios cambiaría lo que ven. Plan por fases en `docs/WEB_VERIFICACION.md`. **NO aplicar todavía.** | Web | abierto |
