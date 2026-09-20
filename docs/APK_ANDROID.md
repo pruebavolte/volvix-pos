@@ -70,11 +70,11 @@ Secretos del repo (Settings → Secrets and variables → Actions; los carga el 
 | `ANDROID_KEY_ALIAS` | alias de la clave (`volvix-release`) |
 | `ANDROID_KEY_PASS` | contraseña de la clave (igual a la del keystore en PKCS12) |
 
-- **Ya generado** (fuera del repo, nunca commiteado ni impreso): `C:	mp\openclaw-gateway\secrets\` → `volvix-release.jks` (PKCS12, RSA 2048, 10000 días), `volvix-release.jks.b64.txt` (el valor de `ANDROID_KEYSTORE_B64`) y `volvix-release-secrets.txt` (contraseñas y alias). **Respaldar esa carpeta**: si se pierde la clave, los APK ya instalados no se podrán actualizar.
+- **Ya generado** (fuera del repo, nunca commiteado ni impreso): `C:\tmp\openclaw-gateway\secrets\` → `volvix-release.jks` (PKCS12, RSA 2048, 10000 días), `volvix-release.jks.b64.txt` (el valor de `ANDROID_KEYSTORE_B64`) y `volvix-release-secrets.txt` (contraseñas y alias). **Respaldar esa carpeta**: si se pierde la clave, los APK ya instalados no se podrán actualizar.
 - Huella SHA-256 del certificado (pública, sirve para comprobar el APK): `36:F7:E0:E7:0A:FC:23:23:37:63:0F:63:53:69:ED:A5:8D:27:A6:D3:FD:E4:ED:DA:5E:64:C5:B3:89:D6:61:C2`. El CI la imprime en el resumen de cada run (paso "Verificar firma del APK").
 - Cargar los secretos (PowerShell, con `gh auth login` hecho por el dueño):
   ```
-  cd C:	mp\openclaw-gateway\secrets
+  cd C:\tmp\openclaw-gateway\secrets
   gh secret set ANDROID_KEYSTORE_B64 --repo pruebavolte/volvix-pos < volvix-release.jks.b64.txt
   gh secret set ANDROID_KEYSTORE_PASS --repo pruebavolte/volvix-pos    # pegar el valor de volvix-release-secrets.txt
   gh secret set ANDROID_KEY_ALIAS --repo pruebavolte/volvix-pos --body volvix-release
