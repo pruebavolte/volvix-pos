@@ -276,6 +276,17 @@
     status: function (key) {
       return this._map[key] || 'enabled';
     },
+    /** Los modulos Loyverse (tickets abiertos, opciones de consumo, pre-cuenta) llaman isEnabled(); no existia, lanzaba
+     *  TypeError y su try/catch los dejaba SIEMPRE encendidos aunque el panel los apagara. Ahora respeta el mapa de
+     *  flags Y el estado del tenant del POS (VOLVIX.state.modules[<clave sin "module.">], que alimenta el panel de control). */
+    isEnabled: function (key) {
+      if (this.status(key) !== 'enabled') return false;
+      try {
+        var V = window.VOLVIX;
+        if (V && typeof V.isFeatureOn === 'function' && typeof V.getState === 'function') return V.isFeatureOn(V.getState(), key) !== false;
+      } catch (e) {}
+      return true;
+    },
     all: function () {
       return Object.assign({}, this._map);
     },

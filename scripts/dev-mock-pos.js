@@ -36,4 +36,5 @@ const srv = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
   fs.createReadStream(f).pipe(res);
 });
-srv.listen(8899, '127.0.0.1', () => console.log('mock POS en http://127.0.0.1:8899'));
+const PORT = Number(process.env.MOCK_PORT) || 8899; // MOCK_PORT=8897 node scripts/dev-mock-pos.js (evita choque con otras sesiones)
+srv.listen(PORT, '127.0.0.1', () => console.log('mock POS en http://127.0.0.1:' + PORT));
