@@ -41,12 +41,12 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 2.3 | Modificadores (diálogo opciones+cantidad+comentario; viajan a ticket/comanda/KDS) | ✅ | 🟡 | 🟡 | 🟡 | `module.modifiers` | `b8ae5d3` (+ `f6a578f` exención guardián) |
 | 2.4 | Precio abierto · duplicar artículo · color/forma del mosaico | ✅ | ⬜ | ⬜ | ⬜ | `module.open_price`, `module.item_tiles` (no creados) | T1.5 pendiente |
 | 2.5 | Dividir ticket (split) | ✅ | ⬜ | ⬜ | ⬜ | `module.split_ticket` (no creado) | T1.8 pendiente |
-| 2.6 | Pre-cuenta ("Imprimir cuenta") | ➖ (no observado) | 🔶 | 🟡 | ⚠️ | `module.print_bill` | `4cb5ee6`; imprime solo por `VolvixPlatform` |
+| 2.6 | Pre-cuenta ("Imprimir cuenta") | ➖ (no observado) | 🔶 | 🟡 | 🟡 | `module.print_bill` | `4cb5ee6`; imprime solo por `VolvixPlatform` |
 | **3** | **Cobro** | | | | | | |
 | 3.1 | Pantalla idéntica: "Importe total adeudado", "Efectivo recibido", botón por tipo de pago, DIVIDIR | ✅ | ⬜ | ⬜ | ⬜ | — | Ola 1b |
 | 3.2 | Tipos de pago configurables (Efectivo/Tarjeta/Transferencia…) | ✅ | ⬜ | ⬜ | ⬜ | — | Ola 5 |
-| 3.3 | Cobro y "Cobro rápido" imprimen ticket + comanda vía `VolvixPlatform` | ✅ | 🔶 | 🟡 | ⚠️ | — | `b0a9e33`, `7ad0c63` |
-| 3.4 | Reembolso por `code` (bug: no emparejaba items) | ✅ | 🟡 | 🟡 | 🟡 | — | `fdc1cf1` (API compartida) |
+| 3.3 | Cobro y "Cobro rápido" imprimen ticket + comanda vía `VolvixPlatform` | ✅ | 🔶 | 🟡 | 🟡 | — | `b0a9e33`, `7ad0c63` |
+| 3.4 | Reembolso por `code` (bug: no emparejaba items) | ✅ | ✅ | 🟡 | 🟡 | — | `fdc1cf1` + web `d3b1e51`: `scripts/test-returns-match.js` 10/10 (antes 4/10). WEB ✅ = lógica de API con harness; EXE/APK usan la misma API, sin humo propio |
 | **4** | **Tickets abiertos** | | | | | | |
 | 4.1 | Guardar con nombre/comentario, N tickets, lista con buscador/orden, combinar | ✅ | 🟡 | 🟡 | 🟡 | `module.open_tickets` | `7e73888` |
 | 4.2 | Tickets predefinidos (Mesa 1..N) | ➖ (superset) | 🟡 | 🟡 | 🟡 | `module.predefined_tickets` | `7e73888` |
@@ -60,8 +60,8 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 7.2 | Modificadores: back-office CRUD de sets + asignación a productos | ✅ | 🟡 | 🟡 | 🟡 | `module.modifiers` | `b8ae5d3` |
 | 7.3 | Alta de producto "modo Loyverse" (campos mínimos) | ✅ | ⬜ | ⬜ | ⬜ | — | T1.9 pendiente |
 | **8** | **Configuración** | | | | | | |
-| 8.1 | Impresoras: cocina por red con ruteo por categoría y tickets de corrección | ✅ | 🔶 | 🟡 | ⚠️ | `module.kitchen_printers` | `c6e7cff`; TCP 9100 solo existe en Electron |
-| 8.2 | Impresora de comandas en Config → Impresión | ✅ | 🔶 | 🟡 | ⚠️ | — | `6ad773f`, `43d7c15` |
+| 8.1 | Impresoras: cocina por red con ruteo por categoría y tickets de corrección | ✅ | 🔶 | 🟡 | 🟡 | `module.kitchen_printers` | `c6e7cff`; TCP 9100 solo existe en Electron |
+| 8.2 | Impresora de comandas en Config → Impresión | ✅ | 🔶 | 🟡 | 🟡 | — | `6ad773f`, `43d7c15` |
 | 8.3 | Pantalla para clientes · Impuestos CRUD · General (cámara, oscuro, idioma) | ✅ | ⬜ | ⬜ | ⬜ | — | Ola 5 |
 | **9–13** | Back office/reportes · Inventario · Empleados/PIN/roles · Lealtad · Apps | ✅ | ⬜ | ⬜ | ⬜ | varios | Olas 3–7 |
 
@@ -69,14 +69,17 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 
 | Tema | Estado | Detalle |
 |---|---|---|
-| Puente único `VolvixPlatform` | 🟡 | `71a7bb4`. Android/web devuelven `{ok:false, unsupported:true}` (no imprimen). |
+| Puente único `VolvixPlatform` | 🟡 | `71a7bb4`. **Android** ya tiene adaptador real (`d75d79a`: ticket/comanda TCP 9100 con `volvix-escpos.js` compartido; `test-escpos-parity` 16 y `test-platform-android` 16 aserciones OK) pero SIN probar en dispositivo/emulador. Web: `window.print()` (🔶). |
 | Guardia CI `scripts/check-paridad.js` | ✅ | En `ci.yml`. Solo FALLA por deuda NUEVA o que crezca; baseline = 51 entradas (anexo §6), a la baja por área. |
 | Versión única | ⚠️ | **Decisión (Vicky): fuente = `package.json`** (hoy 1.0.344). `public/version.json` es generado (1.0.490): la guardia lo ignora. Android `versionName = package.version` y `versionCode = patch`, derivados en el CI del tag (hoy `"1.0"`/`1` fijos en `build.gradle`: tarea APK). `VERSION` raíz v20.0.0 es obsoleto. |
-| CI Android (`build-apk.yml`) | ⬜ | Tarea APK: dispararlo TAMBIÉN por tag `v*` (hoy solo push a `main`), arreglar "Setup Android SDK" (T0.4), derivar versión de `package.json`, publicar `VolvixPOS.apk` en el release; `VolvixCliente.apk` sigue enlazado en `marketplace.html`. **Cero builds locales** (disco): solo GitHub Actions. |
+| CI Android (`build-apk.yml`) | 🟡 | Rama `apk/loyverse` (`9c5e98f`, `f5efcd3`, `2b66f44`): sin `setup-android`, APK en el release por tag, build de prueba con `[emu-test]`. Falta un run verde en Actions y el link de `marketplace.html`. **Cero builds locales.** |
 | Panel de control | 🟡 | CORRECCIÓN: los 6 flags de Ola 1 (`open_tickets`, `predefined_tickets`, `dining_options`, `modifiers`, `print_bill`, `kitchen_printers`) SÍ están en `paneldecontrol.html` (etiquetas, defaults `true` y grupo "Módulos"; los agregó la sesión exe en sus commits T1.x) y en `volvix-feature-flags.js`. Antes los declaré ausentes por buscar solo el prefijo `module.`; la guardia (b) los cubre. Falta: confirmar que existan en la BD `feature_modules` (el panel lee `/api/admin/feature-modules`) y probar el on/off en un negocio de PRUEBA (Web). |
 | Login de pruebas expuesto (T0.5) | ✅ | `6c0fc91` (bloque `#testCreds` fuera). `admin@volvix.test` sigue decisión del dueño. |
 | Cuadrícula vertical 375x812 | 🟡 | Sin medir aún (usar `scripts/dev-mock-pos.js`). |
 | Disco (D:) | ⚠️ | ~1.4–2.0 GB libres: worktrees ESPARSOS (`git sparse-checkout set --cone public api scripts docs electron android .github`), cero builds locales de Android/Electron (solo GitHub Actions). Avisar a Vicky si D: < 800 MB. |
+| Humo WEB `scripts/smoke-web.js --strict` | ✅ | `4924e1d`, re-corrido en `integracion`: TODO OK, 1 aviso (95 ids `vlx-*` estáticos preexistentes, no los oculta el guardián). Falta navegador: columnas 375x812, guardar→abrir, modificador, ⋮, consola. |
+| Persistencia `pending_sales` | ✅ | `3f83844`: `VLXMETA` siempre JSON válido (≤500); en producción falla con 503 (antes 201 con id falso `PND-*`). `test-pending-sales.js` 8/8. |
+| `VolvixFeatures.isEnabled` | ✅ | `4b0ac66`: no existía; apagar un módulo ahora sí detiene su lógica (antes solo se ocultaba). |
 
 ## 3. Deuda que detectó la guardia (baseline `scripts/paridad-baseline.json`, 51 entradas, lista completa en §6)
 
@@ -172,3 +175,14 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | `android/versionCode` | 1 | APK |
 | `android/versionName` | 1 | APK |
 | 2026-09-20 | Decisión de Vicky: WEB imprime con `window.print()` sin comanda de red (🔶); APK con plugin TCP 9100 propio (tarea APK); `package.json` fuente única de versión. Filas 2.6, 3.3, 8.1, 8.2: WEB ⚠️ → 🔶. |
+
+## 7. Riesgos PRE-PUBLICACIÓN (reportados por Web, 2026-09-20)
+
+| # | Riesgo | Dueño | Estado |
+|---|---|---|---|
+| 1 | La BD real de `pending_sales` NO tiene `name/comment/dining/employee`. Migración propuesta en `docs/migrations-propuesta-pending-sales.sql`: **NO se aplica**; el fallback `VLXMETA` basta. | Web | decidido: no migrar |
+| 2 | `/api/feature-flags` devuelve `modules` pero el cliente lee `flags`; `/volvix-feature-flags.css` da 404. No se toca hasta tener plan de compatibilidad (default ON) para no cambiar lo que ven los negocios. | Web | abierto |
+| 3 | `kdsMarkDone` borra tickets abiertos. | exe | abierto |
+| 4 | La reimpresión descarta `modifiers` en 2 sitios del HTML de `salvadorex-pos.html`. | exe | abierto (Web corrigió el lado servidor, `4924e1d`) |
+| 5 | Probables modales ocultos por el guardián (anexo §6 (c)): `vlx-printer-error-modal`, `vlx-barcode-modal`, `vlx-lock-modal`. | exe | por confirmar en navegador |
+| 2026-09-20 | Mezclados en `integracion`: `web/loyverse` @ `4924e1d` (sin conflictos) y `apk/loyverse` @ `2b66f44` (sin conflictos; toca 5 líneas de `salvadorex-pos.html` y `volvix-cobro-modal.js`). Guardia 0 nuevos; `a:volvix-print-config.js` bajó (baseline actualizado). |
