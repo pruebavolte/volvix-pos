@@ -4628,7 +4628,8 @@
       function kdsDoneSet(){ try{ return JSON.parse(localStorage.getItem('vlx_kds_done')||'[]'); }catch(_){ return []; } }
       function kdsDoneAdd(id){ try{ var a=kdsDoneSet(); if(a.indexOf(id)<0) a.push(id); localStorage.setItem('vlx_kds_done',JSON.stringify(a.slice(-300))); }catch(_){} }
       window.renderKDS=async function(){ var grid=document.getElementById('kds-grid'); if(!grid) return; var af=(typeof _authFetch==='function')?_authFetch:function(u,o){return fetch(u,o);};
-        try{ var r=await af('/api/sales/pending'); if(!r.ok){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">No se pudieron cargar las comandas.</div>'; return; }
+        var _kdsFail=function(msg){ if(grid.querySelector('.kds-card')){ var s0=document.getElementById('kds-sub'); if(s0) s0.textContent='⚠ Sin conexion con el servidor: mostrando lo ultimo cargado'; } else { grid.innerHTML=msg; } }; /* B4: 503/red caida no vacia la parrilla */
+        try{ var r=await af('/api/sales/pending'); if(!r.ok){ _kdsFail('<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">No se pudieron cargar las comandas.</div>'); return; }
           var data=await r.json(); var items=(data&&data.items)||(Array.isArray(data)?data:[]); if(window.VolvixOpenTickets&&window.VolvixOpenTickets.normRow){ items=items.map(window.VolvixOpenTickets.normRow); } /* #5: sin VLXMETA como nota */ var _kd=kdsDoneSet(); if(_kd.length){ items=items.filter(function(t){ return _kd.indexOf(String(t.id||''))<0; }); }
           var sub=document.getElementById('kds-sub');
           if(!items.length){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-3)"><div style="font-size:40px">🍽️</div>Sin comandas pendientes.<br><span style="font-size:12px">Las ventas guardadas como pendientes (F6) aparecen aquí para cocina.</span></div>'; if(sub)sub.textContent='0 comandas activas'; return; }
@@ -4638,7 +4639,7 @@
             return '<div class="kds-card" style="border-top:4px solid '+w.color+'"><div class="kds-head"><span class="kds-ref">#'+esc(ref)+'</span><span class="kds-time" style="color:'+w.color+'">⏱ '+w.label+'</span></div><div class="kds-lines">'+lines+'</div>'+(t.dining?'<div class="kds-note">🍽 '+esc(t.dining)+'</div>':'')+((t.note||t.notes)?'<div class="kds-note">📝 '+esc(t.note||t.notes)+'</div>':'')+'<button class="kds-done" onclick="kdsMarkDone(\''+esc(String(t.id||''))+'\',this)">✓ Listo</button></div>';
           }).join('');
           if(sub)sub.textContent=items.length+' comanda'+(items.length!==1?'s':'')+' activa'+(items.length!==1?'s':'');
-        }catch(e){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">Error al cargar comandas.</div>'; } };
+        }catch(e){ _kdsFail('<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-3)">Error al cargar comandas.</div>'); } };
       window.kdsMarkDone=function(id,btn){ if(!id){ if(typeof showToast==='function')showToast('Comanda sin folio: no se puede cerrar'); return; } /* NO borra el ticket abierto de caja (antes hacia DELETE /api/sales/pending): solo lo oculta del KDS de este equipo */ kdsDoneAdd(String(id)); if(btn){ var c=btn.closest('.kds-card'); if(c){ c.style.opacity='.4'; setTimeout(function(){c.remove();},250); } } try{ if(typeof showToast==='function') showToast('✓ Comanda lista'); }catch(_){} };
       function kdsStart(){ if(kdsTimer)clearInterval(kdsTimer); kdsTimer=setInterval(function(){ var s=document.getElementById('screen-kds'); if(s&&!s.classList.contains('hidden')) window.renderKDS(); else { clearInterval(kdsTimer); kdsTimer=null; } },12000); }
       window.kdsToggleAuto=function(on){ if(on)kdsStart(); else if(kdsTimer){clearInterval(kdsTimer);kdsTimer=null;} };
@@ -12996,9 +12997,9 @@
           var fecha = v.created_at ? new Date(v.created_at).toLocaleDateString('es-MX') : '—';
           var tot = Number(v.total||0).toLocaleString('es-MX',{minimumFractionDigits:2});
           var chip = v.status==='completed' ? 'color:#16a34a;' : 'color:#dc2626;';
-          var lbl = v.status==='completed' ? 'Completada' : (v.status || '—');
+          var lbl = v.status==='completed' ? 'Completada' : window.__vlxEsc(v.status || '—');
           return '<tr style="border-bottom:1px solid #f3f4f6;">' +
-            '<td style="padding:8px;font-weight:600;font-family:monospace;">#' + String(v.folio||v.id||'').padStart(6,'0') + '</td>' +
+            '<td style="padding:8px;font-weight:600;font-family:monospace;">#' + window.__vlxEsc(String(v.folio||v.id||'').padStart(6,'0')) + '</td>' +
             '<td style="padding:8px;color:#6b7280;">' + fecha + '</td>' +
             '<td style="padding:8px;">' + window.__vlxEsc(v.payment_method||v.metodo||'Efectivo') + '</td>' +
             '<td style="padding:8px;text-align:right;font-weight:600;">$' + tot + '</td>' +
@@ -18561,7 +18562,7 @@
           let _fallos = 0; // N4: un reintento por ticket; si aun falla se avisa (y se encola el cierre) para no dejar duplicados en silencio
           for (const s of sel) { let ok = await _otDelete(s.id); if (!ok) ok = await _otDelete(s.id); if (!ok) { _fallos++; _otQueueAdd(s.id); } } // borrar origen solo si el combinado se guardó
           showToast(_fallos ? ('⚠ Combinado, pero ' + _fallos + ' ticket(s) original(es) no se pudieron quitar (se reintenta solo): revisa Tickets abiertos') : '✓ Tickets combinados');
-          return await _otFetch();
+          try { return await _otFetch(); } catch (e) { showToast('Combinado, pero no se pudo refrescar la lista (servidor no disponible)'); return null; }
         }
       });
     } catch(e) { showToast('Error: ' + (e.message || e), 'error'); }
