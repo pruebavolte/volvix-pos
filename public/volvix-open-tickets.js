@@ -72,7 +72,7 @@
 
   function overlay(id, html) {
     var d = root.document; var old = d.getElementById(id); if (old) old.remove();
-    var m = d.createElement('div'); m.id = id;
+    var m = d.createElement('div'); m.id = id; m.setAttribute('data-vlx-keep', '1');
     m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:99995;padding:12px;';
     m.innerHTML = html; d.body.appendChild(m); return m;
   }

@@ -22260,7 +22260,7 @@
       var _pbOn = true; try { _pbOn = !window.VolvixFeatures || window.VolvixFeatures.isEnabled('module.print_bill'); } catch(_) {}
       if (!_pbOn) { if (typeof window.openVarios === 'function') { try { window.openVarios(); } catch(_){} } return; }
       var _old = document.getElementById('vlx-more-menu'); if (_old) { _old.remove(); return; }
-      var _m = document.createElement('div'); _m.id = 'vlx-more-menu';
+      var _m = document.createElement('div'); _m.id = 'vlx-more-menu'; _m.setAttribute('data-vlx-keep', '1');
       var _r = e.target.closest('#lv-more').getBoundingClientRect();
       _m.style.cssText = 'position:fixed;z-index:99999;background:#fff;color:#222;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);min-width:180px;top:' + Math.round(_r.bottom + 4) + 'px;right:8px';
       _m.innerHTML = '<div data-a="vario" data-feature="pos.ins_varios" style="padding:12px 16px;cursor:pointer">Art\u00edculo vario</div><div data-a="bill" data-feature="module.print_bill" style="padding:12px 16px;cursor:pointer;border-top:1px solid #eee">Imprimir cuenta</div>';

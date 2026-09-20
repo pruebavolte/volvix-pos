@@ -574,7 +574,7 @@
   function openRealDialog(p, groups, done) {
     if (typeof document === 'undefined') { done(null); return; }
     const ov = document.createElement('div');
-    ov.id = 'vlx-mod-dialog';
+    ov.id = 'vlx-mod-dialog'; ov.setAttribute('data-vlx-keep', '1');
     ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100000;display:flex;align-items:center;justify-content:center;padding:12px;';
     let html = '<div style="background:#fff;color:#1C1917;border-radius:12px;width:420px;max-width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35);font-family:inherit;">'
       + '<div style="padding:14px 16px;border-bottom:1px solid #E7E5E4;font-weight:700;font-size:16px;">' + esc(p.name || 'Producto') + ' <span id="vlx-mod-total" style="float:right;color:#16a34a;"></span></div>'

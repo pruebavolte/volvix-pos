@@ -822,6 +822,7 @@
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
           if (_isHelp(n)) continue;
+          if (n.hasAttribute && n.hasAttribute('data-vlx-keep')) continue;
           if (_isCornerFloater(n)) {
             n.style.setProperty('display', 'none', 'important');
           }
@@ -839,6 +840,8 @@
           (m.addedNodes || []).forEach(function (n) {
             if (!n || n.nodeType !== 1) return;
             if (_isHelp(n)) return;
+            // data-vlx-keep: modales/menus legitimos del POS (tickets abiertos, modificadores, menu ⋮) que llevan id vlx-*
+            if (n.hasAttribute && n.hasAttribute('data-vlx-keep')) return;
             // Hide explicit known IDs
             if (typeof n.id === 'string' && n.id.indexOf('vlx-') === 0 && !_isHelp(n)) {
               n.style.setProperty('display', 'none', 'important');
