@@ -105,7 +105,9 @@ jobs:
       # activa la depuracion remota del WebView. Nunca en tags ni en main.
       - name: Emulator test build (WebView debugging)
         if: github.ref == 'refs/heads/apk/loyverse' && contains(github.event.head_commit.message, '[emu-test]')
-        run: sed -i 's/"webContentsDebuggingEnabled": false/"webContentsDebuggingEnabled": true/' capacitor.config.json && grep -n webContentsDebuggingEnabled capacitor.config.json
+        run: |
+          sed -i 's/"webContentsDebuggingEnabled": false/"webContentsDebuggingEnabled": true/' capacitor.config.json
+          grep -n webContentsDebuggingEnabled capacitor.config.json
 
       - name: Sync Capacitor (bundle public/ into APK assets)
         run: npx cap sync android
