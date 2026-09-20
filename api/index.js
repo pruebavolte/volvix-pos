@@ -18135,6 +18135,27 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: true, id, status: 'cancelled', reason, canceled_at: canceledAt, prev_status: curStatus });
     } catch (err) { sendError(res, err); }
   });
+  // FIX web/loyverse 2026-09-20: NO existia GET /api/sales/:id (404 en produccion) y lo llaman el asistente "Nueva devolucion"
+  // (newReturnLoadSale), la busqueda de venta (r10aFindSale) y la reimpresion por id: sin esto la devolucion desde la UI fallaba
+  // con "Error cargando venta: HTTP 404". Devuelve la fila de pos_sales completa (items[].modifiers/note incluidos), scope por tenant.
+  handlers['GET /api/sales/:id'] = requireAuth(async (req, res, params) => {
+    try {
+      const id = params && params.id;
+      if (!id || !isUuid(String(id))) return sendJSON(res, { error: 'sale not found' }, 404);
+      let sale = null;
+      try {
+        const rows = await supabaseRequest('GET', `/pos_sales?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
+        sale = rows && rows[0];
+      } catch (_) {}
+      if (!sale) return sendJSON(res, { error: 'sale not found' }, 404);
+      if (!b36IsSuperadmin(req) && String(sale.tenant_id || '') !== String(b36Tenant(req) || ' ')) {
+        return sendJSON(res, { error: 'sale not found' }, 404);
+      }
+      if (typeof sale.items === 'string') { try { sale.items = JSON.parse(sale.items); } catch (_) { sale.items = []; } }
+      sendJSON(res, sale);
+    } catch (err) { sendError(res, err); }
+  });
+
   handlers['GET /api/sales/:id/receipt'] = requireAuth(async (req, res, params) => {
     try {
       const id = params && params.id;
@@ -18150,7 +18171,14 @@ handlers['GET /api/config/public'] = async (req, res) => {
         return sendJSON(res, { error: 'sale not found' }, 404);
       }
       const items = Array.isArray(sale.items) ? sale.items : [];
-      const rows = items.map(it => `<tr><td>${it.product_id || it.code || ''}</td><td>${it.qty || 0}</td><td>${it.price || 0}</td></tr>`).join('');
+      // FIX web/loyverse 2026-09-20: el recibo mostraba solo product_id/qty/price; ahora nombre + modificadores + nota (escapados).
+      const _rcEsc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const _rcSub = it => {
+        const parts = (Array.isArray(it.modifiers) ? it.modifiers : []).map(m => String((m && (m.label || m.name)) || m || '')).filter(Boolean).map(t => '+ ' + t);
+        if (it.note) parts.push('Nota: ' + it.note);
+        return parts.length ? '<div style="font-size:11px;color:#555">' + _rcEsc(parts.join(' | ')) + '</div>' : '';
+      };
+      const rows = items.map(it => `<tr><td>${_rcEsc(it.name || it.product_id || it.code || '')}${_rcSub(it)}</td><td>${it.qty || 0}</td><td>${it.price || 0}</td></tr>`).join('');
       // Desglose de pagos (mixto): mostrar cuanto fue por cada metodo, no solo "MIXTO".
       let payBreakdown = '';
       try {
@@ -18345,7 +18373,15 @@ handlers['GET /api/config/public'] = async (req, res) => {
         return sendJSON(res, { error: 'sale not found' }, 404);
       }
       const ESC = String.fromCharCode(0x1b);
-      const lines = [ESC + '@', 'VOLVIX POS\n', `Sale: ${id}\n`, `Total: ${sale.total || 0}\n`, `Method: ${sale.payment_method || ''}\n`, '\n\n\n', ESC + 'd' + String.fromCharCode(3)];
+      // FIX web/loyverse 2026-09-20: agrega renglones de items con sus modificadores/nota (antes solo Sale/Total/Method).
+      const _epItems = [];
+      const _epClean = v => String(v == null ? '' : v).replace(/[^\x20-\x7e]/g, '?');
+      (Array.isArray(sale.items) ? sale.items : []).forEach(it => {
+        _epItems.push(`${Number(it.qty) || 1}x ${_epClean(it.name || it.code || '').slice(0, 28)}\n`);
+        (Array.isArray(it.modifiers) ? it.modifiers : []).forEach(m => _epItems.push('   + ' + _epClean((m && (m.label || m.name)) || m).slice(0, 26) + '\n'));
+        if (it.note) _epItems.push('   Nota: ' + _epClean(it.note).slice(0, 22) + '\n');
+      });
+      const lines = [ESC + '@', 'VOLVIX POS\n', `Sale: ${id}\n`].concat(_epItems, [`Total: ${sale.total || 0}\n`, `Method: ${sale.payment_method || ''}\n`, '\n\n\n', ESC + 'd' + String.fromCharCode(3)]);
       const buf = Buffer.from(lines.join(''), 'binary');
       try { await supabaseRequest('PATCH', `/pos_sales?id=eq.${encodeURIComponent(id)}`, { printed: true }); } catch (_) {}
       res.statusCode = 200; res.setHeader('Content-Type', 'application/octet-stream'); res.end(buf);
