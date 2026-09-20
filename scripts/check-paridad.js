@@ -12,7 +12,7 @@
 //   (c) ids vlx-* creados dinamicamente llevan data-vlx-keep (el guardian de flotantes de
 //       volvix-uplift-wiring.js oculta todo nodo nuevo con id vlx-* que no lo tenga)
 //   (d) todos los <script> inline de salvadorex-pos.html parsean
-//   (e) versiones alineadas: package.json vs public/version.json vs android versionName
+//   (e) versiones: package.json es la fuente; android versionName/versionCode deben derivarse de ella
 //
 // Deuda previa: scripts/paridad-baseline.json (ratchet). Lo que esta en el baseline se reporta como
 // DEUDA (no rompe); cualquier hallazgo NUEVO o que CREZCA rompe (exit 1). Para bajar la deuda:
@@ -114,6 +114,7 @@ const USE_PATTERNS = [
   /data-feature\s*=\s*\\?["']module\.([a-z][a-z0-9_]*)/g,
   /\.(?:has|status|enabled)\(\s*\\?["']module\.([a-z][a-z0-9_]*)/g,
   /enforceFeature\(\s*\\?["'](?:module\.)?([a-z][a-z0-9_]*)/g,
+  /['"]module\.([a-z][a-z0-9_]*)['"]/g, // cualquier literal 'module.x' (helpers propios, isOn, etc.)
 ];
 const usedMods = new Map(); // clave -> primer archivo
 const srcFiles = jsFiles.concat(walk(PUB, ['.html'])).concat([path.join(ROOT, 'api', 'index.js')]);
@@ -160,13 +161,12 @@ for (const s of inlines) {
 
 // ---- (e) versiones alineadas ------------------------------------------------------
 const pkg = (() => { try { return JSON.parse(read(path.join(ROOT, 'package.json'))); } catch (_) { return {}; } })();
-const verJson = (() => { try { return JSON.parse(read(path.join(PUB, 'version.json'))); } catch (_) { return {}; } })();
+// public/version.json es GENERADO (bump-version.js): fuente de verdad = package.json; no se compara.
 const gradle = read(path.join(ROOT, 'android', 'app', 'build.gradle')) || '';
 if (!pkg.version) add('e', 'e:package.json', 'package.json sin version');
 else {
-  if (verJson.version !== pkg.version) add('e', 'e:public/version.json', `public/version.json=${verJson.version} != package.json=${pkg.version}`);
   const vn = (gradle.match(/versionName\s+["']([^"']+)["']/) || [])[1];
-  const derived = /package\.json|VOLVIX_VERSION|APP_VERSION/.test(gradle);
+  const derived = /package\.json|VOLVIX_VERSION|APP_VERSION|VERSION_NAME|VERSION_CODE/.test(gradle);
   if (!derived && vn !== pkg.version) add('e', 'e:android/versionName', `android versionName=${vn} != package.json=${pkg.version}`);
   const vc = (gradle.match(/versionCode\s+(\d+)/) || [])[1];
   if (!derived && vc === '1') add('e', 'e:android/versionCode', 'android versionCode fijo en 1 (no sube con cada release)');

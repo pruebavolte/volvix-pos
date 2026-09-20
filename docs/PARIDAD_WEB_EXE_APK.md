@@ -69,20 +69,20 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | Tema | Estado | Detalle |
 |---|---|---|
 | Puente único `VolvixPlatform` | 🟡 | `71a7bb4`. Android/web devuelven `{ok:false, unsupported:true}` (no imprimen). |
-| Guardia CI `scripts/check-paridad.js` | ✅ | En `ci.yml`. Baseline = deuda previa (52); lo NUEVO rompe. |
-| Versión única | ⚠️ | `package.json` 1.0.344 · `public/version.json` 1.0.490 · Android `versionName "1.0"`/`versionCode 1` · `VERSION` raíz v20.0.0 (obsoleto). Falta fijar una sola fuente. |
-| CI Android (`build-apk.yml`) | ⬜ | Solo corre en push a `main`, no en tag; falla en "Setup Android SDK" (T0.4); `VolvixCliente.apk` sigue enlazado en `marketplace.html`. |
-| Panel de control | ⚠️ bloqueante | Los 6 flags de Ola 1 (`open_tickets`, `predefined_tickets`, `dining_options`, `modifiers`, `print_bill`, `kitchen_printers`) están en `volvix-feature-flags.js` pero **no** en `MOD_LABELS` de `paneldecontrol.html`; falta comprobar la BD `feature_modules` (el panel lee `/api/admin/feature-modules`). |
+| Guardia CI `scripts/check-paridad.js` | ✅ | En `ci.yml`. Solo FALLA por deuda NUEVA o que crezca; baseline = 51 entradas (anexo §6), a la baja por área. |
+| Versión única | ⚠️ | **Decisión (Vicky): fuente = `package.json`** (hoy 1.0.344). `public/version.json` es generado (1.0.490): la guardia lo ignora. Android `versionName = package.version` y `versionCode = patch`, derivados en el CI del tag (hoy `"1.0"`/`1` fijos en `build.gradle`: tarea APK). `VERSION` raíz v20.0.0 es obsoleto. |
+| CI Android (`build-apk.yml`) | ⬜ | Tarea APK: dispararlo TAMBIÉN por tag `v*` (hoy solo push a `main`), arreglar "Setup Android SDK" (T0.4), derivar versión de `package.json`, publicar `VolvixPOS.apk` en el release; `VolvixCliente.apk` sigue enlazado en `marketplace.html`. **Cero builds locales** (disco): solo GitHub Actions. |
+| Panel de control | 🟡 | CORRECCIÓN: los 6 flags de Ola 1 (`open_tickets`, `predefined_tickets`, `dining_options`, `modifiers`, `print_bill`, `kitchen_printers`) SÍ están en `paneldecontrol.html` (etiquetas, defaults `true` y grupo "Módulos"; los agregó la sesión exe en sus commits T1.x) y en `volvix-feature-flags.js`. Antes los declaré ausentes por buscar solo el prefijo `module.`; la guardia (b) los cubre. Falta: confirmar que existan en la BD `feature_modules` (el panel lee `/api/admin/feature-modules`) y probar el on/off en un negocio de PRUEBA (Web). |
 | Login de pruebas expuesto (T0.5) | ✅ | `6c0fc91` (bloque `#testCreds` fuera). `admin@volvix.test` sigue decisión del dueño. |
 | Cuadrícula vertical 375x812 | 🟡 | Sin medir aún (usar `scripts/dev-mock-pos.js`). |
 
-## 3. Deuda que detectó la guardia (baseline `scripts/paridad-baseline.json`)
+## 3. Deuda que detectó la guardia (baseline `scripts/paridad-baseline.json`, 51 entradas, lista completa en §6)
 
 - **(a) 13 archivos** usan `volvixElectron`/`Capacitor` directo en vez de `VolvixPlatform`: `volvix-cobro-modal.js` (16), `volvix-print-universal.js` (22), `volvix-mobile-wiring.js` (18), `volvix-print-config.js` (16), `volvix-ticket-editor.js` (8), `volvix-capacitor-api-rewrite.js` (8), `volvix-capacitor-bridge.js` (7), `volvix-print-hub.js` (4), `volvix-barcode-print.js` (2), `volvix-printer-errors.js`, `volvix-telemetry.js`, el `<script>` inline de `salvadorex-pos.html` y `public/api/index.js`. Migrar (sesión exe/APK según área); el contador **no puede crecer**.
-- **(b) 2:** `module.mapa` falta en el panel; `module.cobrar` (usado en `api/index.js`) falta en `volvix-feature-flags.js`.
+- **(b) 2:** `module.mapa` falta en el panel; `module.cobrar` (usado en `api/index.js`) falta en `volvix-feature-flags.js`. Los 6 flags de Ola 1 NO están en falta (ver §2).
 - **(c) 34:** ids `vlx-*` dinámicos sin `data-vlx-keep` (los oculta el guardián). Muchos son flotantes ocultos a propósito; **probables bugs reales en el POS** (mismo defecto que arregló `f6a578f`): `volvix-printer-errors.js` (`vlx-printer-error-modal`: el cajero no vería errores de impresión), `volvix-barcode-print.js` (`vlx-barcode-modal`), `volvix-module-flags-wiring.js` (`vlx-lock-modal`), `volvix-customer-credit.js`, `volvix-export-import.js`. Confirmar en navegador y agregar `data-vlx-keep`.
 - **(d) 0:** los 38 `<script>` inline de `salvadorex-pos.html` parsean.
-- **(e) 3:** desalineación de versiones (ver §2).
+- **(e) 2:** Android `versionName`/`versionCode` fijos (ver §2). `public/version.json` ya no se compara (generado).
 
 ## 4. Decisiones pendientes (las decide Vicky, no el dueño; bloquean cerrar filas ⚠️)
 
@@ -96,3 +96,76 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 |---|---|
 | 2026-09-20 | Worktree `integracion` (D:\github\volvix-integracion) desde `origin/ola1/loyverse` @ `07ddd71`. Existe solo la sesión "Loyverse exe"; **no existen** las sesiones "Loyverse APK" ni "Loyverse Web" (ni archivadas) ni las ramas `apk/loyverse`/`web/loyverse`. Guardia + tabla creadas. |
 | 2026-09-20 | Mezcladas en `integracion`: `origin/ola1/loyverse` @ `8456036` (doc de equipo) y `security/integrate-ola1` (`c5f4529`, 80 archivos: contraseña de prueba -> `REDACTED_TEST_PASSWORD`; `node --check` OK, guardia sin cambios). La contraseña sigue en el HISTORIAL git del repo público: falta desactivar/rotar `admin@volvix.test` (decide Vicky). |
+
+## 6. Anexo — deuda base (51 entradas; que exe/APK/Web la reduzcan por área)
+
+### (a) uso directo de volvixElectron/Capacitor (migrar a VolvixPlatform; el conteo no puede crecer) — 13
+
+| Hallazgo | # | Área |
+|---|---|---|
+| `public/api/index.js` | 1 | Web |
+| `public/volvix-barcode-print.js` | 2 | exe |
+| `public/volvix-capacitor-api-rewrite.js` | 8 | APK |
+| `public/volvix-capacitor-bridge.js` | 5 | APK |
+| `public/volvix-cobro-modal.js` | 19 | exe |
+| `public/volvix-mobile-wiring.js` | 23 | APK |
+| `public/volvix-print-config.js` | 24 | exe |
+| `public/volvix-print-hub.js` | 6 | exe |
+| `public/volvix-print-universal.js` | 17 | exe |
+| `public/volvix-printer-errors.js` | 1 | exe |
+| `public/volvix-telemetry.js` | 3 | exe |
+| `public/volvix-ticket-editor.js` | 11 | exe |
+| `salvadorex-pos.html#inline` | 70 | exe |
+
+### (b) módulo usado sin alta en flags/panel — 2
+
+| Hallazgo | # | Área |
+|---|---|---|
+| `module.cobrar:volvix-feature-flags.js` | 1 | Web |
+| `module.mapa:paneldecontrol.html` | 1 | Web |
+
+### (c) id vlx-* dinámico sin data-vlx-keep (los oculta el guardián salvo que sea un flotante intencional) — 34
+
+| Hallazgo | # | Área |
+|---|---|---|
+| `public/js/vlxPanelDrawer.js:vlx-giro-config-drawer` | 1 | exe |
+| `public/js/vlxPanelDrawer.js:vlx-giro-config-fab` | 1 | exe |
+| `public/volvix-barcode-print.js:vlx-barcode-modal` | 1 | exe |
+| `public/volvix-capacitor-bridge.js:vlx-update-banner` | 1 | APK |
+| `public/volvix-customer-credit.js:vlx-modal-title-` | 1 | exe |
+| `public/volvix-export-import.js:vlx-modal-title-` | 1 | exe |
+| `public/volvix-helpdesk-wiring.js:vlx-hd-btn` | 1 | exe |
+| `public/volvix-helpdesk-wiring.js:vlx-hd-panel` | 1 | exe |
+| `public/volvix-mexico-pride-wiring.js:vlx-mexico-pride` | 1 | exe |
+| `public/volvix-mexico-pride-wiring.js:vlx-nl-logo-strip` | 1 | exe |
+| `public/volvix-mobile-fixes.js:vlx-empty-products-banner` | 1 | APK |
+| `public/volvix-mobile-fixes.js:vlx-onebyone-tip` | 1 | APK |
+| `public/volvix-module-flags-wiring.js:vlx-lock-modal` | 1 | Web |
+| `public/volvix-modules-wiring.js:vlx-academy-ai` | 1 | exe |
+| `public/volvix-modules-wiring.js:vlx-academy-ai-toggle` | 1 | exe |
+| `public/volvix-modules-wiring.js:vlx-health-pill` | 1 | exe |
+| `public/volvix-modules-wiring.js:vlx-toast-stack` | 1 | exe |
+| `public/volvix-pos-payments-integration.js:vlx-pay-badge` | 1 | exe |
+| `public/volvix-pos-payments-integration.js:vlx-rt-dot` | 1 | exe |
+| `public/volvix-pos-payments-integration.js:vlx-toast-host` | 1 | exe |
+| `public/volvix-printer-errors.js:vlx-printer-error-modal` | 1 | exe |
+| `public/volvix-reminders-wiring.js:vlx-rem-toasts` | 1 | exe |
+| `public/volvix-sync-widget.js:vlx-panel` | 1 | exe |
+| `public/volvix-sync-widget.js:vlx-widget` | 1 | exe |
+| `public/volvix-whatsapp-wiring.js:vlx-wa-fab` | 1 | exe |
+| `public/volvix-whatsapp-wiring.js:vlx-wa-panel` | 1 | exe |
+| `salvadorex-pos.html#inline:vlx-hist-cliente-modal` | 1 | exe |
+| `salvadorex-pos.html#inline:vlx-hist-filter-modal` | 1 | exe |
+| `salvadorex-pos.html#inline:vlx-inv-image-panel` | 1 | exe |
+| `salvadorex-pos.html#inline:vlx-mayoreo-chip` | 1 | exe |
+| `salvadorex-pos.html#inline:vlx-media-lightbox` | 1 | exe |
+| `salvadorex-pos.html#inline:vlx-modal-generic` | 1 | exe |
+| `salvadorex-pos.html#inline:vlx-search-picker` | 1 | exe |
+| `salvadorex-pos.html#inline:vlx-tax-breakdown` | 1 | exe |
+
+### (e) versión — 2
+
+| Hallazgo | # | Área |
+|---|---|---|
+| `android/versionCode` | 1 | APK |
+| `android/versionName` | 1 | APK |
