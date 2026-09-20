@@ -36,6 +36,15 @@
         return Promise.resolve(api.comandaGet()).then(function (r) { _legacy = !!(r && r.ok && r.cfg && !Array.isArray(r.cfg.printers)); return _legacy; }).catch(function () { return false; });
       } catch (_) { return Promise.resolve(false); }
     }
+    // .exe viejo: quita cancel:true y aplana modificadores/nota al nombre; null si no queda nada por preparar.
+    function legacyComanda(c) {
+      if (!c || !Array.isArray(c.items)) return c || null;
+      var items = c.items.filter(function (i) { return !(i && i.cancel); }).map(function (i) {
+        var extra = ((i && i.modifiers) || []).concat(i && i.note ? [i.note] : []).filter(Boolean);
+        return { qty: i && i.qty, name: String((i && i.name) || '') + (extra.length ? ' (' + extra.join(', ') + ')' : '') };
+      });
+      return items.length ? Object.assign({}, c, { items: items }) : null;
+    }
     // Config vieja {ip,port,width} -> sintetiza printers[0] para que la UI nueva la vea (nunca se pierde 192.168.x.x:9100)
     function normGet(r) {
       try {
@@ -49,20 +58,20 @@
     return {
       printTicket: function (opts) {
         if (!api || typeof api.printRawText !== 'function') return unsupported();
-        try { return api.printRawText(opts); } catch (e) { return Promise.resolve({ ok: false, error: e && e.message }); }
+        // N1: el ticket lleva opts.comanda; el .exe viejo imprimiria los cancel:true como platillos nuevos => se filtra igual que en printComanda.
+        if (!opts || !opts.comanda) { try { return api.printRawText(opts); } catch (e) { return Promise.resolve({ ok: false, error: e && e.message }); } }
+        return legacyMode().then(function (legacy) {
+          var o = legacy ? Object.assign({}, opts, { comanda: legacyComanda(opts.comanda) }) : opts;
+          try { return api.printRawText(o); } catch (e) { return { ok: false, error: e && e.message }; }
+        });
       },
       printComanda: function (comanda) {
         if (!api || typeof api.comandaPrint !== 'function') return unsupported();
         return legacyMode().then(function (legacy) {
           var c = comanda;
           if (legacy && comanda && Array.isArray(comanda.items)) {
-            // .exe viejo: no entiende cancel:true (cocinaria lo cancelado) ni modificadores: se filtran/aplanan aqui.
-            var items = comanda.items.filter(function (i) { return !(i && i.cancel); }).map(function (i) {
-              var extra = ((i && i.modifiers) || []).concat(i && i.note ? [i.note] : []).filter(Boolean);
-              return { qty: i && i.qty, name: String((i && i.name) || '') + (extra.length ? ' (' + extra.join(', ') + ')' : '') };
-            });
-            if (!items.length) return { ok: true, empty: true };
-            c = Object.assign({}, comanda, { items: items });
+            c = legacyComanda(comanda);
+            if (!c) return { ok: true, empty: true };
           }
           try { return api.comandaPrint(c); } catch (e) { return { ok: false, error: e && e.message }; }
         });
