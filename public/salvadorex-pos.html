@@ -22251,6 +22251,80 @@
     });
   })();
 
+  // ---- T1.4 Editor de renglon (clon Loyverse): tocar el renglon => Cantidad +/-, Comentario, Descuento, RETIRAR DEL TICKET ----
+  (function(){
+    var items = document.getElementById('lv-ticket-items');
+    if (!items) return;
+    var px = 0, py = 0;
+    items.addEventListener('pointerdown', function(e){ px = e.clientX; py = e.clientY; });
+    function round2(n){ return Math.round((Number(n) || 0) * 100) / 100; }
+    function discOn(){ try { return !window.VolvixFeatures || window.VolvixFeatures.isEnabled('module.line_discount') !== false; } catch(_) { return true; } }
+    function baseOf(it){ return it.originalPrice != null ? Number(it.originalPrice) : Number(it.price) || 0; }
+    function fmtM(n){ return '$' + (Number(n) || 0).toFixed(2); }
+    function close(){ var m = document.getElementById('vlx-line-editor'); if (m) m.remove(); }
+    window.vlxOpenLineEditor = function(idx){
+      var it = CART[idx]; if (!it) return;
+      close();
+      var ld = it.line_discount || { type: 'pct', value: 0 };
+      var m = document.createElement('div');
+      m.id = 'vlx-line-editor'; m.setAttribute('data-vlx-keep', '1');
+      m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99990;display:flex;align-items:center;justify-content:center;padding:12px;';
+      var chips = [5,10,15,20].map(function(p){ return '<button type="button" data-chip="'+p+'" style="border:1px solid #ccc;background:#fff;border-radius:16px;padding:4px 10px;margin:2px;cursor:pointer;">'+p+'%</button>'; }).join('');
+      m.innerHTML = '<div style="background:#fff;color:#222;border-radius:8px;width:100%;max-width:380px;max-height:92vh;overflow:auto;padding:14px 16px;font-family:inherit;">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;"><strong style="font-size:15px;">'+escapeHtml(it.name||'')+' '+fmtM(baseOf(it))+'</strong>'
+        + '<button type="button" id="vlx-le-save" style="background:#26A65B;color:#fff;border:0;border-radius:4px;padding:8px 14px;font-weight:700;cursor:pointer;">GUARDAR</button></div>'
+        + '<label style="font-size:12px;color:#666;">Cantidad</label>'
+        + '<div style="display:flex;align-items:center;gap:8px;margin:4px 0 12px;"><button type="button" id="vlx-le-minus" style="width:40px;height:40px;font-size:20px;">−</button>'
+        + '<input id="vlx-le-qty" type="number" min="1" step="1" value="'+(Number(it.qty)||1)+'" style="width:80px;height:40px;text-align:center;font-size:16px;">'
+        + '<button type="button" id="vlx-le-plus" style="width:40px;height:40px;font-size:20px;">+</button></div>'
+        + '<label style="font-size:12px;color:#666;">Comentario</label>'
+        + '<input id="vlx-le-note" type="text" maxlength="120" placeholder="Introducir comentario" value="'+escapeAttr(it.note||'')+'" style="width:100%;height:38px;margin:4px 0 12px;padding:0 8px;">'
+        + (discOn() ? '<div data-feature="module.line_discount"><label style="font-size:12px;color:#666;">Descuento</label>'
+        + '<div style="display:flex;gap:6px;align-items:center;margin:4px 0;"><input id="vlx-le-disc" type="number" min="0" step="0.01" value="'+(ld.value||0)+'" style="width:100px;height:38px;padding:0 8px;">'
+        + '<select id="vlx-le-dtype" style="height:38px;"><option value="pct"'+(ld.type==='pct'?' selected':'')+'>%</option><option value="amt"'+(ld.type==='amt'?' selected':'')+'>$ (a la linea)</option></select></div>'
+        + '<div>'+chips+'</div></div>' : '')
+        + '<button type="button" id="vlx-le-remove" style="width:100%;margin-top:14px;background:#fff;color:#c62828;border:1px solid #c62828;border-radius:4px;padding:10px;font-weight:700;cursor:pointer;">RETIRAR DEL TICKET</button>'
+        + '<button type="button" id="vlx-le-cancel" style="width:100%;margin-top:8px;background:#eee;border:0;border-radius:4px;padding:8px;cursor:pointer;">Cancelar</button></div>';
+      document.body.appendChild(m);
+      var q = m.querySelector('#vlx-le-qty');
+      m.querySelector('#vlx-le-minus').onclick = function(){ q.value = Math.max(1, (parseInt(q.value,10)||1) - 1); };
+      m.querySelector('#vlx-le-plus').onclick = function(){ q.value = (parseInt(q.value,10)||0) + 1; };
+      Array.prototype.forEach.call(m.querySelectorAll('[data-chip]'), function(b){ b.onclick = function(){ m.querySelector('#vlx-le-disc').value = b.getAttribute('data-chip'); m.querySelector('#vlx-le-dtype').value = 'pct'; }; });
+      m.addEventListener('click', function(e){ if (e.target === m) close(); });
+      m.querySelector('#vlx-le-cancel').onclick = close;
+      m.querySelector('#vlx-le-remove').onclick = function(){ close(); if (typeof window.removeFromCart === 'function') { try { window.removeFromCart(idx); } catch(_){} } };
+      m.querySelector('#vlx-le-save').onclick = function(){
+        var n = parseInt(q.value, 10); if (!isFinite(n) || n < 1) n = Number(it.qty) || 1;
+        if (n !== Number(it.qty) && typeof window.setCartQty === 'function') { try { window.setCartQty(idx, n); } catch(_){} }
+        var cur = CART[idx]; if (!cur) { close(); return; }
+        cur.qty = n; // setCartQty puede rechazar (stock): la cantidad pedida manda aqui, igual que el input de la tabla
+        cur.note = (m.querySelector('#vlx-le-note').value || '').trim();
+        var dEl = m.querySelector('#vlx-le-disc');
+        if (dEl) {
+          var v = Math.max(0, parseFloat(dEl.value) || 0), type = m.querySelector('#vlx-le-dtype').value;
+          var base = baseOf(cur);
+          if (cur.originalPrice == null) cur.originalPrice = base;
+          var unit = base;
+          if (v > 0) unit = type === 'pct' ? base * (1 - Math.min(v, 100) / 100) : base - (v / (cur.qty || 1));
+          cur.price = Math.max(0, round2(unit));
+          cur.discount = base > 0 ? round2((base - cur.price) / base * 100) : 0;
+          cur.line_discount = v > 0 ? { type: type, value: v } : null;
+          if (!v) { cur.originalPrice = null; cur.price = base; }
+        }
+        close(); renderCart();
+        if (typeof showToast === 'function') showToast('Renglon actualizado');
+      };
+    };
+    items.addEventListener('click', function(e){
+      if (e.target.closest('.lv-row-del')) return;
+      var row = e.target.closest('.lv-ticket-row'); if (!row) return;
+      if (row.classList.contains('lv-open')) return;                       // swipe abierto: lo maneja el otro handler
+      if (Math.abs(e.clientX - px) > 8 || Math.abs(e.clientY - py) > 8) return; // fue arrastre, no toque
+      var idx = parseInt(row.getAttribute('data-idx'), 10);
+      if (idx >= 0 && CART[idx]) window.vlxOpenLineEditor(idx);
+    });
+  })();
+
   function isSaleScreen(){
     var p = document.getElementById('screen-pos');
     if (p && !p.classList.contains('hidden')) return true;
