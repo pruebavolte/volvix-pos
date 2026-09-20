@@ -36,7 +36,14 @@ Los bytes se arman en `public/volvix-escpos.js` (compartido; `scripts/test-escpo
 ## 4. Pruebas
 
 - Node: `node scripts/test-escpos-parity.js` (16 aserciones), `node scripts/test-platform-android.js` (16, Capacitor y plugin falsos).
-- CI: build verde en `apk/loyverse`; el APK sube como artifact. Pruebas en emulador → sección de resultados al final.
+- CI: build verde en `apk/loyverse` (run 35511699480, APK 1.0.344 de 30 MB, Java del plugin compila). Push a `main`/`apk/**` solo sube artifact; solo un tag `v*.*.*` publica en el release. Un commit con `[emu-test]` en el mensaje (solo rama `apk/loyverse`) habilita la depuracion remota del WebView para pruebas en emulador.
+- **Emulador `emulator-5556` (Android 10, 1080x2280, 393x830 CSS px), APK real de CI** (evidencia 2026-09-20):
+  - `VolvixPlatform.kind === 'android'`, `Capacitor.Plugins.VolvixPrinter` registrado, `VolvixEscPos` cargado; app arranca sin crash.
+  - Impresion REAL por TCP a una impresora falsa en el host (10.0.2.2:9100/9101): `comandaTest` 274 B; `printTicket` 55 B con CP437 (`Se¤or Jos`) + pulso de cajon (`1b 70 00 3c 78`); comanda ruteada por categoria (Guisados -> :9100, Bebidas -> :9101); `openDrawer` 7 B; `pingPrinter` ok/fallo con mensaje; Bluetooth sin adaptador -> `{ok:false,'Este equipo no tiene Bluetooth'}` sin lanzar.
+  - Vista Loyverse (`body[data-vista=2]`): cuadricula de **3 columnas** a 393 px (tiles 128x104), pestanas de categoria, TICKETS ABIERTOS / COBRAR, tacto OK (anillo de foco), menu ⋮ abre ("Articulo vario", "Imprimir cuenta").
+  - Camara: `scanBarcode` muestra overlay y oculta el resto; la vista previa de la camara del emulador sale negra (sin decodificar codigos aqui; falta probar en equipo fisico). Bug hallado y corregido: `stopScan()` no resuelve `startScan()`, asi que "Cancelar" ahora cierra por su cuenta (verificado).
+  - Bug hallado y corregido: la barra de estado se encimaba con el encabezado (WebView bajo la barra de estado) -> `capacitor.config.json` StatusBar `overlaysWebView:false`, color `#1E8E4E`.
+  - NO concluyente (backend simulado, sin datos reales): agregar producto al ticket, modal de Tickets abiertos, campo de busqueda y teclado no respondieron con el mock de `scripts/dev-mock-pos.js` (los mosaicos se fabricaron; el renderizador clasico de quick-picks no genero productos con el mock). Debe repetirse contra el negocio de PRUEBA cuando haya red en el emulador (hoy sin internet).
 
 ## 5. Pendientes / degradaciones honestas
 
