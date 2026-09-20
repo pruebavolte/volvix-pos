@@ -2496,6 +2496,10 @@
   }
   .lv-product-card:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,.28); z-index: 1; }
   .lv-product-card:active { transform: scale(.97); }
+  /* Ajuste Configuracion > Distribucion de los articulos (clon Loyverse: Lista/Cuadricula). Default = cuadricula. */
+  #lv-products-grid[data-lv-layout="list"] { grid-template-columns: 1fr !important; gap: 1px; }
+  #lv-products-grid[data-lv-layout="list"] .lv-product-card { flex-direction: row; align-items: center; justify-content: space-between; min-height: 56px; padding: 10px 14px; }
+  #lv-products-grid[data-lv-layout="list"] .lv-product-name { flex: 1; }
   /* Especificidad con el id del shell para ganarle SIEMPRE a la regla de tema [class*="card"]
      (misma especificidad pero definida después). Así el mosaico conserva su color/foto. */
   #vista2-loyverse-shell .lv-product-card { background: var(--lv-c, #26A65B) !important; }
@@ -5956,6 +5960,14 @@
             <p style="margin:14px 0 0;color:var(--text-3);font-size:11px;">El cambio se aplica de inmediato. Para alternar también hay un botón en el menubar superior.</p>
           </div>
 
+          <div id="cfg-lvlayout" class="card card-pad">
+            <h3 style="margin: 0 0 6px; font-size: 14px;">▦ Distribución de los artículos</h3>
+            <p style="margin:0 0 14px;color:var(--text-2);font-size:11.5px;">Cómo se muestran los artículos en la pantalla de venta (Vista Tablet). Por defecto: Cuadrícula.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button type="button" class="btn" id="cfg-lvlayout-grid" onclick="vlxSetLvLayout('grid')">▦ Cuadrícula</button>
+              <button type="button" class="btn" id="cfg-lvlayout-list" onclick="vlxSetLvLayout('list')">☰ Lista</button>
+            </div>
+          </div>
           <!-- 2026-05-10 user-request: Bloqueo por inactividad — DESACTIVADO por default -->
           <div id="cfg-bloqueo" class="card card-pad">
             <h3 style="margin: 0 0 6px; font-size: 14px;">🔒 Bloquear equipo por inactividad</h3>
@@ -22046,10 +22058,20 @@
     return '📦';
   }
 
+  function vlxLvLayout() { try { return localStorage.getItem('vlx_lv_layout') === 'list' ? 'list' : 'grid'; } catch (_) { return 'grid'; } }
+  window.vlxSetLvLayout = function (mode, silent) {
+    mode = mode === 'list' ? 'list' : 'grid';
+    try { localStorage.setItem('vlx_lv_layout', mode); } catch (_) {}
+    var g = document.getElementById('lv-products-grid'); if (g) g.setAttribute('data-lv-layout', mode);
+    ['grid', 'list'].forEach(function (m) { var b = document.getElementById('cfg-lvlayout-' + m); if (b) b.setAttribute('aria-pressed', m === mode ? 'true' : 'false'); if (b) b.style.outline = (m === mode) ? '2px solid var(--accent, #2563eb)' : ''; });
+    if (!silent && typeof showToast === 'function') showToast(mode === 'list' ? 'Artículos en lista' : 'Artículos en cuadrícula');
+  };
+  try { window.vlxSetLvLayout(vlxLvLayout(), true); } catch (_) {}
   function syncLvProducts() {
     if (!vistaIs(2)) return;
     var grid = document.getElementById('lv-products-grid');
     if (!grid) return;
+    grid.setAttribute('data-lv-layout', vlxLvLayout());
     var qps = Array.from(document.querySelectorAll('.qp-card'));
     if (!qps.length) {
       grid.innerHTML = '<div class="lv-product-empty">Sin productos en esta categoría.<br>Selecciona otra categoría abajo.</div>';
