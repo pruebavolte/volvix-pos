@@ -101,6 +101,8 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 |---|---|
 | 2026-09-20 | Worktree `integracion` (D:\github\volvix-integracion) desde `origin/ola1/loyverse` @ `07ddd71`. Existe solo la sesión "Loyverse exe"; **no existen** las sesiones "Loyverse APK" ni "Loyverse Web" (ni archivadas) ni las ramas `apk/loyverse`/`web/loyverse`. Guardia + tabla creadas. |
 | 2026-09-20 | Mezcladas en `integracion`: `origin/ola1/loyverse` @ `8456036` (doc de equipo) y `security/integrate-ola1` (`c5f4529`, 80 archivos: contraseña de prueba -> `REDACTED_TEST_PASSWORD`; `node --check` OK, guardia sin cambios). La contraseña sigue en el HISTORIAL git del repo público: falta desactivar/rotar `admin@volvix.test` (decide Vicky). |
+| 2026-09-20 | Decisión de Vicky: WEB imprime con `window.print()` sin comanda de red (🔶); APK con plugin TCP 9100 propio (tarea APK); `package.json` fuente única de versión. Filas 2.6, 3.3, 8.1, 8.2: WEB ⚠️ → 🔶. |
+| 2026-09-20 | Mezclados en `integracion`: `web/loyverse` @ `4924e1d` (sin conflictos) y `apk/loyverse` @ `2b66f44` (sin conflictos; toca 5 líneas de `salvadorex-pos.html` y `volvix-cobro-modal.js`). Guardia 0 nuevos; `a:volvix-print-config.js` bajó (baseline actualizado). |
 
 ## 6. Anexo — deuda base (51 entradas; que exe/APK/Web la reduzcan por área)
 
@@ -174,7 +176,6 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 |---|---|---|
 | `android/versionCode` | 1 | APK |
 | `android/versionName` | 1 | APK |
-| 2026-09-20 | Decisión de Vicky: WEB imprime con `window.print()` sin comanda de red (🔶); APK con plugin TCP 9100 propio (tarea APK); `package.json` fuente única de versión. Filas 2.6, 3.3, 8.1, 8.2: WEB ⚠️ → 🔶. |
 
 ## 7. Riesgos PRE-PUBLICACIÓN (reportados por Web, 2026-09-20)
 
@@ -185,4 +186,3 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 3 | `kdsMarkDone` borra tickets abiertos. | exe | abierto |
 | 4 | La reimpresión descarta `modifiers` en 2 sitios del HTML de `salvadorex-pos.html`. | exe | abierto (Web corrigió el lado servidor, `4924e1d`) |
 | 5 | Probables modales ocultos por el guardián (anexo §6 (c)): `vlx-printer-error-modal`, `vlx-barcode-modal`, `vlx-lock-modal`. | exe | por confirmar en navegador |
-| 2026-09-20 | Mezclados en `integracion`: `web/loyverse` @ `4924e1d` (sin conflictos) y `apk/loyverse` @ `2b66f44` (sin conflictos; toca 5 líneas de `salvadorex-pos.html` y `volvix-cobro-modal.js`). Guardia 0 nuevos; `a:volvix-print-config.js` bajó (baseline actualizado). |
