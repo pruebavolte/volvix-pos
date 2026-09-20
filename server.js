@@ -1626,8 +1626,10 @@ const server = http.createServer(async (req, res) => {
   const parsed = url.parse(req.url);
   const pathname = parsed.pathname;
 
-  // CORS preflight
-  if (req.method === 'OPTIONS') {
+  // CORS preflight. Para /api/* NO se responde aqui: api/index.js contesta con CORS dinamico (Origin permitido,
+  // Allow-Credentials y Allow-Headers explicito con Authorization/Idempotency-Key). El comodin '*' NO cubre
+  // Authorization, y el APK (origin https://localhost) fallaba con "Failed to fetch" en cualquier llamada autenticada.
+  if (req.method === 'OPTIONS' && !pathname.startsWith('/api/')) {
     res.writeHead(204, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': '*',
