@@ -325,6 +325,42 @@
   }
 
   /**
+   * T1.6 PRE-CUENTA: sin folio, sin pago, sin cajon. data:{ticketName,mode,items,subtotal,discount,tax,total}
+   */
+  function renderPreBill(data, cfg) {
+    cfg = cfg || loadConfig();
+    data = data || {};
+    const w = cfg.paperWidth || 32;
+    const L = [];
+    const fit = (s) => String(s == null ? '' : s).slice(0, w);
+    const center = (s) => { s = fit(s); const d = w - s.length; return ' '.repeat(Math.floor(d / 2)) + s; };
+    const two = (a, b) => { a = String(a); b = String(b); const room = Math.max(0, w - b.length - 1); return a.slice(0, room).padEnd(room) + ' ' + b; };
+    const fmt$ = (n) => '$' + Number(n || 0).toFixed(2);
+    const sep = '-'.repeat(w);
+    if (cfg.businessName) L.push(center(String(cfg.businessName).toUpperCase()));
+    L.push(center('PRE-CUENTA'));
+    if (data.ticketName) L.push(fit('Ticket: ' + data.ticketName));
+    if (data.mode) L.push(fit('Consumo: ' + data.mode));
+    L.push(sep);
+    (data.items || []).forEach((it) => {
+      L.push(two(String(it.qty || 1) + ' x ' + String(it.name || ''), fmt$(it.total)));
+      (it.modifiers || []).forEach((m) => {
+        const d = Number(m && m.price_delta) || 0;
+        L.push(fit('   + ' + String((m && m.label) || m) + (d ? ' (' + (d > 0 ? '+' : '-') + fmt$(Math.abs(d)) + ')' : '')));
+      });
+      if (it.note) L.push(fit('   Nota: ' + it.note));
+    });
+    L.push(sep);
+    if (Number(data.subtotal) !== Number(data.total)) L.push(two('Subtotal:', fmt$(data.subtotal)));
+    if (data.discount > 0) L.push(two('Descuento:', '-' + fmt$(data.discount)));
+    if (data.tax > 0) L.push(two('Impuestos:', fmt$(data.tax)));
+    L.push(sep);
+    L.push(fit('IMPORTE A PAGAR: ' + fmt$(data.total)));
+    L.push(center('NO ES COMPROBANTE DE PAGO'));
+    return L.join('\n');
+  }
+
+  /**
    * Render del ticket como HTML para previa
    */
   function renderHTML(data, cfg) {
@@ -352,6 +388,7 @@
     getConfig,
     onChange,
     renderText,
+    renderPreBill,
     renderHTML,
     getSampleData,
     DEFAULT_CONFIG

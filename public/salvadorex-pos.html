@@ -18274,6 +18274,32 @@
     return { delta: delta, markSent: markSent, reset: reset, onSave: onSave };
   })();
 
+  // ---- T1.6 Pre-cuenta (module.print_bill): sin folio, sin pago, sin cajon, no guarda la venta ----
+  window.printPreBill = function () {
+    var toast = function (m, t) { if (typeof window.showToast === 'function') window.showToast(m, t); };
+    if (!CART.length) { toast('El ticket esta vacio', 'error'); return Promise.resolve(); }
+    var TC = window.VolvixTicketCustomizer;
+    if (!TC || !TC.renderPreBill) { toast('No disponible en este dispositivo', 'error'); return Promise.resolve(); }
+    var sub = CART.reduce(function (s, i) { return s + (Number(i.price) || 0) * (Number(i.qty) || 0); }, 0);
+    var disc = Number(window.__volvixCartDiscount || 0), tot = null;
+    try { if (window.VolvixTax && window.VolvixTax.computeTotals) tot = window.VolvixTax.computeTotals(CART, disc); } catch (_) {}
+    var total = tot && tot.total != null && !isNaN(tot.total) ? Number(tot.total) : Math.max(0, sub - disc);
+    var tax = tot && Number(tot.tax) > 0 ? Number(tot.tax) : 0;
+    var din = document.getElementById('lv-dinein');
+    var ot = window.__vlxOpenTicket;
+    var text = TC.renderPreBill({
+      ticketName: (ot && ot.name) || '',
+      mode: din ? (window.VolvixDining ? window.VolvixDining.current().label : (din.getAttribute('data-mode') === 'away' ? 'Para llevar' : 'Comer aqui')) : '',
+      items: CART.map(function (i) { return { qty: i.qty, name: i.name, total: (Number(i.price) || 0) * (Number(i.qty) || 0), modifiers: i.modifiers || [], note: i.note || '' }; }),
+      subtotal: sub, discount: disc, tax: tax, total: total
+    }, TC.getConfig());
+    var P = window.VolvixPlatform;
+    if (!P || P.kind === 'web' || P.kind === 'android') { toast('Impresora no disponible en este dispositivo', 'error'); return Promise.resolve(); }
+    return Promise.resolve(P.printTicket({ text: text, printerName: (function () { try { return localStorage.getItem('volvix_system_printer') || undefined; } catch (_) { return undefined; } })(), openDrawer: false })).then(function (r) {
+      if (r && (r.unsupported || r.ok === false)) toast('Impresora no disponible', 'error'); else toast('Cuenta impresa');
+    }).catch(function () { toast('Impresora no disponible', 'error'); });
+  };
+
   // ---- T1.1 Tickets abiertos (module.open_tickets / module.predefined_tickets) ----
   window.__vlxOpenTicket = null; // {id,name,comment} del ticket abierto cargado; el siguiente Guardar lo ACTUALIZA
   function _otOn(k) { try { return !window.VolvixFeatures || window.VolvixFeatures.isEnabled(k); } catch (_) { return true; } }
@@ -22190,7 +22216,21 @@
       return;
     }
     if (e.target.closest('#lv-more')) {
-      if (typeof window.openVarios === 'function') { try { window.openVarios(); } catch(_){} }
+      // T1.6: menu de tres puntos = Articulo vario + Imprimir cuenta (module.print_bill)
+      var _pbOn = true; try { _pbOn = !window.VolvixFeatures || window.VolvixFeatures.isEnabled('module.print_bill'); } catch(_) {}
+      if (!_pbOn) { if (typeof window.openVarios === 'function') { try { window.openVarios(); } catch(_){} } return; }
+      var _old = document.getElementById('vlx-more-menu'); if (_old) { _old.remove(); return; }
+      var _m = document.createElement('div'); _m.id = 'vlx-more-menu';
+      var _r = e.target.closest('#lv-more').getBoundingClientRect();
+      _m.style.cssText = 'position:fixed;z-index:99999;background:#fff;color:#222;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);min-width:180px;top:' + Math.round(_r.bottom + 4) + 'px;right:8px';
+      _m.innerHTML = '<div data-a="vario" data-feature="pos.ins_varios" style="padding:12px 16px;cursor:pointer">Art\u00edculo vario</div><div data-a="bill" data-feature="module.print_bill" style="padding:12px 16px;cursor:pointer;border-top:1px solid #eee">Imprimir cuenta</div>';
+      _m.addEventListener('click', function (ev) {
+        var t = ev.target.closest('[data-a]'); if (!t) return; _m.remove();
+        if (t.getAttribute('data-a') === 'vario') { if (typeof window.openVarios === 'function') { try { window.openVarios(); } catch(_){} } }
+        else if (typeof window.printPreBill === 'function') window.printPreBill();
+      });
+      document.body.appendChild(_m);
+      setTimeout(function () { document.addEventListener('click', function h(ev2) { if (!_m.contains(ev2.target)) { _m.remove(); } document.removeEventListener('click', h); }); }, 0);
       return;
     }
     if (e.target.closest('#lv-bell')) {
