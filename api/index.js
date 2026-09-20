@@ -25382,12 +25382,33 @@ if (process.env.NODE_ENV === 'test') {
           result = await supabaseRequest('POST', '/pending_sales', rowMeta || row);
         } catch (e1) {
           if (!rowMeta) throw e1;
-          var metaJson = JSON.stringify({ n: tName, c: tComment, e: tEmp, d: tDin, t: row.notes || '' });
-          result = await supabaseRequest('POST', '/pending_sales', Object.assign({}, row, { notes: ('VLXMETA:' + metaJson).slice(0, 500) }));
+          // FIX web/loyverse 2026-09-20: el JSON de VLXMETA se recortaba con slice(0,500) y quedaba INVALIDO
+          // (JSON.parse falla en el cliente y se pierden nombre/comentario/mesero/dining). Ahora se acorta el
+          // campo mas largo hasta que el JSON completo cabe en 500 chars.
+          var metaObj = { n: tName, c: tComment, e: tEmp, d: tDin, t: row.notes || '' };
+          var metaStr = 'VLXMETA:' + JSON.stringify(metaObj);
+          for (var _g = 0; metaStr.length > 500 && _g < 800; _g++) {
+            var _lk = 't';
+            ['c', 'n', 'e', 'd'].forEach(function (k) { if (String(metaObj[k]).length > String(metaObj[_lk]).length) _lk = k; });
+            metaObj[_lk] = String(metaObj[_lk]).slice(0, Math.max(0, String(metaObj[_lk]).length - Math.max(1, metaStr.length - 500)));
+            metaStr = 'VLXMETA:' + JSON.stringify(metaObj);
+          }
+          result = await supabaseRequest('POST', '/pending_sales', Object.assign({}, row, { notes: metaStr }));
         }
         created = (result && result[0]) || result;
       } catch (e) {
-        // Fallback: synthesize id so the client gets a reference even if table missing
+        // FIX web/loyverse 2026-09-20: en PRODUCCION ya NO se finge exito con un id sintetico 'PND-*': el cliente
+        // limpiaba el carrito y borraba el ticket previo creyendo que se guardo (ticket perdido en silencio).
+        // Ahora 503 -> el cliente cae a su cola offline y avisa. En dev se conserva el fallback sintetico.
+        if (IS_PROD) {
+          try { logAudit(req, 'sale.pending.persist_failed', 'pending_sales', { tenant_id: tnt, error: String(e && e.message || e).slice(0, 200) }); } catch (_) {}
+          return sendJSON(res, {
+            ok: false,
+            error_code: 'PENDING_PERSIST_FAILED',
+            error_message: 'No pudimos guardar el ticket abierto. Reintenta.',
+            retry_after_seconds: 5
+          }, 503);
+        }
         created = Object.assign({ id: 'PND-' + Date.now().toString(36) }, rowMeta || row);
       }
       try { logAudit(req, 'sale.pending.saved', 'pending_sales', { id: created && created.id, total: total }); } catch (_) {}
