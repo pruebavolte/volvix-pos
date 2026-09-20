@@ -1184,7 +1184,11 @@
           });
           // Fire and forget — el ticket sale mientras seguimos
           var fastComanda = null;
-          try { fastComanda = buildComandaData(fastFolio, localSale.time, localSale.customer_name, localSale.items); } catch (_) {}
+          // #9 (restaurante en vivo): el cobro rapido NO mandaba comanda; sigue igual salvo config 'vlx_cfg_quick_cobro_comanda'='1' (por equipo/tenant)
+          try {
+            if (localStorage.getItem('vlx_cfg_quick_cobro_comanda') === '1') fastComanda = buildComandaData(fastFolio, localSale.time, localSale.customer_name, localSale.items);
+            else if (window.VolvixComanda) window.VolvixComanda.reset();
+          } catch (_) {}
           window.VolvixPlatform.printTicket({
             text: fastText,
             openDrawer: !!(fastCfg.autoOpenDrawer && /efectivo/i.test(method)),

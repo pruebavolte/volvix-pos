@@ -40,8 +40,9 @@
   // opcion actual {label, mode}; mode here|away (compat con data-mode)
   function current() {
     var d = el();
-    if (!d) return { label: '', mode: 'away' };
-    var mode = d.getAttribute('data-mode') === 'here' ? 'here' : 'away';
+    if (!d) return { label: '', mode: 'here' };
+    // #9: sin data-mode explicito = COMER AQUI (comportamiento de v1.0.344); solo 'away' explicito cuenta como para llevar
+    var mode = d.getAttribute('data-mode') === 'away' ? 'away' : 'here';
     var label = d.getAttribute('data-label') || (mode === 'here' ? 'Comer aquí' : 'Para llevar');
     return { label: label, mode: mode };
   }
@@ -51,12 +52,14 @@
     d.setAttribute('data-label', opt.name);
     var s = d.querySelector('span'); if (s) s.textContent = opt.name;
   }
+  // #9 (restaurante en vivo): por defecto arranca en COMER AQUI como antes. Config por equipo/tenant: localStorage 'vlx_cfg_dining_default_away'='1' => arranca en Para llevar.
+  function defaultKind() { try { return root.localStorage.getItem('vlx_cfg_dining_default_away') === '1' ? 'away' : 'here'; } catch (_) { return 'here'; } }
   function init() {
     var d = el(); if (!d) return;
     if (!enabled()) { d.style.display = 'none'; return; }
     d.setAttribute('data-feature', 'module.dining_options');
     var l = list(), cur = d.getAttribute('data-label');
-    var opt = l.filter(function (o) { return o.name === cur; })[0] || l.filter(function (o) { return o.kind === 'away'; })[0] || l[0];
+    var opt = l.filter(function (o) { return o.name === cur; })[0] || l.filter(function (o) { return o.kind === defaultKind(); })[0] || l[0];
     set(opt);
   }
   function closeMenu() { var m = root.document.getElementById('lv-dinein-menu'); if (m) m.remove(); }
