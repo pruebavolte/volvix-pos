@@ -72,6 +72,7 @@
 
     const modal = document.createElement('div');
     modal.id = 'vlx-printer-error-modal';
+    modal.setAttribute('data-vlx-keep', '1'); // el guardian uplift oculta ids vlx-* nuevos
     modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:system-ui;animation:vlxFadeIn 0.2s ease-out';
 
     // Inyectar keyframes

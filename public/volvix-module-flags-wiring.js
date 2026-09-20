@@ -137,6 +137,7 @@
     if (existing) existing.remove();
     var modal = document.createElement('div');
     modal.id = 'vlx-lock-modal';
+    modal.setAttribute('data-vlx-keep', '1'); // el guardian uplift oculta ids vlx-* nuevos
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
     modal.innerHTML =
