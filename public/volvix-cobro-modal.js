@@ -744,7 +744,8 @@
           if (!comandaData.items.length) comandaData = null;
           if (window.VolvixComanda) window.VolvixComanda.reset();
         } catch (_) { comandaData = null; }
-        result = await window.volvixElectron.printRawText({
+        // 2026-09-19 T0.1: puente único de plataforma (nunca volvixElectron directo).
+        result = await window.VolvixPlatform.printTicket({
           text: textForRaw,
           printerName: chosenPrinter,
           openDrawer: !!(cfgForRaw && cfgForRaw.autoOpenDrawer && realData.payment && /efectivo/i.test(realData.payment.method || '')),
