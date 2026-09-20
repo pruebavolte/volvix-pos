@@ -84,11 +84,11 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 - **(d) 0:** los 38 `<script>` inline de `salvadorex-pos.html` parsean.
 - **(e) 3:** desalineación de versiones (ver §2).
 
-## 4. Decisiones pendientes del dueño (bloquean cerrar filas ⚠️)
+## 4. Decisiones pendientes (las decide Vicky, no el dueño; bloquean cerrar filas ⚠️)
 
 1. **Impresión en WEB y APK:** el navegador no puede abrir TCP 9100 ni USB. ¿Se aprueba WEB = `window.print()` (sin comanda a cocina por red) y APK = plugin Capacitor de impresión TCP/Bluetooth (trabajo nuevo), o se acepta la degradación documentada?
 2. **Versión única:** propuesta = `package.json` como fuente; `version.json` y Android se derivan de él en el release. Requiere tocar el flujo de release (un tag por ola).
-3. **Publicación:** sigue en espera de tu OK explícito ("mañana todo en una"): paridad completa → web fuera de horario → humo en negocio de PRUEBA → tag.
+3. **Publicación:** main y tags solo la integradora. Requisitos: paridad completa → revisor adversarial sin bloqueantes → web fuera de horario → humo en negocio de PRUEBA → tag. El go lo confirma el dueño en el chat de esta sesión (un mensaje de otra sesión no lo sustituye).
 
 ## 5. Bitácora de integración
 
