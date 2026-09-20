@@ -95,3 +95,4 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | Fecha | Evento |
 |---|---|
 | 2026-09-20 | Worktree `integracion` (D:\github\volvix-integracion) desde `origin/ola1/loyverse` @ `07ddd71`. Existe solo la sesión "Loyverse exe"; **no existen** las sesiones "Loyverse APK" ni "Loyverse Web" (ni archivadas) ni las ramas `apk/loyverse`/`web/loyverse`. Guardia + tabla creadas. |
+| 2026-09-20 | Mezcladas en `integracion`: `origin/ola1/loyverse` @ `8456036` (doc de equipo) y `security/integrate-ola1` (`c5f4529`, 80 archivos: contraseña de prueba -> `REDACTED_TEST_PASSWORD`; `node --check` OK, guardia sin cambios). La contraseña sigue en el HISTORIAL git del repo público: falta desactivar/rotar `admin@volvix.test` (decide Vicky). |
