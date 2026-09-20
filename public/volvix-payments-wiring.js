@@ -6,6 +6,7 @@
  */
 (function (global) {
   'use strict';
+  function _vlxEsc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 
   // =========================================================================
   // STATE
@@ -461,7 +462,7 @@
         ${items}
         ${extra}
         <div class="vx-receipt-line vx-receipt-total"><span>TOTAL</span><span>${fmt(tx.total)}</span></div>
-        <div class="vx-receipt-line"><span>Método</span><span>${tx.method}</span></div>
+        <div class="vx-receipt-line"><span>Método</span><span>${_vlxEsc(tx.method)}</span></div>
         <div class="center" style="margin-top:14px;color:#10b981;font-weight:700">✓ APROBADO</div>
         <div class="center" style="margin-top:8px">¡Gracias por su compra!</div>
       </div>
@@ -523,8 +524,8 @@
     const items = VolvixPayments.transactions.slice().reverse().map((t) => `
       <div class="vx-history-item">
         <div>
-          <div><b>${t.id}</b> — ${t.method}</div>
-          <div class="meta">${new Date(t.ts).toLocaleString()} · Orden ${t.orderId}</div>
+          <div><b>${_vlxEsc(t.id)}</b> — ${_vlxEsc(t.method)}</div>
+          <div class="meta">${new Date(t.ts).toLocaleString()} · Orden ${_vlxEsc(t.orderId)}</div>
         </div>
         <div style="text-align:right">
           <div><b>${fmt(t.total)}</b></div>
