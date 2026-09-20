@@ -190,6 +190,7 @@
 
     const modal = document.createElement('div');
     modal.id = 'vlx-barcode-modal';
+    modal.setAttribute('data-vlx-keep', '1'); // el guardian uplift oculta ids vlx-* nuevos
     modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center';
     modal.innerHTML = `
       <div style="background:#fff;border-radius:12px;padding:24px;max-width:480px;width:90%;font-family:system-ui">
