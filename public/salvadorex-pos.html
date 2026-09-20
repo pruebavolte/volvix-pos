@@ -8778,6 +8778,23 @@
 
   // Reimprimir último ticket (vista previa + opción de mandar a impresora)
   // R8a FIX-H4: cualquier reimpresión queda marcada is_copy=true en pos_print_log
+  // Modificadores/nota de un renglon -> lineas de texto (compartido por reimpresion, ESC/POS y buscar-venta)
+  window.__vlxItemExtras = function (it) {
+    const out = [];
+    try {
+      let mods = it && it.modifiers;
+      if (typeof mods === 'string') { try { mods = JSON.parse(mods); } catch (_) { mods = [mods]; } }
+      (Array.isArray(mods) ? mods : []).forEach(m => {
+        const n = String((m && (m.label || m.name)) || m || '').trim();
+        if (!n) return;
+        const p = Number(m && m.price);
+        out.push('+ ' + n + (p ? ' ($' + p.toFixed(2) + ')' : ''));
+      });
+      const note = String((it && (it.note || it.comment)) || '').trim();
+      if (note) out.push('Nota: ' + note);
+    } catch (_) {}
+    return out;
+  };
   window.reimprimirUltimoTicket = async function () {
     try {
       const tok = (typeof getToken === 'function' ? getToken() : '') || (window.session && window.session.token) || localStorage.getItem('volvix_token') || '';
@@ -8792,6 +8809,13 @@
       const data = await r.json();
       const sale = (data.items && data.items[0]) || (Array.isArray(data) && data[0]) || null;
       if (!sale) { showToast('No hay ventas previas'); return; }
+      // La lista no trae modificadores: pedir el detalle (GET /api/sales/:id) y usarlo si responde
+      try {
+        if (sale.id) {
+          const rd = await fetch('/api/sales/' + encodeURIComponent(sale.id), { headers: tok ? { Authorization: 'Bearer ' + tok } : {} });
+          if (rd.ok) { const full = await rd.json(); if (full && Array.isArray(full.items)) sale.items = full.items; }
+        }
+      } catch (_) {}
       // R8a FIX-H4: Audit reprint event (browser preview path)
       try {
         if (sale.id && tok) {
@@ -8820,6 +8844,7 @@
                 <span>${Number(it.qty || 1)}x ${_rptE(it.name || it.code || 'Item')}</span>
                 <span>$${Number((it.price || 0) * (it.qty || 1)).toFixed(2)}</span>
               </div>
+              ${window.__vlxItemExtras(it).map(x => `<div style="font-size:10px;padding-left:12px;">${_rptE(x)}</div>`).join('')}
             `).join('')}
           </div>
           <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:13px;">
@@ -8970,6 +8995,7 @@
         const name = (it.name || it.code || 'Item').slice(0, 22);
         const total = (Number(it.price || 0) * qty).toFixed(2);
         raw += qty + 'x ' + name.padEnd(22, ' ') + ' $' + total + lf;
+        window.__vlxItemExtras(it).forEach(x => { raw += '   ' + String(x).slice(0, 28) + lf; });
       });
       raw += '--------------------------------' + lf;
       raw += bold + 'TOTAL: $' + Number(sale.total || 0).toFixed(2) + noBold + lf + lf;
