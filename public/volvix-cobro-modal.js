@@ -959,6 +959,7 @@
       } catch (_) {}
       if (typeof window.__volvixResetCartToken === 'function') window.__volvixResetCartToken();
       if (Array.isArray(window.CART)) window.CART.length = 0;
+      try { if (typeof window.__vlxCloseOpenTicket === 'function') window.__vlxCloseOpenTicket(); } catch (_) {} // #1: el ticket cobrado sale de Tickets abiertos/KDS (evita doble cobro)
       if (typeof window.renderCart === 'function') window.renderCart();
       // R8a/R8b — limpiar draft + notificar al server
       try { if (typeof window.__r8aClearCartDraft === 'function') window.__r8aClearCartDraft(); } catch (_) {}
@@ -1234,8 +1235,9 @@
       // ─── FASE 5: cierre INSTANTÁNEO del modal + limpieza UI ───
       try {
         if (typeof window.closeModal === 'function') window.closeModal('modal-pay');
-        try { window.__vlxCartSnapshot = (window.CART||[]).map(function(i){ return { id:i.id, code:i.code, name:i.name, price:i.price, qty:i.qty }; }); } catch(_){}
+        try { window.__vlxCartSnapshot = (window.CART||[]).map(function(i){ return { id:i.id, code:i.code, name:i.name, price:i.price, qty:i.qty, modifiers:i.modifiers||[], note:i.note||'', base_price:(i.base_price!=null?i.base_price:null) }; }); } catch(_){}
         if (Array.isArray(window.CART)) window.CART.length = 0;
+        try { if (typeof window.__vlxCloseOpenTicket === 'function') window.__vlxCloseOpenTicket(); } catch (_) {} // #1: el ticket cobrado sale de Tickets abiertos/KDS (evita doble cobro)
         if (typeof window.renderCart === 'function') window.renderCart();
         if (typeof window.__volvixResetCartToken === 'function') window.__volvixResetCartToken();
         var cf = document.getElementById('currentFolio');
