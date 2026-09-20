@@ -18417,12 +18417,24 @@
     return CART.map(i => ({ product_id: i.id || null, code: i.code, name: i.name, price: i.price, qty: i.qty, modifiers: i.modifiers || [], note: i.note || '', base_price: i.base_price || null, category: i.category || '' }));
   }
   window.__vlxOTRefresh = function () { if (window.VolvixOpenTickets) _otFetch().catch(function () {}); };
+  // M2: cola persistente de cierres de ticket abierto que fallaron (sin red): se reintenta al cargar, al volver la red y cada 60 s.
+  function _otQueueGet() { try { return JSON.parse(localStorage.getItem('vlx_ot_close_queue') || '[]'); } catch (_) { return []; } }
+  function _otQueueSet(a) { try { localStorage.setItem('vlx_ot_close_queue', JSON.stringify(a.slice(-100))); } catch (_) {} }
+  function _otQueueAdd(id) { if (!id) return; const q = _otQueueGet(); if (q.indexOf(String(id)) < 0) { q.push(String(id)); _otQueueSet(q); } }
+  window.__vlxFlushCloseQueue = async function () {
+    const q = _otQueueGet(); if (!q.length) return;
+    const rest = [];
+    for (const id of q) { if (!(await _otDelete(id))) rest.push(id); }
+    _otQueueSet(rest);
+    if (rest.length < q.length) { try { _otCount(Math.max(0, (window.__vlxOTCount || q.length) - (q.length - rest.length))); } catch (_) {} }
+  };
+  try { window.addEventListener('online', function () { window.__vlxFlushCloseQueue(); }); setInterval(function () { window.__vlxFlushCloseQueue(); }, 60000); setTimeout(function () { window.__vlxFlushCloseQueue(); }, 5000); } catch (_) {}
   window.__vlxCloseOpenTicket = function () {
     const t = window.__vlxOpenTicket; window.__vlxOpenTicket = null;
     if (t && t.id) {
       _otDelete(t.id).then(function (ok) {
         if (ok) _otCount(Math.max(0, (window.__vlxOTCount || 1) - 1));
-        else showToast('⚠ Venta cobrada, pero el ticket sigue en Tickets abiertos: borralo para no cobrarlo dos veces');
+        else { _otQueueAdd(t.id); showToast('⚠ Venta cobrada, pero el ticket sigue en Tickets abiertos: se reintenta solo; si no desaparece, borralo para no cobrarlo dos veces'); }
       });
     }
   };
@@ -18544,8 +18556,9 @@
           };
           const r = await _otPost(payload);
           if (!r.ok) { showToast('No se pudo combinar los tickets'); return null; }
-          for (const s of sel) { await _otDelete(s.id); } // borrar origen solo si el combinado se guardó
-          showToast('✓ Tickets combinados');
+          let _fallos = 0; // N4: un reintento por ticket; si aun falla se avisa (y se encola el cierre) para no dejar duplicados en silencio
+          for (const s of sel) { let ok = await _otDelete(s.id); if (!ok) ok = await _otDelete(s.id); if (!ok) { _fallos++; _otQueueAdd(s.id); } } // borrar origen solo si el combinado se guardó
+          showToast(_fallos ? ('⚠ Combinado, pero ' + _fallos + ' ticket(s) original(es) no se pudieron quitar (se reintenta solo): revisa Tickets abiertos') : '✓ Tickets combinados');
           return await _otFetch();
         }
       });
