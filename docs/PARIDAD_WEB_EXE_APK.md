@@ -4,10 +4,11 @@
 > Regla de oro del dueño: web, exe y android = **el mismo código** y **las mismas funciones**. Todo en `public/`; solo cambia el
 > puente de hardware (`window.VolvixPlatform`, `public/volvix-platform.js`). Cada función es un módulo on/off (`module.*`).
 > Referencia funcional: app Loyverse del Motorola (`docs/LOYVERSE_REFERENCIA_MOTOROLA.md`) y help.loyverse.com/es.
-> Una función NO está terminada hasta tener las 3 plataformas ✅ o la degradación documentada y **aprobada por el dueño**.
+> Una función NO está terminada hasta tener las 3 plataformas ✅ o la degradación documentada y aprobada (🔶). Las aprobaciones las da Vicky
+> en nombre del dueño; cada 🔶 se lista en el reporte final para que el dueño pueda vetarla.
 
 **Leyenda:** ✅ verificado en esa plataforma (commit + prueba) · 🟡 código en la rama, aún SIN verificar en esa plataforma ·
-⬜ no existe · ⚠️ degradado, sin aprobación del dueño · ➖ no aplica.
+⬜ no existe · ⚠️ degradado o pendiente, sin aprobar · 🔶 degradado APROBADO y documentado · ➖ no aplica.
 Hoy **nada está ✅**: solo hay pruebas de harness/mock de la sesión exe; falta humo real (navegador 375x812 + escritorio, exe, APK).
 
 ## Ramas y áreas de archivo (para que no se pisen)
@@ -40,11 +41,11 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 2.3 | Modificadores (diálogo opciones+cantidad+comentario; viajan a ticket/comanda/KDS) | ✅ | 🟡 | 🟡 | 🟡 | `module.modifiers` | `b8ae5d3` (+ `f6a578f` exención guardián) |
 | 2.4 | Precio abierto · duplicar artículo · color/forma del mosaico | ✅ | ⬜ | ⬜ | ⬜ | `module.open_price`, `module.item_tiles` (no creados) | T1.5 pendiente |
 | 2.5 | Dividir ticket (split) | ✅ | ⬜ | ⬜ | ⬜ | `module.split_ticket` (no creado) | T1.8 pendiente |
-| 2.6 | Pre-cuenta ("Imprimir cuenta") | ➖ (no observado) | ⚠️ | 🟡 | ⚠️ | `module.print_bill` | `4cb5ee6`; imprime solo por `VolvixPlatform` |
+| 2.6 | Pre-cuenta ("Imprimir cuenta") | ➖ (no observado) | 🔶 | 🟡 | ⚠️ | `module.print_bill` | `4cb5ee6`; imprime solo por `VolvixPlatform` |
 | **3** | **Cobro** | | | | | | |
 | 3.1 | Pantalla idéntica: "Importe total adeudado", "Efectivo recibido", botón por tipo de pago, DIVIDIR | ✅ | ⬜ | ⬜ | ⬜ | — | Ola 1b |
 | 3.2 | Tipos de pago configurables (Efectivo/Tarjeta/Transferencia…) | ✅ | ⬜ | ⬜ | ⬜ | — | Ola 5 |
-| 3.3 | Cobro y "Cobro rápido" imprimen ticket + comanda vía `VolvixPlatform` | ✅ | ⚠️ | 🟡 | ⚠️ | — | `b0a9e33`, `7ad0c63` |
+| 3.3 | Cobro y "Cobro rápido" imprimen ticket + comanda vía `VolvixPlatform` | ✅ | 🔶 | 🟡 | ⚠️ | — | `b0a9e33`, `7ad0c63` |
 | 3.4 | Reembolso por `code` (bug: no emparejaba items) | ✅ | 🟡 | 🟡 | 🟡 | — | `fdc1cf1` (API compartida) |
 | **4** | **Tickets abiertos** | | | | | | |
 | 4.1 | Guardar con nombre/comentario, N tickets, lista con buscador/orden, combinar | ✅ | 🟡 | 🟡 | 🟡 | `module.open_tickets` | `7e73888` |
@@ -59,8 +60,8 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 7.2 | Modificadores: back-office CRUD de sets + asignación a productos | ✅ | 🟡 | 🟡 | 🟡 | `module.modifiers` | `b8ae5d3` |
 | 7.3 | Alta de producto "modo Loyverse" (campos mínimos) | ✅ | ⬜ | ⬜ | ⬜ | — | T1.9 pendiente |
 | **8** | **Configuración** | | | | | | |
-| 8.1 | Impresoras: cocina por red con ruteo por categoría y tickets de corrección | ✅ | ⚠️ | 🟡 | ⚠️ | `module.kitchen_printers` | `c6e7cff`; TCP 9100 solo existe en Electron |
-| 8.2 | Impresora de comandas en Config → Impresión | ✅ | ⚠️ | 🟡 | ⚠️ | — | `6ad773f`, `43d7c15` |
+| 8.1 | Impresoras: cocina por red con ruteo por categoría y tickets de corrección | ✅ | 🔶 | 🟡 | ⚠️ | `module.kitchen_printers` | `c6e7cff`; TCP 9100 solo existe en Electron |
+| 8.2 | Impresora de comandas en Config → Impresión | ✅ | 🔶 | 🟡 | ⚠️ | — | `6ad773f`, `43d7c15` |
 | 8.3 | Pantalla para clientes · Impuestos CRUD · General (cámara, oscuro, idioma) | ✅ | ⬜ | ⬜ | ⬜ | — | Ola 5 |
 | **9–13** | Back office/reportes · Inventario · Empleados/PIN/roles · Lealtad · Apps | ✅ | ⬜ | ⬜ | ⬜ | varios | Olas 3–7 |
 
@@ -75,6 +76,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | Panel de control | 🟡 | CORRECCIÓN: los 6 flags de Ola 1 (`open_tickets`, `predefined_tickets`, `dining_options`, `modifiers`, `print_bill`, `kitchen_printers`) SÍ están en `paneldecontrol.html` (etiquetas, defaults `true` y grupo "Módulos"; los agregó la sesión exe en sus commits T1.x) y en `volvix-feature-flags.js`. Antes los declaré ausentes por buscar solo el prefijo `module.`; la guardia (b) los cubre. Falta: confirmar que existan en la BD `feature_modules` (el panel lee `/api/admin/feature-modules`) y probar el on/off en un negocio de PRUEBA (Web). |
 | Login de pruebas expuesto (T0.5) | ✅ | `6c0fc91` (bloque `#testCreds` fuera). `admin@volvix.test` sigue decisión del dueño. |
 | Cuadrícula vertical 375x812 | 🟡 | Sin medir aún (usar `scripts/dev-mock-pos.js`). |
+| Disco (D:) | ⚠️ | ~1.4–2.0 GB libres: worktrees ESPARSOS (`git sparse-checkout set --cone public api scripts docs electron android .github`), cero builds locales de Android/Electron (solo GitHub Actions). Avisar a Vicky si D: < 800 MB. |
 
 ## 3. Deuda que detectó la guardia (baseline `scripts/paridad-baseline.json`, 51 entradas, lista completa en §6)
 
@@ -86,8 +88,8 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 
 ## 4. Decisiones pendientes (las decide Vicky, no el dueño; bloquean cerrar filas ⚠️)
 
-1. **Impresión en WEB y APK:** el navegador no puede abrir TCP 9100 ni USB. ¿Se aprueba WEB = `window.print()` (sin comanda a cocina por red) y APK = plugin Capacitor de impresión TCP/Bluetooth (trabajo nuevo), o se acepta la degradación documentada?
-2. **Versión única:** propuesta = `package.json` como fuente; `version.json` y Android se derivan de él en el release. Requiere tocar el flujo de release (un tag por ola).
+1. ~~**Impresión en WEB y APK:** el navegador no puede abrir TCP 9100 ni USB. ¿Se aprueba WEB = `window.print()` (sin comanda a cocina por red) y APK = plugin Capacitor de impresión TCP/Bluetooth (trabajo nuevo), o se acepta la degradación documentada?~~ **RESUELTO (Vicky, 2026-09-20):** WEB = `window.print()` para el ticket (HTML/58 mm) y SIN comanda de red (🔶 degradado aprobado; la comanda en web se cubre con KDS web en Ola 6). APK = plugin Capacitor propio TCP 9100 (+ Bluetooth SPP si alcanza) para ticket y comanda, compartiendo el armado de bytes/texto desde `public/`; build solo en GitHub Actions. EXE = como hoy.
+2. **Versión única:** RESUELTO (Vicky): `package.json` es la fuente; `version.json` (generado) y Android (`versionName`=version, `versionCode`=patch) se derivan en el CI del tag. Un tag por ola.
 3. **Publicación:** main y tags solo la integradora. Requisitos: paridad completa → revisor adversarial sin bloqueantes → web fuera de horario → humo en negocio de PRUEBA → tag. El go lo confirma el dueño en el chat de esta sesión (un mensaje de otra sesión no lo sustituye).
 
 ## 5. Bitácora de integración
@@ -169,3 +171,4 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 |---|---|---|
 | `android/versionCode` | 1 | APK |
 | `android/versionName` | 1 | APK |
+| 2026-09-20 | Decisión de Vicky: WEB imprime con `window.print()` sin comanda de red (🔶); APK con plugin TCP 9100 propio (tarea APK); `package.json` fuente única de versión. Filas 2.6, 3.3, 8.1, 8.2: WEB ⚠️ → 🔶. |
