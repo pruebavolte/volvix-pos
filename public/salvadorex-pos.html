@@ -10381,6 +10381,7 @@
     }
     if (!ok) return;
     CART.length = 0; window.__vlxOpenTicket = null; renderCart();
+    try { if (window.VolvixComanda) window.VolvixComanda.reset(); } catch (_) {} // #2: sin memoria de comandas del ticket anterior
     try { __r8aClearCartDraft(); } catch (_) {}
     try {
       $('#footer-pago').textContent = '$0.00';
@@ -10401,6 +10402,7 @@
       if (!ok) return;
     }
     CART.length = 0; window.__vlxOpenTicket = null; renderCart();
+    try { if (window.VolvixComanda) window.VolvixComanda.reset(); } catch (_) {} // #2: sin memoria de comandas del ticket anterior
     try { __r8aClearCartDraft(); } catch (_) {}
     try {
       $('#footer-pago').textContent = '$0.00';
