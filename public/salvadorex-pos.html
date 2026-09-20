@@ -18387,23 +18387,38 @@
     return rows;
   }
   async function _otPost(payload) {
-    const idemKey = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('pend-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10));
+    // #8: base estable por ticket (se reinicia al guardar bien) + huella del contenido: reintentos/doble click = misma llave; si cambia el ticket, otra.
+    if (!window.__vlxSaveKeyBase) window.__vlxSaveKeyBase = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('pend-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10));
+    const idemKey = window.__vlxSaveKeyBase + '-' + window.__vlxHash(JSON.stringify([payload.items, payload.total, payload.name, payload.comment, payload.dining]));
     return _authFetch('/api/sales/pending', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idemKey }, body: JSON.stringify(payload) });
   }
+  // #8: devuelve true/false (404 = ya no existe = ok). El llamador decide que hacer si falla; ya no se traga el error.
   async function _otDelete(id) {
-    if (!id) return;
-    try { await _authFetch('/api/sales/pending/' + encodeURIComponent(id), { method: 'DELETE' }); } catch (e) {}
+    if (!id) return true;
+    try { const r = await _authFetch('/api/sales/pending/' + encodeURIComponent(id), { method: 'DELETE' }); return !!(r && (r.ok || r.status === 404)); } catch (e) { return false; }
   }
+  window.__vlxHash = function (str) { var h = 5381; str = String(str); for (var i = 0; i < str.length; i++) { h = ((h << 5) + h + str.charCodeAt(i)) | 0; } return (h >>> 0).toString(36); };
   function _otCartItems() {
     return CART.map(i => ({ product_id: i.id || null, code: i.code, name: i.name, price: i.price, qty: i.qty, modifiers: i.modifiers || [], note: i.note || '', base_price: i.base_price || null, category: i.category || '' }));
   }
   window.__vlxOTRefresh = function () { if (window.VolvixOpenTickets) _otFetch().catch(function () {}); };
   window.__vlxCloseOpenTicket = function () {
     const t = window.__vlxOpenTicket; window.__vlxOpenTicket = null;
-    if (t && t.id) { _otDelete(t.id).then(function () { _otCount(Math.max(0, (window.__vlxOTCount || 1) - 1)); }); }
+    if (t && t.id) {
+      _otDelete(t.id).then(function (ok) {
+        if (ok) _otCount(Math.max(0, (window.__vlxOTCount || 1) - 1));
+        else showToast('⚠ Venta cobrada, pero el ticket sigue en Tickets abiertos: borralo para no cobrarlo dos veces');
+      });
+    }
   };
 
+  // #8: candado anti doble click (el modal de nombre tambien cuenta como 'en curso')
   window.savePendingSale = async function () {
+    if (window.__vlxSaveBusy) return;
+    window.__vlxSaveBusy = true;
+    try { return await window.__vlxSavePendingImpl(); } finally { window.__vlxSaveBusy = false; }
+  };
+  window.__vlxSavePendingImpl = async function () {
     if (!CART.length) {
       if (_otOn('module.open_tickets') && window.VolvixOpenTickets) { return window.restorePendingSale(); }
       showToast('No hay productos para guardar'); return;
@@ -18439,6 +18454,7 @@
       saved_at: Date.now()
     };
     const clearAfter = function () {
+      window.__vlxSaveKeyBase = null;
       window.__vlxOpenTicket = null;
       CART.length = 0; renderCart();
       window.__vlxTicketNote = '';
@@ -18451,7 +18467,7 @@
         const ref = (saved && (saved.id || saved.reference)) || ('LOCAL-' + Date.now().toString(36));
         try { localStorage.setItem('volvix:last_pending_id', String(ref)); } catch(e){}
         try { window.VolvixComanda && window.VolvixComanda.onSave(CART); } catch(_){}
-        if (prevOpen && prevOpen.id) { await _otDelete(prevOpen.id); } // actualizar = reemplazar el ticket previo
+        if (prevOpen && prevOpen.id) { if (!(await _otDelete(prevOpen.id))) showToast('⚠ Ticket guardado, pero no se pudo quitar la version anterior: revisa Tickets abiertos'); } // actualizar = reemplazar el ticket previo
         else _otCount((window.__vlxOTCount || 0) + 1);
         clearAfter();
         showToast('✓ Ticket guardado' + (meta.name ? ' · ' + meta.name : '') + ' · Ref: ' + ref);
@@ -19562,6 +19578,8 @@
   window.newReturnSubmit = async function () {
     var st = window._NEW_RETURN_STATE;
     if (!st.sale || !st.items.length || !st.reason) { showToast('Faltan datos'); return; }
+    if (window.__vlxRetBusy) return; // #7: candado anti doble click
+    window.__vlxRetBusy = true;
     showToast('Creando devolución…');
     try {
       var body = {
@@ -19575,9 +19593,11 @@
         total: st.items.reduce(function (s, i) { return s + (Number(i.qty) * Number(i.price || 0)); }, 0),
         status: 'pending'
       };
+      // #7: llave estable por (venta + renglones + motivo): un reintento no crea otra devolucion
+      var _rk = 'ret-' + String(body.sale_id) + '-' + window.__vlxHash(JSON.stringify([body.items, body.reason, body.total]));
       var r = await _authFetch('/api/returns', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Idempotency-Key': _rk },
         body: JSON.stringify(body)
       });
       if (!r.ok) {
@@ -19594,7 +19614,7 @@
       }
     } catch (err) {
       showToast('Error: ' + (err.message || err));
-    }
+    } finally { window.__vlxRetBusy = false; }
   };
 
   // Wire filters
