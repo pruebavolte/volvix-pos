@@ -10,7 +10,7 @@
  *
  * Este script DEBE cargarse PRIMERO en el HTML (antes que cualquier otro script
  * que use fetch). Detecta la app nativa (VolvixPlatform.kind) y override `window.fetch` + `XMLHttpRequest`
- * para que `/api/*` se reescriba a `https://volvix-pos.vercel.app/api/*`.
+ * para que `/api/*` se reescriba a `https://systeminternational.app/api/*`.
  *
  * Offline behavior: si no hay internet, las llamadas a Vercel fallan rápido,
  * y el offline-queue + IndexedDB local toman el relevo.
@@ -98,7 +98,8 @@
   window.__volvixPlatform = 'android';
   console.log('[volvix-capacitor] APK detectado, configurando bridge…');
 
-  var API_BASE = 'https://volvix-pos.vercel.app';
+  // 2026-09-20: produccion = https://systeminternational.app (Railway). volvix-pos.vercel.app responde 402 (Vercel suspendido).
+  var API_BASE = 'https://systeminternational.app';
 
   // Helper: convierte URL relativa o absoluta interna a la URL real del backend
   function rewriteURL(u) {

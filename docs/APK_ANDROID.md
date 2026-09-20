@@ -8,7 +8,7 @@
 |---|---|
 | `capacitor.config.json` | `appId com.volvix.pos`, `webDir: public`, **sin `server.url`** → el APK **empaqueta `public/`** (offline-first), sirve por `https://localhost`. |
 | `android/` | Proyecto Capacitor 8 (AGP 8.13, compileSdk 36, minSdk 24). Plugins npm: bluetooth-le, barcode-scanner, keep-awake, app, camera, device, filesystem, keyboard, network, preferences, share, splash, status-bar. |
-| `public/volvix-capacitor-bridge.js` | Reescribe `/api/*` → `https://volvix-pos.vercel.app` (misma API que web/exe) y avisa de versiones nuevas (`releases/latest` → asset `VolvixPOS*.apk`). |
+| `public/volvix-capacitor-bridge.js` | Reescribe `/api/*` → `https://systeminternational.app` (produccion en Railway, misma API que web/exe; `volvix-pos.vercel.app` responde 402) y avisa de versiones nuevas (`releases/latest` → asset `VolvixPOS*.apk`). |
 | `build-apps.js` | No existe (el plan lo citaba). El build real es `.github/workflows/build-apk.yml` (`cap sync` + `gradlew assembleRelease`). |
 | Plugin nativo propio | `android/app/src/main/java/com/volvix/pos/VolvixPrinterPlugin.java` (solo bytes: TCP 9100 y Bluetooth SPP), registrado en `MainActivity`. **Sin lógica de negocio.** |
 

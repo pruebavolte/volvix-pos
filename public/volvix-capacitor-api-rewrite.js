@@ -7,7 +7,7 @@
  * y termina sirviendo el index.html (SPA fallback) → fail silencioso.
  *
  * Este wrapper detecta la app nativa (window.VolvixPlatform.kind === 'android') y reescribe `/api/*` a
- * `https://volvix-pos.vercel.app/api/*` con credentials:'include'.
+ * `https://systeminternational.app/api/*` con credentials:'include'.
  *
  * Debe cargarse ANTES de cualquier código que haga fetch (auth-gate.js,
  * volvix-offline-queue.js, etc.). Idealmente en el <head> de cada HTML.
@@ -36,7 +36,8 @@
     return;
   }
 
-  var API_BASE = 'https://volvix-pos.vercel.app';
+  // 2026-09-20: produccion = https://systeminternational.app (Railway). volvix-pos.vercel.app responde 402.
+  var API_BASE = 'https://systeminternational.app';
   console.info('[capacitor-api] Activado: /api/* y /v1/* serán reenviados a', API_BASE);
 
   // Marcar que estamos reescribiendo para que otros scripts sepan
