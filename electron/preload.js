@@ -158,6 +158,9 @@ contextBridge.exposeInMainWorld('volvixElectron', {
   comandaSave: async function (cfg) {
     return await ipcRenderer.invoke('volvix:comanda:save', cfg || {});
   },
+  comandaPrint: async function (comanda) {
+    return await ipcRenderer.invoke('volvix:comanda:print', comanda || {});
+  },
   comandaTest: async function (cfg) {
     return await ipcRenderer.invoke('volvix:comanda:test', cfg || {});
   },

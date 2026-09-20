@@ -738,8 +738,11 @@
             mode: dinEl ? (dinEl.getAttribute('data-mode') === 'away' ? 'PARA LLEVAR' : 'COMER AQUI') : '',
             note: String(window.__vlxTicketNote || ''),
             customer: realData.customer || '',
-            items: (realData.items || []).map(function (i) { return { qty: i.qty || 1, name: i.name || '' }; })
+            // Solo lo que cocina NO ha recibido (si la cuenta se guardó antes, ya salió su comanda)
+            items: (window.VolvixComanda ? window.VolvixComanda.delta(realData.items) : (realData.items || []).map(function (i) { return { qty: i.qty || 1, name: i.name || '' }; }))
           };
+          if (!comandaData.items.length) comandaData = null;
+          if (window.VolvixComanda) window.VolvixComanda.reset();
         } catch (_) { comandaData = null; }
         result = await window.volvixElectron.printRawText({
           text: textForRaw,

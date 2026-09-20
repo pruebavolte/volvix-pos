@@ -599,6 +599,11 @@ ipcMain.handle('volvix:comanda:save', async (event, cfg) => {
   try { return { ok: true, cfg: _comandaPrinter.save(app, cfg || {}) }; }
   catch (e) { return { ok: false, error: e.message }; }
 });
+// 2026-09-19: comanda SIN ticket (botón "Guardar" de la cuenta: cocina empieza, el cliente paga después)
+ipcMain.handle('volvix:comanda:print', async (event, comanda) => {
+  if (!_comandaPrinter) return { ok: false, error: 'módulo no disponible' };
+  return await _comandaPrinter.send(app, _printerNetwork, comanda);
+});
 ipcMain.handle('volvix:comanda:test', async (event, cfg) => {
   if (!_comandaPrinter || !_printerNetwork) return { ok: false, error: 'módulo no disponible' };
   const c = Object.assign({}, _comandaPrinter.load(app), cfg || {});

@@ -18169,6 +18169,39 @@
   // ============================================================
   // 5) VENTA PENDIENTE — save current cart, restore later
   // ============================================================
+  // 2026-09-19 COMANDAS (cocina): al GUARDAR la cuenta se manda la comanda (el cliente paga después).
+  // Solo se imprimen los productos NUEVOS: lo ya enviado se recuerda (sentMap) para que al recuperar
+  // la cuenta y cobrar (o volver a guardar) no se repita la comanda completa. Solo actúa dentro del .exe.
+  window.VolvixComanda = (function () {
+    var sentMap = {};
+    function key(i) { return String((i && (i.code || i.id || i.name)) || ''); }
+    function delta(items) {
+      var out = [];
+      (items || []).forEach(function (i) {
+        var d = (Number(i.qty) || 1) - (Number(sentMap[key(i)]) || 0);
+        if (d > 0) out.push({ qty: d, name: i.name || '' });
+      });
+      return out;
+    }
+    function markSent(items) { sentMap = {}; (items || []).forEach(function (i) { sentMap[key(i)] = Number(i.qty) || 1; }); }
+    function reset() { sentMap = {}; }
+    function onSave(cart) {
+      var api = window.volvixElectron;
+      var items = delta(cart);
+      reset();
+      if (!api || typeof api.comandaPrint !== 'function' || !items.length) return;
+      var din = document.getElementById('lv-dinein');
+      api.comandaPrint({
+        folio: 'CUENTA',
+        time: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+        mode: din ? (din.getAttribute('data-mode') === 'away' ? 'PARA LLEVAR' : 'COMER AQUI') : '',
+        note: String(window.__vlxTicketNote || ''),
+        items: items
+      }).catch(function () {});
+    }
+    return { delta: delta, markSent: markSent, reset: reset, onSave: onSave };
+  })();
+
   window.savePendingSale = async function () {
     if (!CART.length) { showToast('No hay productos para guardar'); return; }
     const session = JSON.parse(localStorage.getItem('volvixSession') || 'null') || {};
@@ -18192,7 +18225,8 @@
         const saved = await r.json();
         const ref = (saved && (saved.id || saved.reference)) || ('LOCAL-' + Date.now().toString(36));
         try { localStorage.setItem('volvix:last_pending_id', String(ref)); } catch(e){}
-        CART.length = 0; renderCart();
+        try { window.VolvixComanda && window.VolvixComanda.onSave(CART); } catch(_){}
+          CART.length = 0; renderCart();
         window.__vlxTicketNote = '';
         try { var _nb = document.getElementById('lv-note'); if (_nb) { _nb.style.color = ''; _nb.title = 'Nota del ticket'; } } catch(_){}
         showToast('✓ Venta pendiente guardada · Ref: ' + ref);
@@ -18200,6 +18234,7 @@
         // fallback to local idb queue — si falla, NO limpiar carrito ni fingir exito
         try {
           await idbQueue('sales_pending', payload);
+          try { window.VolvixComanda && window.VolvixComanda.onSave(CART); } catch(_){}
           CART.length = 0; renderCart();
           showToast('⚠ Pendiente guardada offline');
         } catch (qe) {
@@ -18210,7 +18245,8 @@
     } catch (e) {
       try {
         await idbQueue('sales_pending', payload);
-        CART.length = 0; renderCart();
+        try { window.VolvixComanda && window.VolvixComanda.onSave(CART); } catch(_){}
+          CART.length = 0; renderCart();
         showToast('⚠ Sin conexión - pendiente en cola');
       } catch (qe) {
         console.warn('idbQueue pending failed:', qe);
@@ -18232,6 +18268,7 @@
         price: Number(it.price)||0, qty: Number(it.qty)||1, stock: 0
       }));
       renderCart();
+      try { window.VolvixComanda && window.VolvixComanda.markSent(CART); } catch(_){}
       showToast('✓ Venta pendiente recuperada · Ref: ' + (choice.id || ''));
       // Optionally remove from server
       if (choice.id) { try { await _authFetch('/api/sales/pending/' + encodeURIComponent(choice.id), { method: 'DELETE' }); } catch(e){} }
