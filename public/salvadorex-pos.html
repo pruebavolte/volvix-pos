@@ -5784,18 +5784,14 @@
               </div>
             </div>
             <script>(function(){ if(window.VolvixDining) VolvixDining.renderConfig(document.getElementById('cfg-dining-list')); })();</script>
-            <div id="cfg-comanda-box" hidden style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border);">
-              <strong style="font-size:12.5px;">Impresora de comandas (cocina, por red)</strong>
-              <div style="font-size:12px; color:var(--text-2); margin:4px 0 8px;">Al cobrar, además del ticket, se manda la comanda (productos y cantidades, sin precios) a esta impresora.</div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-                <input id="cfg-comanda-ip" placeholder="IP (ej. 192.168.1.100)" style="width:170px;">
-                <input id="cfg-comanda-port" type="number" placeholder="Puerto 9100" style="width:110px;">
-                <input id="cfg-comanda-width" type="number" placeholder="Ancho 48" title="48 = 80mm, 32 = 58mm" style="width:100px;">
-                <label style="font-size:12.5px; display:flex; align-items:center; gap:5px;"><input id="cfg-comanda-on" type="checkbox"> Imprimir comanda al cobrar</label>
-              </div>
+            <div id="cfg-comanda-box" hidden data-feature="module.kitchen_printers" style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border);">
+              <strong style="font-size:12.5px;">Impresoras de cocina (comandas, por red)</strong>
+              <div style="font-size:12px; color:var(--text-2); margin:4px 0 8px;">Al cobrar o guardar la cuenta se manda una comanda (productos y cantidades, sin precios) a cada impresora segun la categoria del producto. Una impresora sin categorias recibe todo lo que nadie mas reclame. Categorias separadas por coma (ej. Comida, Postres). Los productos quitados salen en una seccion CANCELAR.</div>
+              <label style="font-size:12.5px; display:flex; align-items:center; gap:5px; margin-bottom:8px;"><input id="cfg-comanda-on" type="checkbox"> Imprimir comandas</label>
+              <div id="cfg-comanda-list" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:8px;"></div>
               <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="btn sm" onclick="vlxComandaTest()">🍳 Probar comanda</button>
-                <button class="btn sm secondary" onclick="vlxComandaSave()">💾 Guardar comanda</button>
+                <button class="btn sm" type="button" onclick="vlxComandaAdd()">+ Agregar impresora</button>
+                <button class="btn sm secondary" type="button" onclick="vlxComandaSave()">Guardar comandas</button>
               </div>
               <div id="cfg-comanda-msg" style="font-size:12px; margin-top:6px; color:var(--text-2);"></div>
             </div>
@@ -5806,18 +5802,40 @@
               var box = document.getElementById('cfg-comanda-box'); if (!box) return;
               box.hidden = false;
               var $ = function (id) { return document.getElementById(id); };
-              function read() { return { ip: ($('cfg-comanda-ip').value || '').trim(), port: parseInt($('cfg-comanda-port').value, 10) || 9100, width: parseInt($('cfg-comanda-width').value, 10) || 48, enabled: $('cfg-comanda-on').checked }; }
+              var list = $('cfg-comanda-list');
               function msg(t) { var m = $('cfg-comanda-msg'); if (m) m.textContent = t; }
+              function card(p) {
+                p = p || {};
+                var d = document.createElement('div');
+                d.className = 'vlx-cmd-card';
+                d.style.cssText = 'border:1px solid var(--border); border-radius:8px; padding:8px; display:flex; flex-direction:column; gap:6px;';
+                d.innerHTML = '<input data-f="name" placeholder="Nombre (Cocina, Barra)">' +
+                  '<div style="display:flex; gap:6px;"><input data-f="ip" placeholder="IP 192.168.1.100" style="flex:1; min-width:0;">' +
+                  '<input data-f="port" type="number" placeholder="9100" style="width:70px;"><input data-f="width" type="number" placeholder="48" title="48 = 80mm, 32 = 58mm" style="width:60px;"></div>' +
+                  '<input data-f="categories" placeholder="Categorias (vacio = todas)">' +
+                  '<div style="display:flex; gap:6px;"><button class="btn sm" type="button" data-a="test">Probar</button><button class="btn sm secondary" type="button" data-a="del">Quitar</button></div>';
+                var set = function (f, v) { d.querySelector('[data-f="' + f + '"]').value = v; };
+                set('name', p.name || ''); set('ip', p.ip || ''); set('port', p.port || 9100); set('width', p.width || 48); set('categories', (p.categories || []).join(', '));
+                d.querySelector('[data-a="del"]').onclick = function () { d.remove(); };
+                d.querySelector('[data-a="test"]').onclick = function () {
+                  msg('Enviando comanda de prueba...');
+                  api.comandaTest(readCard(d)).then(function (r) { msg(r && r.ok ? 'Comanda de prueba enviada (' + r.bytesWritten + ' bytes).' : 'La impresora no respondio: ' + (r && r.error)); }).catch(function (e) { msg('Error: ' + e.message); });
+                };
+                return d;
+              }
+              function readCard(d) {
+                var g = function (f) { return (d.querySelector('[data-f="' + f + '"]').value || '').trim(); };
+                return { name: g('name'), ip: g('ip'), port: parseInt(g('port'), 10) || 9100, width: parseInt(g('width'), 10) || 48, categories: g('categories').split(',').map(function (x) { return x.trim(); }).filter(Boolean) };
+              }
+              function read() { return { enabled: $('cfg-comanda-on').checked, printers: [].slice.call(list.children).map(readCard) }; }
               api.comandaGet().then(function (r) {
                 if (!r || !r.ok) return; var c = r.cfg || {};
-                $('cfg-comanda-ip').value = c.ip || ''; $('cfg-comanda-port').value = c.port || 9100; $('cfg-comanda-width').value = c.width || 48; $('cfg-comanda-on').checked = !!c.enabled;
+                $('cfg-comanda-on').checked = !!c.enabled;
+                (c.printers || []).forEach(function (p) { list.appendChild(card(p)); });
               }).catch(function () {});
+              window.vlxComandaAdd = function () { list.appendChild(card({ name: list.children.length ? 'Impresora ' + (list.children.length + 1) : 'Cocina' })); };
               window.vlxComandaSave = function () {
-                api.comandaSave(read()).then(function (r) { msg(r && r.ok ? (r.cfg.enabled ? '✓ Comandas activas en ' + r.cfg.ip + ':' + r.cfg.port : '✓ Guardado (comandas desactivadas)') : '⚠️ ' + (r && r.error)); }).catch(function (e) { msg('⚠️ ' + e.message); });
-              };
-              window.vlxComandaTest = function () {
-                msg('Enviando comanda de prueba…');
-                api.comandaTest(read()).then(function (r) { msg(r && r.ok ? '✓ Comanda de prueba enviada (' + r.bytesWritten + ' bytes). Revisa la impresora de cocina.' : '⚠️ La impresora no respondió: ' + (r && r.error)); }).catch(function (e) { msg('⚠️ ' + e.message); });
+                api.comandaSave(read()).then(function (r) { msg(r && r.ok ? (r.cfg.enabled ? 'Comandas activas en ' + r.cfg.printers.length + ' impresora(s)' : 'Guardado (comandas desactivadas)') : 'Error: ' + (r && r.error)); }).catch(function (e) { msg('Error: ' + e.message); });
               };
             })();
             </script>
@@ -14564,7 +14582,7 @@
       SELECTED_CART_INDEX = CART.indexOf(existing);
     } else {
       CART.push({id: p.id, code:p.code, name:p.name, price:p.price, qty:(Number(p.qty) || 1), stock:p.stock, image_url: p.image_url, images: p.images,
-        modifiers: p.modifiers || [], note: p.note || '', base_price: p.base_price || null});
+        modifiers: p.modifiers || [], note: p.note || '', base_price: p.base_price || null, category: p.category || p.categoria || ''});
       SELECTED_CART_INDEX = CART.length - 1; // V10.3 — auto-seleccionar línea recién agregada
     }
     renderCart();
@@ -18248,15 +18266,37 @@
       var mods = ((i && i.modifiers) || []).map(function (m) { return String((m && m.label) || m || ''); }).sort().join(',');
       return String((i && (i.code || i.id || i.name)) || '') + '|' + mods + '|' + String((i && i.note) || '');
     }
+    // T1.7: categoria del producto (del item o buscada por codigo en el catalogo rapido)
+    function catOf(i) {
+      if (i && (i.category || i.categoria)) return String(i.category || i.categoria);
+      try {
+        var q = (typeof QUICKPICK !== 'undefined' && Array.isArray(QUICKPICK)) ? QUICKPICK : [];
+        var f = q.find(function (x) { return (i.code && x.code === i.code) || (i.id && x.id === i.id); });
+        return f ? String(f.category || f.categoria || '') : '';
+      } catch (_) { return ''; }
+    }
+    function mods(i) { return ((i && i.modifiers) || []).map(function (m) { return String((m && m.label) || m || ''); }); }
+    // Positivos = nuevos por preparar; cancel:true = quitado o reducido respecto a lo ya enviado
     function delta(items) {
-      var out = [];
+      var out = [], seen = {};
       (items || []).forEach(function (i) {
-        var d = (Number(i.qty) || 1) - (Number(sentMap[key(i)]) || 0);
-        if (d > 0) out.push({ qty: d, name: i.name || '', modifiers: ((i.modifiers) || []).map(function (m) { return String((m && m.label) || m || ''); }), note: i.note || '' });
+        var k = key(i); seen[k] = true;
+        var prev = sentMap[k] ? Number(sentMap[k].qty) : 0;
+        var d = (Number(i.qty) || 1) - prev;
+        if (d > 0) out.push({ qty: d, name: i.name || '', modifiers: mods(i), note: i.note || '', category: catOf(i) });
+        else if (d < 0) out.push({ qty: -d, name: i.name || '', modifiers: mods(i), note: i.note || '', category: catOf(i), cancel: true });
+      });
+      Object.keys(sentMap).forEach(function (k) {
+        if (seen[k]) return;
+        var m = sentMap[k];
+        if (m && Number(m.qty) > 0) out.push({ qty: Number(m.qty), name: m.name, modifiers: m.modifiers, note: m.note, category: m.category, cancel: true });
       });
       return out;
     }
-    function markSent(items) { sentMap = {}; (items || []).forEach(function (i) { sentMap[key(i)] = Number(i.qty) || 1; }); }
+    function markSent(items) {
+      sentMap = {};
+      (items || []).forEach(function (i) { sentMap[key(i)] = { qty: Number(i.qty) || 1, name: i.name || '', modifiers: mods(i), note: i.note || '', category: catOf(i) }; });
+    }
     function reset() { sentMap = {}; }
     function onSave(cart) {
       var items = delta(cart);
@@ -18325,7 +18365,7 @@
     try { await _authFetch('/api/sales/pending/' + encodeURIComponent(id), { method: 'DELETE' }); } catch (e) {}
   }
   function _otCartItems() {
-    return CART.map(i => ({ product_id: i.id || null, code: i.code, name: i.name, price: i.price, qty: i.qty, modifiers: i.modifiers || [], note: i.note || '', base_price: i.base_price || null }));
+    return CART.map(i => ({ product_id: i.id || null, code: i.code, name: i.name, price: i.price, qty: i.qty, modifiers: i.modifiers || [], note: i.note || '', base_price: i.base_price || null, category: i.category || '' }));
   }
   window.__vlxOTRefresh = function () { if (window.VolvixOpenTickets) _otFetch().catch(function () {}); };
   window.__vlxCloseOpenTicket = function () {
@@ -18423,7 +18463,7 @@
           (row.items || []).forEach(it => CART.push({
             id: it.product_id, code: it.code, name: it.name,
             price: Number(it.price)||0, qty: Number(it.qty)||1, stock: 0,
-            modifiers: Array.isArray(it.modifiers) ? it.modifiers : [], note: it.note || '', base_price: it.base_price || null
+            modifiers: Array.isArray(it.modifiers) ? it.modifiers : [], note: it.note || '', base_price: it.base_price || null, category: it.category || ''
           }));
           window.__vlxTicketNote = row.note || '';
           renderCart();

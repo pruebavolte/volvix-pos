@@ -5045,7 +5045,7 @@
     // window.RentaEquipoAPI y window.ReservationsAPI con datos demo. La vista
     // previa del panel hace iframe a esos previews (ver renderPreview).
     rentas: '🔑 Renta de Equipo', reservaciones: '📅 Reservaciones',
-    modifiers: '🧩 Modificadores', open_tickets: '🧾 Tickets abiertos', predefined_tickets: '🪑 Tickets predefinidos (mesas)', dining_options: '🍽 Opciones de consumo', print_bill: '🧾 Imprimir cuenta',
+    modifiers: '🧩 Modificadores', open_tickets: '🧾 Tickets abiertos', predefined_tickets: '🪑 Tickets predefinidos (mesas)', dining_options: '🍽 Opciones de consumo', print_bill: '🧾 Imprimir cuenta', kitchen_printers: '🍳 Impresoras de cocina',
   };
   const FEAT_LABELS = {
     'pos.cobrar': '💵 F12 — Cobrar', 'pos.descuento': '% Descuento',
@@ -5077,7 +5077,7 @@
   // ─────────────────────────────────────────────────────────────────────────
   const PROFILE_GENERIC = { // 9 módulos comunes a TODOS los giros
     pos:true, dashboard:true, apertura:true, corte:true, ventas:true,
-    reportes:true, clientes:true, usuarios:true, config:true, devoluciones:true, modifiers:true, open_tickets:true, predefined_tickets:true, dining_options:true, print_bill:true,
+    reportes:true, clientes:true, usuarios:true, config:true, devoluciones:true, modifiers:true, open_tickets:true, predefined_tickets:true, dining_options:true, print_bill:true, kitchen_printers:true,
   };
   const INDUSTRY_PROFILES = {
     abarrotes:    { ...PROFILE_GENERIC, inventario:true, kardex:true, credito:true, proveedores:true, recargas:true, servicios:true, promociones:true, departamentos:true, sugeridas:true, actualizador:true },
@@ -6192,7 +6192,7 @@
 
   // Categorías para agrupar módulos en Col 2 (puramente visual, no toca datos)
   const MOD_CATEGORIES = {
-    operacion:  { label: 'Módulos',       items: ['pos','apertura','corte','ventas','devoluciones','clientes','credito','modifiers','open_tickets','predefined_tickets','dining_options','print_bill'] },
+    operacion:  { label: 'Módulos',       items: ['pos','apertura','corte','ventas','devoluciones','clientes','credito','modifiers','open_tickets','predefined_tickets','dining_options','print_bill','kitchen_printers'] },
     inventario: { label: 'Inventario',    items: ['inventario','kardex','departamentos','proveedores','sugeridas','actualizador'] },
     reportes:   { label: 'Reportes & IA', items: ['dashboard','reportes'] },
     fiscal:     { label: 'Fiscal',        items: ['facturacion','cotizaciones'] },
@@ -6289,7 +6289,7 @@
     rentas:'🔑 Renta de Equipo', reservaciones:'📅 Reservaciones',
     // 2026-05-13: motor visual de distribución (universal layout builder)
     mapa:'🗺️ Mapa del lugar',
-    modifiers:'🧩 Modificadores', open_tickets:'🧾 Tickets abiertos', predefined_tickets:'🪑 Tickets predefinidos (mesas)', dining_options:'🍽 Opciones de consumo', print_bill:'🧾 Imprimir cuenta',
+    modifiers:'🧩 Modificadores', open_tickets:'🧾 Tickets abiertos', predefined_tickets:'🪑 Tickets predefinidos (mesas)', dining_options:'🍽 Opciones de consumo', print_bill:'🧾 Imprimir cuenta', kitchen_printers:'🍳 Impresoras de cocina',
   };
   const FEAT_LABELS_GLOBAL = {
     'pos.cobrar':'💵 F12 — Cobrar','pos.descuento':'% Descuento',

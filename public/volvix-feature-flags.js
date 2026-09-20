@@ -101,7 +101,8 @@
     // 2026-09-19 (T1.2): opciones de consumo configurables
     'module.dining_options': { name: 'Opciones de consumo', default_status: 'enabled' },
     // T1.6: pre-cuenta
-    'module.print_bill': { name: 'Imprimir cuenta (pre-cuenta)', default_status: 'enabled' }
+    'module.print_bill': { name: 'Imprimir cuenta (pre-cuenta)', default_status: 'enabled' },
+    'module.kitchen_printers': { name: 'Impresoras de cocina por categoria', default_status: 'enabled' }
   };
 
   function defaultMap() {

@@ -5,7 +5,8 @@
 // Este módulo manda, además, una COMANDA (qué preparar, sin precios) a una
 // impresora ESC/POS por red (JetDirect 9100) cada vez que se cobra.
 //
-// Config: <userData>/comanda-printer.json  { enabled, ip, port, width }
+// Config: <userData>/comanda-printer.json  { enabled, printers:[{name,ip,port,width,categories:[]}] }
+//   (JSON viejo {enabled,ip,port,width} se migra solo a una impresora "Cocina")
 //   - enabled=false (default) → no hace NADA (la flota no cambia de comportamiento).
 //   - Se configura desde el menú Volvix → "Impresora de comandas (cocina)…".
 // Texto en ASCII puro (sin acentos) para que salga bien en cualquier térmica.
@@ -14,21 +15,31 @@
 const fs = require('fs');
 const path = require('path');
 
-const DEFAULTS = { enabled: false, ip: '', port: 9100, width: 48 };
+const DEFAULTS = { enabled: false, printers: [] };
 
 function cfgPath(app) {
   return path.join(app.getPath('userData'), 'comanda-printer.json');
 }
 
 // Normaliza cualquier objeto a una config válida (se aplica al leer Y al guardar)
-function clean(cfg) {
+function cleanPrinter(p, idx) {
   const num = (v, def, min, max) => { const n = parseInt(v, 10); return Number.isFinite(n) && n >= min && n <= max ? n : def; };
+  let cats = p && p.categories;
+  if (typeof cats === 'string') cats = cats.split(',');
+  if (!Array.isArray(cats)) cats = [];
+  cats = cats.map((c) => String(c || '').trim().slice(0, 60)).filter(Boolean).slice(0, 50);
   return {
-    enabled: !!(cfg && cfg.enabled),
-    ip: String((cfg && cfg.ip) || '').trim().replace(/[^0-9a-zA-Z.\-]/g, '').slice(0, 64),
-    port: num(cfg && cfg.port, 9100, 1, 65535),
-    width: num(cfg && cfg.width, 48, 24, 64)
+    name: String((p && p.name) || ('Cocina' + (idx ? ' ' + (idx + 1) : ''))).trim().slice(0, 40) || 'Cocina',
+    ip: String((p && p.ip) || '').trim().replace(/[^0-9a-zA-Z.\-]/g, '').slice(0, 64),
+    port: num(p && p.port, 9100, 1, 65535),
+    width: num(p && p.width, 48, 24, 64),
+    categories: cats
   };
+}
+function clean(cfg) {
+  let list = cfg && Array.isArray(cfg.printers) ? cfg.printers : null;
+  if (!list) list = (cfg && cfg.ip) ? [{ name: 'Cocina', ip: cfg.ip, port: cfg.port, width: cfg.width, categories: [] }] : [];
+  return { enabled: !!(cfg && cfg.enabled), printers: list.slice(0, 10).map(cleanPrinter) };
 }
 
 // Cache en memoria: con enabled=false (default de toda la flota) no se toca disco en cada ticket.
@@ -79,7 +90,9 @@ function buildEscPos(c, width) {
   if (head.length) out += center + head.join('   ') + '\n';
   if (c.mode) out += center + tall + boldOn + ascii(c.mode) + '\n' + boldOff + norm;
   out += left + sep;
-  (c.items || []).slice(0, 60).forEach((it) => {
+  const items = c.items || [];
+  const adds = items.filter((it) => !it.cancel), cancels = items.filter((it) => it.cancel);
+  const renderItem = (it) => {
     const qty = String(it.qty || 1).replace(/[^0-9]/g, '').slice(0, 3) || '1';
     // En doble ancho caben w/2 caracteres por renglón
     const maxName = Math.max(8, Math.floor(w / 2) - qty.length - 2);
@@ -102,7 +115,13 @@ function buildEscPos(c, width) {
       out += '  * ' + ascii(String(m)).toUpperCase().slice(0, w - 4) + '\n';
     });
     if (it.note) out += '  NOTA: ' + ascii(String(it.note)).slice(0, w - 8) + '\n';
-  });
+  };
+  adds.slice(0, 60).forEach(renderItem);
+  if (cancels.length) {
+    if (adds.length) out += sep;
+    out += center + tall + boldOn + '*** CANCELAR ***\n' + boldOff + norm + left;
+    cancels.slice(0, 60).forEach(renderItem);
+  }
   out += sep;
   if (c.note) out += tall + boldOn + 'NOTA: ' + ascii(c.note) + '\n' + boldOff + norm;
   if (c.customer && !/publico en general/i.test(ascii(c.customer))) out += 'Cliente: ' + ascii(c.customer) + '\n';
@@ -110,20 +129,43 @@ function buildEscPos(c, width) {
   return out;
 }
 
-// Envía la comanda. Nunca lanza: devuelve {ok, error}.
+// Reparte los items entre impresoras segun item.category (puro, testeable).
+// Vacio = comodin (recibe lo que nadie reclamo). Sin match ni comodin -> primera impresora.
+function route(printers, items) {
+  const norm = (v) => ascii(v).trim().toLowerCase();
+  const buckets = printers.map(() => []);
+  const wild = printers.findIndex((p) => !p.categories.length);
+  (items || []).forEach((it) => {
+    const cat = norm(it && it.category);
+    let idx = cat ? printers.findIndex((p) => p.categories.some((c) => norm(c) === cat)) : -1;
+    if (idx < 0) idx = wild >= 0 ? wild : 0;
+    buckets[idx].push(it);
+  });
+  return buckets;
+}
+
+// Envía la comanda (una por impresora, en paralelo). Nunca lanza: devuelve {ok, error}.
 async function send(app, printerNetwork, comanda) {
-  const cfg = load(app);
-  if (!cfg.enabled || !cfg.ip) return { ok: false, skipped: true, error: 'comandas deshabilitadas' };
-  if (!printerNetwork || typeof printerNetwork.printToIP !== 'function') return { ok: false, error: 'printer-network no disponible' };
-  if (!comanda || !Array.isArray(comanda.items) || !comanda.items.length) return { ok: false, error: 'comanda sin items' };
   try {
+    const cfg = load(app);
+    const printers = cfg.printers.filter((p) => p.ip);
+    if (!cfg.enabled || !printers.length) return { ok: false, skipped: true, error: 'comandas deshabilitadas' };
+    if (!printerNetwork || typeof printerNetwork.printToIP !== 'function') return { ok: false, error: 'printer-network no disponible' };
+    if (!comanda || !Array.isArray(comanda.items) || !comanda.items.length) return { ok: false, error: 'comanda sin items' };
     const cut = (v) => String(v || '').slice(0, 120);
-    const safe = { folio: cut(comanda.folio), time: cut(comanda.time), mode: cut(comanda.mode), note: cut(comanda.note), customer: cut(comanda.customer),
-      items: comanda.items.slice(0, 60).map((i) => ({ qty: i && i.qty, name: cut(i && i.name),
-        modifiers: Array.isArray(i && i.modifiers) ? i.modifiers.slice(0, 20).map(cut) : [], note: cut(i && i.note) })) };
-    const bytes = buildEscPos(safe, cfg.width);
-    const r = await printerNetwork.printToIP(cfg.ip, cfg.port, bytes, { timeout: 8000 });
-    return r;
+    const items = comanda.items.slice(0, 120).map((i) => ({ qty: i && i.qty, name: cut(i && i.name), cancel: !!(i && i.cancel), category: cut(i && i.category),
+      modifiers: Array.isArray(i && i.modifiers) ? i.modifiers.slice(0, 20).map(cut) : [], note: cut(i && i.note) }));
+    const head = { folio: cut(comanda.folio), time: cut(comanda.time), mode: cut(comanda.mode), note: cut(comanda.note), customer: cut(comanda.customer) };
+    const buckets = route(printers, items);
+    const results = await Promise.all(printers.map(async (p, k) => {
+      if (!buckets[k].length) return { ok: true, printer: p.name, empty: true };
+      try {
+        const r = await printerNetwork.printToIP(p.ip, p.port, buildEscPos(Object.assign({}, head, { items: buckets[k] }), p.width), { timeout: 8000 });
+        return Object.assign({}, r, { printer: p.name });
+      } catch (e) { return { ok: false, printer: p.name, error: e.message }; }
+    }));
+    const failed = results.filter((r) => !r.ok);
+    return { ok: !failed.length, results, error: failed.length ? failed.map((r) => r.printer + ': ' + r.error).join('; ') : undefined };
   } catch (e) {
     return { ok: false, error: e.message };
   }
@@ -148,19 +190,19 @@ label{display:block;font-size:13px;margin:10px 0 4px}input[type=text],input[type
 .btns{display:flex;gap:10px;margin-top:18px}button{padding:9px 14px;border:0;border-radius:6px;font-size:14px;cursor:pointer}
 #save{background:#1f7a3f;color:#fff}#test{background:#2b5fd9;color:#fff}#msg{margin-top:12px;font-size:13px;min-height:18px}</style></head><body>
 <h2>Impresora de comandas (cocina)</h2>
-<p>Al cobrar, además del ticket, se manda la comanda (productos y cantidades, sin precios) a esta impresora de red.</p>
-<div class="row"><div><label>IP de la impresora</label><input id="ip" type="text" value="${esc(cfg.ip)}" placeholder="192.168.1.100"></div>
-<div style="flex:0 0 110px"><label>Puerto</label><input id="port" type="number" value="${esc(cfg.port || 9100)}"></div>
-<div style="flex:0 0 130px"><label>Ancho (chars)</label><input id="width" type="number" value="${esc(cfg.width || 48)}" title="48 = 80mm, 32 = 58mm"></div></div>
+<p>Al cobrar, además del ticket, se manda la comanda (productos y cantidades, sin precios) a esta impresora de red. Esta ventana edita la impresora principal; para varias impresoras por categoría usa Configuración → Periféricos → Impresoras.</p>
+<div class="row"><div><label>IP de la impresora</label><input id="ip" type="text" value="${esc((cfg.printers[0] || {}).ip)}" placeholder="192.168.1.100"></div>
+<div style="flex:0 0 110px"><label>Puerto</label><input id="port" type="number" value="${esc((cfg.printers[0] || {}).port || 9100)}"></div>
+<div style="flex:0 0 130px"><label>Ancho (chars)</label><input id="width" type="number" value="${esc((cfg.printers[0] || {}).width || 48)}" title="48 = 80mm, 32 = 58mm"></div></div>
 <label class="chk"><input id="enabled" type="checkbox" ${cfg.enabled ? 'checked' : ''}> Imprimir comandas al cobrar</label>
 <div class="btns"><button id="test">Imprimir comanda de prueba</button><button id="save">Guardar</button></div>
 <div id="msg"></div>
 <script>
 const $=id=>document.getElementById(id);const api=window.volvixElectron||{};
-function read(){return {ip:$('ip').value.trim(),port:parseInt($('port').value,10)||9100,width:parseInt($('width').value,10)||48,enabled:$('enabled').checked};}
-$('save').onclick=async()=>{try{const r=await api.comandaSave(read());$('msg').textContent=r&&r.ok?'Guardado. '+(r.cfg.enabled?'Comandas ACTIVAS en '+r.cfg.ip+':'+r.cfg.port:'Comandas desactivadas'):'Error: '+(r&&r.error);}catch(e){$('msg').textContent='Error: '+e.message;}};
+let base=${JSON.stringify(cfg.printers || [])};function read(){const p=Object.assign({name:'Cocina',categories:[]},base[0]||{},{ip:$('ip').value.trim(),port:parseInt($('port').value,10)||9100,width:parseInt($('width').value,10)||48});return {enabled:$('enabled').checked,printers:[p].concat(base.slice(1))};}
+$('save').onclick=async()=>{try{const r=await api.comandaSave(read());$('msg').textContent=r&&r.ok?'Guardado. '+(r.cfg.enabled?'Comandas ACTIVAS ('+r.cfg.printers.length+' impresora(s))':'Comandas desactivadas'):'Error: '+(r&&r.error);}catch(e){$('msg').textContent='Error: '+e.message;}};
 $('test').onclick=async()=>{$('msg').textContent='Enviando prueba...';try{const r=await api.comandaTest(read());$('msg').textContent=r&&r.ok?'Comanda de prueba enviada ('+r.bytesWritten+' bytes). Revise la impresora de cocina.':'No se pudo imprimir: '+(r&&r.error);}catch(e){$('msg').textContent='Error: '+e.message;}};
 </script></body></html>`;
 }
 
-module.exports = { load, save, send, buildEscPos, sampleComanda, configHtml, ascii };
+module.exports = { load, save, send, route, clean, buildEscPos, sampleComanda, configHtml, ascii };

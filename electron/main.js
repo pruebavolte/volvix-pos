@@ -606,10 +606,11 @@ ipcMain.handle('volvix:comanda:print', async (event, comanda) => {
 });
 ipcMain.handle('volvix:comanda:test', async (event, cfg) => {
   if (!_comandaPrinter || !_printerNetwork) return { ok: false, error: 'módulo no disponible' };
-  const c = Object.assign({}, _comandaPrinter.load(app), cfg || {});
+  // cfg puede ser una impresora suelta {ip,port,width} (boton "Probar" por impresora) o una config completa
+  const c = (cfg && Array.isArray(cfg.printers)) ? (cfg.printers.find((p) => p && p.ip) || {}) : (cfg || {});
   if (!c.ip) return { ok: false, error: 'falta la IP' };
   try {
-    return await _printerNetwork.printToIP(c.ip, c.port || 9100, _comandaPrinter.buildEscPos(_comandaPrinter.sampleComanda(), c.width), { timeout: 8000 });
+    return await _printerNetwork.printToIP(String(c.ip).replace(/[^0-9a-zA-Z.\-]/g, ''), parseInt(c.port, 10) || 9100, _comandaPrinter.buildEscPos(_comandaPrinter.sampleComanda(), parseInt(c.width, 10) || 48), { timeout: 8000 });
   } catch (e) { return { ok: false, error: e.message }; }
 });
 
