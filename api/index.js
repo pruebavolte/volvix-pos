@@ -6060,12 +6060,22 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
         priorReturns = await supabaseRequest('GET',
           `/pos_returns?sale_id=eq.${body.sale_id}&status=in.(pending,approved,completed)&select=items,items_returned`) || [];
       } catch (_) { priorReturns = []; }
+      // FIX web/loyverse 2026-09-20: emparejar por CUALQUIERA de product_id|id|code (antes solo la 1a clave
+      // no vacia de la linea: un cliente que mandaba `code` contra una linea con uuid daba "not in sale") y
+      // por producto agregando lineas (mismo producto con distinto modificador = varias lineas). La clave de
+      // "ya devuelto" es canonica (product_id||id||code de la linea vendida), no la que mande el cliente.
+      const _vlxKeys = (o) => [o && o.product_id, o && o.id, o && o.code]
+        .filter(v => v != null && v !== '').map(String);
+      const _vlxCanon = (o) => { const k = _vlxKeys(o); return k.length ? k[0] : ''; };
+      const _vlxFindLines = (pid) => saleItems.filter(s => _vlxKeys(s).indexOf(pid) >= 0);
       const alreadyReturnedQty = {};
       for (const pr of priorReturns) {
         const arr = Array.isArray(pr.items) ? pr.items
           : (Array.isArray(pr.items_returned) ? pr.items_returned : []);
         for (const x of arr) {
-          const k = String(x.product_id || x.id || x.code || '');
+          const raw = String(x.product_id || x.id || x.code || '');
+          const ln = _vlxFindLines(raw)[0];
+          const k = ln ? _vlxCanon(ln) : raw;
           alreadyReturnedQty[k] = (alreadyReturnedQty[k] || 0) + (Number(x.qty || x.quantity) || 0);
         }
       }
@@ -6076,11 +6086,13 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
       for (const it of rawItems) {
         const pid = String(it.product_id || it.id || it.code || '');
         if (!pid) return sendJSON(res, { error: 'item missing product_id' }, 400);
-        const match = saleItems.find(s => String(s.product_id || s.id || s.code) === pid);
-        if (!match) return sendJSON(res, { error: `item ${pid} not in sale` }, 400);
+        const lines = _vlxFindLines(pid);
+        if (!lines.length) return sendJSON(res, { error: `item ${pid} not in sale` }, 400);
+        const match = lines[0];
+        const canon = _vlxCanon(match);
         const askQty = Number(it.qty || it.quantity || 0);
-        const origQty = Number(match.qty || match.quantity || 0);
-        const alreadyQty = Number(alreadyReturnedQty[pid] || 0);
+        const origQty = lines.reduce((a, l) => a + (Number(l.qty || l.quantity || 0) || 0), 0);
+        const alreadyQty = Number(alreadyReturnedQty[canon] || 0);
         const remaining = origQty - alreadyQty;
         if (askQty <= 0) {
           return sendJSON(res, { error: `qty must be > 0 for ${pid}` }, 400);
@@ -6097,14 +6109,24 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
           match.unit_price != null ? match.unit_price :
           (match.price != null ? match.price : it.price)
         ) || 0;
-        const lineDiscount = Number(match.applied_discount_amount || match.discount || 0) || 0;
-        // refund = effectivePrice * qty - proportional lineDiscount
-        const proportion = origQty > 0 ? (askQty / origQty) : 0;
-        const lineRefund = (effectivePrice * askQty) - (lineDiscount * proportion);
+        // refund = sum por linea (FIFO: primero se consume lo ya devuelto) de
+        // effectivePrice * qty - descuento proporcional de esa linea. Con 1 sola linea = formula anterior.
+        let skipQty = alreadyQty, needQty = askQty, lineRefund = 0;
+        for (const ln of lines) {
+          const lq = Number(ln.qty || ln.quantity || 0) || 0;
+          const used = Math.min(skipQty, lq); skipQty -= used;
+          const take = Math.min(needQty, lq - used);
+          if (take <= 0) continue;
+          const lp = Number(ln.unit_price != null ? ln.unit_price : (ln.price != null ? ln.price : it.price)) || 0;
+          const ld = Number(ln.applied_discount_amount || ln.discount || 0) || 0;
+          lineRefund += (lp * take) - (lq > 0 ? ld * (take / lq) : 0);
+          needQty -= take;
+        }
         const safeLineRefund = Math.max(0, Math.round(lineRefund * 100) / 100);
         computedRefund += safeLineRefund;
         normalizedItems.push({
-          product_id: pid,
+          product_id: canon,
+          code: match.code || null,
           name: match.name || match.product_name || it.name || '',
           qty: askQty,
           price: effectivePrice,
@@ -6196,11 +6218,13 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
             updatedReturnedQty[x.product_id] = (updatedReturnedQty[x.product_id] || 0) + x.qty;
           }
           let allReturned = saleItems.length > 0;
+          const soldByKey = {};
           for (const s of saleItems) {
-            const sid = String(s.product_id || s.id || s.code || '');
-            const oq = Number(s.qty || s.quantity || 0);
-            const rq = Number(updatedReturnedQty[sid] || 0);
-            if (rq < oq) { allReturned = false; break; }
+            const sid = _vlxCanon(s);
+            soldByKey[sid] = (soldByKey[sid] || 0) + (Number(s.qty || s.quantity || 0) || 0);
+          }
+          for (const sid of Object.keys(soldByKey)) {
+            if (Number(updatedReturnedQty[sid] || 0) < soldByKey[sid]) { allReturned = false; break; }
           }
           const newStatus = allReturned ? 'refunded' : 'partially_refunded';
           try {
