@@ -50,9 +50,36 @@ Los bytes se arman en `public/volvix-escpos.js` (compartido; `scripts/test-escpo
 - `autoPrintTicket` legado de `volvix-cobro-modal.js` (reintentos USB/BT/IP vía `volvixElectron`) sigue solo-Electron; el camino real de cobro (FASE 4 "rápido") ya usa `VolvixPlatform` y funciona en android.
 - Impresión USB directa: no soportada en Android (aviso claro). Logo/QR del ticket: no se imprimen en android (solo texto).
 - Falta un botón 📷 en la búsqueda/pantalla de venta que llame `VolvixPlatform.scanBarcode()` y meta el código al flujo de escaneo del POS (`salvadorex-pos.html`, área compartida: coordinar con exe/Unificación).
-- La política de firma del APK (keystore autogenerado en CI con contraseña fija) implica que **cada build tiene otra firma**: un APK nuevo no se instala sobre uno viejo sin desinstalar. Decisión de Vicky: guardar un keystore estable como secreto de GitHub.
+- Firma estable: ver §7 (hasta que existan los 4 secretos en GitHub, cada build firma distinto).
 
 ## 6. Deuda (a) de mi area migrada + version derivada (2026-09-20)
 
 - `volvix-capacitor-bridge.js`, `volvix-capacitor-api-rewrite.js`, `volvix-mobile-wiring.js`: 0 referencias directas a `Capacitor`; usan `VolvixPlatform.kind` / `isNative` / `plugin(nombre)` (nuevo en el bloque android de `volvix-platform.js`, idempotente). Si una pagina aun no carga `volvix-platform.js`, el bridge cae a la heuristica de WebView (localhost + UA movil) para no romper el APK. Se agrego 1 linea `<script src=volvix-platform.js>` antes del bridge/mobile-wiring en 8 paginas (commit aparte).
 - `android/app/build.gradle`: `versionName` = `-PVOLVIX_VERSION` / env / `package.json`; `versionCode` = `-PVERSION_CODE` / env / `1000000*mayor + 1000*menor + patch` (contiene el patch y sigue subiendo frente a los APK ya publicados, p. ej. v1.0.336 = 1000336). El CI verifica con `aapt2 dump badging` que el APK trae esa version. Guardia `check-paridad`: 0 nuevos, 5 mejorados.
+
+## 7. Firma del APK (keystore estable) — 2026-09-20
+
+**Estado:** el CI ya soporta firma estable pero **hasta que existan los 4 secretos en GitHub, cada build firma con la clave DEBUG de Android: es distinta en cada build y un APK nuevo NO se instala encima del anterior** (hay que desinstalar). Sin contraseñas por defecto en el repo (se quitó `volvix2026` de `build.gradle` y del workflow; sigue en el historial git pero esa clave se regeneraba en cada build, no hay nada que rotar).
+
+Secretos del repo (Settings → Secrets and variables → Actions; los carga el dueño / `gh`, ninguna IA teclea credenciales):
+
+| Secreto | Contenido |
+|---|---|
+| `ANDROID_KEYSTORE_B64` | el keystore PKCS12 en base64 (una sola línea) |
+| `ANDROID_KEYSTORE_PASS` | contraseña del keystore |
+| `ANDROID_KEY_ALIAS` | alias de la clave (`volvix-release`) |
+| `ANDROID_KEY_PASS` | contraseña de la clave (igual a la del keystore en PKCS12) |
+
+- **Ya generado** (fuera del repo, nunca commiteado ni impreso): `C:	mp\openclaw-gateway\secrets\` → `volvix-release.jks` (PKCS12, RSA 2048, 10000 días), `volvix-release.jks.b64.txt` (el valor de `ANDROID_KEYSTORE_B64`) y `volvix-release-secrets.txt` (contraseñas y alias). **Respaldar esa carpeta**: si se pierde la clave, los APK ya instalados no se podrán actualizar.
+- Huella SHA-256 del certificado (pública, sirve para comprobar el APK): `36:F7:E0:E7:0A:FC:23:23:37:63:0F:63:53:69:ED:A5:8D:27:A6:D3:FD:E4:ED:DA:5E:64:C5:B3:89:D6:61:C2`. El CI la imprime en el resumen de cada run (paso "Verificar firma del APK").
+- Cargar los secretos (PowerShell, con `gh auth login` hecho por el dueño):
+  ```
+  cd C:	mp\openclaw-gateway\secrets
+  gh secret set ANDROID_KEYSTORE_B64 --repo pruebavolte/volvix-pos < volvix-release.jks.b64.txt
+  gh secret set ANDROID_KEYSTORE_PASS --repo pruebavolte/volvix-pos    # pegar el valor de volvix-release-secrets.txt
+  gh secret set ANDROID_KEY_ALIAS --repo pruebavolte/volvix-pos --body volvix-release
+  gh secret set ANDROID_KEY_PASS --repo pruebavolte/volvix-pos         # pegar el valor de volvix-release-secrets.txt
+  ```
+- Generar el base64 de otro keystore: PowerShell `[Convert]::ToBase64String([IO.File]::ReadAllBytes('volvix-release.jks'))`; bash `base64 -w0 volvix-release.jks`. Crear uno nuevo: `keytool -genkeypair -keystore volvix-release.jks -alias volvix-release -keyalg RSA -keysize 2048 -validity 10000 -storetype PKCS12`.
+- Cómo lo usa el build: el paso "Configurar firma del APK" decodifica `ANDROID_KEYSTORE_B64` a `android/app/volvix-release.keystore` (ignorado por git: `*.keystore`, `*.jks`) y exporta los otros 3 como variables de entorno que lee `android/app/build.gradle`; si falta cualquiera, `release` firma con `signingConfigs.debug` y un tag emite un `::warning::`. El paso "Verificar firma" imprime `Firma: stable|debug`.
+- Al pasar a la firma estable, los equipos con un APK anterior (firmado con clave debug) deben **desinstalar una sola vez**; después las actualizaciones se instalan encima.
