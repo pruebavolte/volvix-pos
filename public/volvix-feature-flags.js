@@ -92,7 +92,9 @@
     'module.rentas':        { name: 'Renta de Equipo',    default_status: 'enabled' },
     'module.reservaciones': { name: 'Reservaciones',      default_status: 'enabled' },
     // 2026-05-13: motor visual de distribución (layout builder universal)
-    'module.mapa':          { name: 'Mapa del lugar',     default_status: 'enabled' }
+    'module.mapa':          { name: 'Mapa del lugar',     default_status: 'enabled' },
+    // 2026-09-19 (T1.3): modificadores estilo Loyverse (dialogo en POS + back-office)
+    'module.modifiers':     { name: 'Modificadores',      default_status: 'enabled' }
   };
 
   function defaultMap() {

@@ -57,7 +57,7 @@ function ascii(s) {
 }
 
 // Construye los bytes ESC/POS de la comanda.
-// c = { folio, time, mode, note, customer, items:[{qty,name}] }
+// c = { folio, time, mode, note, customer, items:[{qty,name,modifiers?:[string],note?}] }
 function buildEscPos(c, width) {
   const w = width || 48;
   const ESC = '\x1b', GS = '\x1d';
@@ -97,6 +97,11 @@ function buildEscPos(c, width) {
       out += big + (idx === 0 ? qty + ' ' : ' '.repeat(qty.length + 1)) + r.slice(0, maxName) + '\n';
     });
     out += norm;
+    // T1.3: modificadores bajo el item, tamano normal, prefijo '  * '; comentario del item debajo
+    (it.modifiers || []).slice(0, 20).forEach((m) => {
+      out += '  * ' + ascii(String(m)).toUpperCase().slice(0, w - 4) + '\n';
+    });
+    if (it.note) out += '  NOTA: ' + ascii(String(it.note)).slice(0, w - 8) + '\n';
   });
   out += sep;
   if (c.note) out += tall + boldOn + 'NOTA: ' + ascii(c.note) + '\n' + boldOff + norm;
@@ -114,7 +119,8 @@ async function send(app, printerNetwork, comanda) {
   try {
     const cut = (v) => String(v || '').slice(0, 120);
     const safe = { folio: cut(comanda.folio), time: cut(comanda.time), mode: cut(comanda.mode), note: cut(comanda.note), customer: cut(comanda.customer),
-      items: comanda.items.slice(0, 60).map((i) => ({ qty: i && i.qty, name: cut(i && i.name) })) };
+      items: comanda.items.slice(0, 60).map((i) => ({ qty: i && i.qty, name: cut(i && i.name),
+        modifiers: Array.isArray(i && i.modifiers) ? i.modifiers.slice(0, 20).map(cut) : [], note: cut(i && i.note) })) };
     const bytes = buildEscPos(safe, cfg.width);
     const r = await printerNetwork.printToIP(cfg.ip, cfg.port, bytes, { timeout: 8000 });
     return r;

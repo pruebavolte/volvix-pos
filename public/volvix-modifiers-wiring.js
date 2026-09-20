@@ -462,6 +462,257 @@
     });
   }
 
+  // ------------------------------------------------------- T1.3 Modificadores reales (estilo Loyverse)
+  // Lee los modificadores REALES de GET /api/products/modifiers (por sku) y abre un
+  // dialogo simple: grupos con sus opciones, obligatorio/una o varias, precio extra,
+  // cantidad y comentario. Flag: module.modifiers.
+  const _real = { cache: new Map(), fetcher: null, TTL: 300000, TIMEOUT: 2500 };
+
+  function realEnabled() {
+    try {
+      if (global.VolvixFeatures && typeof global.VolvixFeatures.has === 'function') {
+        return global.VolvixFeatures.has('module.modifiers') !== false;
+      }
+    } catch (e) {}
+    return true;
+  }
+  function round2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
+  function skuOf(p) { return String((p && (p.sku || p.code || p.id)) || '').trim(); }
+  function fmtMoney(n) { return '$' + round2(n).toFixed(2); }
+
+  // filas de BD -> grupos [{label, required, multi, options:[{key,label,price_delta}]}]
+  function groupize(rows) {
+    const map = new Map();
+    (rows || []).forEach(function (r) {
+      if (!r || r.active === false || !(r.modifier_label || r.label)) return;
+      const label = String(r.group_label || r.group || 'Opciones');
+      if (!map.has(label)) map.set(label, { label: label, required: false, multi: false, options: [] });
+      const g = map.get(label);
+      if (r.required) g.required = true;
+      if (r.multiselect !== false) g.multi = true;
+      g.options.push({
+        key: String(r.modifier_key || r.key || (g.options.length + 1)),
+        label: String(r.modifier_label || r.label),
+        price_delta: round2(r.price_delta || r.delta || 0)
+      });
+    });
+    return Array.from(map.values());
+  }
+
+  // precio de la linea = precio base + suma de price_delta de los modificadores elegidos
+  function linePrice(base, mods) {
+    return round2((Number(base) || 0) + (mods || []).reduce(function (s, m) { return s + (Number(m && m.price_delta) || 0); }, 0));
+  }
+  // llave de linea: mismo producto con distintos modificadores/nota = linea distinta
+  function lineKey(item) {
+    const it = item || {};
+    const mods = (it.modifiers || []).map(function (m) { return String((m && m.label) || m || ''); }).sort().join(',');
+    return String(it.code || it.id || it.name || '') + '|' + mods + '|' + String(it.note || '');
+  }
+  // texto por renglon: "+ Arroz (+$5.00)", "Nota: ..."
+  function describe(item) {
+    const out = [];
+    ((item && item.modifiers) || []).forEach(function (m) {
+      const d = Number(m && m.price_delta) || 0;
+      out.push('+ ' + String((m && m.label) || m) + (d ? ' (' + (d > 0 ? '+' : '-') + fmtMoney(Math.abs(d)) + ')' : ''));
+    });
+    if (item && item.note) out.push('Nota: ' + item.note);
+    return out;
+  }
+
+  function setFetcher(fn) { _real.fetcher = fn; }
+  function fetchGroups(key) {
+    const hit = _real.cache.get(key);
+    if (hit && (Date.now() - hit.ts) < _real.TTL) return Promise.resolve(hit.groups);
+    const f = _real.fetcher || (typeof fetch === 'function' ? fetch.bind(global) : null);
+    if (!f) return Promise.resolve([]);
+    const req = Promise.resolve(f('/api/products/modifiers?sku=' + encodeURIComponent(key)))
+      .then(function (r) { return r && r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j) return [];
+        const groups = groupize(j.modifiers || []);
+        _real.cache.set(key, { ts: Date.now(), groups: groups });
+        return groups;
+      })
+      .catch(function () { return []; });
+    const timeout = new Promise(function (res) { setTimeout(function () { res([]); }, _real.TIMEOUT); });
+    return Promise.race([req, timeout]);
+  }
+  function invalidate(key) { if (key) _real.cache.delete(String(key)); else _real.cache.clear(); }
+
+  function applySelection(p, res) {
+    const base = Number(p.price) || 0;
+    const mods = (res && res.modifiers) || [];
+    return Object.assign({}, p, {
+      _modsDone: true,
+      base_price: base,
+      price: linePrice(base, mods),
+      modifiers: mods,
+      note: (res && res.note) || '',
+      qty: (Number(p.qty) || 1) * ((res && res.qty) || 1)
+    });
+  }
+
+  // Devuelve true si tomo el control (async); false si el llamador debe agregar directo (sync).
+  function intercept(p, cont) {
+    if (!p || p._modsDone || (p.modifiers && p.modifiers.length) || !realEnabled()) return false;
+    const key = skuOf(p);
+    if (!key) return false;
+    const hit = _real.cache.get(key);
+    const fresh = hit && (Date.now() - hit.ts) < _real.TTL;
+    if (fresh && !hit.groups.length) return false;
+    const go = function (groups) {
+      if (!groups.length) { cont(Object.assign({}, p, { _modsDone: true })); return; }
+      openRealDialog(p, groups, function (res) { if (res) cont(applySelection(p, res)); });
+    };
+    if (fresh) go(hit.groups); else fetchGroups(key).then(go);
+    return true;
+  }
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  function openRealDialog(p, groups, done) {
+    if (typeof document === 'undefined') { done(null); return; }
+    const ov = document.createElement('div');
+    ov.id = 'vlx-mod-dialog';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100000;display:flex;align-items:center;justify-content:center;padding:12px;';
+    let html = '<div style="background:#fff;color:#1C1917;border-radius:12px;width:420px;max-width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35);font-family:inherit;">'
+      + '<div style="padding:14px 16px;border-bottom:1px solid #E7E5E4;font-weight:700;font-size:16px;">' + esc(p.name || 'Producto') + ' <span id="vlx-mod-total" style="float:right;color:#16a34a;"></span></div>'
+      + '<div style="padding:8px 16px;overflow:auto;flex:1;">';
+    groups.forEach(function (g, gi) {
+      html += '<div class="vlx-mod-group" data-g="' + gi + '" style="margin:10px 0;"><div style="font-weight:700;font-size:13px;margin-bottom:4px;">' + esc(g.label)
+        + ' <span style="font-weight:400;color:#78716C;font-size:11px;">' + (g.required ? 'obligatorio' : 'opcional') + ' - ' + (g.multi ? 'una o varias' : 'elige una') + '</span></div>';
+      g.options.forEach(function (o, oi) {
+        html += '<label style="display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px solid #F5F5F4;font-size:14px;cursor:pointer;">'
+          + '<input type="' + (g.multi ? 'checkbox' : 'radio') + '" name="vlxg' + gi + '" data-g="' + gi + '" data-o="' + oi + '" style="width:20px;height:20px;">'
+          + '<span style="flex:1;">' + esc(o.label) + '</span>'
+          + (o.price_delta ? '<span style="color:#57534E;">' + (o.price_delta > 0 ? '+' : '-') + fmtMoney(Math.abs(o.price_delta)) + '</span>' : '') + '</label>';
+      });
+      html += '</div>';
+    });
+    html += '<div style="margin:10px 0;"><input id="vlx-mod-note" type="text" maxlength="120" placeholder="Comentario (ej. sin cebolla)" style="width:100%;padding:10px;border:1px solid #E7E5E4;border-radius:8px;font-size:14px;box-sizing:border-box;"></div>'
+      + '<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin:8px 0 4px;">'
+      + '<button type="button" id="vlx-mod-minus" style="width:40px;height:40px;border-radius:50%;border:1px solid #D6D3D1;background:#fff;font-size:20px;">-</button>'
+      + '<b id="vlx-mod-qty" style="font-size:18px;min-width:24px;text-align:center;">1</b>'
+      + '<button type="button" id="vlx-mod-plus" style="width:40px;height:40px;border-radius:50%;border:1px solid #D6D3D1;background:#fff;font-size:20px;">+</button></div>'
+      + '<div id="vlx-mod-err" style="color:#dc2626;font-size:12px;min-height:16px;text-align:center;"></div></div>'
+      + '<div style="display:flex;gap:8px;padding:12px 16px;border-top:1px solid #E7E5E4;">'
+      + '<button type="button" id="vlx-mod-cancel" style="flex:1;padding:12px;border:1px solid #D6D3D1;background:#fff;border-radius:8px;font-size:15px;">Cancelar</button>'
+      + '<button type="button" id="vlx-mod-ok" style="flex:1;padding:12px;border:0;background:#16a34a;color:#fff;border-radius:8px;font-size:15px;font-weight:700;">Agregar</button></div></div>';
+    ov.innerHTML = html;
+    document.body.appendChild(ov);
+    let qty = 1;
+    const $ = function (id) { return ov.querySelector('#' + id); };
+    function selected() {
+      const mods = [];
+      ov.querySelectorAll('input[data-g]:checked').forEach(function (el) {
+        const o = groups[+el.getAttribute('data-g')].options[+el.getAttribute('data-o')];
+        mods.push({ label: o.label, price_delta: o.price_delta, group: groups[+el.getAttribute('data-g')].label });
+      });
+      return mods;
+    }
+    function refresh() {
+      $('vlx-mod-qty').textContent = String(qty);
+      $('vlx-mod-total').textContent = fmtMoney(linePrice(p.price, selected()) * qty);
+    }
+    function close(res) { if (ov.parentNode) ov.parentNode.removeChild(ov); done(res); }
+    ov.addEventListener('change', refresh);
+    $('vlx-mod-minus').onclick = function () { if (qty > 1) { qty--; refresh(); } };
+    $('vlx-mod-plus').onclick = function () { if (qty < 99) { qty++; refresh(); } };
+    $('vlx-mod-cancel').onclick = function () { close(null); };
+    $('vlx-mod-ok').onclick = function () {
+      for (let gi = 0; gi < groups.length; gi++) {
+        if (groups[gi].required && !ov.querySelector('input[data-g="' + gi + '"]:checked')) {
+          $('vlx-mod-err').textContent = 'Elige una opcion en "' + groups[gi].label + '"';
+          return;
+        }
+      }
+      close({ modifiers: selected().map(function (m) { return { label: m.label, price_delta: m.price_delta }; }), note: $('vlx-mod-note').value.trim(), qty: qty });
+    };
+    refresh();
+  }
+
+  // ---- Back-office: editor de grupos/opciones dentro de la ficha de producto
+  function rowsFromGroups(groups) {
+    const rows = [];
+    (groups || []).forEach(function (g) {
+      (g.options || []).forEach(function (o) {
+        if (!o.label) return;
+        rows.push({
+          modifier_key: String(o.key || (g.label + '-' + o.label)).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 60),
+          modifier_label: o.label, group_label: g.label || 'Opciones',
+          price_delta: Number(o.price_delta) || 0, required: !!g.required, multiselect: !!g.multi
+        });
+      });
+    });
+    return rows;
+  }
+  async function loadGroups(sku) {
+    invalidate(sku);
+    const groups = await fetchGroups(String(sku));
+    return groups.map(function (g) { return JSON.parse(JSON.stringify(g)); });
+  }
+  async function saveGroups(sku, groups) {
+    const f = _real.fetcher || fetch.bind(global);
+    const r = await f('/api/products/modifiers', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sku: String(sku), modifiers: rowsFromGroups(groups) })
+    });
+    invalidate(sku);
+    return !!(r && r.ok);
+  }
+  // Pinta el editor en `host`; devuelve {read()} para leer los grupos actuales.
+  function mountEditor(host, groups) {
+    const state = JSON.parse(JSON.stringify(groups || []));
+    const inp = 'padding:6px;border:1px solid #D6D3D1;border-radius:6px;';
+    function draw() {
+      let h = '<div style="font-size:12px;color:#78716C;margin-bottom:6px;">Ej. grupo "Guarnicion" con opciones Arroz, Pure... Precio extra en pesos.</div>';
+      state.forEach(function (g, gi) {
+        h += '<div style="border:1px solid #E7E5E4;border-radius:8px;padding:8px;margin-bottom:8px;">'
+          + '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><input data-k="glabel" data-g="' + gi + '" value="' + esc(g.label) + '" placeholder="Nombre del grupo" style="flex:1;min-width:120px;' + inp + '">'
+          + '<label style="font-size:12px;"><input type="checkbox" data-k="req" data-g="' + gi + '"' + (g.required ? ' checked' : '') + '> Obligatorio</label>'
+          + '<select data-k="multi" data-g="' + gi + '" style="' + inp + '"><option value="0"' + (g.multi ? '' : ' selected') + '>Elegir una</option><option value="1"' + (g.multi ? ' selected' : '') + '>Elegir varias</option></select>'
+          + '<button type="button" data-a="delg" data-g="' + gi + '" style="border:0;background:none;color:#dc2626;font-size:18px;">&times;</button></div>';
+        g.options.forEach(function (o, oi) {
+          h += '<div style="display:flex;gap:6px;margin-top:6px;"><input data-k="olabel" data-g="' + gi + '" data-o="' + oi + '" value="' + esc(o.label) + '" placeholder="Opcion" style="flex:1;' + inp + '">'
+            + '<input data-k="odelta" data-g="' + gi + '" data-o="' + oi + '" type="number" step="0.01" value="' + (Number(o.price_delta) || 0) + '" title="Precio extra" style="width:80px;' + inp + '">'
+            + '<button type="button" data-a="delo" data-g="' + gi + '" data-o="' + oi + '" style="border:0;background:none;color:#dc2626;font-size:18px;">&times;</button></div>';
+        });
+        h += '<button type="button" data-a="addo" data-g="' + gi + '" style="margin-top:6px;border:1px dashed #A8A29E;background:#fff;border-radius:6px;padding:4px 10px;font-size:12px;">+ Opcion</button></div>';
+      });
+      h += '<button type="button" data-a="addg" style="border:1px dashed #A8A29E;background:#fff;border-radius:6px;padding:6px 12px;font-size:13px;">+ Grupo de modificadores</button>';
+      host.innerHTML = h;
+    }
+    function sync() {
+      host.querySelectorAll('[data-k]').forEach(function (el) {
+        const g = state[+el.getAttribute('data-g')]; if (!g) return;
+        const k = el.getAttribute('data-k'), o = g.options[+el.getAttribute('data-o')];
+        if (k === 'glabel') g.label = el.value; else if (k === 'req') g.required = el.checked;
+        else if (k === 'multi') g.multi = el.value === '1';
+        else if (o && k === 'olabel') o.label = el.value; else if (o && k === 'odelta') o.price_delta = Number(el.value) || 0;
+      });
+    }
+    host.onclick = function (e) {
+      const b = e.target.closest('[data-a]'); if (!b) return;
+      sync();
+      const a = b.getAttribute('data-a'), gi = +b.getAttribute('data-g'), oi = +b.getAttribute('data-o');
+      if (a === 'addg') state.push({ label: '', required: false, multi: false, options: [{ label: '', price_delta: 0 }] });
+      else if (a === 'delg') state.splice(gi, 1);
+      else if (a === 'addo') state[gi].options.push({ label: '', price_delta: 0 });
+      else if (a === 'delo') state[gi].options.splice(oi, 1);
+      draw();
+    };
+    draw();
+    return { read: function () { sync(); return state.filter(function (g) { return g.label && g.options.some(function (o) { return o.label; }); }); } };
+  }
+
+  const real = {
+    setFetcher: setFetcher, fetchGroups: fetchGroups, invalidate: invalidate, groupize: groupize,
+    linePrice: linePrice, lineKey: lineKey, describe: describe, applySelection: applySelection,
+    intercept: intercept, openDialog: openRealDialog, rowsFromGroups: rowsFromGroups,
+    loadGroups: loadGroups, saveGroups: saveGroups, mountEditor: mountEditor, isEnabled: realEnabled
+  };
+
   // ---------------------------------------------------------------- Expose
   const ModifiersAPI = {
     registerProduct: registerProduct,
@@ -479,10 +730,12 @@
     DEFAULT_EXTRAS: DEFAULT_EXTRAS,
     DEFAULT_REMOVABLE: DEFAULT_REMOVABLE,
     DEFAULT_COMBOS: DEFAULT_COMBOS,
-    version: '1.0.0'
+    real: real,
+    version: '1.1.0'
   };
 
   global.ModifiersAPI = ModifiersAPI;
+  if (typeof module !== 'undefined' && module.exports) module.exports = ModifiersAPI;
 
   if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {

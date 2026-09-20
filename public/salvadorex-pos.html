@@ -2657,6 +2657,7 @@
   .lv-row-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .lv-row-name { font-weight: 400; color: #212121; }
   .lv-row-sub { color: #9e9e9e; font-size: 12.5px; }
+  .lv-row-mods { color: #57534E; font-size: 12.5px; }
   .lv-row-price { font-weight: 500; min-width: 60px; text-align: right; color: #212121; }
   .lv-ticket-empty { padding: 32px 18px; text-align: center; color: #9e9e9e; font-size: 13px; }
   .lv-ticket-tax {
@@ -9549,11 +9550,25 @@
       icon: p.icon || '📦'
     };
   }
+  // T1.3 modificadores: llave de linea (producto + modificadores + nota) y hook del dialogo Loyverse
+  function __vlxLineKey(it) {
+    var mods = ((it && it.modifiers) || []).map(function (m) { return String((m && m.label) || m || ''); }).sort().join(',');
+    return mods + '|' + String((it && it.note) || '');
+  }
+  function __vlxModsIntercept(p, cont) {
+    try {
+      var R = window.ModifiersAPI && window.ModifiersAPI.real;
+      if (!R) return false;
+      if (typeof _authFetch === 'function') R.setFetcher(_authFetch);
+      return R.intercept(p, cont);
+    } catch (e) { return false; }
+  }
   function addToCart(p) {
     // 2026-05-10 fix: respetar p.qty (antes se ignoraba — bug afectaba a
     // _convertToTicket de pedidos PWA con qty>1, que cargaban siempre qty:1).
     const reqQty = Math.max(1, parseInt(p && p.qty, 10) || 1);
-    const existing = CART.find(c => (p.code && c.code === p.code) || (p.id && c.id === p.id));
+    const _lk = __vlxLineKey(p);
+    const existing = CART.find(c => ((p.code && c.code === p.code) || (p.id && c.id === p.id)) && __vlxLineKey(c) === _lk);
     if (existing) existing.qty += reqQty;
     else CART.push({...p, qty: reqQty});
     renderCart();
@@ -9614,7 +9629,8 @@
         items: CART.map(it => ({
           id: it.id || null, code: it.code, barcode: it.barcode || null,
           name: it.name, price: Number(it.price) || 0,
-          qty: Number(it.qty) || 1, stock: Number(it.stock) || 0
+          qty: Number(it.qty) || 1, stock: Number(it.stock) || 0,
+          modifiers: it.modifiers || [], note: it.note || '', base_price: it.base_price || null
         })),
         ts: Date.now(),
         cashier_id: cashierId,
@@ -9764,7 +9780,8 @@
             barcode: it.barcode || null,
             price: Number(it.price) || 0,
             qty: Number(it.qty) || 1,
-            stock: Number(it.stock) || 0
+            stock: Number(it.stock) || 0,
+            modifiers: it.modifiers || [], note: it.note || '', base_price: it.base_price || null
           };
         }),
         total: total,
@@ -10201,6 +10218,11 @@
   // Exponer al window para debugging
   window.__r8b = { state: R8B, save: __r8bSaveCartServer, hb: __r8bHeartbeat, poll: __r8bPollEvents, on: __r8bOnEvent };
   // ============ /R8b RECOVERY SERVER-SIDE ============
+  function __vlxModsText(it) {
+    var out = ((it && it.modifiers) || []).map(function (m) { return '+ ' + String((m && m.label) || m); });
+    if (it && it.note) out.push('Nota: ' + it.note);
+    return out.join(' \u00b7 ');
+  }
   function renderCart() {
     const body = $('#cart-body');
     if (CART.length === 0) {
@@ -10211,7 +10233,7 @@
       body.innerHTML = CART.map((item, i) => `
         <tr onclick="selectCartRow(${i})" style="cursor:pointer; ${i===SELECTED_CART_INDEX?'background:var(--accent-soft);outline:2px solid var(--accent);':''}">
           <td class="mono">${htmlEsc(item.code||'')}</td>
-          <td class="desc">${htmlEsc(item.name||'')}</td>
+          <td class="desc">${htmlEsc(item.name||'')}${(item.modifiers && item.modifiers.length || item.note) ? '<div class="cart-mods" style="font-size:11.5px;color:#78716C;font-weight:400;">' + htmlEsc(__vlxModsText(item)) + '</div>' : ''}</td>
           <td class="num">${fmt(item.price)}</td>
           <td class="center"><span style="display:inline-flex;align-items:center;gap:4px;">
             <button onclick="event.stopPropagation();changeCartQty(${i},-1)" title="Menos" style="width:22px;height:22px;border:1px solid var(--border);background:#fff;border-radius:5px;cursor:pointer;font-weight:700;line-height:1;">−</button>
@@ -10839,7 +10861,8 @@
           name: i.name,
           price: i.price,
           qty: i.qty,
-          subtotal: i.price * i.qty
+          subtotal: i.price * i.qty,
+          modifiers: i.modifiers || [], note: i.note || ''
         })),
         total: total,
         amount_received: recibido,
@@ -12212,6 +12235,10 @@
               </label>`;
             }).join('')}
             ` : ''}
+            <details id="pf-mods-details" data-feature="module.modifiers" style="grid-column:1 / -1;margin-top:4px;border-top:1px dashed #E5E5EA;padding-top:10px">
+              <summary style="cursor:pointer;font-size:13px;font-weight:500;color:#3F3F46;">Modificadores (guarnicion, extras, sin...)</summary>
+              <div id="pf-mods-host" style="margin-top:8px;"></div>
+            </details>
             <div id="pf-msg" style="grid-column:1 / -1;font-size:12px;color:#DC2626;min-height:14px;"></div>
             <div style="grid-column:1 / -1;display:flex;gap:8px;justify-content:flex-end;margin-top:6px;">
               <button type="button" id="pf-cancel" style="padding:10px 18px;border:1px solid #E5E5EA;background:#fff;color:#3F3F46;border-radius:8px;cursor:pointer;font-weight:500;font-size:14px;min-height:44px;">Cancelar</button>
@@ -12331,6 +12358,21 @@
         if (next) { next.focus(); if (next.select) try { next.select(); } catch (_) {} }
       });
 
+      // T1.3: editor de modificadores (se monta al abrir la seccion; carga los existentes por SKU)
+      (function () {
+        var det = modal.querySelector('#pf-mods-details');
+        if (!det) return;
+        det.addEventListener('toggle', function () {
+          if (!det.open || modal.__vlxModsEd) return;
+          var R = window.ModifiersAPI && window.ModifiersAPI.real;
+          var host = modal.querySelector('#pf-mods-host');
+          if (!R || !host) { if (host) host.textContent = 'Modulo no disponible'; return; }
+          if (typeof _authFetch === 'function') R.setFetcher(_authFetch);
+          var sku = (p && (p.code || p.barcode)) || '';
+          var load = sku ? R.loadGroups(sku) : Promise.resolve([]);
+          load.catch(function () { return []; }).then(function (g) { modal.__vlxModsEd = R.mountEditor(host, g); });
+        });
+      })();
       modal.querySelector('#pf-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const msg = modal.querySelector('#pf-msg'); msg.textContent = '';
@@ -12375,6 +12417,14 @@
           image_url: (modal.querySelector('#pf-image') && modal.querySelector('#pf-image').value.trim()) || null,
           industry_fields: _extras, // campos específicos del giro (receta, lote, marca auto, etc.)
         };
+        // T1.3: guardar modificadores (POST /api/products/modifiers) si el editor se uso
+        try {
+          if (modal.__vlxModsEd) {
+            var _mg = modal.__vlxModsEd.read();
+            var _R = window.ModifiersAPI && window.ModifiersAPI.real;
+            if (_mg.length && _R) { if (typeof _authFetch === 'function') _R.setFetcher(_authFetch); _R.saveGroups(code, _mg).catch(function () {}); }
+          }
+        } catch (_) {}
         // Si llamador opt-in con offerLabelPrint, mostrar mini-panel inline
         // antes de cerrar el modal: "¿Imprimir etiqueta de código de barras?"
         if (options && options.offerLabelPrint !== false) {
@@ -14490,15 +14540,19 @@
     const escHandler = (e) => { if (e.key === 'Escape') { lb.remove(); document.removeEventListener('keydown', escHandler); } };
     document.addEventListener('keydown', escHandler);
   };
-  function addQuickPick(code) {
-    const p = QUICKPICK.find(x => x.code === code || x.id === code);
+  function addQuickPick(code, resolved) {
+    const p = resolved || QUICKPICK.find(x => x.code === code || x.id === code);
     if (!p) return;
-    const existing = CART.find(c => (p.code && c.code === p.code) || (p.id && c.id === p.id));
+    // T1.3: si el producto tiene modificadores reales, dialogo estilo Loyverse antes de agregar
+    if (!resolved && __vlxModsIntercept(p, function (q) { addQuickPick(code, q); })) return;
+    const _lk = __vlxLineKey(p);
+    const existing = CART.find(c => ((p.code && c.code === p.code) || (p.id && c.id === p.id)) && __vlxLineKey(c) === _lk);
     if (existing) {
-      existing.qty++;
+      existing.qty += (Number(p.qty) || 1);
       SELECTED_CART_INDEX = CART.indexOf(existing);
     } else {
-      CART.push({id: p.id, code:p.code, name:p.name, price:p.price, qty:1, stock:p.stock, image_url: p.image_url, images: p.images});
+      CART.push({id: p.id, code:p.code, name:p.name, price:p.price, qty:(Number(p.qty) || 1), stock:p.stock, image_url: p.image_url, images: p.images,
+        modifiers: p.modifiers || [], note: p.note || '', base_price: p.base_price || null});
       SELECTED_CART_INDEX = CART.length - 1; // V10.3 — auto-seleccionar línea recién agregada
     }
     renderCart();
@@ -15596,7 +15650,7 @@
   function pickSearchResult(code) {
     const p = CATALOG.find(x => x.code === code || x.id === code);
     if (p) {
-      addToCart(p);
+      if (!__vlxModsIntercept(p, function (q) { addToCart(q); })) addToCart(p);
       showToast('+ ' + p.name);
     }
     closeModal('modal-search');
@@ -18177,12 +18231,16 @@
   // la cuenta y cobrar (o volver a guardar) no se repita la comanda completa. Solo actúa dentro del .exe.
   window.VolvixComanda = (function () {
     var sentMap = {};
-    function key(i) { return String((i && (i.code || i.id || i.name)) || ''); }
+    // T1.3: mismo producto con distintos modificadores/nota = linea distinta
+    function key(i) {
+      var mods = ((i && i.modifiers) || []).map(function (m) { return String((m && m.label) || m || ''); }).sort().join(',');
+      return String((i && (i.code || i.id || i.name)) || '') + '|' + mods + '|' + String((i && i.note) || '');
+    }
     function delta(items) {
       var out = [];
       (items || []).forEach(function (i) {
         var d = (Number(i.qty) || 1) - (Number(sentMap[key(i)]) || 0);
-        if (d > 0) out.push({ qty: d, name: i.name || '' });
+        if (d > 0) out.push({ qty: d, name: i.name || '', modifiers: ((i.modifiers) || []).map(function (m) { return String((m && m.label) || m || ''); }), note: i.note || '' });
       });
       return out;
     }
@@ -18210,7 +18268,7 @@
     const payload = {
       tenant_id: session.tenant_id || _vTenant(),
       user_id: session.user_id || session.id || null,
-      items: CART.map(i => ({ product_id: i.id || null, code: i.code, name: i.name, price: i.price, qty: i.qty })),
+      items: CART.map(i => ({ product_id: i.id || null, code: i.code, name: i.name, price: i.price, qty: i.qty, modifiers: i.modifiers || [], note: i.note || '', base_price: i.base_price || null })),
       total: CART.reduce((s,i) => s + i.price * i.qty, 0),
       note: window.__vlxTicketNote || '',
       notes: window.__vlxTicketNote || '',
@@ -18267,7 +18325,8 @@
       if (CART.length && !confirm('El carrito tiene productos. ¿Reemplazar con la venta pendiente?')) return;
       CART = (choice.items || []).map(it => ({
         id: it.product_id, code: it.code, name: it.name,
-        price: Number(it.price)||0, qty: Number(it.qty)||1, stock: 0
+        price: Number(it.price)||0, qty: Number(it.qty)||1, stock: 0,
+        modifiers: Array.isArray(it.modifiers) ? it.modifiers : [], note: it.note || '', base_price: it.base_price || null
       }));
       renderCart();
       try { window.VolvixComanda && window.VolvixComanda.markSent(CART); } catch(_){}
@@ -21857,7 +21916,11 @@
       if (tds.length < 5) return;
       var m = (tr.getAttribute('onclick') || '').match(/selectCartRow\((\d+)\)/);
       var cartIdx = m ? m[1] : String(i);
-      var desc = (tds[1] && tds[1].textContent || '').trim().replace(/\s+/g,' ');
+      var _dc = tds[1] ? tds[1].cloneNode(true) : null;
+      var _me = _dc ? _dc.querySelector('.cart-mods') : null;
+      var modTxt = _me ? _me.textContent.trim() : '';
+      if (_me) _me.parentNode.removeChild(_me);
+      var desc = (_dc && _dc.textContent || '').trim().replace(/\s+/g,' ');
       var unit = (tds[2] && tds[2].textContent || '').trim();
       var qtyRaw = (tds[3] && tds[3].textContent || '');
       var qty = ((qtyRaw.match(/[\d]+(?:[.,]\d+)?/) || [qtyRaw.trim()])[0]); // solo el número (sin los botones − +)
@@ -21867,7 +21930,8 @@
         + '<button class="lv-row-del" type="button" aria-label="Eliminar" tabindex="-1">🗑</button>'
         + '<div class="lv-row-content">'
         +   '<div class="lv-row-main"><span class="lv-row-name">'+escapeHtml(desc)+'</span>'
-        +     '<span class="lv-row-sub">'+escapeHtml(sub)+'</span></div>'
+        +     '<span class="lv-row-sub">'+escapeHtml(sub)+'</span>'
+        +     (modTxt ? '<span class="lv-row-mods">'+escapeHtml(modTxt)+'</span>' : '') + '</div>'
         +   '<span class="lv-row-price">'+escapeHtml(importe)+'</span>'
         + '</div>'
         + '</div>';

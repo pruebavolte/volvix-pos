@@ -252,6 +252,13 @@
       if (cfg.showItemCode && it.code) {
         lines.push(' '.repeat(5) + 'Código: ' + it.code);
       }
+      // T1.3: modificadores y comentario, indentados bajo el item
+      (it.modifiers || []).forEach((m) => {
+        const d = Number(m && m.price_delta) || 0;
+        const t = '+ ' + String((m && m.label) || m) + (d ? ' (' + (d > 0 ? '+' : '-') + fmt$(Math.abs(d)) + ')' : '');
+        lines.push(' '.repeat(5) + t.slice(0, w - 5));
+      });
+      if (it.note) lines.push(' '.repeat(5) + ('Nota: ' + it.note).slice(0, w - 5));
     });
     lines.push(sep);
 
