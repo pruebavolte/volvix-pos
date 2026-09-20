@@ -53,7 +53,10 @@ function load(app) {
 
 function save(app, cfg) {
   const c = clean(cfg);
-  fs.writeFileSync(cfgPath(app), JSON.stringify(c, null, 2), 'utf8');
+  // Compat hacia atras: un .exe viejo (v1.0.344) solo lee {enabled, ip, port, width}; se conservan los de printers[0].
+  const p0 = c.printers[0];
+  const onDisk = p0 ? Object.assign({}, c, { ip: p0.ip, port: p0.port, width: p0.width }) : c;
+  fs.writeFileSync(cfgPath(app), JSON.stringify(onDisk, null, 2), 'utf8');
   _cache = c;
   return Object.assign({}, c);
 }
