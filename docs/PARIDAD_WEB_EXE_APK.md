@@ -112,6 +112,7 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 2026-09-20 | Bloque 1 APK (`9c86d3f`, ya en `integracion`): filas 1.1, 8.1, 8.2 pasan a ✅ en APK con evidencia de emulador; CI del tag y keystore quedan como 🟡/⚠️. No concluyente aún en APK: agregar producto, Tickets abiertos, búsqueda/teclado, cámara física. |
 | 2026-09-20 | APK bloque 2 (`201e1cb`, ya en `integracion`): versión derivada de `package.json`/tag, deuda (a) migrada en 3 archivos, +1 línea `<script src=volvix-platform.js>` en 8 HTML (`e8e3dcd`; incluye `salvadorex-pos.html`: avisar a exe). Baseline baja a 46 (5 mejorados). |
 | 2026-09-20 | APK bloque 3 (`492f2b7`, ya en `integracion`): firma estable por secretos, botón 📷 (fila 1.6 ✅ APK), aviso de WebView < 80. Sin conflictos; guardia 0 nuevos. |
+| 2026-09-20 | Decisión de Vicky: WebView mínimo ≥ 80 sin transpilar (§7 #7). Secretos `ANDROID_*`: los carga Vicky con `gh` cuando el dueño termine `gh auth login`. |
 
 ## 6. Anexo — deuda base (46 entradas; que exe/APK/Web la reduzcan por área)
 
@@ -186,4 +187,4 @@ Antes de cada tarea nueva: `git fetch` y traer `integracion` (`git merge integra
 | 4 | La reimpresión descarta `modifiers`: `reimprimirUltimoTicket` (~l.8804-8818), ESC/POS de reimpresión (~l.8963-8968) y detalle de buscar-venta (~l.14286-14290); `printPreBill` (~l.18337) ya en manos de exe. Líneas aprox. | exe | abierto (Web corrigió el servidor: `4924e1d`, `83ec27a`) |
 | 5 | Probables modales ocultos por el guardián (anexo §6 (c)): `vlx-printer-error-modal`, `vlx-barcode-modal`, `vlx-lock-modal`. | exe | por confirmar en navegador |
 | 6 | Overrides de flags: 283 filas en 48 negocios (192 `disabled`). TNT-MATA8: impacto cero, pero aplicar defaults ON en otros negocios cambiaría lo que ven. Plan por fases en `docs/WEB_VERIFICACION.md`. **NO aplicar todavía.** | Web | abierto |
-| 7 | El script principal de `salvadorex-pos.html` usa `?.`/`??`: con Android WebView < 80 da SyntaxError y el POS no carga (el emulador trae WebView 74). El bridge muestra un aviso rojo si WebView < 80. Decidir el mínimo soportado (teléfonos con Play actualizan solo; tablets sin Play/viejas, no) y si se transpila. | Vicky | abierto |
+| 7 | El script principal de `salvadorex-pos.html` usa `?.`/`??`: con Android WebView < 80 da SyntaxError (el emulador trae WebView 74). **DECIDIDO (Vicky): mínimo soportado = Android System WebView ≥ 80, SIN transpilar** (disco y riesgo). La app debe mostrar una pantalla clara "Actualiza Android System WebView" (feature-detect de sintaxis) en vez de romperse; se documenta en `docs/APK_ANDROID.md`/README. Se reconsidera transpilar solo si aparece un cliente con tablets viejas sin Play. | APK | decidido; falta la pantalla |
