@@ -6065,7 +6065,7 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
         const arr = Array.isArray(pr.items) ? pr.items
           : (Array.isArray(pr.items_returned) ? pr.items_returned : []);
         for (const x of arr) {
-          const k = String(x.product_id || x.id || '');
+          const k = String(x.product_id || x.id || x.code || '');
           alreadyReturnedQty[k] = (alreadyReturnedQty[k] || 0) + (Number(x.qty || x.quantity) || 0);
         }
       }
@@ -6074,9 +6074,9 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
       const normalizedItems = [];
       let computedRefund = 0;
       for (const it of rawItems) {
-        const pid = String(it.product_id || it.id || '');
+        const pid = String(it.product_id || it.id || it.code || '');
         if (!pid) return sendJSON(res, { error: 'item missing product_id' }, 400);
-        const match = saleItems.find(s => String(s.product_id || s.id) === pid);
+        const match = saleItems.find(s => String(s.product_id || s.id || s.code) === pid);
         if (!match) return sendJSON(res, { error: `item ${pid} not in sale` }, 400);
         const askQty = Number(it.qty || it.quantity || 0);
         const origQty = Number(match.qty || match.quantity || 0);
@@ -6197,7 +6197,7 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
           }
           let allReturned = saleItems.length > 0;
           for (const s of saleItems) {
-            const sid = String(s.product_id || s.id || '');
+            const sid = String(s.product_id || s.id || s.code || '');
             const oq = Number(s.qty || s.quantity || 0);
             const rq = Number(updatedReturnedQty[sid] || 0);
             if (rq < oq) { allReturned = false; break; }
