@@ -463,12 +463,12 @@
       'h2{margin:0 0 10px;}.row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #ccc;}' +
       '.total{font-size:18px;font-weight:bold;margin-top:10px;}</style></head><body>' +
       '<h2>Comprobante de abono</h2>' +
-      '<div class="row"><span>Cliente ID:</span><span>' + customerId + '</span></div>' +
-      '<div class="row"><span>Fecha:</span><span>' + ((payment.date || payment.created_at || '') + '').slice(0, 10) + '</span></div>' +
+      '<div class="row"><span>Cliente ID:</span><span>' + _vlxEsc(customerId) + '</span></div>' +
+      '<div class="row"><span>Fecha:</span><span>' + _vlxEsc(((payment.date || payment.created_at || '') + '').slice(0, 10)) + '</span></div>' +
       '<div class="row"><span>Método:</span><span>' + _vlxEsc(payment.method || '') + '</span></div>' +
       '<div class="row total"><span>Monto:</span><span>' + fmtMoney(payment.amount) + '</span></div>' +
       (payment.balance_after != null ? '<div class="row"><span>Saldo restante:</span><span>' + fmtMoney(payment.balance_after) + '</span></div>' : '') +
-      (payment.notes ? '<div class="row"><span>Notas:</span><span>' + payment.notes + '</span></div>' : '') +
+      (payment.notes ? '<div class="row"><span>Notas:</span><span>' + _vlxEsc(payment.notes) + '</span></div>' : '') +
       '<script>window.onload=function(){window.print();};</' + 'script>' +
       '</body></html>';
     w.document.write(html);
