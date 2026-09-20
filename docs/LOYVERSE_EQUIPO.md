@@ -1,0 +1,38 @@
+# Equipo Loyverse — roles y reglas (fuente única para las 4 sesiones)
+
+> Dueño → Vicky (cerebro, id `local_f9c3d9e5-38f9-410e-9e6a-e33be8fc5002`) → sesiones. Actualizado 2026-09-20.
+> Sesiones: **Loyverse exe** (`local_94dbbc73-d85d-45b2-a4a5-2a8ddeb920f2`, rama `ola1/loyverse`/`exe/*`) ·
+> **Loyverse APK** (rama `apk/loyverse`) · **Loyverse Web** (rama `web/loyverse`) ·
+> **Loyverse Unificación** (`local_b0e75713-c826-40b2-bead-82ee82d80c26`, rama `integracion`, ÚNICA que integra y publica).
+> Encuéntralas con `mcp__ccd_session_mgmt__list_sessions` (por título) y habla con `send_message`.
+
+## REGLAS COMUNES (obligatorias)
+1. **NUNCA preguntes nada al dueño.** Toda pregunta/duda/decisión → Vicky (`send_message`). Vicky decide y contesta. Si no responde en un rato, decide lo más seguro y reversible y avísale. Lo técnico entre sesiones se resuelve con Unificación.
+2. **PERMISOS:** todos, dentro del repo, ramas, builds, pruebas, emulador/adb de prueba, navegadores y APIs de prueba. **Límites duros:** (a) no teclear contraseñas ni API keys en campos; (b) no tocar datos ni cuenta del cliente en vivo *El sazón de las primas* (tenant `TNT-MATA8`, .exe v1.0.344, comandas por red 192.168.1.100:9100) ni escrituras de prueba en su tenant; (c) nada destructivo irreversible en BD (una migración solo se REDACTA; aplicarla en producción = luz verde de Vicky); (d) el Motorola (adb `ZT322LGDTN`) es del dueño: SOLO navegar su app Loyverse (`docs/loyverse-ref/loy.js`), nunca instalar ni tocar sus datos; (e) no enviar mensajes a clientes; (f) **main y tags: solo Unificación con luz verde de Vicky** (el dueño ya autorizó producción "todo en una"; subir a main = deploy web inmediato a todos los negocios; cada tag auto-instala TODOS los .exe).
+3. **TOKENS:** el dueño casi no tiene. Sonnet para programar, Haiku para lo mecánico; **PROHIBIDO Fable/Opus programando** (si tu modelo lo es, avisa a Vicky: ella te lo cambia; no se lo pidas al dueño). Sin polling, sin explorar por explorar, reportes ≤6 líneas.
+4. **REGLA DE ORO:** WEB, EXE y ANDROID = EXACTAMENTE EL MISMO CÓDIGO y LAS MISMAS funciones. Todo en `public/`; hardware solo por `window.VolvixPlatform` (`public/volvix-platform.js`). Sistema de módulos on/off por negocio (`data-feature="module.*"`, `public/volvix-feature-flags.js`, `public/paneldecontrol.html`). En vertical: **cuadrícula**, no lista. Clon exacto de Loyverse (superset) comparando con la app real y help.loyverse.com/es, **de lo más usado a lo menos usado** (`LOYVERSE_CLONE_EJECUCION.md` §6).
+5. **Toda UI nueva con id `vlx-*` lleva `data-vlx-keep="1"`** (el guardián `public/volvix-uplift-wiring.js` la oculta si no). Prueba SIEMPRE en navegador (`scripts/dev-mock-pos.js`, móvil 375×812 y escritorio), no solo `node --check`.
+6. **Git:** NO uses el `main` local (divergió). Tu worktree propio: `git fetch origin && git checkout -B <tu-rama> origin/ola1/loyverse`; empuja SOLO a `origin/<tu-rama>`. Un commit por tarea, mensaje claro; commit con pathspec de tus archivos (nunca `git add -A`).
+7. **Reporte:** al cerrar cada bloque → Unificación (copia a Vicky): qué hiciste, commit, cómo lo probaste, qué falta. Estado de paridad en `docs/PARIDAD_WEB_EXE_APK.md`.
+LEE ANTES: `docs/LOYVERSE_CLONE_EJECUCION.md`, `docs/LOYVERSE_REFERENCIA_MOTOROLA.md`, `docs/LOYVERSE_SUPERSET_PLAN.md`.
+
+## ROL: Loyverse APK (rama `apk/loyverse`)
+1. Inventario rápido: `android/`, `capacitor.config.json`, `build-apps.js`, `.github/workflows/build-apk.yml`. ¿APK con `public/` empaquetado o URL remota? Documenta cómo garantizar el MISMO `public/` y las mismas banderas de módulos.
+2. Arreglar CI "Build Android APK" (falla en "Setup Android SDK"): cada tag publica `VolvixPOS.apk` junto al .exe; luego devolver el link de `public/marketplace.html` a `/releases/latest/download/VolvixPOS.apk` (hoy fijado a v1.0.336). `VolvixCliente.apk` nunca existió.
+3. Adaptador ANDROID de `window.VolvixPlatform` (hoy `{ok:false, unsupported:true}`): `printTicket`/`printComanda` por red (TCP 9100 ESC/POS; plugin Capacitor mínimo; el armado de texto/bytes se comparte desde `public/`, con `electron/comanda-printer.js` como referencia; sin duplicar lógica de negocio), Bluetooth SPP si aplica, `openDrawer`, `scanBarcode` con cámara. `#cfg-comanda-box` debe salir también en android.
+4. Pruebas: `adb -s emulator-5556` (Android 10): cuadrícula ≥3 col, tickets abiertos, modificadores, menú ⋮, teclado, tacto.
+5. Paridad: reporta la columna APK con evidencia; lo que no se pueda en Android se degrada con aviso claro sin romper la venta.
+
+## ROL: Loyverse Web (rama `web/loyverse`) — web + servidor + panel de control
+1. Verificar CONTRA API REAL (negocio de PRUEBA, no TNT-MATA8; login por API con script): (a) `POST /api/sales/pending` guarda name/comment/dining/employee (la tabla `pending_sales` no tiene esas columnas; hoy fallback `VLXMETA` en notes): ¿hace falta migración? (redáctala, no la apliques); (b) `items[].modifiers`/`items[].note` persisten en `/api/sales` y salen en reportes/reimpresión; (c) `/api/returns` con items por `code` end-to-end; (d) qué devuelve `GET /api/tenant/active-modules` en un negocio real y que los módulos nuevos (`module.modifiers`, `open_tickets`, `predefined_tickets`, `dining_options`, `print_bill`, `kitchen_printers`) queden ON por defecto para giro restaurante y apagables en `paneldecontrol.html`.
+2. Web sin hardware: documenta el comportamiento degradado (ticket por impresión del navegador; comandas: propuesta concreta —KDS web y/o puente de impresión local—) sin romper la venta.
+3. Suite de humo reproducible: amplía `scripts/dev-mock-pos.js` y/o crea `scripts/smoke-web.js` (node, sin deps pesadas): viewport móvil y escritorio, cuenta columnas de la cuadrícula, guardar→abrir ticket, modificador, ⋮; falla con errores de consola propios.
+4. Panel de control: alta ordenada de cada módulo nuevo (nombre, descripción, default por giro) y campos personalizables por negocio (`giros_campos`/`giros_terminologia`).
+5. Seguridad ligera: coordina con exe la rama `security/remove-test-creds`.
+6. Paridad: reporta la columna WEB con evidencia.
+
+## ROL: Loyverse Unificación (rama `integracion`, worktree `D:\github\volvix-integracion`)
+Tabla `docs/PARIDAD_WEB_EXE_APK.md` (filas=funciones por uso; columnas=Loyverse/WEB/EXE/APK/flag/evidencia) · `scripts/check-paridad.js` en CI (falla si: `volvixElectron`/Capacitor directo fuera de `volvix-platform.js`; módulo nuevo sin flag en `volvix-feature-flags.js` Y `paneldecontrol.html`; id `vlx-*` dinámico sin `data-vlx-keep`; `<script>` inline de `salvadorex-pos.html` que no parsea; versiones desalineadas package.json/android/version.json) · integra las ramas en `integracion` (cuidado con `salvadorex-pos.html`, enorme y CRLF: asigna áreas de archivo) · humo + revisor adversarial · UNA versión para las 3 plataformas (web = merge a main; .exe/APK = mismo tag `v1.0.N`, un tag por ola) · publica SOLO con luz verde de Vicky (web primero fuera de horario → humo real en negocio de PRUEBA → tag) · resumen ≤8 líneas a Vicky con paridad ✅/⬜ y bloqueos.
+
+## ROL: Loyverse exe (rama `ola1/loyverse` / `exe/*`)
+Ejecuta el plan del clon (Ola 1b → Olas 2–7 por orden de uso) + seguridad rápida (integrar `security/remove-test-creds`; desactivar SOLO `admin@volvix.test` con `is_active=false`, reversible; rotación de llaves de Supabase = inventario + rollback a Vicky antes de ejecutar).
