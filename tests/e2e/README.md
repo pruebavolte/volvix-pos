@@ -46,9 +46,9 @@ VOLVIX_BASE_URL=https://staging.volvix-pos.vercel.app npx playwright test
 
 | Email | Pass | Rol |
 |---|---|---|
-| admin@volvix.test | Volvix2026! | admin |
-| owner@volvix.test | Volvix2026! | owner |
-| cajero@volvix.test | Volvix2026! | cajero |
+| admin@volvix.test | REDACTED_TEST_PASSWORD | admin |
+| owner@volvix.test | REDACTED_TEST_PASSWORD | owner |
+| cajero@volvix.test | REDACTED_TEST_PASSWORD | cajero |
 
 ## Notas
 

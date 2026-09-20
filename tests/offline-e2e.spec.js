@@ -13,7 +13,7 @@ const fs = require('fs');
 const SCREENSHOT_DIR = path.join(__dirname, 'screenshots-b41-offline');
 if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
 
-const CASHIER = { email: 'cajero@volvix.test', password: 'Volvix2026!' };
+const CASHIER = { email: 'cajero@volvix.test', password: 'REDACTED_TEST_PASSWORD' };
 const POS_PATH = '/salvadorex_web_v25.html';
 const QUEUE_KEY = 'volvix:wiring:queue';
 

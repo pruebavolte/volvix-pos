@@ -29,9 +29,9 @@ const BASE_URL = process.env.BASE_URL || process.env.PREVIEW_URL || 'https://vol
 const SCREENSHOT_DIR = path.join(__dirname, 'screenshots-r3b');
 
 const USERS = {
-  admin:  { email: 'admin@volvix.test',  password: 'Volvix2026!', tenant: 'TNT001', role: 'superadmin' },
-  owner:  { email: 'owner@volvix.test',  password: 'Volvix2026!', tenant: 'TNT002', role: 'owner' },
-  cajero: { email: 'cajero@volvix.test', password: 'Volvix2026!', tenant: 'TNT001', role: 'cajero' },
+  admin:  { email: 'admin@volvix.test',  password: 'REDACTED_TEST_PASSWORD', tenant: 'TNT001', role: 'superadmin' },
+  owner:  { email: 'owner@volvix.test',  password: 'REDACTED_TEST_PASSWORD', tenant: 'TNT002', role: 'owner' },
+  cajero: { email: 'cajero@volvix.test', password: 'REDACTED_TEST_PASSWORD', tenant: 'TNT001', role: 'cajero' },
 };
 
 if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });

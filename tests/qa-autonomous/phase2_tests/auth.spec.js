@@ -2,7 +2,7 @@
 const { test, expect } = require('@playwright/test');
 
 const BASE = process.env.BASE_URL || 'https://volvix-pos.vercel.app';
-const PASS = 'Volvix2026!';
+const PASS = 'REDACTED_TEST_PASSWORD';
 const PIN = '1234';
 const ROLES = [
   { email: 'admin@volvix.test', role: 'admin' },

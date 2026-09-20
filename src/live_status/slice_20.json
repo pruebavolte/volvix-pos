@@ -16,7 +16,7 @@
     "endpoints": [
       {"name": "GET /api/health", "expected": 200, "got": 200, "latency_s": 0.530, "status": "pass"},
       {"name": "GET /api/health/deep", "expected": 200, "got": 200, "latency_s": 0.323, "status": "pass", "note": "supabase+jwt+origins+url+key all ok"},
-      {"name": "POST /api/login admin", "expected": 200, "got": 200, "latency_s": 0.247, "status": "pass", "note": "credentials admin@volvix.test/Volvix2026!"},
+      {"name": "POST /api/login admin", "expected": 200, "got": 200, "latency_s": 0.247, "status": "pass", "note": "credentials admin@volvix.test/REDACTED_TEST_PASSWORD"},
       {"name": "GET /api/products (auth)", "expected": 200, "got": 200, "latency_s": 0.327, "status": "pass"},
       {"name": "POST /api/sales (auth)", "expected": 201, "got": 200, "latency_s": 0.316, "status": "pass", "note": "id returned; server returns 200 by design"},
       {"name": "GET /api/customers (auth)", "expected": 200, "got": 200, "latency_s": 0.286, "status": "pass"},

@@ -3,7 +3,7 @@ const { test, expect } = require('@playwright/test');
 
 const BASE = process.env.BASE_URL || 'https://volvix-pos.vercel.app';
 const EMAIL = 'admin@volvix.test';
-const PASS = 'Volvix2026!';
+const PASS = 'REDACTED_TEST_PASSWORD';
 
 async function loginUI(page) {
   await page.goto(`${BASE}/login.html`).catch(() => page.goto(BASE));

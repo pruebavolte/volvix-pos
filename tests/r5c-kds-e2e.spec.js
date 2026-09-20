@@ -37,10 +37,10 @@ const { test, expect, request } = require('@playwright/test');
 const crypto = require('crypto');
 const path = require('path');
 
-// ── Test users (Volvix demo / Volvix2026!) ──────────────────
+// ── Test users (Volvix demo / REDACTED_TEST_PASSWORD) ──────────────────
 const USERS = {
-  cajero: { email: 'cajero@volvix.test', password: 'Volvix2026!', role: 'cajero', tenant: 'TNT001' },
-  owner:  { email: 'owner@volvix.test',  password: 'Volvix2026!', role: 'owner',  tenant: 'TNT002' },
+  cajero: { email: 'cajero@volvix.test', password: 'REDACTED_TEST_PASSWORD', role: 'cajero', tenant: 'TNT001' },
+  owner:  { email: 'owner@volvix.test',  password: 'REDACTED_TEST_PASSWORD', role: 'owner',  tenant: 'TNT002' },
 };
 
 const LOGIN_PATHS = ['/api/auth/login', '/api/login', '/api/v1/auth/login'];

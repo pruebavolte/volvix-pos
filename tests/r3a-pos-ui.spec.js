@@ -14,7 +14,7 @@ const BASE_URL = process.env.BASE_URL || 'https://volvix-pos.vercel.app';
 const SCREENSHOT_DIR = path.join(__dirname, 'screenshots-r3a');
 const REPORT_PATH = path.join(__dirname, '..', 'B42_POS_UI_AUDIT.md');
 
-const CAJERO = { email: 'cajero@volvix.test', password: 'Volvix2026!' };
+const CAJERO = { email: 'cajero@volvix.test', password: 'REDACTED_TEST_PASSWORD' };
 
 // Ensure dirs
 if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });

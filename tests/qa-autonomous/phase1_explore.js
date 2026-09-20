@@ -9,7 +9,7 @@ const path = require('path');
 
 const BASE_URL = process.env.BASE_URL || 'https://volvix-pos.vercel.app';
 const EMAIL = process.env.QA_EMAIL || 'admin@volvix.test';
-const PASSWORD = process.env.QA_PASSWORD || 'Volvix2026!';
+const PASSWORD = process.env.QA_PASSWORD || 'REDACTED_TEST_PASSWORD';
 const PIN = process.env.QA_PIN || '1234';
 const OUT_DIR = path.join(__dirname, 'artifacts');
 const SCREENSHOTS = path.join(OUT_DIR, 'phase1_screens');

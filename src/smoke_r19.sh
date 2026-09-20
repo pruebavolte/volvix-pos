@@ -50,7 +50,7 @@ ENDPOINTS=(
 for ep in "${ENDPOINTS[@]}"; do
   start=$(date +%s%N)
   if [ "$ep" = "/api/login" ]; then
-    code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE$ep" -H "Content-Type: application/json" -d '{"email":"admin@volvix.test","password":"Volvix2026!"}')
+    code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE$ep" -H "Content-Type: application/json" -d '{"email":"admin@volvix.test","password":"REDACTED_TEST_PASSWORD"}')
   else
     code=$(curl -s -o /dev/null -w "%{http_code}" "$BASE$ep" -H "Authorization: Bearer $TOKEN")
   fi

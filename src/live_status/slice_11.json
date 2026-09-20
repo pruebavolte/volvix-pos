@@ -6,7 +6,7 @@
   "results": [
     {"idx": 81, "name": "GET /api/health", "status": "pass", "note": "200 supabase_connected:true users_table_accessible:true version=7.2.0"},
     {"idx": 82, "name": "GET /api/health/deep", "status": "pass", "note": "200 ok:true checks: supabase ok (latency 263ms), jwt_secret ok, allowed_origins ok, supabase_url ok, supabase_service_key ok"},
-    {"idx": 83, "name": "POST /api/login", "status": "pass", "note": "200 ok:true token JWT (admin@volvix.test/Volvix2026!) role=superadmin tenant=TNT001"},
+    {"idx": 83, "name": "POST /api/login", "status": "pass", "note": "200 ok:true token JWT (admin@volvix.test/REDACTED_TEST_PASSWORD) role=superadmin tenant=TNT001"},
     {"idx": 84, "name": "GET /api/products", "status": "pass", "note": "200 array de productos (Coca Cola, Leche, ...). 131 productos totales segun owner/dashboard"},
     {"idx": 85, "name": "POST /api/sales", "status": "pass", "note": "200 con id (f1eb57f1-aebf-40ae-aa2b-2798c90a4a61). Spec pedia 201 pero implementacion devuelve 200 - id presente, registro creado en pos_sales. Token fresco requerido (cold-start de Vercel rota JWT_SECRET)"},
     {"idx": 86, "name": "GET /api/customers", "status": "pass", "note": "200 array de clientes (Luis Fernandez, ...). 16 clientes activos"},

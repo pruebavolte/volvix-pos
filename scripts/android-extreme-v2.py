@@ -83,7 +83,7 @@ if 'login' in url or not ev("localStorage.getItem('volvix_token')"):
     print("Login...")
     ev("""(async () => {
       const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({email:'admin@volvix.test', password:'Volvix2026!'})});
+        body: JSON.stringify({email:'admin@volvix.test', password:'REDACTED_TEST_PASSWORD'})});
       const d = await r.json();
       if (d.token) localStorage.setItem('volvix_token', d.token);
     })()""", ap=True)
@@ -174,7 +174,7 @@ if 'login' in url2:
       const tok = localStorage.getItem('volvix_token');
       if (!tok) {
         const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({email:'admin@volvix.test', password:'Volvix2026!'})});
+          body: JSON.stringify({email:'admin@volvix.test', password:'REDACTED_TEST_PASSWORD'})});
         const d = await r.json();
         if (d.token) localStorage.setItem('volvix_token', d.token);
       }
@@ -289,7 +289,7 @@ if 'login' in url3 or 'salvadorex' not in url3:
       const tok = localStorage.getItem('volvix_token');
       if (!tok) {
         const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({email:'admin@volvix.test', password:'Volvix2026!'})});
+          body: JSON.stringify({email:'admin@volvix.test', password:'REDACTED_TEST_PASSWORD'})});
         const d = await r.json();
         if (d.token) localStorage.setItem('volvix_token', d.token);
       }

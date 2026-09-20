@@ -3,7 +3,7 @@ EXE WAR TESTS - pruebas destructivas extremas del .EXE Volvix POS v1.0.172
 con CDP en port 9230.
 
 Flujo:
-1. Login con admin@volvix.test / Volvix2026!
+1. Login con admin@volvix.test / REDACTED_TEST_PASSWORD
 2. Crear productos ONLINE (snapshot inicial)
 3. Bloquear Internet con Windows Firewall (outbound)
 4. Crear productos OFFLINE
@@ -82,7 +82,7 @@ login_result = eval_js(f"""
     const r = await fetch('/api/login', {{
       method: 'POST',
       headers: {{'Content-Type': 'application/json'}},
-      body: JSON.stringify({{ email:'admin@volvix.test', password:'Volvix2026!' }})
+      body: JSON.stringify({{ email:'admin@volvix.test', password:'REDACTED_TEST_PASSWORD' }})
     }});
     const data = await r.json();
     if (data.token) {{

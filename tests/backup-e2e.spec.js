@@ -14,8 +14,8 @@
 const { test, expect, request } = require('@playwright/test');
 const crypto = require('crypto');
 
-const ADMIN = { email: 'admin@volvix.test', password: 'Volvix2026!' };
-const SUPERADMIN = { email: 'superadmin@volvix.test', password: 'Volvix2026!' };
+const ADMIN = { email: 'admin@volvix.test', password: 'REDACTED_TEST_PASSWORD' };
+const SUPERADMIN = { email: 'superadmin@volvix.test', password: 'REDACTED_TEST_PASSWORD' };
 
 async function login(page, user) {
   await page.goto('/login.html', { waitUntil: 'domcontentloaded' });

@@ -123,7 +123,7 @@ except Exception as e:
 print("\n[5] API proxy /api/version/status via server")
 try:
     r = urllib.request.urlopen(f"http://127.0.0.1:{port}/api/login",
-        data=json.dumps({"email":"admin@volvix.test","password":"Volvix2026!"}).encode(),
+        data=json.dumps({"email":"admin@volvix.test","password":"REDACTED_TEST_PASSWORD"}).encode(),
         headers={'Content-Type':'application/json'}, timeout=10)
     resp = json.loads(r.read())
     print(f"  HTTP {r.status} · token: {resp.get('token','')[:30]}...")

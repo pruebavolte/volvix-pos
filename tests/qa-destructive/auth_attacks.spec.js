@@ -4,7 +4,7 @@ const crypto = require('crypto');
 
 const BASE = process.env.BASE_URL || 'https://volvix-pos.vercel.app';
 const EMAIL = 'admin@volvix.test';
-const PASS = 'Volvix2026!';
+const PASS = 'REDACTED_TEST_PASSWORD';
 
 function b64url(buf) {
   return Buffer.from(buf).toString('base64')

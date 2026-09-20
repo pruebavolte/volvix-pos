@@ -30,7 +30,7 @@ else:
     import urllib.request as _req
     req = _req.Request(
         "https://volvix-pos.vercel.app/api/login",
-        data=json.dumps({"email":"admin@volvix.test","password":"Volvix2026!"}).encode(),
+        data=json.dumps({"email":"admin@volvix.test","password":"REDACTED_TEST_PASSWORD"}).encode(),
         headers={"Content-Type":"application/json"}
     )
     JWT = json.loads(_req.urlopen(req, timeout=15).read()).get("token","")
@@ -132,7 +132,7 @@ for client, server_base in [(exe, "internal-local"), (apk, "internal-local")]:
     client.eval(f"""(async () => {{
       try {{
         const r = await fetch('/api/login', {{method:'POST', headers:{{'Content-Type':'application/json'}},
-          body: JSON.stringify({{email:'admin@volvix.test', password:'Volvix2026!'}})}});
+          body: JSON.stringify({{email:'admin@volvix.test', password:'REDACTED_TEST_PASSWORD'}})}});
         const d = await r.json();
         if (d.token) localStorage.setItem('volvix_token', d.token);
       }} catch(e) {{}}

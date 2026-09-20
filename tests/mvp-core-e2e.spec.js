@@ -17,9 +17,9 @@ const crypto = require('crypto');
 // ──────────────────────────────────────────────────────────────
 // Config
 // ──────────────────────────────────────────────────────────────
-const ADMIN  = { email: 'admin@volvix.test',  password: 'Volvix2026!', tenant: 'TNT001' };
-const OWNER  = { email: 'owner@volvix.test',  password: 'Volvix2026!', tenant: 'TNT002' };
-const CAJERO = { email: 'cajero@volvix.test', password: 'Volvix2026!', tenant: 'TNT001' };
+const ADMIN  = { email: 'admin@volvix.test',  password: 'REDACTED_TEST_PASSWORD', tenant: 'TNT001' };
+const OWNER  = { email: 'owner@volvix.test',  password: 'REDACTED_TEST_PASSWORD', tenant: 'TNT002' };
+const CAJERO = { email: 'cajero@volvix.test', password: 'REDACTED_TEST_PASSWORD', tenant: 'TNT001' };
 
 const REPORT_PATH = path.resolve(__dirname, '..', 'B42_MVP_CORE_REPORT.md');
 const SCREENSHOT_DIR = path.resolve(__dirname, 'screenshots-b42-mvp');

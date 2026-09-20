@@ -13,9 +13,9 @@ const { test, expect, request } = require('@playwright/test');
 const BASE = process.env.BASE_URL || process.env.PREVIEW_URL || 'https://volvix-pos.vercel.app';
 
 const USERS = {
-  admin:  { email: 'admin@volvix.test',  password: 'Volvix2026!', tenant: 'TNT001' },
-  owner:  { email: 'owner@volvix.test',  password: 'Volvix2026!', tenant: 'TNT002' },
-  cajero: { email: 'cajero@volvix.test', password: 'Volvix2026!', tenant: 'TNT001' },
+  admin:  { email: 'admin@volvix.test',  password: 'REDACTED_TEST_PASSWORD', tenant: 'TNT001' },
+  owner:  { email: 'owner@volvix.test',  password: 'REDACTED_TEST_PASSWORD', tenant: 'TNT002' },
+  cajero: { email: 'cajero@volvix.test', password: 'REDACTED_TEST_PASSWORD', tenant: 'TNT001' },
 };
 
 const today = () => new Date().toISOString().slice(0, 10);

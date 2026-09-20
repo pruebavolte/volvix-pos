@@ -100,7 +100,7 @@ else:
     # Real login
     loginR = cdp.ej("""
       fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({email:'admin@volvix.test',password:'Volvix2026!'})
+        body:JSON.stringify({email:'admin@volvix.test',password:'REDACTED_TEST_PASSWORD'})
       }).then(r=>r.json()).then(j=>JSON.stringify(j)).catch(e=>'err:'+e.message)
     """)
     lj = json.loads(loginR)

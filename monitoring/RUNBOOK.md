@@ -12,7 +12,7 @@ Variables de entorno necesarias para `alerts.js` y queries directas:
 export SUPABASE_URL="https://zhvwmzkcqngcaqpdxtwr.supabase.co"
 export SUPABASE_SERVICE_ROLE_KEY="<service_role_jwt>"  # de Vercel env
 export VOLVIX_EMAIL="admin@volvix.test"
-export VOLVIX_PWD="Volvix2026!"
+export VOLVIX_PWD="REDACTED_TEST_PASSWORD"
 ```
 
 Schema de tablas usadas (existentes en Supabase):
