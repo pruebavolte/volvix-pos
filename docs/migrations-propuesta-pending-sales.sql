@@ -10,6 +10,9 @@
 --   error en el log; (2) name/comment no se pueden buscar/ordenar en SQL; (3) la nota del ticket y la meta comparten
 --   el mismo limite de 500 chars. Con estas columnas el primer intento pasa y el fallback queda solo para entornos sin migrar.
 --
+-- REVISADA 2026-09-20 (decision Vicky): SOLO ADITIVA = 4 x ADD COLUMN IF NOT EXISTS, todas nullable y sin DEFAULT: no reescribe la tabla ni cambia
+-- filas existentes; el codigo funciona igual con o sin ella. NO SE APLICA POR AHORA (el fallback VLXMETA basta).
+--
 -- Orden seguro: 1) aplicar este archivo  2) NOTIFY pgrst (incluido)  3) verificar con el SELECT del final
 --   4) NO hace falta desplegar codigo: el server ya envia name/comment/employee/dining y el cliente (parseMeta)
 --   lee columnas primero y VLXMETA despues.  Rollback: ver bloque ROLLBACK (las columnas son nullable, sin riesgo).
@@ -22,25 +25,26 @@ ALTER TABLE public.pending_sales
   ADD COLUMN IF NOT EXISTS employee text,   -- quien lo guardo (mesero/cajero)
   ADD COLUMN IF NOT EXISTS dining   text;   -- opcion de comedor: Comer aqui / Para llevar / A domicilio / ...
 
--- Migrar lo ya guardado como VLXMETA (si lo hay; al 2026-09-20 la tabla esta vacia fuera de TNT-MATA8).
--- Funcion temporal tolerante: un VLXMETA truncado por el bug anterior (slice 500) no debe abortar la migracion.
-CREATE OR REPLACE FUNCTION pg_temp.try_jsonb(t text) RETURNS jsonb LANGUAGE plpgsql AS $$
-BEGIN RETURN t::jsonb; EXCEPTION WHEN others THEN RETURN NULL; END $$;
+-- OPCIONALES (NO son aditivos puros: por eso van comentados; la tabla esta vacia fuera de TNT-MATA8, no hace falta backfill):
+-- -- Migrar lo ya guardado como VLXMETA (si lo hay; al 2026-09-20 la tabla esta vacia fuera de TNT-MATA8).
+-- -- Funcion temporal tolerante: un VLXMETA truncado por el bug anterior (slice 500) no debe abortar la migracion.
+-- CREATE OR REPLACE FUNCTION pg_temp.try_jsonb(t text) RETURNS jsonb LANGUAGE plpgsql AS $$
+-- BEGIN RETURN t::jsonb; EXCEPTION WHEN others THEN RETURN NULL; END $$;
 
-UPDATE public.pending_sales p
-   SET name     = COALESCE(p.name,     NULLIF(m.j->>'n', '')),
-       comment  = COALESCE(p.comment,  NULLIF(m.j->>'c', '')),
-       employee = COALESCE(p.employee, NULLIF(m.j->>'e', '')),
-       dining   = COALESCE(p.dining,   NULLIF(m.j->>'d', '')),
-       notes    = NULLIF(m.j->>'t', '')
-  FROM (SELECT id, pg_temp.try_jsonb(substr(notes, 9)) AS j
-          FROM public.pending_sales
-         WHERE notes LIKE 'VLXMETA:%') m
- WHERE p.id = m.id AND m.j IS NOT NULL;
+-- UPDATE public.pending_sales p
+--    SET name     = COALESCE(p.name,     NULLIF(m.j->>'n', '')),
+--        comment  = COALESCE(p.comment,  NULLIF(m.j->>'c', '')),
+--        employee = COALESCE(p.employee, NULLIF(m.j->>'e', '')),
+--        dining   = COALESCE(p.dining,   NULLIF(m.j->>'d', '')),
+--        notes    = NULLIF(m.j->>'t', '')
+--   FROM (SELECT id, pg_temp.try_jsonb(substr(notes, 9)) AS j
+--           FROM public.pending_sales
+--          WHERE notes LIKE 'VLXMETA:%') m
+--  WHERE p.id = m.id AND m.j IS NOT NULL;
 
--- Busqueda/orden de la lista "Tickets abiertos" por tenant (ya existe idx_pendsales_tenant(tenant_id, restored_at, cancelled_at)).
-CREATE INDEX IF NOT EXISTS idx_pendsales_tenant_created
-  ON public.pending_sales (tenant_id, created_at DESC);
+-- -- Busqueda/orden de la lista "Tickets abiertos" por tenant (ya existe idx_pendsales_tenant(tenant_id, restored_at, cancelled_at)).
+-- CREATE INDEX IF NOT EXISTS idx_pendsales_tenant_created
+--   ON public.pending_sales (tenant_id, created_at DESC);
 
 COMMIT;
 
