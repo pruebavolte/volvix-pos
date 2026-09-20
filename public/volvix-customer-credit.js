@@ -11,6 +11,7 @@
  * ==========================================================================*/
 (function () {
   'use strict';
+  function _vlxEsc(v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
   if (window.__volvixCustomerCreditLoaded) return;
   window.__volvixCustomerCreditLoaded = true;
 
@@ -424,7 +425,7 @@
         tr.innerHTML =
           '<td>' + (p.date || p.created_at || '').toString().slice(0, 10) + '</td>' +
           '<td>' + fmtMoney(p.amount) + '</td>' +
-          '<td>' + (p.method || '') + '</td>' +
+          '<td>' + _vlxEsc(p.method || '') + '</td>' +
           '<td>' + (p.balance_after != null ? fmtMoney(p.balance_after) : '—') + '</td>' +
           '<td>' + ((p.notes || '').replace(/[<>]/g, '')) + '</td>' +
           '<td><button type="button" class="vlx-btn vlx-btn-secondary vlx-print-receipt">Imprimir</button></td>';
@@ -464,7 +465,7 @@
       '<h2>Comprobante de abono</h2>' +
       '<div class="row"><span>Cliente ID:</span><span>' + customerId + '</span></div>' +
       '<div class="row"><span>Fecha:</span><span>' + ((payment.date || payment.created_at || '') + '').slice(0, 10) + '</span></div>' +
-      '<div class="row"><span>Método:</span><span>' + (payment.method || '') + '</span></div>' +
+      '<div class="row"><span>Método:</span><span>' + _vlxEsc(payment.method || '') + '</span></div>' +
       '<div class="row total"><span>Monto:</span><span>' + fmtMoney(payment.amount) + '</span></div>' +
       (payment.balance_after != null ? '<div class="row"><span>Saldo restante:</span><span>' + fmtMoney(payment.balance_after) + '</span></div>' : '') +
       (payment.notes ? '<div class="row"><span>Notas:</span><span>' + payment.notes + '</span></div>' : '') +

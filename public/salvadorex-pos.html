@@ -8776,6 +8776,8 @@
   // Reimprimir último ticket (vista previa + opción de mandar a impresora)
   // R8a FIX-H4: cualquier reimpresión queda marcada is_copy=true en pos_print_log
   // Modificadores/nota de un renglon -> lineas de texto (compartido por reimpresion, ESC/POS y buscar-venta)
+  // Defensa en profundidad: todo dato de servidor que se pinte como HTML pasa por aqui
+  window.__vlxEsc = function (v) { return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); };
   window.__vlxItemExtras = function (it) {
     const out = [];
     try {
@@ -12983,7 +12985,7 @@
           return '<tr style="border-bottom:1px solid #f3f4f6;">' +
             '<td style="padding:8px;font-weight:600;font-family:monospace;">#' + String(v.folio||v.id||'').padStart(6,'0') + '</td>' +
             '<td style="padding:8px;color:#6b7280;">' + fecha + '</td>' +
-            '<td style="padding:8px;">' + String(v.payment_method||v.metodo||'Efectivo') + '</td>' +
+            '<td style="padding:8px;">' + window.__vlxEsc(v.payment_method||v.metodo||'Efectivo') + '</td>' +
             '<td style="padding:8px;text-align:right;font-weight:600;">$' + tot + '</td>' +
             '<td style="padding:8px;text-align:center;font-size:11px;' + chip + '">' + lbl + '</td>' +
             '</tr>';
@@ -14293,7 +14295,7 @@
           '<td style="padding:6px;border-top:1px solid #eee;font-family:monospace;font-size:11px;">' + (s.folio || s.id || '-') + '</td>' +
           '<td style="padding:6px;border-top:1px solid #eee;">' + hora + '</td>' +
           '<td style="padding:6px;border-top:1px solid #eee;text-align:right;">$' + Number(s.total || 0).toFixed(2) + '</td>' +
-          '<td style="padding:6px;border-top:1px solid #eee;">' + (s.payment_method || '-') + '</td>' +
+          '<td style="padding:6px;border-top:1px solid #eee;">' + window.__vlxEsc(s.payment_method || '-') + '</td>' +
           '<td style="padding:6px;border-top:1px solid #eee;text-align:center;">' +
           '<button class="btn ghost" onclick="r10aShowSaleDetail(\'' + (s.id || '') + '\')">Ver</button>' +
           '</td></tr>';
