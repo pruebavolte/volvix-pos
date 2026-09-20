@@ -69,7 +69,7 @@ async function login(page) {
   await page.waitForTimeout(1500);
   try {
     await page.fill('input[type="email"]', 'admin@volvix.test');
-    await page.fill('input[type="password"]', 'Volvix2026!');
+    await page.fill('input[type="password"]', 'REDACTED_TEST_PASSWORD');
     await page.click('button[type="submit"]');
     await page.waitForTimeout(3000);
   } catch(e) {}

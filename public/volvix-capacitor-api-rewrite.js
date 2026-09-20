@@ -1,12 +1,12 @@
 /**
  * volvix-capacitor-api-rewrite.js
  *
- * 2026-05-12 BUG #5 FIX: cuando el APK Capacitor corre, `location.origin` es
- * `https://localhost` (servidor interno de Capacitor que sirve el bundle).
+ * 2026-05-12 BUG #5 FIX: cuando el APK corre, `location.origin` es
+ * `https://localhost` (servidor interno de la app nativa que sirve el bundle).
  * Los `fetch('/api/...')` van a `https://localhost/api/...` que NO existe
  * y termina sirviendo el index.html (SPA fallback) → fail silencioso.
  *
- * Este wrapper detecta Capacitor isNativePlatform y reescribe `/api/*` a
+ * Este wrapper detecta la app nativa (window.VolvixPlatform.kind === 'android') y reescribe `/api/*` a
  * `https://volvix-pos.vercel.app/api/*` con credentials:'include'.
  *
  * Debe cargarse ANTES de cualquier código que haga fetch (auth-gate.js,
@@ -18,19 +18,11 @@
 (function () {
   'use strict';
 
-  // Detectar Capacitor de forma robusta:
-  // 1. window.Capacitor?.isNativePlatform?.() — la API oficial
-  // 2. window.location.protocol === 'capacitor:' — iOS
-  // 3. window.location.hostname === 'localhost' Y UA contiene 'Mobile' — heuristica APK
-  function isCapacitorNative() {
-    try {
-      if (typeof window.Capacitor === 'object' &&
-          typeof window.Capacitor.isNativePlatform === 'function') {
-        return window.Capacitor.isNativePlatform();
-      }
-    } catch (_) {}
+  // Deteccion: window.VolvixPlatform (public/volvix-platform.js, debe cargar ANTES). Si aun no esta,
+  // heuristica de WebView: protocolo nativo o localhost + UA de WebView Android.
+  function isNativeApp() {
+    try { if (window.VolvixPlatform) return window.VolvixPlatform.kind === 'android'; } catch (_) {}
     if (window.location.protocol === 'capacitor:') return true;
-    // Fallback heuristico: WebView Android sirve desde localhost con UA mobile
     if (window.location.hostname === 'localhost' &&
         /Android/i.test(navigator.userAgent) &&
         /wv|; wv\)/.test(navigator.userAgent)) {
@@ -39,7 +31,7 @@
     return false;
   }
 
-  if (!isCapacitorNative()) {
+  if (!isNativeApp()) {
     // En browser web normal, no hacer nada.
     return;
   }

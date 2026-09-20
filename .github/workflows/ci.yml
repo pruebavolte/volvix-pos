@@ -48,6 +48,9 @@ jobs:
             fi
           done
 
+      - name: Guardia de paridad WEB/EXE/APK
+        run: node scripts/check-paridad.js
+
       - name: ESLint (if configured)
         run: |
           if [ -f .eslintrc ] || [ -f .eslintrc.json ] || [ -f .eslintrc.js ] || [ -f eslint.config.js ]; then

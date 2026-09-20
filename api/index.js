@@ -6060,12 +6060,22 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
         priorReturns = await supabaseRequest('GET',
           `/pos_returns?sale_id=eq.${body.sale_id}&status=in.(pending,approved,completed)&select=items,items_returned`) || [];
       } catch (_) { priorReturns = []; }
+      // FIX web/loyverse 2026-09-20: emparejar por CUALQUIERA de product_id|id|code (antes solo la 1a clave
+      // no vacia de la linea: un cliente que mandaba `code` contra una linea con uuid daba "not in sale") y
+      // por producto agregando lineas (mismo producto con distinto modificador = varias lineas). La clave de
+      // "ya devuelto" es canonica (product_id||id||code de la linea vendida), no la que mande el cliente.
+      const _vlxKeys = (o) => [o && o.product_id, o && o.id, o && o.code]
+        .filter(v => v != null && v !== '').map(String);
+      const _vlxCanon = (o) => { const k = _vlxKeys(o); return k.length ? k[0] : ''; };
+      const _vlxFindLines = (pid) => saleItems.filter(s => _vlxKeys(s).indexOf(pid) >= 0);
       const alreadyReturnedQty = {};
       for (const pr of priorReturns) {
         const arr = Array.isArray(pr.items) ? pr.items
           : (Array.isArray(pr.items_returned) ? pr.items_returned : []);
         for (const x of arr) {
-          const k = String(x.product_id || x.id || x.code || '');
+          const raw = String(x.product_id || x.id || x.code || '');
+          const ln = _vlxFindLines(raw)[0];
+          const k = ln ? _vlxCanon(ln) : raw;
           alreadyReturnedQty[k] = (alreadyReturnedQty[k] || 0) + (Number(x.qty || x.quantity) || 0);
         }
       }
@@ -6076,11 +6086,13 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
       for (const it of rawItems) {
         const pid = String(it.product_id || it.id || it.code || '');
         if (!pid) return sendJSON(res, { error: 'item missing product_id' }, 400);
-        const match = saleItems.find(s => String(s.product_id || s.id || s.code) === pid);
-        if (!match) return sendJSON(res, { error: `item ${pid} not in sale` }, 400);
+        const lines = _vlxFindLines(pid);
+        if (!lines.length) return sendJSON(res, { error: `item ${pid} not in sale` }, 400);
+        const match = lines[0];
+        const canon = _vlxCanon(match);
         const askQty = Number(it.qty || it.quantity || 0);
-        const origQty = Number(match.qty || match.quantity || 0);
-        const alreadyQty = Number(alreadyReturnedQty[pid] || 0);
+        const origQty = lines.reduce((a, l) => a + (Number(l.qty || l.quantity || 0) || 0), 0);
+        const alreadyQty = Number(alreadyReturnedQty[canon] || 0);
         const remaining = origQty - alreadyQty;
         if (askQty <= 0) {
           return sendJSON(res, { error: `qty must be > 0 for ${pid}` }, 400);
@@ -6097,14 +6109,24 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
           match.unit_price != null ? match.unit_price :
           (match.price != null ? match.price : it.price)
         ) || 0;
-        const lineDiscount = Number(match.applied_discount_amount || match.discount || 0) || 0;
-        // refund = effectivePrice * qty - proportional lineDiscount
-        const proportion = origQty > 0 ? (askQty / origQty) : 0;
-        const lineRefund = (effectivePrice * askQty) - (lineDiscount * proportion);
+        // refund = sum por linea (FIFO: primero se consume lo ya devuelto) de
+        // effectivePrice * qty - descuento proporcional de esa linea. Con 1 sola linea = formula anterior.
+        let skipQty = alreadyQty, needQty = askQty, lineRefund = 0;
+        for (const ln of lines) {
+          const lq = Number(ln.qty || ln.quantity || 0) || 0;
+          const used = Math.min(skipQty, lq); skipQty -= used;
+          const take = Math.min(needQty, lq - used);
+          if (take <= 0) continue;
+          const lp = Number(ln.unit_price != null ? ln.unit_price : (ln.price != null ? ln.price : it.price)) || 0;
+          const ld = Number(ln.applied_discount_amount || ln.discount || 0) || 0;
+          lineRefund += (lp * take) - (lq > 0 ? ld * (take / lq) : 0);
+          needQty -= take;
+        }
         const safeLineRefund = Math.max(0, Math.round(lineRefund * 100) / 100);
         computedRefund += safeLineRefund;
         normalizedItems.push({
-          product_id: pid,
+          product_id: canon,
+          code: match.code || null,
           name: match.name || match.product_name || it.name || '',
           qty: askQty,
           price: effectivePrice,
@@ -6196,11 +6218,13 @@ ${q.notes ? `<h2>Notas</h2><div style="padding:10px;background:#FFFBEB;border-ra
             updatedReturnedQty[x.product_id] = (updatedReturnedQty[x.product_id] || 0) + x.qty;
           }
           let allReturned = saleItems.length > 0;
+          const soldByKey = {};
           for (const s of saleItems) {
-            const sid = String(s.product_id || s.id || s.code || '');
-            const oq = Number(s.qty || s.quantity || 0);
-            const rq = Number(updatedReturnedQty[sid] || 0);
-            if (rq < oq) { allReturned = false; break; }
+            const sid = _vlxCanon(s);
+            soldByKey[sid] = (soldByKey[sid] || 0) + (Number(s.qty || s.quantity || 0) || 0);
+          }
+          for (const sid of Object.keys(soldByKey)) {
+            if (Number(updatedReturnedQty[sid] || 0) < soldByKey[sid]) { allReturned = false; break; }
           }
           const newStatus = allReturned ? 'refunded' : 'partially_refunded';
           try {
@@ -18111,6 +18135,27 @@ handlers['GET /api/config/public'] = async (req, res) => {
       sendJSON(res, { ok: true, id, status: 'cancelled', reason, canceled_at: canceledAt, prev_status: curStatus });
     } catch (err) { sendError(res, err); }
   });
+  // FIX web/loyverse 2026-09-20: NO existia GET /api/sales/:id (404 en produccion) y lo llaman el asistente "Nueva devolucion"
+  // (newReturnLoadSale), la busqueda de venta (r10aFindSale) y la reimpresion por id: sin esto la devolucion desde la UI fallaba
+  // con "Error cargando venta: HTTP 404". Devuelve la fila de pos_sales completa (items[].modifiers/note incluidos), scope por tenant.
+  handlers['GET /api/sales/:id'] = requireAuth(async (req, res, params) => {
+    try {
+      const id = params && params.id;
+      if (!id || !isUuid(String(id))) return sendJSON(res, { error: 'sale not found' }, 404);
+      let sale = null;
+      try {
+        const rows = await supabaseRequest('GET', `/pos_sales?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
+        sale = rows && rows[0];
+      } catch (_) {}
+      if (!sale) return sendJSON(res, { error: 'sale not found' }, 404);
+      if (!b36IsSuperadmin(req) && String(sale.tenant_id || '') !== String(b36Tenant(req) || ' ')) {
+        return sendJSON(res, { error: 'sale not found' }, 404);
+      }
+      if (typeof sale.items === 'string') { try { sale.items = JSON.parse(sale.items); } catch (_) { sale.items = []; } }
+      sendJSON(res, sale);
+    } catch (err) { sendError(res, err); }
+  });
+
   handlers['GET /api/sales/:id/receipt'] = requireAuth(async (req, res, params) => {
     try {
       const id = params && params.id;
@@ -18126,7 +18171,14 @@ handlers['GET /api/config/public'] = async (req, res) => {
         return sendJSON(res, { error: 'sale not found' }, 404);
       }
       const items = Array.isArray(sale.items) ? sale.items : [];
-      const rows = items.map(it => `<tr><td>${it.product_id || it.code || ''}</td><td>${it.qty || 0}</td><td>${it.price || 0}</td></tr>`).join('');
+      // FIX web/loyverse 2026-09-20: el recibo mostraba solo product_id/qty/price; ahora nombre + modificadores + nota (escapados).
+      const _rcEsc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const _rcSub = it => {
+        const parts = (Array.isArray(it.modifiers) ? it.modifiers : []).map(m => String((m && (m.label || m.name)) || m || '')).filter(Boolean).map(t => '+ ' + t);
+        if (it.note) parts.push('Nota: ' + it.note);
+        return parts.length ? '<div style="font-size:11px;color:#555">' + _rcEsc(parts.join(' | ')) + '</div>' : '';
+      };
+      const rows = items.map(it => `<tr><td>${_rcEsc(it.name || it.product_id || it.code || '')}${_rcSub(it)}</td><td>${it.qty || 0}</td><td>${it.price || 0}</td></tr>`).join('');
       // Desglose de pagos (mixto): mostrar cuanto fue por cada metodo, no solo "MIXTO".
       let payBreakdown = '';
       try {
@@ -18321,7 +18373,15 @@ handlers['GET /api/config/public'] = async (req, res) => {
         return sendJSON(res, { error: 'sale not found' }, 404);
       }
       const ESC = String.fromCharCode(0x1b);
-      const lines = [ESC + '@', 'VOLVIX POS\n', `Sale: ${id}\n`, `Total: ${sale.total || 0}\n`, `Method: ${sale.payment_method || ''}\n`, '\n\n\n', ESC + 'd' + String.fromCharCode(3)];
+      // FIX web/loyverse 2026-09-20: agrega renglones de items con sus modificadores/nota (antes solo Sale/Total/Method).
+      const _epItems = [];
+      const _epClean = v => String(v == null ? '' : v).replace(/[^\x20-\x7e]/g, '?');
+      (Array.isArray(sale.items) ? sale.items : []).forEach(it => {
+        _epItems.push(`${Number(it.qty) || 1}x ${_epClean(it.name || it.code || '').slice(0, 28)}\n`);
+        (Array.isArray(it.modifiers) ? it.modifiers : []).forEach(m => _epItems.push('   + ' + _epClean((m && (m.label || m.name)) || m).slice(0, 26) + '\n'));
+        if (it.note) _epItems.push('   Nota: ' + _epClean(it.note).slice(0, 22) + '\n');
+      });
+      const lines = [ESC + '@', 'VOLVIX POS\n', `Sale: ${id}\n`].concat(_epItems, [`Total: ${sale.total || 0}\n`, `Method: ${sale.payment_method || ''}\n`, '\n\n\n', ESC + 'd' + String.fromCharCode(3)]);
       const buf = Buffer.from(lines.join(''), 'binary');
       try { await supabaseRequest('PATCH', `/pos_sales?id=eq.${encodeURIComponent(id)}`, { printed: true }); } catch (_) {}
       res.statusCode = 200; res.setHeader('Content-Type', 'application/octet-stream'); res.end(buf);
@@ -25358,12 +25418,33 @@ if (process.env.NODE_ENV === 'test') {
           result = await supabaseRequest('POST', '/pending_sales', rowMeta || row);
         } catch (e1) {
           if (!rowMeta) throw e1;
-          var metaJson = JSON.stringify({ n: tName, c: tComment, e: tEmp, d: tDin, t: row.notes || '' });
-          result = await supabaseRequest('POST', '/pending_sales', Object.assign({}, row, { notes: ('VLXMETA:' + metaJson).slice(0, 500) }));
+          // FIX web/loyverse 2026-09-20: el JSON de VLXMETA se recortaba con slice(0,500) y quedaba INVALIDO
+          // (JSON.parse falla en el cliente y se pierden nombre/comentario/mesero/dining). Ahora se acorta el
+          // campo mas largo hasta que el JSON completo cabe en 500 chars.
+          var metaObj = { n: tName, c: tComment, e: tEmp, d: tDin, t: row.notes || '' };
+          var metaStr = 'VLXMETA:' + JSON.stringify(metaObj);
+          for (var _g = 0; metaStr.length > 500 && _g < 800; _g++) {
+            var _lk = 't';
+            ['c', 'n', 'e', 'd'].forEach(function (k) { if (String(metaObj[k]).length > String(metaObj[_lk]).length) _lk = k; });
+            metaObj[_lk] = String(metaObj[_lk]).slice(0, Math.max(0, String(metaObj[_lk]).length - Math.max(1, metaStr.length - 500)));
+            metaStr = 'VLXMETA:' + JSON.stringify(metaObj);
+          }
+          result = await supabaseRequest('POST', '/pending_sales', Object.assign({}, row, { notes: metaStr }));
         }
         created = (result && result[0]) || result;
       } catch (e) {
-        // Fallback: synthesize id so the client gets a reference even if table missing
+        // FIX web/loyverse 2026-09-20: en PRODUCCION ya NO se finge exito con un id sintetico 'PND-*': el cliente
+        // limpiaba el carrito y borraba el ticket previo creyendo que se guardo (ticket perdido en silencio).
+        // Ahora 503 -> el cliente cae a su cola offline y avisa. En dev se conserva el fallback sintetico.
+        if (IS_PROD) {
+          try { logAudit(req, 'sale.pending.persist_failed', 'pending_sales', { tenant_id: tnt, error: String(e && e.message || e).slice(0, 200) }); } catch (_) {}
+          return sendJSON(res, {
+            ok: false,
+            error_code: 'PENDING_PERSIST_FAILED',
+            error_message: 'No pudimos guardar el ticket abierto. Reintenta.',
+            retry_after_seconds: 5
+          }, 503);
+        }
         created = Object.assign({ id: 'PND-' + Date.now().toString(36) }, rowMeta || row);
       }
       try { logAudit(req, 'sale.pending.saved', 'pending_sales', { id: created && created.id, total: total }); } catch (_) {}
@@ -32122,7 +32203,13 @@ if (process.env.NODE_ENV === 'test') {
         var name = (it && (it.name || it.product_name || it.descripcion)) || '';
         var qty = (it && it.qty) || 0;
         var price = (it && it.price) || 0;
-        return '<tr><td style="text-align:left">' + String(name).replace(/[<>&]/g, '') + '</td>' +
+        // FIX web/loyverse 2026-09-20: la reimpresion descartaba items[].modifiers e items[].note (persisten en pos_sales.items).
+        var _rpMods = (it && Array.isArray(it.modifiers) ? it.modifiers : []).map(function (m) {
+          return String((m && (m.label || m.name)) || m || '').replace(/[<>&]/g, '');
+        }).filter(Boolean).map(function (t) { return '+ ' + t; });
+        if (it && it.note) _rpMods.push('Nota: ' + String(it.note).replace(/[<>&]/g, ''));
+        var _rpSub = _rpMods.length ? '<div style="font-size:10px;color:#555">' + _rpMods.join(' &middot; ') + '</div>' : '';
+        return '<tr><td style="text-align:left">' + String(name).replace(/[<>&]/g, '') + _rpSub + '</td>' +
                '<td style="text-align:center">' + qty + '</td>' +
                '<td style="text-align:right">$' + Number(price).toFixed(2) + '</td></tr>';
       }).join('');

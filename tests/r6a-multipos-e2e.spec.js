@@ -56,8 +56,8 @@ const SUITE_PATH = '/multipos_suite_v3.html';
 // Both users are documented in B41_BACKEND_REPORT.md as test fixtures.
 // owner@volvix.test → role=owner, tenant TNT002
 // admin@volvix.test → role=superadmin, tenant TNT001
-const OWNER = { email: 'owner@volvix.test', password: 'Volvix2026!', tenant: 'TNT002', role: 'owner' };
-const ADMIN = { email: 'admin@volvix.test', password: 'Volvix2026!', tenant: 'TNT001', role: 'superadmin' };
+const OWNER = { email: 'owner@volvix.test', password: 'REDACTED_TEST_PASSWORD', tenant: 'TNT002', role: 'owner' };
+const ADMIN = { email: 'admin@volvix.test', password: 'REDACTED_TEST_PASSWORD', tenant: 'TNT001', role: 'superadmin' };
 
 const RUN_TAG  = String(Date.now()).slice(-8);
 const RAND     = crypto.randomBytes(2).toString('hex').toUpperCase();

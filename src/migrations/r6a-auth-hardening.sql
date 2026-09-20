@@ -5,9 +5,9 @@
 -- Closes 5 GAPs in Login + Auth module (score 70 -> 95+):
 --
 --   GAP-L1: Auth-seed fix. The admin@volvix.test row had a scrypt hash that
---           did NOT match the documented password 'Volvix2026!'. We rewrite
+--           did NOT match the documented password 'REDACTED_TEST_PASSWORD'. We rewrite
 --           the password_hash column for the 3 demo users so that login with
---           Volvix2026! works in production. Hash regenerated locally with
+--           REDACTED_TEST_PASSWORD works in production. Hash regenerated locally with
 --           crypto.scryptSync (Node 18+) using the same algorithm the API
 --           uses in verifyPassword().
 --
@@ -38,10 +38,10 @@ BEGIN;
 
 -- ----------------------------------------------------------------------------
 -- GAP-L1: Auth-seed fix — rewrite password_hash for the 3 demo users so that
---         the documented password 'Volvix2026!' actually works in production.
+--         the documented password 'REDACTED_TEST_PASSWORD' actually works in production.
 --         The hash was computed locally with Node:
 --           const salt = crypto.randomBytes(16);
---           const hash = crypto.scryptSync('Volvix2026!', salt, 64);
+--           const hash = crypto.scryptSync('REDACTED_TEST_PASSWORD', salt, 64);
 --           `scrypt$${salt.toString('hex')}$${hash.toString('hex')}`
 -- ----------------------------------------------------------------------------
 DO $$
@@ -55,7 +55,7 @@ BEGIN
            updated_at = NOW()
      WHERE email = 'admin@volvix.test';
 
-    -- owner@volvix.test  (was already 'Volvix2026!' but normalize anyway)
+    -- owner@volvix.test  (was already 'REDACTED_TEST_PASSWORD' but normalize anyway)
     UPDATE pos_users
        SET password_hash = 'scrypt$d2b9e4c23dc63728acd16c71ab523ed5$f142349728822f0f41c668503fa3c371f63a4bc5380b73a4ecba8c8a0e821ede2766c2860c1c39f435995794feb60f06b28803b48f599eeaaf0dfb7910138e07',
            is_active = true,

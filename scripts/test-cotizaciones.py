@@ -52,7 +52,7 @@ print(f"Current: {url[:80]}")
 
 if 'login' in (url or '').lower():
     print("Logging in...")
-    loginR = ej("fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'admin@volvix.test',password:'Volvix2026!'})}).then(r=>r.json()).then(j=>JSON.stringify(j))")
+    loginR = ej("fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'admin@volvix.test',password:'REDACTED_TEST_PASSWORD'})}).then(r=>r.json()).then(j=>JSON.stringify(j))")
     lj = json.loads(loginR)
     token = lj.get('token')
     user = lj.get('user',{})

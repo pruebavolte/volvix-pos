@@ -22,7 +22,7 @@ hit() {
 
 # 3) Login first to get token
 EMAIL="admin@volvix.test"
-PASS="Volvix2026!"
+PASS="REDACTED_TEST_PASSWORD"
 LOGIN_BODY=$(curl -s -X POST -H "Content-Type: application/json" \
   -d "{\"email\":\"$EMAIL\",\"password\":\"$PASS\"}" \
   "$BASE/api/login")

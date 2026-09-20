@@ -34,7 +34,7 @@ def now_iso():
 # JWT for backend queries
 req = urllib.request.Request(
     f"{PROD}/api/login",
-    data=json.dumps({"email":"admin@volvix.test","password":"Volvix2026!"}).encode(),
+    data=json.dumps({"email":"admin@volvix.test","password":"REDACTED_TEST_PASSWORD"}).encode(),
     headers={"Content-Type":"application/json"}
 )
 JWT = json.loads(urllib.request.urlopen(req, timeout=15).read())["token"]
@@ -99,7 +99,7 @@ print("\n[STEP 1] Login en APK v1.0.180", flush=True)
 login = ev("""(async () => {
   try {
     const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email:'admin@volvix.test', password:'Volvix2026!'})});
+      body: JSON.stringify({email:'admin@volvix.test', password:'REDACTED_TEST_PASSWORD'})});
     const d = await r.json();
     if (d.token) {
       localStorage.setItem('volvix_token', d.token);

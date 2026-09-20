@@ -7,8 +7,8 @@
  */
 const https = require('https');
 const API = process.env.VOLVIX_API || 'https://volvix-pos.vercel.app';
-const EMAIL = process.env.VOLVIX_EMAIL || 'admin@volvix.test';
-const PWD = process.env.VOLVIX_PWD || 'Volvix2026!';
+const EMAIL = process.env.VOLVIX_EMAIL;
+const PWD = process.env.VOLVIX_PWD;
 
 function req(method, path, body, headers) {
   return new Promise((resolve, reject) => {

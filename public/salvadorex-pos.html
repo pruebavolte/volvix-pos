@@ -98,10 +98,13 @@
 <title>SalvadoreX · Punto de Venta</title>
 <!-- 2026-05-12: Capacitor bridge — DEBE cargarse PRIMERO para interceptar /api/* fetch
      desde el APK Android antes que cualquier otro script use fetch. -->
+<script src="/volvix-platform.js"></script>
 <script src="/volvix-capacitor-bridge.js"></script>
 <!-- 2026-09-19 T0.1: puente único de plataforma — DEBE cargar antes de cualquier script
      que use window.VolvixPlatform (comandas, cobro, ticket). Nunca llamar volvixElectron directo. -->
+<script src="/volvix-escpos.js"></script>
 <script src="/volvix-platform.js"></script>
+<script src="/volvix-scan-button.js" defer></script>
 <script src="/volvix-dining-options.js"></script>
 <script src="/auth-gate.js"></script>
 <!-- B43: Console-error reducer — intercept known-404 scripts + Stripe ping spam BEFORE other wirings load.
@@ -5800,7 +5803,7 @@
             <script>
             (function () {
               var api = window.VolvixPlatform;
-              if (!api || api.kind !== 'electron') return;
+              if (!api || (api.kind !== 'electron' && api.kind !== 'android')) return;
               var box = document.getElementById('cfg-comanda-box'); if (!box) return;
               box.hidden = false;
               var $ = function (id) { return document.getElementById(id); };
@@ -18336,7 +18339,7 @@
       subtotal: sub, discount: disc, tax: tax, total: total
     }, TC.getConfig());
     var P = window.VolvixPlatform;
-    if (!P || P.kind === 'web' || P.kind === 'android') { toast('Impresora no disponible en este dispositivo', 'error'); return Promise.resolve(); }
+    if (!P || P.kind === 'web') { toast('Impresora no disponible en este dispositivo', 'error'); return Promise.resolve(); }
     return Promise.resolve(P.printTicket({ text: text, printerName: (function () { try { return localStorage.getItem('volvix_system_printer') || undefined; } catch (_) { return undefined; } })(), openDrawer: false })).then(function (r) {
       if (r && (r.unsupported || r.ok === false)) toast('Impresora no disponible', 'error'); else toast('Cuenta impresa');
     }).catch(function () { toast('Impresora no disponible', 'error'); });
@@ -19509,6 +19512,7 @@
           if (qty > 0 && qty <= maxQ) {
             picked.push({
               product_id: li.product_id || li.id || null,
+              code: li.code || null, // lineas sin uuid (cobro rapido): el server empareja por code
               name: li.name || li.product_name || '',
               qty: qty,
               price: Number(li.price || li.unit_price || 0)

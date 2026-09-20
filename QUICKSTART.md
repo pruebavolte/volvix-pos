@@ -17,7 +17,7 @@ http://localhost:3006/login.html
 ### 3️⃣ Login with Test Account
 ```
 Email: admin@volvix.test
-Password: Volvix2026!
+Password: REDACTED_TEST_PASSWORD
 ```
 
 ### 4️⃣ Use POS
@@ -31,9 +31,9 @@ Password: Volvix2026!
 
 | Email | Password | Role | Tenant |
 |-------|----------|------|--------|
-| admin@volvix.test | Volvix2026! | superadmin | Abarrotes Don Chucho |
-| owner@volvix.test | Volvix2026! | owner | Restaurante Los Compadres |
-| cajero@volvix.test | Volvix2026! | cajero | Abarrotes Don Chucho |
+| admin@volvix.test | REDACTED_TEST_PASSWORD | superadmin | Abarrotes Don Chucho |
+| owner@volvix.test | REDACTED_TEST_PASSWORD | owner | Restaurante Los Compadres |
+| cajero@volvix.test | REDACTED_TEST_PASSWORD | cajero | Abarrotes Don Chucho |
 
 ---
 

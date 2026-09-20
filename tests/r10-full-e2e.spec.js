@@ -16,7 +16,7 @@
 const { test, expect, request } = require('@playwright/test');
 
 const BASE_URL = process.env.BASE_URL || 'https://volvix-pos.vercel.app';
-const ADMIN = { email: 'admin@volvix.test', password: 'Volvix2026!' };
+const ADMIN = { email: 'admin@volvix.test', password: 'REDACTED_TEST_PASSWORD' };
 
 // ---------------------------------------------------------------------------
 // Helpers

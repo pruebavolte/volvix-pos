@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <!-- 2026-05-12 BUG #5 FIX: bridge para APK Capacitor.
        2026-05-14 PERF: defer para no bloquear el primer render. -->
+  <script defer src="/volvix-platform.js"></script>
   <script defer src="/volvix-capacitor-bridge.js"></script>
 
 <!-- ============ SEO PRIMARY ============ -->
@@ -1497,7 +1498,7 @@ footer a:hover{color:var(--brand)}
         <div class="dl-badge">Descargar .exe</div>
       </a>
       <!-- Android .apk -->
-      <a href="https://github.com/pruebavolte/volvix-pos/releases/download/v1.0.336/VolvixPOS.apk" class="dl-card" onclick="vlxTrackDownload('apk','android')" target="_blank" rel="noopener">
+      <a href="https://github.com/pruebavolte/volvix-pos/releases/latest/download/VolvixPOS.apk" class="dl-card" onclick="vlxTrackDownload('apk','android')" target="_blank" rel="noopener">
         <div class="dl-icon">🤖</div>
         <div class="dl-title">Android</div>
         <div class="dl-sub">Instala en tu celular o tablet Android</div>
@@ -1519,7 +1520,8 @@ footer a:hover{color:var(--brand)}
         <h3 style="margin:0 0 6px; font-size:16px; font-weight:700; color:#166534;">App para tus clientes</h3>
         <p style="margin:0 0 14px; font-size:13.5px; color:#374151;">Tus clientes pueden descargar la app del cliente para hacer pedidos, ver su historial de compras y acumular puntos de lealtad — funciona offline también.</p>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <a href="https://github.com/pruebavolte/volvix-pos/releases/latest/download/VolvixCliente.apk" class="btn btn-primary" style="font-size:13px; padding:8px 16px;" onclick="vlxTrackDownload('apk-cliente','android')" target="_blank" rel="noopener">⬇️ App Cliente Android (.apk)</a>
+          <!-- 2026-09-20: VolvixCliente.apk nunca existió (link 404) → se quita; queda la PWA del cliente. -->
+
           <a href="#" class="btn btn-ghost" style="font-size:13px; padding:8px 16px;" onclick="vlxShareClientPWA(); return false;">🔗 Compartir enlace PWA del cliente</a>
         </div>
       </div>

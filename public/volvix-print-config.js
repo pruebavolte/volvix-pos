@@ -150,7 +150,11 @@
       onClick: async () => {
         const mac = btSel.value;
         statusEl.textContent = 'Probando Bluetooth…';
-        if (global.volvixElectron && global.volvixElectron.printBluetooth) {
+        if (isAndroid) {
+          if (!mac) { statusEl.textContent = '✗ Elige una impresora Bluetooth emparejada'; return; }
+          const r = await global.VolvixPlatform.printTicket({ text: 'VOLVIX POS - PRUEBA BT\n' + new Date().toLocaleString('es-MX') + '\n--------------\nSi sale este papel,\nBluetooth funciona OK.\n--------------', target: { t: 'bt', address: mac } });
+          statusEl.textContent = r.ok ? '✅ BT enviado a ' + mac : '✗ ' + (r.error || 'error');
+        } else if (global.volvixElectron && global.volvixElectron.printBluetooth) {
           const r = await global.volvixElectron.printBluetooth({
             text: 'VOLVIX POS - PRUEBA BT\n' + new Date().toLocaleString('es-MX') + '\n--------------\nSi sale este papel,\nBluetooth funciona OK.\n--------------\n\n\n\n',
             mac: mac || undefined
@@ -163,7 +167,17 @@
     card.appendChild(btPanel);
 
     // Llenar BT printers
-    if (global.volvixElectron && global.volvixElectron.listBluetoothPrinters) {
+    const isAndroid = !!(global.VolvixPlatform && global.VolvixPlatform.kind === 'android');
+    if (isAndroid) {
+      global.VolvixPlatform.listBluetoothPrinters().then((r) => {
+        ((r && r.devices) || []).forEach((d) => {
+          const opt = el('option', { value: d.address }, d.name + ' (' + d.address + ')');
+          if (d.address === currentBtMac) opt.selected = true;
+          btSel.appendChild(opt);
+        });
+        if (r && r.ok === false) statusEl.textContent = '✗ Bluetooth: ' + (r.error || 'no disponible');
+      });
+    } else if (global.volvixElectron && global.volvixElectron.listBluetoothPrinters) {
       global.volvixElectron.listBluetoothPrinters().then((list) => {
         (list || []).forEach((p) => {
           const opt = el('option', { value: p.mac }, p.name + ' (' + p.com + ')');
@@ -197,8 +211,8 @@
         const port = parseInt(portInput.value, 10) || 9100;
         if (!ip) { statusEl.textContent = '✗ Ingresa una IP'; return; }
         statusEl.textContent = 'Probando ' + ip + ':' + port + '…';
-        if (global.volvixElectron && global.volvixElectron.pingNetworkPrinter) {
-          const r = await global.volvixElectron.pingNetworkPrinter(ip, port);
+        if (isAndroid || (global.volvixElectron && global.volvixElectron.pingNetworkPrinter)) {
+          const r = await global.VolvixPlatform.pingPrinter(ip, port);
           statusEl.textContent = r.ok ? '✅ ' + ip + ':' + port + ' responde (' + r.ms + 'ms)' : '✗ ' + (r.error || 'no responde');
         }
       }
@@ -210,7 +224,10 @@
         const port = parseInt(portInput.value, 10) || 9100;
         if (!ip) { statusEl.textContent = '✗ Ingresa una IP'; return; }
         statusEl.textContent = 'Imprimiendo prueba IP…';
-        if (global.volvixElectron && global.volvixElectron.printNetwork) {
+        if (isAndroid) {
+          const r = await global.VolvixPlatform.printTicket({ text: 'VOLVIX POS - PRUEBA IP\n' + new Date().toLocaleString('es-MX') + '\nIP: ' + ip + ':' + port + '\n--------------\nSi sale este papel,\nimpresion por red OK.\n--------------', target: { t: 'net', host: ip, port: port } });
+          statusEl.textContent = r.ok ? '✅ Prueba IP enviada (' + r.bytesWritten + ' bytes)' : '✗ ' + (r.error || 'error');
+        } else if (global.volvixElectron && global.volvixElectron.printNetwork) {
           const r = await global.volvixElectron.printNetwork({
             ip: ip, port: port,
             text: 'VOLVIX POS - PRUEBA IP\n' + new Date().toLocaleString('es-MX') + '\nIP: ' + ip + ':' + port + '\n--------------\nSi sale este papel,\nimpresion por red OK.\n--------------\n\n\n\n',

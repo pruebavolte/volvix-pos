@@ -32,10 +32,10 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-// ── Test users (Demo / Volvix2026!) ──────────────────────────
+// ── Test users (Demo / REDACTED_TEST_PASSWORD) ──────────────────────────
 const USERS = {
-  admin: { email: 'admin@volvix.test', password: 'Volvix2026!', role: 'admin' },
-  owner: { email: 'owner@volvix.test', password: 'Volvix2026!', role: 'owner' },
+  admin: { email: 'admin@volvix.test', password: 'REDACTED_TEST_PASSWORD', role: 'admin' },
+  owner: { email: 'owner@volvix.test', password: 'REDACTED_TEST_PASSWORD', role: 'owner' },
 };
 
 const LOGIN_PATHS = ['/api/auth/login', '/api/login', '/api/v1/auth/login'];

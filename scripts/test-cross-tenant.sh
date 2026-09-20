@@ -21,12 +21,12 @@ bold "━━━━ B1 cross-tenant tests ━━━━"
 # Login admin@ (TENANT_A) y owner@ (TENANT_B)
 echo "[login] admin@volvix.test"
 TOK_A=$(curl -s -X POST "$PROD/api/login" -H "Content-Type: application/json" \
-  -d '{"email":"admin@volvix.test","password":"Volvix2026!"}' | python -c "import json,sys;print(json.load(sys.stdin).get('token',''))")
+  -d '{"email":"admin@volvix.test","password":"REDACTED_TEST_PASSWORD"}' | python -c "import json,sys;print(json.load(sys.stdin).get('token',''))")
 echo "  TOK_A: ${TOK_A:0:30}..."
 
 echo "[login] owner@volvix.test"
 TOK_B=$(curl -s -X POST "$PROD/api/login" -H "Content-Type: application/json" \
-  -d '{"email":"owner@volvix.test","password":"Volvix2026!"}' | python -c "import json,sys;print(json.load(sys.stdin).get('token',''))")
+  -d '{"email":"owner@volvix.test","password":"REDACTED_TEST_PASSWORD"}' | python -c "import json,sys;print(json.load(sys.stdin).get('token',''))")
 echo "  TOK_B: ${TOK_B:0:30}..."
 
 [ -z "$TOK_A" ] && red "✗ login A falló" && exit 1

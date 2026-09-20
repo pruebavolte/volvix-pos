@@ -2,11 +2,11 @@
  * volvix-mobile-wiring.js
  * Volvix POS — Mobile Wrapper Detection & Native API Bridge
  *
- * Detecta el entorno de ejecución (Capacitor, Cordova, PWA standalone, browser)
+ * Detecta el entorno de ejecución (app nativa, Cordova, PWA standalone, browser)
  * y expone una API unificada window.MobileAPI con mocks de capacidades nativas:
  * camera, GPS, fingerprint, NFC, bluetooth, share.
  *
- * Si existe un puente nativo real (Capacitor/Cordova plugin), lo usa.
+ * Si existe un puente nativo real (plugin vía window.VolvixPlatform / Cordova), lo usa.
  * Si no, cae en mock funcional para desarrollo web.
  */
 (function (global) {
@@ -16,7 +16,7 @@
   // 1. DETECCIÓN DE ENTORNO
   // ─────────────────────────────────────────────────────────────
   const Env = {
-    isCapacitor: !!(global.Capacitor && global.Capacitor.isNativePlatform && global.Capacitor.isNativePlatform()),
+    isCapacitor: !!(global.VolvixPlatform && global.VolvixPlatform.isNative),   // nombre historico = APK nativo
     isCordova: !!(global.cordova || global.PhoneGap || global.phonegap),
     isReactNativeWebView: !!(global.ReactNativeWebView),
     isPWAStandalone: (function () {
@@ -66,9 +66,9 @@
     const source = opts.source || 'prompt'; // 'camera' | 'gallery' | 'prompt'
     log('camera', 'request', { quality, source, wrapper: Env.wrapper });
 
-    if (Env.isCapacitor && global.Capacitor.Plugins && global.Capacitor.Plugins.Camera) {
+    if (Env.isCapacitor && global.VolvixPlatform.plugin('Camera')) {
       try {
-        const r = await global.Capacitor.Plugins.Camera.getPhoto({
+        const r = await global.VolvixPlatform.plugin('Camera').getPhoto({
           quality, allowEditing: false, resultType: 'base64'
         });
         return { ok: true, source: 'capacitor', dataUrl: 'data:image/jpeg;base64,' + r.base64String };
@@ -113,9 +113,9 @@
     const timeout = opts.timeout || 10000;
     log('gps', 'request', opts);
 
-    if (Env.isCapacitor && global.Capacitor.Plugins && global.Capacitor.Plugins.Geolocation) {
+    if (Env.isCapacitor && global.VolvixPlatform.plugin('Geolocation')) {
       try {
-        const p = await global.Capacitor.Plugins.Geolocation.getCurrentPosition({ timeout });
+        const p = await global.VolvixPlatform.plugin('Geolocation').getCurrentPosition({ timeout });
         return { ok: true, source: 'capacitor', lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy };
       } catch (e) { return { ok: false, error: e.message }; }
     }
@@ -146,9 +146,9 @@
     const reason = opts.reason || 'Confirmar identidad';
     log('fingerprint', 'request', { reason });
 
-    if (Env.isCapacitor && global.Capacitor.Plugins && global.Capacitor.Plugins.BiometricAuth) {
+    if (Env.isCapacitor && global.VolvixPlatform.plugin('BiometricAuth')) {
       try {
-        const r = await global.Capacitor.Plugins.BiometricAuth.verify({ reason });
+        const r = await global.VolvixPlatform.plugin('BiometricAuth').verify({ reason });
         return { ok: !!r.verified, source: 'capacitor' };
       } catch (e) { return { ok: false, error: e.message }; }
     }
@@ -244,8 +244,8 @@
     };
     log('share', 'request', payload);
 
-    if (Env.isCapacitor && global.Capacitor.Plugins && global.Capacitor.Plugins.Share) {
-      try { await global.Capacitor.Plugins.Share.share(payload); return { ok: true, source: 'capacitor' }; }
+    if (Env.isCapacitor && global.VolvixPlatform.plugin('Share')) {
+      try { await global.VolvixPlatform.plugin('Share').share(payload); return { ok: true, source: 'capacitor' }; }
       catch (e) { return { ok: false, error: e.message }; }
     }
 
@@ -291,8 +291,8 @@
 
   function haptics(style) {
     style = style || 'light';
-    if (Env.isCapacitor && global.Capacitor.Plugins && global.Capacitor.Plugins.Haptics) {
-      try { global.Capacitor.Plugins.Haptics.impact({ style: style }); return { ok: true, source: 'capacitor' }; }
+    if (Env.isCapacitor && global.VolvixPlatform.plugin('Haptics')) {
+      try { global.VolvixPlatform.plugin('Haptics').impact({ style: style }); return { ok: true, source: 'capacitor' }; }
       catch (e) { return { ok: false, error: e.message }; }
     }
     return vibrate(style === 'heavy' ? 200 : style === 'medium' ? 100 : 30);
@@ -311,7 +311,7 @@
       capabilities: {
         camera: !!(Env.isCapacitor || Env.isCordova || (global.navigator && global.navigator.mediaDevices)),
         gps: !!(global.navigator && global.navigator.geolocation),
-        fingerprint: !!(global.PublicKeyCredential || (global.Capacitor && global.Capacitor.Plugins && global.Capacitor.Plugins.BiometricAuth)),
+        fingerprint: !!(global.PublicKeyCredential || (global.VolvixPlatform && global.VolvixPlatform.plugin('BiometricAuth'))),
         nfc: !!('NDEFReader' in global || global.nfc),
         bluetooth: !!(global.navigator && global.navigator.bluetooth),
         share: !!(global.navigator && global.navigator.share) || Env.isCapacitor,

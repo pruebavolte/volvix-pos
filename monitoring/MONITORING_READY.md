@@ -109,7 +109,7 @@ export SUPABASE_SERVICE_ROLE_KEY="<service_role_jwt_from_vercel_env>"
 node monitoring/alerts.js
 
 # Smoke test completo (crear venta + verificar stock + cleanup)
-VOLVIX_EMAIL=admin@volvix.test VOLVIX_PWD=Volvix2026! node monitoring/daily_smoke.js
+VOLVIX_EMAIL=admin@volvix.test VOLVIX_PWD=REDACTED_TEST_PASSWORD node monitoring/daily_smoke.js
 ```
 
 Output esperado:

@@ -1,15 +1,15 @@
 /**
  * volvix-capacitor-bridge.js — 2026-05-12 v1.0.173
  *
- * Cuando la app corre dentro del APK Android (Capacitor), los archivos HTML/CSS/JS
- * se sirven desde `https://localhost` (el server interno de Capacitor lee del
+ * Cuando la app corre dentro del APK Android (app nativa), los archivos HTML/CSS/JS
+ * se sirven desde `https://localhost` (el server interno de la app nativa lee del
  * webDir bundleado). Pero las llamadas `/api/*` necesitan ir a Vercel.
  *
  * Sin este bridge, `/api/productos` resolvería a `https://localhost/api/productos`
  * que NO existe en el bundle → 404. La app se rompe.
  *
  * Este script DEBE cargarse PRIMERO en el HTML (antes que cualquier otro script
- * que use fetch). Detecta Capacitor y override `window.fetch` + `XMLHttpRequest`
+ * que use fetch). Detecta la app nativa (VolvixPlatform.kind) y override `window.fetch` + `XMLHttpRequest`
  * para que `/api/*` se reescriba a `https://volvix-pos.vercel.app/api/*`.
  *
  * Offline behavior: si no hay internet, las llamadas a Vercel fallan rápido,
@@ -21,13 +21,20 @@
   if (window.__volvixCapacitorBridgeLoaded) return;
   window.__volvixCapacitorBridgeLoaded = true;
 
-  // Detectar si estamos dentro de Capacitor
-  var isCapacitor = !!(
-    window.Capacitor ||
-    (window.location && window.location.protocol === 'capacitor:') ||
-    (window.location && window.location.hostname === 'localhost' &&
-     navigator.userAgent.indexOf('Mobile') >= 0)
-  );
+  // Detectar si estamos dentro del APK: window.VolvixPlatform (public/volvix-platform.js) debe cargar
+  // ANTES que este script. Si la pagina aun no lo incluye, heuristica de WebView (localhost + UA movil).
+  var isCapacitor = false;   // nombre historico = "estamos dentro del APK"
+  try {
+    if (window.VolvixPlatform) {
+      isCapacitor = window.VolvixPlatform.kind === 'android';
+    } else {
+      isCapacitor = !!(
+        (window.location && window.location.protocol === 'capacitor:') ||
+        (window.location && window.location.hostname === 'localhost' &&
+         navigator.userAgent.indexOf('Mobile') >= 0)
+      );
+    }
+  } catch (_) {}
 
   if (!isCapacitor) {
     // Browser normal — no hacer nada
@@ -151,6 +158,29 @@
       });
     }
   }
+
+  // 2026-09-20: WebView < 80 no entiende `?.` ni `??` que usa el POS -> el script principal falla y queda la
+  // pantalla vacia (verificado en emulador con WebView 74). Avisar en vez de dejar al cajero sin explicacion.
+  function checkWebView() {
+    try {
+      var m = /Chrome\/(\d+)/.exec(navigator.userAgent);
+      if (!m || parseInt(m[1], 10) >= 80) return;
+      var put = function () {
+        if (document.getElementById('vlx-webview-old')) return;
+        var b = document.createElement('div');
+        b.id = 'vlx-webview-old';
+        b.setAttribute('data-vlx-keep', '1');
+        b.setAttribute('data-vlx-system', 'webview');
+        b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483647;padding:14px 16px;background:#b91c1c;color:#fff;' +
+          'font:600 13px/1.35 system-ui,sans-serif;text-align:center';
+        b.textContent = 'Tu Android System WebView (v' + m[1] + ') es muy viejo y Volvix POS no puede iniciar. ' +
+          'Actualiza "Android System WebView" o Chrome en Google Play.';
+        (document.body || document.documentElement).appendChild(b);
+      };
+      if (document.body) put(); else document.addEventListener('DOMContentLoaded', put);
+    } catch (_) {}
+  }
+  checkWebView();
 
   // Chequear actualización 10s después del boot (no bloquear arranque)
   setTimeout(checkForUpdate, 10000);

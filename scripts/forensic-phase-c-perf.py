@@ -12,7 +12,7 @@ PROD = "https://volvix-pos.vercel.app"
 
 req = urllib.request.Request(
     f"{PROD}/api/login",
-    data=json.dumps({"email":"admin@volvix.test","password":"Volvix2026!"}).encode(),
+    data=json.dumps({"email":"admin@volvix.test","password":"REDACTED_TEST_PASSWORD"}).encode(),
     headers={"Content-Type":"application/json"}
 )
 JWT = json.loads(urllib.request.urlopen(req, timeout=15).read())["token"]

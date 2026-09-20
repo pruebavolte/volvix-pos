@@ -15,7 +15,7 @@
 # Variables de entorno opcionales:
 #   VOLVIX_BASE_URL   — URL base (default: https://salvadorexoficial.com)
 #   VOLVIX_EMAIL      — email admin (default: admin@volvix.test)
-#   VOLVIX_PASSWORD   — password (default: Volvix2026!)
+#   VOLVIX_PASSWORD   — password (default: REDACTED_TEST_PASSWORD)
 #   VOLVIX_TIMEOUT    — timeout por curl en seg (default: 10)
 #   VOLVIX_SLOW_MS    — latencia de warning (default: 1000)
 # ============================================================================
@@ -24,7 +24,7 @@ set -uo pipefail
 
 BASE_URL="${VOLVIX_BASE_URL:-https://salvadorexoficial.com}"
 EMAIL="${VOLVIX_EMAIL:-admin@volvix.test}"
-PASSWORD="${VOLVIX_PASSWORD:-Volvix2026!}"
+PASSWORD="${VOLVIX_PASSWORD:-REDACTED_TEST_PASSWORD}"
 TIMEOUT="${VOLVIX_TIMEOUT:-10}"
 SLOW_MS="${VOLVIX_SLOW_MS:-1000}"
 JSON_OUT=0

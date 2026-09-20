@@ -40,7 +40,7 @@ test.describe.parallel('B16 final audit', () => {
     await page.goto(BASE + '/login.html', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2000);
     await page.fill('input[type="email"]', 'admin@volvix.test');
-    await page.fill('input[type="password"]', 'Volvix2026!');
+    await page.fill('input[type="password"]', 'REDACTED_TEST_PASSWORD');
     await page.click('button[type="submit"]');
     await page.waitForTimeout(3500);
 
@@ -59,11 +59,11 @@ test.describe.parallel('B16 final audit', () => {
 
   test('cross-tenant API isolation', async ({ request }) => {
     const lA = await request.post(BASE + '/api/login', {
-      data: { email: 'admin@volvix.test', password: 'Volvix2026!' }
+      data: { email: 'admin@volvix.test', password: 'REDACTED_TEST_PASSWORD' }
     });
     const tokA = (await lA.json()).token;
     const lB = await request.post(BASE + '/api/login', {
-      data: { email: 'owner@volvix.test', password: 'Volvix2026!' }
+      data: { email: 'owner@volvix.test', password: 'REDACTED_TEST_PASSWORD' }
     });
     const tokB = (await lB.json()).token;
 
@@ -84,13 +84,13 @@ test.describe.parallel('B16 final audit', () => {
 
   test('vendor portal A vs B ven distintos POs', async ({ request }) => {
     const lA = await request.post(BASE + '/api/login', {
-      data: { email: 'admin@volvix.test', password: 'Volvix2026!' }
+      data: { email: 'admin@volvix.test', password: 'REDACTED_TEST_PASSWORD' }
     });
     const tokA = (await lA.json()).token;
     const meA = await (await request.get(BASE + '/api/vendor/me', { headers: { Authorization: 'Bearer ' + tokA } })).json();
 
     const lB = await request.post(BASE + '/api/login', {
-      data: { email: 'owner@volvix.test', password: 'Volvix2026!' }
+      data: { email: 'owner@volvix.test', password: 'REDACTED_TEST_PASSWORD' }
     });
     const tokB = (await lB.json()).token;
     const meB = await (await request.get(BASE + '/api/vendor/me', { headers: { Authorization: 'Bearer ' + tokB } })).json();
@@ -102,7 +102,7 @@ test.describe.parallel('B16 final audit', () => {
 
   test('mega-dashboard KPIs reales', async ({ request }) => {
     const l = await request.post(BASE + '/api/login', {
-      data: { email: 'admin@volvix.test', password: 'Volvix2026!' }
+      data: { email: 'admin@volvix.test', password: 'REDACTED_TEST_PASSWORD' }
     });
     const tok = (await l.json()).token;
     const r = await request.get(BASE + '/api/dashboard/today', { headers: { Authorization: 'Bearer ' + tok } });

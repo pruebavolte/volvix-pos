@@ -1,5 +1,23 @@
 apply plugin: 'com.android.application'
 
+// Firma: ANDROID_KEYSTORE_PASS / ANDROID_KEY_ALIAS / ANDROID_KEY_PASS por -P o variable de entorno; el archivo
+// android/app/volvix-release.keystore lo escribe el CI desde ANDROID_KEYSTORE_B64 (nunca va al repo, ver .gitignore).
+def vlxProp = { String n -> (project.findProperty(n) ?: System.getenv(n)) }
+def vlxKeystoreFile = file('volvix-release.keystore')
+def vlxKsPass = vlxProp('ANDROID_KEYSTORE_PASS')
+def vlxKeyAlias = vlxProp('ANDROID_KEY_ALIAS')
+def vlxKeyPass = vlxProp('ANDROID_KEY_PASS')
+def vlxHaveReleaseKey = vlxKeystoreFile.exists() && vlxKsPass && vlxKeyAlias && vlxKeyPass
+
+// 2026-09-20: version UNICA derivada de package.json (fuente de verdad). El CI del tag la sobreescribe con
+// -PVOLVIX_VERSION=<tag sin v> (y opcional -PVERSION_CODE). versionCode = 1000000*mayor + 1000*menor + patch:
+// contiene el patch y sigue subiendo respecto a los APK ya publicados (v1.0.336 = 1000336).
+def vlxVersion = (project.findProperty('VOLVIX_VERSION') ?: System.getenv('VOLVIX_VERSION') ?:
+    new groovy.json.JsonSlurper().parse(new File(rootProject.projectDir, '../package.json')).version).toString()
+def vlxParts = vlxVersion.tokenize('.')
+def vlxCode = (project.findProperty('VERSION_CODE') ?: System.getenv('VERSION_CODE') ?:
+    (vlxParts.size() >= 3 ? vlxParts[0].toInteger() * 1000000 + vlxParts[1].toInteger() * 1000 + vlxParts[2].toInteger() : 1)).toString().toInteger()
+
 android {
     namespace = "com.volvix.pos"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +25,8 @@ android {
         applicationId "com.volvix.pos"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode vlxCode
+        versionName vlxVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -17,18 +35,24 @@ android {
         }
     }
     signingConfigs {
+        // Firma ESTABLE de release: keystore decodificado por el CI (secreto ANDROID_KEYSTORE_B64) + 3 secretos.
+        // Sin valores por defecto en el repo. Si falta algo, buildTypes.release firma con la clave debug de Android
+        // (instalable, pero cada build firma distinto: no se instala encima del anterior).
         release {
-            storeFile file('volvix-release.keystore')
-            storePassword (project.hasProperty('VOLVIX_KEYSTORE_PASSWORD') ? VOLVIX_KEYSTORE_PASSWORD : 'volvix2026')
-            keyAlias     (project.hasProperty('VOLVIX_KEY_ALIAS')         ? VOLVIX_KEY_ALIAS         : 'volvix-pos')
-            keyPassword  (project.hasProperty('VOLVIX_KEY_PASSWORD')      ? VOLVIX_KEY_PASSWORD      : 'volvix2026')
+            if (vlxHaveReleaseKey) {
+                storeFile vlxKeystoreFile
+                storeType 'pkcs12'
+                storePassword vlxKsPass
+                keyAlias vlxKeyAlias
+                keyPassword vlxKeyPass
+            }
         }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            signingConfig vlxHaveReleaseKey ? signingConfigs.release : signingConfigs.debug
         }
     }
 }

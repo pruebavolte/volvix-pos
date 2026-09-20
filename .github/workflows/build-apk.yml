@@ -1,8 +1,19 @@
 name: Build Android APK
 
+# 2026-09-20 (rol Loyverse APK):
+#  - "Setup Android SDK" (android-actions/setup-android@v3) fallaba en ~5 s desde el 19-sep
+#    (Node 24 forzado en el runner). Ya NO se usa esa accion: se usa el SDK preinstalado de
+#    ubuntu-latest (ANDROID_HOME) + sdkmanager, con descarga de cmdline-tools como respaldo.
+#  - Cada TAG v*.*.* publica VolvixPOS.apk (+ VolvixPOS-<ver>.apk) en el MISMO release que el .exe
+#    (build-exe-release.yml). Push a main / apk/** solo compila y sube el APK como artifact
+#    (ya NO crea releases ni tags por su cuenta: crear un release crea el tag y dispararia el .exe).
+#  - El APK empaqueta public/ (capacitor.config.json webDir=public): mismo codigo que web y .exe.
+
 on:
   push:
-    branches: [main]
+    branches: [main, 'apk/**']
+    tags:
+      - 'v*.*.*'
     paths:
       - 'android/**'
       - 'public/**'
@@ -11,10 +22,15 @@ on:
       - '.github/workflows/build-apk.yml'
   workflow_dispatch:
 
+concurrency:
+  group: build-apk-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     permissions:
       contents: write
     steps:
@@ -33,13 +49,40 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Setup Android SDK (preinstalado en el runner + sdkmanager)
+        run: |
+          set -eo pipefail
+          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          mkdir -p "$SDK"
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          SM="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SM" ]; then
+            echo "cmdline-tools no encontrado en $SDK: descargando"
+            curl -fsSL -o /tmp/cmdtools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+            rm -rf /tmp/cmdtools && mkdir -p /tmp/cmdtools "$SDK/cmdline-tools"
+            unzip -q /tmp/cmdtools.zip -d /tmp/cmdtools
+            rm -rf "$SDK/cmdline-tools/latest"
+            mv /tmp/cmdtools/cmdline-tools "$SDK/cmdline-tools/latest"
+          fi
+          echo "$SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          set +o pipefail
+          yes | "$SM" --sdk_root="$SDK" --licenses > /dev/null || true
+          set -o pipefail
+          "$SM" --sdk_root="$SDK" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          "$SM" --sdk_root="$SDK" --list_installed | head -20 || true
 
-      - name: Read version from package.json
+      - name: Read version (tag si es release, si no package.json)
         id: version
         run: |
           VERSION=$(node -p "require('./package.json').version")
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            TAGVER="${GITHUB_REF_NAME#v}"
+            if [ "$TAGVER" != "$VERSION" ]; then
+              echo "::warning::tag $GITHUB_REF_NAME != package.json $VERSION: se usa la version del tag"
+            fi
+            VERSION="$TAGVER"
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
           echo "App version: v$VERSION"
@@ -49,10 +92,22 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           # Insertar meta tag con la version antes del primer script
           sed -i "s|<script src=\"/volvix-capacitor-bridge.js\">|<meta name=\"version\" content=\"$VERSION\"><script>window.__vlxAppVersion='$VERSION';</script><script src=\"/volvix-capacitor-bridge.js\">|" public/salvadorex-pos.html
-          echo "Version $VERSION inyectada en HTML"
+          if grep -q "__vlxAppVersion='$VERSION'" public/salvadorex-pos.html; then
+            echo "Version $VERSION inyectada en HTML"
+          else
+            echo "::warning::no se pudo inyectar la version en salvadorex-pos.html (el aviso de actualizacion usara 1.0.0)"
+          fi
 
       - name: Install dependencies
         run: npm ci || npm install --no-audit --no-fund
+
+      # Solo para PRUEBAS en emulador (rama apk/loyverse + marcador [emu-test] en el mensaje del commit):
+      # activa la depuracion remota del WebView. Nunca en tags ni en main.
+      - name: Emulator test build (WebView debugging)
+        if: github.ref == 'refs/heads/apk/loyverse' && contains(github.event.head_commit.message, '[emu-test]')
+        run: |
+          sed -i 's/"webContentsDebuggingEnabled": false/"webContentsDebuggingEnabled": true/' capacitor.config.json
+          grep -n webContentsDebuggingEnabled capacitor.config.json
 
       - name: Sync Capacitor (bundle public/ into APK assets)
         run: npx cap sync android
@@ -72,40 +127,73 @@ jobs:
             exit 1
           fi
           echo "Bridge OK: $BRIDGE"
+          # Regla de oro: el APK lleva EXACTAMENTE el mismo public/ que web y .exe
+          PLAT=$(find android/app/src/main/assets/public -name "volvix-platform.js" 2>/dev/null | head -1)
+          [ -n "$PLAT" ] && diff -q public/volvix-platform.js "$PLAT" && echo "Platform bridge OK: $PLAT" || echo "::warning::volvix-platform.js del bundle difiere de public/"
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      - name: Generate keystore (auto-sign)
+      # Firma ESTABLE: 4 secretos del repo (ANDROID_KEYSTORE_B64, ANDROID_KEYSTORE_PASS, ANDROID_KEY_ALIAS, ANDROID_KEY_PASS).
+      # Sin ellos el build sigue verde y firma con la clave DEBUG de Android (cada build firma distinto).
+      # Sin contrasenas por defecto en el repo. Los valores nunca se imprimen (los secretos van enmascarados).
+      - name: Configurar firma del APK
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASS }}
         run: |
-          cd android/app
-          if [ ! -f volvix-release.keystore ]; then
-            keytool -genkeypair -v \
-              -keystore volvix-release.keystore \
-              -alias volvix-pos \
-              -keyalg RSA -keysize 2048 -validity 10000 \
-              -storepass volvix2026 -keypass volvix2026 \
-              -dname "CN=Volvix POS, OU=Volvix, O=Volvix, L=Monterrey, ST=NL, C=MX"
+          if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ] && [ -n "$KS_ALIAS" ] && [ -n "$KEY_PASS" ]; then
+            echo "$KS_B64" | base64 -d > android/app/volvix-release.keystore
+            {
+              echo "ANDROID_KEYSTORE_PASS=$KS_PASS"
+              echo "ANDROID_KEY_ALIAS=$KS_ALIAS"
+              echo "ANDROID_KEY_PASS=$KEY_PASS"
+              echo "VLX_SIGNING=stable"
+            } >> "$GITHUB_ENV"
+            echo "Firma: keystore ESTABLE (secretos del repo)"
+          else
+            echo "VLX_SIGNING=debug" >> "$GITHUB_ENV"
+            if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+              echo "::warning::FALTAN los secretos ANDROID_KEYSTORE_B64/ANDROID_KEYSTORE_PASS/ANDROID_KEY_ALIAS/ANDROID_KEY_PASS: este APK de tag se firma con la clave DEBUG (no se instala encima de otro build). Ver docs/APK_ANDROID.md"
+            else
+              echo "Firma: clave debug (sin secretos de keystore)"
+            fi
           fi
 
-      - name: Update versionCode + versionName in build.gradle
+      - name: Derivar versionName / versionCode (package.json es la fuente; en tags, el tag)
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          # versionCode: convertir "1.0.172" a 1000172 (X*1000000 + Y*1000 + Z)
+          # versionCode = 1000000*mayor + 1000*menor + patch (1.0.344 -> 1000344)
           IFS='.' read -r MAJ MIN PATCH <<< "$VERSION"
           VCODE=$(( MAJ * 1000000 + MIN * 1000 + PATCH ))
-          echo "versionCode=$VCODE versionName=$VERSION"
-          sed -i "s|versionCode [0-9]\+|versionCode $VCODE|" android/app/build.gradle
-          sed -i "s|versionName \"[^\"]*\"|versionName \"$VERSION\"|" android/app/build.gradle
-          grep -E "versionCode|versionName" android/app/build.gradle | head -3
+          echo "VOLVIX_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$VCODE" >> "$GITHUB_ENV"
+          echo "versionName=$VERSION versionCode=$VCODE (android/app/build.gradle los lee de env/-P)"
 
       - name: Build release APK
         run: |
           cd android
-          ./gradlew assembleRelease \
-            -PVOLVIX_KEYSTORE_PASSWORD=volvix2026 \
-            -PVOLVIX_KEY_ALIAS=volvix-pos \
-            -PVOLVIX_KEY_PASSWORD=volvix2026
+          ./gradlew assembleRelease --no-daemon --stacktrace             -PVOLVIX_VERSION="$VOLVIX_VERSION" -PVERSION_CODE="$VERSION_CODE"
+
+      - name: Verificar versionName/versionCode dentro del APK
+        run: |
+          APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
+          AAPT2=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 | tail -1)
+          INFO=$("$AAPT2" dump badging "$APK" | head -1)
+          echo "$INFO"
+          echo "$INFO" | grep -q "versionCode='$VERSION_CODE'" || { echo "::error::versionCode del APK != $VERSION_CODE"; exit 1; }
+          echo "$INFO" | grep -q "versionName='$VOLVIX_VERSION'" || { echo "::error::versionName del APK != $VOLVIX_VERSION"; exit 1; }
+
+      - name: Verificar firma del APK (huella SHA-256 publica)
+        run: |
+          APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | tail -1)
+          OUT=$("$APKSIGNER" verify --print-certs "$APK")
+          echo "$OUT" | grep -E "certificate (DN|SHA-256 digest)" || echo "$OUT"
+          FP=$(echo "$OUT" | grep -m1 "certificate SHA-256 digest" | sed 's/.*: //' || true)
+          echo "Firma: $VLX_SIGNING | SHA-256: $FP" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Locate APK
         id: locate
@@ -133,20 +221,27 @@ jobs:
           path: VolvixPOS*.apk
           retention-days: 90
 
-      - name: Attach APK to GitHub Release
-        if: github.ref == 'refs/heads/main'
+      # Solo en TAGS v*.*.*: el .exe (build-exe-release.yml) y este job corren en paralelo sobre el
+      # mismo tag; el release lo crea quien llegue primero (--verify-tag: nunca crea tags).
+      - name: Attach APK to GitHub Release (tag)
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ steps.version.outputs.tag }}"
+          TAG="${GITHUB_REF_NAME}"
           VERSION="${{ steps.version.outputs.version }}"
-          # Crear release si no existe
-          if ! gh release view "$TAG" >/dev/null 2>&1; then
-            gh release create "$TAG" \
+          for i in 1 2 3 4 5 6; do
+            gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 && break
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag \
               --title "Volvix POS $TAG" \
-              --notes "APK Android v$VERSION auto-construido por GitHub Actions · Offline-first (todo bundleado)"
-          fi
-          # Subir versionado + alias sin version
-          gh release upload "$TAG" "VolvixPOS-$VERSION.apk" --clobber
-          gh release upload "$TAG" "VolvixPOS.apk" --clobber
+              --notes "Volvix POS $TAG (Windows .exe + Android .apk, mismo codigo public/)" >/dev/null 2>&1 && break
+            echo "release $TAG aun no existe, reintento $i/6"; sleep 20
+          done
+          for f in "VolvixPOS-$VERSION.apk" "VolvixPOS.apk"; do
+            for i in 1 2 3; do
+              gh release upload "$TAG" "$f" --clobber --repo "$GITHUB_REPOSITORY" && break
+              echo "upload $f fallo, reintento $i/3"; sleep 10
+            done
+          done
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name'
           echo "APK ($VERSION) subido al release $TAG"
