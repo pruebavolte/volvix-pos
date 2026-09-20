@@ -24,6 +24,23 @@
   var satCatalogsLoaded = false;
   var subtotalCache = 0;
 
+  // T0.3: armado unico de comanda (cobro normal + cobro rapido). Devuelve null si no hay items nuevos.
+  function buildComandaData(folio, time, customer, items) {
+    var dinEl = document.getElementById('lv-dinein');
+    var c = {
+      folio: folio,
+      time: time,
+      mode: dinEl ? (dinEl.getAttribute('data-mode') === 'away' ? 'PARA LLEVAR' : 'COMER AQUI') : '',
+      note: String(window.__vlxTicketNote || ''),
+      customer: customer || '',
+      // Solo lo que cocina NO ha recibido
+      items: (window.VolvixComanda ? window.VolvixComanda.delta(items) : (items || []).map(function (i) { return { qty: i.qty || 1, name: i.name || '' }; }))
+    };
+    if (!c.items.length) c = null;
+    if (window.VolvixComanda) window.VolvixComanda.reset();
+    return c;
+  }
+  window.__vlxBuildComanda = buildComandaData;
   function log() { if (VLX_DEBUG) console.log.apply(console, ['[vlx-cobro]'].concat([].slice.call(arguments))); }
   function $(sel) { return document.querySelector(sel); }
   function $$(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
@@ -731,18 +748,7 @@
         // menú Volvix → "Impresora de comandas"). Versiones viejas del .exe ignoran el campo.
         var comandaData = null;
         try {
-          var dinEl = document.getElementById('lv-dinein');
-          comandaData = {
-            folio: realData.folio,
-            time: realData.time,
-            mode: dinEl ? (dinEl.getAttribute('data-mode') === 'away' ? 'PARA LLEVAR' : 'COMER AQUI') : '',
-            note: String(window.__vlxTicketNote || ''),
-            customer: realData.customer || '',
-            // Solo lo que cocina NO ha recibido (si la cuenta se guardó antes, ya salió su comanda)
-            items: (window.VolvixComanda ? window.VolvixComanda.delta(realData.items) : (realData.items || []).map(function (i) { return { qty: i.qty || 1, name: i.name || '' }; }))
-          };
-          if (!comandaData.items.length) comandaData = null;
-          if (window.VolvixComanda) window.VolvixComanda.reset();
+          comandaData = buildComandaData(realData.folio, realData.time, realData.customer, realData.items);
         } catch (_) { comandaData = null; }
         // 2026-09-19 T0.1: puente único de plataforma (nunca volvixElectron directo).
         result = await window.VolvixPlatform.printTicket({
@@ -1155,7 +1161,7 @@
 
       // ─── FASE 4: IMPRIMIR ticket (la venta YA está garantizada en local) ───
       try {
-        if (window.volvixElectron && window.volvixElectron.printRawText &&
+        if (window.VolvixPlatform && window.VolvixPlatform.printTicket &&
             window.VolvixTicketCustomizer && window.VolvixTicketCustomizer.renderText) {
           var fastText = window.VolvixTicketCustomizer.renderText({
             folio: fastFolio,
@@ -1173,10 +1179,13 @@
             qrUrl: 'https://volvix.app/t/' + fastFolio
           });
           // Fire and forget — el ticket sale mientras seguimos
-          window.volvixElectron.printRawText({
+          var fastComanda = null;
+          try { fastComanda = buildComandaData(fastFolio, localSale.time, localSale.customer_name, localSale.items); } catch (_) {}
+          window.VolvixPlatform.printTicket({
             text: fastText,
             openDrawer: !!(fastCfg.autoOpenDrawer && /efectivo/i.test(method)),
-            cfg: fastFullCfg
+            cfg: fastFullCfg,
+            comanda: fastComanda
           }).then(function(r){
             // Marcar como impreso en local
             try {
